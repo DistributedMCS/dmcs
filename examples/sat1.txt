@@ -1,0 +1,3 @@
+a v -b v -c.
+-a v b.
+-a v c.

@@ -1,0 +1,10 @@
+c v -d.
+-c v d.
+c v e v f.
+-c v d v -e.
+-c v d v -f.
+-c v -e.
+-d v -e.
+-c v -f.
+-d v -f.
+-e v -f.

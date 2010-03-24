@@ -1,0 +1,791 @@
+2010-03-23  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/dmcsc.cpp: Replaced command line arguments with boost program options
+	* src/dmcsd.cpp: Likewise
+
+	* configure.ac: Add BOOST_PROGRAM_OPTIONS
+	* src/Makefile.am: Likewise
+
+2010-03-03  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/dmcsc.cpp: Fix debug output.
+	* include/PrimitiveDMCS.tcc: Likewise.
+
+2010-03-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/ProcessCommandLine.h: Remove.
+
+	* include/BRGrammar.h: Update copyright information.
+	* include/BRGrammar.tcc: Likewise.
+	* include/BaseBuilder.h: Likewise.
+	* include/BaseDMCS.h: Likewise.
+	* include/BaseSolver.h: Likewise.
+	* include/BaseVisitor.h: Likewise.
+	* include/BeliefCombination.h: Likewise.
+	* include/BeliefState.h: Likewise.
+	* include/BinaryTreeQPGenerator.h: Likewise.
+	* include/BridgeRulesBuilder.h: Likewise.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+	* include/CNFLocalLoopFormulaBuilder.h: Likewise.
+	* include/Cache.h: Likewise.
+	* include/ClaspProcess.h: Likewise.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/ClaspResultGrammar.h: Likewise.
+	* include/ClaspResultGrammar.tcc: Likewise.
+	* include/Client.h: Likewise.
+	* include/Client.tcc: Likewise.
+	* include/CnfBuilder.h: Likewise.
+	* include/CnfBuilder.tcc: Likewise.
+	* include/CnfGrammar.h: Likewise.
+	* include/CnfGrammar.tcc: Likewise.
+	* include/CommandType.h: Likewise.
+	* include/Context.h: Likewise.
+	* include/ContextGenerator.h: Likewise.
+	* include/DLVVisitor.h: Likewise.
+	* include/DiamondOptQPGenerator.h: Likewise.
+	* include/DiamondQPGenerator.h: Likewise.
+	* include/DiamondZigZagOptQPGenerator.h: Likewise.
+	* include/DiamondZigZagQPGenerator.h: Likewise.
+	* include/DimacsVisitor.h: Likewise.
+	* include/EquiCNFLocalLoopFormulaBuilder.h: Likewise.
+	* include/HouseOptQPGenerator.h: Likewise.
+	* include/HouseQPGenerator.h: Likewise.
+	* include/IMPLocalLoopFormulaBuilder.h: Likewise.
+	* include/LPGrammar.h: Likewise.
+	* include/LocalKBBuilder.h: Likewise.
+	* include/LocalKBBuilder.tcc: Likewise.
+	* include/LocalLoopFormulaBuilder.h: Likewise.
+	* include/LogicVisitor.h: Likewise.
+	* include/LoopFormula.h: Likewise.
+	* include/LoopFormulaBuilder.h: Likewise.
+	* include/LoopFormulaDirector.h: Likewise.
+	* include/Makefile.am: Likewise.
+	* include/Message.h: Likewise.
+	* include/MultipleRingOptQPGenerator.h: Likewise.
+	* include/MultipleRingQPGenerator.h: Likewise.
+	* include/Neighbor.h: Likewise.
+	* include/OptDMCS.h: Likewise.
+	* include/OptDMCS.tcc: Likewise.
+	* include/ParserDirector.h: Likewise.
+	* include/ParserDirector.tcc: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/PrimitiveDMCS.tcc: Likewise.
+	* include/Process.h: Likewise.
+	* include/ProcessBuf.h: Likewise.
+	* include/PropositionalASPGrammar.h: Likewise.
+	* include/PropositionalASPGrammar.tcc: Likewise.
+	* include/QueryPlan.h: Likewise.
+	* include/QueryPlanGenerator.h: Likewise.
+	* include/QueryPlanWriter.h: Likewise.
+	* include/RingEdgeQPGenerator.h: Likewise.
+	* include/RingOptQPGenerator.h: Likewise.
+	* include/RingQPGenerator.h: Likewise.
+	* include/Rule.h: Likewise.
+	* include/SatSolver.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* include/Server.h: Likewise.
+	* include/Server.tcc: Likewise.
+	* include/Session.h: Likewise.
+	* include/Signature.h: Likewise.
+	* include/SpiritDebugging.h: Likewise.
+	* include/SpiritFilePositionNode.h: Likewise.
+	* include/Theory.h: Likewise.
+	* src/BeliefCombination.cpp: Likewise.
+	* src/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/Cache.cpp: Likewise.
+	* src/ClaspProcess.cpp: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/DLVVisitor.cpp: Likewise.
+	* src/DimacsVisitor.cpp: Likewise.
+	* src/IMPLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/LocalLoopFormulaBuilder.cpp: Likewise.
+	* src/LogicVisitor.cpp: Likewise.
+	* src/ProcessBuf.cpp: Likewise.
+	* src/QueryPlan.cpp: Likewise.
+	* src/QueryPlanGenerator.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/genTest.cpp: Likewise.
+
+2010-03-01  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/BeliefState.h: Fix @file.
+
+	* TODO: Update.
+
+	* Makefile.am: Add support for doxygen.
+	* configure.ac: Likewise.
+	* doxygen.am: Likewise.
+	* doxygen.cfg: Likewise.
+	* m4/doxygen.m4: Likewise.
+
+2010-02-02  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/LogicVisitor.cpp: Fixed a printing typo
+
+	* src/genTest.cpp: Update DLV commands
+
+	* include/QueryPlan.h: Add getSignature1 function.
+	* src/QueryPlan.cpp: Likewise.
+
+	* include/BridgeRulesBuilder.tcc: Extended an if condition.
+
+2010-02-01  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/Signature.h (operator>>): Add operator>> for Signature.
+
+2010-02-01  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* include/BridgeRulesBuilder.tcc: Revert BridgeRulesBuilder to version 1410
+	* include/BridgeRulesBuilder.h : Likewise
+
+2010-01-29  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/clasp-wrapper.sh: New file, which needs to be copied to /usr/local/bin.
+	Then configure again using: CLASP=/usr/local/bin/clasp-wrapper.sh
+	(This is a quick hack to deal with multiple line answers from clasp).
+
+2010-01-29  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/genTest.cpp: Add count parameter to dlv commands.
+
+	* src/LogicVisitor.cpp: Code refactoring.
+	* include/LogicVisitor.h: Likewise.
+	* src/DLVVisitor.cpp: Likewise.
+	* include/DLVVisitor.h: Likwise.
+
+	* src/genTest.cpp: Autogenerate DLV files.
+	* src/DLVVisitor.cpp: Likewise.
+	* include/LogicVisitor.h: Likewise.
+	* include/DLVVisitor.h: Likwise.
+
+	* src/Makefile.am: Update genTest sources.
+
+	* src/LogicVisitor.cpp: Code Clean up.
+
+	* include/Makefile.am: Update Headers.
+
+
+2010-01-28  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/QueryPlan.h (QueryPlan::vmap): Add mapping from context
+	ids to vertex ids, can be made more efficient.
+	* src/QueryPlan.cpp: Likewise.
+
+2010-01-27  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/LocalLoopFormulaBuilder.cpp: Add assertions
+
+	* include/Server.tcc (handle_session): Code Clean up
+
+	* include/BridgeRulesBuilder.tcc (build_bridge_atom): Handled the case that a bridge atom might have been parsed earlier
+
+2010-01-24  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* include/Client.cpp: File removed
+
+	* include/Client.tcc: Create template for Client
+	* include/Client.h: Likewise.
+
+	* include/RingOptQPGenerator.h: Fixed a bug.
+	* include/MultipleRingOptQPGenerator.h: Likewise.
+
+2010-01-23  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/genTest.cpp (print_command_lines): New method.
+
+	* include/QueryPlan.h: new method for reading graph from file.
+	* src/QueryPlan.cpp: Likewise.
+
+2010-01-23  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* include/MultipleRingOptQPGenerator.h: Create Opt Multiple Ring local interface
+
+	* include/RingOptQPGenerator.h: Create Opt Ring local interface
+
+	* include/HouseOptQPGenerator.h: Create Opt House local interface
+	* src/genTest.cpp: Likewise
+
+	* include/DiamondOptQPGenerator.h: Code clean up
+	* include/DiamondZigZagOptQPGenerator.h: Likewise
+
+2010-01-22  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+	* src/QueryPlan.cpp: more methods for manipulating the inside graph.
+	(getMinV/putMinV): New methods for global V.
+	(getGraph/putGraph): New methods for graph.
+	(getEdges): New method for returning edges.
+	(remove_connection): New method for removing an edge. Used for the optimal query plan.
+
+	* include/DiamondOptQPGenerator.h (DiamondQPGenerator): New file.
+	* src/QueryPlanGenerator.cpp: Likewise.
+
+	* include/DiamondZigZagOptQPGenerator.h : create local interface.
+
+2010-01-21  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* include/Makefile.am: Update Headers
+
+	* src/genTest.cpp: Generate Optimal Query Plans.
+	* include/RingOptQPGenerator.h: Likewise.
+	* include/MultipleRingOptQPGenerator.h: Likewise.
+	* include/HouseOptQPGenerator.h: Likewise.
+
+	* src/genTest.cpp: Generate Topologies within QueryPlanGenerator
+	* include/RingQPGenerator.h: Likewise
+	* include/RingEdgeQPGenerator.h: Likwise
+	* include/MultipleRingQPGenerator.h: Likewise
+	* include/HouseQPGenerator.h:Likwise
+	* include/BinaryTreeQPGenerator.h: Likwise
+
+	* include/Makefile.am:Update Headers
+	
+2010-01-20  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/tests/testTranslation.cpp: Update Loop Formula builder's invocation.
+	* src/dmcsd.cpp: Likewise.
+
+	* src/Makefile.am: Update translation lib
+
+	* src/LocalLoopFormulaBuilder.cpp: Fix Graph index problem
+
+	* include/Makefile.am: Add header files
+
+	* include/IMPLocalLoopFormulaBuilder.h: Update Constructor.
+	* include/LocalLoopFormulaBuilder.h: Likewise.
+
+	* include/Context.h: removed unnecessary "&".
+
+	* include/CNFLocalLoopFormulaBuilder.h: Add Equisatisfiable CNF LF Builder.
+	* include/EquiCNFLocalLoopFormulaBuilder.h: Likewise.
+
+	* include/BaseVisitor.h: Update to use Signature instead of BiMap.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+	* include/BridgeRulesBuilder.h: Likwise.
+	* include/DimacsVisitor.h: Likewise.
+	* include/LocalKBBuilder.h:Likewise. 
+	* include/LocalKBBuilder.tcc: Likewise.
+	* include/LogicVisitor.h: Likewise.
+	* src/DimacsVisitor.cpp: Likewise.
+
+2010-01-20  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/ContextGenerator.cpp: Fix bug with cover_neighbors().
+
+	* include/QueryPlan.h: Adapt to have hostname, port as vertex
+	property, BeliefStatePtr as edge property.
+	* include/QueryPlanWriter.h: Likewise.
+	* src/QueryPlan.cpp: Likewise.
+
+	* include/BeliefState.h: Add operator>>, operator<< for BeliefStatePtr
+
+2010-01-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/Signature.h: Add index to context IDs.
+
+2010-01-19  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/Makefile.am: Update translation lib.
+
+	* src/LocalLoopFormulaBuilder.cpp: Code refactoring and optimisation
+	* src/ImpLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* include/Theory.h:Likewise. 
+	* include/LoopFormulaBuilder.h: Likewise. 
+	* include/LoopFormulaDirector.h:Likewise. 
+	* include/LoopFormula.h: Likewise.
+	* include/LocalLoopFormulaBuilder.h: Likewise.
+	* include/IMPLocalLoopFormulaBuilder.h: Likewise.
+	* include/CNFLocalLoopFormulaBuilder.h: Likewise.
+
+2010-01-19  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/tests/testReadGraph.cpp: More experiments.
+
+	* include/QueryPlan.h: New file.
+	* src/QueryPlan.cpp: Likewise.
+	* include/QueryPlanWriter.h: Likewise.
+	* src/tests/testQueryPlan.cpp: Likewise.
+
+2010-01-19  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/dmcsd.cpp (Server): Add Loop formula computation
+
+	* include/PrimitiveDMCS.h (LoopFormulaBuilder): Add theory as a part of PrimitiveDMCS.
+	* include/Server.h (catch): Likewise.
+	* src/PrimitiveDMCS.cpp (visitCNFFormula):Likewise.
+	* src/Server.cpp (localSolve): Likewise.
+
+	* include/CNFLocalLoopFormulaBuilder.h: Update to accomodate the new Signature.
+	* include/DimacsVisitor.h: likewise.
+	* include/LocalLoopFormulaBuilder.h:Likwise. 
+	* src/DimacsVisitor.cpp: Likwise.
+
+	* include/BaseSolver.h: Modify solve to take theory as input.
+	* include/SatSolver.h: Likwise.
+	* include/SatSolver.tcc: Likwise.
+
+	* include/BaseDMCS.h (B): Add typedef DMCSPtr.
+
+	* src/genTest.cpp: Add Multiple Ring Topology.
+	* include/MultipleRingTopoGenerator.h: Likewise.
+	* include/Makefile.am: Likewise.
+
+2010-01-19  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+	* src/tests/testReadGraph.cpp: New file.
+
+2010-01-18  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* include/HouseTopoGenerator.h: Add House topology.
+	* src/genTest.cpp: Likewise.
+	* include/Makefile.am: Likewise.
+
+	* include/RingEdgeTopoGenerator.h: Add Binary tree topology.
+	* src/genTest.cpp (noinst_HEADERS): Likewise.
+	* include/Makefile.am (noinst_HEADERS):Likewise.
+
+	* src/LogicVisitor.cpp: Fixed bridge atom names.
+	* include/LogicVisitor.h: Likewise.
+
+	* include/BaseVisitor.h: Code clean up
+	* src/genTest.cpp : Likewise
+
+	* src/LogicVisitor.cpp (BaseVisitor): Visit literals as char instead of int
+	* include/LogicVisitor.h (BaseVisitor): Likewise.
+
+	* include/RingEdgeTopoGenerator.h: Add Ring topology with arbitrary additional edges
+	* src/genTest.cpp: Likewise.
+
+2010-01-17  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+	* include/Makefile.am (L): Add missing headers
+
+	* src/LocalLoopFormulaBuilder.cpp: Removed local ID generation
+	* src/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* include/LoopFormulaBuilder.h: Likewise.
+	* include/LocalLoopFormulaBuilder.h: Likewise.
+	* include/CNFLocalLoopFormulaBuilder.h: Likewise.
+	* src/tests/testTranslation.cpp: Likewise.
+
+	* src/genTest.cpp: Add Pure Ring topolgy generator
+
+	* include/RingTopoGenerator.h: New file
+
+2010-01-17  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/genTest.cpp: Add generating contexts.
+	* src/LogicVisitor.h: Use references.
+	* src/LogicVisitor.cpp: Likewise.
+
+	* include/Context.h: add cover_neighbors().
+
+	* include/ContextGenerator.h: New file.
+	* src/ContextGenerator.cpp: Likewise.
+
+2010-01-17  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Use NeighborsPtr.
+
+	* src/PrimitiveDMCS.cpp: Move caching to DMCS.
+	* include/PrimitiveDMCS.h: Likewise.
+
+	* include/Cache.h: Typedef CachePtr and CacheStatsPtr.
+
+	* src/LogicVisitor.cpp: Removed BridgeAtomPtr.
+	* include/LogicVisitor.h: Likewise.
+
+	* include/SatSolver.tcc (solve): Use Signature.
+
+	* include/ClaspResultBuilder.tcc: Optimize.
+
+	* include/Signature.h: Inline operator<<'s.
+
+	* src/dmcsd.cpp: Update to Signature (preliminary).
+
+	* include/Server.h: Use ContextPtr.
+	* include/BaseDMCS.h: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+	* src/Server.cpp: Likewise.
+
+	* include/Rule.h: Remove Signature from here.
+	Add Literal type
+	(getHead): Fixed const-correctness.
+
+	* include/Neighbor.h: Add documentation.
+	* include/Signature.h: Likewise.
+
+	* include/Context.h: Add Signature member.
+
+2010-01-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/Makefile.am: Add testSignature.cpp.
+	* src/tests/testSignature.cpp: Likewise.
+
+	* include/Makefile.am: Add Signature.h.
+	* include/Signature.h: Likewise.
+
+2010-01-16  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/genTest.cpp: Restart.
+
+	* include/TopologyGenerator.h: New file.
+	* include/DiamondTopoGenerator.h: Likewise.
+	* include/DiamondZigZagTopoGenerator.h: Likewise.
+
+	* include/Context.h: Replace BiMap stuff by Rules stuff.
+
+	* include/Neighbor.h: Simplify.
+
+2010-01-15  Seif El-Din Bairakdar  <bairakdar@kr.tuwien.ac.at>
+
+	* src/LogicVisitor.cpp (noinst_HEADERS): Create Logic Visitor.
+	* include/LogicVisitor.h: Likewise.
+
+	* src/Makefile.am (noinst_HEADERS): Add LogicVisitor.
+	* include/Makefile.am (noinst_HEADERS): Likewise.
+
+2010-01-15  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/ParserDirector.tcc: Roll back @1280.
+	* include/SatSolver.tcc: Likewise.
+	* src/DimacsVisitor.cpp: Likewise.
+	* src/tests/testSolver.cpp: Likewise.
+
+	* src/ProcessBuf.cpp (ProcessBuf): Ignore SIGCHLD, otw. Boost.Test
+	installs its own signal handler.
+
+	* include/Makefile.am (noinst_HEADERS): Remove CNFFormula.h.
+
+2010-01-14  Seif El-Din Bairakdar  <bairakdar@kr.tuwien.ac.at>
+
+	* include/Theory.h: Added CNF creation methods
+
+	* src/tests/testTranslation.cpp : Substituted CNFFormula with Theory in all Loop Formula implementation
+	* src/DimacsVisitor.cpp: Likewise.
+	* src/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* include/LoopFormula.h: Likewise.
+	* include/DimacsVisitor.h: Likewise.
+	* include/CNFLocalLoopFormulaBuilder.h: Likewise.
+
+2010-01-12  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp (main): Get the system size from the number of alphabets.
+
+	* src/Client.cpp: Instantiate BeliefStates with system size.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/tests/testBeliefComparison.cpp: Likewise.
+	* src/tests/testCombination.cpp: Likewise.
+	* src/tests/testParsers.cpp: Likewise.
+	* src/tests/testSolver.cpp: Likewise.
+
+	* include/Server.h (Server::dmcs): New member.
+	(Server::belief_states): Remove.
+	* src/Server.cpp: Likewise.
+
+	* include/Message.h (Message::getSystemSize): New method.
+
+	* include/BeliefState.h (isEpsilon): New function.
+	(BeliefStates::system_size): New member.
+	(operator<<): Fix BeliefSets streaming.
+
+	* include/BeliefCombination.h (combine): Optimize and document.
+
+	* include/BaseSolver.h: Fix const correctness for Context.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/Context.h: Likewise.
+	* include/SatSolver.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+
+	* include/BaseDMCS.h: Add Context member variable.
+	* include/PrimitiveDMCS.h: Likewise.
+
+2010-01-11  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/Makefile.am: Resuscitate testSolver.
+	* src/tests/testSolver.cpp: Likewise.
+
+	* m4/boost.m4: New version from
+	<http://github.com/tsuna/boost.m4/raw/master/build-aux/boost.m4>.
+
+	* include/SatSolver.h: Add ParserGrammar as template parameter for
+	removing the coupling with ClaspResultBuilder.
+	* include/SatSolver.tcc: Likewise.
+	* src/ClaspProcess.cpp: Likewise.
+
+	* include/ParserDirector.tcc (ParserDirector::parse): Throw
+	std::runtime_error instead of printing errors.
+
+	* include/BeliefState.h: Add operator<< for BeliefSets.
+
+	* include/CNFFormula.h (CNFFormula::expandTwoCNFFormulae): Prevent
+	unnecessary copying of stuff.
+
+2010-01-10  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/genTest.cpp (gen_command_lines): Adapt command line options.
+
+	* include/BRGrammar.tcc (definition): Fix bug with empty input file.
+	* include/PropositionalASPGrammar.tcc (definition): Likewise.
+	* include/CnfGrammar.tcc (definition): Likewise.
+
+2010-01-10  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/testParsers.cpp: Update testcase.
+	* src/tests/testTranslation.cpp: Likewise.
+
+	* src/tests/Makefile.am (TESTS): Add testTranslation.
+
+	* include/ProcessCommandLine.h: Add c++-mode.
+	* include/Rule.h: Likewise.
+
+	* include/CNFFormula.h: Add const qualifiers.
+	* include/CNFLocalLoopFormulaBuilder.h: Likewise.
+	* include/DimacsVisitor.h: Likewise.
+	* include/LoopFormulaBuilder.h: Likewise.
+
+2010-01-10  Seif El-Din Bairakdar  <bairakdar@kr.tuwien.ac.at>
+
+	* src/tests/testTranslation.cpp: Simple code optimisation.
+	* src/DimacsVisitor.cpp: Likewise.
+	* include/LoopFormulaBuilder.h: Likewise.
+	* include/DimacsVisitor.h: Likewise.
+	* include/CNFFormula.h : Likewise.
+
+2010-01-09  Seif El-Din Bairakdar  <bairakdar@kr.tuwien.ac.at>
+
+	* src/tests/testTranslation.cpp: Testing Dimacs Visitor with CNF builder.
+
+	* src/Makefile.am: Update translation lib.
+
+	* src/DimacsVisitor.cpp: Adjust DimacsVisitor to work with CNF loop formula.
+	* src/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* include/DimacsVisitor.h: Likewise.
+	* include/CNFFormula.h: Likewise.
+	* include/BaseVisitor.h: Likewise.
+	* include/CNFLocalLoopFormulaBuilder.h: Likewise.
+
+	* include/LoopFormulaBuilder.h: Move getLocalId() to the generic builder.
+	* src/LocalLoopFormulaBuilder.cpp: Likewise.
+	* include/LocalLoopFormulaBuilder.h: Likewise.
+
+	* include/Makefile.am: Add headers.
+
+	* include/CNFFormula.h: Create crude CNF loop formula Builder.
+	* include/CNFLocalLoopFormulaBuilder.h: Likewise.
+	* include/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* include/LoopFormula.h: Likewise.
+
+2010-01-08  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/Server.cpp: Move main() to dmcsd.cpp.
+	* src/dmcsd.cpp: Likewise.
+	* src/Makefile.am: Likewise.
+
+	* src/Cache.cpp: Include config.h.
+	* src/DimacsVisitor.cpp: Likewise.
+	* src/Client.cpp: Likewise.
+	* src/ClaspProcess.cpp: Likewise.
+	* src/LocalLoopFormulaBuilder.cpp: Likwise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/ProcessBuf.cpp: Likewise.
+	* src/genTest.cpp: Likewise.
+
+	* AUTHORS: Add Seif.
+
+	* src/LocalLoopFormulaBuilder.cpp (LocalLoopFormulaBuilder::getLocalId): Optimize local ID finding/creation.
+
+	* include/LocalLoopFormulaBuilder.h: Likewise.
+
+	* include/LoopFormulaDirector.h: Protect debug info with #if defined(DEBUG).
+
+	* include/LoopFormulaBuilder.h: Add todo.
+
+2010-01-08  Seif El-Din Bairakdar  <bairakdar@kr.tuwien.ac.at>
+
+	* src/LocalLoopFormulaBuilder.cpp: Code optimisation.
+	* include/LocalLoopFormulaBuilder.h: Likewise.
+
+	* src/tests/Makefile.am: Enable testTranslation.
+	* src/tests/testTranslation.cpp: Likewise.
+
+	* include/Rule.h: Add inline to helper functions.
+
+	* include/LocalLoopFormulaBuilder.h: Adjust refactored code to work, fixed local vs global Id problem.
+	* include/LoopFormulaDirector.h: Likewise.
+	* include/LoopFormulaBuilder.h: Likewise.
+	* include/LoopFormula.h: Likewise.
+	* src/LocalLoopFormulaBuilder.cpp: Likewise.
+
+2010-01-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/Makefile.am (testTranslation_SOURCES): Add testTranslation.
+	* src/tests/testTranslation.cpp: Likewise.
+
+	* src/Makefile.am (noinst_LIBRARIES): Create libtranslation.a.
+
+	* include/Makefile.am (noinst_HEADERS): Add new headers.
+
+	* include/Rule.h: Add some helper functions.
+
+	* include/LocalLoopFormulaBuilder.h: Code refactoring and optimization.
+	* include/LoopFormula.h: Likewise.
+	* include/LoopFormulaDirector.h: Likewise.
+	* include/LoopFormulaBuilder.h: Likewise.
+	* src/LocalLoopFormulaBuilder.cpp: Likewise.
+
+	* include/ContextLF.h: Delete.
+        * include/Kappa.h: Likewise.
+	* include/MultiContextSystem.h: Likewise.
+	* src/ContextLF.cpp: Likewise.
+        * src/Kappa.cpp: Likewise.
+	* src/LocalBuilder.cpp: Likewise.
+	* src/LoopFormula.cpp: Likewise.
+	* src/MultiContextSystem.cpp: Likewise.
+
+2010-01-06  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/LocalKBBuilder.tcc: returns local kb signature.
+	* include/LocalKBBuilder.h: new member: sig
+	* include/BridgeRulesBuilder.tcc: returns br's head signature and
+	bridge body atoms' signature.
+	* include/BridgeRulesBuilder.h: new members: sig and br
+	* include/Rule.h: New type for signatures.
+	* src/Server.cpp: adapt to having sig and br.
+	* src/test/testMCSParser.cpp: Likewise.
+
+2010-01-05  Seif El-Din Bairakdar  <bairakdar@kr.tuwien.ac.at>
+
+	* src/ContextLF.cpp (ContextLF::checkStronglyConnected): Check if
+	loop is strongly connected in induced subgraph.
+	(ContextLF::checkAllInducedSubGraphs): Enumerates all possible
+	loops.
+	* include/ContextLF.h: Likewise.
+
+2010-01-05  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/genTest.cpp: output topology information in graphviz format.
+
+2010-01-04  Seif El-Din Bairakdar  <bairakdar@kr.tuwien.ac.at>
+
+	* include/MultiContextSystem.h: Add loop formula implementation.
+	* include/LoopFormulaDirector.h: Likewise.
+	* include/LoopFormulaBuilder.h: Likewise.
+	* include/LoopFormula.h: Likewise.
+	* include/LFPrintVisitor.h: Likewise.
+	* include/Kappa.h: Likewise.
+	* include/ContextLF.h: Likewise.
+	* src/MultiContextSystem.cpp: Likewise.
+	* src/LoopFormula.cpp: Likewise.
+	* src/LFPrimitivePrintVisitor.cpp: Likewise.
+	* src/Kappa.cpp: Likewise.
+	* src/ContextLF.cpp: Likewise.
+
+	* examples/bridgeRules.txt: New file.
+	* examples/rules.txt: Likewise.
+
+2010-01-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/Makefile.am: Rename libcontext.a to libcache.a.
+	* src/tests/Makefile.am: Likewise.
+
+	* include/Makefile.am: Add Neighbor.h.
+	* include/Neighbor.h: Likewise.
+
+	* include/Context.h: Decouple CNF parsing from Context.
+	* src/Context.cpp: Likewise.
+	* src/Server.cpp: Likewise.
+	* src/tests/testParsers.cpp: Likewise.
+
+	* include/CnfBuilder.h (CnfBuilder::getLocalSATId): New method.
+	* include/CnfBuilder.tcc: Likewise.
+
+	* include/BeliefState.h: Clean up.
+
+	* include/BaseVisitor.h: Use const arguments.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/DimacsVisitor.h: Likewise.
+	* src/DimacsVisitor.cpp: Likewise.
+
+2010-01-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/LocalKBBuilder.tcc: Adapt buildNode to building a rule.
+
+	* src/genTest.cpp: Output topology information in a text file.
+	Generate 2 files (local kb and bridge rules) for each context.
+	Adapt the command lines wrt the input.
+
+	* include/LocalKBBuilder.tcc: Adapt buildNode to building a rule.
+
+2010-01-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/Makefile.am: Enable testParsers.
+	* src/tests/testParsers.cpp: Likewise.
+
+	* include/ParserDirector.h (ParserDirector::setBuilder): Move ctor parameter.
+	* include/ParserDirector.tcc: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* src/tests/testMCSParser.cpp:Likewise.
+
+	* include/Context.h (Context::print_theory): Remove since it
+	causes bad dependencies on DimacsVisitor.
+	* src/Context.cpp: Likewise.
+
+	* include/BaseModelBuilder.h: Remove dead file.
+	* include/Makefile.am: Likewise.
+
+	* include/BaseBuilder.h (BaseBuilder::buildNode): Rename BaseBuilder::build.
+	* include/BridgeRulesBuilder.h: Likewise.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/CnfBuilder.h: Likewise.
+	* include/CnfBuilder.tcc: Likewise.
+	* include/LocalKBBuilder.h: Likewise.
+	* include/LocalKBBuilder.tcc: Likewise.
+
+	* src/tests/testClasp.cpp: Compare output of clasp with clasp-result.txt.
+	* examples/clasp-result.txt: Likewise.
+
+2010-01-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+	* include/BridgeRulesBuilder.h: New file.
+	* include/BridgeRulesBuilder.tcc:Likewise.
+	* include/BRGrammar.h: Likewise.
+	* include/BRGrammar.tcc: Likewise.
+	* include/MCSGrammar.h: Separate local KB grammar and bridge rules grammar.
+	* include/MCSGrammar.tcc: Likewise.
+
+2010-01-01  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/ClaspProcess.cpp: Add comment on spurious "--" command line option.
+
+	* src/Makefile.am: Add libcontext.a and libsatsolver.a.
+
+	* configure.ac: Add support for Boost.Test.
+	* src/tests/Makefile.am: Likewise.
+	* src/tests/testClasp.cpp: Likewise.
+
+2009-12-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* INSTALL: Update.
+
+	* src/genTest.cpp: Enable genTest binary.
+	(gen_command_lines): Use TESTSDIR, DMCSD and DMCSC.
+
+	* src/Makefile.am: Likewise.
+
+2009-12-17  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/Makefile.am: Use dmcsc instead of testClient.
+
+	* configure.ac: Fix Boost checking.
+
+	* m4/boost.m4: Likewise.
+
+	* src/tests/Makefile.am: Fix automake files.
+
+	* README: Add required files.
+	* INSTALL: Likewise.
+	* COPYING: Likewise.
+

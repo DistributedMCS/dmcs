@@ -1,0 +1,5 @@
+./dmcsd 1 localhost 5001 tests/dia-4-4-2-2-1-1.lp tests/dia-4-4-2-2-1-1.br tests/dia-4-4-2-2-1.opt
+./dmcsd 2 localhost 5002 tests/dia-4-4-2-2-1-2.lp tests/dia-4-4-2-2-1-2.br tests/dia-4-4-2-2-1.opt
+./dmcsd 3 localhost 5003 tests/dia-4-4-2-2-1-3.lp tests/dia-4-4-2-2-1-3.br tests/dia-4-4-2-2-1.opt
+./dmcsd 4 localhost 5004 tests/dia-4-4-2-2-1-4.lp tests/dia-4-4-2-2-1-4.br tests/dia-4-4-2-2-1.opt
+time ./dmcsc localhost 5001 4
