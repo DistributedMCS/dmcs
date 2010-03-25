@@ -50,7 +50,7 @@
 #include "PrimitiveDMCS.h"
 #include "OptDMCS.h"
 #include "CommandType.h"
-
+#include "ProgramOptions.h"
 
 #include <string>
 #include <boost/serialization/vector.hpp>
@@ -72,23 +72,22 @@ int main(int argc, char* argv[])
     {
       boost::program_options::options_description desc("Allowed options");
       desc.add_options()
-	("help", "produce help and usage message")
-	("context,c", boost::program_options::value<std::size_t>(), "set context ID")
-	("port,p", boost::program_options::value<int>()->default_value(5001), "set port")
-	("kb,kb", boost::program_options::value<std::string>(), "set Knowledge Base file name")
-	("br,br", boost::program_options::value<std::string>(), "set Bridge Rules file name")
-	("manager,m", boost::program_options::value<std::string>(), "set manager HOST:PORT")
-	("topology,t", boost::program_options::value<std::string>(), "set Topology file name")
+	(HELP, "produce help and usage message")
+	(CONTEXT_ID, boost::program_options::value<std::size_t>(), "set context ID")
+	(PORT, boost::program_options::value<int>()->default_value(DEFAULT_PORT), "set port")
+	(KB, boost::program_options::value<std::string>(), "set Knowledge Base file name")
+	(BR, boost::program_options::value<std::string>(), "set Bridge Rules file name")
+	(MANAGER, boost::program_options::value<std::string>(), "set Manager HOST:PORT")
+	(TOPOLOGY, boost::program_options::value<std::string>(), "set Topology file name")
 	;
       
       boost::program_options::variables_map vm;        
       boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
       boost::program_options::notify(vm);    
       
-      if (vm.count("help")) {
+      if (vm.count(HELP)) {
 	
-	std::cerr << "Usage: " << argv[0] << " --context=ID [--port=PORT] --kb=LOCAL_KB(FN) --br=BRIDGE_RULES(FN) [--manager=HOSTNAME:PORT|--topology=TOPOLOGY(FN)]" << std::endl;
-	std::cerr << "Or: " << argv[0] << " -c=ID [-p=PORT] -kb=LOCAL_KB(FN) -br=BRIDGE_RULES(FN) [-m=HOSTNAME:PORT|-t=TOPOLOGY(FN)]" << std::endl;
+	std::cerr << "Usage: " << argv[0] << " --" << CONTEXT_ID << "=ID [--" << PORT << "=PORT] --" << KB << "=LOCAL_KB(FILE) --" << BR << "=BRIDGE_RULES(FILE) [--" << MANAGER << "=HOSTNAME:PORT|--" << TOPOLOGY << "=TOPOLOGY(FILE)]" << std::endl;
 	return 1;
       }
       
@@ -98,37 +97,39 @@ int main(int argc, char* argv[])
       std::string filename_bridge_rules = "";
       std::string filename_topo = "";
       
-      if (vm.count("context")) 
+      if (vm.count(CONTEXT_ID)) 
 	{
-	  myid = vm["context"].as<std::size_t>();
+	  myid = vm[CONTEXT_ID].as<std::size_t>();
 	}
 
-      if (vm.count("port")) 
+      if (vm.count(PORT)) 
 	{
-	  myport = vm["port"].as<int>();
+	  myport = vm[PORT].as<int>();
 	}
 
-      if (vm.count("kb")) 
+      if (vm.count(KB)) 
 	{
-	  filename_local_kb = vm["kb"].as<std::string>();
+	  filename_local_kb = vm[KB].as<std::string>();
 	}
 
-      if (vm.count("br")) 
+      if (vm.count(BR)) 
 	{
-	  filename_bridge_rules = vm["br"].as<std::string>();
+	  filename_bridge_rules = vm[BR].as<std::string>();
 	}
 
 	int optionalCount = 0;
 
-	if (vm.count("manager")) 
+	if (vm.count(MANAGER)) 
 	  {
 	    optionalCount++;
+	    std::cerr << "We are sorry, but the manager feature is under implementation, please try the other alternatives";
 	    //read manager host and port
+	    return 1;
 	  }
 
-	if (vm.count("topology")) 
+	if (vm.count(TOPOLOGY)) 
 	  {
-	    filename_topo = vm["topology"].as<std::string>();
+	    filename_topo = vm[TOPOLOGY].as<std::string>();
 	    optionalCount++;
 	  }
 
@@ -152,8 +153,13 @@ int main(int argc, char* argv[])
 
       //      SignaturePtr sig(new Signature);
 
-
-
+ #ifdef DEBUG
+	std::cout << "we have read everything and we will start" << std::endl;
+	std::cout << "myid: " << myid <<std::endl;
+	std::cout << "local KB: " << filename_local_kb <<std::endl;
+	std::cout << "Bridge Rules: " << filename_bridge_rules <<std::endl;
+	std::cout << "Topology: " << filename_topo <<std::endl;
+ #endif 
 	///@todo change when the manager is added
       QueryPlanPtr query_plan(new QueryPlan);
 

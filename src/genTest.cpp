@@ -53,7 +53,7 @@
 #include "QueryPlanGenerator.h"
 #include "Rule.h"
 #include "Signature.h"
-
+#include "ProgramOptions.h"
 
 using namespace dmcs;
 using namespace dmcs::generator;
@@ -589,64 +589,68 @@ print_command_lines()
       index << context->getContextID();
 
       // ID PortNo@Hostname
-      out << context->getContextID() << " " 
-	  << original_qp->getHostname1(context->getContextID()) << " "
-	  << original_qp->getPort1(context->getContextID());
+      out << "--" << CONTEXT_ID << "=" << context->getContextID() << " " 
+	//	  << original_qp->getHostname1(context->getContextID()) << " "
+	  << "--" << PORT << "=" << original_qp->getPort1(context->getContextID());
 
       command_line_opt_sh = "$DMCSPATH/" DMCSD " " + out.str() + 
-	" $TESTSPATH/" + filename + "-" + index.str() + LP_EXT +
-	" $TESTSPATH/" + filename + "-" + index.str() + BR_EXT +
-	" $TESTSPATH/" + filename + OPT_EXT;
+	" --" KB "=$TESTSPATH/" + filename + "-" + index.str() + LP_EXT +
+	" --" BR "=$TESTSPATH/" + filename + "-" + index.str() + BR_EXT +
+	" --"TOPOLOGY "=$TESTSPATH/" + filename + OPT_EXT;
 
       command_line_sh = "$DMCSPATH/" DMCSD " " + out.str() + 
-	" $TESTSPATH/" + filename + "-" + index.str() + LP_EXT +
-	" $TESTSPATH/" + filename + "-" + index.str() + BR_EXT +
-	" $TESTSPATH/" + filename + TOP_EXT;
+	" --" KB "=$TESTSPATH/" + filename + "-" + index.str() + LP_EXT +
+	" --" BR "=$TESTSPATH/" + filename + "-" + index.str() + BR_EXT +
+	" --" TOPOLOGY "=$TESTSPATH/" + filename + TOP_EXT;
 
       command_line_opt = "./" DMCSD " " + out.str() + 
-	" " TESTSDIR "/" + filename + "-" + index.str() + LP_EXT +
-	" " TESTSDIR "/" + filename + "-" + index.str() + BR_EXT +
-	" " TESTSDIR "/" + filename + OPT_EXT;
+	" --" KB "=" TESTSDIR "/" + filename + "-" + index.str() + LP_EXT +
+	" --" BR "=" TESTSDIR "/" + filename + "-" + index.str() + BR_EXT +
+	" --" TOPOLOGY "=" TESTSDIR "/" + filename + OPT_EXT;
 
       command_line = "./" DMCSD " " + out.str() + 
-	" " TESTSDIR "/" + filename + "-" + index.str() + LP_EXT +
-	" " TESTSDIR "/" + filename + "-" + index.str() + BR_EXT +
-	" " TESTSDIR "/" + filename + TOP_EXT;
+	" --" KB "=" TESTSDIR "/" + filename + "-" + index.str() + LP_EXT +
+	" --" BR "=" TESTSDIR "/" + filename + "-" + index.str() + BR_EXT +
+	" --" TOPOLOGY "=" TESTSDIR "/" + filename + TOP_EXT;
 
       file_command_line_opt_sh << command_line_opt_sh << " >/dev/null 2>&1 &" << std::endl;
       file_command_line_opt << command_line_opt << std::endl;
       file_command_line_sh << command_line_sh << " >/dev/null 2>&1 &" << std::endl;
       file_command_line << command_line << std::endl;
     }
-
+  
   
   // client command
   // time | ./dmcsc localhost 5001
 
   ContextPtr context = *(contexts->begin());
   int start_id = context->getContextID();
-  std::stringstream out;
-  out << no_contexts;
+  std::stringstream  globalV;
+  std::stringstream  systemSize;
+  globalV << original_qp->getGlobalV();
+  systemSize << no_contexts;
   
-  command_line_sh = "time $DMCSPATH/" DMCSC " " +
-    original_qp->getHostname1(start_id) + " " +
-    original_qp->getPort1(start_id) + 
-    " $TESTSPATH/" + filename + TOP_EXT + " ";
+  command_line_sh = "time $DMCSPATH/" DMCSC
+    " --" HOSTNAME "=" + original_qp->getHostname1(start_id) +
+    " --" PORT "=" + original_qp->getPort1(start_id) +
+    " --" SYSTEM_SIZE "=" + systemSize.str() + 
+    " --" QUERY_VARS "=\"" + globalV.str() + "\"";
 
-  command_line = "time ./" DMCSC " " +
-    original_qp->getHostname1(start_id) + " " +
-    original_qp->getPort1(start_id) + " " + 
-    TESTSDIR "/" + filename + TOP_EXT + " ";
+  command_line = "time ./" DMCSC 
+    " --" HOSTNAME "=" + original_qp->getHostname1(start_id) +
+    " --" PORT "=" + original_qp->getPort1(start_id) +
+    " --" SYSTEM_SIZE "=" + systemSize.str() + 
+    " --" QUERY_VARS "=\"" + globalV.str() + "\"";
 
-  command_line_opt_sh = "time $DMCSPATH/" DMCSC " " +
-    original_qp->getHostname1(start_id) + " " +
-    original_qp->getPort1(start_id) + " " + 
-    " $TESTSPATH/" + filename + OPT_EXT + " ";
+  command_line_opt_sh = "time $DMCSPATH/" DMCSC
+    " --" HOSTNAME "=" + original_qp->getHostname1(start_id) +
+    " --" PORT "=" + original_qp->getPort1(start_id) +
+    " --" SYSTEM_SIZE "=" + systemSize.str();
 
-  command_line_opt = "time ./" DMCSC " " +
-    original_qp->getHostname1(start_id) + " " +
-    original_qp->getPort1(start_id) + " " + 
-    TESTSDIR "/" + filename + OPT_EXT + " ";
+  command_line_opt = "time ./"  DMCSC 
+    " --" HOSTNAME "=" + original_qp->getHostname1(start_id) +
+    " --" PORT "=" + original_qp->getPort1(start_id) +
+    " --" SYSTEM_SIZE "=" + systemSize.str();
 
   file_command_line_sh << command_line_sh << std::endl << "killall " DMCSD << std::endl;
   file_command_line << command_line << std::endl;

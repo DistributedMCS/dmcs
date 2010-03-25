@@ -37,6 +37,7 @@
 #include "BeliefState.h"
 #include "Message.h"
 #include "QueryPlan.h"
+#include "ProgramOptions.h"
 
 #include <fstream>
 #include <iostream>
@@ -65,22 +66,21 @@ int main(int argc, char* argv[])
 
         boost::program_options::options_description desc("Allowed options");
         desc.add_options()
-	  ("help", "produce help and usage message")
-	  ("hostname,h", boost::program_options::value<std::string>(), "set host name")
-	  ("port,p", boost::program_options::value<std::string>(), "set port")
-	  ("query-variables,v", boost::program_options::value<std::string>(), "set port")
-	  ("systemsize,s", boost::program_options::value<std::size_t>(), "set system size")
-	  ("manager,m", boost::program_options::value<std::string>(), "set manager HOST:PORT")
+	  (HELP, "produce help and usage message")
+	  (HOSTNAME, boost::program_options::value<std::string>(), "set host name")
+	  (PORT, boost::program_options::value<std::string>(), "set port")
+	  (QUERY_VARS, boost::program_options::value<std::string>(), "set port")
+	  (SYSTEM_SIZE, boost::program_options::value<std::size_t>(), "set system size")
+	  (MANAGER, boost::program_options::value<std::string>(), "set Manager HOST:PORT")
 	  ;
 	
         boost::program_options::variables_map vm;        
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
         boost::program_options::notify(vm);    
 
-        if (vm.count("help")) {
-
-	  std::cerr << "Usage: " << argv[0] << " --hostname=<HOST> --port=<PORT> --query-variables=V [--manager=HOSTNAME:PORT|--systemsize=<SIZE>]" << std::endl;
-	  std::cerr << "Or: " << argv[0] << " -h=<HOST> -p=<PORT> -v=V [-m=HOSTNAME:PORT|-s=<SIZE>]" << std::endl;
+        if (vm.count(HELP)) {
+	  
+	  std::cerr << "Usage: " << argv[0] << " --" << HOSTNAME << "=<HOST> --" << PORT << "=<PORT> --" << QUERY_VARS << "=V [--" << MANAGER << "=HOSTNAME:PORT|--" << SYSTEM_SIZE << "=<SIZE>]" << std::endl;
 	  return 1;
         }
 
@@ -88,38 +88,47 @@ int main(int argc, char* argv[])
 	std::string port = "";
 	std::size_t systemSize = 0;	
 
-	if (vm.count("hostname")) 
+	if (vm.count(HOSTNAME)) 
 	  {
-	    hostName = vm["hostname"].as<std::string>();
+	    hostName = vm[HOSTNAME].as<std::string>();
 	  }
 
-	if (vm.count("port")) 
+	if (vm.count(PORT)) 
 	  {
-	    port = vm["port"].as<std::string>();
+	    port = vm[PORT].as<std::string>();
 	  }
 
 	bool primitiveDMCS = false;
-	if (vm.count("query-variables")) // reading the V
+	if (vm.count(QUERY_VARS)) // reading the V
 	  {
 	    primitiveDMCS = true;
-	    boost::tokenizer<> s(vm["query-variables"].as<std::string>());
-	    for (boost::tokenizer<>::iterator it = s.begin(); it != s.end(); ++it)
+
+	    const std::string& qvs = vm[QUERY_VARS].as<std::string>();
+
+	    boost::tokenizer<> tok(qvs);
+
+	    for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
 	      {
-		V.belief_state_ptr->belief_state.push_back(std::atoi(it->c_str()));
+		std::istringstream iss(it->c_str());
+		BeliefSet bs;
+		iss >> bs;
+		V.belief_state_ptr->belief_state.push_back(bs);
 	      }
 	  }
 
 	int optionalCount = 0;
 
-	if (vm.count("manager")) 
+	if (vm.count(MANAGER)) 
 	  {
 	    optionalCount++;
+	    std::cerr << "We are sorry, but the manager feature is under implementation, please try the other alternatives";
 	    //read manager host and port
+	    return 1;
 	  }
 
-	if (vm.count("systemsize")) 
+	if (vm.count(SYSTEM_SIZE)) 
 	  {
-	    systemSize = vm["systemsize"].as<std::size_t>();
+	    systemSize = vm[SYSTEM_SIZE].as<std::size_t>();
 	    optionalCount++;
 	  }
 
@@ -153,14 +162,18 @@ int main(int argc, char* argv[])
 #ifdef DEBUG
 	    std::cerr << "Primitive" <<std::endl;
 #endif
-	    
-	    // 	  V = query_plan->getGlobalV();
-	    PrimitiveMessage mess(V);
-	    Client<PrimitiveMessage> c(io_service, 
-				       iterator,
-				       systemSize,
-				       mess);
 
+ #ifdef DEBUG
+       std::cerr << "Going to send: ";
+       std::cerr << V << std::endl;
+ #endif 
+       
+       PrimitiveMessage mess(V);
+       Client<PrimitiveMessage> c(io_service, 
+				  iterator,
+				  systemSize,
+				  mess);
+       
 #ifdef DEBUG
 	    std::cerr << "Running ioservice" <<std::endl;
 #endif
@@ -183,17 +196,12 @@ int main(int argc, char* argv[])
  	  belief_states= c.getBeliefStates();
  	}
 
- #ifdef DEBUG
-       std::cerr << "Going to send: ";
-       std::cerr << V << std::endl;
- #endif 
 
-       //decode_result(belief_states);
+#ifdef DEBUG
+       std::cerr << "Result: " << std::endl << belief_states << std::endl;
+#endif
 
-       //      std::cerr << "Result: " << std::endl << belief_states << std::endl;
        std::cout << "Number of answers: " << belief_states.belief_states_ptr->belief_states.size() << std::endl;
-       //std::cerr << "Result: " << std::endl << belief_states << std::endl;
-
 
     }
     catch(std::exception& e) {
