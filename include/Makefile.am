@@ -2,6 +2,7 @@ AUTOMAKE_OPTIONS = gnu
 
 # including headers for make dist
 noinst_HEADERS =  \
+	  ProgramOptions.h \
 	  Signature.h \
 	  CNFLocalLoopFormulaBuilder.h \
 	  IMPLocalLoopFormulaBuilder.h \
