@@ -30,6 +30,7 @@ This is the TODO list for DMCS -*- org -*-
 ** TODO sanitize combination functions
 ** TODO add timing values to the transferred messages like solver time, combination time
 ** TODO query plans should have the possibility of querying in a special order
+* TODO checking "sizeof(Signature)" in the parsers
 * TODO create README file
 * TODO setup http://www.kr.tuwien.ac.at/research/systems/dmcs/
 * TODO setup a public SVN repository for DMCS
