@@ -16,6 +16,8 @@ This is the TODO list for DMCS -*- org -*-
 **** --context=ID [--port=PORT] --kb=LOCAL_KB(FN) --br=BRIDGE_RULES(FN) [--manager=HOSTNAME:PORT|--topology=TOPOLOGY(FN)]
 *** DONE dmcsc
 **** --hostname=<HOST> --port=<PORT> --query-variables=V [--manager=HOSTNAME:PORT|--systemsize=<SIZE>]
+*** genTest
+**** --contexts=<no_contexts> --atoms=<no_atoms> --interface=<no_interface_atoms> --bridgerules=<no_bridge_rules> --topology=<topology_type> --filename=<filename>
 ** TODO implement query plan generator
 ** TODO compile on Windows
 ** TODO belief state streaming support
