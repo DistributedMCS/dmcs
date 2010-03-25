@@ -1,3 +1,11 @@
+2010-03-25  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* include/Makefile.am (noinst_HEADERS): Add ProgramOptions.h
+
+	* src/dmcsc.cpp (main): included Program options as a header
+	* src/dmcsd.cpp: Likewise.
+	* src/genTest.cpp: Likewise.
+
 2010-03-23  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
 	* src/dmcsc.cpp: Replaced command line arguments with boost program options
