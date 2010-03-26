@@ -17,7 +17,7 @@ LIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_THREAD_LIBS) $
 bin_PROGRAMS = dmcsd dmcsc 
 noinst_LIBRARIES = libsatsolver.a libcache.a libtranslation.a libdmcs.a
 
-noinst_PROGRAMS = genTest
+noinst_PROGRAMS = dmcsGen
 
 # the translation library
 libtranslation_a_SOURCES = \
@@ -56,12 +56,12 @@ dmcsc_SOURCES = \
 
 dmcsc_LDADD = libdmcs.a
 
-# the genTest binary
-genTest_SOURCES = \
+# the dmcsGen binary
+dmcsGen_SOURCES = \
                   ContextGenerator.cpp \
                   LogicVisitor.cpp \
 		  DLVVisitor.cpp \
                   QueryPlanGenerator.cpp \
                   genTest.cpp
 
-genTest_LDADD = libdmcs.a
+dmcsGen_LDADD = libdmcs.a
