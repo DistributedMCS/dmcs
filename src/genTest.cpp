@@ -27,12 +27,6 @@
  * 
  */
 
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-
 #include "Context.h"
 #include "ContextGenerator.h"
 #include "BinaryTreeQPGenerator.h"
@@ -54,6 +48,15 @@
 #include "Rule.h"
 #include "Signature.h"
 #include "ProgramOptions.h"
+
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+
+
+#include <boost/program_options.hpp>
 
 using namespace dmcs;
 using namespace dmcs::generator;
@@ -105,50 +108,178 @@ QueryPlanPtr optimal_qp;
 int
 read_input(int argc, char* argv[])
 {
-  if (argc != 7)
-    {
-      std::cerr << "Usage: " << argv[0] << " <no_contexts> <no_atoms> <no_interface_atoms> <no_bridge_rules> <topology_type> <filename>";
-      std::cerr << std::endl;
-      std::cerr << std::endl;
-      std::cerr << "       <topology_type> = 0 : random topology" << std::endl;
-      std::cerr << "       <topology_type> = 1 : chain of diamonds topology (all way down)" << std::endl;
-      std::cerr << "       <topology_type> = 2 : chain of diamonds topology (arbitrary edges)" << std::endl;
-      std::cerr << "       <topology_type> = 3 : chain of zig-zag diamonds topology" << std::endl;
-      std::cerr << "       <topology_type> = 4 : pure ring topology" << std::endl;
-      std::cerr << "       <topology_type> = 5 : ring topology (with additional edges)" << std::endl;
-      std::cerr << "       <topology_type> = 6 : binary tree topology" << std::endl;
-      std::cerr << "       <topology_type> = 7 : house topology" << std::endl;
-      std::cerr << "       <topology_type> = 8 : multiple ring topology" << std::endl;
-      std::cerr << std::endl;
-      return 1;
-    }
+    try {
 
-  no_contexts = std::atoi(argv[1]);
-  no_atoms = std::atoi(argv[2]);
-  no_interface_atoms = std::atoi(argv[3]);
-  no_bridge_rules = std::atoi(argv[4]);
-  topology_type = std::atoi(argv[5]);
+        boost::program_options::options_description desc("Allowed options");
+        desc.add_options()
+	  (HELP, "produce help and usage message")
+	  (CONTEXTS, boost::program_options::value<std::size_t>(), "set number of contexts")
+	  (ATOMS, boost::program_options::value<int>(), "set number of atoms")
+	  (INTERFACE, boost::program_options::value<int>(), "set number of interfcace atoms")
+	  (BRIDGE_RULES, boost::program_options::value<int>(), "set number of bridge rules")
+	  (TOPOLOGY, boost::program_options::value<int>(), "set topology type")
+	  (TEMPLATE, boost::program_options::value<std::string>(), "set template")
+	  ;
+	
+        boost::program_options::variables_map vm;        
+        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+        boost::program_options::notify(vm);    
 
-  filename = argv[6];
+        if (vm.count(HELP)) {
+	  
+	  std::cerr << "Usage: " << argv[0] << " --" << CONTEXTS << "=<no_contexts> --" << ATOMS << "=<no_atoms> --" << INTERFACE << "=<no_interface_atoms> --" << BRIDGE_RULES << "=no_bridge_rules --" << TOPOLOGY << "=<TYPE> --" << TEMPLATE << "=<FILE>" << std::endl;
+	  std::cerr << std::endl;
+	  std::cerr << "\t <topology_type> = 0 : random topology" << std::endl;
+	  std::cerr << "\t <topology_type> = 1 : chain of diamonds topology (all way down)" << std::endl;
+	  std::cerr << "\t <topology_type> = 2 : chain of diamonds topology (arbitrary edges)" << std::endl;
+	  std::cerr << "\t <topology_type> = 3 : chain of zig-zag diamonds topology" << std::endl;
+	  std::cerr << "\t <topology_type> = 4 : pure ring topology" << std::endl;
+	  std::cerr << "\t <topology_type> = 5 : ring topology (with additional edges)" << std::endl;
+	  std::cerr << "\t <topology_type> = 6 : binary tree topology" << std::endl;
+	  std::cerr << "\t <topology_type> = 7 : house topology" << std::endl;
+	  std::cerr << "\t <topology_type> = 8 : multiple ring topology" << std::endl;
+	  std::cerr << std::endl;
+    
 
-  if ((1 <= topology_type) && (topology_type <= 3) && (no_contexts % 3 != 1))
-    {
-      std::cerr << "For \"chain of diamond\" topology, the number of contexts must be 3n+1" 
-		<< std::endl;
-      return 1;
-    }
-  if ((topology_type == 7) && (no_contexts % 4 != 1))
-    {
-      std::cerr << "For \"house\" topology, the number of contexts must be 4n+1" << std::endl;
-      return 1;
-    }
-  if ((topology_type == 8)&& (no_contexts < 6) && (no_contexts % 3 != 0) )
-    {
-      std::cerr << "For \"multiple ring\" topology, the number of contexts must be 3(n-1) where n >= 3" 
-		<< std::endl;
-      return 1;
-    }
+	  return 1;
+        }
 
+	int numberOfArguments = 0;
+	if (vm.count(CONTEXTS)) 
+	  {
+	    no_contexts = vm[CONTEXTS].as<std::size_t>();
+	    numberOfArguments++;
+	  }
+	if (vm.count(ATOMS)) 
+	  {
+	    no_atoms = vm[ATOMS].as<int>();
+	    numberOfArguments++;
+	  }
+	if (vm.count(INTERFACE)) 
+	  {
+	    no_interface_atoms = vm[INTERFACE].as<int>();
+	    numberOfArguments++;
+	  }
+	if (vm.count(BRIDGE_RULES)) 
+	  {
+	    no_bridge_rules = vm[BRIDGE_RULES].as<int>();
+	    numberOfArguments++;
+	  }
+	if (vm.count(TOPOLOGY)) 
+	  {
+	    topology_type = vm[TOPOLOGY].as<int>();
+	    numberOfArguments++;
+	  }
+	if (vm.count(TEMPLATE)) 
+	  {
+	    filename = vm[TEMPLATE].as<std::string>();	    
+	    numberOfArguments++;
+	  }
+
+
+	if( numberOfArguments != 6 || filename.compare("") ==0 ||no_contexts == 0 || no_atoms == 0 || no_interface_atoms == 0 || no_bridge_rules == 0 || topology_type ==0 ) 
+	  {
+	    std::cout << desc << "\n";
+	    return 1;
+	  }
+
+	switch (topology_type) {
+	case 1:
+	  { 
+	    if(no_contexts == 1 || no_contexts % 3 != 1)
+	      {
+		std::cerr << "For \"chain of diamond\" topology, the number of contexts must be 3n+1" 
+			  << std::endl;
+		return 1;
+	      }
+	    break;
+	  }
+	case 2:
+	  { 
+	    if(no_contexts == 1 || no_contexts % 3 != 1)
+	      {
+		std::cerr << "For \"chain of diamond\" topology, the number of contexts must be 3n+1" 
+			  << std::endl;
+		return 1;
+	      }
+	    break;
+	  }
+	case 3:
+	  { 
+	    if(no_contexts == 1 || no_contexts % 3 != 1)
+	      {
+		std::cerr << "For \"chain of zig-zag diamond\" topology, the number of contexts must be 3n+1" 
+			  << std::endl;
+		return 1;
+	      }
+	    break;
+	  }
+	case 4:
+	  { 
+	    if(no_contexts == 1)
+	      {
+		std::cerr << "For \"pure ring\" topology, the number of contexts must be at least 2" 
+			  << std::endl;
+		return 1;
+	      }
+	    break;
+	  }
+	case 5:
+	  { 
+	    if(no_contexts == 1)
+	      {
+		std::cerr << "For \"ring\" topology, the number of contexts must be at least 2" 
+			  << std::endl;
+		return 1;
+	      }
+	    break;
+	  }
+	case 6:
+	  { 
+	    if(no_contexts == 1)
+	      {
+		std::cerr << "For \"binary tree\" topology, the number of contexts must be at least 2" 
+			  << std::endl;
+		return 1;
+	      }
+	    break;
+	  }
+	case 7:
+	  { 
+	    if(no_contexts == 1 || no_contexts % 4 != 1)
+	      {
+		std::cerr << "For \"house\" topology, the number of contexts must be 4n+1" 
+			  << std::endl;
+		return 1;
+	      }
+	    break;
+	  }
+	case 8:
+	  { 
+	    if((no_contexts < 6) && (no_contexts % 3 != 0))
+	      {
+		std::cerr << "For \"multiple ring\" topology, the number of contexts must be 3(n-1) where n >= 3"  
+			  << std::endl;
+		return 1;
+	      }
+	    break;
+	  }
+	default:
+	  {
+	    std::cerr << "Topology type must be in the range of 1-8 inclusive" 
+		      << std::endl;
+	    return 1;
+	  }
+	}
+	
+    }
+    catch(std::exception& e) {
+      std::cerr << "error: " << e.what() << "\n";
+        return 1;
+    }
+    catch(...) {
+      std::cerr << "Exception of unknown type!\n";
+    }
 
   std::cerr << "Number of context:                             " << no_contexts << std::endl;
   std::cerr << "Number of atoms per context:                   " << no_atoms << std::endl;

@@ -1,3 +1,9 @@
+2010-03-26  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/Makefile.am (genTest_SOURCES): Changed the name of "genTest" binary to "dmcsGen"
+
+	* src/genTest.cpp: Replaced command line arguments with boost program options
+
 2010-03-25  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
 	* include/Makefile.am (noinst_HEADERS): Add ProgramOptions.h
