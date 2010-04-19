@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
       //compute size local signature
       const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
       
-      SignatureByCtx::const_iterator low = local_sig.lower_bound(myid);       
+      SignatureByCtx::const_iterator low = local_sig.lower_bound(myid);
       SignatureByCtx::const_iterator up  = local_sig.upper_bound(myid);
       
 #ifdef DEBUG

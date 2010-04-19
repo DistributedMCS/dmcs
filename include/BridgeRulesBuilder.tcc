@@ -119,8 +119,11 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
   SignatureBySym& local_sig = boost::get<Tag::Sym>(*sig);
   SignatureBySym::iterator loc_it = local_sig.find(atom_name);      
 
+  // did not find local id for atom_name, generate one
   if(loc_it == local_sig.end())
     {
+      ///@todo get rid of using globalV, add the whole neighbors' signatures instead
+      ///this can be done before bridge rules parsing
       std::size_t contextID = std::atoi(context_id.c_str());
       const BeliefStatePtr& globalInterface = query_plan->getGlobalV();
       const Signature& neighbourSignature = query_plan->getSignature(contextID);
@@ -132,6 +135,8 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
 	{
 	  std::size_t i = 1; // ignore epsilon bit
 	  
+	  ///@todo let i=1, ..., neighbourSignature.size(), otw. we run always through all bits
+
 	  for (; i < sizeof(neighbourInterface)*8 ; ++i)
 	    {
 	      if ((neighbourInterface  & (1 << i)) && i <= neighbourSignature.size() )
@@ -144,8 +149,10 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
 	    }
 	}
     }
-  // if local_sig automatically reflects the change of sig, then this should be ok, otherwise we have to get the signature by id again from the sig.
-  //might need to remove this
+
+  // if local_sig automatically reflects the change of sig, then this
+  //should be ok, otherwise we have to get the signature by id again
+  //from the sig.  might need to remove this
   local_sig = boost::get<Tag::Sym>(*sig);
   loc_it = local_sig.find(atom_name);      
   assert(loc_it !=local_sig.end() );

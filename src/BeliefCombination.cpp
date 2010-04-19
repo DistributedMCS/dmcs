@@ -132,6 +132,8 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
 	const QueryPlanPtr& query_plan)
 {
 
+  ///@todo put V as parameter to combine and remove query_plan as parameter
+  /// XXXXXXXXXXXXXXXXXXXX
   const BeliefStatePtr& V = query_plan->getGlobalV();
 
 #ifdef DEBUG
@@ -140,6 +142,7 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
   std::cerr << "with: " << std::endl;
   printBeliefStateNicely(std::cerr, t, V, query_plan);
 #endif
+  /// XXXXXXXXXXXXXXXXXXXX
 
   const BeliefSets& s_state = s.belief_state_ptr->belief_state;
   const BeliefSets& t_state = t.belief_state_ptr->belief_state;
@@ -205,6 +208,8 @@ BeliefStatesPtr
 combine(const BeliefStatesPtr& cs, const BeliefStatesPtr& ct, 
 	const QueryPlanPtr& query_plan)
 {
+  ///@todo we need a V here as a parameter and do not assume that V stems from the query_plan
+
   assert(cs.belief_states_ptr->system_size == ct.belief_states_ptr->system_size);
   assert((cs.belief_states_ptr->system_size > 0) && 
 	 (ct.belief_states_ptr->system_size > 0));
@@ -232,6 +237,7 @@ combine(const BeliefStatesPtr& cs, const BeliefStatesPtr& ct,
 	  
 	  BeliefStatePtr u(new BeliefState(n));
 
+	  ///@todo pass on V instead of query_plan
 	  if (combine(*s_it, *t_it, u, query_plan))
 	    {
 	      u_set.insert(u);

@@ -120,6 +120,7 @@ OptDMCS::getBeliefStates(OptMessage& mess)
       localV = query_plan->getInterface(c, k);
     }
 
+  ///@todo we have to check if we really can use a localized version of the global V
   globalV = query_plan->getGlobalV();
 
   /*

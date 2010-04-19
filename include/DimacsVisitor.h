@@ -54,6 +54,7 @@ public:
   std::ostream&
   getStream();
 
+  ///@todo use std::size_t no_vars (== local_sig_size + neighbor_vars + V_vars) instead of whole sig
   void 
   visitTheory(const TheoryPtr t, const Signature& sig);
 

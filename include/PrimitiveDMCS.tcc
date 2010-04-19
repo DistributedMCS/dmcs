@@ -239,6 +239,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #endif
 
 #ifdef DEBUG
+  ///@todo use V from message instead of query_plan
   printBeliefStatesNicely(std::cerr, belief_states, query_plan->getGlobalV(), query_plan);
 #endif
   

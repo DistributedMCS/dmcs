@@ -46,6 +46,7 @@ public:
   /// Ctor.
   SatSolver(Process& p);
 
+  ///@todo add additional V parameter for calculating the size of SAT variables
   void
   solve(const Context& context, BeliefStatesPtr& belief_states, const TheoryPtr& theory);
 
