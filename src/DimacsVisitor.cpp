@@ -58,9 +58,9 @@ DimacsVisitor::visitTheory1(const TheoryPtr t)
 }
 
 void
-DimacsVisitor::visitTheory(const TheoryPtr t, const Signature& sig)
+DimacsVisitor::visitTheory(const TheoryPtr t, std::size_t size)
 {
-  stream << "p cnf " << sig.size() << " " << t->size() << std::endl; 
+  stream << "p cnf " << size << " " << t->size() << std::endl; 
   visitTheory1(t);
 }
 

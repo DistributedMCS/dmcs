@@ -117,42 +117,28 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
   std::string atom_name = BaseBuilder<Grammar>::createStringFromNode(node.children[1]);
 
   SignatureBySym& local_sig = boost::get<Tag::Sym>(*sig);
-  SignatureBySym::iterator loc_it = local_sig.find(atom_name);      
+  SignatureBySym::iterator loc_it = local_sig.find(atom_name);   
 
   // did not find local id for atom_name, generate one
   if(loc_it == local_sig.end())
     {
-      ///@todo get rid of using globalV, add the whole neighbors' signatures instead
-      ///this can be done before bridge rules parsing
       std::size_t contextID = std::atoi(context_id.c_str());
-      const BeliefStatePtr& globalInterface = query_plan->getGlobalV();
-      const Signature& neighbourSignature = query_plan->getSignature(contextID);
-      
-      const SignatureByLocal& neighbour_sig = boost::get<Tag::Local>(neighbourSignature);
-      BeliefSet neighbourInterface = globalInterface.belief_state_ptr->belief_state[contextID-1];
-      
-      if (!isEpsilon(neighbourInterface))
-	{
-	  std::size_t i = 1; // ignore epsilon bit
-	  
-	  ///@todo let i=1, ..., neighbourSignature.size(), otw. we run always through all bits
 
-	  for (; i < sizeof(neighbourInterface)*8 ; ++i)
-	    {
-	      if ((neighbourInterface  & (1 << i)) && i <= neighbourSignature.size() )
-		{
-		  std::size_t local_id_here = sig->size() + 1;
-		  SignatureByLocal::const_iterator neighbour_it = neighbour_sig.find(i); 
-		  assert(neighbour_it != neighbour_sig.end());
-		  sig->insert(Symbol(neighbour_it->sym,neighbour_it->ctxId, local_id_here, i));
-		}
-	    }
-	}
+      const Signature& neighborSignature = query_plan->getSignature(contextID);
+    
+      const SignatureBySym& neighbor_sig = boost::get<Tag::Sym>(neighborSignature);
+      SignatureBySym::const_iterator neighbor_it = neighbor_sig.find(atom_name);
+
+      assert(neighbor_it != neighbor_sig.end());
+
+      std::size_t local_id_here = sig->size() + 1;
+      sig->insert(Symbol(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId));
     }
 
   // if local_sig automatically reflects the change of sig, then this
   //should be ok, otherwise we have to get the signature by id again
   //from the sig.  might need to remove this
+
   local_sig = boost::get<Tag::Sym>(*sig);
   loc_it = local_sig.find(atom_name);      
   assert(loc_it !=local_sig.end() );

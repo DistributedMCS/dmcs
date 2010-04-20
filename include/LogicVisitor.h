@@ -78,7 +78,7 @@ public:
   { }
 
   void
-  visitTheory(const TheoryPtr, const Signature&)
+  visitTheory(const TheoryPtr, std::size_t size)
   { }
 };
 

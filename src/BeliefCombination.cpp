@@ -129,20 +129,17 @@ update(BeliefStatePtr& s, const BeliefStatePtr& t)
  */
 bool
 combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u, 
-	const QueryPlanPtr& query_plan)
+	const BeliefStatePtr& V)
 {
 
-  ///@todo put V as parameter to combine and remove query_plan as parameter
-  /// XXXXXXXXXXXXXXXXXXXX
-  const BeliefStatePtr& V = query_plan->getGlobalV();
+  //  const BeliefStatePtr& V = query_plan->getGlobalV();
 
-#ifdef DEBUG
-  std::cerr << "Combining: " << std::endl;
-  printBeliefStateNicely(std::cerr, s, V, query_plan);
-  std::cerr << "with: " << std::endl;
-  printBeliefStateNicely(std::cerr, t, V, query_plan);
-#endif
-  /// XXXXXXXXXXXXXXXXXXXX
+  //#ifdef DEBUG
+  //  std::cerr << "Combining: " << std::endl;
+  //  printBeliefStateNicely(std::cerr, s, V, query_plan);
+  //  std::cerr << "with: " << std::endl;
+  //  printBeliefStateNicely(std::cerr, t, V, query_plan);
+  //#endif
 
   const BeliefSets& s_state = s.belief_state_ptr->belief_state;
   const BeliefSets& t_state = t.belief_state_ptr->belief_state;
@@ -206,7 +203,7 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
  */
 BeliefStatesPtr 
 combine(const BeliefStatesPtr& cs, const BeliefStatesPtr& ct, 
-	const QueryPlanPtr& query_plan)
+	const BeliefStatePtr& V)
 {
   ///@todo we need a V here as a parameter and do not assume that V stems from the query_plan
 
@@ -237,8 +234,7 @@ combine(const BeliefStatesPtr& cs, const BeliefStatesPtr& ct,
 	  
 	  BeliefStatePtr u(new BeliefState(n));
 
-	  ///@todo pass on V instead of query_plan
-	  if (combine(*s_it, *t_it, u, query_plan))
+	  if (combine(*s_it, *t_it, u, V))
 	    {
 	      u_set.insert(u);
 	    }	    

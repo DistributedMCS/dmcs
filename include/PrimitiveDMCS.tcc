@@ -71,7 +71,7 @@ PrimitiveDMCS::~PrimitiveDMCS()
 
 
 void
-PrimitiveDMCS::localSolve()
+PrimitiveDMCS::localSolve(const BeliefStatePtr& V)
 {
 #ifdef DEBUG
   std::cerr << "Starting local solve..." << std::endl;
@@ -85,7 +85,7 @@ PrimitiveDMCS::localSolve()
   std::cerr << "Calling solver..." << std::endl;
 #endif
 
-  solver->solve(*ctx, local_belief_states, theory);
+  solver->solve(*ctx, local_belief_states, theory, V);
 
 #ifdef DEBUG
   std::cerr << "Got " << local_belief_states.belief_states_ptr->belief_states.size();
@@ -136,7 +136,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
   // This will give us local_belief_states
 
-  localSolve();
+  localSolve(V);
 
 #ifdef DEBUG
   BeliefStatePtr all_masked(new BeliefState(n));
@@ -209,7 +209,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  std::cerr << "Going to combine " << "k = " << k << " neighbor = " << *it << std::endl;
 #endif // DEBUG
 
-	  belief_states = combine(belief_states, bs, query_plan);
+	  belief_states = combine(belief_states, bs, V);
 
 #if defined(DEBUG)
 	  std::cerr << "Accumulated combination... " << std::endl;	  	  

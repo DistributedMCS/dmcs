@@ -51,7 +51,7 @@ public:
 
 private:
   void
-  localSolve();
+  localSolve(const BeliefStatePtr& V);
 
 private:
   BeliefStatesPtr belief_states;

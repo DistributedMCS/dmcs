@@ -51,10 +51,10 @@ void
 update(BeliefStatePtr& s, const BeliefStatePtr& t);
 
 bool
-combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u, const QueryPlanPtr& query_plan);
+combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u, const BeliefStatePtr& V);
 
 BeliefStatesPtr 
-combine(const BeliefStatesPtr& cs, const BeliefStatesPtr& ct, const QueryPlanPtr& query_plan);
+combine(const BeliefStatesPtr& cs, const BeliefStatesPtr& ct, const BeliefStatePtr& V);
 
 void
 project_to(const BeliefStatesPtr& cs, const BeliefStatePtr& v, BeliefStatesPtr& cu);

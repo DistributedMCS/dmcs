@@ -67,7 +67,7 @@ OptDMCS::~OptDMCS()
 
 
 void
-OptDMCS::localSolve()
+OptDMCS::localSolve(const BeliefStatePtr& V)
 {
 #ifdef DEBUG
   std::cerr << "Starting local solve..." << std::endl;
@@ -77,7 +77,7 @@ OptDMCS::localSolve()
   cp.addOption("-n 0");
   boost::shared_ptr<BaseSolver> solver(cp.createSolver());
   std::cerr << "Calling solver..." << std::endl;
-  solver->solve(*ctx, local_belief_states, theory);
+  solver->solve(*ctx, local_belief_states, theory, V);
 
 
 #ifdef DEBUG
@@ -170,7 +170,7 @@ OptDMCS::getBeliefStates(OptMessage& mess)
 
 
   // This will give us local_belief_states
-  localSolve();
+  localSolve(globalV);
 
 #ifdef DEBUG
   BeliefStatePtr all_masked(new BeliefState(n));
@@ -230,9 +230,7 @@ OptDMCS::getBeliefStates(OptMessage& mess)
       //const BeliefStatePtr& localV = ctx->getQueryPlan()->getInterface(k, *it);
 
       //std::cerr << "projected global V = " << globalV << std::endl;
-      temporary_belief_states = combine(temporary_belief_states, bs, query_plan);
-      //local_belief_states = combine7(local_belief_states, bs, k, *it, localV, globalV);
-      //neighbors_combined = combine(neighbors_combined, bs, k, *it, localV, globalV);
+      temporary_belief_states = combine(temporary_belief_states, bs, globalV);
       
 #if defined(DEBUG)
       std::cerr << "Combined at our belief state:... " << std::endl;	  	  

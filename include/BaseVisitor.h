@@ -47,7 +47,7 @@ public:
   { }
   
   virtual void
-  visitTheory(const TheoryPtr t, const Signature& sig) = 0;
+  visitTheory(const TheoryPtr t, std::size_t size) = 0;
   
   virtual void
   visitClause(const ClausePtr c) = 0;

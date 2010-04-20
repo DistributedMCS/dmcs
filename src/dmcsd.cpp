@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
 
 #ifdef DEBUG      
       DimacsVisitor v(std::cerr);
-      v.visitTheory(loopFormula,*sig);
+      v.visitTheory(loopFormula, sig->size());
 #endif
       
      
