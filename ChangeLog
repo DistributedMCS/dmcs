@@ -1,3 +1,56 @@
+2010-04-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/BeliefCombination.cpp: Remove debug output.
+	Check that V has the same size as all other belief states.
+
+	* include/SpiritFilePositionNode.h: Add operator<< for
+	FilePositionNodeData to get suport for BOOST_SPIRIT_DEBUG.
+
+	* include/SatSolver.tcc: Fix signed comparison.
+
+	* include/OptDMCS.tcc: Remove debug output.
+	* include/PrimitiveDMCS.tcc: Likewise.
+
+	* include/ClaspResultGrammar.h: Add support for multi-line models
+	and simplify belief state building.
+	* include/ClaspResultGrammar.tcc: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/BaseBuilder.h: Likewise.
+
+	* src/tests/testClasp.cpp: New test case for clasp result parsing.
+	* src/tests/Makefile.am: Likewise.
+	* examples/clasp-result-big.txt: Likewise.
+	* examples/dimacs-big.txt: Likewise.
+
+2010-04-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	Release internal version 0.0.1.
+
+	* configure.ac: Bump version to 0.1.0.
+
+2010-04-20  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/BaseSolver.h: Do not use global interface variables from QueryPlan.
+	* include/BaseVisitor.h: Likewise.
+	* include/BeliefCombination.h: Likewise.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+	* include/DimacsVisitor.h: Likewise.
+	* include/LogicVisitor.h: Likewise.
+	* include/OptDMCS.h: Likewise.
+	* include/OptDMCS.tcc: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/PrimitiveDMCS.tcc: Likewise.
+	* include/SatSolver.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* src/BeliefCombination.cpp: Likewise.
+	* src/DimacsVisitor.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+
+2010-04-20  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* include/ProgramOptions.h: Add missing file.
+
 2010-03-26  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
 	* src/Makefile.am (genTest_SOURCES): Changed the name of "genTest" binary to "dmcsGen"
@@ -180,7 +233,6 @@
 
 	* include/Makefile.am: Update Headers.
 
-
 2010-01-28  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/QueryPlan.h (QueryPlan::vmap): Add mapping from context
@@ -189,17 +241,18 @@
 
 2010-01-27  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
-	* src/LocalLoopFormulaBuilder.cpp: Add assertions
+	* src/LocalLoopFormulaBuilder.cpp: Add assertions.
 
-	* include/Server.tcc (handle_session): Code Clean up
+	* include/Server.tcc (handle_session): Code clean up.
 
-	* include/BridgeRulesBuilder.tcc (build_bridge_atom): Handled the case that a bridge atom might have been parsed earlier
+	* include/BridgeRulesBuilder.tcc (build_bridge_atom): Handled the
+	case that a bridge atom might have been parsed earlier.
 
 2010-01-24  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
-	* include/Client.cpp: File removed
+	* include/Client.cpp: File removed.
 
-	* include/Client.tcc: Create template for Client
+	* include/Client.tcc: Create template for Client.
 	* include/Client.h: Likewise.
 
 	* include/RingOptQPGenerator.h: Fixed a bug.

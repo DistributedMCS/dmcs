@@ -33,9 +33,10 @@ This is the TODO list for DMCS -*- org -*-
 * TODO checking "sizeof(Signature)" in the parsers
 * TODO create README file
 * TODO setup http://www.kr.tuwien.ac.at/research/systems/dmcs/
-* TODO setup a public SVN repository for DMCS
 * TODO setup doxygen documentation
 * TODO add more TODO items
+* DONE setup a public SVN repository for DMCS
+  CLOSED: [2010-04-21 Wed 07:12]
 * DONE add missing test cases
   CLOSED: [2010-03-03 Wed 16:54]
 * DONE add dmcs namespace
