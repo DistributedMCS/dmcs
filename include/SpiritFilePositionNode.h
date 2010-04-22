@@ -41,8 +41,16 @@ struct FilePositionNodeData
 
   FilePositionNodeData(): pos() {}
   FilePositionNodeData& operator=(const FilePositionNodeData& n)
-   { pos = n.pos; return *this; }
+  { pos = n.pos; return *this; }
 };
+
+// for BOOST_SPIRIT_DEBUG
+inline std::ostream&
+operator<< (std::ostream& os, const FilePositionNodeData& /* d */)
+{
+  return os;
+}
+
 
 // Factory which automatically sets the position (adapted from spirit sources)
 //
