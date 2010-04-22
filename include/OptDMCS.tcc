@@ -76,9 +76,7 @@ OptDMCS::localSolve(const BeliefStatePtr& V)
   ClaspProcess cp;
   cp.addOption("-n 0");
   boost::shared_ptr<BaseSolver> solver(cp.createSolver());
-  std::cerr << "Calling solver..." << std::endl;
   solver->solve(*ctx, local_belief_states, theory, V);
-
 
 #ifdef DEBUG
   std::cerr << "Got " << local_belief_states.belief_states_ptr->belief_states.size();
@@ -142,24 +140,23 @@ OptDMCS::getBeliefStates(OptMessage& mess)
     }
   */
 
+#if defined(DEBUG)
   std::cerr << c << " calling " << k << std::endl;
-
-
-  const NeighborsPtr_& nbs = query_plan->getNeighbors(k);
+#endif // DEBUG
 
   ///@todo use cache in DMCS
   //  BeliefStatesPtr bs = cache->cacheHit(V);
 
 #if defined(DEBUG)
   std::cerr << "In OptDMCS: ";
-#endif
+#endif // DEBUG
 
 
   //  if (bs.belief_states_ptr) 
   //{
-#if defined(DEBUG)
+  //#if defined(DEBUG)
   //std::cerr << "cache hit" << std::endl;
-#endif //DEBUG
+  //#endif //DEBUG
 
       //      belief_states = bs;
       //return belief_states;
@@ -168,6 +165,10 @@ OptDMCS::getBeliefStates(OptMessage& mess)
   // No cache found, we need to compute from scratch
   // Compute all of our local belief states
 
+
+  //
+  // call the local solver
+  //
 
   // This will give us local_belief_states
   localSolve(globalV);
@@ -189,9 +190,18 @@ OptDMCS::getBeliefStates(OptMessage& mess)
   std::cerr << globalV << std::endl;
   printBeliefStatesNicely(std::cerr, temporary_belief_states, globalV, query_plan);
   std::cerr << "Now check for neighbors..." << std::endl;
-#endif
+#endif // DEBUG
 
+  //
+  // now visit the neighbors
+  //
+
+  const NeighborsPtr_& nbs = query_plan->getNeighbors(k);
+
+#if defined(DEBUG)
   std::cerr << "Number of neighbors: " << nbs->size() << std::endl;
+#endif //DEBUG
+
   for (Neighbors_::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
     {
       boost::asio::io_service io_service;
@@ -243,8 +253,10 @@ OptDMCS::getBeliefStates(OptMessage& mess)
 
   project_to(temporary_belief_states, localV, belief_states);
 
+#if defined(DEBUG)
   std::cerr << "Going to send back... " << std::endl;	  	  
   std::cerr << belief_states << std::endl;
+#endif // DEBUG
 
   return belief_states;
 }

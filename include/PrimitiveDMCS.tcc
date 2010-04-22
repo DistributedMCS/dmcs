@@ -81,10 +81,6 @@ PrimitiveDMCS::localSolve(const BeliefStatePtr& V)
   cp.addOption("-n 0");
   boost::shared_ptr<BaseSolver> solver(cp.createSolver());
 
-#ifdef DEBUG
-  std::cerr << "Calling solver..." << std::endl;
-#endif
-
   solver->solve(*ctx, local_belief_states, theory, V);
 
 #ifdef DEBUG
@@ -108,8 +104,6 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   belief_states.belief_states_ptr->belief_states.clear();
 
   const QueryPlanPtr query_plan = ctx->getQueryPlan();
-
-  const NeighborsPtr_& nbs = query_plan->getNeighbors(k);
 
   const BeliefStatePtr& V = mess.getV();
 
@@ -142,7 +136,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   BeliefStatePtr all_masked(new BeliefState(n));
   all_masked.belief_state_ptr->belief_state = BeliefSets(n, std::numeric_limits<unsigned long>::max());
   printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
-#endif
+#endif // DEBUG
 
   project_to(local_belief_states, V, belief_states);
 
@@ -153,12 +147,15 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   std::cerr << V << std::endl;
   printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
   std::cerr << "Now check for neighbors..." << std::endl;
-#endif
+#endif // DEBUG
 
-  
+  //
+  // detect cycles
+  //
+
   const History& hist = mess.getHistory();
+  const NeighborsPtr_& nbs = query_plan->getNeighbors(k);
   
-  // Cycles handling
   if ((hist.find(k) != hist.end()) || nbs->empty())
     {
 #if defined(DEBUG)
@@ -239,8 +236,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #endif
 
 #ifdef DEBUG
-  ///@todo use V from message instead of query_plan
-  printBeliefStatesNicely(std::cerr, belief_states, query_plan->getGlobalV(), query_plan);
+  printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
 #endif
   
   return belief_states;
