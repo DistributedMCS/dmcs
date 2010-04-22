@@ -22,7 +22,7 @@ TESTS_ENVIRONMENT = EXAMPLESDIR=$(top_srcdir)/examples
 check_PROGRAMS = testClasp testParsers testTranslation testSolver testSignature testQueryPlan testReadGraph #testMCSParser testSolver testCombination testBeliefComparison
 
 testClasp_SOURCES = testClasp.cpp 
-testClasp_LDADD = $(top_builddir)/src/libsatsolver.a # $(top_builddir)/src/libcontext.a
+testClasp_LDADD = $(top_builddir)/src/libsatsolver.a $(top_builddir)/src/libdmcs.a
 
 testParsers_SOURCES = testParsers.cpp
 testParsers_LDADD = $(top_builddir)/src/libcache.a
