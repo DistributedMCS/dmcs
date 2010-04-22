@@ -48,28 +48,29 @@ printBeliefStateNicely(std::ostream& os, const BeliefStatePtr& b_ptr,
 
   BeliefSets::const_iterator bt = belief_sets.begin();
   BeliefSets::const_iterator vt = mask.begin();
-  
+
+   
   std::size_t j = 1;
   for(; j <= n; ++bt, ++vt, ++j)
-    {
-      const BeliefSet b = *bt;
-      const BeliefSet v = *vt;
-      os << "{";
-      const Signature& sig = query_plan->getSignature(j);
-      const SignatureByLocal& sig_local = boost::get<Tag::Local>(sig);
-      std::size_t sig_size = sig.size();
-      
-      if (!isEpsilon(b))
-	{
+     {
+       const BeliefSet b = *bt;
+       const BeliefSet v = *vt;
+       os << "{";
+       const Signature& sig = query_plan->getSignature(j);
+       const SignatureByLocal& sig_local = boost::get<Tag::Local>(sig);
+       std::size_t sig_size = sig.size();
+       
+       if (!isEpsilon(b))
+ 	{
 	  std::size_t i = 1; // ignore epsilon bit	      
 	  for (; i <= sig_size ; ++i)
-	    {
-	      if (v & (1 << i))
-		{
+ 	    {
+ 	      if (v & (1 << i))
+ 		{
 		  SignatureByLocal::const_iterator local_it = sig_local.find(i);
+
 		  if (b & (1 << i))
 		    {
-		      
 		      os  << local_it->sym << " ";
 		    }
 		  else
@@ -119,11 +120,12 @@ update(BeliefStatePtr& s, const BeliefStatePtr& t)
 
 
 /** 
- * Try to consistently join s and t to u.
+ * Try to consistently join s and t wrt. V to u.
  * 
  * @param s 
  * @param t 
  * @param u 
+ * @param V 
  * 
  * @return true if join is consistent, false otw.
  */
@@ -131,23 +133,15 @@ bool
 combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u, 
 	const BeliefStatePtr& V)
 {
-
-  //  const BeliefStatePtr& V = query_plan->getGlobalV();
-
-  //#ifdef DEBUG
-  //  std::cerr << "Combining: " << std::endl;
-  //  printBeliefStateNicely(std::cerr, s, V, query_plan);
-  //  std::cerr << "with: " << std::endl;
-  //  printBeliefStateNicely(std::cerr, t, V, query_plan);
-  //#endif
-
   const BeliefSets& s_state = s.belief_state_ptr->belief_state;
   const BeliefSets& t_state = t.belief_state_ptr->belief_state;
   const BeliefSets& v_state = V.belief_state_ptr->belief_state;
   BeliefSets& u_state = u.belief_state_ptr->belief_state;
 
+  // all belief states must have identical size
   assert((s_state.size() == t_state.size()) &&
-	 (t_state.size() == u_state.size()));
+	 (t_state.size() == u_state.size()) &&
+	 (u_state.size() == v_state.size()));
 
   const std::size_t n = s_state.size(); // system size
 
@@ -198,6 +192,7 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
  * 
  * @param cs 
  * @param ct 
+ * @param V
  * 
  * @return 
  */
@@ -205,8 +200,7 @@ BeliefStatesPtr
 combine(const BeliefStatesPtr& cs, const BeliefStatesPtr& ct, 
 	const BeliefStatePtr& V)
 {
-  ///@todo we need a V here as a parameter and do not assume that V stems from the query_plan
-
+  // some sanity checks
   assert(cs.belief_states_ptr->system_size == ct.belief_states_ptr->system_size);
   assert((cs.belief_states_ptr->system_size > 0) && 
 	 (ct.belief_states_ptr->system_size > 0));
@@ -231,6 +225,13 @@ combine(const BeliefStatesPtr& cs, const BeliefStatesPtr& ct,
 #ifdef DEBUG
 	  std::cerr << "Combining " << *s_it << " and " << *t_it << std::endl;
 #endif
+
+  //#ifdef DEBUG
+  //  std::cerr << "Combining: " << std::endl;
+  //  printBeliefStateNicely(std::cerr, s, V, query_plan);
+  //  std::cerr << "with: " << std::endl;
+  //  printBeliefStateNicely(std::cerr, t, V, query_plan);
+  //#endif
 	  
 	  BeliefStatePtr u(new BeliefState(n));
 
