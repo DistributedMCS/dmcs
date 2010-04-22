@@ -101,7 +101,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
 	      const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
 
 
-	      for (int i = 1; i < sizeof(neighbor_V)*8; ++i)
+	      for (std::size_t i = 1; i < sizeof(neighbor_V)*8; ++i)
 		{
 		  if (neighbor_V & (1 << i))
 		    {
