@@ -51,9 +51,16 @@ public:
   buildNode (typename BaseBuilder<Grammar>::node_t& node);
   
 private:
-  void add_atom(typename BaseBuilder<Grammar>::node_t& node, BeliefStatePtr& bs);
+  void
+  add_literal(typename BaseBuilder<Grammar>::node_t& node, BeliefStatePtr& bs);
 
-  const Context& context;
+
+  const SignaturePtr& sig;
+  const SignatureByLocal& local_sig;
+
+  std::size_t sig_size;
+  std::size_t system_size;
+
   BeliefStatesPtr& belief_states;
 };
 

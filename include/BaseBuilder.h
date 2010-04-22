@@ -37,11 +37,9 @@
 #include <boost/spirit/include/classic_position_iterator.hpp>
 
 #include "SpiritFilePositionNode.h"
-#include "Theory.h"
 
 
 namespace dmcs {
-
 
 /**
  * @brief Base class for builders.
@@ -50,7 +48,14 @@ template<class Grammar>
 class BaseBuilder
 {
 protected:
-  Grammar g;
+  /// a generic Grammar
+  Grammar grammar;
+
+  /// pass Grammar as parameter
+  BaseBuilder(const Grammar& g) : grammar(g) { }
+
+  /// default ctor if Grammar has a default ctor
+  BaseBuilder() : grammar() { }
 
 public:
   typedef FilePositionNodeFactory<FilePositionNodeData> factory_t;
@@ -68,7 +73,7 @@ public:
   virtual Grammar&
   getGrammar()
   {
-    return g;
+    return grammar;
   }
 
   std::string 

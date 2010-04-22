@@ -38,7 +38,12 @@ namespace dmcs {
 template<typename Grammar>
 ClaspResultBuilder<Grammar>::ClaspResultBuilder(const Context& context_,
 						BeliefStatesPtr& belief_states_)
-  : context(context_),
+  ///@todo future versions of clasp will have a sentinel
+  : BaseBuilder<Grammar>(Grammar(context_.getSignature()->size())), 
+    sig(context_.getSignature()),
+    local_sig(boost::get<Tag::Local>(*sig)),
+    sig_size(sig->size()),
+    system_size(context_.getSystemSize()),
     belief_states(belief_states_)
 { }
 
@@ -47,16 +52,16 @@ template<typename Grammar>
 void
 ClaspResultBuilder<Grammar>::buildNode (typename BaseBuilder<Grammar>::node_t& node)
 {
-  assert(node.value.id() == Grammar::ClaspAnswer);
+  assert(node.value.id() == Grammar::Value); // we expect a model
 
-  BeliefStatePtr bs(new BeliefState(context.getSystemSize())); // initially, all is zero
+  BeliefStatePtr bs(new BeliefState(system_size)); // initially, all is zero
 
-  ///@todo this may be optimized
+  ///@todo this may be optimized, I think we can remove the non-epsilon part here...
 
   // mark this belief set as non-epsilon
-  bs.belief_state_ptr->belief_state[context.getContextID() - 1] = 1;
+  //bs.belief_state_ptr->belief_state[context.getContextID() - 1] = 1;
 
-  NeighborsPtr_ neighbors= context.getQueryPlan()->getNeighbors(context.getContextID());
+  //NeighborsPtr_ neighbors= context.getQueryPlan()->getNeighbors(context.getContextID());
   // activate neighbors as non-epsilons
   
   /*for (Neighbors_::const_iterator it = neighbors->begin(); 
@@ -66,12 +71,13 @@ ClaspResultBuilder<Grammar>::buildNode (typename BaseBuilder<Grammar>::node_t& n
       bs.belief_state_ptr->belief_state[(*it) - 1] = 1;
       }*/
   
+  assert(node.children.size() == sig_size); // a model must have sig_size literals
   
   // set all positive literals in the belief state
   for (typename BaseBuilder<Grammar>::node_t::tree_iterator jt = node.children.begin(); 
        jt != node.children.end(); ++jt)
     {
-      add_atom(*jt, bs);
+      add_literal(*jt, bs);
     }
 
   belief_states.belief_states_ptr->belief_states.insert(bs);
@@ -80,52 +86,48 @@ ClaspResultBuilder<Grammar>::buildNode (typename BaseBuilder<Grammar>::node_t& n
 
 template<typename Grammar>
 void
-ClaspResultBuilder<Grammar>::add_atom(typename BaseBuilder<Grammar>::node_t& node, BeliefStatePtr& bs)
+ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& node,
+					 BeliefStatePtr& bs)
 {
-  BeliefSets& bstate = bs.belief_state_ptr->belief_state;
-  if (node.children.size() == 1) // only positive atoms
+  assert(node.children.size() == 1); // we expect that literals have size() == 1
+
+  std::string str_lit = BaseBuilder<Grammar>::createStringFromNode(node.children[0]);
+
+  ///@todo no error checking??
+  Literal local_lit = std::atoi(str_lit.c_str());
+  
+  // we only allow non-zero literals in range of the signature, as 0
+  // is used as sentinel
+  assert(std::abs(local_lit) > 0 && std::abs(local_lit) <= (int)sig_size);
+
+  // find the global value for the belief state
+  SignatureByLocal::const_iterator loc_it = local_sig.find(std::abs(local_lit));
+
+  // it must show up in the signature
+  if(loc_it != local_sig.end())
     {
-      ///@todo can be optimized
-      // turn on the respective bit in bs
-      std::string str_lit = BaseBuilder<Grammar>::createStringFromNode(node.children[0]);
-      Literal local_lit = std::atoi(str_lit.c_str());
+      // now setup belief state at the right position
+      BeliefSets& bstate = bs.belief_state_ptr->belief_state;
 
-      // we only allow positive literals
-      assert(local_lit > 0);
-      
-      // look-up signature for the position in the belief state
-      const SignatureByLocal& local_sig = boost::get<Tag::Local>(*context.getSignature());
-      SignatureByLocal::const_iterator loc_it = local_sig.find(local_lit);
-      
+      std::size_t cid = loc_it->ctxId - 1;
 
-      // it must show up in the signature
-      if(loc_it != local_sig.end())
+      // just to be save
+      assert(cid < system_size);
+
+      // un/set bit in the right context at the right position
+      if (local_lit > 0) // positive literal
 	{
-	  // set bit in the right context at the right position
-	  bstate[loc_it->ctxId - 1] |= (0x1 << loc_it->origId);
-
-	  // turn on neighbor here, because we don't have enough information 
-	  // about neighbors from the graph (some edges were removed).
-	  bstate[loc_it->ctxId - 1] |= 1;
+	  bstate[cid] |= (0x1 << loc_it->origId);
 	}
-    }
-  else
-    {
-      std::string str_lit = BaseBuilder<Grammar>::createStringFromNode(node.children[1]);
-      Literal local_lit = std::atoi(str_lit.c_str());
-
-      const SignatureByLocal& local_sig = boost::get<Tag::Local>(*context.getSignature());
-      SignatureByLocal::const_iterator loc_it = local_sig.find(local_lit);
-      
-
-      // it must show up in the signature
-      if(loc_it != local_sig.end())
+      else // negative literal (this is probably not needed)
 	{
-	  // turn on neighbor here, because we don't have enough information 
-	  // about neighbors from the graph (some edges were removed).
-	  // However, we don't need to set bit because this is a false atom.
-	  bstate[loc_it->ctxId - 1] |= 1;
+	  bstate[cid] &= ~(0x1 << loc_it->origId);
 	}
+      
+      // turn on epsilon of neighbor here, because we don't have
+      // enough information about neighbors from the graph (some edges
+      // were removed).
+      bstate[cid] |= 1;
     }
 }
 

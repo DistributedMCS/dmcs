@@ -47,11 +47,22 @@ struct ClaspResultGrammar
       None = 0,
       Root,
       Neg,
-      Number,
-      DimacsAtom,
-      ClaspAnswer,
-      Conclusion
+      Variable,
+      Sentinel,
+      Literal,
+      Value,
+      Comments,
+      Solution
     };
+
+  std::string maxvariable;
+
+  ClaspResultGrammar(std::size_t maxint)
+  {
+    std::ostringstream oss;
+    oss << maxint;
+    maxvariable = oss.str();
+  }
   
   // S = ScannerT
   template<typename S>
@@ -61,15 +72,21 @@ struct ClaspResultGrammar
     typedef BOOST_SPIRIT_CLASSIC_NS :: parser_context<> Ctx;
     template<int Tag> struct tag : public BOOST_SPIRIT_CLASSIC_NS :: parser_tag<Tag> {};
     
+    /// copy ctor
     definition(ClaspResultGrammar const& self);
-    BOOST_SPIRIT_CLASSIC_NS :: rule< S, Ctx, tag<Root> > const& start() const { return root_; }
+
+    BOOST_SPIRIT_CLASSIC_NS :: rule< S, Ctx, tag<Root> > const&
+    start() const
+    { return root; }
     
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<DimacsAtom> >  dimacs_atom_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<ClaspAnswer> > clasp_answer_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Conclusion> >  conclusion_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Neg> >         neg_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Number> >      number_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Root> >        root_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Variable> > var;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Sentinel> > sentinel;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Neg> >      neg;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Literal> >  literal;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Value> >    value;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Comments> > comments;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Solution> > solution;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Root> >     root;
   };
 };
 

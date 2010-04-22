@@ -33,29 +33,39 @@
 namespace dmcs {
 
 template<typename ScannerT>
-ClaspResultGrammar::definition<ScannerT>::definition(ClaspResultGrammar const&)
+ClaspResultGrammar::definition<ScannerT>::definition(ClaspResultGrammar const& self)
 {
+  namespace spirit = BOOST_SPIRIT_CLASSIC_NS;
+
   // shortcut for boost::spirit::discard_node_d() const
-  BOOST_SPIRIT_CLASSIC_NS::node_parser_gen<BOOST_SPIRIT_CLASSIC_NS::discard_node_op>
+  spirit::node_parser_gen<spirit::discard_node_op>
   rm =
-  BOOST_SPIRIT_CLASSIC_NS::node_parser_gen<BOOST_SPIRIT_CLASSIC_NS::discard_node_op>();
+  spirit::node_parser_gen<spirit::discard_node_op>();
 
-  neg_ = BOOST_SPIRIT_CLASSIC_NS::ch_p('-');
+  neg = spirit::ch_p('-');
 
-  number_ =
-    BOOST_SPIRIT_CLASSIC_NS::token_node_d[+BOOST_SPIRIT_CLASSIC_NS::digit_p];
+  sentinel = spirit::token_node_d[!neg >> spirit::str_p(self.maxvariable.c_str())];
 
-  dimacs_atom_ = !neg_ >> number_;
+  var = spirit::token_node_d[spirit::int_p] - sentinel;
 
-  clasp_answer_ = rm[BOOST_SPIRIT_CLASSIC_NS::ch_p('v')] >> +dimacs_atom_;
+  literal = var;
 
-  conclusion_ = BOOST_SPIRIT_CLASSIC_NS::ch_p('s') >>
-  (BOOST_SPIRIT_CLASSIC_NS::str_p("SATISFIABLE") |
-  BOOST_SPIRIT_CLASSIC_NS::str_p("UNSATISFIABLE"));
+  value =
+    *(rm[spirit::ch_p('v')] >> (+literal % rm[spirit::ch_p('v')])) >>
+    rm[spirit::ch_p('v')] >> *literal >> sentinel; // !neg >> sentinel may be removed for '0'
 
-  root_ = *(rm[BOOST_SPIRIT_CLASSIC_NS::comment_p("c")] | clasp_answer_) >>
-    rm[conclusion_] >> *(rm[BOOST_SPIRIT_CLASSIC_NS::comment_p("c")]) >>
-    !BOOST_SPIRIT_CLASSIC_NS::end_p;
+  solution =
+    spirit::ch_p('s') >> (spirit::str_p("SATISFIABLE") |
+			  spirit::str_p("UNSATISFIABLE") |
+			  spirit::str_p("UNKNOWN"));
+
+  comments = spirit::comment_p("c");
+
+  root =
+    *(rm[comments] | value) >>
+    rm[solution] >>
+    *(rm[comments] | value) >>
+    !spirit::end_p;
 }
 
 } // namespace dmcs
