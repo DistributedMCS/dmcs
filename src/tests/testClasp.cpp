@@ -83,7 +83,6 @@ BOOST_AUTO_TEST_CASE( testClaspResult )
       std::string s;
       s += c;
       Symbol sym(s, k, i, i);
-      std::cerr << sym << std::endl;
       sig->insert(sym);
       k = (k + 1) > 3 ? 1 : k + 1;
     }

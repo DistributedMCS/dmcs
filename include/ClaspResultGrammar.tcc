@@ -46,13 +46,11 @@ ClaspResultGrammar::definition<ScannerT>::definition(ClaspResultGrammar const& s
 
   sentinel = spirit::token_node_d[!neg >> spirit::str_p(self.maxvariable.c_str())];
 
-  var = spirit::token_node_d[spirit::int_p] - sentinel;
-
-  literal = var;
+  literal = spirit::token_node_d[spirit::int_p] - sentinel;
 
   value =
     *(rm[spirit::ch_p('v')] >> (+literal % rm[spirit::ch_p('v')])) >>
-    rm[spirit::ch_p('v')] >> *literal >> sentinel; // !neg >> sentinel may be removed for '0'
+    rm[spirit::ch_p('v')] >> *literal >> sentinel; ///@todo sentinel may be removed for '0'
 
   solution =
     spirit::ch_p('s') >> (spirit::str_p("SATISFIABLE") |

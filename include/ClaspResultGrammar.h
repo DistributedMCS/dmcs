@@ -47,7 +47,6 @@ struct ClaspResultGrammar
       None = 0,
       Root,
       Neg,
-      Variable,
       Sentinel,
       Literal,
       Value,
@@ -79,7 +78,6 @@ struct ClaspResultGrammar
     start() const
     { return root; }
     
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Variable> > var;
     BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Sentinel> > sentinel;
     BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Neg> >      neg;
     BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Literal> >  literal;

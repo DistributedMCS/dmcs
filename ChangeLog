@@ -1,5 +1,7 @@
 2010-04-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/clasp-wrapper.sh: Remove.
+
 	* src/BeliefCombination.cpp: Remove debug output.
 	Check that V has the same size as all other belief states.
 
