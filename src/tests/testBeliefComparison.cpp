@@ -1,166 +1,211 @@
-#include <iostream>
 #include "BeliefState.h"
+
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "testBeliefComparison"
+#include <boost/test/unit_test.hpp>
+
+#include <iostream>
 
 using namespace dmcs;
 
-std::size_t system_size = 2;
-BeliefStatesPtr cs(new BeliefStates(system_size));
-BeliefStatesPtr ct(new BeliefStates(system_size));
 
-void create_belief_states()
+BOOST_AUTO_TEST_CASE( testBeliefStates )
 {
-  BeliefState s1;
-  BeliefState s2;
-  BeliefState t1;
-  BeliefState t2;
+  std::size_t system_size = 2;
 
-  std::pair<int, char> p1(1, 'T');
-  std::pair<int, char> p2(2, 'F');
-  std::pair<int, char> p3(3, 'T');
-  std::pair<int, char> p4(4, 'F');
-  std::pair<int, char> p5(5, 'F');
+  BeliefStateListPtr cs(new BeliefStateList);
+  BeliefStateListPtr ct(new BeliefStateList);
 
-  std::pair<int, char> q1(1, 'T');
-  std::pair<int, char> q2(2, 'T');
-  std::pair<int, char> q3(3, 'F');
-  std::pair<int, char> q4(4, 'F');
-  std::pair<int, char> q5(5, 'F');
-  
+  BeliefStatePtr s1(new BeliefState(system_size, 0));
+  BeliefStatePtr s2(new BeliefState(system_size, 0));
+  BeliefStatePtr t1(new BeliefState(system_size, 0));
+  BeliefStatePtr t2(new BeliefState(system_size, 0));
 
-  std::pair<int, char> r1(1, 'T');
-  std::pair<int, char> r2(2, 'T');
-  std::pair<int, char> r3(3, 'T');
-  std::pair<int, char> r4(4, 'F');
-  std::pair<int, char> r5(5, 'F');
 
-  std::pair<int, char> u1(1, 'T');
-  std::pair<int, char> u2(2, 'T');
-  std::pair<int, char> u3(3, 'T');
-  std::pair<int, char> u4(4, 'F');
-  std::pair<int, char> u5(5, 'F');
+  //
+  // S1 = ( 001011, 000001 )
+  //
+  BeliefState::iterator it = s1->begin();
+
+  BeliefSet& s11 = *it;
+  s11 |= (1 << (1 + 1));
+  s11 |= (1 << (3 + 1));
+  s11 = setEpsilon(s11);
   
-  BeliefSet s11;
-  s11.insert(p1);
-  s11.insert(p2);
-  s11.insert(p3);
+  BeliefSet& s12 = *(++it);
+  s12 = setEpsilon(s12);
+
+
+  //
+  // S2 = ( 000111, 000001 )
+  //
+  it = s2->begin();
+
+  BeliefSet& s21 = *it;
+  s21 |= (1 << (1 + 1));
+  s21 |= (1 << (2 + 1));
+  s21 = setEpsilon(s21);
   
-  BeliefSet s12;
-  s12.insert(p4);
-  s12.insert(p5);
-  
-  std::pair<int, BeliefSet> ps11(1, s11);
-  std::pair<int, BeliefSet> ps12(2, s12);
-  
-  s1.mapping.insert(ps11);
-  s1.mapping.insert(ps12);
-  
+  BeliefSet& s22 = *(++it);
+  s22 = setEpsilon(s22);
+
   cs->push_back(s1);
-
-  //-------------------------------------
-
-  BeliefSet s21;
-  s21.insert(q1);
-  s21.insert(q2);
-  s21.insert(q3);
-  
-  BeliefSet s22;
-  s22.insert(q4);
-  s22.insert(q5);
-
-  std::pair<int, BeliefSet> ps21(1, s21);
-  std::pair<int, BeliefSet> ps22(2, s22);
-  
-  s2.mapping.insert(ps21);
-  s2.mapping.insert(ps22);
-  
   cs->push_back(s2);
 
-  //-------------------------------------
-
-  BeliefSet t11;
-  t11.insert(r1);
-  t11.insert(r2);
-  t11.insert(r3);
   
-  BeliefSet t12;
-  t12.insert(q4);
-  t12.insert(q5);
+  //
+  // T1 = (001111, 000001)
+  //
+  it = t1->begin();
 
-  std::pair<int, BeliefSet> pt11(1, t11);
-  std::pair<int, BeliefSet> pt12(2, t12);
+  BeliefSet& t11 = *it;
+  t11 |= (1 << (1 + 1));
+  t11 |= (1 << (2 + 1));
+  t11 |= (1 << (3 + 1));
+  t11 = setEpsilon(t11);
   
-  t1.mapping.insert(pt11);
-  //t1.mapping.insert(pt12);
+  BeliefSet& t12 = *(++it);
+  t12 = setEpsilon(t12);
+
+  //
+  // T2 = (000111, 000001)
+  //
+  it = t2->begin();
+
+  BeliefSet& t21 = *it;
+  t21 |= (1 << (1 + 1));
+  t21 |= (1 << (2 + 1));
+  t21 = setEpsilon(t21);
+  
+  BeliefSet& t22 = *(++it);
+  t22 = setEpsilon(t22);
   
   ct->push_back(t1);
-
-  //-------------------------------------
-
-  BeliefSet t21;
-  t21.insert(u1);
-  t21.insert(u2);
-  t21.insert(u3);
-  
-  BeliefSet t22;
-  t22.insert(u4);
-  t22.insert(u5);
-
-  std::pair<int, BeliefSet> pt21(1, t21);
-  std::pair<int, BeliefSet> pt22(2, t22);
-  
-  t2.mapping.insert(pt21);
-  t2.mapping.insert(pt22);
-  
   ct->push_back(t2);
+
+  BOOST_CHECK_EQUAL(cs->size(), 2);
+  BOOST_CHECK_EQUAL(ct->size(), 2);
+
+  BeliefStateList::const_iterator s_it = cs->begin();
+  BeliefStateList::const_iterator t_it = ct->begin();
+
+  // compare S1 to T1
+  const BeliefStatePtr& my_s1 = *s_it;
+  const BeliefStatePtr& my_t1 = *t_it;
+
+  BOOST_CHECK_EQUAL(*s_it, s1);
+  BOOST_CHECK_EQUAL(*t_it, t1);
+
+  BOOST_CHECK_EQUAL(my_s1->size(), system_size);
+  BOOST_CHECK_EQUAL(my_t1->size(), system_size);
+
+  BOOST_CHECK_NE( my_s1->at(0), my_t1->at(0) );
+  BOOST_CHECK_EQUAL( (*my_s1)[1], (*my_t1)[1] );
+
+  // vector::at() bails, vector::operator[] doesn't
+  //my_s1->at(2);
+
+  // compare S2 to T2
+
+  ++s_it;
+  ++t_it;
+
+  BOOST_CHECK_EQUAL(*s_it, s2);
+  BOOST_CHECK_EQUAL(*t_it, t2);
+
+  const BeliefState& my_s2 = **s_it;
+  const BeliefState& my_t2 = **t_it;
+
+  ///@todo GRRRRR BOOST_CHECK_BITWISE_EQUAL does not work with shared_ptr
+
+  BOOST_CHECK_EQUAL(my_s2.size(), system_size);
+  BOOST_CHECK_EQUAL(my_t2.size(), system_size);
+
+  BOOST_CHECK_EQUAL( my_s2[0], my_t2[0] );
+  BOOST_CHECK_EQUAL( my_s2[1], my_t2[1] );
 }
 
-void print_belief_states(BeliefStatesPtr& belief_states)
+
+
+
+BOOST_AUTO_TEST_CASE( testBeliefStateSorting )
 {
-  for (std::size_t i = 0; i < belief_states->size(); ++i)
-    {
-      std::cerr << "+Belief state number " << i+1 << ": ";
-      std::cerr << "( ";
-      for (BeliefState::Map::const_iterator it1 = belief_states->at(i).mapping.begin();
-	   it1 != belief_states->at(i).mapping.end(); ++ it1)
-	{
-	  //std::cerr << "-Belief set number " << it1->first << std::endl;
-	  std::cerr << "{";
-	  for (BeliefSet::const_iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
-	    {
-	      std::cerr << it2->first << it2->second << ",";
-	    }
-	  std::cerr << "}, ";
-	}
-      std::cerr << ")" << std::endl;
-    }  
-}
+  std::size_t system_size = 3;
 
-int main()
-{
-    create_belief_states();
+  BeliefStateListPtr cs(new BeliefStateList);
 
-    std::cerr << "CS:" << std::endl;
-    print_belief_states(cs);
-    
-    std::cerr << "CT:" << std::endl;
-    print_belief_states(ct);
+  BeliefStatePtr s1(new BeliefState(system_size, 0));
+  BeliefStatePtr s2(new BeliefState(system_size, 0));
+  BeliefStatePtr s3(new BeliefState(system_size, 0));
 
-    int i = 0;
-    for (BeliefStates::iterator cs1 = cs->begin(); cs1 != cs->end(); ++cs1)
-    {
-	++i;
-	int j = 0;
-	for (BeliefStates::iterator ct1 = ct->begin(); ct1 != ct->end(); ct1++)
-	{
-	    ++j;
-	    if (*cs1 < *ct1)
-	    {
-		std::cerr << "cs[" << i << "] < ct[" << j << "]" << std::endl;	
-	    }
-	    else
-	    {
-		std::cerr << "cs[" << i << "] not < ct[" << j << "]" << std::endl;
-	    }
-	}
-    }
+
+  //
+  // S1 = ( 001011, 000001, 000000 )
+  //
+  BeliefState::iterator it = s1->begin();
+
+  BeliefSet& s11 = *it;
+  s11 |= (1 << (1 + 1));
+  s11 |= (1 << (3 + 1));
+  s11 = setEpsilon(s11);
+  
+  BeliefSet& s12 = *(++it);
+  s12 = setEpsilon(s12);
+
+
+  //
+  // S2 = ( 001011, 000001, 000000 )
+  //
+  it = s2->begin();
+
+  BeliefSet& s21 = *it;
+  s21 |= (1 << (1 + 1));
+  s21 |= (1 << (3 + 1));
+  s21 = setEpsilon(s21);
+  
+  BeliefSet& s22 = *(++it);
+  s22 = setEpsilon(s22);
+
+ 
+  //
+  // S3 = ( 000011, 000001, 000000 )
+  //
+  it = s3->begin();
+
+  BeliefSet& s31 = *it;
+  s31 |= (1 << (1 + 1));
+  s31 = setEpsilon(s31);
+  
+  BeliefSet& s32 = *(++it);
+  s32 = setEpsilon(s32);
+
+  cs->push_back(s1);
+  cs->push_back(s2);
+  cs->push_back(s3);
+  
+
+  BOOST_CHECK_EQUAL(cs->size(), 3);
+
+  BeliefStateList::const_iterator s_it = cs->begin();
+
+  BOOST_CHECK_EQUAL(*s_it, s1);
+  BOOST_CHECK_EQUAL(*(++s_it), s2);
+  BOOST_CHECK_EQUAL(*(++s_it), s3);
+
+  cs->sort(BeliefStateCmp());
+
+  s_it = cs->begin();
+
+  BOOST_CHECK_EQUAL(*s_it, s3);
+  BOOST_CHECK_EQUAL(*(++s_it), s1);
+  BOOST_CHECK_EQUAL(*(++s_it), s2);
+
+  cs->unique(BeliefStateEq());
+
+  BOOST_CHECK_EQUAL(cs->size(), 2);
+
+  s_it = cs->begin();
+
+  BOOST_CHECK_EQUAL(*s_it, s3);
+  BOOST_CHECK_EQUAL(*(++s_it), s1);
 }
