@@ -51,6 +51,7 @@ typedef boost::shared_ptr<BeliefState> BeliefStatePtr;
 typedef std::list<BeliefStatePtr> BeliefStateList;
 typedef boost::shared_ptr<BeliefStateList> BeliefStateListPtr;
 
+#define EPSILONBIT 0x1
 
 /** 
  * @param b 
@@ -62,7 +63,21 @@ isEpsilon(BeliefSet b)
 {
   // we need the first bit true in b for efficient subset checking in
   // non-epsilon BeliefSet's
-  return !(b & 0x1); 
+  return !(b & EPSILONBIT); 
+}
+
+
+/** 
+ * @param b 
+ * 
+ * @return a BeliefSet with epsilon-bit set to 1
+ */
+inline BeliefSet
+setEpsilon(BeliefSet b)
+{
+  // we need the first bit true in b for efficient subset checking in
+  // non-epsilon BeliefSet's
+  return b | (1 << EPSILONBIT);
 }
 
 
@@ -75,6 +90,18 @@ struct BeliefStateCmp
     assert (bs1->size() == bs2->size());
     return std::lexicographical_compare(bs1->begin(), bs1->end(),
 					bs2->begin(), bs2->end());
+  }
+};
+
+
+/// @brief for setting BeliefStateLists unique
+struct BeliefStateEq
+{
+  bool
+  operator() (const BeliefStatePtr& bs1, const BeliefStatePtr& bs2)
+  {
+    assert (bs1->size() == bs2->size());
+    return std::equal(bs1->begin(), bs1->end(), bs2->begin());
   }
 };
 

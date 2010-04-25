@@ -1,5 +1,10 @@
 2010-04-25  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/tests/testBeliefComparison.cpp: Resuscitate testBeliefComparison.
+	* src/tests/Makefile.am: Likewise.
+
+	* INSTALL: Remove.
+
 	* TODO: Update.
 
 	* include/LogicVisitor.h: Fix warning.
@@ -8,11 +13,14 @@
 	<http://github.com/tsuna/boost.m4/raw/master/build-aux/boost.m4>.
 
 	* include/BeliefState.h: Simplify BeliefState types.
+	(setEpsilon): Sets epsilon flag.
+	(BeliefStateEq): Returns true iff both parameters are equal.
 	* src/genTest.cpp: Likewise.
 	* src/dmcsc.cpp: Likewise.
 	* src/QueryPlanGenerator.cpp: Likewise.
 	* src/Cache.cpp: Likewise.
 	* src/BeliefCombination.cpp: Likewise.
+	* src/tests/testClasp.cpp: Likewise.
 	* include/Server.tcc: Likewise.
 	* include/SatSolver.tcc: Likewise.
 	* include/SatSolver.h: Likewise.
