@@ -37,7 +37,7 @@ namespace dmcs {
 
 template<typename Grammar>
 ClaspResultBuilder<Grammar>::ClaspResultBuilder(const Context& context_,
-						BeliefStatesPtr& belief_states_)
+						BeliefStateListPtr& belief_states_)
   ///@todo future versions of clasp will have a sentinel
   : BaseBuilder<Grammar>(Grammar(context_.getSignature()->size())), 
     sig(context_.getSignature()),
@@ -54,7 +54,7 @@ ClaspResultBuilder<Grammar>::buildNode (typename BaseBuilder<Grammar>::node_t& n
 {
   assert(node.value.id() == Grammar::Value); // we expect a model
 
-  BeliefStatePtr bs(new BeliefState(system_size)); // initially, all is zero
+  BeliefStatePtr bs(new BeliefState(system_size, 0)); // initially, all is zero
 
   ///@todo this may be optimized, I think we can remove the non-epsilon part here...
 
@@ -80,7 +80,7 @@ ClaspResultBuilder<Grammar>::buildNode (typename BaseBuilder<Grammar>::node_t& n
       add_literal(*jt, bs);
     }
 
-  belief_states.belief_states_ptr->belief_states.insert(bs);
+  belief_states->push_back(bs); ///@todo sort???
 }
 
 
@@ -107,7 +107,7 @@ ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& 
   if(loc_it != local_sig.end())
     {
       // now setup belief state at the right position
-      BeliefSets& bstate = bs.belief_state_ptr->belief_state;
+      BeliefState& bstate = *bs;
 
       std::size_t cid = loc_it->ctxId - 1;
 

@@ -1,3 +1,34 @@
+2010-04-25  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* TODO: Update.
+
+	* include/LogicVisitor.h: Fix warning.
+
+	* m4/boost.m4: Update from
+	<http://github.com/tsuna/boost.m4/raw/master/build-aux/boost.m4>.
+
+	* include/BeliefState.h: Simplify BeliefState types.
+	* src/genTest.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/QueryPlanGenerator.cpp: Likewise.
+	* src/Cache.cpp: Likewise.
+	* src/BeliefCombination.cpp: Likewise.
+	* include/Server.tcc: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* include/SatSolver.h: Likewise.
+	* include/PrimitiveDMCS.tcc: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/OptDMCS.tcc: Likewise.
+	* include/OptDMCS.h: Likewise.
+	* include/CommandType.h: Likewise.
+	* include/Client.tcc: Likewise.
+	* include/Client.h: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/Cache.h: Likewise.
+	* include/BeliefCombination.h: Likewise.
+	* include/BaseSolver.h: Likewise.
+
 2010-04-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/clasp-wrapper.sh: Remove.

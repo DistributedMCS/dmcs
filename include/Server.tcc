@@ -122,7 +122,7 @@ Server<CmdType,Message_t>::handle_session(const boost::system::error_code& e,
 #endif //DEBUG
 
       CmdType c(*dmcs, sesh->mess);
-      BeliefStatesPtr belief_states = c.getBeliefStates();
+      BeliefStateListPtr belief_states = c.getBeliefStates();
 
 
 #if defined(DEBUG)

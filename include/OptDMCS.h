@@ -45,7 +45,7 @@ public:
   virtual
   ~OptDMCS();
 
-  BeliefStatesPtr
+  BeliefStateListPtr
   getBeliefStates(OptMessage& mess);
 
 private:
@@ -53,8 +53,8 @@ private:
   localSolve(const BeliefStatePtr& V);
 
 private:
-  BeliefStatesPtr belief_states;
-  BeliefStatesPtr local_belief_states;
+  BeliefStateListPtr belief_states;
+  BeliefStateListPtr local_belief_states;
   CacheStatsPtr cacheStats;
   CachePtr cache;
   TheoryPtr theory;

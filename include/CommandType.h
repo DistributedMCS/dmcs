@@ -38,7 +38,7 @@ class CommandType
 {
 public:
   // i removed the abstract because of this error "initializer specified for non-virtual method"
-  BeliefStatesPtr 
+  BeliefStateListPtr 
   getBeliefStates();
 };
 
@@ -53,12 +53,12 @@ public:
      mess(mess_)
   { }
 
-  BeliefStatesPtr
+  BeliefStateListPtr
   getBeliefStates()
   {
     ///@todo get rid of copying
     // not sure if it will work
-    OptMessage * optMess;
+    OptMessage* optMess;
   
     OptDMCS* odmcs;
 
@@ -86,7 +86,7 @@ public:
      mess(mess_)
   { }
 
-  BeliefStatesPtr 
+  BeliefStateListPtr 
   getBeliefStates()
   {
     ///@todo get rid of copying

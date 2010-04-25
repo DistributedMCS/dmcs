@@ -52,7 +52,7 @@ Client<Message_t>::Client(boost::asio::io_service& io_service,
   : io_service_(io_service),
     conn(new connection(io_service)),
     mess(mess_),
-    belief_states(new BeliefStates(n))
+    belief_states(new BeliefStateList)
 {
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 

@@ -47,7 +47,7 @@ public:
   SatSolver(Process& p);
 
   void
-  solve(const Context& context, BeliefStatesPtr& belief_states, const TheoryPtr& theory, const BeliefStatePtr& V);
+  solve(const Context& context, BeliefStateListPtr& belief_states, const TheoryPtr& theory, const BeliefStatePtr& V);
 
 };
 

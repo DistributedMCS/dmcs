@@ -93,7 +93,7 @@ using namespace dmcs;
 //}
 
 
-BeliefStatesPtr
+BeliefStateListPtr
 Cache::cacheHit(const BeliefStatePtr& v) const
 {
   // find if there exists any cache (v*, s*) such that v < v*
@@ -110,7 +110,7 @@ Cache::cacheHit(const BeliefStatePtr& v) const
 
   stats->miss(1);
   //std::cerr << "In cacheHit: Found nothing..." << std::endl << *stats << std::endl;
-  return BeliefStatesPtr();
+  return BeliefStateListPtr();
 }
 
 
@@ -158,7 +158,7 @@ Cache::cacheHit(const BeliefStatePtr& v) const
 
 
 void
-Cache::insert(const BeliefStatePtr& v, BeliefStatesPtr s)
+Cache::insert(const BeliefStatePtr& v, BeliefStateListPtr& s)
 {
   QueryAnswerMap::iterator foundit = cacheMap.find(v);
   if (foundit == cacheMap.end())

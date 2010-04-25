@@ -45,7 +45,7 @@ template<class Grammar>
 class ClaspResultBuilder : public BaseBuilder<Grammar>
 {
 public:
-  ClaspResultBuilder(const Context&, BeliefStatesPtr&);
+  ClaspResultBuilder(const Context&, BeliefStateListPtr&);
 
   void
   buildNode (typename BaseBuilder<Grammar>::node_t& node);
@@ -61,7 +61,7 @@ private:
   std::size_t sig_size;
   std::size_t system_size;
 
-  BeliefStatesPtr& belief_states;
+  BeliefStateListPtr& belief_states;
 };
 
 } // namespace dmcs

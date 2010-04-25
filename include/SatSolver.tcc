@@ -52,7 +52,7 @@ SatSolver<Builder, Parser, ParserGrammar>::SatSolver(Process& p)
 template <typename Builder, typename Parser, typename ParserGrammar>
 void
 SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
-						 BeliefStatesPtr& belief_states,
+						 BeliefStateListPtr& belief_states,
 						 const TheoryPtr& theory,
 						 const BeliefStatePtr& V)
 {
@@ -76,8 +76,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
 	  const QueryPlanPtr& query_plan = context.getQueryPlan();
 
 	  const NeighborsPtr_& neighbors = query_plan->getNeighbors(my_id);
-	  Neighbors_::const_iterator n_it = neighbors->begin();
-
+	  
 #ifdef DEBUG
 	  std::cerr << "In SatSolver" << std::endl;
 	  std::cerr << "Neighbors are: " << std::endl;
@@ -87,11 +86,12 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
 	    }
 	  std::cerr << std::endl;
 #endif
-	  
 
-	  for (; n_it != neighbors->end(); ++n_it)
+	  for (Neighbors_::const_iterator n_it = neighbors->begin();
+	       n_it != neighbors->end();
+	       ++n_it)
 	    {
-	      BeliefSet neighbor_V = V.belief_state_ptr->belief_state[*n_it - 1];
+	      BeliefSet neighbor_V = (*V)[*n_it - 1];
 
 #ifdef DEBUG
 	      std::cerr << "Interface variable of neighbor[" << *n_it <<"]: " << neighbor_V << std::endl;

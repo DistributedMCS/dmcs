@@ -132,9 +132,9 @@ QueryPlanGenerator::initialize_local_interface()
 
   for (Edges::const_iterator e = edges->begin(); e != edges->end(); ++e)
     {
-      BeliefStatePtr V(new BeliefState(contexts->size()));
+      BeliefStatePtr V(new BeliefState(contexts->size(), 0)); // create empty belief state
       
-      V.belief_state_ptr->belief_state[e->second-1] = local_interface(e->first, e->second);
+      (*V)[e->second-1] = local_interface(e->first, e->second);
 
       //  std::cerr << "initialize local interface " << e->first << " " << e->second << std::endl;
       query_plan->putInterface(e->first, e->second, V);
@@ -150,7 +150,7 @@ QueryPlanGenerator::compute_min_V()
 
   Contexts::const_iterator i = contexts->begin();
 
-  BeliefSets& v_state = V.belief_state_ptr->belief_state;
+  BeliefState& v_state = *V;
 
   for (;i != contexts->end(); ++i)
     {

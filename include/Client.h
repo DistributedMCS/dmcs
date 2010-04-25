@@ -53,7 +53,7 @@ class Client
 	 std::size_t n,
 	 Message_t& mess);
 
-  BeliefStatesPtr
+  BeliefStateListPtr
   getBeliefStates()
   {
     return belief_states;
@@ -76,7 +76,7 @@ class Client
 
   connection_ptr conn;
   Message_t& mess;
-  BeliefStatesPtr belief_states;
+  BeliefStateListPtr belief_states;
 };
 
 } // namespace dmcs

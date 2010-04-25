@@ -44,7 +44,7 @@ printBeliefStateNicely(std::ostream& os, const BeliefStatePtr& b_ptr,
 		       const BeliefStatePtr& V, const QueryPlanPtr& query_plan);
 
 void
-printBeliefStatesNicely(std::ostream& os, const BeliefStatesPtr& bs_ptr, 
+printBeliefStatesNicely(std::ostream& os, const BeliefStateListPtr& bs_ptr, 
 			const BeliefStatePtr& V, const QueryPlanPtr& query_plan);
 
 void
@@ -53,11 +53,11 @@ update(BeliefStatePtr& s, const BeliefStatePtr& t);
 bool
 combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u, const BeliefStatePtr& V);
 
-BeliefStatesPtr 
-combine(const BeliefStatesPtr& cs, const BeliefStatesPtr& ct, const BeliefStatePtr& V);
+BeliefStateListPtr
+combine(const BeliefStateListPtr& cs, const BeliefStateListPtr& ct, const BeliefStatePtr& V);
 
 void
-project_to(const BeliefStatesPtr& cs, const BeliefStatePtr& v, BeliefStatesPtr& cu);
+project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateListPtr& cu);
 
 } // namespace dmcs
 

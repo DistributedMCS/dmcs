@@ -140,13 +140,13 @@ typedef boost::shared_ptr<CacheStats> CacheStatsPtr;
      *
      * @return 
      */
-    virtual BeliefStatesPtr
+    virtual BeliefStateListPtr
     cacheHit(const BeliefStatePtr& v) const = 0;
 
     /** 
      */
     virtual void
-    insert(const BeliefStatePtr& v, BeliefStatesPtr s) = 0;
+    insert(const BeliefStatePtr& v, BeliefStateListPtr& s) = 0;
 
   };
 
@@ -174,7 +174,7 @@ typedef boost::shared_ptr<CacheStats> CacheStatsPtr;
     //typedef std::set<BeliefState> CacheSet;
 
     /// maps V to BeliefStates
-    typedef std::map<BeliefStatePtr, BeliefStatesPtr, BeliefCmp> QueryAnswerMap;
+    typedef std::map<BeliefStatePtr, BeliefStateListPtr, BeliefCmp> QueryAnswerMap;
 		     //		     boost::indirect_fun<std::less<BeliefState> > > QueryAnswerMap;
 
     /// the cache
@@ -191,11 +191,11 @@ typedef boost::shared_ptr<CacheStats> CacheStatsPtr;
 	cacheMap()
     { }
 
-    virtual BeliefStatesPtr
+    virtual BeliefStateListPtr
     cacheHit(const BeliefStatePtr& v) const;
 
     virtual void
-    insert(const BeliefStatePtr& v, BeliefStatesPtr s);
+    insert(const BeliefStatePtr& v, BeliefStateListPtr& s);
 
   };
 

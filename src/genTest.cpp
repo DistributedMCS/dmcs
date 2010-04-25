@@ -502,42 +502,42 @@ print_topo()
 const std::string
 getOptimumDLVFilter() 
 {
-  std::string result = "";
-  NeighborsPtr_ neighbors =optimal_qp->getNeighbors1(1);
-  BeliefState neighborsInterface(no_contexts);
+  std::string result;
+  NeighborsPtr_ neighbors = optimal_qp->getNeighbors1(1);
+  BeliefStatePtr neighborsInterface(new BeliefState(no_contexts, 0));
   
   for(Neighbors_::const_iterator it = neighbors->begin(); it != neighbors->end();++it )
     {
-      const BeliefStatePtr& currentInterface=  optimal_qp->getInterface1(1, *it);
-      BeliefSets::iterator jt = currentInterface.belief_state_ptr->belief_state.begin();
-      BeliefSets::iterator kt = neighborsInterface.belief_state.begin();
+      const BeliefStatePtr& currentInterface = optimal_qp->getInterface1(1, *it);
+      BeliefState::iterator jt = currentInterface->begin();
+      BeliefState::iterator kt = neighborsInterface->begin();
 
-      for (; jt != currentInterface.belief_state_ptr->belief_state.end(); ++jt,++kt)
+      for (; jt != currentInterface->end(); ++jt, ++kt)
 	{
 	  *kt |= *jt;
 	}
-      
     }
-    BeliefSets::iterator kt = neighborsInterface.belief_state.begin();
-    *kt |= std::numeric_limits<unsigned long>::max();
+
+  BeliefState::iterator kt = neighborsInterface->begin();
+  *kt |= std::numeric_limits<unsigned long>::max();
   
   ///@todo define constant names for topologies types
-    if (topology_type == 1)
+  if (topology_type == 1)
     {
       const BeliefStatePtr& currentInterface =  optimal_qp->getInterface1(2, 4);
-      BeliefSets::iterator jt = currentInterface.belief_state_ptr->belief_state.begin();
-      BeliefSets::iterator kt = neighborsInterface.belief_state.begin();
+      BeliefState::iterator jt = currentInterface->begin();
+      BeliefState::iterator kt = neighborsInterface->begin();
 
-      for (; jt != currentInterface.belief_state_ptr->belief_state.end(); ++jt,++kt)
+      for (; jt != currentInterface->end(); ++jt,++kt)
 	{
 	  *kt |= *jt;
 	}
 
       const BeliefStatePtr& currentInterface1 =  optimal_qp->getInterface1(3, 4);
-      BeliefSets::iterator jt1 = currentInterface1.belief_state_ptr->belief_state.begin();
-      BeliefSets::iterator kt1 = neighborsInterface.belief_state.begin();
+      BeliefState::iterator jt1 = currentInterface1->begin();
+      BeliefState::iterator kt1 = neighborsInterface->begin();
       
-      for (; jt1 != currentInterface1.belief_state_ptr->belief_state.end(); ++jt1,++kt1)
+      for (; jt1 != currentInterface1->end(); ++jt1,++kt1)
 	{
 	  *kt1 |= *jt1;
 	}
@@ -547,10 +547,10 @@ getOptimumDLVFilter()
     if (topology_type == 3)
       {
 	const BeliefStatePtr& currentInterface1 =  optimal_qp->getInterface1(2, 3);
-	BeliefSets::iterator jt1 = currentInterface1.belief_state_ptr->belief_state.begin();
-	BeliefSets::iterator kt1 = neighborsInterface.belief_state.begin();
+	BeliefState::iterator jt1 = currentInterface1->begin();
+	BeliefState::iterator kt1 = neighborsInterface->begin();
 	
-	for (; jt1 != currentInterface1.belief_state_ptr->belief_state.end(); ++jt1,++kt1)
+	for (; jt1 != currentInterface1->end(); ++jt1,++kt1)
 	  {
 	    *kt1 |= *jt1;
 	  }
@@ -564,7 +564,7 @@ getOptimumDLVFilter()
 	const Signature& contextSignature  = optimal_qp->getSignature1(contextID);
       
 	const SignatureByLocal& contextSigByLocal = boost::get<Tag::Local>(contextSignature);
-	BeliefSet contextInterface = neighborsInterface.belief_state[contextID-1];
+	BeliefSet contextInterface = (*neighborsInterface)[contextID-1];
 	SignatureByLocal::const_iterator context_it; 
 	
 	if (!isEpsilon(contextInterface))
@@ -606,7 +606,7 @@ getGeneralDLVFilter()
     {
       const Signature& contextSignature  = original_qp->getSignature1(contextID);
       const SignatureByLocal& contextSigByLocal = boost::get<Tag::Local>(contextSignature);
-      BeliefSet contextInterface = globalInterface.belief_state_ptr->belief_state[contextID-1];
+      BeliefSet contextInterface = (*globalInterface)[contextID-1];
       SignatureByLocal::const_iterator context_it; 
 
       if (!isEpsilon(contextInterface))

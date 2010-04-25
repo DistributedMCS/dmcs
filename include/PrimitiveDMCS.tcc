@@ -56,8 +56,8 @@ namespace dmcs {
 
 PrimitiveDMCS::PrimitiveDMCS(ContextPtr& c, TheoryPtr & t)
   : BaseDMCS(c),
-    belief_states(new BeliefStates(c->getSystemSize())),
-    local_belief_states(new BeliefStates(c->getSystemSize())),
+    belief_states(new BeliefStateList),
+    local_belief_states(new BeliefStateList),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats)),
     theory(t)
@@ -93,7 +93,7 @@ PrimitiveDMCS::localSolve(const BeliefStatePtr& V)
 
 
 
-BeliefStatesPtr
+BeliefStateListPtr
 PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 {
   const std::size_t n = ctx->getSystemSize();
@@ -101,7 +101,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
   assert(n > 0 && k <= n);
 
-  belief_states.belief_states_ptr->belief_states.clear();
+  belief_states->clear();
 
   const QueryPlanPtr query_plan = ctx->getQueryPlan();
 
@@ -112,7 +112,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #endif
 
 #if 0
-  BeliefStatesPtr bs = cache->cacheHit(V);
+  BeliefStateListPtr bs = cache->cacheHit(V);
 
   if (bs.belief_states_ptr) 
     {
@@ -197,7 +197,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  
 	  io_service.run();
 
-	  BeliefStatesPtr bs = client.getBeliefStates();
+	  BeliefStateListPtr bs = client.getBeliefStates();
 	  mess.removeHistory(k);
 
 #if defined(DEBUG)

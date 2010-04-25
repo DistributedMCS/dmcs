@@ -52,8 +52,8 @@ namespace dmcs {
 
 OptDMCS::OptDMCS(ContextPtr& c, TheoryPtr & t)
   : BaseDMCS(c),
-    belief_states(new BeliefStates(c->getSystemSize())),
-    local_belief_states(new BeliefStates(c->getSystemSize())),
+    belief_states(new BeliefStateList),
+    local_belief_states(new BeliefStateList),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats)),
     theory(t)
@@ -88,22 +88,23 @@ OptDMCS::localSolve(const BeliefStatePtr& V)
 
 
 
-BeliefStatesPtr
+BeliefStateListPtr
 OptDMCS::getBeliefStates(OptMessage& mess)
 {
   const std::size_t n = ctx->getSystemSize();
   const std::size_t k = ctx->getContextID(); // my local id
   const std::size_t c = mess.getInvoker();
-  belief_states.belief_states_ptr->belief_states.clear();
+
+  belief_states->clear();
 
 #ifdef DEBUG
   std::cerr << "invoker ID " << c << std::endl;
 #endif
 
   // get V from the query plan
-  BeliefStatePtr localV(new BeliefState(n));
-  BeliefStatePtr globalV(new BeliefState(n));
-  BeliefStatePtr mask(new BeliefState(n));
+  BeliefStatePtr localV(new BeliefState(n, 0));
+  BeliefStatePtr globalV(new BeliefState(n, 0));
+  BeliefStatePtr mask(new BeliefState(n, 0));
 
   const QueryPlanPtr query_plan = ctx->getQueryPlan();
 
@@ -111,7 +112,8 @@ OptDMCS::getBeliefStates(OptMessage& mess)
   // edge in the query plan and use just the maximal V
   if (c == 0) 
     {
-      localV.belief_state_ptr->belief_state = BeliefSets(n, std::numeric_limits<unsigned long>::max());
+      BeliefStatePtr nv(new BeliefState(n, std::numeric_limits<unsigned long>::max()));
+      localV = nv; // everything set true
     }
   else // some context invoked this DMCS
     {
@@ -179,7 +181,7 @@ OptDMCS::getBeliefStates(OptMessage& mess)
   printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif
 
-  BeliefStatesPtr temporary_belief_states(new BeliefStates(n));
+  BeliefStateListPtr temporary_belief_states(new BeliefStateList);
 
   project_to(local_belief_states, globalV, temporary_belief_states);
 
@@ -221,7 +223,7 @@ OptDMCS::getBeliefStates(OptMessage& mess)
       
       io_service.run();
       
-      BeliefStatesPtr bs = client.getBeliefStates();
+      BeliefStateListPtr bs = client.getBeliefStates();
       
       //BeliefStatesPtr pbs(new BeliefStates(n));
       
