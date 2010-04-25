@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( testClaspResult )
     }
 
   Context context(k, system_size, sig, qp, kb, br);
-  BeliefStatesPtr bs(new BeliefStates(system_size));
+  BeliefStateListPtr bs(new BeliefStateList);
 
   ClaspResultBuilder<ClaspResultGrammar> builder(context, bs);
   ParserDirector<ClaspResultGrammar> parser_director;
@@ -96,5 +96,5 @@ BOOST_AUTO_TEST_CASE( testClaspResult )
   parser_director.parse(resultfile);
 
   // 10 ... satisfiable
-  BOOST_CHECK_EQUAL(bs.belief_states_ptr->belief_states.size(), (std::size_t)2045);
+  BOOST_CHECK_EQUAL(bs->size(), (std::size_t)2045);
 }
