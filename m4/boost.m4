@@ -190,13 +190,14 @@ AC_LANG_POP([C++])dnl
         ;;#(
       yes)
         BOOST_CPPFLAGS=
-        AC_DEFINE([HAVE_BOOST], [1],
-                  [Defined if the requested minimum BOOST version is satisfied])
         ;;#(
       *)
         AC_SUBST([BOOST_CPPFLAGS], ["-I$boost_cv_inc_path"])
         ;;
     esac
+  if test x"$boost_cv_inc_path" != xno; then
+  AC_DEFINE([HAVE_BOOST], [1],
+            [Defined if the requested minimum BOOST version is satisfied])
   AC_CACHE_CHECK([for Boost's header version],
     [boost_cv_lib_version],
     [m4_pattern_allow([^BOOST_LIB_VERSION$])dnl
@@ -211,6 +212,7 @@ boost-lib-version = BOOST_LIB_VERSION],
         AC_MSG_ERROR([invalid value: boost_major_version=$boost_major_version])
         ;;
     esac
+fi
 CPPFLAGS=$boost_save_CPPFLAGS
 ])# BOOST_REQUIRE
 
@@ -893,8 +895,9 @@ AC_DEFUN([_BOOST_FIND_COMPILER_TAG],
 [AC_REQUIRE([AC_PROG_CXX])dnl
 AC_REQUIRE([AC_CANONICAL_HOST])dnl
 AC_CACHE_CHECK([for the toolset name used by Boost for $CXX], [boost_cv_lib_tag],
-[AC_LANG_PUSH([C++])dnl
-  boost_cv_lib_tag=unknown
+[boost_cv_lib_tag=unknown
+if test x$boost_cv_inc_path != xno; then
+  AC_LANG_PUSH([C++])dnl
   # The following tests are mostly inspired by boost/config/auto_link.hpp
   # The list is sorted to most recent/common to oldest compiler (in order
   # to increase the likelihood of finding the right compiler with the
@@ -969,7 +972,7 @@ AC_LANG_POP([C++])dnl
       boost_cv_lib_tag=
       ;;
   esac
-])dnl end of AC_CACHE_CHECK
+fi])dnl end of AC_CACHE_CHECK
 ])# _BOOST_FIND_COMPILER_TAG
 
 
