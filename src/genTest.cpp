@@ -108,176 +108,200 @@ QueryPlanPtr optimal_qp;
 int
 read_input(int argc, char* argv[])
 {
-    try {
+  try
+    {
+      boost::program_options::options_description desc("Allowed options");
+      desc.add_options()
+	(HELP, "produce help and usage message")
+	(CONTEXTS, boost::program_options::value<std::size_t>(), "set number of contexts")
+	(ATOMS, boost::program_options::value<int>(), "set number of atoms")
+	(INTERFACE, boost::program_options::value<int>(), "set number of interface atoms")
+	(BRIDGE_RULES, boost::program_options::value<int>(), "set number of bridge rules")
+	(TOPOLOGY, boost::program_options::value<int>(), "set topology type")
+	(TEMPLATE, boost::program_options::value<std::string>(), "set template")
+	;
+      
+      boost::program_options::variables_map vm;        
+      boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+      boost::program_options::notify(vm);    
+      
+      if (vm.count(HELP))
+	{
+	  std::cerr << "Usage: " << argv[0] << " [OPTIONS]" << std::endl << std::endl;
 
-        boost::program_options::options_description desc("Allowed options");
-        desc.add_options()
-	  (HELP, "produce help and usage message")
-	  (CONTEXTS, boost::program_options::value<std::size_t>(), "set number of contexts")
-	  (ATOMS, boost::program_options::value<int>(), "set number of atoms")
-	  (INTERFACE, boost::program_options::value<int>(), "set number of interfcace atoms")
-	  (BRIDGE_RULES, boost::program_options::value<int>(), "set number of bridge rules")
-	  (TOPOLOGY, boost::program_options::value<int>(), "set topology type")
-	  (TEMPLATE, boost::program_options::value<std::string>(), "set template")
-	  ;
-	
-        boost::program_options::variables_map vm;        
-        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-        boost::program_options::notify(vm);    
+	  std::cerr << "Parameter setting options:" << std::endl << std::endl;
 
-        if (vm.count(HELP)) {
+	  std::cerr << "--" << CONTEXTS << "=N" << "\t" << "set system size to N" << std::endl
+		    << "--" << ATOMS << "=S" << "\t" << "set local alphabet size to S" << std::endl
+		    << "--" << INTERFACE << "=B" << "\t" << "set max. number of interface atoms to B" << std::endl
+		    << "--" << BRIDGE_RULES << "=R" << "\t" << "set max. number of bridge rules per context to R" << std::endl
+		    << std::endl;
+
+	  std::cerr << "General options:" << std::endl << std::endl;
+
+	  std::cerr << "--" << TOPOLOGY << "=T" << "\t" << "create topology of type T, where T is one of" << std::endl
+		    << "            \t 0 : random topology" << std::endl
+		    << "            \t 1 : chain of diamonds topology (all way down)" << std::endl
+		    << "            \t 2 : chain of diamonds topology (arbitrary edges)" << std::endl
+		    << "            \t 3 : chain of zig-zag diamonds topology" << std::endl
+		    << "            \t 4 : pure ring topology" << std::endl
+		    << "            \t 5 : ring topology (with additional edges)" << std::endl
+		    << "            \t 6 : binary tree topology" << std::endl
+		    << "            \t 7 : house topology" << std::endl
+		    << "            \t 8 : multiple ring topology" << std::endl;
+
+	  std::cerr << "--" << TEMPLATE << "=P" << "\t" << "use P as prefix for all created files" << std::endl;
 	  
-	  std::cerr << "Usage: " << argv[0] << " --" << CONTEXTS << "=<no_contexts> --" << ATOMS << "=<no_atoms> --" << INTERFACE << "=<no_interface_atoms> --" << BRIDGE_RULES << "=no_bridge_rules --" << TOPOLOGY << "=<TYPE> --" << TEMPLATE << "=<FILE>" << std::endl;
 	  std::cerr << std::endl;
-	  std::cerr << "\t <topology_type> = 0 : random topology" << std::endl;
-	  std::cerr << "\t <topology_type> = 1 : chain of diamonds topology (all way down)" << std::endl;
-	  std::cerr << "\t <topology_type> = 2 : chain of diamonds topology (arbitrary edges)" << std::endl;
-	  std::cerr << "\t <topology_type> = 3 : chain of zig-zag diamonds topology" << std::endl;
-	  std::cerr << "\t <topology_type> = 4 : pure ring topology" << std::endl;
-	  std::cerr << "\t <topology_type> = 5 : ring topology (with additional edges)" << std::endl;
-	  std::cerr << "\t <topology_type> = 6 : binary tree topology" << std::endl;
-	  std::cerr << "\t <topology_type> = 7 : house topology" << std::endl;
-	  std::cerr << "\t <topology_type> = 8 : multiple ring topology" << std::endl;
-	  std::cerr << std::endl;
-    
-
+	  
 	  return 1;
         }
+      
+      int numberOfArguments = 0;
+      
+      if (vm.count(CONTEXTS)) 
+	{
+	  no_contexts = vm[CONTEXTS].as<std::size_t>();
+	  numberOfArguments++;
+	}
+      if (vm.count(ATOMS)) 
+	{
+	  no_atoms = vm[ATOMS].as<int>();
+	  numberOfArguments++;
+	}
+      if (vm.count(INTERFACE)) 
+	{
+	  no_interface_atoms = vm[INTERFACE].as<int>();
+	  numberOfArguments++;
+	}
+      if (vm.count(BRIDGE_RULES)) 
+	{
+	  no_bridge_rules = vm[BRIDGE_RULES].as<int>();
+	  numberOfArguments++;
+	}
+      if (vm.count(TOPOLOGY)) 
+	{
+	  topology_type = vm[TOPOLOGY].as<int>();
+	  numberOfArguments++;
+	}
+      if (vm.count(TEMPLATE)) 
+	{
+	  filename = vm[TEMPLATE].as<std::string>();	    
+	  numberOfArguments++;
+	}
+      
 
-	int numberOfArguments = 0;
-	if (vm.count(CONTEXTS)) 
-	  {
-	    no_contexts = vm[CONTEXTS].as<std::size_t>();
-	    numberOfArguments++;
-	  }
-	if (vm.count(ATOMS)) 
-	  {
-	    no_atoms = vm[ATOMS].as<int>();
-	    numberOfArguments++;
-	  }
-	if (vm.count(INTERFACE)) 
-	  {
-	    no_interface_atoms = vm[INTERFACE].as<int>();
-	    numberOfArguments++;
-	  }
-	if (vm.count(BRIDGE_RULES)) 
-	  {
-	    no_bridge_rules = vm[BRIDGE_RULES].as<int>();
-	    numberOfArguments++;
-	  }
-	if (vm.count(TOPOLOGY)) 
-	  {
-	    topology_type = vm[TOPOLOGY].as<int>();
-	    numberOfArguments++;
-	  }
-	if (vm.count(TEMPLATE)) 
-	  {
-	    filename = vm[TEMPLATE].as<std::string>();	    
-	    numberOfArguments++;
-	  }
+      if ( numberOfArguments != 6 ||
+	   filename.compare("") == 0 ||
+	   no_contexts == 0 ||
+	   no_atoms == 0 ||
+	   no_interface_atoms == 0 ||
+	   no_bridge_rules == 0 ||
+	   topology_type == 0 ) 
+	{
+	  std::cerr << desc << std::endl;
+	  return 1;
+	}
+      
 
-
-	if( numberOfArguments != 6 || filename.compare("") ==0 ||no_contexts == 0 || no_atoms == 0 || no_interface_atoms == 0 || no_bridge_rules == 0 || topology_type ==0 ) 
-	  {
-	    std::cout << desc << "\n";
-	    return 1;
-	  }
-
-	switch (topology_type) {
+      // dispatch topology type
+      switch (topology_type)
+	{
 	case 1:
 	  { 
-	    if(no_contexts == 1 || no_contexts % 3 != 1)
+	    if (no_contexts == 1 || no_contexts % 3 != 1)
 	      {
 		std::cerr << "For \"chain of diamond\" topology, the number of contexts must be 3n+1" 
 			  << std::endl;
 		return 1;
 	      }
-	    break;
 	  }
+	  break;
 	case 2:
 	  { 
-	    if(no_contexts == 1 || no_contexts % 3 != 1)
+	    if (no_contexts == 1 || no_contexts % 3 != 1)
 	      {
 		std::cerr << "For \"chain of diamond\" topology, the number of contexts must be 3n+1" 
 			  << std::endl;
 		return 1;
 	      }
-	    break;
 	  }
+	  break;
 	case 3:
 	  { 
-	    if(no_contexts == 1 || no_contexts % 3 != 1)
+	    if (no_contexts == 1 || no_contexts % 3 != 1)
 	      {
 		std::cerr << "For \"chain of zig-zag diamond\" topology, the number of contexts must be 3n+1" 
 			  << std::endl;
 		return 1;
 	      }
-	    break;
 	  }
+	  break;
 	case 4:
 	  { 
-	    if(no_contexts == 1)
+	    if (no_contexts == 1)
 	      {
 		std::cerr << "For \"pure ring\" topology, the number of contexts must be at least 2" 
 			  << std::endl;
 		return 1;
 	      }
-	    break;
 	  }
+	  break;
 	case 5:
 	  { 
-	    if(no_contexts == 1)
+	    if (no_contexts == 1)
 	      {
 		std::cerr << "For \"ring\" topology, the number of contexts must be at least 2" 
 			  << std::endl;
 		return 1;
 	      }
-	    break;
 	  }
+	  break;
 	case 6:
 	  { 
-	    if(no_contexts == 1)
+	    if (no_contexts == 1)
 	      {
 		std::cerr << "For \"binary tree\" topology, the number of contexts must be at least 2" 
 			  << std::endl;
 		return 1;
 	      }
-	    break;
 	  }
+	  break;
 	case 7:
 	  { 
-	    if(no_contexts == 1 || no_contexts % 4 != 1)
+	    if (no_contexts == 1 || no_contexts % 4 != 1)
 	      {
 		std::cerr << "For \"house\" topology, the number of contexts must be 4n+1" 
 			  << std::endl;
 		return 1;
 	      }
-	    break;
 	  }
+	  break;
 	case 8:
 	  { 
-	    if((no_contexts < 6) && (no_contexts % 3 != 0))
+	    if ((no_contexts < 6) && (no_contexts % 3 != 0))
 	      {
 		std::cerr << "For \"multiple ring\" topology, the number of contexts must be 3(n-1) where n >= 3"  
 			  << std::endl;
 		return 1;
 	      }
-	    break;
 	  }
+	  break;
 	default:
 	  {
 	    std::cerr << "Topology type must be in the range of 1-8 inclusive" 
 		      << std::endl;
 	    return 1;
 	  }
-	}
-	
+	} // switch
+    } // try
+  catch (std::exception& e)
+    {
+      std::cerr << "error: " << e.what() << std::endl;
+      return 1;
     }
-    catch(std::exception& e) {
-      std::cerr << "error: " << e.what() << "\n";
-        return 1;
-    }
-    catch(...) {
+  catch (...)
+    {
       std::cerr << "Exception of unknown type!\n";
     }
 
@@ -315,7 +339,7 @@ init()
       SignaturePtr s(new Signature);
 
       // create local signature for context i
-      for (int j = 0; j < no_atoms; ++j)
+      for (std::size_t j = 0; j < no_atoms; ++j)
 	{
 	  atom_name = (char)(j+'a') + out.str();
 	  s->insert(Symbol(atom_name, i, j+1, j+1));
@@ -527,12 +551,12 @@ getOptimumDLVFilter()
       const BeliefStatePtr& currentInterface =  optimal_qp->getInterface1(2, 4);
       BeliefState::iterator jt = currentInterface->begin();
       BeliefState::iterator kt = neighborsInterface->begin();
-
+      
       for (; jt != currentInterface->end(); ++jt,++kt)
 	{
 	  *kt |= *jt;
 	}
-
+      
       const BeliefStatePtr& currentInterface1 =  optimal_qp->getInterface1(3, 4);
       BeliefState::iterator jt1 = currentInterface1->begin();
       BeliefState::iterator kt1 = neighborsInterface->begin();
@@ -541,43 +565,41 @@ getOptimumDLVFilter()
 	{
 	  *kt1 |= *jt1;
 	}
-
-    }
-
-    if (topology_type == 3)
-      {
-	const BeliefStatePtr& currentInterface1 =  optimal_qp->getInterface1(2, 3);
-	BeliefState::iterator jt1 = currentInterface1->begin();
-	BeliefState::iterator kt1 = neighborsInterface->begin();
-	
-	for (; jt1 != currentInterface1->end(); ++jt1,++kt1)
-	  {
-	    *kt1 |= *jt1;
-	  }
-      }
-
-
-    bool first = true;
-    std::size_t contextID = 1;
-    for(;contextID <= no_contexts; ++contextID)
-      {
-	const Signature& contextSignature  = optimal_qp->getSignature1(contextID);
       
-	const SignatureByLocal& contextSigByLocal = boost::get<Tag::Local>(contextSignature);
-	BeliefSet contextInterface = (*neighborsInterface)[contextID-1];
-	SignatureByLocal::const_iterator context_it; 
-	
-	if (!isEpsilon(contextInterface))
-	  {
-	    std::size_t i = 1; // ignore epsilon bit
-	    
-	  for (; i < sizeof(contextInterface)*8 ; ++i)
+    }
+  else if (topology_type == 3)
+    {
+      const BeliefStatePtr& currentInterface1 =  optimal_qp->getInterface1(2, 3);
+      BeliefState::iterator jt1 = currentInterface1->begin();
+      BeliefState::iterator kt1 = neighborsInterface->begin();
+      
+      for (; jt1 != currentInterface1->end(); ++jt1,++kt1)
+	{
+	  *kt1 |= *jt1;
+	}
+    }
+  
+  
+  bool first = true;
+  
+  for (std::size_t contextID = 1; contextID <= no_contexts; ++contextID)
+    {
+      const Signature& contextSignature  = optimal_qp->getSignature1(contextID);
+      
+      const SignatureByLocal& contextSigByLocal = boost::get<Tag::Local>(contextSignature);
+      BeliefSet contextInterface = (*neighborsInterface)[contextID-1];
+      SignatureByLocal::const_iterator context_it; 
+      
+      if (!isEpsilon(contextInterface))
+	{
+	  for (std::size_t i = 1; // ignore epsilon bit
+	       i < sizeof(contextInterface)*8 ; ++i)
 	    {
-	      if ((contextInterface  & (1 << i)) && i <= contextSignature.size())
+	      if (testBeliefSet(contextInterface, i) && i <= contextSignature.size())
 		{
 		  context_it = contextSigByLocal.find(i); 
 		  assert(context_it != contextSigByLocal.end());
-		  if(!first)
+		  if (!first)
 		    {
 		      result += ",";
 		    }
@@ -590,38 +612,39 @@ getOptimumDLVFilter()
 	    }
 	}
     }
-
+  
   return result;
 }
 
 
-const std::string
+std::string
 getGeneralDLVFilter()
 {
   const BeliefStatePtr& globalInterface = original_qp->getGlobalV();
-  std::string result = ""; 
+  std::string result; 
   bool first = true;
-  std::size_t contextID = 1;
-  for(;contextID <= no_contexts; ++contextID)
+  
+  for (std::size_t contextID = 1; contextID <= no_contexts; ++contextID)
     {
       const Signature& contextSignature  = original_qp->getSignature1(contextID);
       const SignatureByLocal& contextSigByLocal = boost::get<Tag::Local>(contextSignature);
+
       BeliefSet contextInterface = (*globalInterface)[contextID-1];
       SignatureByLocal::const_iterator context_it; 
 
       if (!isEpsilon(contextInterface))
 	{
-	  std::size_t i = 1; // ignore epsilon bit
-
-	  for (; i < sizeof(contextInterface)*8 ; ++i)
+	  for (std::size_t i = 1; // ignore epsilon bit
+	       i < sizeof(contextInterface)*8;
+	       ++i)
 	    {
-	      if(contextID != 1)
+	      if (contextID != 1)
 		{
-		  if (contextInterface  & (1 << i))
+		  if (testBeliefSet(contextInterface, i))
 		    {
-		      context_it = contextSigByLocal.find(i); 
+		      context_it = contextSigByLocal.find(i);
 		      assert(context_it != contextSigByLocal.end());
-		      if(!first)
+		      if (!first)
 			{
 			  result += ",";
 			}
@@ -631,12 +654,12 @@ getGeneralDLVFilter()
 			}
 		      result += context_it->sym;
 		    }
-		}// this extra if is used to make sure that all of sigma 1 is used, regardless of global V
-	      else if(i <= contextSignature.size())
+		} // this extra if is used to make sure that all of sigma 1 is used, regardless of global V
+	      else if (i <= contextSignature.size())
 		{
 		  context_it = contextSigByLocal.find(i); 
 		  assert(context_it != contextSigByLocal.end());
-		  if(!first)
+		  if (!first)
 		    {
 		      result += ",";
 		    }

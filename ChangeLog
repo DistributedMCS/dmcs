@@ -1,10 +1,29 @@
 2010-04-26  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/genTest.cpp: Sanitize.
+
+	* include/RingQPGenerator.h: Fix warning.
+	* include/RingEdgeQPGenerator.h: Likewise.
+	* include/MultipleRingQPGenerator.h: Likewise.
+	* include/HouseQPGenerator.h: Likewise.
+	* include/DiamondZigZagQPGenerator.h: Likewise.
+	* include/DiamondQPGenerator.h: Likewise.
+	* include/BinaryTreeQPGenerator.h: Likewise.
+
+	* include/BeliefState.h: Add some BeliefSet helper functions.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/QueryPlanGenerator.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* src/BeliefCombination.cpp: Likewise.
+	* src/tests/testBeliefComparison.cpp: Likewise.
+	* src/QueryPlanGenerator.cpp: Likewise.
+
 	* src/genTest.cpp: Rename Neighbors_ and NeigborsPtr_ to Neighbors
 	and NeighbordPtr.
 	* src/QueryPlan.cpp: Likewise.
 	* src/ContextGenerator.cpp: Likewise.
 	* include/SatSolver.tcc: Likewise.
+
 	* include/QueryPlan.h: Likewise.
 	* include/PrimitiveDMCS.tcc: Likewise.
 	* include/OptDMCS.tcc: Likewise.
