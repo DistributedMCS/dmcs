@@ -59,7 +59,7 @@ public:
   getMinV() const;
 
 protected:
-  int 
+  BeliefSet 
   local_interface(std::size_t context_id1, std::size_t context_id2);
 
   void

@@ -38,7 +38,7 @@ using namespace dmcs::generator;
 QueryPlanGenerator::QueryPlanGenerator(ContextsPtr& contexts_, QueryPlanPtr& query_plan_)
   : contexts(contexts_), 
     query_plan(query_plan_), 
-    V(new BeliefState(contexts->size()))
+    V(new BeliefState(contexts->size(), 0))
 { 
   std::srand ( std::time(NULL) );
 }
@@ -82,10 +82,10 @@ QueryPlanGenerator::create_interfaces()
 }
 
 
-int
+BeliefSet
 QueryPlanGenerator::local_interface(std::size_t context_id1, std::size_t context_id2)
 {
-  int li = 1;
+  BeliefSet local_interface = setEpsilon(0);
   Contexts::const_iterator c1 = contexts->begin();
   Contexts::const_iterator c2 = contexts->begin();
   
@@ -106,7 +106,7 @@ QueryPlanGenerator::local_interface(std::size_t context_id1, std::size_t context
 	    {
 	      const SignatureByLocal& local = boost::get<Tag::Local>(*sig);
 	      SignatureByLocal::const_iterator loc_it = local.find(i->second);
-	      li = li | 1 << (loc_it->localId);
+	      local_interface = setBeliefSet(local_interface, loc_it->localId);
 	    }
 	}
       
@@ -116,12 +116,12 @@ QueryPlanGenerator::local_interface(std::size_t context_id1, std::size_t context
 	    {
 	      const SignatureByLocal& local = boost::get<Tag::Local>(*sig);
 	      SignatureByLocal::const_iterator loc_it = local.find(i->second);
-	      li = li | 1 << (loc_it->localId);
+	      local_interface = setBeliefSet(local_interface, loc_it->localId);
 	    }
 	}
     }
   
-  return li;
+  return local_interface;
 }
 
 
@@ -134,6 +134,7 @@ QueryPlanGenerator::initialize_local_interface()
     {
       BeliefStatePtr V(new BeliefState(contexts->size(), 0)); // create empty belief state
       
+      // setup interface of direct neighbors of the edge
       (*V)[e->second-1] = local_interface(e->first, e->second);
 
       //  std::cerr << "initialize local interface " << e->first << " " << e->second << std::endl;
@@ -148,31 +149,29 @@ QueryPlanGenerator::compute_min_V()
   std::size_t context_id;
   std::size_t atom_id;
 
-  Contexts::const_iterator i = contexts->begin();
-
   BeliefState& v_state = *V;
-
-  for (;i != contexts->end(); ++i)
-    {
-      v_state[(*i)->getContextID() - 1] = 1;
-    }
 
   for (Contexts::const_iterator i = contexts->begin(); i != contexts->end(); ++i)
     {
-      BridgeRulesPtr br = (*i)->getBridgeRules();
+      v_state[(*i)->getContextID() - 1] = setEpsilon(0); // set epsilon bit for current context id
+
+      const BridgeRulesPtr& br = (*i)->getBridgeRules();
       
       for (BridgeRules::const_iterator j = br->begin(); j != br->end(); ++j)
 	{
 	  const PositiveBridgeBody& pb = getPositiveBody(*j);
 	  const NegativeBridgeBody& nb = getNegativeBody(*j);
 
+ 
 	  for (PositiveBridgeBody::const_iterator k = pb.begin(); k != pb.end(); ++k)
 	    {
 	      context_id = k->first;
 	      atom_id = k->second;
 
+	      BeliefSet& vb = v_state[context_id - 1];
+
 	      // in V: turn on the corresponding bit in the corresponding context
-	      v_state[context_id - 1] |= (1 << atom_id);
+	      vb = setBeliefSet(vb, atom_id);
 	    }
 
 	  for (NegativeBridgeBody::const_iterator k = nb.begin(); k != nb.end(); ++k)
@@ -180,18 +179,22 @@ QueryPlanGenerator::compute_min_V()
 	      context_id = k->first;
 	      atom_id = k->second;
 
+	      BeliefSet& vb = v_state[context_id - 1];
+
 	      // in V: turn on the corresponding bit in the corresponding context
-	      v_state[context_id - 1] |= (1 << atom_id);
+	      vb = setBeliefSet(vb, atom_id);
 	    }
 	}
     }
 
-  i = contexts->begin();
-  context_id = (*i)->getContextID();
+  // get the root k of the contexts and set every bit to true (including
+  // epsilon) to get all variables for k
+  Contexts::const_iterator k = contexts->begin();
+  context_id = (*k)->getContextID();
 
-  if (v_state[context_id - 1] == 1)
+  if (!isEpsilon(v_state[context_id - 1]))
     {
-      v_state[context_id - 1] = std::numeric_limits<unsigned long>::max();  
+      v_state[context_id - 1] = maxBeliefSet();
     }
 }
 

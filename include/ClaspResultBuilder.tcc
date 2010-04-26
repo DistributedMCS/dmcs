@@ -107,9 +107,9 @@ ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& 
   if(loc_it != local_sig.end())
     {
       // now setup belief state at the right position
-      BeliefState& bstate = *bs;
-
       std::size_t cid = loc_it->ctxId - 1;
+
+      BeliefSet& b = (*bs)[cid];
 
       // just to be save
       assert(cid < system_size);
@@ -117,17 +117,17 @@ ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& 
       // un/set bit in the right context at the right position
       if (local_lit > 0) // positive literal
 	{
-	  bstate[cid] |= (0x1 << loc_it->origId);
+	  b = setBeliefSet(b, loc_it->origId, true);
 	}
       else // negative literal (this is probably not needed)
 	{
-	  bstate[cid] &= ~(0x1 << loc_it->origId);
+	  b = setBeliefSet(b, loc_it->origId, false);
 	}
       
       // turn on epsilon of neighbor here, because we don't have
       // enough information about neighbors from the graph (some edges
       // were removed).
-      bstate[cid] |= 1;
+      b = setEpsilon(b);
     }
 }
 

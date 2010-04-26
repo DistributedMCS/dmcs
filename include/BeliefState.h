@@ -31,7 +31,7 @@
 #define BELIEF_STATE_H
 
 #include <iosfwd>
-
+#include <limits>
 #include <list>
 #include <vector>
 
@@ -51,7 +51,50 @@ typedef boost::shared_ptr<BeliefState> BeliefStatePtr;
 typedef std::list<BeliefStatePtr> BeliefStateList;
 typedef boost::shared_ptr<BeliefStateList> BeliefStateListPtr;
 
-#define EPSILONBIT 0x1
+
+/** 
+ * @param b 
+ * @param pos
+ * 
+ * @return true if the pos'th bit in b is 1
+ */
+inline bool
+testBeliefSet(BeliefSet b, std::size_t pos)
+{
+  assert (pos > 0 && pos < sizeof(b)*8);
+  return b & ((BeliefSet)1 << pos);
+}
+
+
+/** 
+ * @param b 
+ * @param pos
+ * @param val
+ * 
+ * @return set the pos'th bit in b to val
+ */
+inline BeliefSet
+setBeliefSet(BeliefSet b, std::size_t pos, bool val = true)
+{
+  assert (pos > 0 && pos < sizeof(b)*8);
+  return val ? ( b | ((BeliefSet)1 << pos) ) : ( b & ~((BeliefSet)1 << pos) );
+}
+
+
+/** 
+ * @return BeliefSet with every bit set to 1
+ */
+inline BeliefSet
+maxBeliefSet()
+{
+  return std::numeric_limits<BeliefSet>::max();
+}
+
+
+
+
+/// the first bit is used to enable a BeliefSet
+#define EPSILONMASK ((BeliefSet)1 << 0)
 
 /** 
  * @param b 
@@ -63,22 +106,23 @@ isEpsilon(BeliefSet b)
 {
   // we need the first bit true in b for efficient subset checking in
   // non-epsilon BeliefSet's
-  return !(b & EPSILONBIT); 
+  return !(b & EPSILONMASK); 
 }
 
 
 /** 
  * @param b 
  * 
- * @return a BeliefSet with epsilon-bit set to 1
+ * @return an enabled BeliefSet with epsilon-bit set to 1
  */
 inline BeliefSet
 setEpsilon(BeliefSet b)
 {
   // we need the first bit true in b for efficient subset checking in
   // non-epsilon BeliefSet's
-  return b | (1 << EPSILONBIT);
+  return b | EPSILONMASK;
 }
+
 
 
 /// @brief for sorting BeliefStateLists

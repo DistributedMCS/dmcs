@@ -103,7 +103,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
 
 	      for (std::size_t i = 1; i < sizeof(neighbor_V)*8; ++i)
 		{
-		  if (neighbor_V & (1 << i))
+		  if (testBeliefSet(neighbor_V, i))
 		    {
 		      SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
 		      std::size_t local_id_here = sig->size()+1;

@@ -60,14 +60,14 @@ printBeliefStateNicely(std::ostream& os, const BeliefStatePtr& b_ptr,
        
        if (!isEpsilon(b))
  	{
-	  std::size_t i = 1; // ignore epsilon bit	      
-	  for (; i <= sig_size ; ++i)
+	  for (std::size_t i = 1; // ignore epsilon bit
+	       i <= sig_size; ++i)
  	    {
- 	      if (v & (1 << i))
+ 	      if (testBeliefSet(v, i))
  		{
 		  SignatureByLocal::const_iterator local_it = sig_local.find(i);
 
-		  if (b & (1 << i))
+		  if (testBeliefSet(b, i))
 		    {
 		      os  << local_it->sym << " ";
 		    }
