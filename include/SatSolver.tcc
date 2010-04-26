@@ -75,19 +75,19 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
 	  std::size_t my_id = context.getContextID();
 	  const QueryPlanPtr& query_plan = context.getQueryPlan();
 
-	  const NeighborsPtr_& neighbors = query_plan->getNeighbors(my_id);
+	  const NeighborsPtr& neighbors = query_plan->getNeighbors(my_id);
 	  
 #ifdef DEBUG
 	  std::cerr << "In SatSolver" << std::endl;
 	  std::cerr << "Neighbors are: " << std::endl;
-	  for (Neighbors_::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
+	  for (Neighbors::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
 	    {
 	      std::cerr << *it << "  ";
 	    }
 	  std::cerr << std::endl;
 #endif
 
-	  for (Neighbors_::const_iterator n_it = neighbors->begin();
+	  for (Neighbors::const_iterator n_it = neighbors->begin();
 	       n_it != neighbors->end();
 	       ++n_it)
 	    {

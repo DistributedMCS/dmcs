@@ -154,7 +154,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   //
 
   const History& hist = mess.getHistory();
-  const NeighborsPtr_& nbs = query_plan->getNeighbors(k);
+  const NeighborsPtr& nbs = query_plan->getNeighbors(k);
   
   if ((hist.find(k) != hist.end()) || nbs->empty())
     {
@@ -177,7 +177,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     {
       // We are now at an intermediate context.
       // Need to consult all neighbors before combining with our local belief states
-      for (Neighbors_::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
+      for (Neighbors::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
 	{
 	  boost::asio::io_service io_service;
 	  boost::asio::ip::tcp::resolver resolver(io_service);

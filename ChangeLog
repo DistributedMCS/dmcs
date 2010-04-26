@@ -1,3 +1,14 @@
+2010-04-26  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/genTest.cpp: Rename Neighbors_ and NeigborsPtr_ to Neighbors
+	and NeighbordPtr.
+	* src/QueryPlan.cpp: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* include/QueryPlan.h: Likewise.
+	* include/PrimitiveDMCS.tcc: Likewise.
+	* include/OptDMCS.tcc: Likewise.
+
 2010-04-25  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/tests/testBeliefComparison.cpp: Resuscitate testBeliefComparison.

@@ -503,10 +503,10 @@ const std::string
 getOptimumDLVFilter() 
 {
   std::string result;
-  NeighborsPtr_ neighbors = optimal_qp->getNeighbors1(1);
+  NeighborsPtr neighbors = optimal_qp->getNeighbors1(1);
   BeliefStatePtr neighborsInterface(new BeliefState(no_contexts, 0));
   
-  for(Neighbors_::const_iterator it = neighbors->begin(); it != neighbors->end();++it )
+  for(Neighbors::const_iterator it = neighbors->begin(); it != neighbors->end();++it )
     {
       const BeliefStatePtr& currentInterface = optimal_qp->getInterface1(1, *it);
       BeliefState::iterator jt = currentInterface->begin();

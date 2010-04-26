@@ -53,7 +53,7 @@ ContextGenerator::generate()
       //query_plan->write_graph(std::cerr);
       //std::cerr << std::endl;
 
-      NeighborsPtr_ neighbors = query_plan->getNeighbors1(context_id);
+      NeighborsPtr neighbors = query_plan->getNeighbors1(context_id);
       /*std::cerr << "Our neighbor:" << std::endl;
       for (Neighbors_::const_iterator j = neighbors->begin(); j != neighbors->end(); ++j)
 	{
@@ -193,7 +193,7 @@ ContextGenerator::generate_bridge_rule(const ContextPtr& context)
   // loop until enough unique atoms
   int i = 0;
   int context_id = context->getContextID();
-  NeighborsPtr_ nbors = query_plan->getNeighbors1(context_id);
+  NeighborsPtr nbors = query_plan->getNeighbors1(context_id);
 
   /*
   std::cerr << "Our neighbor:" << std::endl;
