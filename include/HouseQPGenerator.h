@@ -90,7 +90,7 @@ public:
   }
 
   void
-  create_interface(const ContextPtr& context)
+  create_interface(const ContextPtr& /* context */)
   { }
 };
 
