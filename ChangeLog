@@ -1,3 +1,29 @@
+2010-04-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/testParsers.cpp: Resuscitate testParsers testcase.
+	* src/tests/Makefile.am: Likewise.
+	* examples/dia-4-4-2-2-1_opt_dlv.txt: Likewise.
+	* examples/dia-4-4-2-2-1_dlv.txt: Likewise.
+	* examples/dia-4-4-2-2-1_command_line_opt.txt: Likewise.
+	* examples/dia-4-4-2-2-1_command_line_opt.sh: Likewise.
+	* examples/dia-4-4-2-2-1_command_line.txt: Likewise.
+	* examples/dia-4-4-2-2-1_command_line.sh: Likewise.
+	* examples/dia-4-4-2-2-1.top: Likewise.
+	* examples/dia-4-4-2-2-1.opt: Likewise.
+	* examples/dia-4-4-2-2-1.dlv: Likewise.
+	* examples/dia-4-4-2-2-1-4.lp: Likewise.
+	* examples/dia-4-4-2-2-1-3.lp: Likewise.
+	* examples/dia-4-4-2-2-1-3.br: Likewise.
+	* examples/dia-4-4-2-2-1-2.lp: Likewise.
+	* examples/dia-4-4-2-2-1-2.br: Likewise.
+	* examples/dia-4-4-2-2-1-1.lp: Likewise.
+	* examples/dia-4-4-2-2-1-1.br: Likewise.
+
+	* include/ParserDirector.tcc: Include stdexcept.
+
+	* include/BeliefState.h (operator>>): Initialize BeliefStatePtr.
+	Add documentation.
+
 2010-04-26  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/genTest.cpp: Sanitize.

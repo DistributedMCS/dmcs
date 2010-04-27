@@ -22,7 +22,7 @@ testBeliefComparison_SOURCES = testBeliefComparison.cpp
 testBeliefComparison_LDADD = $(top_builddir)/src/libdmcs.a
 
 testParsers_SOURCES = testParsers.cpp
-testParsers_LDADD = $(top_builddir)/src/libcache.a
+testParsers_LDADD = $(top_builddir)/src/libdmcs.a
 
 testTranslation_SOURCES = testTranslation.cpp
 testTranslation_LDADD = $(top_builddir)/src/libtranslation.a
