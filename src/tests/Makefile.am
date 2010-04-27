@@ -10,10 +10,27 @@ AM_LDFLAGS = $(BOOST_SYSTEM_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_SERIALIZATI
 LIBS = $(BOOST_THREAD_LIBS) $(BOOST_GRAPH_LIBS) $(BOOST_SERIALIZATION_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) $(BOOST_SYSTEM_LIBS)
 
 
-TESTS = testClasp testBeliefComparison testParsers testTranslation testSolver testSignature # testMCSParser testCombination 
+TESTS = \
+	testClasp \
+	testBeliefComparison \
+	testParsers \
+	testTranslation \
+	testSolver \
+	testSignature \
+	testCombination 
+
 TESTS_ENVIRONMENT = EXAMPLESDIR=$(top_srcdir)/examples
 
-check_PROGRAMS = testClasp testBeliefComparison testParsers testTranslation testSolver testSignature testQueryPlan testReadGraph #testMCSParser testSolver testCombination 
+check_PROGRAMS = \
+	testClasp \
+	testBeliefComparison \
+	testParsers \
+	testTranslation \
+	testSolver \
+	testSignature \
+	testQueryPlan \
+	testReadGraph \
+	testCombination 
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = $(top_builddir)/src/libsatsolver.a $(top_builddir)/src/libdmcs.a
@@ -23,6 +40,9 @@ testBeliefComparison_LDADD = $(top_builddir)/src/libdmcs.a
 
 testParsers_SOURCES = testParsers.cpp
 testParsers_LDADD = $(top_builddir)/src/libdmcs.a
+
+testCombination_SOURCES = testCombination.cpp
+testCombination_LDADD = $(top_builddir)/src/libdmcs.a
 
 testTranslation_SOURCES = testTranslation.cpp
 testTranslation_LDADD = $(top_builddir)/src/libtranslation.a
@@ -36,9 +56,6 @@ testReadGraph_SOURCES = testReadGraph.cpp
 
 testQueryPlan_SOURCES = testQueryPlan.cpp \
                         $(top_builddir)/src/QueryPlan.cpp 
-
-testCombination_SOURCES = testCombination.cpp
-testMCSParser_SOURCES = testMCSParser.cpp
 
 
 
