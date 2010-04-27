@@ -79,7 +79,7 @@ OptDMCS::localSolve(const BeliefStatePtr& V)
   solver->solve(*ctx, local_belief_states, theory, V);
 
 #ifdef DEBUG
-  std::cerr << "Got " << local_belief_states.belief_states_ptr->belief_states.size();
+  std::cerr << "Got " << local_belief_states->size();
   std::cerr << " answers from CLASP" << std::endl;
   std::cerr << "Local belief states from localsolve(): " << std::endl;
   std::cerr << local_belief_states << std::endl;
@@ -176,8 +176,7 @@ OptDMCS::getBeliefStates(OptMessage& mess)
   localSolve(globalV);
 
 #ifdef DEBUG
-  BeliefStatePtr all_masked(new BeliefState(n));
-  all_masked.belief_state_ptr->belief_state = BeliefSets(n, std::numeric_limits<unsigned long>::max());
+  BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
   printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif
 
