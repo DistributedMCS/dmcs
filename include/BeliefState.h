@@ -44,10 +44,14 @@
 
 namespace dmcs {
 
-
+/// a belief set
 typedef uint64_t BeliefSet;
+
+/// a belief state
 typedef std::vector<BeliefSet> BeliefState;
 typedef boost::shared_ptr<BeliefState> BeliefStatePtr;
+
+/// a list of belief states, use BeliefStateCmp and BeliefStateEq for sort() and unique(), resp.
 typedef std::list<BeliefStatePtr> BeliefStateList;
 typedef boost::shared_ptr<BeliefStateList> BeliefStateListPtr;
 
@@ -150,6 +154,7 @@ struct BeliefStateEq
 };
 
 
+/// @brief less-than-equal for belief states
 inline bool
 operator<= (const BeliefStatePtr& bs1, const BeliefStatePtr& bs2)
 {
@@ -174,11 +179,23 @@ operator<= (const BeliefStatePtr& bs1, const BeliefStatePtr& bs2)
 }
 
 
-
+/**
+ * Read a space-separated belief state from is and store it in bs.
+ *
+ * @param is
+ * @param bs
+ *
+ * @return is
+ */
 inline std::istream& 
 operator>> (std::istream& is, BeliefStatePtr& bs)
 {
-  assert(bs);
+  // bs may be NULL, set it up
+  if (!bs)
+    {
+      BeliefStatePtr tmp(new BeliefState);
+      bs = tmp;
+    }
 
   std::string input;
   std::getline(is, input);
@@ -186,6 +203,7 @@ operator>> (std::istream& is, BeliefStatePtr& bs)
   boost::tokenizer<> s(input);
   for (boost::tokenizer<>::iterator it = s.begin(); it != s.end(); ++it)
     {
+      ///@todo TK: this should be fixed
       bs->push_back(std::atoi(it->c_str()));
     }
   
@@ -193,16 +211,32 @@ operator>> (std::istream& is, BeliefStatePtr& bs)
 }
 
 
+/**
+ * Output a space-separated belief state bs.
+ *
+ * @param os
+ * @param bs
+ *
+ * @return os
+ */
 inline std::ostream&
-operator<< (std::ostream& os, const BeliefStatePtr& p)
+operator<< (std::ostream& os, const BeliefStatePtr& bs)
 {
-  std::copy(p->begin(), p->end(),
+  std::copy(bs->begin(), bs->end(),
 	    std::ostream_iterator<BeliefSet>(os, " ")
 	    );
   return os;
 }
 
 
+/**
+ * Output a newline-separated list of belief states.
+ *
+ * @param os
+ * @param l
+ *
+ * @return os
+ */
 inline std::ostream&
 operator<< (std::ostream& os, const BeliefStateList& l)
 {
