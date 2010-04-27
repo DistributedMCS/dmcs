@@ -31,7 +31,9 @@
 
 #include <algorithm>
 
-
+#if defined(DEBUG)
+#include <bitset>
+#endif
 
 namespace dmcs {
 
@@ -149,7 +151,12 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
   for (; s_it != s->end(); ++s_it, ++t_it, ++u_it, ++v_it)
     {
 #ifdef DEBUG
-      std::cerr << "  Combining " << *s_it << " and " << *t_it << std::endl;
+      std::bitset<sizeof(BeliefSet)*8> sbs = *s_it;
+      std::bitset<sizeof(BeliefSet)*8> tbs = *t_it;
+      std::bitset<sizeof(BeliefSet)*8> vbs = *v_it;
+      std::cerr << "  Combining S = " << sbs << std::endl
+		<< "  with      T = " << tbs << std::endl 
+		<< "  on        V = " << vbs << std::endl;
 #endif
       if (isEpsilon(*s_it))
 	{
