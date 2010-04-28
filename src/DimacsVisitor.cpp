@@ -32,8 +32,11 @@
 #endif
 
 #include "DimacsVisitor.h"
-#include <set>
+#include "Theory.h"
+
 #include <iostream> 
+#include <iterator>
+#include <functional>
 
 using namespace dmcs;
 
@@ -49,27 +52,12 @@ DimacsVisitor::getStream()
 }
 
 void
-DimacsVisitor::visitTheory1(const TheoryPtr t)
+DimacsVisitor::visitTheory(const TheoryPtr& t, std::size_t sig_size)
 {
-   for (Theory::const_iterator it = t->begin(); it != t->end(); ++it)
+  stream << "p cnf " << sig_size << ' ' << t->size() << std::endl;
+  for (Theory::const_iterator it = t->begin(); it != t->end(); ++it)
     {
-      visitClause(*it);
+      std::copy((*it)->begin(), (*it)->end(), std::ostream_iterator<Variable>(stream, " "));
+      stream << '0' << std::endl;
     }
-}
-
-void
-DimacsVisitor::visitTheory(const TheoryPtr t, std::size_t size)
-{
-  stream << "p cnf " << size << " " << t->size() << std::endl; 
-  visitTheory1(t);
-}
-
-void
-DimacsVisitor::visitClause(const ClausePtr c)
-{
-  for(Clause::iterator kt = c->begin(); kt != c->end(); ++kt)
-    {
-      stream << *kt << " " ;	    	    
-    } 
-  stream << "0" << std::endl;
 }

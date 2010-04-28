@@ -30,15 +30,17 @@
 #ifndef DIMACS_VISITOR_H
 #define DIMACS_VISITOR_H
 
-
+#include "Theory.h"
 #include "BaseVisitor.h"
-#include "Signature.h"
 
 #include <iosfwd>
 
 
 namespace dmcs {
 
+/**
+ * Print Theory as DIMACS, see <http://www.satcompetition.org/2009/format-benchmarks2009.html>
+ */
 class DimacsVisitor : public BaseVisitor
 {
 protected:
@@ -56,14 +58,7 @@ public:
 
   ///@todo use std::size_t no_vars (== local_sig_size + neighbor_vars + V_vars) instead of whole sig
   void 
-  visitTheory(const TheoryPtr t, std::size_t size);
-
-  /// @todo TK: clean up!
-  void 
-  visitTheory1(const TheoryPtr t);
-
-  void
-  visitClause(const ClausePtr c);
+  visitTheory(const TheoryPtr& t, std::size_t sig_size);
 
 };
 

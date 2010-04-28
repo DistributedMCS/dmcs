@@ -46,7 +46,6 @@ protected:
   std::ostream& stream;
 
 public:
-  explicit
   LogicVisitor(std::ostream&);
 
   /**
@@ -73,13 +72,6 @@ public:
   virtual void
   printNegativeBridgeRule(std::ostream& os,const BridgeAtom& b);
 
-  void
-  visitClause(const ClausePtr)
-  { }
-
-  void
-  visitTheory(const TheoryPtr, std::size_t /* size */)
-  { }
 };
 
 

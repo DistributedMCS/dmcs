@@ -27,11 +27,10 @@
  * 
  */
 
-#include "Theory.h"
-#include "Signature.h"
-
 #ifndef BASE_VISITOR_H_
 #define BASE_VISITOR_H_
+
+#include <iosfwd>
 
 namespace dmcs {
 
@@ -46,16 +45,17 @@ public:
   ~BaseVisitor()
   { }
   
-  virtual void
-  visitTheory(const TheoryPtr t, std::size_t size) = 0;
-  
-  virtual void
-  visitClause(const ClausePtr c) = 0;
+  /**
+   * returns the stream of the visitor.
+   */
+  std::ostream&
+  getStream();
+
 };
 
 } // namespace dmcs
 
-#endif // _MCS_BASE_VISITOR_H_
+#endif // BASE_VISITOR_H_
 
 // Local Variables:
 // mode: C++
