@@ -15,7 +15,6 @@ TESTS = \
 	testBeliefComparison \
 	testParsers \
 	testTranslation \
-	testSolver \
 	testSignature \
 	testCombination 
 
@@ -26,10 +25,8 @@ check_PROGRAMS = \
 	testBeliefComparison \
 	testParsers \
 	testTranslation \
-	testSolver \
 	testSignature \
 	testQueryPlan \
-	testReadGraph \
 	testCombination 
 
 testClasp_SOURCES = testClasp.cpp 
@@ -45,17 +42,12 @@ testCombination_SOURCES = testCombination.cpp
 testCombination_LDADD = $(top_builddir)/src/libdmcs.a
 
 testTranslation_SOURCES = testTranslation.cpp
-testTranslation_LDADD = $(top_builddir)/src/libtranslation.a
-
-testSolver_SOURCES = testSolver.cpp
-testSolver_LDADD = $(top_builddir)/src/libsatsolver.a $(top_builddir)/src/libcache.a $(top_builddir)/src/libtranslation.a
+testTranslation_LDADD = $(top_builddir)/src/libdmcs.a $(top_builddir)/src/libtranslation.a
 
 testSignature_SOURCES = testSignature.cpp
 
-testReadGraph_SOURCES = testReadGraph.cpp
-
-testQueryPlan_SOURCES = testQueryPlan.cpp \
-                        $(top_builddir)/src/QueryPlan.cpp 
+testQueryPlan_SOURCES = testQueryPlan.cpp
+testQueryPlan_LDADD = $(top_builddir)/src/libdmcs.a
 
 
 
