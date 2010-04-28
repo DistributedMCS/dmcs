@@ -50,7 +50,6 @@ class Client
  public:
   Client(boost::asio::io_service& io_service,
 	 boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-	 std::size_t n,
 	 Message_t& mess);
 
   BeliefStateListPtr

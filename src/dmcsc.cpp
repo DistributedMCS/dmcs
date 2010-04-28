@@ -148,8 +148,8 @@ main(int argc, char* argv[])
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::resolver resolver(io_service);
       boost::asio::ip::tcp::resolver::query query(hostName, port);
-      boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
-      boost::asio::ip::tcp::endpoint endpoint = *iterator;
+      boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
+      boost::asio::ip::tcp::endpoint endpoint = *it;
       
       // our result
       BeliefStateListPtr belief_states(new BeliefStateList);
@@ -167,10 +167,7 @@ main(int argc, char* argv[])
 #endif 
 	  
 	  PrimitiveMessage mess(V);
-	  Client<PrimitiveMessage> c(io_service, 
-				     iterator,
-				     systemSize,
-				     mess);
+	  Client<PrimitiveMessage> c(io_service, it, mess);
 	  
 #ifdef DEBUG
 	  std::cerr << "Running ioservice" <<std::endl;
@@ -187,10 +184,7 @@ main(int argc, char* argv[])
       else // Opt DMCS
  	{
  	  OptMessage mess(0); // invoker ID ?
- 	  Client<OptMessage> c(io_service, 
- 			       iterator,
- 			       systemSize,
- 			       mess);
+ 	  Client<OptMessage> c(io_service, it, mess);
  	  io_service.run();
  	  belief_states= c.getBeliefStates();
  	}

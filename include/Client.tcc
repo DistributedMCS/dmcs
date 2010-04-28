@@ -47,7 +47,6 @@ namespace dmcs {
 template<typename Message_t>
 Client<Message_t>::Client(boost::asio::io_service& io_service,
 	       boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-	       std::size_t n,
 	       Message_t& mess_)
   : io_service_(io_service),
     conn(new connection(io_service)),
