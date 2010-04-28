@@ -1,7 +1,37 @@
+2010-04-28  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/testQueryPlan.cpp: Resuscitate testQueryPlan.
+
+	* src/tests/testTranslation.cpp: Resuscitate testTranslation.
+
+	* src/tests/Makefile.am: Remove unused tests.
+	* src/tests/testReadGraph.cpp: Likewise.
+	* src/tests/testSolver.cpp: Likewise.
+
+	* include/DimacsVisitor.h: Clean up.
+	* include/LogicVisitor.h: Likewise.
+	* src/DimacsVisitor.cpp: Likewise.
+	* include/BaseVisitor.h: Likewise.
+
+	* include/Client.h: Remove system size from ctor.
+	* include/Client.tcc: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
 2010-04-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/testMCSParser.cpp: Remove.
+
+	* src/tests/Makefile.am: Resuscitate testCombination.
+	* src/tests/testCombination.cpp: Likewise.
+
+	* src/BeliefCombination.cpp: Use bitset to print DEBUG info.
+
+	* include/OptDMCS.tcc: Fix DEBUG.
+	* include/PrimitiveDMCS.tcc: Likewise.
 
 	* src/tests/testParsers.cpp: Resuscitate testParsers testcase.
 	* src/tests/Makefile.am: Likewise.
+
 	* examples/dia-4-4-2-2-1_opt_dlv.txt: Likewise.
 	* examples/dia-4-4-2-2-1_dlv.txt: Likewise.
 	* examples/dia-4-4-2-2-1_command_line_opt.txt: Likewise.

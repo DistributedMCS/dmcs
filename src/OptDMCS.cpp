@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   OptDMCS.tcc
+ * @file   OptDMCS.cpp
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
  * @date   Wed Nov  18 18:03:24 2009
  * 
@@ -26,9 +26,6 @@
  * 
  * 
  */
-
-#ifndef OPT_DMCS_TCC
-#define OPT_DMCS_TCC
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -41,7 +38,7 @@
 #include "Client.h"
 #include "DimacsVisitor.h"
 #include "ParserDirector.h"
-#include "PrimitiveDMCS.h"
+#include "OptDMCS.h"
 #include "Cache.h"
 
 #include <vector>
@@ -89,7 +86,7 @@ OptDMCS::localSolve(const BeliefStatePtr& V)
 
 
 BeliefStateListPtr
-OptDMCS::getBeliefStates(OptMessage& mess)
+OptDMCS::getBeliefStates(const OptMessage& mess)
 {
   const std::size_t n = ctx->getSystemSize();
   const std::size_t k = ctx->getContextID(); // my local id
@@ -176,7 +173,7 @@ OptDMCS::getBeliefStates(OptMessage& mess)
   localSolve(globalV);
 
 #ifdef DEBUG
-  BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
+  BeliefStatePtr all_masked(new BeliefState(n, std::numeric_limits<unsigned long>::max()));
   printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif
 
@@ -218,7 +215,7 @@ OptDMCS::getBeliefStates(OptMessage& mess)
 #endif // DEBUG
 
       OptMessage neighbourMess(k);
-      Client<OptMessage> client(io_service, res_it, n, neighbourMess);
+      Client<OptMessage> client(io_service, res_it, neighbourMess);
       
       io_service.run();
       
@@ -264,7 +261,6 @@ OptDMCS::getBeliefStates(OptMessage& mess)
 
 } // namespace dmcs
 
-#endif // OPT_DMCS_TCC
 
 // Local Variables:
 // mode: C++

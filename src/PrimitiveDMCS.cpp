@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   PrimitiveDMCS.tcc
+ * @file   PrimitiveDMCS.cpp
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
  * @date   Wed Nov  18 18:03:24 2009
  * 
@@ -26,9 +26,6 @@
  * 
  * 
  */
-
-#ifndef PRIMITIVE_DMCS_TCC
-#define PRIMITIVE_DMCS_TCC
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -117,7 +114,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   if (bs.belief_states_ptr) 
     {
 #if defined(DEBUG)
-      std::cerr << "cache hit" << std::endl;
+      std::cerr << "cache hit" << std::endl;0
 #endif //DEBUG
       belief_states = bs;
       return belief_states;
@@ -133,7 +130,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   localSolve(V);
 
 #ifdef DEBUG
-  BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
+  BeliefStatePtr all_masked(new BeliefState(n, std::numeric_limits<unsigned long>::max()));
   printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif // DEBUG
 
@@ -192,7 +189,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  std::cerr << "Invoking neighbor " << *it << std::endl;
 #endif // DEBUG
 
-	  Client<PrimitiveMessage> client(io_service, res_it, n, mess);
+	  Client<PrimitiveMessage> client(io_service, res_it, mess);
 	  
 	  io_service.run();
 
@@ -242,8 +239,6 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 }
 
 } // namespace dmcs
-
-#endif // PRIMITIVE_DMCS_TCC
 
 // Local Variables:
 // mode: C++

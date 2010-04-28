@@ -30,6 +30,8 @@
 #ifndef PRIMITIVE_DMCS_H
 #define PRIMITIVE_DMCS_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "BaseDMCS.h"
 #include "Message.h"
 #include "Cache.h"
@@ -37,6 +39,7 @@
 
 
 namespace dmcs {
+
 
 class PrimitiveDMCS : public BaseDMCS
 {
@@ -61,11 +64,10 @@ private:
   TheoryPtr theory;
 };
 
+typedef boost::shared_ptr<PrimitiveDMCS> PrimitiveDMCSPtr;
 
 } // namespace dmcs
 
-
-#include "PrimitiveDMCS.tcc"
 
 #endif // PRIMITIVE_DMCS_H
 

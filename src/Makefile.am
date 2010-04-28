@@ -40,6 +40,8 @@ libsatsolver_a_SOURCES = \
 
 # the DMCS library
 libdmcs_a_SOURCES = \
+		OptDMCS.cpp \
+		PrimitiveDMCS.cpp \
                 QueryPlan.cpp \
                 BeliefCombination.cpp
 

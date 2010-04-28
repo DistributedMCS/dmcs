@@ -30,6 +30,8 @@
 #ifndef OPT_DMCS_H
 #define OPT_DMCS_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "BaseDMCS.h"
 #include "Message.h"
 #include "Cache.h"
@@ -46,7 +48,7 @@ public:
   ~OptDMCS();
 
   BeliefStateListPtr
-  getBeliefStates(OptMessage& mess);
+  getBeliefStates(const OptMessage& mess);
 
 private:
   void
@@ -60,10 +62,10 @@ private:
   TheoryPtr theory;
 };
 
+typedef boost::shared_ptr<OptDMCS> OptDMCSPtr;
 
 } // namespace dmcs
 
-#include "OptDMCS.tcc"
 
 #endif // OPT_DMCS_H
 
