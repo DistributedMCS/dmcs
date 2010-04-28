@@ -2,7 +2,6 @@
 #include "QueryPlan.h"
 
 using namespace dmcs;
-using namespace dmcs::generator;
 
 int main()
 {
@@ -30,7 +29,7 @@ int main()
 
   std::cerr << "Write graph..." << std::endl;
 
-  BeliefStatePtr V1(new BeliefState(4));
+  BeliefStatePtr V1(new BeliefState(4, 0));
   qp.putGlobalV(V1);
   qp.write_graph(std::cerr);
 
@@ -48,7 +47,7 @@ int main()
 
 
   BeliefStatePtr V(new BeliefState(3));
-  V.belief_state_ptr->belief_state[2] = 1;
+  (*V)[2] = 1;
 
   qp.putInterface(1, 2, V);
 
