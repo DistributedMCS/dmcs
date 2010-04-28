@@ -43,12 +43,15 @@ BOOST_AUTO_TEST_CASE( testCNFTranslation )
 
   RulesPtr local_kb(new Rules);
   BridgeRulesPtr bridge_rules(new BridgeRules);
+  QueryPlanPtr query_plan(new QueryPlan);
 
   const char* ex = getenv("EXAMPLESDIR");
   std::string kb_file(ex);
   kb_file += "/rules.txt";
   std::string br_file(ex);
   br_file += "/bridgeRules.txt";
+
+  
 
   // parse KB
   LocalKBBuilder<PropositionalASPGrammar> builder1(local_kb, sig);
@@ -57,7 +60,7 @@ BOOST_AUTO_TEST_CASE( testCNFTranslation )
   parser_director.parse(kb_file);
 
   //parse BR
-  BridgeRulesBuilder<BRGrammar> builder_br(bridge_rules, sig);
+  BridgeRulesBuilder<BRGrammar> builder_br(bridge_rules, sig, query_plan);
   ParserDirector<BRGrammar> parser_director_br;
   parser_director_br.setBuilder(&builder_br);
   parser_director_br.parse(br_file);
@@ -90,7 +93,7 @@ BOOST_AUTO_TEST_CASE( testCNFTranslation )
 
 
   DimacsVisitor v(fs);
-  v.visitTheory(formula,*resultSig);
+  v.visitTheory(formula, resultSig->size());
   fs.close();
 
 }
