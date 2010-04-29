@@ -49,7 +49,7 @@ libdmcs_a_SOURCES = \
 dmcsd_SOURCES = \
 		dmcsd.cpp
 
-dmcsd_LDADD = libsatsolver.a libcache.a libtranslation.a libdmcs.a
+dmcsd_LDADD = libdmcs.a libsatsolver.a libcache.a libtranslation.a
 
 
 # the dmcsc binary
