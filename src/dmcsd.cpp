@@ -36,8 +36,6 @@
 #include "Message.h"
 #include "DimacsVisitor.h"
 #include "Session.h"
-#include "CnfBuilder.h"
-#include "CnfGrammar.h"
 #include "LocalKBBuilder.h"
 #include "PropositionalASPGrammar.h"
 #include "BRGrammar.h"
