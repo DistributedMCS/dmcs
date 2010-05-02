@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   PrimitiveDMCS.h
+ * @file   OptDMCS.h
  * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
  * @date   Wed Nov  4 11:14:01 2009
  * 
@@ -42,7 +42,7 @@ namespace dmcs {
 class OptDMCS : public BaseDMCS
 {
 public:
-  OptDMCS(ContextPtr& c, TheoryPtr& t);
+  OptDMCS(const ContextPtr& c, const TheoryPtr& t);
 
   virtual
   ~OptDMCS();
@@ -51,15 +51,8 @@ public:
   getBeliefStates(const OptMessage& mess);
 
 private:
-  void
-  localSolve(const BeliefStatePtr& V);
-
-private:
-  BeliefStateListPtr belief_states;
-  BeliefStateListPtr local_belief_states;
   CacheStatsPtr cacheStats;
   CachePtr cache;
-  TheoryPtr theory;
 };
 
 typedef boost::shared_ptr<OptDMCS> OptDMCSPtr;

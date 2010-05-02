@@ -1,3 +1,22 @@
+2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/BeliefCombination.cpp: Fix debug output.
+
+	* include/SatSolver.tcc (dmcs::solve): Throw exception when there
+	was an error during SAT solving.
+
+	* include/Client.tcc: Throw a runtime_error when there is a
+	network error.
+
+	* include/BaseDMCS.h: Move localSolve to BaseDMCS.
+	Do not use global belief states.
+	* include/OptDMCS.h: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* src/BaseDMCS.cpp: Likewise.
+	* src/Makefile.am: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
 2010-05-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/ClaspResultGrammar.tcc: Simplify rule value. Fixed the

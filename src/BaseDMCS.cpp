@@ -17,62 +17,65 @@
  *  along with DMCS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /**
- * @file   BaseDMCS.h
+ * @file   BaseDMCS.cpp
  * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
- * @date   Wed Nov  4 11:14:01 2009
+ * @date   Sun May  2 16:42:53 2010
  * 
- * @brief  
+ * @brief  Base DMCS methods.
  * 
  * 
  */
 
-#ifndef BASE_DMCS_H
-#define BASE_DMCS_H
 
-#include "BeliefState.h"
-#include "Context.h"
-#include "Message.h"
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
 
+#include "BaseDMCS.h"
+#include "ClaspProcess.h"
 
 namespace dmcs {
 
-/**
- * @brief Base class for DMCS algorithms
- */
-class BaseDMCS
+BaseDMCS::BaseDMCS(const ContextPtr& c, const TheoryPtr& t)
+  : ctx(c),
+    theory(t)
+{ }
+
+
+
+BaseDMCS::~BaseDMCS()
+{ }
+
+
+
+BeliefStateListPtr
+BaseDMCS::localSolve(const BeliefStatePtr& V)
 {
-private:
-  
-  // default ctor is private
-  BaseDMCS();
+#ifdef DEBUG
+  std::cerr << "Starting local solve..." << std::endl;
+#endif
 
-protected:
-  ContextPtr ctx; /// the context of DMCS
-  TheoryPtr theory; /// the theory of DMCS
+  ClaspProcess cp;
+  cp.addOption("-n 0");
+  boost::shared_ptr<BaseSolver> solver(cp.createSolver());
 
-  /// ctor for children
-  BaseDMCS(const ContextPtr& c, const TheoryPtr& t);
+  BeliefStateListPtr local_belief_states(new BeliefStateList);
+  solver->solve(*ctx, local_belief_states, theory, V);
 
-  /**
-   * @par V interface
-   *
-   * @return list of local belief states
-   */
-  virtual BeliefStateListPtr
-  localSolve(const BeliefStatePtr& V);
+#ifdef DEBUG
+  std::cerr << "Got " << local_belief_states->size();
+  std::cerr << " answers from CLASP" << std::endl;
+  std::cerr << "Local belief states from localsolve(): " << std::endl;
+  std::cerr << local_belief_states << std::endl;
+#endif
 
-public:
-  virtual
-  ~BaseDMCS();
-};
+  return local_belief_states;
+}
 
-typedef boost::shared_ptr<BaseDMCS> DMCSPtr;
 
 } // namespace dmcs
 
-#endif // BASE_DMCS_H
 
 // Local Variables:
 // mode: C++

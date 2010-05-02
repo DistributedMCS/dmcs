@@ -51,42 +51,16 @@
 namespace dmcs {
 
 
-PrimitiveDMCS::PrimitiveDMCS(ContextPtr& c, TheoryPtr & t)
-  : BaseDMCS(c),
-    belief_states(new BeliefStateList),
-    local_belief_states(new BeliefStateList),
+PrimitiveDMCS::PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t)
+  : BaseDMCS(c,t),
     cacheStats(new CacheStats),
-    cache(new Cache(cacheStats)),
-    theory(t)
+    cache(new Cache(cacheStats))
 { }
 
 
 
 PrimitiveDMCS::~PrimitiveDMCS()
 { }
-
-
-
-void
-PrimitiveDMCS::localSolve(const BeliefStatePtr& V)
-{
-#ifdef DEBUG
-  std::cerr << "Starting local solve..." << std::endl;
-#endif
-
-  ClaspProcess cp;
-  cp.addOption("-n 0");
-  boost::shared_ptr<BaseSolver> solver(cp.createSolver());
-
-  solver->solve(*ctx, local_belief_states, theory, V);
-
-#ifdef DEBUG
-  std::cerr << "Got " << local_belief_states->size();
-  std::cerr << " answers from CLASP" << std::endl;
-  std::cerr << "Local belief states from localsolve(): " << std::endl;
-  std::cerr << local_belief_states << std::endl;
-#endif
-}
 
 
 
@@ -97,8 +71,6 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   const std::size_t k = ctx->getContextID(); // my local id
 
   assert(n > 0 && k <= n);
-
-  belief_states->clear();
 
   const QueryPlanPtr query_plan = ctx->getQueryPlan();
 
@@ -114,7 +86,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   if (bs.belief_states_ptr) 
     {
 #if defined(DEBUG)
-      std::cerr << "cache hit" << std::endl;0
+      std::cerr << "cache hit" << std::endl;
 #endif //DEBUG
       belief_states = bs;
       return belief_states;
@@ -127,12 +99,14 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
   // This will give us local_belief_states
 
-  localSolve(V);
+  BeliefStateListPtr local_belief_states = localSolve(V);
 
 #ifdef DEBUG
-  BeliefStatePtr all_masked(new BeliefState(n, std::numeric_limits<unsigned long>::max()));
+  BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
   printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif // DEBUG
+
+  BeliefStateListPtr belief_states(new BeliefStateList);
 
   project_to(local_belief_states, V, belief_states);
 
@@ -193,16 +167,18 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  
 	  io_service.run();
 
-	  BeliefStateListPtr bs = client.getBeliefStates();
+	  BeliefStateListPtr neighbor_belief_state = client.getBeliefStates();
 	  mess.removeHistory(k);
 
 #if defined(DEBUG)
 	  std::cerr << "Belief states received from neighbor " << *it << std::endl;	  
-	  std::cerr << bs << std::endl;
+	  std::cerr << neighbor_belief_state << std::endl;
 	  std::cerr << "Going to combine " << "k = " << k << " neighbor = " << *it << std::endl;
 #endif // DEBUG
 
-	  belief_states = combine(belief_states, bs, V);
+	  belief_states = combine(belief_states,
+				  neighbor_belief_state,
+				  V);
 
 #if defined(DEBUG)
 	  std::cerr << "Accumulated combination... " << std::endl;	  	  
@@ -229,9 +205,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
       std::cerr << "Going to send " << belief_states->size()
 		<< " belief states above back to user." << std::endl;
     }
-#endif
-
-#ifdef DEBUG
+ 
   printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
 #endif
   

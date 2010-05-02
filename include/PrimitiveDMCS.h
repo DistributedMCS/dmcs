@@ -44,24 +44,17 @@ namespace dmcs {
 class PrimitiveDMCS : public BaseDMCS
 {
 public:
-  PrimitiveDMCS(ContextPtr& c, TheoryPtr& t);
+  PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t);
 
   virtual
   ~PrimitiveDMCS();
 
   BeliefStateListPtr
-  getBeliefStates(PrimitiveMessage & mess);
+  getBeliefStates(PrimitiveMessage& mess);
 
 private:
-  void
-  localSolve(const BeliefStatePtr& V);
-
-private:
-  BeliefStateListPtr belief_states;
-  BeliefStateListPtr local_belief_states;
   CacheStatsPtr cacheStats;
   CachePtr cache;
-  TheoryPtr theory;
 };
 
 typedef boost::shared_ptr<PrimitiveDMCS> PrimitiveDMCSPtr;

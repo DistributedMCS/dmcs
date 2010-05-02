@@ -47,41 +47,16 @@
 
 namespace dmcs {
 
-OptDMCS::OptDMCS(ContextPtr& c, TheoryPtr & t)
-  : BaseDMCS(c),
-    belief_states(new BeliefStateList),
-    local_belief_states(new BeliefStateList),
+OptDMCS::OptDMCS(const ContextPtr& c, const TheoryPtr & t)
+  : BaseDMCS(c,t),
     cacheStats(new CacheStats),
-    cache(new Cache(cacheStats)),
-    theory(t)
+    cache(new Cache(cacheStats))
 { }
 
 
 
 OptDMCS::~OptDMCS()
 { }
-
-
-
-void
-OptDMCS::localSolve(const BeliefStatePtr& V)
-{
-#ifdef DEBUG
-  std::cerr << "Starting local solve..." << std::endl;
-#endif
-
-  ClaspProcess cp;
-  cp.addOption("-n 0");
-  boost::shared_ptr<BaseSolver> solver(cp.createSolver());
-  solver->solve(*ctx, local_belief_states, theory, V);
-
-#ifdef DEBUG
-  std::cerr << "Got " << local_belief_states->size();
-  std::cerr << " answers from CLASP" << std::endl;
-  std::cerr << "Local belief states from localsolve(): " << std::endl;
-  std::cerr << local_belief_states << std::endl;
-#endif
-}
 
 
 
@@ -92,11 +67,9 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   const std::size_t k = ctx->getContextID(); // my local id
   const std::size_t c = mess.getInvoker();
 
-  belief_states->clear();
-
-#ifdef DEBUG
-  std::cerr << "invoker ID " << c << std::endl;
-#endif
+#if defined(DEBUG)
+  std::cerr << "OptDMCS at " << k << ", invoker ID " << c << std::endl;
+#endif // DEBUG
 
   // get V from the query plan
   BeliefStatePtr localV(new BeliefState(n, 0));
@@ -109,7 +82,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   // edge in the query plan and use just the maximal V
   if (c == 0) 
     {
-      BeliefStatePtr nv(new BeliefState(n, std::numeric_limits<unsigned long>::max()));
+      BeliefStatePtr nv(new BeliefState(n, maxBeliefSet()));
       localV = nv; // everything set true
     }
   else // some context invoked this DMCS
@@ -120,36 +93,12 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   ///@todo we have to check if we really can use a localized version of the global V
   globalV = query_plan->getGlobalV();
 
-  /*
-  for (int i = 0; i < n; ++i)
-    {
-      if (isEpsilon(localV.belief_state_ptr->belief_state[i]))
-	{
-	  mask.belief_state_ptr->belief_state[i] = 0;
-	}
-      else
-	{
-	  mask.belief_state_ptr->belief_state[i] = std::numeric_limits<unsigned long>::max();
-	}
-    }
-
-  for (int i = 0; i < n; ++i)
-    {
-      globalV.belief_state_ptr->belief_state[i] &= mask.belief_state_ptr->belief_state[i];
-    }
-  */
-
 #if defined(DEBUG)
-  std::cerr << c << " calling " << k << std::endl;
+  std::cerr << "context " << c << " is calling context " << k << std::endl;
 #endif // DEBUG
 
   ///@todo use cache in DMCS
   //  BeliefStatesPtr bs = cache->cacheHit(V);
-
-#if defined(DEBUG)
-  std::cerr << "In OptDMCS: ";
-#endif // DEBUG
-
 
   //  if (bs.belief_states_ptr) 
   //{
@@ -170,23 +119,26 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   //
 
   // This will give us local_belief_states
-  localSolve(globalV);
+  BeliefStateListPtr local_belief_states = localSolve(globalV);
 
 #ifdef DEBUG
-  BeliefStatePtr all_masked(new BeliefState(n, std::numeric_limits<unsigned long>::max()));
+  BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
   printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif
 
+  ///@todo TK: can we get rid off it?
   BeliefStateListPtr temporary_belief_states(new BeliefStateList);
 
   project_to(local_belief_states, globalV, temporary_belief_states);
 
 #if defined(DEBUG)
   std::cerr << "Projected belief states..." << std::endl;
-  std::cerr << belief_states << std::endl;
+  std::cerr << temporary_belief_states << std::endl;
   std::cerr << "The V used in projection..." << std::endl;
   std::cerr << globalV << std::endl;
+
   printBeliefStatesNicely(std::cerr, temporary_belief_states, globalV, query_plan);
+
   std::cerr << "Now check for neighbors..." << std::endl;
 #endif // DEBUG
 
@@ -219,36 +171,26 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       
       io_service.run();
       
-      BeliefStateListPtr bs = client.getBeliefStates();
-      
-      //BeliefStatesPtr pbs(new BeliefStates(n));
-      
-      //project_to(bs, ctx->getQueryPlan()->getInterface(k, *it), pbs);
-      
+      BeliefStateListPtr neighbor_belief_states = client.getBeliefStates();
+            
 #if defined(DEBUG)
       std::cerr << "Belief states received from neighbor " << *it << std::endl;	  
-      std::cerr << bs << std::endl;
-      //std::cerr << "Projected to interface vars " << V << std::endl;	  
-      //std::cerr << pbs << std::endl;
-      
+      std::cerr << neighbor_belief_states << std::endl;      
 #endif // DEBUG
 	  
-      //belief_states = combine(belief_states, pbs, k, *it, ctx->getQueryPlan()->getInterface(k, *it));
-      //belief_states = combine(belief_states, bs, k, *it, ctx->getQueryPlan()->getInterface(k, *it));
-      //const BeliefStatePtr& localV = ctx->getQueryPlan()->getInterface(k, *it);
-
-      //std::cerr << "projected global V = " << globalV << std::endl;
-      temporary_belief_states = combine(temporary_belief_states, bs, globalV);
+      temporary_belief_states = combine(temporary_belief_states,
+					neighbor_belief_states,
+					globalV);
       
 #if defined(DEBUG)
-      std::cerr << "Combined at our belief state:... " << std::endl;	  	  
+      std::cerr << "Combined belief state:... " << std::endl;	  	  
       std::cerr << temporary_belief_states << std::endl;
 #endif // DEBUG
     }
   
   //  cache->insert(V, belief_states);
 
-
+  BeliefStateListPtr belief_states(new BeliefStateList);
   project_to(temporary_belief_states, localV, belief_states);
 
 #if defined(DEBUG)
