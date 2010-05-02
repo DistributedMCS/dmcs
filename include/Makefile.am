@@ -64,6 +64,7 @@ noinst_HEADERS =  \
 		Rule.h \
 		SatSolver.h \
 		SatSolver.tcc \
+		StatsInfo.h \
 		Server.h \
 		Server.tcc \
 		Session.h \

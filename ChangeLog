@@ -1,3 +1,11 @@
+2010-05-02  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* src/Makefile.am: Add date_time library.
+	* include/Makefile.am: Add StatsInfo.h
+
+	* include/Message.h: Add ReturnMessage.
+	* include/StatsInfo.h: New file.
+
 2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/BeliefCombination.cpp: Fix debug output.

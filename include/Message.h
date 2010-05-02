@@ -31,6 +31,7 @@
 #define MESSAGE_H
 
 #include "BeliefState.h"
+#include "StatsInfo.h"
 
 #include <set>
 #include <boost/serialization/set.hpp>
@@ -169,6 +170,47 @@ operator<< (std::ostream& os, const OptMessage& optMess)
   
   return os;
 }
+
+
+
+class ReturnMessage : public Message
+{
+public:
+  ReturnMessage()
+  { }
+
+  virtual ~ReturnMessage() 
+  {}
+
+  ReturnMessage(BeliefStateListPtr v_, StatsInfoPtr info_)
+    : v(v_), info(info_)
+  { }
+
+  BeliefStateListPtr
+  getBeliefStates() const
+  {
+    return v;
+  }
+
+  StatsInfoPtr
+  getStatsInfo() const
+  {
+    return info;
+  }
+
+public:
+  template <typename Archive>
+  void
+  serialize(Archive& ar, const unsigned int /* version */)
+  {
+    ar & v;
+    ar & info;
+  }
+
+private:
+  BeliefStateListPtr v;
+  StatsInfoPtr info;
+};
 
 
 } // namespace dmcs
