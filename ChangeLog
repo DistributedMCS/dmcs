@@ -1,3 +1,18 @@
+2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Do not include CnfBuilder.h and CnfGrammar.h.
+
+	* include/LoopFormula.h: Add documentation.
+	* include/SatSolver.tcc: Likewise.
+	* include/Theory.h: Likewise.
+
+	* include/CnfBuilder.h: Deprecate file.
+	* include/CnfBuilder.tcc: Likewise.
+	* include/CnfGrammar.h: Likewise.
+	* include/CnfGrammar.tcc: Likewise.
+
+	* include/ClaspResultBuilder.tcc: De-obfuscate code.
+
 2010-04-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/Makefile.am (dmcsd_LDADD): Linker on Linux is
