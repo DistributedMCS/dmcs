@@ -247,7 +247,7 @@ void
 project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateListPtr& cu)
 {
  #ifdef DEBUG
-   std::cerr << "Projecting " << std::endl << cs << std::endl;
+   std::cerr << "Projecting " << std::endl << *cs << std::endl;
    std::cerr << "to         " << std::endl << v << std::endl;
  #endif
 
