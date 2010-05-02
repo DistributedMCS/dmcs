@@ -1,5 +1,8 @@
 2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* examples/dimacs-small.txt: New file.
+	* examples/dimacs-small-result.txt: Likewise.
+
 	* examples/dia-4-4-2-2-1.opt1: Remove.
 
 	* examples/dia-4-4-2-2-1_command_line.txt: Fix V for basic DMCS.
