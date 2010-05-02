@@ -21,6 +21,7 @@
  * @file   CnfGrammar.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
  * @date   Sun Nov  8 10:48:22 2009
+ * @deprecated not used anymore...
  * 
  * @brief  
  * 

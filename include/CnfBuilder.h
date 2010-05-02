@@ -21,7 +21,8 @@
  * @file   CnfBuilder.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
  * @date   Sun Nov  8 10:46:30 2009
- * 
+ * @deprecated not used anymore... 
+ *
  * @brief  
  * 
  * 
@@ -35,6 +36,15 @@
 #include "Theory.h"
 
 namespace dmcs {
+
+///@todo TK: are these guys still needed?
+// typedef std::map<Variable, std::string> MapId2Name;
+// typedef std::map<Variable, Variable> MapId2Lid;
+// typedef boost::bimap<Variable, std::string> BiMapId2Name;
+// typedef boost::bimap<Variable, Variable> BiMapId2Lid;
+// typedef std::vector<BiMapId2Name> BiMapsId2Name;
+// typedef std::vector<BiMapId2Lid> BiMapsId2Lid;
+
 
 template<typename Grammar>
 class CnfBuilder : public BaseBuilder<Grammar>

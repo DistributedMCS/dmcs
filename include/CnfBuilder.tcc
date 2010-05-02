@@ -21,6 +21,7 @@
  * @file   CnfBuilder.tcc
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
  * @date   Sun Nov  8 10:47:20 2009
+ * @deprecated not used anymore...
  * 
  * @brief  
  * 
