@@ -119,7 +119,7 @@ supportRules(AtomSetIterator abeg, AtomSetIterator aend,
 
 struct EpsilonConjunction
 {
-  typedef std::list<int> Conjunction;
+  typedef std::list<int> Conjunction; // we need a list that allows sort() for set operations
   Conjunction posLiterals;
   Conjunction negLiterals;
 };
@@ -130,7 +130,6 @@ supportFormula(AtomSetIterator abeg, AtomSetIterator aend,
 	       RuleIterator rbeg, RuleIterator rend,
 	       std::list<EpsilonConjunction>& disj)
 {
-
   for (RuleIterator it = rbeg; it != rend; ++it) 
     {
       EpsilonConjunction literals; // conjunction of literals
@@ -144,14 +143,15 @@ supportFormula(AtomSetIterator abeg, AtomSetIterator aend,
       // std::transform(nbody.begin(), nbody.end(), nlins, std::negate<Atom>());
       
       const PositiveBody& pbody = getPositiveBody(**it);
-      std::back_insert_iterator<std::list<int> > rt (literals.posLiterals);
-      std::copy(pbody.begin(), pbody.end(),rt);
+      std::back_insert_iterator<EpsilonConjunction::Conjunction> plins(literals.posLiterals);
+      std::copy(pbody.begin(), pbody.end(), plins);
 
       disj.push_back(literals);
     }
 }
 
 
+///@todo TK: setIterator is an ugly name
 template<typename setIterator>
 ClausePtr
 createNegatedConjunction(setIterator abeg, setIterator aend)
@@ -169,7 +169,7 @@ createNegatedConjunction(setIterator abeg, setIterator aend)
 }
 
 
-inline  ClausePtr
+inline ClausePtr
 mergeTwoConjunctions(ClausePtr conj1, ClausePtr conj2)
 {
   std::sort(conj1->begin(),conj1->end());

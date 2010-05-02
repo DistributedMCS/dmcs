@@ -38,22 +38,26 @@
 
 namespace dmcs {
 
+/// a propositional Literal is either a positive or negative integer
 typedef int Variable;
 
-typedef std::vector<Variable> Variables;
-
+/// a clause is a list of literals
 typedef std::vector<Variable> Clause;
 typedef boost::shared_ptr<Clause> ClausePtr;
+
+/// a propositional theory is a list of clauses
 typedef std::vector<ClausePtr> Theory;
 typedef boost::shared_ptr<Theory> TheoryPtr;
+
+
 
 ///@todo TK: get rid of this guy
 inline void
 add(TheoryPtr& firstFormula,const TheoryPtr& otherFormula)
 {
   firstFormula->insert(firstFormula->end(),
-		  otherFormula->begin(),
-		  otherFormula->end());
+		       otherFormula->begin(),
+		       otherFormula->end());
 }
 
 ///@todo TK: get rid of this guy
@@ -96,13 +100,6 @@ createCNF(TheoryPtr& DNF, ClausePtr& clauseSoFar)
   return result;
 }
 
-///@todo TK: are these guys still needed?
-typedef std::map<Variable, std::string> MapId2Name;
-typedef std::map<Variable, Variable> MapId2Lid;
-typedef boost::bimap<Variable, std::string> BiMapId2Name;
-typedef boost::bimap<Variable, Variable> BiMapId2Lid;
-typedef std::vector<BiMapId2Name> BiMapsId2Name;
-typedef std::vector<BiMapId2Lid> BiMapsId2Lid;
 
 } // namespace dmcs
 

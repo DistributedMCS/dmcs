@@ -40,7 +40,6 @@
 
 namespace dmcs {
 
-typedef std::list<Signature::const_iterator> SignatureIterators;
 
 template <typename Builder, typename Parser, typename ParserGrammar>
 SatSolver<Builder, Parser, ParserGrammar>::SatSolver(Process& p)
@@ -48,6 +47,7 @@ SatSolver<Builder, Parser, ParserGrammar>::SatSolver(Process& p)
 { }
 
 
+typedef std::list<Signature::const_iterator> SignatureIterators;
 
 template <typename Builder, typename Parser, typename ParserGrammar>
 void
@@ -60,112 +60,125 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
   
   try
     {
-      proc.spawn();
+      //      
+      // first, go through the neighbors and setup the additional Signature from V
+      //
+
       const SignaturePtr& sig = context.getSignature();
+
       SignatureIterators insert_iterators;
 
+      
 #ifdef DEBUG
       std::cerr << "Original signature: " << *sig << std::endl;
 #endif
+      
+      std::size_t my_id = context.getContextID();
+      const QueryPlanPtr& query_plan = context.getQueryPlan();
+      
+      const NeighborsPtr& neighbors = query_plan->getNeighbors(my_id);
 
-      try 
+      for (Neighbors::const_iterator n_it = neighbors->begin();
+	   n_it != neighbors->end();
+	   ++n_it)
 	{
-	  Builder builder(proc.getOutput());
-	  
-	  std::size_t my_id = context.getContextID();
-	  const QueryPlanPtr& query_plan = context.getQueryPlan();
-
-	  const NeighborsPtr& neighbors = query_plan->getNeighbors(my_id);
+	  const BeliefSet neighbor_V = (*V)[*n_it - 1];
 	  
 #ifdef DEBUG
-	  std::cerr << "In SatSolver" << std::endl;
-	  std::cerr << "Neighbors are: " << std::endl;
-	  for (Neighbors::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
-	    {
-	      std::cerr << *it << "  ";
-	    }
-	  std::cerr << std::endl;
+	  std::cerr << "Interface variable of neighbor[" << *n_it <<"]: " << neighbor_V << std::endl;
 #endif
-
-	  for (Neighbors::const_iterator n_it = neighbors->begin();
-	       n_it != neighbors->end();
-	       ++n_it)
+	  
+	  const Signature& neighbor_sig = query_plan->getSignature(*n_it);
+	  const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
+	  
+	  // setup local signature for neighbors: this way we can translate
+	  // SAT models back to belief states in case we do not
+	  // reference them in the bridge rules
+	  for (std::size_t i = 1; i < sizeof(neighbor_V)*8; ++i)
 	    {
-	      BeliefSet neighbor_V = (*V)[*n_it - 1];
-
-#ifdef DEBUG
-	      std::cerr << "Interface variable of neighbor[" << *n_it <<"]: " << neighbor_V << std::endl;
-#endif
-
-	      const Signature& neighbor_sig = query_plan->getSignature(*n_it);
-	      const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
-
-
-	      for (std::size_t i = 1; i < sizeof(neighbor_V)*8; ++i)
+	      if (testBeliefSet(neighbor_V, i))
 		{
-		  if (testBeliefSet(neighbor_V, i))
+		  SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
+		  std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
+		  
+		  // add new symbol for neighbor
+		  Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
+		  std::pair<Signature::iterator, bool> sp = sig->insert(sym);
+		  
+		  // only add them if it was not already included
+		  // during bridge rule parsing
+		  if (sp.second)
 		    {
-		      SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
-		      std::size_t local_id_here = sig->size()+1;
-		      Symbol s(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
-		      std::pair<Signature::iterator, bool> p = sig->insert(s);
-
-		      if (p.second)
-			{
-			  insert_iterators.push_back(p.first);
-			}
+		      insert_iterators.push_back(sp.first);
 		    }
 		}
-
 	    }
-
+	}
+      
 #ifdef DEBUG
-	  std::cerr << "Updated signature: " << *sig << std::endl;
+      std::cerr << "Updated signature: " << *sig << std::endl;
 #endif
 
-	  builder.visitTheory(theory, sig->size());
-	}
-      catch (std::ios_base::failure& e)
-	{
-	  std::cerr << "Error: " << e.what() << std::endl;
-	}
+      //
+      // now send the theory to the SAT solver using the adapted Signature
+      //
+
+      proc.spawn();
+      
+      Builder builder(proc.getOutput());
+      builder.visitTheory(theory, sig->size());
+      
       proc.endoffile();
-
-      // parse result
-
+      
+      //
+      // parse result and set belief states
+      //
+      
 #if defined(DEBUG)
       std::cerr << "Parsing the models..." << std::endl;
 #endif // DEBUG
-
-      Parser builder(context, belief_states);
-
+      
+      Parser model_builder(context, belief_states);
+      
       ParserDirector<ParserGrammar> parser_director;
-      parser_director.setBuilder(&builder);
+      parser_director.setBuilder(&model_builder);
       parser_director.parse(proc.getInput());      
 
+      //
+      // close the connection to the SAT solver
+      //
+
+      retcode = proc.close();
+
+      //
+      // restore Signature
+      //
+      
 #ifdef DEBUG      
       std::cerr << "Erasing..." << std::endl;
 #endif
-
-      SignatureIterators::const_iterator s_it = insert_iterators.begin();
-      for(; s_it != insert_iterators.end(); ++ s_it)
+      
+      for (SignatureIterators::const_iterator s_it = insert_iterators.begin();
+	   s_it != insert_iterators.end(); 
+	   ++s_it)
 	{
 	  sig->erase(*s_it);
-
-#ifdef DEBUG
-	  std::cerr << "Restored signature: " << *sig << std::endl;
-#endif
 	}
-
-
-      retcode = proc.close();
+      
+#ifdef DEBUG
+      std::cerr << "Restored signature: " << *sig << std::endl;
+#endif
+    }
+  catch (std::ios_base::failure& e)
+    {
+      std::cerr << "Error: " << e.what() << std::endl;
     }
   catch(std::exception& e)
     {
       std::cerr << "Error: " << e.what() << std::endl;
     }
 }
-
+  
 } // namespace dmcs
 
 #endif // _SAT_SOLVER_TCC
