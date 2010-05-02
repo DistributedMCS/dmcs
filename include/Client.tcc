@@ -103,9 +103,7 @@ Client<Message_t>::handle_connect(const boost::system::error_code& error,
       // An error occurred. Log it and return. Since we are not starting a new
       // operation the io_service will run out of work to do and the client will
       // exit.
-#ifdef DEBUG
       std::cerr << "handle_connect: " << error.message() << std::endl;
-#endif
     }
 }
 
@@ -114,7 +112,7 @@ Client<Message_t>::handle_connect(const boost::system::error_code& error,
 template<typename Message_t>
 void
 Client<Message_t>::handle_write_message(const boost::system::error_code& error, 
-			       connection_ptr /* c */)
+					connection_ptr /* c */)
 {
 
 #ifdef DEBUG
@@ -136,6 +134,7 @@ Client<Message_t>::handle_write_message(const boost::system::error_code& error,
   else
     {
       std::cerr << "handle_write_message: " << error.message() << std::endl;
+      throw std::runtime_error(error.message());
     }
 }
 
@@ -158,6 +157,7 @@ Client<Message_t>::handle_read_models(const boost::system::error_code& error)
   else
     {
       std::cerr << "handle_read_models: " << error.message() << std::endl;
+      throw std::runtime_error(error.message());
     }
 
   // Since we are not starting a new operation the io_service will run out of
