@@ -9,6 +9,7 @@
 2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/BeliefCombination.cpp: Fix debug output.
+	(dmcs::project_to): Sort and unique projection result.
 
 	* include/SatSolver.tcc (dmcs::solve): Throw exception when there
 	was an error during SAT solving.

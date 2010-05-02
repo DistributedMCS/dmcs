@@ -256,8 +256,8 @@ project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateLis
        const BeliefStatePtr& is = *it;
 
        BeliefStatePtr u(new BeliefState(is->size(), 0)); // create empty belief state
-
        BeliefState::iterator ut = u->begin();
+
        BeliefState::const_iterator vt = v->begin();
 
        for (BeliefState::const_iterator ct = is->begin();
@@ -267,7 +267,12 @@ project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateLis
  	  *ut = *ct & *vt;
  	}
 
-       cu->push_back(u); ///@todo here, we could sort???
+       cu->push_back(u);
+
+       ///@todo TK: we could also get rid off duplicates outside the
+       ///loop, this needs some testing
+       cu->sort(BeliefStateCmp());
+       cu->unique(BeliefStateEq());
      }
 }
 
