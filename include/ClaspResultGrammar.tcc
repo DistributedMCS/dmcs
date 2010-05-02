@@ -49,7 +49,8 @@ ClaspResultGrammar::definition<ScannerT>::definition(ClaspResultGrammar const& s
   literal = spirit::token_node_d[spirit::int_p] - sentinel;
 
   value =
-    *(rm[spirit::ch_p('v')] >> (+literal % rm[spirit::ch_p('v')])) >>
+    //    *(rm[spirit::ch_p('v')] >> (+literal % rm[spirit::ch_p('v')])) >>
+    *(rm[spirit::ch_p('v')] >> +literal >> spirit::eol_p) >>
     rm[spirit::ch_p('v')] >> *literal >> sentinel; ///@todo sentinel may be removed for '0'
 
   solution =

@@ -1,3 +1,8 @@
+2010-05-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/ClaspResultGrammar.tcc: Simplify rule value. Fixed the
+	bug with single line result from clasp.
+
 2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* examples/dimacs-small.txt: New file.
