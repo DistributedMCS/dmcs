@@ -1,5 +1,12 @@
 2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* examples/dia-4-4-2-2-1.opt1: Remove.
+
+	* examples/dia-4-4-2-2-1_command_line.txt: Fix V for basic DMCS.
+	* examples/dia-4-4-2-2-1_command_line.sh: Likewise.
+	* examples/dia-4-4-2-2-1.top: Likewise.
+	* examples/dia-4-4-2-2-1.opt: Likewise.
+
 	* src/dmcsd.cpp: Do not include CnfBuilder.h and CnfGrammar.h.
 
 	* include/LoopFormula.h: Add documentation.
