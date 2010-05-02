@@ -172,10 +172,12 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
   catch (std::ios_base::failure& e)
     {
       std::cerr << "Error: " << e.what() << std::endl;
+      throw e;
     }
   catch(std::exception& e)
     {
       std::cerr << "Error: " << e.what() << std::endl;
+      throw e;
     }
 }
   
