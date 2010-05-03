@@ -31,38 +31,119 @@
 #define STATS_INFO_H
 
 #include <map>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/time_serialize.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/date_time/gregorian/greg_serialize.hpp>
+#include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/map.hpp>
+#include <boost/serialization/vector.hpp>
 
+typedef boost::posix_time::ptime PTime;
+typedef boost::shared_ptr<PTime> PTimePtr;
 typedef boost::posix_time::time_duration TimeDuration;
-typedef std::map<std::size_t, TimeDuration> TransferTime;
+typedef boost::shared_ptr<TimeDuration> TimeDurationPtr;
+typedef std::map<std::size_t, TimeDurationPtr> TransferTimes;
+typedef boost::shared_ptr<TransferTimes> TransferTimesPtr;
 
 namespace dmcs {
 
 struct StatsInfo
 {
-  TimeDuration lsolve;
-  TimeDuration join;
-  TimeDuration projection;
-  TransferTime transfer;
+  TimeDurationPtr lsolve;
+  TimeDurationPtr combine;
+  TimeDurationPtr projection;
+  TransferTimesPtr transfer;
 
-  StatsInfo(TimeDuration& lsolve_, TimeDuration& join_, TimeDuration& projection_, TransferTime& transfer_)
-  : lsolve(lsolve_), join(join_), projection(projection_), transfer(transfer_)
+  StatsInfo()
+  { }
+
+  StatsInfo(TimeDurationPtr& lsolve_, 
+	    TimeDurationPtr& combine_, 
+	    TimeDurationPtr& projection_, 
+	    TransferTimesPtr& transfer_)
+    : lsolve(lsolve_), 
+      combine(combine_), 
+      projection(projection_), 
+      transfer(transfer_)
   { }
 
   template<class Archive>
   void serialize(Archive & ar, const unsigned int /* version */)
   {
     ar & lsolve;
-    ar & join;
+    ar & combine;
     ar & projection;
     ar & transfer;
   }
 };
 
 typedef boost::shared_ptr<StatsInfo> StatsInfoPtr;
+typedef std::vector<StatsInfoPtr> StatsInfos;
+typedef boost::shared_ptr<StatsInfos> StatsInfosPtr;
+
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const StatsInfo& si)
+{
+  os << "[" << boost::posix_time::to_simple_string(*si.lsolve) << "], "
+     << "[" << boost::posix_time::to_simple_string(*si.combine) << "], " 
+     << "[" << boost::posix_time::to_simple_string(*si.projection) << "]" 
+     << std::endl;
+
+  if (!si.transfer->empty())
+    {
+      TransferTimes::const_iterator end = --si.transfer->end();
+      
+      for (TransferTimes::const_iterator it = si.transfer->begin(); it != end; ++it)
+	{
+	  os << "(" << it->first << ", " << it->second << "); ";
+	}
+      os << "(" << end->first << ", " << end->second << ")";
+    }
+  
+  return os;
+}
+
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const StatsInfos sis)
+{
+  for (StatsInfos::const_iterator it = sis.begin(); it != sis.end(); ++it)
+    {
+      os << *it << std::endl;
+    }
+
+  return os;
+}
+
+
+inline void
+combine(StatsInfosPtr& sis1, const StatsInfosPtr& sis2)
+{
+  assert(sis1->size() == sis2->size());
+
+  StatsInfos::iterator it1 = sis1->begin();
+  StatsInfos::const_iterator it2 = sis2->begin();
+
+  for (; it1 != sis1->end(); ++it1, ++it2)
+    {
+      TimeDurationPtr lsolve1     = (*it1)->lsolve;
+      TimeDurationPtr combine1    = (*it1)->combine;
+      TimeDurationPtr projection1 = (*it1)->projection;
+
+      const TimeDurationPtr lsolve2     = (*it2)->lsolve;
+      const TimeDurationPtr combine2    = (*it2)->combine;
+      const TimeDurationPtr projection2 = (*it2)->projection;
+
+      *lsolve1     = *lsolve1     + (*lsolve2);
+      *combine1    = *combine1    + (*combine2);
+      *projection1 = *projection1 + (*projection2);
+    }
+}
 
 } // namespace dmcs
 
