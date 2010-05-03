@@ -50,6 +50,7 @@ noinst_HEADERS =  \
 		LogicVisitor.h \
 		LocalKBBuilder.h \
 		LocalKBBuilder.tcc \
+		OptMessage.h \
 		PropositionalASPGrammar.h \
 		PropositionalASPGrammar.tcc \
 		Message.h \
@@ -57,10 +58,12 @@ noinst_HEADERS =  \
 		ParserDirector.h \
 		ParserDirector.tcc \
 		PrimitiveDMCS.h \
+		PrimitiveMessage.h \
 		Process.h \
 		ProcessBuf.h \
                 QueryPlanWriter.h \
                 QueryPlan.h \
+		ReturnMessage.h \
 		Rule.h \
 		SatSolver.h \
 		SatSolver.tcc \

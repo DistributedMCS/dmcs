@@ -27,7 +27,8 @@
  * 
  */
 
-#include "Message.h"
+#include "OptMessage.h"
+#include "PrimitiveMessage.h"
 #include "Theory.h"
 #include "connection.hpp"
 
@@ -38,10 +39,10 @@
 
 namespace dmcs {
 
-template <typename Message_t>
+template <typename MessageType>
 struct Session
 {
-  Message_t mess;
+  MessageType mess;
   connection_ptr conn;
 
   Session(connection_ptr c) : conn(c) { }

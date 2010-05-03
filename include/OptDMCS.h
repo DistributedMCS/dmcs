@@ -33,7 +33,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "BaseDMCS.h"
-#include "Message.h"
+#include "OptMessage.h"
 #include "Cache.h"
 #include "Theory.h"
 

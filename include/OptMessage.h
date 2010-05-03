@@ -18,52 +18,64 @@
  */
 
 /**
- * @file   PrimitiveDMCS.h
- * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
- * @date   Wed Nov  4 11:14:01 2009
+ * @file   OptMessage.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Mon May  3 10:49:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PRIMITIVE_DMCS_H
-#define PRIMITIVE_DMCS_H
+#ifndef OPT_MESSAGE_H
+#define OPT_MESSAGE_H
 
-#include <boost/shared_ptr.hpp>
-
-#include "BaseDMCS.h"
-#include "PrimitiveMessage.h"
-#include "Cache.h"
-#include "Theory.h"
-
+#include "Message.h"
 
 namespace dmcs {
 
-
-class PrimitiveDMCS : public BaseDMCS
+class OptMessage : public Message
 {
 public:
-  PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t);
+  OptMessage()
+  { }
 
-  virtual
-  ~PrimitiveDMCS();
+  virtual ~OptMessage() 
+  {}
+  OptMessage(std::size_t invoker_)
+    : invoker(invoker_)
+  { }
 
-  //BeliefStateListPtr
-  dmcs_return_type
-  getBeliefStates(PrimitiveMessage& mess);
+  std::size_t
+  getInvoker() const
+  {
+    return invoker;
+  }
+
+public:
+  template <typename Archive>
+  void
+  serialize(Archive& ar, const unsigned int /* version */)
+  {
+    ar & invoker;
+  }
 
 private:
-  CacheStatsPtr cacheStats;
-  CachePtr cache;
+  std::size_t invoker;
 };
 
-typedef boost::shared_ptr<PrimitiveDMCS> PrimitiveDMCSPtr;
+inline std::ostream&
+operator<< (std::ostream& os, const OptMessage& optMess)
+{
+
+  os << optMess.getInvoker() << " ";
+  
+  return os;
+}
 
 } // namespace dmcs
 
-
-#endif // PRIMITIVE_DMCS_H
+#endif // OPT_MESSAGE_H
 
 // Local Variables:
 // mode: C++
