@@ -167,7 +167,8 @@ main(int argc, char* argv[])
 #endif 
 	  
 	  PrimitiveMessage mess(V);
-	  Client<PrimitiveMessage> c(io_service, it, mess);
+
+	  Client<PrimitiveCommandType> c(io_service, it, mess);
 	  
 #ifdef DEBUG
 	  std::cerr << "Running ioservice" <<std::endl;
@@ -179,14 +180,14 @@ main(int argc, char* argv[])
 	  std::cerr << "Getting BeliefStates" <<std::endl;
 #endif
 	  
-	  belief_states = c.getBeliefStates();
+	  belief_states = c.getResult();
  	}
       else // Opt DMCS
  	{
- 	  OptMessage mess(0); // invoker ID ?
- 	  Client<OptMessage> c(io_service, it, mess);
+	  OptCommandType::input_type mess(0); // invoker ID ?
+ 	  Client<OptCommandType> c(io_service, it, mess);
  	  io_service.run();
- 	  belief_states= c.getBeliefStates();
+ 	  belief_states= c.getResult();
  	}
 
 #ifdef DEBUG

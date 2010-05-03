@@ -3,6 +3,14 @@
 	* src/Makefile.am: Add date_time library.
 	* include/Makefile.am: Add StatsInfo.h
 
+	* include/Client.h: Use CmdType instead of Message_t.
+	* include/Client.tcc: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* include/Message.h: Likewise.
+	* include/CommandType.h: Likewise.
+
 	* include/Message.h: Add ReturnMessage.
 	* include/StatsInfo.h: New file.
 

@@ -256,18 +256,18 @@ int main(int argc, char* argv[])
       // setup the server
       if (filename_topo.find(TOP_EXT) != std::string::npos)
 	{
-	  DMCSPtr d(new PrimitiveDMCS(ctx, loopFormula));
-	  dmcs = d;
+	  PrimitiveDMCSPtr d(new PrimitiveDMCS(ctx, loopFormula));
+	  PrimitiveCommandType pdmcs(d);
 	  
-	  boost::shared_ptr<BaseServer> s(new Server<PrimitiveCommandType, PrimitiveMessage>(dmcs, io_service, endpoint));      
+	  boost::shared_ptr<BaseServer> s(new Server<PrimitiveCommandType>(pdmcs, io_service, endpoint));      
 	  server = s;
 	}
       else if (filename_topo.find(OPT_EXT) != std::string::npos)
 	{
-	  DMCSPtr d(new OptDMCS(ctx, loopFormula));
-	  dmcs = d;
+	  OptDMCSPtr d(new OptDMCS(ctx, loopFormula));
+	  OptCommandType odmcs(d);
 
-	  boost::shared_ptr<BaseServer> s(new Server<OptCommandType, OptMessage>(dmcs, io_service, endpoint));  
+	  boost::shared_ptr<BaseServer> s(new Server<OptCommandType>(odmcs, io_service, endpoint));  
 	  server = s;
 	}
       else 

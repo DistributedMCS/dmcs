@@ -37,6 +37,7 @@
 #include "Rule.h"
 #include "Theory.h"
 #include "Session.h"
+#include "CommandType.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -54,32 +55,38 @@ struct BaseServer
  * @brief
  * 
  */
-template< typename CmdType, typename Message_t>
+template<typename CmdType>
 class Server : public BaseServer
 {
 public:
-  Server(DMCSPtr& d,
+  typedef Session<typename CmdType::input_type> SessionMsg;
+  typedef typename boost::shared_ptr<SessionMsg> SessionMsgPtr;
+
+
+  Server(const CmdType& cmd_,
 	 boost::asio::io_service& io_service,
 	 const boost::asio::ip::tcp::endpoint& endpoint);
 
   void 
-  handle_accept(const boost::system::error_code& e,
-		connection_ptr conn);
+  handle_accept(const boost::system::error_code& e, connection_ptr conn);
 
   void 
-  handle_session(const boost::system::error_code& e,
-		 typename boost::shared_ptr<Session<Message_t> > sesh);
+  handle_next_message(const boost::system::error_code& e, SessionMsgPtr sesh);
 
   void 
-  handle_finalize(const boost::system::error_code& e,
-		  connection_ptr conn);
+  handle_read_message(const boost::system::error_code& e, SessionMsgPtr sesh);
+
+  void 
+  handle_session(const boost::system::error_code& e, SessionMsgPtr sesh);
+
+  void 
+  handle_finalize(const boost::system::error_code& e, SessionMsgPtr sesh);
   
  private:
   boost::asio::io_service& io_service_;
   boost::asio::ip::tcp::acceptor acceptor_;
 
-  ContextPtr ctx;
-  DMCSPtr dmcs;
+  CmdType cmd;
 };
 
 } // namespace dmcs

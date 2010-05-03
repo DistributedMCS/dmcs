@@ -31,79 +31,71 @@
 #define COMMAND_TYPE_H
 
 #include "BeliefState.h"
+#include "OptDMCS.h"
+#include "PrimitiveDMCS.h"
+
 
 namespace dmcs {
 
+template<typename MessageType, typename Retval>
 class CommandType
 {
 public:
-  // i removed the abstract because of this error "initializer specified for non-virtual method"
-  BeliefStateListPtr 
-  getBeliefStates();
+  typedef MessageType input_type;
+  typedef Retval value_type;
+  typedef boost::shared_ptr<value_type> return_type;
+
+  return_type
+  execute(input_type& mess);
+
+  bool
+  continues(input_type& /* mess */)
+  {
+    return true;
+  }
 };
 
 
 
-class OptCommandType : public CommandType
+class OptCommandType : public CommandType<OptMessage, BeliefStateList>
 {
 public:
+  typedef OptMessage input_type;
+  typedef BeliefStateList value_type;
 
-  OptCommandType(BaseDMCS& d, Message& mess_)
-    :dmcs(d),
-     mess(mess_)
+  OptCommandType(OptDMCSPtr odmcs_)
+    : odmcs(odmcs_)
   { }
 
-  BeliefStateListPtr
-  getBeliefStates()
+  return_type
+  execute(const OptMessage& mess)
   {
-    ///@todo get rid of copying
-    // not sure if it will work
-    OptMessage* optMess;
-  
-    OptDMCS* odmcs;
-
-    optMess = dynamic_cast<OptMessage*>(&mess);
-    odmcs = dynamic_cast<OptDMCS*>(&dmcs);
-    
-    
-    return odmcs->getBeliefStates(*optMess);
+    return odmcs->getBeliefStates(mess);
   }
 
 private:
-
-  BaseDMCS& dmcs;
-  Message& mess;
+  OptDMCSPtr odmcs;
 };
 
 
 
-class PrimitiveCommandType : public CommandType
+class PrimitiveCommandType : public CommandType<PrimitiveMessage, BeliefStateList>
 {
 public:
+  typedef BeliefStateList value_type;
 
-  PrimitiveCommandType(BaseDMCS& d, Message& mess_)
-    :dmcs(d),
-     mess(mess_)
+  PrimitiveCommandType(PrimitiveDMCSPtr pdmcs_)
+    : pdmcs(pdmcs_)
   { }
 
-  BeliefStateListPtr 
-  getBeliefStates()
+  return_type
+  execute(PrimitiveMessage& mess)
   {
-    ///@todo get rid of copying
-    // not sure if it will work
-    PrimitiveMessage* primMess;
-    PrimitiveDMCS* pdmcs;
-
-    primMess = dynamic_cast<PrimitiveMessage*>(&mess);
-    pdmcs = dynamic_cast<PrimitiveDMCS*>(&dmcs);
-    
-    return pdmcs->getBeliefStates(*primMess);
+    return pdmcs->getBeliefStates(mess);
   }
 
 private:
-
-  BaseDMCS& dmcs;
-  Message& mess;
+  PrimitiveDMCSPtr pdmcs;
 };
 
 

@@ -36,6 +36,7 @@
 #include "ClaspResultBuilder.h"
 #include "ClaspProcess.h"
 #include "Client.h"
+#include "CommandType.h"
 #include "DimacsVisitor.h"
 #include "ParserDirector.h"
 #include "OptDMCS.h"
@@ -167,12 +168,12 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 #endif // DEBUG
 
       OptMessage neighbourMess(k);
-      Client<OptMessage> client(io_service, res_it, neighbourMess);
+      Client<OptCommandType> client(io_service, res_it, neighbourMess);
       
       io_service.run();
       
-      BeliefStateListPtr neighbor_belief_states = client.getBeliefStates();
-            
+      BeliefStateListPtr neighbor_belief_states = client.getResult();
+      
 #if defined(DEBUG)
       std::cerr << "Belief states received from neighbor " << *it << std::endl;	  
       std::cerr << neighbor_belief_states << std::endl;      

@@ -44,14 +44,14 @@
 
 namespace dmcs {
 
-template<typename Message_t>
-Client<Message_t>::Client(boost::asio::io_service& io_service,
+template<typename CmdType>
+Client<CmdType>::Client(boost::asio::io_service& io_service,
 	       boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-	       Message_t& mess_)
+			  typename CmdType::input_type& mess_)
   : io_service_(io_service),
     conn(new connection(io_service)),
     mess(mess_),
-    belief_states(new BeliefStateList)
+    result(new (typename CmdType::value_type))
 {
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 
@@ -68,9 +68,9 @@ Client<Message_t>::Client(boost::asio::io_service& io_service,
 
 
 
-template<typename Message_t>
+template<typename CmdType>
 void
-Client<Message_t>::handle_connect(const boost::system::error_code& error,
+Client<CmdType>::handle_connect(const boost::system::error_code& error,
 		       boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
 {
 #ifdef DEBUG
@@ -109,9 +109,9 @@ Client<Message_t>::handle_connect(const boost::system::error_code& error,
 
 
 
-template<typename Message_t>
+template<typename CmdType>
 void
-Client<Message_t>::handle_write_message(const boost::system::error_code& error, 
+Client<CmdType>::handle_write_message(const boost::system::error_code& error, 
 					connection_ptr /* c */)
 {
 
@@ -125,8 +125,7 @@ Client<Message_t>::handle_write_message(const boost::system::error_code& error,
       std::cerr << "Client::handle_write_message" << std::endl;
 #endif // DEBUG
       
-      //conn->async_read(*belief_states,
-      conn->async_read(belief_states,
+      conn->async_read(result,
 		       boost::bind(&Client::handle_read_models, this,
 				   boost::asio::placeholders::error)
 		       );
@@ -139,9 +138,9 @@ Client<Message_t>::handle_write_message(const boost::system::error_code& error,
 }
 
 
-template<typename Message_t>
+template<typename CmdType>
 void 
-Client<Message_t>::handle_read_models(const boost::system::error_code& error)
+Client<CmdType>::handle_read_models(const boost::system::error_code& error)
 {
 
 #ifdef DEBUG

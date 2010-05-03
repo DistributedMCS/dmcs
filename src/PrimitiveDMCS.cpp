@@ -36,6 +36,7 @@
 #include "ClaspResultBuilder.h"
 #include "ClaspProcess.h"
 #include "Client.h"
+#include "CommandType.h"
 #include "DimacsVisitor.h"
 #include "ParserDirector.h"
 #include "PrimitiveDMCS.h"
@@ -163,11 +164,12 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  std::cerr << "Invoking neighbor " << *it << std::endl;
 #endif // DEBUG
 
-	  Client<PrimitiveMessage> client(io_service, res_it, mess);
+	  Client<PrimitiveCommandType> client(io_service, res_it, mess);
 	  
 	  io_service.run();
 
-	  BeliefStateListPtr neighbor_belief_state = client.getBeliefStates();
+	  BeliefStateListPtr neighbor_belief_state = client.getResult();
+
 	  mess.removeHistory(k);
 
 #if defined(DEBUG)

@@ -31,30 +31,30 @@
 #include "config.h"
 #endif
 
-#include "PrimitiveDMCS.h"
+#include "CommandType.h"
 
 
 namespace dmcs {
 
-template<typename CmdType, typename Message_t>
-Server<CmdType,Message_t>::Server(DMCSPtr& d,
+template<typename CmdType>
+Server<CmdType>::Server(const CmdType& cmd_,
 	       boost::asio::io_service& io_service,
 	       const boost::asio::ip::tcp::endpoint& endpoint)
   : io_service_(io_service),
     acceptor_(io_service, endpoint),
-    dmcs(d)
+    cmd(cmd_)
 {
   connection_ptr my_connection(new connection(io_service_));
 
   acceptor_.async_accept(my_connection->socket(),
-			 boost::bind(&Server<CmdType,Message_t>::handle_accept, this,
+			 boost::bind(&Server<CmdType>::handle_accept, this,
 				     boost::asio::placeholders::error, my_connection));
 }
 
 
-template<typename CmdType, typename Message_t>
+template<typename CmdType>
 void
-Server<CmdType,Message_t>::handle_accept(const boost::system::error_code& error, connection_ptr conn)
+Server<CmdType>::handle_accept(const boost::system::error_code& error, connection_ptr conn)
 {
   if (!error)
     {
@@ -65,18 +65,18 @@ Server<CmdType,Message_t>::handle_accept(const boost::system::error_code& error,
       // Start an accept operation for a new connection.
       connection_ptr new_conn(new connection(acceptor_.io_service()));
       acceptor_.async_accept(new_conn->socket(),
-			     boost::bind(&Server<CmdType, Message_t>::handle_accept, this,
+			     boost::bind(&Server<CmdType>::handle_accept, this,
 					 boost::asio::placeholders::error, new_conn));
 
-      boost::shared_ptr<Session<Message_t> > sesh(new Session<Message_t>(conn));
+      SessionMsgPtr sesh(new SessionMsg(conn));
 
 #if defined(DEBUG)
-      std::cerr << "Server::Read V and hist..." << std::endl;
+      std::cerr << "Server:: Reading..." << std::endl;
 #endif // DEBUG
 
-      //      handle_session
+      // go to process this message
       conn->async_read(sesh->mess,
-		       boost::bind(&Server<CmdType, Message_t>::handle_session, this,
+		       boost::bind(&Server<CmdType>::handle_next_message, this,
 				   boost::asio::placeholders::error, sesh)
 		       );
     }
@@ -92,57 +92,67 @@ Server<CmdType,Message_t>::handle_accept(const boost::system::error_code& error,
     }
 }
 
-template <typename CmdType,typename Message_t>
-/// Handle completion of a write operation.
-void
-Server<CmdType,Message_t>::handle_finalize(const boost::system::error_code& e, connection_ptr /* conn */)
-{
-  // Nothing to do. The socket will be closed automatically when the last
-  // reference to the connection object goes away.
-  if (e)
-    {
-      // An error occurred.
 
-#ifdef DEBUG
-      std::cerr << "handle_finalize: " << e.message() << std::endl;
-#endif
-    }
-}
-
-template<typename CmdType,typename Message_t>
+template<typename CmdType>
 void
-Server<CmdType,Message_t>::handle_session(const boost::system::error_code& e,
-					  typename boost::shared_ptr<Session<Message_t> > sesh)
+Server<CmdType>::handle_next_message(const boost::system::error_code& e, SessionMsgPtr sesh)
 {
   if (!e)
     {
 #if defined(DEBUG)
-      // Print out the data that was received.
-      std::cerr << "Message received: " << sesh->mess << std::endl;
+      std::cerr << "in handle_next_message with mess =  " << sesh->mess << std::endl;
 #endif //DEBUG
+      
+      // do the local job
+      typename CmdType::return_type result = cmd.execute(sesh->mess);
+      
+#if defined(DEBUG)
+      std::cerr << "Sending result back to invoker" << std::endl;
+      //std::cerr << "Sending " << std::endl << result <<std::endl;
+#endif //DEBUG
+	  
+      // Send the result to the client. The connection::async_write()
+      // function will automatically serialize the data structure for
+      // us.
+      sesh->conn->async_write(result,
+			      boost::bind(&Server<CmdType>::handle_session, this,
+					  boost::asio::placeholders::error, sesh));
+    }
+  else
+    {
+      // An error occurred.
 
-      CmdType c(*dmcs, sesh->mess);
-      BeliefStateListPtr belief_states = c.getBeliefStates();
+#ifdef DEBUG
+      std::cerr << "handle_next_message: " << e.message() << std::endl;
+#endif
+    }
+}
 
+
+template<typename CmdType>
+void
+Server<CmdType>::handle_session(const boost::system::error_code& e, SessionMsgPtr sesh)
+{
+  if (!e)
+    {
 
 #if defined(DEBUG)
-      std::cerr << "Sending belief states back to invoker" << std::endl;
-      std::cerr << "Sending " << std::endl << belief_states <<std::endl;
+      std::cerr << "in handle sesstion with mess = " << sesh->mess << std::endl;
 #endif //DEBUG
 
-      // Successfully accepted a new connection. Send the list of models to the
-      // client. The connection::async_write() function will automatically
-      // serialize the data structure for us.
-      //sesh->conn->async_write(*projected_belief_states,
-      //sesh->conn->async_write(*belief_states,
-      sesh->conn->async_write(belief_states,
-			      boost::bind(&Server<CmdType, Message_t>::handle_finalize, this,
-					  boost::asio::placeholders::error, sesh->conn));
-
-#if defined(DEBUG)
-      // print statistical caching information
-      //std::cerr << "Cache statistics: " << *ctx.getStatsInfo();
-#endif //DEBUG
+      // after processing the message, check whether it's the last
+      // one. PrimitiveCommandType and OptCommandType should always
+      // return STOP independently from the message, while
+      // DynamicCommandType check whether the flag LAST was turned on
+      // in the message.
+      if (cmd.continues(sesh->mess))
+	{
+	  handle_read_message(e, sesh);
+	}
+      else
+	{
+	  handle_finalize(e, sesh);
+	}
     }
   else
     {
@@ -152,7 +162,55 @@ Server<CmdType,Message_t>::handle_session(const boost::system::error_code& e,
       std::cerr << "handle_session: " << e.message() << std::endl;
 #endif
     }
+}
 
+
+
+template<typename CmdType>
+void
+Server<CmdType>::handle_read_message(const boost::system::error_code& e, SessionMsgPtr sesh)
+{
+  if (!e)
+    {
+
+#if defined(DEBUG)
+      std::cerr << "in handle read message: " << std::endl;
+#endif //DEBUG
+
+      sesh->conn->async_read(sesh->mess,
+		       boost::bind(&Server<CmdType>::handle_next_message, this,
+				   boost::asio::placeholders::error, sesh)
+		       );
+    }
+  else
+    {
+      // An error occurred.
+
+#ifdef DEBUG
+      std::cerr << "handle_read_message: " << e.message() << std::endl;
+#endif
+    }
+
+}
+
+
+template <typename CmdType>
+void
+Server<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsgPtr /* conn */)
+{
+  // Nothing to do. The socket will be closed automatically when the last
+  // reference to the connection object goes away.
+#ifdef DEBUG
+  std::cerr << "in handle_finalize: " << std::endl;
+#endif
+  if (e)
+    {
+      // An error occurred.
+
+#ifdef DEBUG
+      std::cerr << "handle_finalize: " << e.message() << std::endl;
+#endif
+    }
 }
 
 

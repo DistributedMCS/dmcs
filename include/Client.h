@@ -34,6 +34,7 @@
 
 #include "connection.hpp"
 #include "BeliefState.h"
+#include "CommandType.h"
 #include "Message.h"
 #include "Theory.h"
 
@@ -44,18 +45,18 @@ namespace dmcs {
 /**
  * @brief
  */
-template <typename Message_t>
+template <typename CmdType>
 class Client
 {
  public:
   Client(boost::asio::io_service& io_service,
 	 boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-	 Message_t& mess);
+	 typename CmdType::input_type& mess);
 
-  BeliefStateListPtr
-  getBeliefStates()
+  typename CmdType::return_type
+  getResult()
   {
-    return belief_states;
+    return result;
   }
 
  private:
@@ -74,8 +75,8 @@ class Client
   boost::asio::io_service& io_service_;
 
   connection_ptr conn;
-  Message_t& mess;
-  BeliefStateListPtr belief_states;
+  typename CmdType::input_type mess;
+  typename CmdType::return_type result;
 };
 
 } // namespace dmcs

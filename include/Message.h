@@ -32,6 +32,7 @@
 
 #include "BeliefState.h"
 #include "StatsInfo.h"
+#include "Context.h"
 
 #include <set>
 #include <boost/serialization/set.hpp>
