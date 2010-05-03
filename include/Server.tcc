@@ -147,10 +147,12 @@ Server<CmdType>::handle_session(const boost::system::error_code& e, SessionMsgPt
       // in the message.
       if (cmd.continues(sesh->mess))
 	{
+	  std::cerr << "still continue, going to read messages"  << std::endl;
 	  handle_read_message(e, sesh);
 	}
       else
 	{
+	  std::cerr << "go to finalize"  << std::endl;
 	  handle_finalize(e, sesh);
 	}
     }
@@ -194,7 +196,7 @@ Server<CmdType>::handle_read_message(const boost::system::error_code& e, Session
 }
 
 
-template <typename CmdType>
+template<typename CmdType>
 void
 Server<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsgPtr /* conn */)
 {
