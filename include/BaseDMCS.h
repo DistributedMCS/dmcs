@@ -31,12 +31,23 @@
 #ifndef BASE_DMCS_H
 #define BASE_DMCS_H
 
+
 #include "BeliefState.h"
 #include "Context.h"
-#include "Message.h"
-
+#include "ReturnMessage.h"
+#include "StatsInfo.h"
 
 namespace dmcs {
+
+
+#ifdef  DMCS_STATS_INFO
+  typedef ReturnMessage      dmcs_value_type;
+  typedef ReturnMessagePtr   dmcs_return_type;
+#else
+  typedef BeliefStateList    dmcs_value_type;
+  typedef BeliefStateListPtr dmcs_return_type;
+#endif
+
 
 /**
  * @brief Base class for DMCS algorithms

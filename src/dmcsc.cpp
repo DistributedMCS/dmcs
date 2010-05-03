@@ -152,11 +152,16 @@ main(int argc, char* argv[])
       boost::asio::ip::tcp::endpoint endpoint = *it;
       
       // our result
-      BeliefStateListPtr belief_states(new BeliefStateList);
+#ifdef DMCS_STATS_INFO
+      ReturnMessagePtr result(new ReturnMessage);
+#else
+      BeliefStateListPtr result(new BeliefStateList);
+#endif // DMCS_STATS_INFO
 	
 #ifdef DEBUG
       std::cerr << "Starting the DMCS with " << systemSize << std::endl;
 #endif
+
       
       if (primitiveDMCS) //primitive DMCS
 	{
@@ -177,24 +182,40 @@ main(int argc, char* argv[])
 	  io_service.run();
 	  
 #ifdef DEBUG
-	  std::cerr << "Getting BeliefStates" <<std::endl;
+	  std::cerr << "Getting results" <<std::endl;
 #endif
 	  
-	  belief_states = c.getResult();
+	  result = c.getResult();
+
  	}
       else // Opt DMCS
  	{
 	  OptCommandType::input_type mess(0); // invoker ID ?
  	  Client<OptCommandType> c(io_service, it, mess);
  	  io_service.run();
- 	  belief_states= c.getResult();
+
+	  //result = c.getResult();
  	}
 
 #ifdef DEBUG
-      std::cerr << "Result: " << std::endl << belief_states << std::endl;
+
+#ifdef DMCS_STATS_INFO
+      std::cerr << "Result: " << std::endl << result->getBeliefStates() << std::endl;
+
+      std::cerr << "Result: " << std::endl << result->getStatsInfo() << std::endl;
+#else
+      std::cerr << "Result: " << std::endl << result << std::endl;
+#endif // DMCS_STATS_INFO
+      
+#endif // DEBUG
+      
+
+#ifdef DMCS_STATS_INFO
+      std::cerr << "Result: " << std::endl << result->getBeliefStates()->size() << std::endl;
+#else
+      std::cout << "Number of answers: " << result->size() << std::endl;
 #endif
 
-      std::cout << "Number of answers: " << belief_states->size() << std::endl;
     }
   catch (std::exception& e)
     {
