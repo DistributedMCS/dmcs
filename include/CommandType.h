@@ -37,22 +37,19 @@
 
 namespace dmcs {
 
-template<typename MessageType, typename Retval>
+template<typename MessageType, typename RetVal>
 class CommandType
 {
 public:
   typedef MessageType input_type;
-  typedef Retval value_type;
+  typedef RetVal value_type;
   typedef boost::shared_ptr<value_type> return_type;
 
   return_type
   execute(input_type& mess);
 
-  bool
-  continues(input_type& /* mess */)
-  {
-    return true;
-  }
+  virtual bool
+  continues(input_type& mess) = 0;
 };
 
 
@@ -73,16 +70,22 @@ public:
     return odmcs->getBeliefStates(mess);
   }
 
+  bool
+  continues(OptMessage& /* mess */)
+  {
+    return false;
+  }
+
 private:
   OptDMCSPtr odmcs;
 };
 
 
 
-class PrimitiveCommandType : public CommandType<PrimitiveMessage, BeliefStateList>
+class PrimitiveCommandType : public CommandType<PrimitiveMessage, dmcs_value_type>
 {
 public:
-  typedef BeliefStateList value_type;
+  typedef dmcs_value_type value_type;
 
   PrimitiveCommandType(PrimitiveDMCSPtr pdmcs_)
     : pdmcs(pdmcs_)
@@ -92,6 +95,12 @@ public:
   execute(PrimitiveMessage& mess)
   {
     return pdmcs->getBeliefStates(mess);
+  }
+
+  bool
+  continues(PrimitiveMessage& /* mess */)
+  {
+    return false;
   }
 
 private:
