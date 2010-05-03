@@ -1,3 +1,29 @@
+2010-05-03  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* configure.ac: Add BOOST_DATE_TIME
+
+	* src/PrimitiveDMCS.cpp: Add statistic information.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/StatsInfo.h: Define operator<< and combine()
+
+	* include/Server.tcc: Add some debug information.
+
+	* include/Message.h: Remove sub-messages and put them to
+	separated files.
+	* include/OptDMCS.h: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/Session.h: Likewise.
+	* include/Makefile.am: Likewise.
+
+	* include/OptMessage.h: New file.
+	* include/PrimitiveMessage.h: Likewise.
+	* include/ReturnMessage.h: Likewise.
+
+	* include/CommandType.h: Realize continues().
+
+	* include/BaseDMCS.h: Add case distinction for StatisticInformation.
+
 2010-05-02  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
 	* src/Makefile.am: Add date_time library.
