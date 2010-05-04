@@ -157,8 +157,11 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
   BeliefStateListPtr local_belief_states;
 
-  STATS_DIFF (local_belief_states = localSolve(globalV),
-	      time_lsolve);
+  ///@todo this has to be fixed ........... when Proxy is implelemented
+    const SignaturePtr& sig = ctx->getSignature();
+
+    STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig)),
+		time_lsolve);
 
 #ifdef DMCS_STATS_INFO
   my_stats_info.lsolve.second = local_belief_states->size();
@@ -207,7 +210,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::resolver resolver(io_service);
 
-      std::size_t neighbor_id = *it;
+      //      std::size_t neighbor_id = *it;
       
       boost::asio::ip::tcp::resolver::query query(query_plan->getHostname(*it),
 						  query_plan->getPort(*it));

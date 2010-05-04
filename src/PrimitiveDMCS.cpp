@@ -45,6 +45,10 @@
 #include "QueryPlan.h"
 #include "BeliefState.h"
 
+#include "BaseBuilder.h"
+#include "ParserDirector.h"
+
+
 #include <vector>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -52,271 +56,363 @@
 namespace dmcs {
 
 
-PrimitiveDMCS::PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t)
-  : BaseDMCS(c,t),
-    cacheStats(new CacheStats),
-    cache(new Cache(cacheStats))
-{ }
+  PrimitiveDMCS::PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t)
+    : BaseDMCS(c,t),
+      cacheStats(new CacheStats),
+      cache(new Cache(cacheStats))
+  { }
 
 
 
-PrimitiveDMCS::~PrimitiveDMCS()
-{ }
+  PrimitiveDMCS::~PrimitiveDMCS()
+  { }
 
 
+  PrimitiveDMCS::dmcs_return_type
+  PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
+  {
+    const std::size_t n = ctx->getSystemSize();
+    const std::size_t k = ctx->getContextID(); // my local id
 
-PrimitiveDMCS::dmcs_return_type
-PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
-{
-  const std::size_t n = ctx->getSystemSize();
-  const std::size_t k = ctx->getContextID(); // my local id
-
-  assert(n > 0 && k <= n);
+    assert(n > 0 && k <= n);
 
 
 #ifdef DMCS_STATS_INFO
-  // initialize the statistic information
-  StatsInfosPtr sis(new StatsInfos);
+    // initialize the statistic information
+    StatsInfosPtr sis(new StatsInfos);
   
-  for (std::size_t i = 0; i < n; ++i)
-    {
-      TimeDuration local_i(0, 0, 0, 0);
-      TimeDuration combine_i(0, 0, 0, 0);
-      TimeDuration project_i(0, 0, 0, 0);
+    for (std::size_t i = 0; i < n; ++i)
+      {
+	TimeDuration local_i(0, 0, 0, 0);
+	TimeDuration combine_i(0, 0, 0, 0);
+	TimeDuration project_i(0, 0, 0, 0);
 
-      Info info_local(local_i, 0);
-      Info info_combine(combine_i, 0);
-      Info info_project(project_i, 0);
+	Info info_local(local_i, 0);
+	Info info_combine(combine_i, 0);
+	Info info_project(project_i, 0);
 
-      TransferTimesPtr tf_i(new TransferTimes);
+	TransferTimesPtr tf_i(new TransferTimes);
       
-      StatsInfo si(info_local, info_combine, info_project, tf_i);
+	StatsInfo si(info_local, info_combine, info_project, tf_i);
       
-      sis->push_back(si);
-    }
+	sis->push_back(si);
+      }
   
-  TimeDuration time_combine(0, 0, 0, 0);
+    TimeDuration time_combine(0, 0, 0, 0);
 
-  std::cerr << "Initialization of the statistic information: " << *sis << std::endl;
+    std::cerr << "Initialization of the statistic information: " << *sis << std::endl;
 
-  TransferTimesPtr time_transfer(new TransferTimes);
-  StatsInfo& my_stats_info = (*sis)[k-1];
+    TransferTimesPtr time_transfer(new TransferTimes);
+    StatsInfo& my_stats_info = (*sis)[k-1];
 #endif
 
 
-  const QueryPlanPtr query_plan = ctx->getQueryPlan();
+    const QueryPlanPtr query_plan = ctx->getQueryPlan();
 
-  const BeliefStatePtr& V = mess.getV();
+    const BeliefStatePtr& V = mess.getV();
 
 #if defined(DEBUG)
-  std::cerr << "In PrimitiveDMCS, at context " << k << std::endl;
+    std::cerr << "In PrimitiveDMCS, at context " << k << std::endl;
 #endif // DEBUG
 
 #if 0
-  BeliefStateListPtr bs = cache->cacheHit(V);
+    BeliefStateListPtr bs = cache->cacheHit(V);
 
-  if (bs.belief_states_ptr) 
-    {
+    if (bs.belief_states_ptr) 
+      {
 #if defined(DEBUG)
-      std::cerr << "cache hit" << std::endl;
+	std::cerr << "cache hit" << std::endl;
 #endif //DEBUG
-      belief_states = bs;
-      return belief_states;
-    }
+	belief_states = bs;
+	return belief_states;
+      }
 #endif
 
-  // No cache found, we need to compute from scratch
-  // Compute all of our local belief states
+    // No cache found, we need to compute from scratch
+    // Compute all of our local belief states
 
 
-  // This will give us local_belief_states
+    // This will give us local_belief_states
 
-  ///@todo compute guessing signature and pass it on to localsolve as ProxySignatureByLocalId
+    ///@todo compute guessing signature and pass it on to localsolve as ProxySignatureByLocal
+    //    createGuessingSignature();
 
-  BeliefStateListPtr local_belief_states;
+    ///////////////////////////////////////////////////////////
+    ///////////////////////REMOVE THIS PART////////////////////
+    ///////////////////////////////////////////////////////////
 
-  STATS_DIFF (local_belief_states = localSolve(V),
-	      time_lsolve);
+    const SignaturePtr& sig = ctx->getSignature();
+
+    std::list<Signature::const_iterator>  insert_iterators;
+
+      
+#ifdef DEBUG
+    std::cerr << "Original signature: " << *sig << std::endl;
+#endif
+      
+    std::size_t my_id = ctx->getContextID();
+    //    const QueryPlanPtr& query_plan = context->getQueryPlan();
+      
+    const NeighborsPtr& neighbors = query_plan->getNeighbors(my_id);
+
+
+
+    for (Neighbors::const_iterator n_it = neighbors->begin();
+	 n_it != neighbors->end();
+	 ++n_it)
+      {
+	const BeliefSet neighbor_V = (*V)[*n_it - 1];
+	  
+#ifdef DEBUG
+	std::cerr << "Interface variable of neighbor[" << *n_it <<"]: " << neighbor_V << std::endl;
+#endif
+	  
+	const Signature& neighbor_sig = query_plan->getSignature(*n_it);
+	const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
+	  
+	// setup local signature for neighbors: this way we can translate
+	// SAT models back to belief states in case we do not
+	// reference them in the bridge rules
+	//for (std::size_t i = 1; i < sizeof(neighbor_V)*8; ++i)
+	for (std::size_t i = 1; i <= neighbor_sig.size(); ++i) // at most sig-size bits are allowed
+	  {
+	    if (testBeliefSet(neighbor_V, i))
+	      {
+		SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
+
+		// the neighbor's V must be set up properly
+		assert(neighbor_it != neighbor_loc.end());
+
+		std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
+		  
+		// add new symbol for neighbor
+		Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
+		std::pair<Signature::iterator, bool> sp = sig->insert(sym);
+		  
+		// only add them if it was not already included
+		// during bridge rule parsing
+		if (sp.second)
+		  {
+		    insert_iterators.push_back(sp.first);
+		  }
+	      }
+	  }
+      }
+      
+#ifdef DEBUG
+    std::cerr << "Updated signature: " << *sig << std::endl;
+#endif
+
+    //////////////////////////////////////////////////////////
+    /////////////////////////END REMOVE///////////////////////
+    //////////////////////////////////////////////////////////
+    BeliefStateListPtr local_belief_states;
+
+    STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig)),
+		time_lsolve);
+
+    /////////////////////////////////////////////////////////
+    ////////////////////REMOVE THIS PART/////////////////////
+    /////////////////////////////////////////////////////////
+#ifdef DEBUG      
+    std::cerr << "Erasing..." << std::endl;
+#endif
+    
+    for ( std::list<Signature::const_iterator>::const_iterator s_it = insert_iterators.begin();
+	 s_it != insert_iterators.end(); 
+	 ++s_it)
+      {
+	sig->erase(*s_it);
+      }
+      
+#ifdef DEBUG
+    std::cerr << "Restored signature: " << *sig << std::endl;
+#endif
+
+    /////////////////////////////////////////////////////////
+    ///////////////////END REMOVE////////////////////////////
+    ////////////////////////////////////////////////////////
+
 #ifdef DMCS_STATS_INFO
-  my_stats_info.lsolve.second = local_belief_states->size();
-  std::cerr << "local belief states size: " << my_stats_info.lsolve.second << " == " << local_belief_states->size() << std::endl;
-  std::cerr << my_stats_info << std::endl;
+    my_stats_info.lsolve.second = local_belief_states->size();
+    std::cerr << "local belief states size: " << my_stats_info.lsolve.second << " == " << local_belief_states->size() << std::endl;
+    std::cerr << my_stats_info << std::endl;
 #endif // DMCS_STATS_INFO
 
 #ifdef DEBUG
-  BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
-  printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
+    BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
+    printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif // DEBUG
 
-  BeliefStateListPtr belief_states(new BeliefStateList);
+    BeliefStateListPtr belief_states(new BeliefStateList);
 
-  STATS_DIFF (project_to(local_belief_states, V, belief_states),
-	      time_projection);
+    STATS_DIFF (project_to(local_belief_states, V, belief_states),
+		time_projection);
 
 #ifdef DMCS_STATS_INFO
-  std::cerr << "projected belief states size: " << belief_states->size() << std::endl;
-  my_stats_info.projection.second = belief_states->size();
-  std::cerr << my_stats_info << std::endl;
+    std::cerr << "projected belief states size: " << belief_states->size() << std::endl;
+    my_stats_info.projection.second = belief_states->size();
+    std::cerr << my_stats_info << std::endl;
 #endif // DMCS_STATS_INFO
 
 
 #if defined(DEBUG)
-  std::cerr << "Projected belief states..." << std::endl;
-  std::cerr << *belief_states << std::endl;
-  std::cerr << "The V used in projection..." << std::endl;
-  std::cerr << *V << std::endl;
-  printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
-  std::cerr << "Now check for neighbors..." << std::endl;
+    std::cerr << "Projected belief states..." << std::endl;
+    std::cerr << *belief_states << std::endl;
+    std::cerr << "The V used in projection..." << std::endl;
+    std::cerr << *V << std::endl;
+    printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
+    std::cerr << "Now check for neighbors..." << std::endl;
 #endif // DEBUG
 
 
-  //
-  // detect cycles
-  //
+    //
+    // detect cycles
+    //
 
-  const History& hist = mess.getHistory();
-  const NeighborsPtr& nbs = query_plan->getNeighbors(k);
+    const History& hist = mess.getHistory();
+    const NeighborsPtr& nbs = query_plan->getNeighbors(k);
 
 
-  if ((hist.find(k) != hist.end()) || nbs->empty())
-    {
+    if ((hist.find(k) != hist.end()) || nbs->empty())
+      {
 #if defined(DEBUG)
-      if (nbs->empty())
-	{
-	  std::cerr << "Reached a leaf context " << k << std::endl;
+	if (nbs->empty())
+	  {
+	    std::cerr << "Reached a leaf context " << k << std::endl;
 
-	}
-      else
-	{
-	  std::cerr << "Cycle detected at context " << k << std::endl;
-	}
+	  }
+	else
+	  {
+	    std::cerr << "Cycle detected at context " << k << std::endl;
+	  }
 #endif // DEBUG
 
-      //
-      // Do nothing else, local belief states will be sent back to the invoker
-      //
-    }
-  else 
-    {
-      // We are now at an intermediate context.
-      // Need to consult all neighbors before combining with our local belief states
+	//
+	// Do nothing else, local belief states will be sent back to the invoker
+	//
+      }
+    else 
+      {
+	// We are now at an intermediate context.
+	// Need to consult all neighbors before combining with our local belief states
 
-      for (Neighbors::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
-	{
-	  boost::asio::io_service io_service;
-	  boost::asio::ip::tcp::resolver resolver(io_service);
+	for (Neighbors::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
+	  {
+	    boost::asio::io_service io_service;
+	    boost::asio::ip::tcp::resolver resolver(io_service);
 
-	  std::size_t neighbor_id = *it;
+	    std::size_t neighbor_id = *it;
 
-	  boost::asio::ip::tcp::resolver::query query(ctx->getQueryPlan()->getHostname(neighbor_id),
-						      ctx->getQueryPlan()->getPort(*it));
-	  boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
-	  boost::asio::ip::tcp::endpoint endpoint = *res_it;
+	    boost::asio::ip::tcp::resolver::query query(ctx->getQueryPlan()->getHostname(neighbor_id),
+							ctx->getQueryPlan()->getPort(*it));
+	    boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
+	    boost::asio::ip::tcp::endpoint endpoint = *res_it;
 	  
-	  mess.insertHistory(k);
+	    mess.insertHistory(k);
 
 #if defined(DEBUG)
-	  std::cerr << "Invoking neighbor " << neighbor_id << std::endl;
+	    std::cerr << "Invoking neighbor " << neighbor_id << std::endl;
 #endif // DEBUG
 
-	  Client<PrimitiveCommandType> client(io_service, res_it, mess);
+	    Client<PrimitiveCommandType> client(io_service, res_it, mess);
 	  
-	  io_service.run();
+	    io_service.run();
 
-	  dmcs_return_type client_mess = client.getResult();
+	    dmcs_return_type client_mess = client.getResult();
 
 
 #ifdef DMCS_STATS_INFO
-	  BeliefStateListPtr neighbor_belief_states = client_mess->getBeliefStates();
-	  StatsInfosPtr stats_infos = client_mess->getStatsInfo();
+	    BeliefStateListPtr neighbor_belief_states = client_mess->getBeliefStates();
+	    StatsInfosPtr stats_infos = client_mess->getStatsInfo();
 
-	  combine(sis, stats_infos);
+	    combine(sis, stats_infos);
 
-	  PTime sent_moment = client_mess->getSendingMoment();
-	  PTime this_moment = boost::posix_time::microsec_clock::local_time();
-	  TimeDuration time_neighbor_me = this_moment - sent_moment;
-	  Info neighbor_transfer(time_neighbor_me, neighbor_belief_states->size());
+	    PTime sent_moment = client_mess->getSendingMoment();
+	    PTime this_moment = boost::posix_time::microsec_clock::local_time();
+	    TimeDuration time_neighbor_me = this_moment - sent_moment;
+	    Info neighbor_transfer(time_neighbor_me, neighbor_belief_states->size());
 
-	  time_transfer->insert(std::pair<std::size_t, Info>(neighbor_id, neighbor_transfer));
+	    time_transfer->insert(std::pair<std::size_t, Info>(neighbor_id, neighbor_transfer));
 #else
-	  BeliefStateListPtr neighbor_belief_states = client_mess;
+	    BeliefStateListPtr neighbor_belief_states = client_mess;
 #endif // DMCS_STATS_INFO
 
 
-	  mess.removeHistory(k);
+	    mess.removeHistory(k);
 
 
 #if defined(DEBUG)
-	  std::cerr << "Belief states received from neighbor " << neighbor_id << std::endl;	  
-	  std::cerr << *neighbor_belief_states << std::endl;
-	  std::cerr << "Going to combine " << "k = " << k << " neighbor = " << neighbor_id << std::endl;
+	    std::cerr << "Belief states received from neighbor " << neighbor_id << std::endl;	  
+	    std::cerr << *neighbor_belief_states << std::endl;
+	    std::cerr << "Going to combine " << "k = " << k << " neighbor = " << neighbor_id << std::endl;
 #endif // DEBUG
 
 
-	  STATS_DIFF_REUSE (belief_states = combine(belief_states,
-						    neighbor_belief_states,
-						    V),
-			    time_combine
-			    );
+	    STATS_DIFF_REUSE (belief_states = combine(belief_states,
+						      neighbor_belief_states,
+						      V),
+			      time_combine
+			      );
 
 #if defined(DEBUG)
-	  std::cerr << "Accumulated combination... " << std::endl;	  	  
-	  std::cerr << *belief_states << std::endl;
+	    std::cerr << "Accumulated combination... " << std::endl;	  	  
+	    std::cerr << *belief_states << std::endl;
 #endif // DEBUG
-	}
+	  }
 
 #ifdef DMCS_STATS_INFO
 
-      std::cerr << "combination size: " << belief_states->size() << std::endl;
-      my_stats_info.combine.second = belief_states->size();
+	std::cerr << "combination size: " << belief_states->size() << std::endl;
+	my_stats_info.combine.second = belief_states->size();
 #endif // DMCS_STATS_INFO
       
 #if 0
-      cache->insert(V, belief_states);
+	cache->insert(V, belief_states);
 #endif
-    }
+      }
 
 #ifdef DEBUG
-  if (!hist.empty())
-    {
-      History::const_iterator ed = hist.end();
-      --ed;
-      std::size_t invoker = *ed;
-      std::cerr << "Going to send " << belief_states->size()
-		<< " belief states above back to invoker: C_" << invoker << std::endl;
-    }
-  else
-    {
-      std::cerr << "Going to send " << belief_states->size()
-		<< " belief states above back to user." << std::endl;
-    }
+    if (!hist.empty())
+      {
+	History::const_iterator ed = hist.end();
+	--ed;
+	std::size_t invoker = *ed;
+	std::cerr << "Going to send " << belief_states->size()
+		  << " belief states above back to invoker: C_" << invoker << std::endl;
+      }
+    else
+      {
+	std::cerr << "Going to send " << belief_states->size()
+		  << " belief states above back to user." << std::endl;
+      }
  
-  printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
+    printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
 #endif // DEBUG
   
 #ifdef DMCS_STATS_INFO
-  my_stats_info.lsolve.first     += time_lsolve;
-  my_stats_info.combine.first    += time_combine;
-  my_stats_info.projection.first += time_projection;
+    my_stats_info.lsolve.first     += time_lsolve;
+    my_stats_info.combine.first    += time_combine;
+    my_stats_info.projection.first += time_projection;
 
-  TransferTimesPtr my_transfer   = my_stats_info.transfer;
+    TransferTimesPtr my_transfer   = my_stats_info.transfer;
 
-  *my_transfer   = *time_transfer; // copy here
+    *my_transfer   = *time_transfer; // copy here
 
-  std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
+    std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
 
-  PTime sending_moment = boost::posix_time::microsec_clock::local_time();
+    PTime sending_moment = boost::posix_time::microsec_clock::local_time();
 
-  ReturnMessagePtr returning_message(new ReturnMessage(belief_states, sending_moment, sis));
+    ReturnMessagePtr returning_message(new ReturnMessage(belief_states, sending_moment, sis));
 
-  std::cerr << "Returning message is: " << std::endl << *returning_message << std::endl;
+    std::cerr << "Returning message is: " << std::endl << *returning_message << std::endl;
 
-  return returning_message;
+    return returning_message;
 
 #else
-  return belief_states;
+    return belief_states;
 #endif // DMCS_STATS_INFO
-}
+  }
 
 } // namespace dmcs
 
