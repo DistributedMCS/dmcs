@@ -70,7 +70,7 @@ QueryPlanGenerator::create_interfaces()
   // but when we really implement the optimze algorithm, it doesn't matter.
   initialize_local_interface();
   compute_min_V();
-  query_plan->putGlobalV(V);
+  query_plan->putGlobalV(*V);
 
   Contexts::const_iterator i = contexts->end();
   --i;
@@ -153,8 +153,10 @@ QueryPlanGenerator::compute_min_V()
 
   for (Contexts::const_iterator i = contexts->begin(); i != contexts->end(); ++i)
     {
-      v_state[(*i)->getContextID() - 1] = setEpsilon(0); // set epsilon bit for current context id
 
+      // set epsilon bit for current context id, by sending its belief set as a input
+      v_state[(*i)->getContextID() - 1] = setEpsilon(v_state[(*i)->getContextID() - 1]); 
+      
       const BridgeRulesPtr& br = (*i)->getBridgeRules();
       
       for (BridgeRules::const_iterator j = br->begin(); j != br->end(); ++j)
@@ -162,7 +164,6 @@ QueryPlanGenerator::compute_min_V()
 	  const PositiveBridgeBody& pb = getPositiveBody(*j);
 	  const NegativeBridgeBody& nb = getNegativeBody(*j);
 
- 
 	  for (PositiveBridgeBody::const_iterator k = pb.begin(); k != pb.end(); ++k)
 	    {
 	      context_id = k->first;
@@ -196,6 +197,9 @@ QueryPlanGenerator::compute_min_V()
     {
       v_state[context_id - 1] = maxBeliefSet();
     }
+
+  //  std::cerr << "Before finishing: " <<v_state <<std::endl;
+  //  std::cerr << "also: " <<*V <<std::endl;
 }
 
 
