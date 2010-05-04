@@ -51,18 +51,25 @@ typedef std::list<Signature::const_iterator> SignatureIterators;
 
 template <typename Builder, typename Parser, typename ParserGrammar>
 void
-SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
+SatSolver<Builder, Parser, ParserGrammar>::solve(SignatureByLocal& context_signature,
 						 BeliefStateListPtr& belief_states,
-						 const TheoryPtr& theory,
-						 const BeliefStatePtr& V)
+						 const TheoryPtr& theory
+						 )
 {
   int retcode = -1;
   
   try
     {
+
+      ///@todo remove , replaced by ProxySignatureByLocal
+
+
+
       //      
       // first, go through the neighbors and setup the additional Signature from V
       //
+
+
 
       const SignaturePtr& sig = context.getSignature();
 
@@ -77,6 +84,8 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
       const QueryPlanPtr& query_plan = context.getQueryPlan();
       
       const NeighborsPtr& neighbors = query_plan->getNeighbors(my_id);
+
+
 
       for (Neighbors::const_iterator n_it = neighbors->begin();
 	   n_it != neighbors->end();
@@ -124,14 +133,21 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
       std::cerr << "Updated signature: " << *sig << std::endl;
 #endif
 
+      ///@todo end remove
+
       //
       // now send the theory to the SAT solver using the adapted Signature
       //
-
+     
       proc.spawn();
       
       Builder builder(proc.getOutput());
-      builder.visitTheory(theory, sig->size());
+      builder.visitTheory(theory, context_signature->size());
+
+#ifdef DEBUG
+      Builder evil_builder(std::cerr);
+      evil_builder.visitTheory(theory, sig->size());
+#endif
       
       proc.endoffile();
       
@@ -143,7 +159,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
       std::cerr << "Parsing the models..." << std::endl;
 #endif // DEBUG
       
-      Parser model_builder(context, belief_states);
+      Parser model_builder(context_signature, belief_states);
       
       ParserDirector<ParserGrammar> parser_director;
       parser_director.setBuilder(&model_builder);
@@ -159,6 +175,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
       // restore Signature
       //
       
+      ///@todo delete
 #ifdef DEBUG      
       std::cerr << "Erasing..." << std::endl;
 #endif
@@ -174,6 +191,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
       std::cerr << "Restored signature: " << *sig << std::endl;
 #endif
     }
+  ///@todo end delete
   catch (std::ios_base::failure& e)
     {
       std::cerr << "Error: " << e.what() << std::endl;

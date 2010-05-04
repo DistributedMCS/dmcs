@@ -153,6 +153,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   // This will give us local_belief_states
   //BeliefStateListPtr local_belief_states = localSolve(globalV);
 
+  ///@todo compute guessing signature and pass it on to localsolve as ProxySignatureByLocalId
+
   BeliefStateListPtr local_belief_states;
 
   STATS_DIFF (local_belief_states = localSolve(globalV),
@@ -241,8 +243,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 #endif // DMCS_STATS_INFO
       
 #if defined(DEBUG)
-      //std::cerr << "Belief states received from neighbor " << *it << std::endl;	  
-      //std::cerr << neighbor_belief_states << std::endl;      
+      std::cerr << "Belief states received from neighbor " << *it << std::endl;	  
+      std::cerr << *neighbor_belief_states << std::endl;      
 #endif // DEBUG
 	  
       //temporary_belief_states = combine(temporary_belief_states, neighbor_belief_states, globalV);
@@ -254,8 +256,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 			);
 
 #if defined(DEBUG)
-      //std::cerr << "Combined belief state:... " << std::endl;	  	  
-      //std::cerr << temporary_belief_states << std::endl;
+      std::cerr << "Combined belief state:... " << std::endl;	  	  
+      std::cerr << *temporary_belief_states << std::endl;
 #endif // DEBUG
     }
   

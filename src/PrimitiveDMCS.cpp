@@ -131,6 +131,8 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
   // This will give us local_belief_states
 
+  ///@todo compute guessing signature and pass it on to localsolve as ProxySignatureByLocalId
+
   BeliefStateListPtr local_belief_states;
 
   STATS_DIFF (local_belief_states = localSolve(V),
