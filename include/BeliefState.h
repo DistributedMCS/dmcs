@@ -230,6 +230,15 @@ operator<< (std::ostream& os, const BeliefState& bs)
   return os;
 }
 
+inline std::ostream&
+operator<< (std::ostream& os, const BeliefStatePtr& bs)
+{
+  std::copy(bs->begin(), bs->end(),
+	    std::ostream_iterator<BeliefSet>(os, " ")
+	    );
+  return os;
+}
+
 
 /**
  * Output a newline-separated list of belief states.
@@ -250,6 +259,15 @@ operator<< (std::ostream& os, const BeliefStateList& l)
     {
       os << **it << std::endl;
     }
+  return os;
+}
+
+inline std::ostream&
+operator<< (std::ostream& os, const BeliefStateListPtr& l)
+{
+
+  std::copy(l->begin(), l->end(), std::ostream_iterator<BeliefStatePtr>(os, "\n"));
+
   return os;
 }
 

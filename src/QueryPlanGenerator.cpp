@@ -70,7 +70,7 @@ QueryPlanGenerator::create_interfaces()
   // but when we really implement the optimze algorithm, it doesn't matter.
   initialize_local_interface();
   compute_min_V();
-  query_plan->putGlobalV(*V);
+  query_plan->putGlobalV(V);
 
   Contexts::const_iterator i = contexts->end();
   --i;
@@ -197,9 +197,6 @@ QueryPlanGenerator::compute_min_V()
     {
       v_state[context_id - 1] = maxBeliefSet();
     }
-
-  //  std::cerr << "Before finishing: " <<v_state <<std::endl;
-  //  std::cerr << "also: " <<*V <<std::endl;
 }
 
 
