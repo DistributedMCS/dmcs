@@ -45,7 +45,7 @@ template<class Grammar>
 class ClaspResultBuilder : public BaseBuilder<Grammar>
 {
 public:
-  ClaspResultBuilder(const Context&, BeliefStateListPtr&);
+  ClaspResultBuilder(const SignatureByLocal&, BeliefStateListPtr&);
 
   void
   buildNode (typename BaseBuilder<Grammar>::node_t& node);
@@ -55,7 +55,7 @@ private:
   add_literal(typename BaseBuilder<Grammar>::node_t& node, BeliefStatePtr& bs);
 
 
-  const SignaturePtr& sig;
+  //  const SignaturePtr& sig;
   const SignatureByLocal& local_sig;
 
   std::size_t sig_size;

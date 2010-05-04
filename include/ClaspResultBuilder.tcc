@@ -36,14 +36,14 @@
 namespace dmcs {
 
 template<typename Grammar>
-ClaspResultBuilder<Grammar>::ClaspResultBuilder(const Context& context_,
+ClaspResultBuilder<Grammar>::ClaspResultBuilder(const SignatureByLocal& context_signature,
 						BeliefStateListPtr& belief_states_)
   ///@todo future versions of clasp will have a sentinel
-  : BaseBuilder<Grammar>(Grammar(context_.getSignature()->size())), 
-    sig(context_.getSignature()),
-    local_sig(boost::get<Tag::Local>(*sig)),
-    sig_size(sig->size()),
-    system_size(context_.getSystemSize()),
+  : BaseBuilder<Grammar>(Grammar(context_signature.size())), 
+    //    sig(context_.getSignature()),
+    local_sig(context_signature),
+    sig_size(local_sig.size()),
+    system_size(0), ///@todo fix it
     belief_states(belief_states_)
 { }
 
@@ -53,6 +53,8 @@ void
 ClaspResultBuilder<Grammar>::buildNode (typename BaseBuilder<Grammar>::node_t& node)
 {
   assert(node.value.id() == Grammar::Value); // we expect a model
+
+  ///@todo must find a way to get the system size in the proxySignature format
 
   BeliefStatePtr bs(new BeliefState(system_size, 0)); // initially, all is zero
 
