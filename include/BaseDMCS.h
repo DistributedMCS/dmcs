@@ -60,7 +60,7 @@ protected:
    * @return list of local belief states
    */
   virtual BeliefStateListPtr
-  localSolve(const BeliefStatePtr& V);
+  localSolve(const SignatureByLocal& sig);
 
 public:
   virtual

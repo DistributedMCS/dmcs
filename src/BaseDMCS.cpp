@@ -50,7 +50,7 @@ BaseDMCS::~BaseDMCS()
 
 
 BeliefStateListPtr
-BaseDMCS::localSolve(const BeliefStatePtr& V)
+BaseDMCS::localSolve(const SignatureByLocal& sig)
 {
 #ifdef DEBUG
   std::cerr << "Starting local solve..." << std::endl;
@@ -61,7 +61,9 @@ BaseDMCS::localSolve(const BeliefStatePtr& V)
   boost::shared_ptr<BaseSolver> solver(cp.createSolver());
 
   BeliefStateListPtr local_belief_states(new BeliefStateList);
-  solver->solve(*ctx, local_belief_states, theory, V);
+
+  ///@todo 
+  solver->solve(sig, local_belief_states, theory);
 
 #ifdef DEBUG
   std::cerr << "Got " << local_belief_states->size();

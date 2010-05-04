@@ -48,8 +48,8 @@ class BaseSolver
   {}
 
   virtual void
-  solve(const Context& context, BeliefStateListPtr& belief_states,
-	const TheoryPtr& theory, const BeliefStatePtr& V) = 0;
+  solve(const SignatureByLocal& context_signature, BeliefStateListPtr& belief_states,
+	const TheoryPtr& theory) = 0;
 };
 
 } // namespace dmcs
