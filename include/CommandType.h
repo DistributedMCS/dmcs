@@ -82,10 +82,11 @@ private:
 
 
 
-class PrimitiveCommandType : public CommandType<PrimitiveMessage, dmcs_value_type>
+class PrimitiveCommandType 
+  : public CommandType<PrimitiveMessage, PrimitiveDMCS::dmcs_value_type>
 {
 public:
-  typedef dmcs_value_type value_type;
+  typedef PrimitiveDMCS::dmcs_value_type value_type;
 
   PrimitiveCommandType(PrimitiveDMCSPtr pdmcs_)
     : pdmcs(pdmcs_)

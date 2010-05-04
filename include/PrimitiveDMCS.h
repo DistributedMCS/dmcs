@@ -34,6 +34,7 @@
 
 #include "BaseDMCS.h"
 #include "PrimitiveMessage.h"
+#include "ReturnMessage.h"
 #include "Cache.h"
 #include "Theory.h"
 
@@ -44,12 +45,19 @@ namespace dmcs {
 class PrimitiveDMCS : public BaseDMCS
 {
 public:
+#if defined(DMCS_STATS_INFO)
+  typedef ReturnMessage      dmcs_value_type;
+  typedef ReturnMessagePtr   dmcs_return_type;
+#else
+  typedef BeliefStateList    dmcs_value_type;
+  typedef BeliefStateListPtr dmcs_return_type;
+#endif
+
   PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t);
 
   virtual
   ~PrimitiveDMCS();
 
-  //BeliefStateListPtr
   dmcs_return_type
   getBeliefStates(PrimitiveMessage& mess);
 

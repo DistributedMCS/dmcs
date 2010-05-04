@@ -47,6 +47,30 @@ typedef boost::shared_ptr<TimeDuration> TimeDurationPtr;
 typedef std::map<std::size_t, TimeDurationPtr> TransferTimes;
 typedef boost::shared_ptr<TransferTimes> TransferTimesPtr;
 
+
+#if defined(DMCS_STATS_INFO)
+#define STATS_DIFF(a,b)						   \
+  TimeDurationPtr b(new TimeDuration(0,0,0,0));			   \
+  {								   \
+    PTime begin = boost::posix_time::microsec_clock::local_time(); \
+    a;								   \
+    PTime end = boost::posix_time::microsec_clock::local_time();   \
+    *b = end - begin;						   \
+  }
+
+#define STATS_DIFF_REUSE(a,b)					   \
+  {								   \
+    PTime begin = boost::posix_time::microsec_clock::local_time(); \
+    a;								   \
+    PTime end = boost::posix_time::microsec_clock::local_time();   \
+    *b += end - begin;						   \
+  }
+#else
+#define STATS_DIFF(a,b) do { a; } while(0);
+#define STATS_DIFF_REUSE(a,b) do { a; } while(0);
+#endif // DMCS_STATS_INFO
+
+
 namespace dmcs {
 
 struct StatsInfo

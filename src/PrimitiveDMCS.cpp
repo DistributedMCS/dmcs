@@ -65,8 +65,7 @@ PrimitiveDMCS::~PrimitiveDMCS()
 
 
 
-//BeliefStateListPtr
-dmcs_return_type
+PrimitiveDMCS::dmcs_return_type
 PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 {
   const std::size_t n = ctx->getSystemSize();
@@ -124,17 +123,10 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
   // This will give us local_belief_states
 
-#ifdef DMCS_STATS_INFO
-  PTime beg_lsolve = boost::posix_time::microsec_clock::local_time();
-#endif // DMCS_STATS_INFO
+  BeliefStateListPtr local_belief_states;
 
-  BeliefStateListPtr local_belief_states = localSolve(V);
-
-#ifdef DMCS_STATS_INFO
-  PTime end_lsolve = boost::posix_time::microsec_clock::local_time();  
-  TimeDurationPtr time_lsolve(new TimeDuration(0, 0, 0, 0));
-  *time_lsolve = end_lsolve - beg_lsolve;
-#endif // DMCS_STATS_INFO
+  STATS_DIFF (local_belief_states = localSolve(V),
+	      time_lsolve);
 
 #ifdef DEBUG
   BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
@@ -143,17 +135,9 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
   BeliefStateListPtr belief_states(new BeliefStateList);
 
-#ifdef DMCS_STATS_INFO
-  PTime beg_projection = boost::posix_time::microsec_clock::local_time();  
-#endif // DMCS_STATS_INFO
+  STATS_DIFF (project_to(local_belief_states, V, belief_states),
+	      time_projection);
 
-  project_to(local_belief_states, V, belief_states);
-
-#ifdef DMCS_STATS_INFO
-  PTime end_projection = boost::posix_time::microsec_clock::local_time();
-  TimeDurationPtr time_projection(new TimeDuration(0, 0, 0, 0));
-  *time_projection = end_projection - beg_projection;
-#endif // DMCS_STATS_INFO
 
 #if defined(DEBUG)
   std::cerr << "Projected belief states..." << std::endl;
@@ -222,27 +206,28 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  
 	  io_service.run();
 
-	  //BeliefStateListPtr neighbor_belief_state = client.getResult();
+	  dmcs_return_type client_mess = client.getResult();
+
 
 #ifdef DMCS_STATS_INFO
-	  dmcs_return_type returned_mess = client.getResult();
-
-	  BeliefStateListPtr neighbor_belief_state = returned_mess->getBeliefStates();
-	  StatsInfosPtr stats_infos = returned_mess->getStatsInfo();
+	  BeliefStateListPtr neighbor_belief_state = client_mess->getBeliefStates();
+	  StatsInfosPtr stats_infos = client_mess->getStatsInfo();
 
 	  combine(sis, stats_infos);
 
-	  PTimePtr sent_moment = returned_mess->getSendingMoment();
+	  PTimePtr sent_moment = client_mess->getSendingMoment();
 	  PTime this_moment = boost::posix_time::microsec_clock::local_time();
 	  TimeDurationPtr time_neighbor_me(new TimeDuration(0, 0, 0, 0));
 	  *time_neighbor_me = this_moment - (*sent_moment);
 
 	  time_transfer->insert(std::pair<std::size_t, TimeDurationPtr>(neighbor_id, time_neighbor_me));
 #else
-	  dmcs_return_type neighbor_belief_state = client.getResult();
+	  BeliefStateListPtr neighbor_belief_state = client_mess;
 #endif // DMCS_STATS_INFO
 
+
 	  mess.removeHistory(k);
+
 
 #if defined(DEBUG)
 	  std::cerr << "Belief states received from neighbor " << neighbor_id << std::endl;	  
@@ -250,18 +235,13 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  std::cerr << "Going to combine " << "k = " << k << " neighbor = " << neighbor_id << std::endl;
 #endif // DEBUG
 
-#ifdef DMCS_STATS_INFO
-	  PTime beg_combine = boost::posix_time::microsec_clock::local_time();
-#endif // DMCS_STATS_INFO
 
-	  belief_states = combine(belief_states,
-				  neighbor_belief_state,
-				  V);
+	  STATS_DIFF_REUSE (belief_states = combine(belief_states,
+						    neighbor_belief_state,
+						    V),
+			    time_combine
+			    );
 
-#ifdef DMCS_STATS_INFO
-	  PTime end_combine = boost::posix_time::microsec_clock::local_time();
-	  *time_combine = *(time_combine) + (end_combine - beg_combine);
-#endif // DMCS_STATS_INFO
 
 #if defined(DEBUG)
 	  std::cerr << "Accumulated combination... " << std::endl;	  	  
