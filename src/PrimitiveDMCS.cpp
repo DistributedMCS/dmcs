@@ -143,9 +143,9 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
 #if defined(DEBUG)
   std::cerr << "Projected belief states..." << std::endl;
-  std::cerr << belief_states << std::endl;
+  std::cerr << *belief_states << std::endl;
   std::cerr << "The V used in projection..." << std::endl;
-  std::cerr << V << std::endl;
+  std::cerr << *V << std::endl;
   printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
   std::cerr << "Now check for neighbors..." << std::endl;
 #endif // DEBUG
@@ -229,7 +229,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
 #if defined(DEBUG)
 	  std::cerr << "Belief states received from neighbor " << neighbor_id << std::endl;	  
-	  std::cerr << neighbor_belief_states << std::endl;
+	  std::cerr << *neighbor_belief_states << std::endl;
 	  std::cerr << "Going to combine " << "k = " << k << " neighbor = " << neighbor_id << std::endl;
 #endif // DEBUG
 
@@ -243,7 +243,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
 #if defined(DEBUG)
 	  std::cerr << "Accumulated combination... " << std::endl;	  	  
-	  std::cerr << belief_states << std::endl;
+	  std::cerr << *belief_states << std::endl;
 #endif // DEBUG
 	}
       

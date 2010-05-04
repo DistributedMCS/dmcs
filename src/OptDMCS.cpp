@@ -167,9 +167,9 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
 #if defined(DEBUG)
   std::cerr << "Projected belief states..." << std::endl;
-  std::cerr << temporary_belief_states << std::endl;
+  std::cerr << *temporary_belief_states << std::endl;
   std::cerr << "The V used in projection..." << std::endl;
-  std::cerr << globalV << std::endl;
+  std::cerr << *globalV << std::endl;
 
   printBeliefStatesNicely(std::cerr, temporary_belief_states, globalV, query_plan);
 
@@ -252,7 +252,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
 #if defined(DEBUG)
   std::cerr << "Going to send back... " << std::endl;	  	  
-  std::cerr << belief_states << std::endl;
+  std::cerr << *belief_states << std::endl;
+  printBeliefStatesNicely(std::cerr, belief_states,globalV, query_plan);
 #endif // DEBUG
 
 #ifdef DMCS_STATS_INFO

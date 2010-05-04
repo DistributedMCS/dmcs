@@ -67,9 +67,8 @@ BaseDMCS::localSolve(const BeliefStatePtr& V)
   std::cerr << "Got " << local_belief_states->size();
   std::cerr << " answers from CLASP" << std::endl;
   std::cerr << "Local belief states from localsolve(): " << std::endl;
-  std::cerr << local_belief_states << std::endl;
+  std::cerr << *local_belief_states << std::endl;
 #endif
-
   return local_belief_states;
 }
 
