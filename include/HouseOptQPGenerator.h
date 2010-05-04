@@ -49,16 +49,13 @@ public:
 
     std::size_t id = context->getContextID();
 
-
     if (id == 1)
       {
-	  BeliefStatePtr bs_12 = query_plan->getInterface(id, id+1);
+	  BeliefStatePtr bs_12 = query_plan->getInterface1(id, id+1);
 	  
-	  const BeliefStatePtr bs_23 = query_plan->getInterface(id+1, id+2);
-	  
+	  const BeliefStatePtr bs_23 = query_plan->getInterface1(id+1, id+2);
 	  update(bs_12, bs_23);
 	  query_plan->putInterface(id, id+1, bs_12);
-
 	return;
       }
 
@@ -81,45 +78,46 @@ public:
 		  parentId = 2*(((id-5)/4)+1) +1;
 		}
 	    }
-	  BeliefStatePtr bs_23 = query_plan->getInterface(id, id+1);
-	  const BeliefStatePtr bs_p3 = query_plan->getInterface(parentId, id+1);
-	  const BeliefStatePtr bs_30 = query_plan->getInterface(id+1, id+2);
-	  
+	  BeliefStatePtr bs_23 = query_plan->getInterface1(id, id+1);
+	   const BeliefStatePtr bs_p3 = query_plan->getInterface1(parentId, id+1);
+	  //	  const BeliefStatePtr bs_30 = query_plan->getInterface(id+1, id+2);
+	  const BeliefStatePtr bs_12 = query_plan->getInterface1(id+3, id);
+
 	  update(bs_23, bs_p3);
-	  update(bs_23, bs_30);
+	  update(bs_23, bs_12);
 	  query_plan->putInterface(id, id+1, bs_23);
+	  query_plan->remove_connection(id+3, id);
 	  query_plan->remove_connection(parentId, id+1);
 	}
 	break;
       case 3:
 	{
-	  BeliefStatePtr bs_30 = query_plan->getInterface(id, id+1);
+	  BeliefStatePtr bs_30 = query_plan->getInterface1(id, id+1);
+
+	  const BeliefStatePtr bs_12 = query_plan->getInterface1(id+2, id-1);	  
+	  //	  const BeliefStatePtr bs_01 = query_plan->getInterface(id+1, id+2);
 	  
-	  const BeliefStatePtr bs_01 = query_plan->getInterface(id+1, id+2);
-	  
-	  update(bs_30, bs_01);
+	  update(bs_30, bs_12);
 	  query_plan->putInterface(id, id+1, bs_30);
 	}
 	break;
       case 0:
 	{
-	  BeliefStatePtr bs_01 = query_plan->getInterface(id, id+1);
-	  
-	  const BeliefStatePtr bs_12 = query_plan->getInterface(id+1, id-2);
+	  BeliefStatePtr bs_01 = query_plan->getInterface1(id, id+1);	  
+	  const BeliefStatePtr bs_12 = query_plan->getInterface1(id+1, id-2);
 	  update(bs_01, bs_12);
-	  query_plan->putInterface(id, id+1, bs_12);
-	  query_plan->remove_connection(id+1, id-2);
+	  query_plan->putInterface(id, id+1, bs_01);
+	  //	  query_plan->remove_connection(id+1, id-2);
 	  
 	  std::size_t childId = id + ((id/4)-1)*4 + 2;
 	  if(childId < context->getSystemSize())
 	    {
-	      BeliefStatePtr bs_p2 = query_plan->getInterface(id, childId);
+	      BeliefStatePtr bs_p2 = query_plan->getInterface1(id, childId);
 	      
-	      const BeliefStatePtr bs_23 = query_plan->getInterface(childId, childId+1);
+	      const BeliefStatePtr bs_23 = query_plan->getInterface1(childId, childId+1);
 	      
 	      update(bs_p2, bs_23);
 	      query_plan->putInterface(id, childId, bs_p2);
-
 	    }
 	}
 	break;
@@ -128,9 +126,9 @@ public:
 	  std::size_t childId = id + ((id/4)-1)*4 + 5;
 	  if(childId < context->getSystemSize())
 	    {
-	      BeliefStatePtr bs_p2 = query_plan->getInterface(id, childId);
+	      BeliefStatePtr bs_p2 = query_plan->getInterface1(id, childId);
 	      
-	      const BeliefStatePtr bs_23 = query_plan->getInterface(childId, childId+1);
+	      const BeliefStatePtr bs_23 = query_plan->getInterface1(childId, childId+1);
 	      
 	      update(bs_p2, bs_23);
 	      query_plan->putInterface(id, childId, bs_p2);
