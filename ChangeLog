@@ -1,3 +1,19 @@
+2010-05-05  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/OptDMCS.cpp : Adjust code syntax for compilation purposes.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+	* include/ProxySignatureByLocal.h: Cleanup
+
+	* include/ClaspResultBuilder.h : Adapt Builder to use SignatureByLocal instead of BeliefStatePtr
+	* include/ClaspResultBuilder.tcc: Likewise.
+
+	* include/BaseDMCS.h: Adapt solve to use SignatureByLocal instead of BeliefStatePtr
+	* include/SatSolver.h : Likewise.
+	* include/BaseSolver.h: Likewise.
+	* include/SatSolver.tcc : Likewise.
+	* src/BaseDMCS.cpp : Likewise.
+
 2010-05-04  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
 	* src/PrimitiveDMCS.cpp : Add ProxySignature todo items.
