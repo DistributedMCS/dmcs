@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   Signature.h
+ * @file   ProxySignatureByLocal.h
  * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
  * @date   Sat Jan 16 18:38:40 2010
  * 
