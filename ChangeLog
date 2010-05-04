@@ -1,3 +1,13 @@
+2010-05-04  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/PrimitiveDMCS.cpp : Add ProxySignature todo items.
+	* src/OptDMCS.cpp: Likewise.
+	* include/SatSolver.tcc : Likewise.
+
+	* include/ProxySignatureByLocal.h: New file.
+
+	* include/HouseOptQPGenerator.h : Update queryplan computation.
+
 2010-05-04  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
 
 	* include/StatsInfo.h: Use PTime/TimeDuration instead of
