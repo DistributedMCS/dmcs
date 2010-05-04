@@ -94,11 +94,16 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const Context& context,
 	  // setup local signature for neighbors: this way we can translate
 	  // SAT models back to belief states in case we do not
 	  // reference them in the bridge rules
-	  for (std::size_t i = 1; i < sizeof(neighbor_V)*8; ++i)
+	  //for (std::size_t i = 1; i < sizeof(neighbor_V)*8; ++i)
+	  for (std::size_t i = 1; i <= neighbor_sig.size(); ++i) // at most sig-size bits are allowed
 	    {
 	      if (testBeliefSet(neighbor_V, i))
 		{
 		  SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
+
+		  // the neighbor's V must be set up properly
+		  assert(neighbor_it != neighbor_loc.end());
+
 		  std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
 		  
 		  // add new symbol for neighbor

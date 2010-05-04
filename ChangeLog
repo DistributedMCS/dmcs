@@ -1,3 +1,7 @@
+2010-05-04  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* include/SatSolver.tcc: Fix segmetation fault.
+
 2010-05-04  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
 	* src/dmcsc.cpp: Fix output info.
