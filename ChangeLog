@@ -1,3 +1,12 @@
+2010-05-04  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+
+	* src/PrimitiveDMCS.cpp: Fix SegFault and get transfer time.
+
+	* include/ReturnMessage.h: Update outputting result.
+
+	* include/StatsInfo.h: Update outputting result, update transfer
+	time from neighbors.
+
 2010-05-04  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/StatsInfo.h: Add STATS_DIFF and STATS_DIFF_REUSE macros.

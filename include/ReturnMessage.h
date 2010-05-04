@@ -94,7 +94,7 @@ typedef boost::shared_ptr<ReturnMessage> ReturnMessagePtr;
 inline std::ostream&
 operator<< (std::ostream& os, const ReturnMessage& mess)
 {
-  os << mess.getBeliefStates() << std::endl
+  os << *mess.getBeliefStates() << std::endl
      << boost::posix_time::to_simple_string(*mess.getSendingMoment()) << std::endl
      << *mess.getStatsInfo();
 

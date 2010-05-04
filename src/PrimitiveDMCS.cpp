@@ -93,6 +93,8 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   TimeDurationPtr time_combine(new TimeDuration(0, 0, 0, 0));
 
   std::cerr << "Initialization of the statistic information: " << *sis << std::endl;
+
+  TransferTimesPtr time_transfer(new TransferTimes);
 #endif
 
 
@@ -180,10 +182,6 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
       // We are now at an intermediate context.
       // Need to consult all neighbors before combining with our local belief states
 
-#ifdef DMCS_STATS_INFO
-      TransferTimesPtr time_transfer(new TransferTimes);
-#endif
-
       for (Neighbors::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
 	{
 	  boost::asio::io_service io_service;
@@ -220,7 +218,9 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  TimeDurationPtr time_neighbor_me(new TimeDuration(0, 0, 0, 0));
 	  *time_neighbor_me = this_moment - (*sent_moment);
 
+	  std::cerr << "Adding transfer time from neighbor: " << neighbor_id << std::endl;
 	  time_transfer->insert(std::pair<std::size_t, TimeDurationPtr>(neighbor_id, time_neighbor_me));
+	  std::cerr << "size = " << time_transfer->size() << std::endl;
 #else
 	  BeliefStateListPtr neighbor_belief_state = client_mess;
 #endif // DMCS_STATS_INFO
@@ -273,20 +273,26 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #endif // DEBUG
   
 #ifdef DMCS_STATS_INFO
-  StatsInfoPtr my_stats_info = (*sis)[k];
+  StatsInfoPtr my_stats_info = (*sis)[k-1];
 
-  TimeDurationPtr my_lsolve     = my_stats_info->lsolve;
-  TimeDurationPtr my_combine    = my_stats_info->combine;
-  TimeDurationPtr my_projection = my_stats_info->projection;
+  TimeDurationPtr  my_lsolve     = my_stats_info->lsolve;
+  TimeDurationPtr  my_combine    = my_stats_info->combine;
+  TimeDurationPtr  my_projection = my_stats_info->projection;
+  TransferTimesPtr my_transfer   = my_stats_info->transfer;
 
   *my_lsolve     = (*my_lsolve)     + (*time_lsolve);
   *my_combine    = (*my_combine)    + (*time_combine);
   *my_projection = (*my_projection) + (*time_projection);
+  *my_transfer   = *time_transfer; // copy here
+
+  std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
 
   PTime s_moment = boost::posix_time::microsec_clock::local_time();
   PTimePtr sending_moment(new PTime(s_moment));
 
   ReturnMessagePtr returning_message(new ReturnMessage(belief_states, sending_moment, sis));
+
+  std::cerr << "Returning message is: " << std::endl << *returning_message << std::endl;
 
   return returning_message;
 

@@ -117,24 +117,34 @@ operator<< (std::ostream& os, const StatsInfo& si)
      << "[" << boost::posix_time::to_simple_string(*si.projection) << "]" 
      << std::endl;
 
+  os << "Transfer size = " << si.transfer->size() << std::endl;
+
   if (!si.transfer->empty())
     {
+      os << "not empty" << std::endl;
+
       TransferTimes::const_iterator end = --si.transfer->end();
       
       for (TransferTimes::const_iterator it = si.transfer->begin(); it != end; ++it)
 	{
-	  os << "(" << it->first << ", " << it->second << "); ";
+	  os << "(" << it->first << ", " << boost::posix_time::to_simple_string(*it->second) << "); ";
 	}
-      os << "(" << end->first << ", " << end->second << ")";
+      os << "(" << end->first << ", " << boost::posix_time::to_simple_string(*end->second) << ")";
     }
   
   return os;
 }
 
 
+inline std::ostream&
+operator<< (std::ostream& os, const StatsInfoPtr& si)
+{
+  return os << *si;
+}
+
 
 inline std::ostream&
-operator<< (std::ostream& os, const StatsInfos sis)
+operator<< (std::ostream& os, const StatsInfos& sis)
 {
   for (StatsInfos::const_iterator it = sis.begin(); it != sis.end(); ++it)
     {
@@ -155,17 +165,24 @@ combine(StatsInfosPtr& sis1, const StatsInfosPtr& sis2)
 
   for (; it1 != sis1->end(); ++it1, ++it2)
     {
-      TimeDurationPtr lsolve1     = (*it1)->lsolve;
-      TimeDurationPtr combine1    = (*it1)->combine;
-      TimeDurationPtr projection1 = (*it1)->projection;
+      TimeDurationPtr  lsolve1     = (*it1)->lsolve;
+      TimeDurationPtr  combine1    = (*it1)->combine;
+      TimeDurationPtr  projection1 = (*it1)->projection;
+      TransferTimesPtr transfer1   = (*it1)->transfer;
 
-      const TimeDurationPtr lsolve2     = (*it2)->lsolve;
-      const TimeDurationPtr combine2    = (*it2)->combine;
-      const TimeDurationPtr projection2 = (*it2)->projection;
+      const TimeDurationPtr  lsolve2     = (*it2)->lsolve;
+      const TimeDurationPtr  combine2    = (*it2)->combine;
+      const TimeDurationPtr  projection2 = (*it2)->projection;
+      const TransferTimesPtr transfer2   = (*it2)->transfer;
 
       *lsolve1     = *lsolve1     + (*lsolve2);
       *combine1    = *combine1    + (*combine2);
       *projection1 = *projection1 + (*projection2);
+
+      if ((transfer1->size() == 0) && (transfer2->size() > 0))
+	{
+	  *transfer1   = *transfer2; // copy here
+	}
     }
 }
 
