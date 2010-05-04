@@ -80,21 +80,27 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   
   for (std::size_t i = 0; i < n; ++i)
     {
-      TimeDurationPtr t_i(new TimeDuration(0, 0, 0, 0));
-      TimeDurationPtr c_i(new TimeDuration(0, 0, 0, 0));
-      TimeDurationPtr p_i(new TimeDuration(0, 0, 0, 0));
+      TimeDuration local_i(0, 0, 0, 0);
+      TimeDuration combine_i(0, 0, 0, 0);
+      TimeDuration project_i(0, 0, 0, 0);
+
+      Info info_local(local_i, 0);
+      Info info_combine(combine_i, 0);
+      Info info_project(project_i, 0);
+
       TransferTimesPtr tf_i(new TransferTimes);
       
-      StatsInfoPtr si(new StatsInfo(t_i, c_i, p_i, tf_i));
+      StatsInfo si(info_local, info_combine, info_project, tf_i);
       
       sis->push_back(si);
     }
   
-  TimeDurationPtr time_combine(new TimeDuration(0, 0, 0, 0));
+  TimeDuration time_combine(0, 0, 0, 0);
 
   std::cerr << "Initialization of the statistic information: " << *sis << std::endl;
 
   TransferTimesPtr time_transfer(new TransferTimes);
+  StatsInfo& my_stats_info = (*sis)[k-1];
 #endif
 
 
@@ -129,6 +135,11 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
   STATS_DIFF (local_belief_states = localSolve(V),
 	      time_lsolve);
+#ifdef DMCS_STATS_INFO
+  my_stats_info.lsolve.second = local_belief_states->size();
+  std::cerr << "local belief states size: " << my_stats_info.lsolve.second << " == " << local_belief_states->size() << std::endl;
+  std::cerr << my_stats_info << std::endl;
+#endif // DMCS_STATS_INFO
 
 #ifdef DEBUG
   BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
@@ -139,6 +150,12 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
   STATS_DIFF (project_to(local_belief_states, V, belief_states),
 	      time_projection);
+
+#ifdef DMCS_STATS_INFO
+  std::cerr << "projected belief states size: " << belief_states->size() << std::endl;
+  my_stats_info.projection.second = belief_states->size();
+  std::cerr << my_stats_info << std::endl;
+#endif // DMCS_STATS_INFO
 
 
 #if defined(DEBUG)
@@ -213,12 +230,12 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
 	  combine(sis, stats_infos);
 
-	  PTimePtr sent_moment = client_mess->getSendingMoment();
+	  PTime sent_moment = client_mess->getSendingMoment();
 	  PTime this_moment = boost::posix_time::microsec_clock::local_time();
-	  TimeDurationPtr time_neighbor_me(new TimeDuration(0, 0, 0, 0));
-	  *time_neighbor_me = this_moment - (*sent_moment);
+	  TimeDuration time_neighbor_me = this_moment - sent_moment;
+	  Info neighbor_transfer(time_neighbor_me, neighbor_belief_states->size());
 
-	  time_transfer->insert(std::pair<std::size_t, TimeDurationPtr>(neighbor_id, time_neighbor_me));
+	  time_transfer->insert(std::pair<std::size_t, Info>(neighbor_id, neighbor_transfer));
 #else
 	  BeliefStateListPtr neighbor_belief_states = client_mess;
 #endif // DMCS_STATS_INFO
@@ -240,12 +257,17 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 			    time_combine
 			    );
 
-
 #if defined(DEBUG)
 	  std::cerr << "Accumulated combination... " << std::endl;	  	  
 	  std::cerr << *belief_states << std::endl;
 #endif // DEBUG
 	}
+
+#ifdef DMCS_STATS_INFO
+
+      std::cerr << "combination size: " << belief_states->size() << std::endl;
+      my_stats_info.combine.second = belief_states->size();
+#endif // DMCS_STATS_INFO
       
 #if 0
       cache->insert(V, belief_states);
@@ -271,22 +293,17 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #endif // DEBUG
   
 #ifdef DMCS_STATS_INFO
-  StatsInfoPtr my_stats_info = (*sis)[k-1];
+  my_stats_info.lsolve.first     += time_lsolve;
+  my_stats_info.combine.first    += time_combine;
+  my_stats_info.projection.first += time_projection;
 
-  TimeDurationPtr  my_lsolve     = my_stats_info->lsolve;
-  TimeDurationPtr  my_combine    = my_stats_info->combine;
-  TimeDurationPtr  my_projection = my_stats_info->projection;
-  TransferTimesPtr my_transfer   = my_stats_info->transfer;
+  TransferTimesPtr my_transfer   = my_stats_info.transfer;
 
-  *my_lsolve     = (*my_lsolve)     + (*time_lsolve);
-  *my_combine    = (*my_combine)    + (*time_combine);
-  *my_projection = (*my_projection) + (*time_projection);
   *my_transfer   = *time_transfer; // copy here
 
   std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
 
-  PTime s_moment = boost::posix_time::microsec_clock::local_time();
-  PTimePtr sending_moment(new PTime(s_moment));
+  PTime sending_moment = boost::posix_time::microsec_clock::local_time();
 
   ReturnMessagePtr returning_message(new ReturnMessage(belief_states, sending_moment, sis));
 

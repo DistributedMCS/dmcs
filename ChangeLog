@@ -1,4 +1,11 @@
-2010-05-04  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+2010-05-04  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+
+	* include/StatsInfo.h: Use PTime/TimeDuration instead of
+	PTimePtr/TimeDurationPtr. Provide (time + #models) in statistic
+	information.
+	* include/ReturnMessage.h: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
 
 	* include/SatSolver.tcc: Fix segmetation fault.
 
@@ -9,7 +16,7 @@
 	* include/ClaspResultGrammar.tcc: Fix parsing models with older
 	boost.
 
-2010-05-04  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+2010-05-04  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
 	* src/BeliefCombination.cpp: remove some debug output.
 
 	* include/OptDMCS.h: Adapt OptDMCS to returning

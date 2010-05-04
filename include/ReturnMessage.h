@@ -46,7 +46,7 @@ public:
   {}
 
   ReturnMessage(BeliefStateListPtr belief_states_,
-		PTimePtr sending_moment_,
+		PTime sending_moment_,
 		StatsInfosPtr info_)
     : belief_states(belief_states_), 
       sending_moment(sending_moment_),
@@ -65,7 +65,7 @@ public:
     return info;
   }
 
-  PTimePtr
+  PTime
   getSendingMoment() const
   {
     return sending_moment;
@@ -83,7 +83,7 @@ public:
 
 private:
   BeliefStateListPtr belief_states;
-  PTimePtr sending_moment;
+  PTime sending_moment;
   StatsInfosPtr info;
 };
 
@@ -95,7 +95,7 @@ inline std::ostream&
 operator<< (std::ostream& os, const ReturnMessage& mess)
 {
   os << *mess.getBeliefStates() << std::endl
-     << boost::posix_time::to_simple_string(*mess.getSendingMoment()) << std::endl
+     << boost::posix_time::to_simple_string(mess.getSendingMoment()) << std::endl
      << *mess.getStatsInfo();
 
   return os;

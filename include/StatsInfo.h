@@ -41,21 +41,20 @@
 #include <boost/serialization/vector.hpp>
 
 typedef boost::posix_time::ptime PTime;
-typedef boost::shared_ptr<PTime> PTimePtr;
 typedef boost::posix_time::time_duration TimeDuration;
-typedef boost::shared_ptr<TimeDuration> TimeDurationPtr;
-typedef std::map<std::size_t, TimeDurationPtr> TransferTimes;
+typedef std::pair<TimeDuration, std::size_t> Info;
+typedef std::map<std::size_t, Info> TransferTimes;
 typedef boost::shared_ptr<TransferTimes> TransferTimesPtr;
 
 
 #if defined(DMCS_STATS_INFO)
 #define STATS_DIFF(a,b)						   \
-  TimeDurationPtr b(new TimeDuration(0,0,0,0));			   \
+  TimeDuration b(0,0,0,0);			   \
   {								   \
     PTime begin = boost::posix_time::microsec_clock::local_time(); \
     a;								   \
     PTime end = boost::posix_time::microsec_clock::local_time();   \
-    *b = end - begin;						   \
+    b = end - begin;						   \
   }
 
 #define STATS_DIFF_REUSE(a,b)					   \
@@ -63,7 +62,7 @@ typedef boost::shared_ptr<TransferTimes> TransferTimesPtr;
     PTime begin = boost::posix_time::microsec_clock::local_time(); \
     a;								   \
     PTime end = boost::posix_time::microsec_clock::local_time();   \
-    *b += end - begin;						   \
+    b += end - begin;						   \
   }
 #else
 #define STATS_DIFF(a,b) do { a; } while(0);
@@ -73,20 +72,51 @@ typedef boost::shared_ptr<TransferTimes> TransferTimesPtr;
 
 namespace dmcs {
 
+  /*
+inline TimeDuration&
+getTimeDuration(Info& info)
+{
+  return info.first;
+  }*/
+
+inline TimeDuration
+getTimeDuration(const Info& info)
+{
+  return info.first;
+}
+
+
+inline std::size_t
+getNoModels(Info& info)
+{
+  return info.second;
+}
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const Info& info)
+{
+  os << boost::posix_time::to_simple_string( getTimeDuration(info) )
+     << ", "
+     << info.second;
+
+  return os;
+}
+
 struct StatsInfo
 {
-  TimeDurationPtr lsolve;
-  TimeDurationPtr combine;
-  TimeDurationPtr projection;
+  Info lsolve;
+  Info combine;
+  Info projection;
   TransferTimesPtr transfer;
 
   StatsInfo()
   { }
 
-  StatsInfo(TimeDurationPtr& lsolve_, 
-	    TimeDurationPtr& combine_, 
-	    TimeDurationPtr& projection_, 
-	    TransferTimesPtr& transfer_)
+  StatsInfo(Info lsolve_, 
+	    Info combine_, 
+	    Info projection_, 
+	    TransferTimesPtr transfer_)
     : lsolve(lsolve_), 
       combine(combine_), 
       projection(projection_), 
@@ -103,8 +133,7 @@ struct StatsInfo
   }
 };
 
-typedef boost::shared_ptr<StatsInfo> StatsInfoPtr;
-typedef std::vector<StatsInfoPtr> StatsInfos;
+typedef std::vector<StatsInfo> StatsInfos;
 typedef boost::shared_ptr<StatsInfos> StatsInfosPtr;
 
 
@@ -112,38 +141,31 @@ typedef boost::shared_ptr<StatsInfos> StatsInfosPtr;
 inline std::ostream&
 operator<< (std::ostream& os, const StatsInfo& si)
 {
-  os << "[" << boost::posix_time::to_simple_string(*si.lsolve) << "], "
-     << "[" << boost::posix_time::to_simple_string(*si.combine) << "], " 
-     << "[" << boost::posix_time::to_simple_string(*si.projection) << "]" 
-     << std::endl;
+  os << si.lsolve << ", " << si.projection << ", " << si.combine;
 
-  os << "Transfer size = " << si.transfer->size() << std::endl;
+  int i = -1;
 
-  if (!si.transfer->empty())
+  if (si.transfer->size() > 0)
     {
+      os << ", ";
       TransferTimes::const_iterator end = --si.transfer->end();
-      
-      for (TransferTimes::const_iterator it = si.transfer->begin(); it != end; ++it)
+      for (TransferTimes::const_iterator it = si.transfer->begin(); it != end; ++it, --i)
 	{
-	  os << "(" << it->first << ", " << boost::posix_time::to_simple_string(*it->second) << "); ";
+	  os << i << ", " << it->first << ", " << it->second << ", ";
 	}
-      os << "(" << end->first << ", " << boost::posix_time::to_simple_string(*end->second) << ")";
+      os << i << ", " << end->first << ", " << end->second;
     }
+
   
   return os;
 }
 
 
-inline std::ostream&
-operator<< (std::ostream& os, const StatsInfoPtr& si)
-{
-  return os << *si;
-}
-
 
 inline std::ostream&
 operator<< (std::ostream& os, const StatsInfos& sis)
 {
+  //std::copy(sis.begin(), sis.end(), std::ostream_iterator<StatsInfo>(os, "\n");
   for (StatsInfos::const_iterator it = sis.begin(); it != sis.end(); ++it)
     {
       os << *it << std::endl;
@@ -151,6 +173,7 @@ operator<< (std::ostream& os, const StatsInfos& sis)
 
   return os;
 }
+
 
 
 inline void
@@ -163,23 +186,32 @@ combine(StatsInfosPtr& sis1, const StatsInfosPtr& sis2)
 
   for (; it1 != sis1->end(); ++it1, ++it2)
     {
-      TimeDurationPtr  lsolve1     = (*it1)->lsolve;
-      TimeDurationPtr  combine1    = (*it1)->combine;
-      TimeDurationPtr  projection1 = (*it1)->projection;
-      TransferTimesPtr transfer1   = (*it1)->transfer;
+      TransferTimesPtr transfer1       = it1->transfer;
+      const TransferTimesPtr transfer2 = it2->transfer;
 
-      const TimeDurationPtr  lsolve2     = (*it2)->lsolve;
-      const TimeDurationPtr  combine2    = (*it2)->combine;
-      const TimeDurationPtr  projection2 = (*it2)->projection;
-      const TransferTimesPtr transfer2   = (*it2)->transfer;
+       ///@todo: use helper function getTimeDuration
+      it1->lsolve.first     += it2->lsolve.first;
+      it1->combine.first    += it2->combine.first;
+      it1->projection.first += it2->projection.first;
 
-      *lsolve1     = *lsolve1     + (*lsolve2);
-      *combine1    = *combine1    + (*combine2);
-      *projection1 = *projection1 + (*projection2);
+      if (it1->lsolve.second == 0)
+	{
+	  it1->lsolve.second = it2->lsolve.second;
+	}
+
+      if (it1->combine.second == 0)
+	{
+	  it1->combine.second = it2->combine.second;
+	}
+
+      if (it1->projection.second == 0)
+	{
+	  it1->projection.second = it2->projection.second;
+	}
 
       if ((transfer1->size() == 0) && (transfer2->size() > 0))
 	{
-	  *transfer1   = *transfer2; // copy here
+	  *transfer1 = *transfer2; // copy here
 	}
     }
 }
