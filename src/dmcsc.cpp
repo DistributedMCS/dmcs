@@ -204,14 +204,14 @@ main(int argc, char* argv[])
 
       std::cerr << "Result: " << std::endl << *result->getStatsInfo() << std::endl;
 #else
-      std::cerr << "Result: " << std::endl << result << std::endl;
+      std::cerr << "Result: " << std::endl << *result << std::endl;
 #endif // DMCS_STATS_INFO
       
 #endif // DEBUG
       
 
 #ifdef DMCS_STATS_INFO
-      std::cerr << "Result: " << std::endl << result->getBeliefStates()->size() << std::endl;
+      std::cout << "Number of answers: " << result->getBeliefStates()->size() << std::endl;
 #else
       std::cout << "Number of answers: " << result->size() << std::endl;
 #endif
