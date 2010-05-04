@@ -50,7 +50,7 @@ public:
   void
   genNeighbor(const ContextPtr& context, std::size_t id);
 
-  void create_interfaces();
+  void create_interfaces(int topology);
 
   virtual void
   create_interface(const ContextPtr& context) = 0;
@@ -66,7 +66,7 @@ protected:
   initialize_local_interface();
 
   void
-  compute_min_V();
+  compute_min_V(int topology);
 
 protected:
   ContextsPtr& contexts;

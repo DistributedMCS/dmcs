@@ -832,11 +832,11 @@ int main(int argc, char* argv[])
 
   context_gen.generate();
   
-  qpgen->create_interfaces();
+  qpgen->create_interfaces(topology_type);
 
   optimal_qp->putGraph(original_qp->getGraph());
   
-  opt_qpgen->create_interfaces();
+  opt_qpgen->create_interfaces(topology_type);
   
   print_contexts();
   print_topo();

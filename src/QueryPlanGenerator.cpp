@@ -64,12 +64,12 @@ QueryPlanGenerator::genNeighbor(const ContextPtr& context, std::size_t id)
 
 
 void 
-QueryPlanGenerator::create_interfaces()
+QueryPlanGenerator::create_interfaces(int topology)
 {
   // a bit redundant to put local interface initialization here.
   // but when we really implement the optimze algorithm, it doesn't matter.
   initialize_local_interface();
-  compute_min_V();
+  compute_min_V(topology);
   query_plan->putGlobalV(V);
 
   Contexts::const_iterator i = contexts->end();
@@ -144,7 +144,7 @@ QueryPlanGenerator::initialize_local_interface()
 
 
 void
-QueryPlanGenerator::compute_min_V()
+QueryPlanGenerator::compute_min_V(int topology)
 {
   std::size_t context_id;
   std::size_t atom_id;
@@ -190,13 +190,24 @@ QueryPlanGenerator::compute_min_V()
 
   // get the root k of the contexts and set every bit to true (including
   // epsilon) to get all variables for k
-  Contexts::const_iterator k = contexts->begin();
-  context_id = (*k)->getContextID();
-
-  if (!isEpsilon(v_state[context_id - 1]))
+  switch(topology)
     {
-      v_state[context_id - 1] = maxBeliefSet();
+    case 4: // ring case
+      {
+	break;
+      }
+    default:
+      {
+	Contexts::const_iterator k = contexts->begin();
+	context_id = (*k)->getContextID();
+	
+	if (!isEpsilon(v_state[context_id - 1]))
+	  {
+	    v_state[context_id - 1] = maxBeliefSet();
+	  }
+      }
     }
+ 
 }
 
 
