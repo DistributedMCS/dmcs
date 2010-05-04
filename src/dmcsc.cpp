@@ -194,15 +194,15 @@ main(int argc, char* argv[])
  	  Client<OptCommandType> c(io_service, it, mess);
  	  io_service.run();
 
-	  //result = c.getResult();
+	  result = c.getResult();
  	}
 
 #ifdef DEBUG
 
 #ifdef DMCS_STATS_INFO
-      std::cerr << "Result: " << std::endl << result->getBeliefStates() << std::endl;
+      std::cerr << "Result: " << std::endl << *result->getBeliefStates() << std::endl;
 
-      std::cerr << "Result: " << std::endl << result->getStatsInfo() << std::endl;
+      std::cerr << "Result: " << std::endl << *result->getStatsInfo() << std::endl;
 #else
       std::cerr << "Result: " << std::endl << result << std::endl;
 #endif // DMCS_STATS_INFO

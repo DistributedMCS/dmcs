@@ -121,8 +121,6 @@ operator<< (std::ostream& os, const StatsInfo& si)
 
   if (!si.transfer->empty())
     {
-      os << "not empty" << std::endl;
-
       TransferTimes::const_iterator end = --si.transfer->end();
       
       for (TransferTimes::const_iterator it = si.transfer->begin(); it != end; ++it)

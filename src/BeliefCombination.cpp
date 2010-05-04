@@ -150,6 +150,7 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
   // walk through the belief sets
   for (; s_it != s->end(); ++s_it, ++t_it, ++u_it, ++v_it)
     {
+      /*
 #ifdef DEBUG
       std::bitset<sizeof(BeliefSet)*8> sbs = *s_it;
       std::bitset<sizeof(BeliefSet)*8> tbs = *t_it;
@@ -158,6 +159,7 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
 		<< "  with      T = " << tbs << std::endl 
 		<< "  on        V = " << vbs << std::endl;
 #endif
+      */
       if (isEpsilon(*s_it))
 	{
 	  *u_it = *t_it;
@@ -173,7 +175,7 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
       else 
 	{
 #ifdef DEBUG
-	  std::cerr << " Upps. MISMATCH at position" << std::endl;
+	  //std::cerr << " Upps. MISMATCH at position" << std::endl;
 #endif
 	  return false;
 	}
@@ -181,7 +183,7 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
     } // for
   
 #ifdef DEBUG
-  std::cerr << "Combination suceeded. u = " << u << std::endl;
+  //std::cerr << "Combination suceeded. u = " << u << std::endl;
 #endif
 
   return true; // consistent
@@ -206,8 +208,8 @@ combine(const BeliefStateListPtr& cs, const BeliefStateListPtr& ct,
   assert(V->size() > 0);
 
 #ifdef DEBUG
-  std::cerr << "Combining " << cs << std::endl << " and " ;
-  std::cerr << std::endl << ct << std::endl;
+  //std::cerr << "Combining " << cs << std::endl << " and " ;
+  //std::cerr << std::endl << ct << std::endl;
 #endif
 
   const std::size_t n = V->size();
@@ -219,7 +221,7 @@ combine(const BeliefStateListPtr& cs, const BeliefStateListPtr& ct,
       for (BeliefStateList::const_iterator t_it = ct->begin(); t_it != ct->end(); ++t_it)
 	{
 #ifdef DEBUG
-	  std::cerr << "Combining " << *s_it << " and " << *t_it << std::endl;
+	  //	  std::cerr << "Combining " << *s_it << " and " << *t_it << std::endl;
 #endif
 
   //#ifdef DEBUG

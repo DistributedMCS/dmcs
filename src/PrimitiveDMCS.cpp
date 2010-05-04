@@ -208,7 +208,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
 
 #ifdef DMCS_STATS_INFO
-	  BeliefStateListPtr neighbor_belief_state = client_mess->getBeliefStates();
+	  BeliefStateListPtr neighbor_belief_states = client_mess->getBeliefStates();
 	  StatsInfosPtr stats_infos = client_mess->getStatsInfo();
 
 	  combine(sis, stats_infos);
@@ -218,11 +218,9 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  TimeDurationPtr time_neighbor_me(new TimeDuration(0, 0, 0, 0));
 	  *time_neighbor_me = this_moment - (*sent_moment);
 
-	  std::cerr << "Adding transfer time from neighbor: " << neighbor_id << std::endl;
 	  time_transfer->insert(std::pair<std::size_t, TimeDurationPtr>(neighbor_id, time_neighbor_me));
-	  std::cerr << "size = " << time_transfer->size() << std::endl;
 #else
-	  BeliefStateListPtr neighbor_belief_state = client_mess;
+	  BeliefStateListPtr neighbor_belief_states = client_mess;
 #endif // DMCS_STATS_INFO
 
 
@@ -231,13 +229,13 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
 #if defined(DEBUG)
 	  std::cerr << "Belief states received from neighbor " << neighbor_id << std::endl;	  
-	  std::cerr << neighbor_belief_state << std::endl;
+	  std::cerr << neighbor_belief_states << std::endl;
 	  std::cerr << "Going to combine " << "k = " << k << " neighbor = " << neighbor_id << std::endl;
 #endif // DEBUG
 
 
 	  STATS_DIFF_REUSE (belief_states = combine(belief_states,
-						    neighbor_belief_state,
+						    neighbor_belief_states,
 						    V),
 			    time_combine
 			    );

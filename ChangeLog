@@ -1,4 +1,15 @@
-2010-05-04  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+2010-05-04  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+	* src/BeliefCombination.cpp: remove some debug output.
+
+	* include/OptDMCS.h: Adapt OptDMCS to returning
+	statistic information.
+	* src/OptDMCS.cpp: Likewise.
+	* include/CommandType.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/BeliefState.h: Update operator<<
+	* include/PrimitiveMessage.h: Likewise.
+	* include/StatsInfo.h: Likewise.
 
 	* src/PrimitiveDMCS.cpp: Fix SegFault and get transfer time.
 

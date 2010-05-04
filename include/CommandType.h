@@ -54,11 +54,11 @@ public:
 
 
 
-class OptCommandType : public CommandType<OptMessage, BeliefStateList>
+class OptCommandType : public CommandType<OptMessage, OptDMCS::dmcs_value_type>
 {
 public:
   typedef OptMessage input_type;
-  typedef BeliefStateList value_type;
+  typedef OptDMCS::dmcs_value_type value_type;
 
   OptCommandType(OptDMCSPtr odmcs_)
     : odmcs(odmcs_)

@@ -40,6 +40,8 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/iterator/indirect_iterator.hpp>
+#include <boost/iterator/iterator_adaptor.hpp>
 
 
 namespace dmcs {
@@ -220,9 +222,9 @@ operator>> (std::istream& is, BeliefStatePtr& bs)
  * @return os
  */
 inline std::ostream&
-operator<< (std::ostream& os, const BeliefStatePtr& bs)
+operator<< (std::ostream& os, const BeliefState& bs)
 {
-  std::copy(bs->begin(), bs->end(),
+  std::copy(bs.begin(), bs.end(),
 	    std::ostream_iterator<BeliefSet>(os, " ")
 	    );
   return os;
@@ -240,9 +242,14 @@ operator<< (std::ostream& os, const BeliefStatePtr& bs)
 inline std::ostream&
 operator<< (std::ostream& os, const BeliefStateList& l)
 {
-  std::copy(l.begin(), l.end(),
-	    std::ostream_iterator<BeliefStatePtr>(os, "\n")
-	    );
+  //typedef boost::iterator_adaptor<BeliefState,BeliefStateList::const_iterator> my_iterator; 
+  //my_iterator first(l.begin());
+  //my_iterator last(l.end());
+  //std::copy(first, last, std::ostream_iterator<BeliefState>(os, "\n"));
+  for (BeliefStateList::const_iterator it = l.begin(); it != l.end(); ++it)
+    {
+      os << **it << std::endl;
+    }
   return os;
 }
 

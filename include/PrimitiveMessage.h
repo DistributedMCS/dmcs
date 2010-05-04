@@ -105,7 +105,7 @@ inline std::ostream&
 operator<< (std::ostream& os, const PrimitiveMessage& primMess)
 {
 
-  os << "{ " << primMess.getV() << "} ";
+  os << "{ " << *primMess.getV() << "} ";
   for (History::const_iterator it = primMess.getHistory().begin(); it != primMess.getHistory().end(); ++it)
     {
       os << *it << " ";

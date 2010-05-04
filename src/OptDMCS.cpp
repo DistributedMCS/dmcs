@@ -31,6 +31,7 @@
 #include "config.h"
 #endif
 
+#include "BeliefState.h"
 #include "BeliefCombination.h"
 #include "ClaspResultGrammar.h"
 #include "ClaspResultBuilder.h"
@@ -61,12 +62,36 @@ OptDMCS::~OptDMCS()
 
 
 
-BeliefStateListPtr
+OptDMCS::dmcs_return_type
 OptDMCS::getBeliefStates(const OptMessage& mess)
 {
   const std::size_t n = ctx->getSystemSize();
   const std::size_t k = ctx->getContextID(); // my local id
   const std::size_t c = mess.getInvoker();
+
+#ifdef DMCS_STATS_INFO
+  // initialize the statistic information
+  StatsInfosPtr sis(new StatsInfos);
+  
+  for (std::size_t i = 0; i < n; ++i)
+    {
+      TimeDurationPtr t_i(new TimeDuration(0, 0, 0, 0));
+      TimeDurationPtr c_i(new TimeDuration(0, 0, 0, 0));
+      TimeDurationPtr p_i(new TimeDuration(0, 0, 0, 0));
+      TransferTimesPtr tf_i(new TransferTimes);
+      
+      StatsInfoPtr si(new StatsInfo(t_i, c_i, p_i, tf_i));
+      
+      sis->push_back(si);
+    }
+  
+  TimeDurationPtr time_combine(new TimeDuration(0, 0, 0, 0));
+
+  std::cerr << "Initialization of the statistic information: " << *sis << std::endl;
+
+  TransferTimesPtr time_transfer(new TransferTimes);
+#endif
+
 
 #if defined(DEBUG)
   std::cerr << "OptDMCS at " << k << ", invoker ID " << c << std::endl;
@@ -120,7 +145,12 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   //
 
   // This will give us local_belief_states
-  BeliefStateListPtr local_belief_states = localSolve(globalV);
+  //BeliefStateListPtr local_belief_states = localSolve(globalV);
+
+  BeliefStateListPtr local_belief_states;
+
+  STATS_DIFF (local_belief_states = localSolve(globalV),
+	      time_lsolve);
 
 #ifdef DEBUG
   BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
@@ -130,7 +160,10 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   ///@todo TK: can we get rid off it?
   BeliefStateListPtr temporary_belief_states(new BeliefStateList);
 
-  project_to(local_belief_states, globalV, temporary_belief_states);
+  //project_to(local_belief_states, globalV, temporary_belief_states);
+
+  STATS_DIFF (project_to(local_belief_states, globalV, temporary_belief_states),
+	      time_projection);
 
 #if defined(DEBUG)
   std::cerr << "Projected belief states..." << std::endl;
@@ -157,6 +190,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
     {
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::resolver resolver(io_service);
+
+      std::size_t neighbor_id = *it;
       
       boost::asio::ip::tcp::resolver::query query(query_plan->getHostname(*it),
 						  query_plan->getPort(*it));
@@ -171,21 +206,42 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       Client<OptCommandType> client(io_service, res_it, neighbourMess);
       
       io_service.run();
+
+
+      dmcs_return_type client_mess = client.getResult();
+
+#ifdef DMCS_STATS_INFO
+      BeliefStateListPtr neighbor_belief_states = client_mess->getBeliefStates();
+      StatsInfosPtr stats_infos = client_mess->getStatsInfo();
+
+      combine(sis, stats_infos);
       
+      PTimePtr sent_moment = client_mess->getSendingMoment();
+      PTime this_moment = boost::posix_time::microsec_clock::local_time();
+      TimeDurationPtr time_neighbor_me(new TimeDuration(0, 0, 0, 0));
+      *time_neighbor_me = this_moment - (*sent_moment);
+      
+      time_transfer->insert(std::pair<std::size_t, TimeDurationPtr>(neighbor_id, time_neighbor_me));
+#else
       BeliefStateListPtr neighbor_belief_states = client.getResult();
+#endif // DMCS_STATS_INFO
       
 #if defined(DEBUG)
-      std::cerr << "Belief states received from neighbor " << *it << std::endl;	  
-      std::cerr << neighbor_belief_states << std::endl;      
+      //std::cerr << "Belief states received from neighbor " << *it << std::endl;	  
+      //std::cerr << neighbor_belief_states << std::endl;      
 #endif // DEBUG
 	  
-      temporary_belief_states = combine(temporary_belief_states,
-					neighbor_belief_states,
-					globalV);
-      
+      //temporary_belief_states = combine(temporary_belief_states, neighbor_belief_states, globalV);
+
+      STATS_DIFF_REUSE (temporary_belief_states = combine(temporary_belief_states,
+						neighbor_belief_states,
+						globalV),
+			time_combine
+			);
+
 #if defined(DEBUG)
-      std::cerr << "Combined belief state:... " << std::endl;	  	  
-      std::cerr << temporary_belief_states << std::endl;
+      //std::cerr << "Combined belief state:... " << std::endl;	  	  
+      //std::cerr << temporary_belief_states << std::endl;
 #endif // DEBUG
     }
   
@@ -199,7 +255,34 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   std::cerr << belief_states << std::endl;
 #endif // DEBUG
 
+#ifdef DMCS_STATS_INFO
+  StatsInfoPtr my_stats_info = (*sis)[k-1];
+
+  TimeDurationPtr  my_lsolve     = my_stats_info->lsolve;
+  TimeDurationPtr  my_combine    = my_stats_info->combine;
+  TimeDurationPtr  my_projection = my_stats_info->projection;
+  TransferTimesPtr my_transfer   = my_stats_info->transfer;
+
+  *my_lsolve     = (*my_lsolve)     + (*time_lsolve);
+  *my_combine    = (*my_combine)    + (*time_combine);
+  *my_projection = (*my_projection) + (*time_projection);
+  *my_transfer   = *time_transfer; // copy here
+
+  std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
+
+  PTime s_moment = boost::posix_time::microsec_clock::local_time();
+  PTimePtr sending_moment(new PTime(s_moment));
+
+  ReturnMessagePtr returning_message(new ReturnMessage(belief_states, sending_moment, sis));
+
+  std::cerr << "Returning message is: " << std::endl << *returning_message << std::endl;
+
+  return returning_message;
+
+#else
   return belief_states;
+#endif // DMCS_STATS_INFO
+
 }
 
 } // namespace dmcs
