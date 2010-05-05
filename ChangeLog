@@ -1,3 +1,20 @@
+2010-05-05  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* include/QueryPlan.h: Replace Neighbors by NeighborList.
+	* include/Signature.h: Replace Signatures by SignatureVec.
+	* src/genTest.cpp: Likewise.
+	* src/dmcsd.cpp): Likewise.
+	* src/QueryPlan.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/Neighbor.h: Likewise.
+	* include/Context.h: Likewise.
+
+	* include/BridgeRulesBuilder.tcc: Build neighbor_list from
+	bridge rules.
+	* include/BridgeRulesBuilder.h: Likewise.
 2010-05-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 

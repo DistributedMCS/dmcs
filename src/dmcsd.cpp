@@ -161,8 +161,10 @@ int main(int argc, char* argv[])
 	///@todo change when the manager is added
       QueryPlanPtr query_plan(new QueryPlan);
 
+
       query_plan->read_graph(filename_topo);
       std::size_t system_size = query_plan->getSystemSize();
+      NeighborListPtr neighbor_list = query_plan->getNeighbors(myid);
 
       // get the global signature from the query plan. Later we might
       // find another way to pass it to dmcsd, so that we don't have
@@ -170,7 +172,8 @@ int main(int argc, char* argv[])
       // opt-dmcs and should be computed from neighbors + global_sigs,
       // by the manager.
 
-      SignaturesPtr global_sigs(new Signatures);
+      ///@todo: have config file to provide Signature
+      SignatureVecPtr global_sigs(new SignatureVec);
       for (std::size_t i = 1; i <= system_size; ++ i)
 	{
 	  SignaturePtr s(new Signature);
@@ -210,7 +213,7 @@ int main(int argc, char* argv[])
 
       // now we got the local KB,
       // going to parse the bridge rules
-      BridgeRulesBuilder<BRGrammar> builder_br(bridge_rules, sig, query_plan);
+      BridgeRulesBuilder<BRGrammar> builder_br(myid, bridge_rules, neighbor_list, global_sigs);
       ParserDirector<BRGrammar> parser_director_br;
       parser_director_br.setBuilder(&builder_br);
       parser_director_br.parse(filename_bridge_rules);

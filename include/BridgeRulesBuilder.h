@@ -33,7 +33,7 @@
 #include "BaseBuilder.h"
 #include "Rule.h"
 #include "Theory.h"
-#include "QueryPlan.h"
+#include "Signature.h"
 
 namespace dmcs {
 
@@ -41,7 +41,10 @@ template<class Grammar>
 class BridgeRulesBuilder : public BaseBuilder<Grammar>
 {
 public:
-  BridgeRulesBuilder(BridgeRulesPtr& bridge_rules_, SignaturePtr& sig_, QueryPlanPtr& query_plan_);
+  BridgeRulesBuilder(std::size_t ctx_id, 
+		     BridgeRulesPtr& bridge_rules_, 
+		     NeighborListPtr& neighbor_list_,
+		     SignatureVecPtr& global_sigs_);
 
   void
   buildNode (typename BaseBuilder<Grammar>::node_t& node);
@@ -56,9 +59,12 @@ private:
   BridgeAtom
   build_bridge_atom(typename BaseBuilder<Grammar>::node_t& node);
 
+  std::size_t ctx_id; // ctx_id can later be used with sym to make a
+		      // composite key of the signature. With this we
+		      // can have shared signatures.
   BridgeRulesPtr& bridge_rules;
-  SignaturePtr& sig;
-  QueryPlanPtr& query_plan;
+  NeighborListPtr& neighbor_list;
+  SignatureVecPtr& global_sigs;
 };
 
 } // namespace dmcs

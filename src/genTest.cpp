@@ -83,7 +83,7 @@ ContextsPtr contexts(new Contexts);
 std::vector<Signature> sigmas;
 
 std::size_t no_contexts;
-int no_atoms;
+std::size_t no_atoms;
 int no_interface_atoms;
 int no_bridge_rules;
 int topology_type;
@@ -527,10 +527,10 @@ const std::string
 getOptimumDLVFilter() 
 {
   std::string result;
-  NeighborsPtr neighbors = optimal_qp->getNeighbors1(1);
+  NeighborListPtr neighbors = optimal_qp->getNeighbors1(1);
   BeliefStatePtr neighborsInterface(new BeliefState(no_contexts, 0));
   
-  for(Neighbors::const_iterator it = neighbors->begin(); it != neighbors->end();++it )
+  for(NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end();++it )
     {
       const BeliefStatePtr& currentInterface = optimal_qp->getInterface1(1, *it);
       BeliefState::iterator jt = currentInterface->begin();

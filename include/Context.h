@@ -82,7 +82,7 @@ public:
     return query_plan;
   }
 
-  const NeighborsPtr
+  const NeighborListPtr
   getNeighbors() const
   {
     return query_plan->getNeighbors(id);

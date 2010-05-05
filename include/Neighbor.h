@@ -31,6 +31,7 @@
 #if !defined(NEIGHBOR_H)
 #define NEIGHBOR_H
 
+#include <list>
 #include <string>
 #include <boost/shared_ptr.hpp>
 
@@ -57,9 +58,9 @@ struct Neighbor
 };
 
 typedef boost::shared_ptr<Neighbor> NeighborPtr;
-typedef std::vector<NeighborPtr> Neighbors;
-typedef boost::shared_ptr<Neighbors> NeighborsPtr;
-typedef std::vector<NeighborsPtr> Neighbors2D;
+typedef std::list<NeighborPtr> NeighborList;
+typedef boost::shared_ptr<NeighborList> NeighborPtr;
+
 
 } // namespace dmcs
 

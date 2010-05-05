@@ -54,7 +54,7 @@
 
 namespace dmcs {
 
-PrimitiveDMCS::PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t, const SignaturesPtr& s)
+PrimitiveDMCS::PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s)
   : BaseDMCS(c, t),
     global_sigs(s),
     cacheStats(new CacheStats),
@@ -77,9 +77,9 @@ PrimitiveDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignatureP
 
   const SignatureBySym& my_sig_sym = boost::get<Tag::Sym>(*my_sig);
 
-  const NeighborsPtr& neighbors = ctx->getNeighbors();
+  const NeighborListPtr& neighbors = ctx->getNeighbors();
 
-  for (Neighbors::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
+  for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
     {
       const std::size_t neighbor_id = *n_it - 1;
       const BeliefSet neighbor_V = (*V)[neighbor_id];
@@ -177,10 +177,10 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
       std::size_t my_id = ctx->getContextID();
       const QueryPlanPtr& query_plan = ctx->getQueryPlan();
       
-      const NeighborsPtr& neighbors = query_plan->getNeighbors(my_id);
+      const NeighborListPtr& neighbors = query_plan->getNeighbors(my_id);
 
 
-      for (Neighbors::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
+      for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
 	{
 
 	  const Signature& neighbor_sig = query_plan->getSignature(*n_it);
@@ -290,7 +290,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     //
     // detect cycles
     //
-    const NeighborsPtr& nbs = ctx->getNeighbors();
+    const NeighborListPtr& nbs = ctx->getNeighbors();
     const History& hist = mess.getHistory();
 
     if ((hist.find(k) != hist.end()) || nbs->empty())
@@ -316,7 +316,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	// We are now at an intermediate context.
 	// Need to consult all neighbors before combining with our local belief states
 
-	for (Neighbors::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
+	for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
 	  {
 	    boost::asio::io_service io_service;
 	    boost::asio::ip::tcp::resolver resolver(io_service);

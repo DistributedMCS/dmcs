@@ -216,9 +216,9 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       
       std::size_t my_id = ctx->getContextID();
       
-      const NeighborsPtr& neighbors = query_plan->getNeighbors(my_id);
+      const NeighborListPtr& neighbors = query_plan->getNeighbors(my_id);
 
-      for (Neighbors::const_iterator n_it = neighbors->begin();
+      for (NeighborList::const_iterator n_it = neighbors->begin();
 					 n_it != neighbors->end();
 					 ++n_it)
 				{
@@ -331,13 +331,13 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   // now visit the neighbors
   //
 
-  const NeighborsPtr& nbs = query_plan->getNeighbors(k);
+  const NeighborListPtr& nbs = query_plan->getNeighbors(k);
 
 #if defined(DEBUG)
   std::cerr << "Number of neighbors: " << nbs->size() << std::endl;
 #endif //DEBUG
 
-  for (Neighbors::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
+  for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
     {
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::resolver resolver(io_service);

@@ -101,8 +101,8 @@ typedef boost::property_map<graph_t, interface_t>::type           EdgeInterfaceP
 typedef boost::ref_property_map<graph_t*, BeliefStatePtr>         GraphNameProperty;
 
 /// Neighbors is a list of context ids
-typedef std::vector<std::size_t> Neighbors;
-typedef boost::shared_ptr<Neighbors> NeighborsPtr;
+typedef std::vector<std::size_t> NeighborList;
+typedef boost::shared_ptr<NeighborList> NeighborListPtr;
 
 typedef std::pair<std::size_t, std::size_t> EdgeInt;
 typedef std::vector<EdgeInt> Edges;
@@ -175,10 +175,10 @@ public:
   void
   remove_connection(std::size_t context1, std::size_t context2);
 
-  NeighborsPtr
+  NeighborListPtr
   getNeighbors1(std::size_t context_id);
 
-  NeighborsPtr
+  NeighborListPtr
   getNeighbors(std::size_t context_id);
 
   EdgesPtr

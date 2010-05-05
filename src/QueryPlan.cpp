@@ -273,10 +273,10 @@ QueryPlan::remove_connection(std::size_t context_id1, std::size_t context_id2)
 }
 
 
-NeighborsPtr
+NeighborListPtr
 QueryPlan::getNeighbors1(std::size_t context_id)
 {
-  NeighborsPtr nbs(new Neighbors);
+  NeighborListPtr nbs(new NeighborList);
   
   Vertex v = boost::vertex(context_id-1, query_plan);
   
@@ -296,11 +296,11 @@ QueryPlan::getNeighbors1(std::size_t context_id)
 }
 
 
-NeighborsPtr
+NeighborListPtr
 QueryPlan::getNeighbors(std::size_t context_id)
 {
   //std::cerr << "in get Neighbors with VMAP"<< std::endl;
-  NeighborsPtr nbs(new Neighbors);
+  NeighborListPtr nbs(new NeighborList);
   
   Vertex v = boost::vertex(vmap[context_id-1], query_plan);
   OutEdgeIter out_i;

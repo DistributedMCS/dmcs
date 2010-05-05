@@ -37,12 +37,14 @@
 namespace dmcs {
 
 template<typename Grammar>
-BridgeRulesBuilder<Grammar>::BridgeRulesBuilder(BridgeRulesPtr& bridge_rules_, 
-						SignaturePtr& sig_,
-						QueryPlanPtr& query_plan_)
-  : bridge_rules(bridge_rules_),
-    sig(sig_),
-    query_plan(query_plan_)
+BridgeRulesBuilder<Grammar>::BridgeRulesBuilder(std::size_t ctx_id_, 
+						BridgeRulesPtr& bridge_rules_, 
+						NeighborListPtr& neighbor_list_,
+						SignatureVecPtr& global_sigs_)
+  : ctx_id(ctx_id_),
+    bridge_rules(bridge_rules_),
+    neighbor_list(neighbor_list_),
+    global_sigs(global_sigs_)
 { }
 
 template<typename Grammar>
@@ -78,8 +80,10 @@ BridgeRulesBuilder<Grammar>::build_disjunctive_head(typename BaseBuilder<Grammar
 
       std::string atom_name = BaseBuilder<Grammar>::createStringFromNode(it->children[0]);
 
-      const SignatureBySym& local_sig = boost::get<Tag::Sym>(*sig);
-      SignatureBySym::const_iterator loc_it = local_sig.find(atom_name);      
+      SignaturePtr& local_sig = (*global_sigs)[ctx_id - 1];
+      const SignatureBySym& local_sig_sym = boost::get<Tag::Sym>(*local_sig);
+      SignatureBySym::const_iterator loc_it = local_sig_sym.find(atom_name);      
+      // getHead(r)->push_back(loc_it->localId);
       r->first->push_back(loc_it->localId);
     }
 }
@@ -97,12 +101,14 @@ BridgeRulesBuilder<Grammar>::build_body(typename BaseBuilder<Grammar>::node_t& n
 	// positive atom
 	{
 	  BridgeAtom bap = build_bridge_atom(it->children[0]);
+	  // getPositiveBody(r)->push_back(bap);
 	  r->second.first->push_back(bap);
 	}
       else
 	// negative atom
 	{
 	  BridgeAtom bap = build_bridge_atom(it->children[1]);
+	  // getNegativeBody(r)->push_back(bap);
 	  r->second.second->push_back(bap);
 	}
     }
@@ -116,32 +122,34 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
   std::string context_id = BaseBuilder<Grammar>::createStringFromNode(node.children[0]);
   std::string atom_name = BaseBuilder<Grammar>::createStringFromNode(node.children[1]);
 
-  SignatureBySym& local_sig = boost::get<Tag::Sym>(*sig);
-  SignatureBySym::iterator loc_it = local_sig.find(atom_name);   
+  SignaturePtr& local_sig = (*global_sigs)[ctx_id - 1];
+  SignatureBySym& local_sig_sym = boost::get<Tag::Sym>(*local_sig);
+  SignatureBySym::iterator loc_it = local_sig_sym.find(atom_name);   
 
   // did not find local id for atom_name, generate one
-  if(loc_it == local_sig.end())
+  if(loc_it == local_sig_sym.end())
     {
       std::size_t contextID = std::atoi(context_id.c_str());
 
-      const Signature& neighborSignature = query_plan->getSignature(contextID);
+      //const Signature& neighborSignature = query_plan->getSignature(contextID);
+      const SignaturePtr neighborSignature = (*global_sigs)[contextID - 1];
     
-      const SignatureBySym& neighbor_sig = boost::get<Tag::Sym>(neighborSignature);
-      SignatureBySym::const_iterator neighbor_it = neighbor_sig.find(atom_name);
+      const SignatureBySym& neighbor_sig_sym = boost::get<Tag::Sym>(*neighborSignature);
+      SignatureBySym::const_iterator neighbor_it = neighbor_sig_sym.find(atom_name);
 
-      assert(neighbor_it != neighbor_sig.end());
+      assert(neighbor_it != neighbor_sig_sym.end());
 
-      std::size_t local_id_here = sig->size() + 1;
-      sig->insert(Symbol(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId));
+      std::size_t local_id_here = local_sig->size() + 1;
+      local_sig->insert(Symbol(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId));
     }
 
   // if local_sig automatically reflects the change of sig, then this
   //should be ok, otherwise we have to get the signature by id again
   //from the sig.  might need to remove this
 
-  local_sig = boost::get<Tag::Sym>(*sig);
-  loc_it = local_sig.find(atom_name);      
-  assert(loc_it !=local_sig.end() );
+  local_sig_sym = boost::get<Tag::Sym>(*local_sig);
+  loc_it = local_sig_sym.find(atom_name);      
+  assert(loc_it !=local_sig_sym.end() );
   BridgeAtom ba(std::atoi(context_id.c_str()), loc_it->localId);
   return ba;
 }
