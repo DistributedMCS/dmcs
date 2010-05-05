@@ -43,6 +43,7 @@ class BaseSolver;
 /**
  * @brief Base class for solver processes
  */
+template <typename ModelBuilder>
 class Process
 {
 public:
@@ -50,7 +51,7 @@ public:
   ~Process() { }
 
   virtual BaseSolver*
-  createSolver() = 0;
+  createSolver(ModelBuilder*) = 0;
 
   virtual void
   addOption(const std::string&) = 0;

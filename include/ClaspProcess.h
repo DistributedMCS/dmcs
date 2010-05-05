@@ -34,6 +34,8 @@
 #include "Process.h"
 #include "ProcessBuf.h"
 #include "BaseSolver.h"
+#include "ClaspResultGrammar.h"
+#include "ClaspResultBuilder.h"
 
 #include <iosfwd>
 #include <string>
@@ -42,7 +44,7 @@
 
 namespace dmcs {
 
-class ClaspProcess : public Process 
+class ClaspProcess : public Process<ClaspResultBuilder<ClaspResultGrammar> >
 {
 protected:
   ProcessBuf proc;
@@ -61,7 +63,7 @@ public:
   ~ClaspProcess();
 
   virtual BaseSolver*
-  createSolver();
+  createSolver(ClaspResultBuilder<ClaspResultGrammar>*);
 
   virtual void 
   addOption(const std::string&);

@@ -53,9 +53,9 @@ ClaspProcess::~ClaspProcess()
 }
 
 BaseSolver*
-ClaspProcess::createSolver()
+ClaspProcess::createSolver(ClaspResultBuilder<ClaspResultGrammar>* mb)
 {
-  return new SatSolver<DimacsVisitor, ClaspResultBuilder<ClaspResultGrammar>, ClaspResultGrammar>(*this);
+  return new SatSolver<DimacsVisitor, ClaspResultBuilder<ClaspResultGrammar>, ClaspResultGrammar>(this, mb);
 }
 
 void

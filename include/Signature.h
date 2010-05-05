@@ -100,6 +100,8 @@ typedef boost::multi_index_container<
 
 
 typedef boost::shared_ptr<Signature> SignaturePtr;
+typedef std::vector<SignaturePtr> Signatures;
+typedef boost::shared_ptr<Signatures> SignaturesPtr;
 
 // output the whole Signature
 inline std::ostream&

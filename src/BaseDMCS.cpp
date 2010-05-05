@@ -34,18 +34,62 @@
 
 #include "BaseDMCS.h"
 #include "ClaspProcess.h"
+#include "StatsInfo.h"
 
 namespace dmcs {
 
 BaseDMCS::BaseDMCS(const ContextPtr& c, const TheoryPtr& t)
   : ctx(c),
-    theory(t)
+    theory(t),
+    sis(new StatsInfos)
 { }
 
 
 
 BaseDMCS::~BaseDMCS()
 { }
+
+
+
+std::size_t
+BaseDMCS::updateGuessingSignature(SignaturePtr& guessing_sig, 
+			const SignatureBySym& my_sig_sym,
+			const Signature& neighbor_sig,
+			const BeliefSet& neighbor_V,
+			std::size_t guessing_sig_local_id)
+{
+  const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
+      
+  // setup local signature for neighbors: this way we can translate
+  // SAT models back to belief states in case we do not
+  // reference them in the bridge rules
+  //for (std::size_t i = 1; i < sizeof(neighbor_V)*8; ++i)
+  for (std::size_t i = 1; i <= neighbor_sig.size(); ++i) // at most sig-size bits are allowed
+    {
+      if (testBeliefSet(neighbor_V, i))
+	{
+	  SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
+	  
+	  // the neighbor's V must be set up properly
+	  assert(neighbor_it != neighbor_loc.end());
+	  
+	  SignatureBySym::const_iterator my_it = my_sig_sym.find(neighbor_it->sym);
+	  
+	  // only add to guessing_sig ig this atom is not in
+	  // my_sig, i.e., it's in the neighbor's interface but
+		  // does not show up in my bridge rules
+	  if (my_it != my_sig_sym.end())
+	    {
+	      // add new symbol for neighbor
+	      Symbol sym(neighbor_it->sym, neighbor_it->ctxId, guessing_sig_local_id, neighbor_it->origId);
+	      guessing_sig->insert(sym);
+	      guessing_sig_local_id++;
+	    }
+	}
+    }
+
+  return guessing_sig_local_id;
+}
 
 
 
@@ -56,14 +100,17 @@ BaseDMCS::localSolve(const SignatureByLocal& sig)
   std::cerr << "Starting local solve..." << std::endl;
 #endif
 
-  ClaspProcess cp;
-  cp.addOption("-n 0");
-  boost::shared_ptr<BaseSolver> solver(cp.createSolver());
-
   BeliefStateListPtr local_belief_states(new BeliefStateList);
 
+  ///@todo TK: fix the system size, a context should not depend on the whole MCS and the query plan
+  ClaspResultBuilder<ClaspResultGrammar> crb(sig, local_belief_states, ctx->getQueryPlan()->getSystemSize());
+
+  ClaspProcess cp;
+  cp.addOption("-n 0");
+  boost::shared_ptr<BaseSolver> solver(cp.createSolver(&crb));
+
   ///@todo 
-  solver->solve(sig, local_belief_states, theory);
+  solver->solve(theory, sig.size());
 
 #ifdef DEBUG
   std::cerr << "Got " << local_belief_states->size();
@@ -71,8 +118,44 @@ BaseDMCS::localSolve(const SignatureByLocal& sig)
   std::cerr << "Local belief states from localsolve(): " << std::endl;
   std::cerr << *local_belief_states << std::endl;
 #endif
+
   return local_belief_states;
 }
+
+
+
+/// methods only needed for providing statistic information
+#ifdef DMCS_STATS_INFO
+
+void
+BaseDMCS::initStatsInfos(std::size_t system_size)
+{
+  // initialize the statistic information
+  sis->clear();
+  
+  for (std::size_t i = 0; i < system_size; ++i)
+    {
+      TimeDuration local_i(0, 0, 0, 0);
+      TimeDuration combine_i(0, 0, 0, 0);
+      TimeDuration project_i(0, 0, 0, 0);
+      
+      Info info_local(local_i, 0);
+      Info info_combine(combine_i, 0);
+      Info info_project(project_i, 0);
+      
+      TransferTimesPtr tf_i(new TransferTimes);
+      
+      StatsInfo si(info_local, info_combine, info_project, tf_i);
+      
+      sis->push_back(si);
+    }
+
+#ifdef DEBUG
+  std::cerr << "Initialization of the statistic information: " << *sis << std::endl;
+#endif // DEBUG
+}
+
+#endif // DMCS_STATS_INFO
 
 
 } // namespace dmcs

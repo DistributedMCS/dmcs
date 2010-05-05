@@ -82,6 +82,12 @@ public:
     return query_plan;
   }
 
+  const NeighborsPtr
+  getNeighbors() const
+  {
+    return query_plan->getNeighbors(id);
+  }
+
   const SignaturePtr&
   getSignature() const
   {

@@ -53,7 +53,7 @@ public:
   typedef BeliefStateListPtr dmcs_return_type;
 #endif
 
-  PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t);
+  PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t, const SignaturesPtr& s);
 
   virtual
   ~PrimitiveDMCS();
@@ -61,7 +61,13 @@ public:
   dmcs_return_type
   getBeliefStates(PrimitiveMessage& mess);
 
+protected:
+
+  SignaturePtr
+  createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
+
 private:
+  SignaturesPtr global_sigs; /// global signature of the whole system 
   CacheStatsPtr cacheStats;
   CachePtr cache;
 };

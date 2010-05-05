@@ -42,40 +42,39 @@ namespace dmcs {
 
 
 template <typename Builder, typename Parser, typename ParserGrammar>
-SatSolver<Builder, Parser, ParserGrammar>::SatSolver(Process& p)
-  : proc(p)
+SatSolver<Builder, Parser, ParserGrammar>::SatSolver(Process<Parser>* p, Parser* mb)
+  : proc(p),
+    model_builder(mb)
 { }
 
 
 typedef std::list<Signature::const_iterator> SignatureIterators;
 
 template <typename Builder, typename Parser, typename ParserGrammar>
-void
-SatSolver<Builder, Parser, ParserGrammar>::solve(const SignatureByLocal& context_signature,
-						 BeliefStateListPtr& belief_states,
-						 const TheoryPtr& theory
-						 )
+int
+SatSolver<Builder, Parser, ParserGrammar>::solve(const TheoryPtr& theory, std::size_t sig_size)
 {
   int retcode = -1;
   
   try
     {
+      assert(proc != 0);
 
       //
       // send the theory to the SAT solver 
       //
      
-      proc.spawn();
+      proc->spawn();
       
-      Builder builder(proc.getOutput());
-      builder.visitTheory(theory, context_signature.size());
+      Builder builder(proc->getOutput());
+      builder.visitTheory(theory, sig_size);
 
 #ifdef DEBUG
       Builder evil_builder(std::cerr);
-      evil_builder.visitTheory(theory, context_signature.size());
+      evil_builder.visitTheory(theory, sig_size);
 #endif
       
-      proc.endoffile();
+      proc->endoffile();
       
       //
       // parse result and set belief states
@@ -85,18 +84,17 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const SignatureByLocal& context
       std::cerr << "Parsing the models..." << std::endl;
 #endif // DEBUG
       
-      Parser model_builder(context_signature, belief_states);
+      //Parser model_builder(context_signature, belief_states);
       
       ParserDirector<ParserGrammar> parser_director;
-      parser_director.setBuilder(&model_builder);
-      parser_director.parse(proc.getInput());      
+      parser_director.setBuilder(model_builder);
+      parser_director.parse(proc->getInput());      
 
       //
       // close the connection to the SAT solver
       //
 
-      retcode = proc.close();
-
+      retcode = proc->close();
     }
   catch (std::ios_base::failure& e)
     {
@@ -108,6 +106,8 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const SignatureByLocal& context
       std::cerr << "Error: " << e.what() << std::endl;
       throw e;
     }
+
+  return retcode;
 }
   
 } // namespace dmcs

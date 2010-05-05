@@ -37,13 +37,13 @@ namespace dmcs {
 
 template<typename Grammar>
 ClaspResultBuilder<Grammar>::ClaspResultBuilder(const SignatureByLocal& context_signature,
-						BeliefStateListPtr& belief_states_)
+						const BeliefStateListPtr& belief_states_,
+						std::size_t sys_size)
   ///@todo future versions of clasp will have a sentinel
   : BaseBuilder<Grammar>(Grammar(context_signature.size())), 
     //    sig(context_.getSignature()),
     local_sig(context_signature),
-    sig_size(local_sig.size()),
-    system_size(0), ///@todo fix it
+    system_size(sys_size),
     belief_states(belief_states_)
 { }
 
@@ -54,28 +54,15 @@ ClaspResultBuilder<Grammar>::buildNode (typename BaseBuilder<Grammar>::node_t& n
 {
   assert(node.value.id() == Grammar::Value); // we expect a model
 
-  ///@todo must find a way to get the system size in the proxySignature format
+  assert(node.children.size() == local_sig.size()); // a model must have sig_size literals
+
+  //
+  // create a new belief state and dispatch content of the model represented in node
+  //
 
   BeliefStatePtr bs(new BeliefState(system_size, 0)); // initially, all is zero
-
-  ///@todo this may be optimized, I think we can remove the non-epsilon part here...
-
-  // mark this belief set as non-epsilon
-  //bs.belief_state_ptr->belief_state[context.getContextID() - 1] = 1;
-
-  //NeighborsPtr_ neighbors= context.getQueryPlan()->getNeighbors(context.getContextID());
-  // activate neighbors as non-epsilons
   
-  /*for (Neighbors_::const_iterator it = neighbors->begin(); 
-       it != neighbors->end(); ++it)
-    {
-      std::cerr << "Turn on neighbor " << *it << std::endl;
-      bs.belief_state_ptr->belief_state[(*it) - 1] = 1;
-      }*/
-  
-  assert(node.children.size() == sig_size); // a model must have sig_size literals
-  
-  // set all positive literals in the belief state
+  // set all literals in the belief state based on the model in node
   for (typename BaseBuilder<Grammar>::node_t::tree_iterator jt = node.children.begin(); 
        jt != node.children.end(); ++jt)
     {
@@ -93,6 +80,7 @@ ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& 
 {
   assert(node.children.size() == 1); // we expect that literals have size() == 1
 
+  ///@todo TK: find a way to get integers from the model
   std::string str_lit = BaseBuilder<Grammar>::createStringFromNode(node.children[0]);
 
   ///@todo no error checking??
@@ -100,7 +88,7 @@ ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& 
   
   // we only allow non-zero literals in range of the signature, as 0
   // is used as sentinel
-  assert(std::abs(local_lit) > 0 && std::abs(local_lit) <= (int)sig_size);
+  assert(std::abs(local_lit) > 0 && std::abs(local_lit) <= (int)local_sig.size());
 
   // find the global value for the belief state
   SignatureByLocal::const_iterator loc_it = local_sig.find(std::abs(local_lit));

@@ -34,20 +34,22 @@
 
 namespace dmcs {
 
+template <typename ModelBuilder>
 class Process;
 
 template <typename Builder, typename Parser, typename ParserGrammar>
 class SatSolver : public BaseSolver
 {
 private:
-  Process& proc;
+  Process<Parser>* proc;
+  Parser* model_builder;
 
 public:
   /// Ctor.
-  SatSolver(Process& p);
+  SatSolver(Process<Parser>* p, Parser* mb);
 
-  void
-  solve(const SignatureByLocal& context, BeliefStateListPtr& belief_states, const TheoryPtr& theory);
+  int
+  solve(const TheoryPtr& theory, std::size_t sig_size);
 
 };
 

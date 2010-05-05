@@ -28,8 +28,6 @@
  */
 
 #include "Theory.h"
-#include "BeliefState.h"
-#include "Context.h"
 
 #if !defined(BASE_SOLVER_H)
 #define BASE_SOLVER_H
@@ -47,9 +45,8 @@ class BaseSolver
   ~BaseSolver()
   {}
 
-  virtual void
-  solve(const SignatureByLocal& context_signature, BeliefStateListPtr& belief_states,
-	const TheoryPtr& theory) = 0;
+  virtual int
+  solve(const TheoryPtr& theory, std::size_t sig_size) = 0;
 };
 
 } // namespace dmcs

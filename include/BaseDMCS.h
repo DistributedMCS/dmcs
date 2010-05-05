@@ -31,6 +31,9 @@
 #ifndef BASE_DMCS_H
 #define BASE_DMCS_H
 
+#ifdef DMCS_STATS_INFO
+#include "StatsInfo.h"
+#endif // DMCS_STATS_INFO
 
 #include "BeliefState.h"
 #include "Context.h"
@@ -48,23 +51,49 @@ private:
   BaseDMCS();
 
 protected:
-  ContextPtr ctx; /// the context of DMCS
-  TheoryPtr theory; /// the theory of DMCS
+  ContextPtr    ctx;        /// the context of DMCS
+  TheoryPtr     theory;     /// the theory of DMCS
+
+#ifdef DMCS_STATS_INFO
+  StatsInfosPtr sis; /// the statistic information
+#endif // DMCS_STATS_INFO
 
   /// ctor for children
   BaseDMCS(const ContextPtr& c, const TheoryPtr& t);
 
+  virtual SignaturePtr
+  createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig) = 0;
+
+  std::size_t
+  updateGuessingSignature(SignaturePtr& guessing_sig, 
+			  const SignatureBySym& my_sig_sym,
+			  const Signature& neighbor_sig,
+			  const BeliefSet& neighbor_V,
+			  std::size_t guessing_sig_local_id);
+
   /**
-   * @par V interface
+   * @par sig signature mapping
    *
    * @return list of local belief states
    */
   virtual BeliefStateListPtr
   localSolve(const SignatureByLocal& sig);
 
+
+  /// methods only needed for providing statistic information
+#ifdef DMCS_STATS_INFO
+  /// initialize the statistic information
+  void
+  initStatsInfos(std::size_t system_size);
+#endif // DMCS_STATS_INFO
+
+
 public:
   virtual
   ~BaseDMCS();
+
+  // to be deleted
+  typedef std::list<Signature::const_iterator> SignatureIterators;
 };
 
 typedef boost::shared_ptr<BaseDMCS> DMCSPtr;

@@ -162,18 +162,24 @@ int main(int argc, char* argv[])
       QueryPlanPtr query_plan(new QueryPlan);
 
       query_plan->read_graph(filename_topo);
-
-      SignaturePtr sig(new Signature);
-      *sig = query_plan->getSignature(myid);
       std::size_t system_size = query_plan->getSystemSize();
 
-      // // create local signature from local sigma
-      // boost::tokenizer<> alphabet(my_alphabet);
-      // std::size_t symcount = 1;
-      // for (boost::tokenizer<>::iterator it = alphabet.begin(); it != alphabet.end(); ++it, ++symcount)
-      // 	{
-      // 	  sig->insert(Symbol(*it, myid, symcount, symcount));
-      // 	}
+      // get the global signature from the query plan. Later we might
+      // find another way to pass it to dmcsd, so that we don't have
+      // to depend on the query plan, which is just for the purpose of
+      // opt-dmcs and should be computed from neighbors + global_sigs,
+      // by the manager.
+
+      SignaturesPtr global_sigs(new Signatures);
+      for (std::size_t i = 1; i <= system_size; ++ i)
+	{
+	  SignaturePtr s(new Signature);
+	  *s = query_plan->getSignature(i);
+	  global_sigs->push_back(s);
+	}
+
+      // get my local signature
+      SignaturePtr sig = (*global_sigs)[myid-1];
 
 // #ifdef DEBUG
 //       std::cerr << "Server information              " << std::endl;
@@ -256,7 +262,7 @@ int main(int argc, char* argv[])
       // setup the server
       if (filename_topo.find(TOP_EXT) != std::string::npos)
 	{
-	  PrimitiveDMCSPtr d(new PrimitiveDMCS(ctx, loopFormula));
+	  PrimitiveDMCSPtr d(new PrimitiveDMCS(ctx, loopFormula, global_sigs));
 	  PrimitiveCommandType pdmcs(d);
 	  
 	  boost::shared_ptr<BaseServer> s(new Server<PrimitiveCommandType>(pdmcs, io_service, endpoint));      

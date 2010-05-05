@@ -30,6 +30,7 @@
 #ifndef CLASP_RESULT_GRAMMAR_H
 #define CLASP_RESULT_GRAMMAR_H
 
+#include <sstream>
 #include <boost/spirit/include/classic_core.hpp>
 #include <boost/spirit/include/classic_chset.hpp>
 #include <boost/spirit/include/classic_confix.hpp>

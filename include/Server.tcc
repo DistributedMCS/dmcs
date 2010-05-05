@@ -108,7 +108,7 @@ Server<CmdType>::handle_next_message(const boost::system::error_code& e, Session
       
 #if defined(DEBUG)
       std::cerr << "Sending result back to invoker" << std::endl;
-      //std::cerr << "Sending " << std::endl << result <<std::endl;
+      std::cerr << "Sending " << std::endl << *result <<std::endl;
 #endif //DEBUG
 	  
       // Send the result to the client. The connection::async_write()

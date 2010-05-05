@@ -50,7 +50,7 @@
 namespace dmcs {
 
 OptDMCS::OptDMCS(const ContextPtr& c, const TheoryPtr & t)
-  : BaseDMCS(c,t),
+  : BaseDMCS(c, t),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats))
 { }
@@ -59,6 +59,49 @@ OptDMCS::OptDMCS(const ContextPtr& c, const TheoryPtr & t)
 
 OptDMCS::~OptDMCS()
 { }
+
+
+SignaturePtr 
+OptDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig)
+{
+  SignaturePtr guessing_sig(new Signature);
+
+  // local id in guessing_sig will start from my signature's size + 1
+  std::size_t guessing_sig_local_id = my_sig->size() + 1;
+
+  const SignatureBySym& my_sig_sym = boost::get<Tag::Sym>(*my_sig);
+
+
+
+  //for (Neighbors::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
+
+	std::size_t i = 0;
+  for (BeliefState::const_iterator it = V->begin(); it != V->end(); ++it, ++i)
+    {
+      const BeliefSet neighbor_V = *it;
+
+      if (!isEpsilon(neighbor_V))
+				{
+#ifdef DEBUG
+	  std::cerr << "Interface variable of neighbor[" << i+1 <<"]: " << neighbor_V << std::endl;
+#endif
+	  
+	  const Signature& neighbor_sig = ctx->getQueryPlan()->getSignature(i);
+
+	  guessing_sig_local_id = updateGuessingSignature(guessing_sig,
+													  my_sig_sym,
+													  neighbor_sig,
+													  neighbor_V,
+													  guessing_sig_local_id);
+				}
+    }
+      
+#ifdef DEBUG
+    std::cerr << "Guessing signature: " << *guessing_sig << std::endl;
+#endif
+
+	return guessing_sig;
+}
 
 
 
@@ -158,10 +201,91 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   BeliefStateListPtr local_belief_states;
 
   ///@todo this has to be fixed ........... when Proxy is implelemented
-    const SignaturePtr& sig = ctx->getSignature();
+	const SignaturePtr& sig = ctx->getSignature();
+
+	//createGuessingSignature()
+
+    /// ***************** FOR TESTING ****************************
+
+     SignatureIterators insert_iterators;
+
+      
+#ifdef DEBUG
+    std::cerr << "Original signature: " << *sig << std::endl;
+#endif
+      
+      std::size_t my_id = ctx->getContextID();
+      
+      const NeighborsPtr& neighbors = query_plan->getNeighbors(my_id);
+
+      for (Neighbors::const_iterator n_it = neighbors->begin();
+					 n_it != neighbors->end();
+					 ++n_it)
+				{
+
+					const BeliefSet neighbor_V = query_plan->getInterface(my_id, *n_it)->at(*n_it - 1);
+					const Signature neighbor_sig = query_plan->getSignature(*n_it);
+					const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
+
+
+					std::cerr << "check neighbor " << *n_it << std::endl
+										<< "neighbor_V = " << neighbor_V << std::endl;
+	  
+					// setup local signature for neighbors: this way we can translate
+					// SAT models back to belief states in case we do not
+					// reference them in the bridge rules
+					for (std::size_t i = 1; i <= neighbor_sig.size(); ++i)
+						{
+							if (testBeliefSet(neighbor_V, i))
+								{
+									std::cerr << "Bit " << i << "is on" << std::endl;
+									SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
+									std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
+									
+									// add new symbol for neighbor
+									Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
+									std::pair<Signature::iterator, bool> sp = sig->insert(sym);
+
+									std::cerr << "want to insert " << neighbor_it->sym << std::endl;
+									
+									// only add them if it was not already included
+									// during bridge rule parsing
+									if (sp.second)
+										{
+											std::cerr << "insert " << neighbor_it->sym << std::endl;
+											insert_iterators.push_back(sp.first);
+										}
+								}
+						}
+				}
+
+				
+#ifdef DEBUG
+      std::cerr << "Updated signature: " << *sig << std::endl;
+#endif
+
+    /// **********************************************************
 
     STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig)),
 		time_lsolve);
+
+
+    /// ***************** FOR TESTING ****************************
+#ifdef DEBUG      
+      std::cerr << "Erasing..." << std::endl;
+#endif
+      
+      for (SignatureIterators::const_iterator s_it = insert_iterators.begin();
+	   s_it != insert_iterators.end(); 
+	   ++s_it)
+				{
+					sig->erase(*s_it);
+				}
+      
+#ifdef DEBUG
+      std::cerr << "Restored signature: " << *sig << std::endl;
+#endif
+    /// **********************************************************
 
 #ifdef DMCS_STATS_INFO
   my_stats_info.lsolve.second = local_belief_states->size();
@@ -240,7 +364,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       TimeDuration time_neighbor_me = this_moment - sent_moment;
       Info neighbor_transfer(time_neighbor_me, neighbor_belief_states->size());
       
-      time_transfer->insert(std::pair<std::size_t, Info>(neighbor_id, neighbor_transfer));
+      time_transfer->insert(std::pair<std::size_t, Info>(*it - 1, neighbor_transfer));
 #else
       BeliefStateListPtr neighbor_belief_states = client.getResult();
 #endif // DMCS_STATS_INFO
@@ -302,7 +426,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   return belief_states;
 #endif // DMCS_STATS_INFO
 
-}
+}			
+				
 
 } // namespace dmcs
 
