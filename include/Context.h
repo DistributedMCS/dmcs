@@ -55,13 +55,15 @@ public:
 	  SignaturePtr& signature_,
 	  QueryPlanPtr& query_plan_,
 	  RulesPtr& local_kb_,
-	  BridgeRulesPtr& bridgerules_)
+	  BridgeRulesPtr& bridgerules_,
+	  NeighborListPtr& neighbor_list_)
     : id(id_),
       system_size(system_size_),
       signature(signature_),
       query_plan(query_plan_),
       local_kb(local_kb_),
-      bridgerules(bridgerules_)
+      bridgerules(bridgerules_),
+      neighbor_list(neighbor_list_)
   { }
 
   std::size_t
@@ -85,7 +87,7 @@ public:
   const NeighborListPtr
   getNeighbors() const
   {
-    return query_plan->getNeighbors(id);
+    return neighbor_list;
   }
 
   const SignaturePtr&
@@ -113,6 +115,7 @@ private:
   QueryPlanPtr query_plan;
   RulesPtr local_kb;
   BridgeRulesPtr bridgerules;
+  NeighborListPtr neighbor_list;
 };
 
 typedef boost::shared_ptr<Context> ContextPtr;

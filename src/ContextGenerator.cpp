@@ -209,7 +209,9 @@ ContextGenerator::generate_bridge_rule(const ContextPtr& context)
 
       int neighbors_size = nbors->size();
       int neighbor_pos = (rand() % neighbors_size);
-      std::size_t neighbor_id = (*nbors)[neighbor_pos];
+      NeighborList::const_iterator it = nbors->begin();
+      std::advance(it, neighbor_pos);
+      std::size_t neighbor_id = *it;//(*nbors)[neighbor_pos];
 
       int atom = sign() * ((rand() % no_atoms) + 1);
 

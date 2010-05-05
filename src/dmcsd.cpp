@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 
       query_plan->read_graph(filename_topo);
       std::size_t system_size = query_plan->getSystemSize();
-      NeighborListPtr neighbor_list = query_plan->getNeighbors(myid);
+      //NeighborListPtr neighbor_list = query_plan->getNeighbors(myid);
 
       // get the global signature from the query plan. Later we might
       // find another way to pass it to dmcsd, so that we don't have
@@ -213,13 +213,17 @@ int main(int argc, char* argv[])
 
       // now we got the local KB,
       // going to parse the bridge rules
+      NeighborListPtr neighbor_list(new NeighborList);
+
       BridgeRulesBuilder<BRGrammar> builder_br(myid, bridge_rules, neighbor_list, global_sigs);
       ParserDirector<BRGrammar> parser_director_br;
       parser_director_br.setBuilder(&builder_br);
       parser_director_br.parse(filename_bridge_rules);
 
+      std::cerr << "Finished parsing bridge rules" << std::endl;
+
       // setup my context
-      ContextPtr ctx(new Context(myid, system_size, sig, query_plan, local_kb, bridge_rules));
+      ContextPtr ctx(new Context(myid, system_size, sig, query_plan, local_kb, bridge_rules, neighbor_list));
 
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), myport);    

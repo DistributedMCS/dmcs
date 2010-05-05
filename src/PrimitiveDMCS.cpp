@@ -177,23 +177,23 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
       std::size_t my_id = ctx->getContextID();
       const QueryPlanPtr& query_plan = ctx->getQueryPlan();
       
-      const NeighborListPtr& neighbors = query_plan->getNeighbors(my_id);
+      const NeighborListPtr& neighbors = ctx->getNeighbors();
 
 
       for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
 	{
 
-	  const Signature& neighbor_sig = query_plan->getSignature(*n_it);
-	  const BeliefSet neighbor_V = (*V)[*n_it-1];
+	  const SignaturePtr neighbor_sig = (*global_sigs)[*n_it - 1];
+	  const BeliefSet neighbor_V = (*V)[*n_it - 1];
 
 	  std::cerr << "neighbor_V = " << neighbor_V << std::endl;
 
-	  const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
+	  const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(*neighbor_sig);
 	  
 	  // setup local signature for neighbors: this way we can translate
 	  // SAT models back to belief states in case we do not
 	  // reference them in the bridge rules
-	  for (std::size_t i = 1; i <= neighbor_sig.size(); ++i)
+	  for (std::size_t i = 1; i <= neighbor_sig->size(); ++i)
 	    {
 	      if (testBeliefSet(neighbor_V, i))
 		{
@@ -322,6 +322,8 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	    boost::asio::ip::tcp::resolver resolver(io_service);
 
 	    std::size_t neighbor_id = *it;
+
+	    // to remove dependency to query plan: give hostname and port to neighbors
 
 	    boost::asio::ip::tcp::resolver::query query(ctx->getQueryPlan()->getHostname(neighbor_id),
 							ctx->getQueryPlan()->getPort(*it));

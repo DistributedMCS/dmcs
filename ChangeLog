@@ -1,3 +1,20 @@
+2010-05-06  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Get neighbor_list from bridge rules parsing.
+
+	* src/PrimitiveDMCS.cpp: Use neighbors from context.
+	* src/OptDMCS.cpp: Likewise.
+
+	* src/ContextGenerator.cpp: Adapt to neighbor_list.
+	* src/genTest.cpp: Likewise.
+
+	* include/Context.h: Let neighbor_list be a member of context.
+
+	* include/ClaspResultGrammar.tcc: #if --> #ifdef
+
+	* include/BridgeRulesBuilder.tcc: Update neighbor_list based on
+	bridge atoms.
+
 2010-05-05  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
 	* include/QueryPlan.h: Replace Neighbors by NeighborList.

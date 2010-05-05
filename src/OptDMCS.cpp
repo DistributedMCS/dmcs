@@ -216,58 +216,57 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       
       std::size_t my_id = ctx->getContextID();
       
-      const NeighborListPtr& neighbors = query_plan->getNeighbors(my_id);
+      const NeighborListPtr& neighbors = ctx->getNeighbors();
 
       for (NeighborList::const_iterator n_it = neighbors->begin();
-					 n_it != neighbors->end();
-					 ++n_it)
-				{
-
-					for (std::size_t j = 1; j <= n; ++j)
-						{
-							const BeliefSet neighbor_V = query_plan->getInterface(my_id, *n_it)->at(j-1);
-
-							if (!isEpsilon(neighbor_V))
-								{
-
-									const Signature neighbor_sig = query_plan->getSignature(j);
-									const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
+	   n_it != neighbors->end();
+	   ++n_it)
+	{
+	  
+	  for (std::size_t j = 1; j <= n; ++j)
+	    {
+	      const BeliefSet neighbor_V = query_plan->getInterface(my_id, *n_it)->at(j-1);
+	      
+	      if (!isEpsilon(neighbor_V))
+		{
+		  const Signature neighbor_sig = query_plan->getSignature(j);
+		  const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
+		  
+		  
+		  std::cerr << "check neighbor " << j << std::endl
+			    << "neighbor_V = " << neighbor_V << std::endl;
 									
-									
-									std::cerr << "check neighbor " << j << std::endl
-														<< "neighbor_V = " << neighbor_V << std::endl;
-									
-									// setup local signature for neighbors: this way we can translate
-									// SAT models back to belief states in case we do not
-									// reference them in the bridge rules
-									for (std::size_t i = 1; i <= neighbor_sig.size(); ++i)
-										{
-											if (testBeliefSet(neighbor_V, i))
-												{
-													std::cerr << "Bit " << i << "is on" << std::endl;
-													SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
-													std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
-													
-													// add new symbol for neighbor
-													Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
-													std::pair<Signature::iterator, bool> sp = sig->insert(sym);
-													
-													std::cerr << "want to insert " << neighbor_it->sym << std::endl;
-													
-													// only add them if it was not already included
-													// during bridge rule parsing
-													if (sp.second)
-														{
-															std::cerr << "insert " << neighbor_it->sym << std::endl;
-															insert_iterators.push_back(sp.first);
-														}
-												}
-										}
-								}
-						}
-				}
-
-				
+		  // setup local signature for neighbors: this way we can translate
+		  // SAT models back to belief states in case we do not
+		  // reference them in the bridge rules
+		  for (std::size_t i = 1; i <= neighbor_sig.size(); ++i)
+		    {
+		      if (testBeliefSet(neighbor_V, i))
+			{
+			  std::cerr << "Bit " << i << "is on" << std::endl;
+			  SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
+			  std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
+			  
+			  // add new symbol for neighbor
+			  Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
+			  std::pair<Signature::iterator, bool> sp = sig->insert(sym);
+			  
+			  std::cerr << "want to insert " << neighbor_it->sym << std::endl;
+			  
+			  // only add them if it was not already included
+			  // during bridge rule parsing
+			  if (sp.second)
+			    {
+			      std::cerr << "insert " << neighbor_it->sym << std::endl;
+			      insert_iterators.push_back(sp.first);
+			    }
+			}
+		    }
+		}
+	    }
+	}
+      
+      
 #ifdef DEBUG
       std::cerr << "Updated signature: " << *sig << std::endl;
 #endif
@@ -286,14 +285,14 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       for (SignatureIterators::const_iterator s_it = insert_iterators.begin();
 	   s_it != insert_iterators.end(); 
 	   ++s_it)
-				{
-					sig->erase(*s_it);
-				}
+	{
+	  sig->erase(*s_it);
+	}
       
 #ifdef DEBUG
       std::cerr << "Restored signature: " << *sig << std::endl;
 #endif
-    /// **********************************************************
+      /// **********************************************************
 
 #ifdef DMCS_STATS_INFO
   my_stats_info.lsolve.second = local_belief_states->size();
@@ -331,7 +330,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   // now visit the neighbors
   //
 
-  const NeighborListPtr& nbs = query_plan->getNeighbors(k);
+  const NeighborListPtr& nbs = ctx->getNeighbors();
 
 #if defined(DEBUG)
   std::cerr << "Number of neighbors: " << nbs->size() << std::endl;
@@ -385,11 +384,11 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       //temporary_belief_states = combine(temporary_belief_states, neighbor_belief_states, globalV);
 
       STATS_DIFF_REUSE (temporary_belief_states = combine(temporary_belief_states,
-						neighbor_belief_states,
-						localV),
+							  neighbor_belief_states,
+							  localV),
 			time_combine
 			);
-
+      
 #if defined(DEBUG)
       std::cerr << "Combined belief state:... " << std::endl;	  	  
       std::cerr << *temporary_belief_states << std::endl;

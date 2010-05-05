@@ -44,7 +44,7 @@ ClaspResultGrammar::definition<ScannerT>::definition(ClaspResultGrammar const& s
 
   neg = spirit::ch_p('-');
 
-#if DEBUG
+#ifdef DEBUG
   std::cerr << "maxvariable: " << self.maxvariable << std::endl;
 #endif
 

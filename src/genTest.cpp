@@ -354,7 +354,9 @@ init()
 
       RulesPtr r(new Rules);
       BridgeRulesPtr br(new BridgeRules);
-      ContextPtr c(new Context(i, no_contexts, s, optimal_qp, r, br));
+      // hack to get neighbors
+      NeighborListPtr neighbors = optimal_qp->getNeighbors1(i);
+      ContextPtr c(new Context(i, no_contexts, s, optimal_qp, r, br, neighbors));
 
       contexts->push_back(c);
     }

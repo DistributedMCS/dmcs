@@ -65,6 +65,8 @@ BridgeRulesBuilder<Grammar>::buildNode(typename BaseBuilder<Grammar>::node_t& no
     }
 
   bridge_rules->push_back(r);
+  neighbor_list->sort();
+  neighbor_list->unique();
 }
 
 template<typename Grammar>
@@ -130,6 +132,9 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
   if(loc_it == local_sig_sym.end())
     {
       std::size_t contextID = std::atoi(context_id.c_str());
+
+      // this is one of my neighbor
+      neighbor_list->push_back(contextID);
 
       //const Signature& neighborSignature = query_plan->getSignature(contextID);
       const SignaturePtr neighborSignature = (*global_sigs)[contextID - 1];
