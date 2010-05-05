@@ -41,12 +41,11 @@
 #include "ParserDirector.h"
 #include "PrimitiveDMCS.h"
 #include "Cache.h"
-
 #include "QueryPlan.h"
 #include "BeliefState.h"
-
 #include "BaseBuilder.h"
 #include "ParserDirector.h"
+#include "ProxySignatureByLocal.h"
 
 
 #include <vector>
@@ -90,11 +89,11 @@ PrimitiveDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignatureP
       std::cerr << "Interface variable of neighbor[" << *n_it <<"]: " << neighbor_V << std::endl;
 #endif
 
-      /*      guessing_sig_local_id = updateGuessingSignature(guessing_sig,
+      guessing_sig_local_id = updateGuessingSignature(guessing_sig,
 						      my_sig_sym,
 						      neighbor_sig,
 						      neighbor_V,
-						      guessing_sig_local_id);*/
+						      guessing_sig_local_id);
     }
       
 #ifdef DEBUG
@@ -157,8 +156,14 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     std::cerr << "Original signature: " << *sig << std::endl;
 #endif
       
-    //createGuessingSignature(V, sig);
+    const SignaturePtr& gsig = createGuessingSignature(V, sig);
 
+    const SignatureByLocal& sl1 = boost::get<Tag::Local>(*sig);
+    const SignatureByLocal& sl2 = boost::get<Tag::Local>(*gsig);
+
+    const SignatureByLocal& sl3(sl1);
+
+    //    ProxySignatureByLocal mixed_sig(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig));
 
     /// ***************** FOR TESTING ****************************
 
@@ -181,6 +186,8 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  const Signature& neighbor_sig = query_plan->getSignature(*n_it);
 	  const BeliefSet neighbor_V = (*V)[*n_it-1];
 
+	  std::cerr << "neighbor_V = " << neighbor_V << std::endl;
+
 	  const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
 	  
 	  // setup local signature for neighbors: this way we can translate
@@ -190,9 +197,13 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	    {
 	      if (testBeliefSet(neighbor_V, i))
 		{
+		  std::cerr << "Bit " << i << "is on" << std::endl;
+
 		  SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
 		  std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
 		  
+		  std::cerr << "want to insert " << neighbor_it->sym << std::endl;
+
 		  // add new symbol for neighbor
 		  Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
 		  std::pair<Signature::iterator, bool> sp = sig->insert(sym);
@@ -201,6 +212,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 		  // during bridge rule parsing
 		  if (sp.second)
 		    {
+		      std::cerr << neighbor_it->sym << "inserted" << std::endl;
 		      insert_iterators.push_back(sp.first);
 		    }
 		}
@@ -219,9 +231,9 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     BeliefStateListPtr local_belief_states;
 
     // This will give us local_belief_states
-    STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig)),
-		time_lsolve);
+    STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig)), time_lsolve);
 
+    //STATS_DIFF (local_belief_states = localSolve(mixed_sig), time_lsolve);
 
     /// ***************** FOR TESTING ****************************
 #ifdef DEBUG      

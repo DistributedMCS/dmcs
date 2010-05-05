@@ -148,7 +148,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
   // get V from the query plan
   BeliefStatePtr localV(new BeliefState(n, 0));
-  BeliefStatePtr globalV(new BeliefState(n, 0));
+  //BeliefStatePtr globalV(new BeliefState(n, 0));
   BeliefStatePtr mask(new BeliefState(n, 0));
 
   const QueryPlanPtr query_plan = ctx->getQueryPlan();
@@ -166,7 +166,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
     }
 
   ///@todo we have to check if we really can use a localized version of the global V
-  globalV = query_plan->getGlobalV();
+  //globalV = query_plan->getGlobalV();
 
 #if defined(DEBUG)
   std::cerr << "context " << c << " is calling context " << k << std::endl;
@@ -223,37 +223,45 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 					 ++n_it)
 				{
 
-					const BeliefSet neighbor_V = query_plan->getInterface(my_id, *n_it)->at(*n_it - 1);
-					const Signature neighbor_sig = query_plan->getSignature(*n_it);
-					const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
-
-
-					std::cerr << "check neighbor " << *n_it << std::endl
-										<< "neighbor_V = " << neighbor_V << std::endl;
-	  
-					// setup local signature for neighbors: this way we can translate
-					// SAT models back to belief states in case we do not
-					// reference them in the bridge rules
-					for (std::size_t i = 1; i <= neighbor_sig.size(); ++i)
+					for (std::size_t j = 1; j <= n; ++j)
 						{
-							if (testBeliefSet(neighbor_V, i))
-								{
-									std::cerr << "Bit " << i << "is on" << std::endl;
-									SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
-									std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
-									
-									// add new symbol for neighbor
-									Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
-									std::pair<Signature::iterator, bool> sp = sig->insert(sym);
+							const BeliefSet neighbor_V = query_plan->getInterface(my_id, *n_it)->at(j-1);
 
-									std::cerr << "want to insert " << neighbor_it->sym << std::endl;
+							if (!isEpsilon(neighbor_V))
+								{
+
+									const Signature neighbor_sig = query_plan->getSignature(j);
+									const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
 									
-									// only add them if it was not already included
-									// during bridge rule parsing
-									if (sp.second)
+									
+									std::cerr << "check neighbor " << j << std::endl
+														<< "neighbor_V = " << neighbor_V << std::endl;
+									
+									// setup local signature for neighbors: this way we can translate
+									// SAT models back to belief states in case we do not
+									// reference them in the bridge rules
+									for (std::size_t i = 1; i <= neighbor_sig.size(); ++i)
 										{
-											std::cerr << "insert " << neighbor_it->sym << std::endl;
-											insert_iterators.push_back(sp.first);
+											if (testBeliefSet(neighbor_V, i))
+												{
+													std::cerr << "Bit " << i << "is on" << std::endl;
+													SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
+													std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
+													
+													// add new symbol for neighbor
+													Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
+													std::pair<Signature::iterator, bool> sp = sig->insert(sym);
+													
+													std::cerr << "want to insert " << neighbor_it->sym << std::endl;
+													
+													// only add them if it was not already included
+													// during bridge rule parsing
+													if (sp.second)
+														{
+															std::cerr << "insert " << neighbor_it->sym << std::endl;
+															insert_iterators.push_back(sp.first);
+														}
+												}
 										}
 								}
 						}
@@ -301,7 +309,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
   //project_to(local_belief_states, globalV, temporary_belief_states);
 
-  STATS_DIFF (project_to(local_belief_states, globalV, temporary_belief_states),
+  STATS_DIFF (project_to(local_belief_states, localV, temporary_belief_states),
 	      time_projection);
 
 #ifdef DMCS_STATS_INFO
@@ -312,9 +320,9 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   std::cerr << "Projected belief states..." << std::endl;
   std::cerr << *temporary_belief_states << std::endl;
   std::cerr << "The V used in projection..." << std::endl;
-  std::cerr << *globalV << std::endl;
+  std::cerr << *localV << std::endl;
 
-  printBeliefStatesNicely(std::cerr, temporary_belief_states, globalV, query_plan);
+  printBeliefStatesNicely(std::cerr, temporary_belief_states, localV, query_plan);
 
   std::cerr << "Now check for neighbors..." << std::endl;
 #endif // DEBUG
@@ -378,7 +386,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
       STATS_DIFF_REUSE (temporary_belief_states = combine(temporary_belief_states,
 						neighbor_belief_states,
-						globalV),
+						localV),
 			time_combine
 			);
 
@@ -400,7 +408,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 #if defined(DEBUG)
   std::cerr << "Going to send back... " << std::endl;	  	  
   std::cerr << *belief_states << std::endl;
-  printBeliefStatesNicely(std::cerr, belief_states,globalV, query_plan);
+  printBeliefStatesNicely(std::cerr, belief_states,localV, query_plan);
 #endif // DEBUG
 
 #ifdef DMCS_STATS_INFO

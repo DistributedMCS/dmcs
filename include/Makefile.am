@@ -61,6 +61,7 @@ noinst_HEADERS =  \
 		PrimitiveMessage.h \
 		Process.h \
 		ProcessBuf.h \
+		ProxySignatureByLocal.h \
                 QueryPlanWriter.h \
                 QueryPlan.h \
 		ReturnMessage.h \

@@ -36,19 +36,52 @@ namespace dmcs {
 
 
 ///@brief proxy to local and guessing signature
-class ProxySignatureByLocal : public SignatureByLocal
+class ProxySignatureByLocal // : public SignatureByLocal
 {
-  std::size_t l; // upper bound of sig
-  std::size_t s; // upper bound of gsig
-  SignatureByLocal& sig;
-  SignatureByLocal& gsig;
 
+public:
+  ProxySignatureByLocal(const SignatureByLocal& sig_, const SignatureByLocal& gsig_)
+    : sig(sig_),
+      gsig(gsig_)
+  { }
 
-  find()
+  SignatureByLocal::const_iterator
+  find(std::size_t local_id) const
+  {
+    if (local_id < sig.size())
+      {
+	return sig.find(local_id);
+      }
 
-  begin()
+    if (local_id < sig.size() + gsig.size())
+      {
+	return gsig.find(local_id);
+      }
 
-  end()
+    return gsig.end();
+  }
+
+  std::size_t
+  size() const
+  {
+    return sig.size() + gsig.size();
+  }
+
+  SignatureByLocal::const_iterator
+  begin() const
+  {
+    return sig.begin();
+  }
+
+  SignatureByLocal::const_iterator
+  end() const
+  {
+    return gsig.end();
+  }
+
+private:
+  const SignatureByLocal& sig;
+  const SignatureByLocal& gsig;
 };
 
 

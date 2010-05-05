@@ -38,12 +38,16 @@
 
 namespace dmcs {
 
+
 BaseDMCS::BaseDMCS(const ContextPtr& c, const TheoryPtr& t)
   : ctx(c),
+#ifdef DMCS_STATS_INFO
     theory(t),
     sis(new StatsInfos)
+#else
+    theory(t)
+#endif // DMCS_STATS_INFO
 { }
-
 
 
 BaseDMCS::~BaseDMCS()

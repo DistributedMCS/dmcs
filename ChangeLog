@@ -1,5 +1,17 @@
 2010-05-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+
+	* src/OptDMCS.cpp: Adapt generation of V.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+	* src/BaseDMCS.cpp: Add case distinction whether to initiate sis
+	in the constructor
+
+	* include/Makefile.am: Add ProxySignatureByLocal.h
+
+	* include/ProxySignatureByLocal.h: Detail the methods.
+
+
 	* src/dmcsd.cpp: Create global_sigs and pass it to PrimitiveDMCS.
 
 	* src/OptDMCS.cpp (getBeliefStates): Move construction of
