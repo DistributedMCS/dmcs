@@ -1,3 +1,45 @@
+2010-05-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Create global_sigs and pass it to PrimitiveDMCS.
+
+	* src/OptDMCS.cpp (getBeliefStates): Move construction of
+	signatures from SatSolver here. Will be replaced by
+	ProxySignatureByLocal.
+	* src/PrimitiveDMCS.cpp (getBeliefStates): Likewise.
+
+	* include/Signature.h: Add Signatures and SignaturesPtr.
+
+	* include/Server.tcc: update debug information.
+
+	* include/Process.h: templatized with ModelBuilder.
+
+	* include/PrimitiveDMCS.h: Add sis for statistic information, add
+	createGuessingSignature(). Add global_sigs.
+
+	* include/OptDMCS.h: Add createGuessingSignature().
+
+	* include/Context.h: Add getNeighbors().
+
+	* include/ClaspResultBuilder.tcc: Remove sig_size and use
+	local_sig.size()
+
+	* include/ClaspResultBuilder.h: Use BeliefStateListPtr instead of
+	BeliefStateListPtr&.
+
+	* include/ClaspProcess.h: Instantiated with
+	Process<ClaspResultBuilder<ClaspResultGrammar> >
+	* include/ClaspProcess.h: Likewise.
+
+	* src/BaseDMCS.cpp (localSolve): Use ClaspResultBuilder with sig,
+	local_belief_states and sis_size. @todo: remove dependency on
+	query_plan.
+	+ new methods for creating guessing signature.
+
+	* include/BaseSolver.h: Pass theory and sig_size to solve()
+	instead of context_signature, belief_states, and theory.
+	* include/SatSolver.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+
 2010-05-05  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
 	* src/OptDMCS.cpp : Adjust code syntax for compilation purposes.
