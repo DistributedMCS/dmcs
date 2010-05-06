@@ -295,7 +295,7 @@ QueryPlan::getNeighbors1(std::size_t context_id)
       std::size_t nid = index[t];
       //std::cerr << "nid: " << nid << std::endl;
 
-      NeighborPtr nb(new Neighbor(nid+1, getHostname(nid+1), getPort(nid+1)));
+      NeighborPtr nb(new Neighbor(nid+1, getHostname1(nid+1), getPort1(nid+1)));
 
       nbs->push_back(nb);
     }
