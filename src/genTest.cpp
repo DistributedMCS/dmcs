@@ -796,11 +796,11 @@ print_command_lines()
   globalV << original_qp->getGlobalV();
   systemSize << no_contexts;
   
-  command_line_sh = "time $DMCSPATH/" DMCSC
+  command_line_sh = "/usr/bin/time --portability -o "+filename +"-dmcs-time.log $DMCSPATH/"  DMCSC
     " --" HOSTNAME "=" + original_qp->getHostname1(start_id) +
     " --" PORT "=" + original_qp->getPort1(start_id) +
     " --" SYSTEM_SIZE "=" + systemSize.str() + 
-    " --" QUERY_VARS "=\"" + globalV.str() + "\"";
+    " --" QUERY_VARS "=\"" + globalV.str() + "\" > "+ filename +"-dmcs.log 2> " + filename +"-dmcs-err.log";
 
   command_line = "time ./" DMCSC 
     " --" HOSTNAME "=" + original_qp->getHostname1(start_id) +
@@ -808,10 +808,10 @@ print_command_lines()
     " --" SYSTEM_SIZE "=" + systemSize.str() + 
     " --" QUERY_VARS "=\"" + globalV.str() + "\"";
 
-  command_line_opt_sh = "time $DMCSPATH/" DMCSC
+  command_line_opt_sh = "/usr/bin/time --portability -o "+filename +"-dmcsopt-time.log $DMCSPATH/"  DMCSC
     " --" HOSTNAME "=" + original_qp->getHostname1(start_id) +
     " --" PORT "=" + original_qp->getPort1(start_id) +
-    " --" SYSTEM_SIZE "=" + systemSize.str();
+    " --" SYSTEM_SIZE "=" + systemSize.str() + " > "+ filename +"-dmcsopt.log 2> " + filename +"-dmcsopt-err.log";
 
   command_line_opt = "time ./"  DMCSC 
     " --" HOSTNAME "=" + original_qp->getHostname1(start_id) +
