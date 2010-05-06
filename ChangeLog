@@ -1,5 +1,17 @@
 2010-05-06  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
+	* src/dmcsd.cpp: Initialize OptDMCS with global_sigs.
+
+	* src/OptDMCS.cpp: Use ProxySignatureByLocal.
+
+	* include/OptDMCS.h: Now inherits global sigs from BaseDMCS.
+	* include/PrimitiveDMCS.h: Likewise.
+
+	* include/BaseDMCS.h: Move global_sigs up here.
+	* src/BaseDMCS.cpp: Likewise.
+
+2010-05-06  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+
 	* include/ProxySignatureByLocal.h: Use ProxySignatureByLocal in PrimitiveDMCS.
 	* src/PrimitiveDMCS.cpp: Likewise.
 	* src/OptDMCS.cpp: Likewise.

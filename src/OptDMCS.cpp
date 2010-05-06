@@ -49,8 +49,8 @@
 
 namespace dmcs {
 
-OptDMCS::OptDMCS(const ContextPtr& c, const TheoryPtr& t, const QueryPlanPtr& query_plan_)
-  : BaseDMCS(c, t),
+  OptDMCS::OptDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s, const QueryPlanPtr& query_plan_)
+    : BaseDMCS(c, t, s),
     query_plan(query_plan_),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats))
@@ -63,7 +63,7 @@ OptDMCS::~OptDMCS()
 
 
 SignaturePtr 
-OptDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig)
+OptDMCS::createGuessingSignature(const SignaturePtr& my_sig)
 {
   SignaturePtr guessing_sig(new Signature);
 
@@ -72,22 +72,41 @@ OptDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my
 
   const SignatureBySym& my_sig_sym = boost::get<Tag::Sym>(*my_sig);
 
+  std::size_t my_id = ctx->getContextID();
+      
+  const NeighborListPtr& reduced_neighbors_list = query_plan->getNeighbors(my_id);
 
-
-  //for (Neighbors::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
-
-	std::size_t i = 0;
-  for (BeliefState::const_iterator it = V->begin(); it != V->end(); ++it, ++i)
+  std::cerr << "Context " << my_id << " has " << reduced_neighbors_list->size() << " neighbors." << std::endl;
+  
+  for (NeighborList::const_iterator rn_it = reduced_neighbors_list->begin();
+       rn_it != reduced_neighbors_list->end();
+       ++rn_it)
     {
-      const BeliefSet neighbor_V = *it;
+      const NeighborPtr& rn = *rn_it;
+      
+      std::cerr << "Checking reduced neighbor " << *rn << std::endl;
+      
+      std::size_t reduced_neighbor = rn->neighbor_id;
+      
+      const NeighborListPtr& physical_neighbors_list = ctx->getNeighbors();
 
-      if (!isEpsilon(neighbor_V))
+      for (NeighborList::const_iterator pn_it = physical_neighbors_list->begin();
+	   pn_it != physical_neighbors_list->end(); ++pn_it)
 	{
-#ifdef DEBUG
-	  std::cerr << "Interface variable of neighbor[" << i+1 <<"]: " << neighbor_V << std::endl;
-#endif
+	  const NeighborPtr& pn = *pn_it;
 	  
-	  const Signature& neighbor_sig = query_plan->getSignature(i);
+	  std::size_t physical_neighbor = pn->neighbor_id;
+	  
+	  std::cerr << "physical neighbor is " << *pn << std::endl;
+	  
+	  const BeliefStatePtr& V = query_plan->getInterface(my_id, reduced_neighbor);
+	  
+	  const BeliefSet neighbor_V = (*V)[physical_neighbor - 1];
+	  const Signature& neighbor_sig = *((*global_sigs)[physical_neighbor - 1]);
+	  
+#ifdef DEBUG
+	  std::cerr << "Interface variable of neighbor[" << pn->neighbor_id <<"]: " << neighbor_V << std::endl;
+#endif
 	  
 	  guessing_sig_local_id = updateGuessingSignature(guessing_sig,
 							  my_sig_sym,
@@ -96,12 +115,35 @@ OptDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my
 							  guessing_sig_local_id);
 	}
     }
-      
+  
+  //for (Neighbors::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
+  
+  /*	std::size_t i = 0;
+	for (BeliefState::const_iterator it = V->begin(); it != V->end(); ++it, ++i)
+	{
+	const BeliefSet neighbor_V = *it;
+	
+	if (!isEpsilon(neighbor_V))
+	{
+	#ifdef DEBUG
+	std::cerr << "Interface variable of neighbor[" << i+1 <<"]: " << neighbor_V << std::endl;
+	#endif
+	
+	const Signature& neighbor_sig = query_plan->getSignature(i);
+	
+	guessing_sig_local_id = updateGuessingSignature(guessing_sig,
+	my_sig_sym,
+	neighbor_sig,
+	neighbor_V,
+	guessing_sig_local_id);
+	}
+	}*/
+  
 #ifdef DEBUG
-    std::cerr << "Guessing signature: " << *guessing_sig << std::endl;
+  std::cerr << "Guessing signature: " << *guessing_sig << std::endl;
 #endif
-
-	return guessing_sig;
+  
+  return guessing_sig;
 }
 
 
@@ -208,11 +250,20 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   ///@todo this has to be fixed ........... when Proxy is implelemented
 	const SignaturePtr& sig = ctx->getSignature();
 
+#ifdef DEBUG
+    std::cerr << "Original signature: " << *sig << std::endl;
+#endif
+      
+
+    const SignaturePtr& gsig = createGuessingSignature(sig);
+
+    ProxySignatureByLocal mixed_sig(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig));
+
 	//createGuessingSignature()
 
     /// ***************** FOR TESTING ****************************
 
-     SignatureIterators insert_iterators;
+	/*SignatureIterators insert_iterators;
 
       
 #ifdef DEBUG
@@ -292,20 +343,21 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       
 #ifdef DEBUG
       std::cerr << "Updated signature: " << *sig << std::endl;
+      #endif*/
+
+#ifdef DEBUG
+      std::cerr << "Local:    " << *sig << std::endl;
+      std::cerr << "Guessing: " << *gsig << std::endl;
 #endif
 
     /// **********************************************************
 
-      //STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig), query_plan->getSystemSize()),
-      //time_lsolve);
+      STATS_DIFF (local_belief_states = localSolve(mixed_sig, query_plan->getSystemSize()), time_lsolve);
 
 
     /// ***************** FOR TESTING ****************************
-#ifdef DEBUG      
-      std::cerr << "Erasing..." << std::endl;
-#endif
       
-      for (SignatureIterators::const_iterator s_it = insert_iterators.begin();
+      /*      for (SignatureIterators::const_iterator s_it = insert_iterators.begin();
 	   s_it != insert_iterators.end(); 
 	   ++s_it)
 	{
@@ -314,7 +366,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       
 #ifdef DEBUG
       std::cerr << "Restored signature: " << *sig << std::endl;
-#endif
+#endif*/
       /// **********************************************************
 
 #ifdef DMCS_STATS_INFO
@@ -353,6 +405,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   // now visit the neighbors
   //
 
+  std::size_t my_id = ctx->getContextID();
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
 
 #if defined(DEBUG)
@@ -441,7 +494,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 #endif // DEBUG
 
 #ifdef DMCS_STATS_INFO
-  //my_stats_info.lsolve.first     += time_lsolve;
+  my_stats_info.lsolve.first     += time_lsolve;
   my_stats_info.combine.first    += time_combine;
   my_stats_info.projection.first += time_projection;
 

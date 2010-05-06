@@ -55,8 +55,7 @@
 namespace dmcs {
 
 PrimitiveDMCS::PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s)
-  : BaseDMCS(c, t),
-    global_sigs(s),
+  : BaseDMCS(c, t, s),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats))
 { }

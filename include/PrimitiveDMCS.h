@@ -67,7 +67,6 @@ protected:
   createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
 
 private:
-  SignatureVecPtr global_sigs; /// global signature of the whole system 
   CacheStatsPtr cacheStats;
   CachePtr cache;
 };

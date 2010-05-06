@@ -54,16 +54,17 @@ private:
 protected:
   ContextPtr    ctx;        /// the context of DMCS
   TheoryPtr     theory;     /// the theory of DMCS
+  SignatureVecPtr global_sigs; /// global signature of the whole system 
 
 #ifdef DMCS_STATS_INFO
   StatsInfosPtr sis; /// the statistic information
 #endif // DMCS_STATS_INFO
 
   /// ctor for children
-  BaseDMCS(const ContextPtr& c, const TheoryPtr& t);
+  BaseDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s);
 
-  virtual SignaturePtr
-  createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig) = 0;
+  //virtual SignaturePtr
+  //createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig) = 0;
 
   std::size_t
   updateGuessingSignature(SignaturePtr& guessing_sig, 
@@ -93,9 +94,6 @@ protected:
 public:
   virtual
   ~BaseDMCS();
-
-  // to be deleted
-  typedef std::list<Signature::const_iterator> SignatureIterators;
 };
 
 typedef boost::shared_ptr<BaseDMCS> DMCSPtr;

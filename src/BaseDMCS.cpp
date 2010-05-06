@@ -39,13 +39,14 @@
 namespace dmcs {
 
 
-BaseDMCS::BaseDMCS(const ContextPtr& c, const TheoryPtr& t)
+BaseDMCS::BaseDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s)
   : ctx(c),
-#ifdef DMCS_STATS_INFO
     theory(t),
+#ifdef DMCS_STATS_INFO
+    global_sigs(s),
     sis(new StatsInfos)
 #else
-    theory(t)
+    global_sigs(s)
 #endif // DMCS_STATS_INFO
 { }
 

@@ -53,7 +53,7 @@ public:
   typedef BeliefStateListPtr dmcs_return_type;
 #endif
 
-  OptDMCS(const ContextPtr& c, const TheoryPtr& t, const QueryPlanPtr& query_plan_);
+  OptDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s, const QueryPlanPtr& query_plan_);
 
   virtual
   ~OptDMCS();
@@ -65,7 +65,7 @@ public:
 protected:
 
   SignaturePtr
-  createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
+  createGuessingSignature(const SignaturePtr& my_sig);
 
 private:
   QueryPlanPtr query_plan;

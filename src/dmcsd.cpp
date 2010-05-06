@@ -289,7 +289,7 @@ int main(int argc, char* argv[])
 	}
       else if (filename_topo.find(OPT_EXT) != std::string::npos)
 	{
-	  OptDMCSPtr d(new OptDMCS(ctx, loopFormula, query_plan));
+	  OptDMCSPtr d(new OptDMCS(ctx, loopFormula, global_sigs, query_plan));
 	  OptCommandType odmcs(d);
 
 	  boost::shared_ptr<BaseServer> s(new Server<OptCommandType>(odmcs, io_service, endpoint));  
