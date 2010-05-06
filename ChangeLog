@@ -1,3 +1,11 @@
+2010-05-06  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/genTest.cpp: Fix neighbor access
+
+	* src/QueryPlan.cpp: used getHostName1 and getPort1 as we are still in generation mode
+
+	* include/Context.h: Add setNeighbors method
+
 2010-05-06  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
 	* src/dmcsd.cpp: Initialize OptDMCS with global_sigs.
