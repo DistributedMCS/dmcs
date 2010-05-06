@@ -146,26 +146,29 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   std::cerr << "OptDMCS at " << k << ", invoker ID " << c << std::endl;
 #endif // DEBUG
 
-  // get V from the query plan
-  BeliefStatePtr localV(new BeliefState(n, 0));
-
   BeliefStatePtr mask(new BeliefState(n, 0));
 
 #if defined(DEBUG)
   std::cerr << "context " << c << " is calling context " << k << std::endl;
 #endif // DEBUG
 
+
+  // get V from the query plan
+  BeliefStatePtr localV;
+
   // if c is 0, the client invoked this DMCS, thus we don't have an
   // edge in the query plan and use just the maximal V
   if (c == 0) 
     {
-      BeliefStatePtr nv(new BeliefState(n, maxBeliefSet()));
-      localV = nv; // everything set true
+      //      BeliefStatePtr nv(new BeliefState(n, maxBeliefSet()));
+      // localV = nv; // everything set true
+      localV = query_plan->getGlobalV();
     }
   else // some context invoked this DMCS
     {
       localV = query_plan->getInterface(c, k);
     }
+
 
   ///@todo use cache in DMCS
   //  BeliefStatesPtr bs = cache->cacheHit(V);
