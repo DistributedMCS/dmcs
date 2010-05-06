@@ -34,7 +34,7 @@
 
 namespace dmcs {
 
-typedef std::set<int> History;
+  typedef std::list<std::size_t> History;
 
 class PrimitiveMessage : public Message
 {
@@ -75,13 +75,13 @@ public:
   void
   insertHistory(std::size_t k)
   {
-    history.insert(k);
+    history.push_back(k);
   }
 
   void
-  removeHistory(std::size_t k)
+  removeHistory()
   {
-    history.erase(k);
+    history.pop_back();
   }  
 
 public:

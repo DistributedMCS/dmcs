@@ -212,7 +212,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     const NeighborListPtr& nbs = ctx->getNeighbors();
     const History& hist = mess.getHistory();
 
-    if ((hist.find(k) != hist.end()) || nbs->empty())
+    if ((std::find(hist.begin(), hist.end(), k) != hist.end()) || nbs->empty())
       {
 #if defined(DEBUG)
 	if (nbs->empty())
@@ -234,6 +234,10 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
       {
 	// We are now at an intermediate context.
 	// Need to consult all neighbors before combining with our local belief states
+
+#ifdef DEBUG
+	std::cerr << "At an intermediate context! " << std::endl;
+#endif
 
 	for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
 	  {
@@ -279,7 +283,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #endif // DMCS_STATS_INFO
 
 
-	    mess.removeHistory(k);
+	    mess.removeHistory();
 
 
 #if defined(DEBUG)
@@ -297,14 +301,14 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
 #if defined(DEBUG)
 	    std::cerr << "Accumulated combination... " << std::endl;	  	  
-	    std::cerr << *belief_states << std::endl;
+	    //std::cerr << *belief_states << std::endl;
 #endif // DEBUG
 	  }
 
 #ifdef DMCS_STATS_INFO
 
 #ifdef DEBUG
-	std::cerr << "combination size: " << belief_states->size() << std::endl;
+	//std::cerr << "combination size: " << belief_states->size() << std::endl;
 #endif // DEBUG
 
 	my_stats_info.combine.second = belief_states->size();
@@ -354,7 +358,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #else
     return belief_states;
 #endif // DMCS_STATS_INFO
-  }
+}
 
 } // namespace dmcs
 

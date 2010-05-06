@@ -65,7 +65,7 @@ public:
 protected:
 
   SignaturePtr
-  createGuessingSignature(const SignaturePtr& my_sig);
+  createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
 
 private:
   QueryPlanPtr query_plan;

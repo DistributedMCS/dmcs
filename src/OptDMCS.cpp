@@ -63,8 +63,48 @@ OptDMCS::~OptDMCS()
 
 
 SignaturePtr 
-OptDMCS::createGuessingSignature(const SignaturePtr& my_sig)
+OptDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig)
 {
+
+
+
+SignaturePtr guessing_sig(new Signature);
+
+  // local id in guessing_sig will start from my signature's size + 1
+  std::size_t guessing_sig_local_id = my_sig->size() + 1;
+
+  const SignatureBySym& my_sig_sym = boost::get<Tag::Sym>(*my_sig);
+
+  const NeighborListPtr& neighbors = ctx->getNeighbors();
+
+  for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
+    {
+      NeighborPtr nb = *n_it;
+      const std::size_t neighbor_id = nb->neighbor_id;
+      const BeliefSet neighbor_V = (*V)[neighbor_id - 1];
+      const Signature& neighbor_sig = *((*global_sigs)[neighbor_id - 1]);
+
+#ifdef DEBUG
+      std::cerr << "Interface variable of neighbor[" << nb->neighbor_id <<"]: " << neighbor_V << std::endl;
+#endif
+
+      guessing_sig_local_id = updateGuessingSignature(guessing_sig,
+						      my_sig_sym,
+						      neighbor_sig,
+						      neighbor_V,
+						      guessing_sig_local_id);
+    }
+      
+#ifdef DEBUG
+    std::cerr << "Guessing signature: " << *guessing_sig << std::endl;
+#endif
+
+    return guessing_sig;
+
+
+
+
+  /*******************
   SignaturePtr guessing_sig(new Signature);
 
   // local id in guessing_sig will start from my signature's size + 1
@@ -121,6 +161,8 @@ OptDMCS::createGuessingSignature(const SignaturePtr& my_sig)
     }
 
   return guessing_sig;
+
+  ******************************************/
 }
 
 
@@ -162,6 +204,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
     {
       //      BeliefStatePtr nv(new BeliefState(n, maxBeliefSet()));
       // localV = nv; // everything set true
+      /// just a quick hack here. for a correct implementation, we
+      /// need to collect all interfaces of our neighbors.
       localV = query_plan->getGlobalV();
     }
   else // some context invoked this DMCS
@@ -199,7 +243,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
     std::cerr << "Original signature: " << *sig << std::endl;
 #endif
       
-    const SignaturePtr& gsig = createGuessingSignature(sig);
+    const SignaturePtr& gsig = createGuessingSignature(localV, sig);
 
     ProxySignatureByLocal mixed_sig(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig));
 
@@ -294,10 +338,14 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       std::cerr << "Belief states received from neighbor " << *it << std::endl;	  
       std::cerr << *neighbor_belief_states << std::endl;      
 #endif // DEBUG
-	  
+    
+      /// for combination, we need to use Edge_V from myself to the neighbor
+
+      const BeliefStatePtr neighbor_V = query_plan->getInterface(k, nb->neighbor_id);
+
       STATS_DIFF_REUSE (temporary_belief_states = combine(temporary_belief_states,
 							  neighbor_belief_states,
-							  localV),
+							  neighbor_V),
 			time_combine
 			);
       
