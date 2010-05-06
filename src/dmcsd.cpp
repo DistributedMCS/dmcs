@@ -153,11 +153,11 @@ int main(int argc, char* argv[])
       //      SignaturePtr sig(new Signature);
 
  #ifdef DEBUG
-	std::cout << "we have read everything and we will start" << std::endl;
-	std::cout << "myid: " << myid <<std::endl;
-	std::cout << "local KB: " << filename_local_kb <<std::endl;
-	std::cout << "Bridge Rules: " << filename_bridge_rules <<std::endl;
-	std::cout << "Topology: " << filename_topo <<std::endl;
+	std::cerr << "we have read everything and we will start" << std::endl;
+	std::cerr << "myid: " << myid <<std::endl;
+	std::cerr << "local KB: " << filename_local_kb <<std::endl;
+	std::cerr << "Bridge Rules: " << filename_bridge_rules <<std::endl;
+	std::cerr << "Topology: " << filename_topo <<std::endl;
  #endif 
 	///@todo change when the manager is added
       QueryPlanPtr query_plan(new QueryPlan);
@@ -221,7 +221,9 @@ int main(int argc, char* argv[])
       parser_director_br.setBuilder(&builder_br);
       parser_director_br.parse(filename_bridge_rules);
 
+#ifdef DEBUG
       std::cerr << "Finished parsing bridge rules" << std::endl;
+#endif // DEBUG
 
       for (NeighborList::const_iterator it = neighbor_list->begin(); it != neighbor_list->end(); ++it)
 	{

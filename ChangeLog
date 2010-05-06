@@ -1,11 +1,16 @@
 2010-05-06  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
-	* src/OptDMCS.cpp (dmcs): Fix: incoming V for guessing, outgoing V
-	for combining.
-	* include/OptDMCS.h (dmcs): Likewise.
+	* src/dmcsd.cpp: Fix cerr here and there.
+	* src/dmcsc.cpp: Likewise.
 
-	* include/PrimitiveMessage.h (dmcs): Use history as a list.
-	* src/PrimitiveDMCS.cpp (dmcs): Likewise.
+	* include/StatsInfo.h: Add time_in_secs()
+
+	* src/OptDMCS.cpp: Fix: incoming V for guessing, outgoing V
+	for combining.
+	* include/OptDMCS.h: Likewise.
+
+	* include/PrimitiveMessage.h: Use history as a list.
+	* src/PrimitiveDMCS.cpp: Likewise.
 
 
 2010-05-06  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>

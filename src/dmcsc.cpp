@@ -201,8 +201,6 @@ main(int argc, char* argv[])
 
 #ifdef DMCS_STATS_INFO
       std::cerr << "Result: " << std::endl << *result->getBeliefStates() << std::endl;
-
-      std::cerr << "Result: " << std::endl << *result->getStatsInfo() << std::endl;
 #else
       std::cerr << "Result: " << std::endl << *result << std::endl;
 #endif // DMCS_STATS_INFO
@@ -211,9 +209,10 @@ main(int argc, char* argv[])
       
 
 #ifdef DMCS_STATS_INFO
-      std::cout << "Number of answers: " << result->getBeliefStates()->size() << std::endl;
+      std::cout << "# " << result->getBeliefStates()->size() << std::endl;
+      std::cout << *result->getStatsInfo() << std::endl;
 #else
-      std::cout << "Number of answers: " << result->size() << std::endl;
+      std::cerr << "Number of answers: " << result->size() << std::endl;
 #endif
 
     }

@@ -93,10 +93,38 @@ getNoModels(Info& info)
 }
 
 
+
+inline std::string
+time_in_secs(const TimeDuration& td)
+{
+  long in_secs = td.total_milliseconds();
+
+  std::stringstream out;
+
+  long secs = in_secs / 1000;
+  long rest = in_secs % 1000;
+
+  out << secs << ".";
+
+  if (rest < 10) 
+    {
+      out << "00";
+    }
+  else if (rest < 100)
+    {
+      out << "0";
+    }
+
+  out << rest;
+    
+  return out.str();
+}
+
+
 inline std::ostream&
 operator<< (std::ostream& os, const Info& info)
 {
-  os << boost::posix_time::to_simple_string( getTimeDuration(info) )
+  os << time_in_secs( getTimeDuration(info) )
      << ", "
      << info.second;
 
@@ -141,7 +169,7 @@ typedef boost::shared_ptr<StatsInfos> StatsInfosPtr;
 inline std::ostream&
 operator<< (std::ostream& os, const StatsInfo& si)
 {
-  os << si.lsolve << ", " << si.projection << ", " << si.combine;
+  os << "% " << si.lsolve << ", " << si.projection << ", " << si.combine;
 
   int i = -1;
 
