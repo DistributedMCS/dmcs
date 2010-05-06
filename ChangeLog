@@ -1,3 +1,7 @@
+2010-05-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/run-tests.sh: New file.
+
 2010-05-06  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
 	* src/dmcsd.cpp: Fix cerr here and there.
