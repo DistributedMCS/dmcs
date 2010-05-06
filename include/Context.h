@@ -82,6 +82,12 @@ public:
     return neighbor_list;
   }
 
+  void
+  setNeighbors( NeighborListPtr& neighborList)
+  {
+    neighbor_list = neighborList;
+  }
+
   const SignaturePtr&
   getSignature() const
   {
