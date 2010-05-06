@@ -57,9 +57,54 @@ struct Neighbor
   { }
 };
 
+
 typedef boost::shared_ptr<Neighbor> NeighborPtr;
 typedef std::list<NeighborPtr> NeighborList;
-typedef boost::shared_ptr<NeighborList> NeighborPtr;
+typedef boost::shared_ptr<NeighborList> NeighborListPtr;
+
+
+struct compareNeighbors
+{
+  std::size_t an_id;
+
+  compareNeighbors(std::size_t an_id_)
+    : an_id(an_id_)
+  { }
+
+  bool
+  operator() (const NeighborPtr& nb)
+  {
+    return (nb->neighbor_id == an_id);
+  }
+};
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const Neighbor& nb)
+{
+
+  os << "(" << nb.neighbor_id << "@" << nb.hostname << ":" << nb.port << ")";
+  return os;
+}
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const NeighborList& neighbors)
+{
+  if (!neighbors.empty())
+    {
+      const NeighborList::const_iterator end = --neighbors.end();
+      for (NeighborList::const_iterator it = neighbors.begin(); it != end; ++it)
+	{
+	  NeighborPtr nb = *it;
+	  os << "(" << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port << "), ";
+	}
+      NeighborPtr nb = *end;
+      os << "(" << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port << ")";
+    }
+
+  return os;
+}
 
 
 } // namespace dmcs

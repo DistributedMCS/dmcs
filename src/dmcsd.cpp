@@ -49,6 +49,7 @@
 #include "OptDMCS.h"
 #include "CommandType.h"
 #include "ProgramOptions.h"
+#include "Neighbor.h"
 
 #include <string>
 #include <boost/serialization/vector.hpp>
@@ -222,8 +223,19 @@ int main(int argc, char* argv[])
 
       std::cerr << "Finished parsing bridge rules" << std::endl;
 
+      for (NeighborList::const_iterator it = neighbor_list->begin(); it != neighbor_list->end(); ++it)
+	{
+	  NeighborPtr nb = *it;
+	  nb->hostname = query_plan->getHostname(nb->neighbor_id);
+	  nb->port     = query_plan->getPort(nb->neighbor_id);
+	}
+
+#ifdef DEBUG
+      std::cerr << "My neighbors: " << *neighbor_list << std::endl;
+#endif // DEBUG
+
       // setup my context
-      ContextPtr ctx(new Context(myid, system_size, sig, query_plan, local_kb, bridge_rules, neighbor_list));
+      ContextPtr ctx(new Context(myid, system_size, sig, local_kb, bridge_rules, neighbor_list));
 
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), myport);    
@@ -277,7 +289,7 @@ int main(int argc, char* argv[])
 	}
       else if (filename_topo.find(OPT_EXT) != std::string::npos)
 	{
-	  OptDMCSPtr d(new OptDMCS(ctx, loopFormula));
+	  OptDMCSPtr d(new OptDMCS(ctx, loopFormula, query_plan));
 	  OptCommandType odmcs(d);
 
 	  boost::shared_ptr<BaseServer> s(new Server<OptCommandType>(odmcs, io_service, endpoint));  

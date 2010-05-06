@@ -49,8 +49,9 @@
 
 namespace dmcs {
 
-OptDMCS::OptDMCS(const ContextPtr& c, const TheoryPtr & t)
+OptDMCS::OptDMCS(const ContextPtr& c, const TheoryPtr& t, const QueryPlanPtr& query_plan_)
   : BaseDMCS(c, t),
+    query_plan(query_plan_),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats))
 { }
@@ -81,19 +82,19 @@ OptDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my
       const BeliefSet neighbor_V = *it;
 
       if (!isEpsilon(neighbor_V))
-				{
+	{
 #ifdef DEBUG
 	  std::cerr << "Interface variable of neighbor[" << i+1 <<"]: " << neighbor_V << std::endl;
 #endif
 	  
-	  const Signature& neighbor_sig = ctx->getQueryPlan()->getSignature(i);
-
+	  const Signature& neighbor_sig = query_plan->getSignature(i);
+	  
 	  guessing_sig_local_id = updateGuessingSignature(guessing_sig,
-													  my_sig_sym,
-													  neighbor_sig,
-													  neighbor_V,
-													  guessing_sig_local_id);
-				}
+							  my_sig_sym,
+							  neighbor_sig,
+							  neighbor_V,
+							  guessing_sig_local_id);
+	}
     }
       
 #ifdef DEBUG
@@ -153,9 +154,11 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
   std::cerr << "Get query plan" << std::endl;
 
-  const QueryPlanPtr query_plan = ctx->getQueryPlan();
-
   std::cerr << "Got it" << std::endl;
+
+#if defined(DEBUG)
+  std::cerr << "context " << c << " is calling context " << k << std::endl;
+#endif // DEBUG
 
   // if c is 0, the client invoked this DMCS, thus we don't have an
   // edge in the query plan and use just the maximal V
@@ -172,9 +175,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   ///@todo we have to check if we really can use a localized version of the global V
   //globalV = query_plan->getGlobalV();
 
-#if defined(DEBUG)
-  std::cerr << "context " << c << " is calling context " << k << std::endl;
-#endif // DEBUG
+
 
   ///@todo use cache in DMCS
   //  BeliefStatesPtr bs = cache->cacheHit(V);
@@ -228,17 +229,26 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 	   rn_it != reduced_neighbors_list->end();
 	   ++rn_it)
 	{
+	  const NeighborPtr& rn = *rn_it;
 
-	  std::size_t reduced_neighbor = *rn_it;
+	  std::cerr << "Checking reduced neighbor " << *rn << std::endl;
+
+	  std::size_t reduced_neighbor = rn->neighbor_id;
 
 	  const NeighborListPtr& physical_neighbors_list = ctx->getNeighbors();
 
 	  for (NeighborList::const_iterator pn_it = physical_neighbors_list->begin();
 	       pn_it != physical_neighbors_list->end(); ++pn_it)
 	    {
-	      std::size_t physical_neighbor = *pn_it;
+	      const NeighborPtr& pn = *pn_it;
 
-	      const BeliefSet neighbor_V = query_plan->getInterface(my_id, reduced_neighbor)->at(physical_neighbor - 1);
+	      std::size_t physical_neighbor = pn->neighbor_id;
+
+	      std::cerr << "physical neighbor is " << *pn << std::endl;
+
+	      const BeliefStatePtr& V = query_plan->getInterface(my_id, reduced_neighbor);
+
+	      const BeliefSet neighbor_V = (*V)[physical_neighbor - 1];
 	      
 	      if (!isEpsilon(neighbor_V))
 		{
@@ -286,7 +296,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
     /// **********************************************************
 
-    STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig)),
+      STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig), query_plan->getSystemSize()),
 		time_lsolve);
 
 
@@ -356,14 +366,21 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
       //      std::size_t neighbor_id = *it;
       
-      boost::asio::ip::tcp::resolver::query query(query_plan->getHostname(*it),
-						  query_plan->getPort(*it));
+      //      boost::asio::ip::tcp::resolver::query query(query_plan->getHostname(*it),
+      //						  query_plan->getPort(*it));
+
+      NeighborPtr nb = *it;
+
+#if defined(DEBUG)
+      std::cerr << "Invoking neighbor " << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port << std::endl;
+#endif // DEBUG
+
+      
+      boost::asio::ip::tcp::resolver::query query(nb->hostname, nb->port);
+
       boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
       boost::asio::ip::tcp::endpoint endpoint = *res_it;
       
-#if defined(DEBUG)
-      std::cerr << "Invoking neighbor " << *it << std::endl;
-#endif // DEBUG
 
       OptMessage neighbourMess(k);
       Client<OptCommandType> client(io_service, res_it, neighbourMess);
@@ -383,8 +400,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       PTime this_moment = boost::posix_time::microsec_clock::local_time();
       TimeDuration time_neighbor_me = this_moment - sent_moment;
       Info neighbor_transfer(time_neighbor_me, neighbor_belief_states->size());
-      
-      time_transfer->insert(std::pair<std::size_t, Info>(*it - 1, neighbor_transfer));
+
+      time_transfer->insert(std::pair<std::size_t, Info>(nb->neighbor_id - 1, neighbor_transfer));
 #else
       BeliefStateListPtr neighbor_belief_states = client.getResult();
 #endif // DMCS_STATS_INFO

@@ -35,7 +35,7 @@
 
 #include "Theory.h"
 #include "BeliefState.h"
-#include "QueryPlan.h"
+#include "Neighbor.h"
 #include "Rule.h"
 #include "Signature.h"
 
@@ -53,14 +53,12 @@ class Context
 public:
   Context(std::size_t id_, std::size_t system_size_,
 	  SignaturePtr& signature_,
-	  QueryPlanPtr& query_plan_,
 	  RulesPtr& local_kb_,
 	  BridgeRulesPtr& bridgerules_,
 	  NeighborListPtr& neighbor_list_)
     : id(id_),
       system_size(system_size_),
       signature(signature_),
-      query_plan(query_plan_),
       local_kb(local_kb_),
       bridgerules(bridgerules_),
       neighbor_list(neighbor_list_)
@@ -76,12 +74,6 @@ public:
   getSystemSize() const
   {
     return system_size;
-  }
-
-  const QueryPlanPtr&
-  getQueryPlan() const
-  {
-    return query_plan;
   }
 
   const NeighborListPtr
@@ -112,7 +104,6 @@ private:
   std::size_t id;
   std::size_t system_size;
   SignaturePtr signature;
-  QueryPlanPtr query_plan;
   RulesPtr local_kb;
   BridgeRulesPtr bridgerules;
   NeighborListPtr neighbor_list;

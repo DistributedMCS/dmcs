@@ -81,7 +81,8 @@ PrimitiveDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignatureP
 
   for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
     {
-      const std::size_t neighbor_id = *n_it - 1;
+      NeighborPtr nb = *n_it;
+      const std::size_t neighbor_id = nb->neighbor_id - 1;
       const BeliefSet neighbor_V = (*V)[neighbor_id];
       const Signature& neighbor_sig = *((*global_sigs)[neighbor_id]);
 
@@ -175,16 +176,17 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #endif
       
       std::size_t my_id = ctx->getContextID();
-      const QueryPlanPtr& query_plan = ctx->getQueryPlan();
+      //const QueryPlanPtr& query_plan = ctx->getQueryPlan();
       
       const NeighborListPtr& neighbors = ctx->getNeighbors();
 
 
       for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
 	{
+	  NeighborPtr nb = *n_it;
 
-	  const SignaturePtr neighbor_sig = (*global_sigs)[*n_it - 1];
-	  const BeliefSet neighbor_V = (*V)[*n_it - 1];
+	  const SignaturePtr neighbor_sig = (*global_sigs)[nb->neighbor_id - 1];
+	  const BeliefSet neighbor_V = (*V)[nb->neighbor_id - 1];
 
 	  std::cerr << "neighbor_V = " << neighbor_V << std::endl;
 
@@ -231,7 +233,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     BeliefStateListPtr local_belief_states;
 
     // This will give us local_belief_states
-    STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig)), time_lsolve);
+    STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig), n), time_lsolve);
 
     //STATS_DIFF (local_belief_states = localSolve(mixed_sig), time_lsolve);
 
@@ -262,7 +264,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
 #ifdef DEBUG
     BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
-    printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
+    //printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif // DEBUG
 
     BeliefStateListPtr belief_states(new BeliefStateList);
@@ -282,7 +284,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     std::cerr << *belief_states << std::endl;
     std::cerr << "The V used in projection..." << std::endl;
     std::cerr << *V << std::endl;
-    printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
+    //printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
     std::cerr << "Now check for neighbors..." << std::endl;
 #endif // DEBUG
 
@@ -321,12 +323,12 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	    boost::asio::io_service io_service;
 	    boost::asio::ip::tcp::resolver resolver(io_service);
 
-	    std::size_t neighbor_id = *it;
+	    NeighborPtr nb = *it;
+	    std::size_t neighbor_id = nb->neighbor_id;
 
 	    // to remove dependency to query plan: give hostname and port to neighbors
 
-	    boost::asio::ip::tcp::resolver::query query(ctx->getQueryPlan()->getHostname(neighbor_id),
-							ctx->getQueryPlan()->getPort(*it));
+	    boost::asio::ip::tcp::resolver::query query(nb->hostname, nb->port);
 	    boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
 	    boost::asio::ip::tcp::endpoint endpoint = *res_it;
 	  
@@ -408,7 +410,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 		  << " belief states above back to user." << std::endl;
       }
  
-    printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
+    //printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
 #endif // DEBUG
   
 #ifdef DMCS_STATS_INFO

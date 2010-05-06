@@ -33,6 +33,7 @@
 #include "SpiritDebugging.h"
 #include <boost/functional/hash.hpp>
 #include <iostream>
+#include <algorithm>
 
 namespace dmcs {
 
@@ -131,13 +132,20 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
   // did not find local id for atom_name, generate one
   if(loc_it == local_sig_sym.end())
     {
-      std::size_t contextID = std::atoi(context_id.c_str());
+      std::size_t neighbor_id = std::atoi(context_id.c_str());
+
+      const std::string empty_str = "";
 
       // this is one of my neighbor
-      neighbor_list->push_back(contextID);
+      NeighborList::const_iterator it = std::find_if(neighbor_list->begin(), neighbor_list->end(), compareNeighbors(neighbor_id));
 
-      //const Signature& neighborSignature = query_plan->getSignature(contextID);
-      const SignaturePtr neighborSignature = (*global_sigs)[contextID - 1];
+      if (it == neighbor_list->end())
+	{
+	  NeighborPtr n(new Neighbor(neighbor_id, "", ""));
+	  neighbor_list->push_back(n);
+	}
+
+      const SignaturePtr neighborSignature = (*global_sigs)[neighbor_id - 1];
     
       const SignatureBySym& neighbor_sig_sym = boost::get<Tag::Sym>(*neighborSignature);
       SignatureBySym::const_iterator neighbor_it = neighbor_sig_sym.find(atom_name);

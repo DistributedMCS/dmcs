@@ -356,7 +356,7 @@ init()
       BridgeRulesPtr br(new BridgeRules);
       // hack to get neighbors
       NeighborListPtr neighbors = optimal_qp->getNeighbors1(i);
-      ContextPtr c(new Context(i, no_contexts, s, optimal_qp, r, br, neighbors));
+      ContextPtr c(new Context(i, no_contexts, s, r, br, neighbors));
 
       contexts->push_back(c);
     }
@@ -534,7 +534,8 @@ getOptimumDLVFilter()
   
   for(NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end();++it )
     {
-      const BeliefStatePtr& currentInterface = optimal_qp->getInterface1(1, *it);
+      NeighborPtr nb = *it;
+      const BeliefStatePtr& currentInterface = optimal_qp->getInterface1(1, nb->neighbor_id);
       BeliefState::iterator jt = currentInterface->begin();
       BeliefState::iterator kt = neighborsInterface->begin();
 

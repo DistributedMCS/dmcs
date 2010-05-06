@@ -31,6 +31,7 @@
 #define BRIDGE_RULES_BUILDER_H
 
 #include "BaseBuilder.h"
+#include "Neighbor.h"
 #include "Rule.h"
 #include "Theory.h"
 #include "Signature.h"

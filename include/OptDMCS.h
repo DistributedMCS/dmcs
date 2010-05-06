@@ -37,6 +37,7 @@
 #include "ReturnMessage.h"
 #include "Cache.h"
 #include "Theory.h"
+#include "QueryPlan.h"
 
 namespace dmcs {
 
@@ -52,7 +53,7 @@ public:
   typedef BeliefStateListPtr dmcs_return_type;
 #endif
 
-  OptDMCS(const ContextPtr& c, const TheoryPtr& t);
+  OptDMCS(const ContextPtr& c, const TheoryPtr& t, const QueryPlanPtr& query_plan_);
 
   virtual
   ~OptDMCS();
@@ -67,6 +68,7 @@ protected:
   createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
 
 private:
+  QueryPlanPtr query_plan;
   CacheStatsPtr cacheStats;
   CachePtr cache;
 };

@@ -32,6 +32,7 @@
 
 
 #include "BeliefState.h"
+#include "Neighbor.h"
 #include "Signature.h"
 
 #include <boost/graph/adjacency_list.hpp>
@@ -101,8 +102,8 @@ typedef boost::property_map<graph_t, interface_t>::type           EdgeInterfaceP
 typedef boost::ref_property_map<graph_t*, BeliefStatePtr>         GraphNameProperty;
 
 /// Neighbors is a list of context ids
-typedef std::list<std::size_t> NeighborList;
-typedef boost::shared_ptr<NeighborList> NeighborListPtr;
+//typedef std::list<std::size_t> NeighborList;
+//typedef boost::shared_ptr<NeighborList> NeighborListPtr;
 
 typedef std::pair<std::size_t, std::size_t> EdgeInt;
 typedef std::vector<EdgeInt> Edges;

@@ -77,7 +77,7 @@ protected:
    * @return list of local belief states
    */
   virtual BeliefStateListPtr
-  localSolve(const SignatureByLocal& sig);
+  localSolve(const SignatureByLocal& sig, std::size_t system_size);
 
 
   /// methods only needed for providing statistic information

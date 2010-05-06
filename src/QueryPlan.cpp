@@ -206,6 +206,8 @@ QueryPlan::getInterface(std::size_t context1, std::size_t context2) const
   EdgeIter ei, ei_end;
   boost::tie(ei, ei_end) = boost::edges(query_plan);
 
+  bool got_edge = false;
+
   for (; ei != ei_end; ++ei)
     {
       //std::size_t id1 = index[boost::source(*ei, query_plan)];
@@ -215,9 +217,12 @@ QueryPlan::getInterface(std::size_t context1, std::size_t context2) const
       
       if ((context1 - 1 == id1) && (context2 - 1 == id2))
 	{
+	  got_edge = true;
 	  break;
 	}
     }
+
+  assert (got_edge);
 
   return boost::get(interface_t(), query_plan, *ei);
 }
@@ -289,7 +294,10 @@ QueryPlan::getNeighbors1(std::size_t context_id)
       Vertex t = boost::target(*out_i, query_plan);
       std::size_t nid = index[t];
       //std::cerr << "nid: " << nid << std::endl;
-      nbs->push_back(nid+1);
+
+      NeighborPtr nb(new Neighbor(nid+1, getHostname(nid+1), getPort(nid+1)));
+
+      nbs->push_back(nb);
     }
 
   return nbs;
@@ -311,11 +319,14 @@ QueryPlan::getNeighbors(std::size_t context_id)
     {
       Vertex t = boost::target(*out_i, query_plan);
       std::size_t nid = name[t];
-      nbs->push_back(nid+1);
+
+      NeighborPtr nb(new Neighbor(nid+1, getHostname(nid+1), getPort(nid+1)));
+
+      nbs->push_back(nb);
     }
 
   return nbs;
-}
+  }
 
 
 EdgesPtr

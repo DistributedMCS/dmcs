@@ -98,7 +98,7 @@ BaseDMCS::updateGuessingSignature(SignaturePtr& guessing_sig,
 
 
 BeliefStateListPtr
-BaseDMCS::localSolve(const SignatureByLocal& sig)
+BaseDMCS::localSolve(const SignatureByLocal& sig, std::size_t system_size)
 {
 #ifdef DEBUG
   std::cerr << "Starting local solve..." << std::endl;
@@ -107,7 +107,7 @@ BaseDMCS::localSolve(const SignatureByLocal& sig)
   BeliefStateListPtr local_belief_states(new BeliefStateList);
 
   ///@todo TK: fix the system size, a context should not depend on the whole MCS and the query plan
-  ClaspResultBuilder<ClaspResultGrammar> crb(sig, local_belief_states, ctx->getQueryPlan()->getSystemSize());
+  ClaspResultBuilder<ClaspResultGrammar> crb(sig, local_belief_states, system_size);
 
   ClaspProcess cp;
   cp.addOption("-n 0");
