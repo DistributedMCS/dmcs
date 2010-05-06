@@ -151,7 +151,11 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   //BeliefStatePtr globalV(new BeliefState(n, 0));
   BeliefStatePtr mask(new BeliefState(n, 0));
 
+  std::cerr << "Get query plan" << std::endl;
+
   const QueryPlanPtr query_plan = ctx->getQueryPlan();
+
+  std::cerr << "Got it" << std::endl;
 
   // if c is 0, the client invoked this DMCS, thus we don't have an
   // edge in the query plan and use just the maximal V
@@ -216,24 +220,33 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       
       std::size_t my_id = ctx->getContextID();
       
-      const NeighborListPtr& neighbors = ctx->getNeighbors();
+      const NeighborListPtr& reduced_neighbors_list = query_plan->getNeighbors(my_id);
 
-      for (NeighborList::const_iterator n_it = neighbors->begin();
-	   n_it != neighbors->end();
-	   ++n_it)
+      std::cerr << "Context " << my_id << " has " << reduced_neighbors_list->size() << " neighbors." << std::endl;
+
+      for (NeighborList::const_iterator rn_it = reduced_neighbors_list->begin();
+	   rn_it != reduced_neighbors_list->end();
+	   ++rn_it)
 	{
-	  
-	  for (std::size_t j = 1; j <= n; ++j)
+
+	  std::size_t reduced_neighbor = *rn_it;
+
+	  const NeighborListPtr& physical_neighbors_list = ctx->getNeighbors();
+
+	  for (NeighborList::const_iterator pn_it = physical_neighbors_list->begin();
+	       pn_it != physical_neighbors_list->end(); ++pn_it)
 	    {
-	      const BeliefSet neighbor_V = query_plan->getInterface(my_id, *n_it)->at(j-1);
+	      std::size_t physical_neighbor = *pn_it;
+
+	      const BeliefSet neighbor_V = query_plan->getInterface(my_id, reduced_neighbor)->at(physical_neighbor - 1);
 	      
 	      if (!isEpsilon(neighbor_V))
 		{
-		  const Signature neighbor_sig = query_plan->getSignature(j);
+		  const Signature neighbor_sig = query_plan->getSignature(physical_neighbor);
 		  const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
 		  
 		  
-		  std::cerr << "check neighbor " << j << std::endl
+		  std::cerr << "check neighbor " << physical_neighbor << std::endl
 			    << "neighbor_V = " << neighbor_V << std::endl;
 									
 		  // setup local signature for neighbors: this way we can translate
@@ -330,7 +343,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   // now visit the neighbors
   //
 
-  const NeighborListPtr& nbs = ctx->getNeighbors();
+  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
 
 #if defined(DEBUG)
   std::cerr << "Number of neighbors: " << nbs->size() << std::endl;

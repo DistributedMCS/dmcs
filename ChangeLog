@@ -1,3 +1,7 @@
+2010-05-06  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* src/OptDMCS.cpp: Use the right V at the right place.
+
 2010-05-06  Dao Tran Minh  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsd.cpp: Get neighbor_list from bridge rules parsing.
