@@ -72,22 +72,35 @@ BaseDMCS::updateGuessingSignature(SignaturePtr& guessing_sig,
     {
       if (testBeliefSet(neighbor_V, i))
 	{
+#ifdef DEBUG
+	  std::cerr << "Bit " << i << "is on" << std::endl;
+#endif // DEBUG
 	  SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
+
+
 	  
 	  // the neighbor's V must be set up properly
 	  assert(neighbor_it != neighbor_loc.end());
+
+#ifdef DEBUG
+	  std::cerr << "want to insert " << neighbor_it->sym << std::endl;
+#endif // DEBUG
 	  
 	  SignatureBySym::const_iterator my_it = my_sig_sym.find(neighbor_it->sym);
 	  
 	  // only add to guessing_sig ig this atom is not in
 	  // my_sig, i.e., it's in the neighbor's interface but
 		  // does not show up in my bridge rules
-	  if (my_it != my_sig_sym.end())
+	  if (my_it == my_sig_sym.end())
 	    {
 	      // add new symbol for neighbor
 	      Symbol sym(neighbor_it->sym, neighbor_it->ctxId, guessing_sig_local_id, neighbor_it->origId);
 	      guessing_sig->insert(sym);
 	      guessing_sig_local_id++;
+
+#ifdef DEBUG
+	      std::cerr << neighbor_it->sym << "inserted" << std::endl;
+#endif // DEBUG
 	    }
 	}
     }
@@ -98,7 +111,7 @@ BaseDMCS::updateGuessingSignature(SignaturePtr& guessing_sig,
 
 
 BeliefStateListPtr
-BaseDMCS::localSolve(const SignatureByLocal& sig, std::size_t system_size)
+BaseDMCS::localSolve(const ProxySignatureByLocal& sig, std::size_t system_size)
 {
 #ifdef DEBUG
   std::cerr << "Starting local solve..." << std::endl;

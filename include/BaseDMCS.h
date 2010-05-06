@@ -37,6 +37,7 @@
 
 #include "BeliefState.h"
 #include "Context.h"
+#include "ProxySignatureByLocal.h"
 
 namespace dmcs {
 
@@ -77,7 +78,8 @@ protected:
    * @return list of local belief states
    */
   virtual BeliefStateListPtr
-  localSolve(const SignatureByLocal& sig, std::size_t system_size);
+  //localSolve(const SignatureByLocal& sig, std::size_t system_size);
+  localSolve(const ProxySignatureByLocal& sig, std::size_t system_size);
 
 
   /// methods only needed for providing statistic information

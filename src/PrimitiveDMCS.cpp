@@ -82,12 +82,12 @@ PrimitiveDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignatureP
   for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
     {
       NeighborPtr nb = *n_it;
-      const std::size_t neighbor_id = nb->neighbor_id - 1;
-      const BeliefSet neighbor_V = (*V)[neighbor_id];
-      const Signature& neighbor_sig = *((*global_sigs)[neighbor_id]);
+      const std::size_t neighbor_id = nb->neighbor_id;
+      const BeliefSet neighbor_V = (*V)[neighbor_id - 1];
+      const Signature& neighbor_sig = *((*global_sigs)[neighbor_id - 1]);
 
 #ifdef DEBUG
-      std::cerr << "Interface variable of neighbor[" << *n_it <<"]: " << neighbor_V << std::endl;
+      std::cerr << "Interface variable of neighbor[" << nb->neighbor_id <<"]: " << neighbor_V << std::endl;
 #endif
 
       guessing_sig_local_id = updateGuessingSignature(guessing_sig,
@@ -157,25 +157,21 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     std::cerr << "Original signature: " << *sig << std::endl;
 #endif
       
+    // create the guessing signature using global V and my signature
     const SignaturePtr& gsig = createGuessingSignature(V, sig);
 
-    const SignatureByLocal& sl1 = boost::get<Tag::Local>(*sig);
-    const SignatureByLocal& sl2 = boost::get<Tag::Local>(*gsig);
-
-    const SignatureByLocal& sl3(sl1);
-
-    //    ProxySignatureByLocal mixed_sig(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig));
+    ProxySignatureByLocal mixed_sig(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig));
 
     /// ***************** FOR TESTING ****************************
 
-    SignatureIterators insert_iterators;
+    /*    SignatureIterators insert_iterators;
 
       
 #ifdef DEBUG
     std::cerr << "Original signature: " << *sig << std::endl;
 #endif
       
-      std::size_t my_id = ctx->getContextID();
+    //std::size_t my_id = ctx->getContextID();
       //const QueryPlanPtr& query_plan = ctx->getQueryPlan();
       
       const NeighborListPtr& neighbors = ctx->getNeighbors();
@@ -219,7 +215,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 		    }
 		}
 	    }
-	}
+	    }*/
 	  
 #ifdef DEBUG
       std::cerr << "Updated signature: " << *sig << std::endl;
@@ -227,13 +223,15 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
     /// **********************************************************
 
-
-    ///@todo create a ProxySignatureByLocal here and pass it to the localSolve
+#ifdef DEBUG
+      std::cerr << "Local:    " << *sig << std::endl;
+      std::cerr << "Guessing: " << *gsig << std::endl;
+#endif
 
     BeliefStateListPtr local_belief_states;
 
     // This will give us local_belief_states
-    STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig), n), time_lsolve);
+    STATS_DIFF (local_belief_states = localSolve(mixed_sig, n), time_lsolve);
 
     //STATS_DIFF (local_belief_states = localSolve(mixed_sig), time_lsolve);
 
@@ -242,16 +240,14 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
       std::cerr << "Erasing..." << std::endl;
 #endif
       
-      for (SignatureIterators::const_iterator s_it = insert_iterators.begin();
+      /*      for (SignatureIterators::const_iterator s_it = insert_iterators.begin();
 	   s_it != insert_iterators.end(); 
 	   ++s_it)
 	{
 	  sig->erase(*s_it);
-	}
+	  }*/
       
-#ifdef DEBUG
-      std::cerr << "Restored signature: " << *sig << std::endl;
-#endif
+
     /// **********************************************************
 
 

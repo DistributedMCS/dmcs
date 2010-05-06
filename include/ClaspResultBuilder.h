@@ -36,6 +36,7 @@
 #include "BeliefState.h"
 #include "Context.h"
 #include "Theory.h"
+#include "ProxySignatureByLocal.h"
 
 #include <boost/functional/hash.hpp>
 
@@ -45,7 +46,7 @@ template<class Grammar>
 class ClaspResultBuilder : public BaseBuilder<Grammar>
 {
 public:
-  ClaspResultBuilder(const SignatureByLocal&, const BeliefStateListPtr&, std::size_t system_size);
+  ClaspResultBuilder(const ProxySignatureByLocal&, const BeliefStateListPtr&, std::size_t system_size);
 
   void
   buildNode (typename BaseBuilder<Grammar>::node_t& node);
@@ -55,7 +56,7 @@ private:
   add_literal(typename BaseBuilder<Grammar>::node_t& node, BeliefStatePtr& bs);
 
 
-  const SignatureByLocal& local_sig;
+  const ProxySignatureByLocal& local_sig;
 
   std::size_t system_size;
 

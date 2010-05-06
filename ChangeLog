@@ -1,5 +1,15 @@
 2010-05-06  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
+	* include/ProxySignatureByLocal.h: Use ProxySignatureByLocal in PrimitiveDMCS.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/BaseDMCS.cpp: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/BaseDMCS.h: Likewise.
+
+2010-05-06  Minh Tran Dao  <dao@kr.tuwien.ac.at>
+
 	* include/Neighbor.h: Use Neighbor instead of QueryPlan to
 	get hostname and port
 	* src/genTest.cpp: Likewise.

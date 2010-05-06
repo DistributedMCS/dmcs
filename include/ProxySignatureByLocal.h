@@ -48,16 +48,16 @@ public:
   SignatureByLocal::const_iterator
   find(std::size_t local_id) const
   {
-    if (local_id < sig.size())
+    if (local_id <= sig.size())
       {
 	return sig.find(local_id);
       }
 
-    if (local_id < sig.size() + gsig.size())
+    if (local_id <= sig.size() + gsig.size())
       {
 	return gsig.find(local_id);
       }
-
+    
     return gsig.end();
   }
 

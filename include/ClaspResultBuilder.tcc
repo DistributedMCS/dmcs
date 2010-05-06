@@ -36,7 +36,7 @@
 namespace dmcs {
 
 template<typename Grammar>
-ClaspResultBuilder<Grammar>::ClaspResultBuilder(const SignatureByLocal& context_signature,
+ClaspResultBuilder<Grammar>::ClaspResultBuilder(const ProxySignatureByLocal& context_signature,
 						const BeliefStateListPtr& belief_states_,
 						std::size_t sys_size)
   ///@todo future versions of clasp will have a sentinel
@@ -98,6 +98,8 @@ ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& 
 
   // now setup belief state at the right position
   std::size_t cid = loc_it->ctxId - 1;
+
+  //  std::cerr << "Have atom: " << std::abs(local_lit) << "in context " << cid+1 << std::endl;
   
   BeliefSet& b = (*bs)[cid];
 

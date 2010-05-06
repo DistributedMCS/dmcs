@@ -296,8 +296,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
     /// **********************************************************
 
-      STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig), query_plan->getSystemSize()),
-		time_lsolve);
+      //STATS_DIFF (local_belief_states = localSolve(boost::get<Tag::Local>(*sig), query_plan->getSystemSize()),
+      //time_lsolve);
 
 
     /// ***************** FOR TESTING ****************************
@@ -441,7 +441,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 #endif // DEBUG
 
 #ifdef DMCS_STATS_INFO
-  my_stats_info.lsolve.first     += time_lsolve;
+  //my_stats_info.lsolve.first     += time_lsolve;
   my_stats_info.combine.first    += time_combine;
   my_stats_info.projection.first += time_projection;
 
