@@ -8,6 +8,11 @@
 
 2010-05-06  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
+	* src/OptDMCS.cpp: Clean up.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+2010-05-06  Minh Tran Dao  <dao@kr.tuwien.ac.at>
+
 	* src/dmcsd.cpp: Initialize OptDMCS with global_sigs.
 
 	* src/OptDMCS.cpp: Use ProxySignatureByLocal.

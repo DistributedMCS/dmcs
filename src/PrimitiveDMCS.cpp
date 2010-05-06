@@ -66,6 +66,7 @@ PrimitiveDMCS::~PrimitiveDMCS()
 { }
 
 
+
 SignaturePtr
 PrimitiveDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig)
 {
@@ -104,6 +105,7 @@ PrimitiveDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignatureP
 }
 
 
+
 PrimitiveDMCS::dmcs_return_type
 PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 {
@@ -119,13 +121,9 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #ifdef DMCS_STATS_INFO
   initStatsInfos(n);
 
-  std::cerr << "Initialization of the statistic information: " << *sis << std::endl;
-
   TimeDuration time_combine(0, 0, 0, 0);
   TransferTimesPtr time_transfer(new TransferTimes);
   StatsInfo& my_stats_info = (*sis)[k-1];
-
-  std::cerr << "My stats info: " << my_stats_info << std::endl;
 #endif
 
   const BeliefStatePtr& V = mess.getV();
@@ -145,11 +143,6 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
     // No cache found, we need to compute from scratch
 
-
-
-    ///@todo compute guessing signature and pass it on to localsolve as ProxySignatureByLocal
-    //    createGuessingSignature();
-
     const SignaturePtr& sig = ctx->getSignature();
 
 #ifdef DEBUG
@@ -161,67 +154,6 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
     ProxySignatureByLocal mixed_sig(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig));
 
-    /// ***************** FOR TESTING ****************************
-
-    /*    SignatureIterators insert_iterators;
-
-      
-#ifdef DEBUG
-    std::cerr << "Original signature: " << *sig << std::endl;
-#endif
-      
-    //std::size_t my_id = ctx->getContextID();
-      //const QueryPlanPtr& query_plan = ctx->getQueryPlan();
-      
-      const NeighborListPtr& neighbors = ctx->getNeighbors();
-
-
-      for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
-	{
-	  NeighborPtr nb = *n_it;
-
-	  const SignaturePtr neighbor_sig = (*global_sigs)[nb->neighbor_id - 1];
-	  const BeliefSet neighbor_V = (*V)[nb->neighbor_id - 1];
-
-	  std::cerr << "neighbor_V = " << neighbor_V << std::endl;
-
-	  const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(*neighbor_sig);
-	  
-	  // setup local signature for neighbors: this way we can translate
-	  // SAT models back to belief states in case we do not
-	  // reference them in the bridge rules
-	  for (std::size_t i = 1; i <= neighbor_sig->size(); ++i)
-	    {
-	      if (testBeliefSet(neighbor_V, i))
-		{
-		  std::cerr << "Bit " << i << "is on" << std::endl;
-
-		  SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
-		  std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
-		  
-		  std::cerr << "want to insert " << neighbor_it->sym << std::endl;
-
-		  // add new symbol for neighbor
-		  Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
-		  std::pair<Signature::iterator, bool> sp = sig->insert(sym);
-		  
-		  // only add them if it was not already included
-		  // during bridge rule parsing
-		  if (sp.second)
-		    {
-		      std::cerr << neighbor_it->sym << "inserted" << std::endl;
-		      insert_iterators.push_back(sp.first);
-		    }
-		}
-	    }
-	    }*/
-	  
-#ifdef DEBUG
-      std::cerr << "Updated signature: " << *sig << std::endl;
-#endif
-
-    /// **********************************************************
-
 #ifdef DEBUG
       std::cerr << "Local:    " << *sig << std::endl;
       std::cerr << "Guessing: " << *gsig << std::endl;
@@ -232,29 +164,15 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     // This will give us local_belief_states
     STATS_DIFF (local_belief_states = localSolve(mixed_sig, n), time_lsolve);
 
-    //STATS_DIFF (local_belief_states = localSolve(mixed_sig), time_lsolve);
-
-    /// ***************** FOR TESTING ****************************
-#ifdef DEBUG      
-      std::cerr << "Erasing..." << std::endl;
-#endif
-      
-      /*      for (SignatureIterators::const_iterator s_it = insert_iterators.begin();
-	   s_it != insert_iterators.end(); 
-	   ++s_it)
-	{
-	  sig->erase(*s_it);
-	  }*/
-      
-
-    /// **********************************************************
-
-
 #ifdef DMCS_STATS_INFO
       my_stats_info.lsolve.second = local_belief_states->size();
-      //    std::cerr << "local belief states size: " << my_stats_info.lsolve.second << " == " << local_belief_states->size() << std::endl;
-      //    std::cerr << my_stats_info << std::endl;
+
+#ifdef DEBUG
+      std::cerr << "local belief states size: " << my_stats_info.lsolve.second << " == " << local_belief_states->size() << std::endl;
       std::cerr << local_belief_states->size() << std::endl;
+#endif // DEBUG
+
+
 #endif // DMCS_STATS_INFO
 
 #ifdef DEBUG
@@ -268,9 +186,13 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 		time_projection);
 
 #ifdef DMCS_STATS_INFO
-    std::cerr << "projected belief states size: " << belief_states->size() << std::endl;
     my_stats_info.projection.second = belief_states->size();
+
+#ifdef DEBUG
+    std::cerr << "projected belief states size: " << belief_states->size() << std::endl;
     std::cerr << my_stats_info << std::endl;
+#endif // DEBUG
+
 #endif // DMCS_STATS_INFO
 
 
@@ -381,7 +303,10 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 
 #ifdef DMCS_STATS_INFO
 
+#ifdef DEBUG
 	std::cerr << "combination size: " << belief_states->size() << std::endl;
+#endif // DEBUG
+
 	my_stats_info.combine.second = belief_states->size();
 #endif // DMCS_STATS_INFO
       
@@ -414,16 +339,15 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     my_stats_info.projection.first += time_projection;
 
     TransferTimesPtr my_transfer   = my_stats_info.transfer;
-
-    *my_transfer   = *time_transfer; // copy here
-
-    std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
+    *my_transfer = *time_transfer; // copy here
 
     PTime sending_moment = boost::posix_time::microsec_clock::local_time();
-
     ReturnMessagePtr returning_message(new ReturnMessage(belief_states, sending_moment, sis));
 
+#ifdef DEBUG
+    std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
     std::cerr << "Returning message is: " << std::endl << *returning_message << std::endl;
+#endif // DEBUG
 
     return returning_message;
 

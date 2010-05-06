@@ -76,15 +76,19 @@ OptDMCS::createGuessingSignature(const SignaturePtr& my_sig)
       
   const NeighborListPtr& reduced_neighbors_list = query_plan->getNeighbors(my_id);
 
-  std::cerr << "Context " << my_id << " has " << reduced_neighbors_list->size() << " neighbors." << std::endl;
+#ifdef DEBUG
+  std::cerr << "Context " << my_id << " has " << reduced_neighbors_list->size() << " reduced neighbors." << std::endl;
+#endif // DEBUG
   
   for (NeighborList::const_iterator rn_it = reduced_neighbors_list->begin();
        rn_it != reduced_neighbors_list->end();
        ++rn_it)
     {
       const NeighborPtr& rn = *rn_it;
-      
+
+#ifdef DEBUG      
       std::cerr << "Checking reduced neighbor " << *rn << std::endl;
+#endif // DEBUG
       
       std::size_t reduced_neighbor = rn->neighbor_id;
       
@@ -115,34 +119,7 @@ OptDMCS::createGuessingSignature(const SignaturePtr& my_sig)
 							  guessing_sig_local_id);
 	}
     }
-  
-  //for (Neighbors::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
-  
-  /*	std::size_t i = 0;
-	for (BeliefState::const_iterator it = V->begin(); it != V->end(); ++it, ++i)
-	{
-	const BeliefSet neighbor_V = *it;
-	
-	if (!isEpsilon(neighbor_V))
-	{
-	#ifdef DEBUG
-	std::cerr << "Interface variable of neighbor[" << i+1 <<"]: " << neighbor_V << std::endl;
-	#endif
-	
-	const Signature& neighbor_sig = query_plan->getSignature(i);
-	
-	guessing_sig_local_id = updateGuessingSignature(guessing_sig,
-	my_sig_sym,
-	neighbor_sig,
-	neighbor_V,
-	guessing_sig_local_id);
-	}
-	}*/
-  
-#ifdef DEBUG
-  std::cerr << "Guessing signature: " << *guessing_sig << std::endl;
-#endif
-  
+
   return guessing_sig;
 }
 
@@ -157,29 +134,9 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
 #ifdef DMCS_STATS_INFO
   // initialize the statistic information
-  StatsInfosPtr sis(new StatsInfos);
-  
-  for (std::size_t i = 0; i < n; ++i)
-    {
-      TimeDuration local_i(0, 0, 0, 0);
-      TimeDuration combine_i(0, 0, 0, 0);
-      TimeDuration project_i(0, 0, 0, 0);
-
-      Info info_local(local_i, 0);
-      Info info_combine(combine_i, 0);
-      Info info_project(project_i, 0);
-
-      TransferTimesPtr tf_i(new TransferTimes);
-
-      StatsInfo si(info_local, info_combine, info_project, tf_i);      
-
-      sis->push_back(si);
-    }
+  initStatsInfos(n);
   
   TimeDuration time_combine(0, 0, 0, 0);
-
-  std::cerr << "Initialization of the statistic information: " << *sis << std::endl;
-
   TransferTimesPtr time_transfer(new TransferTimes);
   StatsInfo& my_stats_info = (*sis)[k-1];
 #endif
@@ -191,12 +148,8 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
   // get V from the query plan
   BeliefStatePtr localV(new BeliefState(n, 0));
-  //BeliefStatePtr globalV(new BeliefState(n, 0));
+
   BeliefStatePtr mask(new BeliefState(n, 0));
-
-  std::cerr << "Get query plan" << std::endl;
-
-  std::cerr << "Got it" << std::endl;
 
 #if defined(DEBUG)
   std::cerr << "context " << c << " is calling context " << k << std::endl;
@@ -213,11 +166,6 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
     {
       localV = query_plan->getInterface(c, k);
     }
-
-  ///@todo we have to check if we really can use a localized version of the global V
-  //globalV = query_plan->getGlobalV();
-
-
 
   ///@todo use cache in DMCS
   //  BeliefStatesPtr bs = cache->cacheHit(V);
@@ -240,134 +188,19 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   // call the local solver
   //
 
-  // This will give us local_belief_states
-  //BeliefStateListPtr local_belief_states = localSolve(globalV);
-
-  ///@todo compute guessing signature and pass it on to localsolve as ProxySignatureByLocalId
-
   BeliefStateListPtr local_belief_states;
 
-  ///@todo this has to be fixed ........... when Proxy is implelemented
-	const SignaturePtr& sig = ctx->getSignature();
+  const SignaturePtr& sig = ctx->getSignature();
 
 #ifdef DEBUG
     std::cerr << "Original signature: " << *sig << std::endl;
 #endif
       
-
     const SignaturePtr& gsig = createGuessingSignature(sig);
 
     ProxySignatureByLocal mixed_sig(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig));
 
-	//createGuessingSignature()
-
-    /// ***************** FOR TESTING ****************************
-
-	/*SignatureIterators insert_iterators;
-
-      
-#ifdef DEBUG
-    std::cerr << "Original signature: " << *sig << std::endl;
-#endif
-      
-      std::size_t my_id = ctx->getContextID();
-      
-      const NeighborListPtr& reduced_neighbors_list = query_plan->getNeighbors(my_id);
-
-      std::cerr << "Context " << my_id << " has " << reduced_neighbors_list->size() << " neighbors." << std::endl;
-
-      for (NeighborList::const_iterator rn_it = reduced_neighbors_list->begin();
-	   rn_it != reduced_neighbors_list->end();
-	   ++rn_it)
-	{
-	  const NeighborPtr& rn = *rn_it;
-
-	  std::cerr << "Checking reduced neighbor " << *rn << std::endl;
-
-	  std::size_t reduced_neighbor = rn->neighbor_id;
-
-	  const NeighborListPtr& physical_neighbors_list = ctx->getNeighbors();
-
-	  for (NeighborList::const_iterator pn_it = physical_neighbors_list->begin();
-	       pn_it != physical_neighbors_list->end(); ++pn_it)
-	    {
-	      const NeighborPtr& pn = *pn_it;
-
-	      std::size_t physical_neighbor = pn->neighbor_id;
-
-	      std::cerr << "physical neighbor is " << *pn << std::endl;
-
-	      const BeliefStatePtr& V = query_plan->getInterface(my_id, reduced_neighbor);
-
-	      const BeliefSet neighbor_V = (*V)[physical_neighbor - 1];
-	      
-	      if (!isEpsilon(neighbor_V))
-		{
-		  const Signature neighbor_sig = query_plan->getSignature(physical_neighbor);
-		  const SignatureByLocal& neighbor_loc = boost::get<Tag::Local>(neighbor_sig);
-		  
-		  
-		  std::cerr << "check neighbor " << physical_neighbor << std::endl
-			    << "neighbor_V = " << neighbor_V << std::endl;
-									
-		  // setup local signature for neighbors: this way we can translate
-		  // SAT models back to belief states in case we do not
-		  // reference them in the bridge rules
-		  for (std::size_t i = 1; i <= neighbor_sig.size(); ++i)
-		    {
-		      if (testBeliefSet(neighbor_V, i))
-			{
-			  std::cerr << "Bit " << i << "is on" << std::endl;
-			  SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
-			  std::size_t local_id_here = sig->size()+1; // compute new local id for i'th bit
-			  
-			  // add new symbol for neighbor
-			  Symbol sym(neighbor_it->sym, neighbor_it->ctxId, local_id_here, neighbor_it->origId);
-			  std::pair<Signature::iterator, bool> sp = sig->insert(sym);
-			  
-			  std::cerr << "want to insert " << neighbor_it->sym << std::endl;
-			  
-			  // only add them if it was not already included
-			  // during bridge rule parsing
-			  if (sp.second)
-			    {
-			      std::cerr << "insert " << neighbor_it->sym << std::endl;
-			      insert_iterators.push_back(sp.first);
-			    }
-			}
-		    }
-		}
-	    }
-	}
-      
-      
-#ifdef DEBUG
-      std::cerr << "Updated signature: " << *sig << std::endl;
-      #endif*/
-
-#ifdef DEBUG
-      std::cerr << "Local:    " << *sig << std::endl;
-      std::cerr << "Guessing: " << *gsig << std::endl;
-#endif
-
-    /// **********************************************************
-
-      STATS_DIFF (local_belief_states = localSolve(mixed_sig, query_plan->getSystemSize()), time_lsolve);
-
-
-    /// ***************** FOR TESTING ****************************
-      
-      /*      for (SignatureIterators::const_iterator s_it = insert_iterators.begin();
-	   s_it != insert_iterators.end(); 
-	   ++s_it)
-	{
-	  sig->erase(*s_it);
-	}
-      
-#ifdef DEBUG
-      std::cerr << "Restored signature: " << *sig << std::endl;
-#endif*/
-      /// **********************************************************
+    STATS_DIFF (local_belief_states = localSolve(mixed_sig, query_plan->getSystemSize()), time_lsolve);
 
 #ifdef DMCS_STATS_INFO
   my_stats_info.lsolve.second = local_belief_states->size();
@@ -417,11 +250,6 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::resolver resolver(io_service);
 
-      //      std::size_t neighbor_id = *it;
-      
-      //      boost::asio::ip::tcp::resolver::query query(query_plan->getHostname(*it),
-      //						  query_plan->getPort(*it));
-
       NeighborPtr nb = *it;
 
 #if defined(DEBUG)
@@ -464,8 +292,6 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       std::cerr << *neighbor_belief_states << std::endl;      
 #endif // DEBUG
 	  
-      //temporary_belief_states = combine(temporary_belief_states, neighbor_belief_states, globalV);
-
       STATS_DIFF_REUSE (temporary_belief_states = combine(temporary_belief_states,
 							  neighbor_belief_states,
 							  localV),
@@ -499,16 +325,15 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   my_stats_info.projection.first += time_projection;
 
   TransferTimesPtr my_transfer   = my_stats_info.transfer;
-
   *my_transfer   = *time_transfer; // copy here
 
-  std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
-
   PTime sending_moment = boost::posix_time::microsec_clock::local_time();
-
   ReturnMessagePtr returning_message(new ReturnMessage(belief_states, sending_moment, sis));
 
+#ifdef DEBUG
+  std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
   std::cerr << "Returning message is: " << std::endl << *returning_message << std::endl;
+#endif // DEBUG
 
   return returning_message;
 
