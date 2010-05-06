@@ -107,11 +107,8 @@ namespace dmcs { namespace generator {
 	      std::cerr << "In case 3"<<std::endl;
 #endif
 	      BeliefStatePtr bs_30 = query_plan->getInterface1(id, id+1);
-	      std::cerr << "1 " << *bs_30 << std::endl;
 	      const BeliefStatePtr bs_01 = query_plan->getInterface1(id+1, id+2);
-	      std::cerr << "2" << *bs_01 << std::endl;	  
 	      update(bs_30, bs_01);
-	      std::cerr << "3" <<std::endl;
 	      query_plan->putInterface(id, id+1, bs_30);
 #ifdef DEBUG
 	      std::cerr << "done with case 3"<<std::endl;
