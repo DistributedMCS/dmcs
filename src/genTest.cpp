@@ -319,10 +319,10 @@ read_input(int argc, char* argv[])
 void
 init()
 {
+
   std::stringstream out;
   std::string atom_name;
   std::string local_sigma;
-
 
   QueryPlanPtr tmp1(new QueryPlan);
   original_qp = tmp1;
@@ -335,7 +335,6 @@ init()
       local_sigma = "";
       out.str("");
       out << i;
-
       SignaturePtr s(new Signature);
 
       // create local signature for context i
@@ -355,9 +354,9 @@ init()
       RulesPtr r(new Rules);
       BridgeRulesPtr br(new BridgeRules);
       // hack to get neighbors
-      NeighborListPtr neighbors = optimal_qp->getNeighbors1(i);
-      ContextPtr c(new Context(i, no_contexts, s, r, br, neighbors));
+      NeighborListPtr neighbors(new NeighborList);
 
+      ContextPtr c(new Context(i, no_contexts, s, r, br, neighbors));
       contexts->push_back(c);
     }
 }
@@ -366,6 +365,7 @@ init()
 void
 setupInfo()
 {
+
   std::stringstream out;
   std::string str_port;
 
@@ -382,6 +382,15 @@ setupInfo()
       original_qp->putSignature(i, sigmas[i-1]);
       original_qp->putHostname(i, STR_LOCALHOST);
       original_qp->putPort(i, str_port);
+
+    }
+
+  for (std::size_t i = 1; i <= no_contexts; ++i)
+    {
+
+      NeighborListPtr neighbors = original_qp->getNeighbors1(i);
+      contexts->at(i-1)->setNeighbors(neighbors);      
+
     }
 }
 
@@ -828,19 +837,42 @@ int main(int argc, char* argv[])
       return 1;
     }
 
+#ifdef DEBUG
+    std::cerr << "Initialising .." << std::endl;
+#endif
+
   init();
+
+#ifdef DEBUG
+    std::cerr << "Generating topology .." << std::endl;
+#endif
   generate_topology();
   
   ContextGenerator context_gen(contexts, original_qp, no_bridge_rules, no_atoms);
 
+#ifdef DEBUG
+    std::cerr << "Generating Contexts .." << std::endl;
+#endif
   context_gen.generate();
-  
+
+#ifdef DEBUG
+    std::cerr << "Create interface for standard QP .." << std::endl;
+#endif  
+
   qpgen->create_interfaces(topology_type);
+
+#ifdef DEBUG
+    std::cerr << "Create interface for opt QP .." << std::endl;
+#endif  
 
   optimal_qp->putGraph(original_qp->getGraph());
   
   opt_qpgen->create_interfaces(topology_type);
   
+#ifdef DEBUG
+    std::cerr << "Printing .." << std::endl;
+#endif  
+
   print_contexts();
   print_topo();
   ///@todo update the command lines of invoking the client
