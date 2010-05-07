@@ -4,6 +4,11 @@
 
 2010-05-07  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
+	* src/genTest.cpp: Use a single srand(). 
+	* src/QueryPlanGenerator.cpp: Likewise.
+
+2010-05-07  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+
 	* include/ContextGenerator.h: Use no_interface_atoms in generating
 	bridge rules.
 	* src/ContextGenerator.cpp: Likewise.

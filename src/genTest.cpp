@@ -321,8 +321,6 @@ read_input(int argc, char* argv[])
 void
 init()
 {
-   srand ( time(NULL) );
-
   std::stringstream out;
   std::string atom_name;
   std::string local_sigma;
@@ -874,6 +872,8 @@ int main(int argc, char* argv[])
     { 
       return 1;
     }
+
+  srand ( time(NULL) );
 
 #ifdef DEBUG
     std::cerr << "Initialising .." << std::endl;

@@ -40,7 +40,7 @@ QueryPlanGenerator::QueryPlanGenerator(ContextsPtr& contexts_, QueryPlanPtr& que
     query_plan(query_plan_), 
     V(new BeliefState(contexts->size(), 0))
 { 
-  std::srand ( std::time(NULL) );
+  //std::srand ( std::time(NULL) );
 }
 
 
