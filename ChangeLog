@@ -1,5 +1,9 @@
 2010-05-07  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
+	* src/DLVVisitor.cpp: Need 'a' - 1.
+	* src/LogicVisitor.cpp: Likewise.
+	* src/genTest.cpp: Likewise.
+
 	* src/BeliefCombination.cpp: Add a remark for a chance to improve
 	projection.
 

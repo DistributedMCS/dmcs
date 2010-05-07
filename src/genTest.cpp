@@ -389,7 +389,7 @@ init()
       Interface ci = context_interfaces[i];
       for (std::size_t j = 0; j < no_interface_atoms; ++j)
 	{
-	  std::cerr << ci[j] << "=" << (char)('a' + ci[j]) << " ";
+	  std::cerr << ci[j] << "=" << (char)(ci[j] +'a' - 1) << " ";
 	}
       std::cerr << std::endl;
     }
@@ -488,7 +488,7 @@ interface_vars(ContextPtr& context, std::size_t neighbor_id)
 	{
 	  if (j->first == neighbor_id)
 	    {
-	      temp = temp + (char)(j->second + 'a') + out.str() + " ";
+	      temp = temp + (char)(j->second + 'a' - 1) + out.str() + " ";
 	    }
 	}
 
@@ -496,7 +496,7 @@ interface_vars(ContextPtr& context, std::size_t neighbor_id)
 	{
 	  if (j->first == neighbor_id)
 	    {
-	      temp = temp + (char)(j->second + 'a') + out.str() + " ";
+	      temp = temp + (char)(j->second + 'a' - 1) + out.str() + " ";
 	    }
 	}
     }
