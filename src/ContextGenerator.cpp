@@ -236,6 +236,8 @@ ContextGenerator::generate_bridge_rules(const ContextPtr& context)
 {
   do
     {
+      context->getBridgeRules()->clear();
+
       for (int i = 0; i < no_bridge_rules; ++i)
 	{
 	  if (rand() % 2)
