@@ -33,6 +33,8 @@
 #include "Context.h"
 #include "QueryPlan.h"
 
+typedef std::vector<std::size_t> Interface;
+typedef std::vector<Interface> InterfaceVec;
 
 namespace dmcs { namespace generator {
 
@@ -40,11 +42,15 @@ class ContextGenerator
 {
 public:
   ContextGenerator(ContextsPtr& contexts_, QueryPlanPtr& query_plan_,
-		   int no_bridge_rules_, int no_atoms_)
+		   std::size_t no_bridge_rules_, std::size_t no_atoms_,
+		   std::size_t no_interface_atoms_,
+		   const InterfaceVec context_interfaces_)
     : contexts(contexts_),
       query_plan(query_plan_),
       no_bridge_rules(no_bridge_rules_),
-      no_atoms(no_atoms_)
+      no_atoms(no_atoms_),
+      no_interface_atoms(no_interface_atoms_),
+      context_interfaces(context_interfaces_)
   { }
 
   void
@@ -72,8 +78,10 @@ protected:
 protected:
   ContextsPtr contexts;
   QueryPlanPtr& query_plan;
-  int no_bridge_rules;
-  int no_atoms;
+  std::size_t no_bridge_rules;
+  std::size_t no_atoms;
+  std::size_t no_interface_atoms;
+  const InterfaceVec context_interfaces;
 };
 
   } // namespace generator

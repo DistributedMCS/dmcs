@@ -45,11 +45,11 @@ DLVVisitor::DLVVisitor(std::ostream& s)
 void
 DLVVisitor::printPositiveBridgeRule(std::ostream& os,const BridgeAtom& b)
 {
-  os << (char)(b.second+96)<< "" << b.first;
+  os << (char)(b.second+'a')<< "" << b.first;
 }
 
 void
 DLVVisitor::printNegativeBridgeRule(std::ostream& os,const BridgeAtom& b)
 {
-  os << "not " << (char)(b.second+96)<< "" << b.first;
+  os << "not " << (char)(b.second+'a')<< "" << b.first;
 }

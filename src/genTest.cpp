@@ -84,9 +84,9 @@ std::vector<Signature> sigmas;
 
 std::size_t no_contexts;
 std::size_t no_atoms;
-int no_interface_atoms;
-int no_bridge_rules;
-int topology_type;
+std::size_t no_interface_atoms;
+std::size_t no_bridge_rules;
+std::size_t topology_type;
 
 std::string filename;
 std::ofstream file_rules;
@@ -104,6 +104,8 @@ QueryPlanGenerator* opt_qpgen;
 
 QueryPlanPtr original_qp;
 QueryPlanPtr optimal_qp;
+
+InterfaceVec context_interfaces;
 
 int
 read_input(int argc, char* argv[])
@@ -319,6 +321,7 @@ read_input(int argc, char* argv[])
 void
 init()
 {
+   srand ( time(NULL) );
 
   std::stringstream out;
   std::string atom_name;
@@ -351,6 +354,26 @@ init()
 
       sigmas.push_back(*s);
 
+      // randomly choose the output interface for context i
+
+      Interface c_i_interface;
+
+      for (std::size_t j = 0; j < no_interface_atoms; ++j)
+	{
+	  
+
+	  while (1)
+	    {
+	      std::size_t k = (rand() % no_atoms) + 1;
+	      if (std::find(c_i_interface.begin(), c_i_interface.end(), k) == c_i_interface.end())
+		{
+		  c_i_interface.push_back(k);
+		  break;
+		}
+	    };
+	}
+      context_interfaces.push_back(c_i_interface);
+
       RulesPtr r(new Rules);
       BridgeRulesPtr br(new BridgeRules);
       // hack to get neighbors
@@ -359,6 +382,21 @@ init()
       ContextPtr c(new Context(i, no_contexts, s, r, br, neighbors));
       contexts->push_back(c);
     }
+
+#ifdef DEBUG
+  std::cerr << "Interface of contexts:" << std::endl;
+  for (std::size_t i = 0; i < no_contexts; ++i)
+    {
+      std::cerr << "C_" << i+1 << ": ";
+      Interface ci = context_interfaces[i];
+      for (std::size_t j = 0; j < no_interface_atoms; ++j)
+	{
+	  std::cerr << ci[j] << "=" << (char)('a' + ci[j]) << " ";
+	}
+      std::cerr << std::endl;
+    }
+#endif // DEBUG  
+
 }
 
 
@@ -452,7 +490,7 @@ interface_vars(ContextPtr& context, std::size_t neighbor_id)
 	{
 	  if (j->first == neighbor_id)
 	    {
-	      temp = temp + (char)(j->second + 96) + out.str() + " ";
+	      temp = temp + (char)(j->second + 'a') + out.str() + " ";
 	    }
 	}
 
@@ -460,7 +498,7 @@ interface_vars(ContextPtr& context, std::size_t neighbor_id)
 	{
 	  if (j->first == neighbor_id)
 	    {
-	      temp = temp + (char)(j->second + 96) + out.str() + " ";
+	      temp = temp + (char)(j->second + 'a') + out.str() + " ";
 	    }
 	}
     }
@@ -848,7 +886,7 @@ int main(int argc, char* argv[])
 #endif
   generate_topology();
   
-  ContextGenerator context_gen(contexts, original_qp, no_bridge_rules, no_atoms);
+  ContextGenerator context_gen(contexts, original_qp, no_bridge_rules, no_atoms, no_interface_atoms, context_interfaces);
 
 #ifdef DEBUG
     std::cerr << "Generating Contexts .." << std::endl;

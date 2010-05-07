@@ -71,7 +71,7 @@ LogicVisitor::visitRule(const RulePtr& t,const std::size_t contextId )
 	{
 	  stream << "v ";
 	}
-      stream << (char)((*it)+96) << "" << contextId << " ";
+      stream << (char)((*it)+'a') << "" << contextId << " ";
       multiple = true;
     }  
 
@@ -85,7 +85,7 @@ LogicVisitor::visitRule(const RulePtr& t,const std::size_t contextId )
 	{
 	  stream << ", ";
 	}
-      stream << (char)((*it)+96) << "" << contextId ;
+      stream << (char)((*it)+'a') << "" << contextId ;
       multiple = true;      
     }
   
@@ -96,7 +96,7 @@ LogicVisitor::visitRule(const RulePtr& t,const std::size_t contextId )
 	{
 	  stream << ", ";
 	}
-      stream << "not " << (char)((*it)+96)<< "" << contextId;
+      stream << "not " << (char)((*it)+'a')<< "" << contextId;
       multiple = true;     
     }
   stream << "." << std::endl;
@@ -140,7 +140,7 @@ LogicVisitor::visitBridgeRule(const BridgeRulePtr& t, const std::size_t contextI
 	  stream << ", ";
 	}
       printPositiveBridgeRule(stream,*it);
-      //      stream << "(" << it->first << ":" << (char)(it->second+96)<< "" << it->first << ")";
+      //      stream << "(" << it->first << ":" << (char)(it->second+'a')<< "" << it->first << ")";
       multiple = true;      
     }
  
@@ -152,7 +152,7 @@ LogicVisitor::visitBridgeRule(const BridgeRulePtr& t, const std::size_t contextI
 	  stream << ", ";
 	}
       printNegativeBridgeRule(stream,*it);
-      //      stream << "not (" << it->first << ":" << (char)(it->second+96)<< "" << it->first << ")";
+      //      stream << "not (" << it->first << ":" << (char)(it->second+'a')<< "" << it->first << ")";
       multiple = true;     
     }
 
@@ -162,11 +162,11 @@ LogicVisitor::visitBridgeRule(const BridgeRulePtr& t, const std::size_t contextI
 void
 LogicVisitor::printPositiveBridgeRule(std::ostream& os,const BridgeAtom& b)
 {
-  os << "(" << b.first << ":" << (char)(b.second+96)<< "" << b.first << ")";
+  os << "(" << b.first << ":" << (char)(b.second+'a')<< "" << b.first << ")";
 }
 
 void
 LogicVisitor::printNegativeBridgeRule(std::ostream& os,const BridgeAtom& b)
 {
-  os << "not (" << b.first << ":" << (char)(b.second+96)<< "" << b.first << ")";
+  os << "not (" << b.first << ":" << (char)(b.second+'a')<< "" << b.first << ")";
 }

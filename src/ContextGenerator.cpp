@@ -74,6 +74,8 @@ addUniqueBridgeAtom(BridgeRulePtr& r, std::size_t neighbor_id, int neighbor_atom
 {
   BridgeAtom bap = std::make_pair(neighbor_id, std::max(neighbor_atom, -neighbor_atom));
 
+  std::cerr << "Adding atom " << neighbor_atom << " of neighbor " << neighbor_id << std::endl;
+
   PositiveBridgeBody& pb = getPositiveBody(r);
   NegativeBridgeBody& nb = getNegativeBody(r);
 
@@ -135,7 +137,7 @@ ContextGenerator::cover_neighbors(const ContextPtr& context)
 void
 ContextGenerator::generate_local_kb(const ContextPtr& context)
 {
-  for (int i = 1; i <= no_atoms; ++i)
+  for (std::size_t i = 1; i <= no_atoms; ++i)
     {
       HeadPtr head(new Head);
       PositiveBodyPtr pbody(new PositiveBody);
@@ -214,7 +216,21 @@ ContextGenerator::generate_bridge_rule(const ContextPtr& context)
       NeighborPtr nb = *it;
       std::size_t neighbor_id = nb->neighbor_id;//(*nbors)[neighbor_pos];
 
-      int atom = sign() * ((rand() % no_atoms) + 1);
+      //int atom = sign() * ((rand() % no_atoms) + 1);
+      std::size_t atom_pos = rand() % no_interface_atoms;
+
+      std::cerr << "Neighbor = " << nb->neighbor_id << std::endl;
+      Interface interface_neighbor = context_interfaces[neighbor_id-1];
+
+      for (std::size_t it = 0; it < no_interface_atoms; ++it)
+	{
+	  std::cerr << interface_neighbor[it] << " ";
+	}
+      std::cerr << std::endl;
+
+      std::cerr << "atom_pos = " << atom_pos << " --> atom = " << interface_neighbor[atom_pos] << std::endl;
+
+      int atom = sign() * interface_neighbor[atom_pos];
 
       i += addUniqueBridgeAtom(r, neighbor_id, atom);
 
@@ -238,7 +254,7 @@ ContextGenerator::generate_bridge_rules(const ContextPtr& context)
     {
       context->getBridgeRules()->clear();
 
-      for (int i = 0; i < no_bridge_rules; ++i)
+      for (std::size_t i = 0; i < no_bridge_rules; ++i)
 	{
 	  if (rand() % 2)
 	    {

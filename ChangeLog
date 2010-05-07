@@ -1,3 +1,13 @@
+2010-05-07  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* include/ContextGenerator.h: Use no_interface_atoms in generating
+	bridge rules.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/genTest.cpp: Likewise.
+
+	* src/LogicVisitor.cpp: Fix stupid bug: 96 vs. 'a'
+	* src/DLVVisitor.cpp: Likewise.
+
 2010-05-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* TODO: Update.
