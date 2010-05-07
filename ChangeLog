@@ -1,3 +1,7 @@
+2010-05-07  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/ContextGenerator.cpp: Clean up
+
 2010-05-07  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
 	* include/ContextGenerator.h: Use no_interface_atoms in generating
