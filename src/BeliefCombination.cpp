@@ -273,6 +273,13 @@ project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateLis
 
        ///@todo TK: we could also get rid off duplicates outside the
        ///loop, this needs some testing
+
+       ///experiments show that projection sometime takes a lot of
+       ///time due to sort and unique.
+
+       ///@todo: use set for internal
+       ///accumulation and return a list another possibility is to use
+       ///multi-index-container
        cu->sort(BeliefStateCmp());
        cu->unique(BeliefStateEq());
      }

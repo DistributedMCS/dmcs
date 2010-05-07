@@ -1,3 +1,8 @@
+2010-05-07  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* src/BeliefCombination.cpp: Add a remark for a chance to improve
+	projection.
+
 2010-05-07  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
 	* src/ContextGenerator.cpp: Clean up
