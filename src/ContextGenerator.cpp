@@ -74,8 +74,9 @@ addUniqueBridgeAtom(BridgeRulePtr& r, std::size_t neighbor_id, int neighbor_atom
 {
   BridgeAtom bap = std::make_pair(neighbor_id, std::max(neighbor_atom, -neighbor_atom));
 
+#ifdef DEBUG
   std::cerr << "Adding atom " << neighbor_atom << " of neighbor " << neighbor_id << std::endl;
-
+#endif
   PositiveBridgeBody& pb = getPositiveBody(r);
   NegativeBridgeBody& nb = getNegativeBody(r);
 
@@ -218,10 +219,12 @@ ContextGenerator::generate_bridge_rule(const ContextPtr& context)
 
       //int atom = sign() * ((rand() % no_atoms) + 1);
       std::size_t atom_pos = rand() % no_interface_atoms;
-
+#ifdef DEBUG
       std::cerr << "Neighbor = " << nb->neighbor_id << std::endl;
+#endif
       Interface interface_neighbor = context_interfaces[neighbor_id-1];
 
+#ifdef DEBUG
       for (std::size_t it = 0; it < no_interface_atoms; ++it)
 	{
 	  std::cerr << interface_neighbor[it] << " ";
@@ -229,7 +232,7 @@ ContextGenerator::generate_bridge_rule(const ContextPtr& context)
       std::cerr << std::endl;
 
       std::cerr << "atom_pos = " << atom_pos << " --> atom = " << interface_neighbor[atom_pos] << std::endl;
-
+#endif
       int atom = sign() * interface_neighbor[atom_pos];
 
       i += addUniqueBridgeAtom(r, neighbor_id, atom);
