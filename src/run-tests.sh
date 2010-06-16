@@ -28,6 +28,37 @@ done
 
 cd ..
 
+
+for (( i=1; i<=$NOTESTS; i++ ))
+do
+    c=$(echo {a..z} | awk "{print \$$i;}")
+
+    THETEST=$TEMPLATE-$c
+
+    if $DOPRIMITIVE ; then
+	echo calling DMCS $THETEST...
+	date > $THETEST-dmcs-start.log
+	bash $TESTSPATH/$THETEST"_command_line.sh" 2> $THETEST-dmcs-globalerr.log
+	date > $THETEST-dmcs-end.log
+	sleep 10
+    fi
+
+    echo calling DMCSOPT $THETEST...
+    date > $THETEST-dmcsopt-start.log
+    bash $TESTSPATH/$THETEST"_command_line_opt.sh" 2> $THETEST-dmcsopt-globalerr.log
+    date > $THETEST-dmcsopt-end.log
+    sleep 10
+
+done
+
+## do csv here...
+
+
+ZIPDIR=$TEMPLATE-$NOTESTS
+echo Generating $ZIPDIR.zip...
+mkdir $ZIPDIR
+cp -v $TESTSPATH/$TEMPLATE-*-*.* *.log *.csv $ZIPDIR
+zip -r $ZIPDIR.zip $ZIPDIR=======
 #
 #for (( i=1; i<=$NOTESTS; i++ ))
 #do

@@ -1,3 +1,9 @@
+2010-06-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/run-tests.sh: Update run-tests.
+
+	* include/Cache.h: Include map.
+
 2010-05-07  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
 	* src/DLVVisitor.cpp: Need 'a' - 1.
