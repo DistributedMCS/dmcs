@@ -34,6 +34,7 @@
 
 #include "BeliefState.h"
 
+#include <map>
 #include <set>
 #include <iosfwd>
 
