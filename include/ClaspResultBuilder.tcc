@@ -39,9 +39,7 @@ template<typename Grammar>
 ClaspResultBuilder<Grammar>::ClaspResultBuilder(const ProxySignatureByLocal& context_signature,
 						const BeliefStateListPtr& belief_states_,
 						std::size_t sys_size)
-  ///@todo future versions of clasp will have a sentinel
-  : BaseBuilder<Grammar>(Grammar(context_signature.size())), 
-    //    sig(context_.getSignature()),
+  : BaseBuilder<Grammar>(Grammar()), 
     local_sig(context_signature),
     system_size(sys_size),
     belief_states(belief_states_)
