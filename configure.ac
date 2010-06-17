@@ -17,12 +17,28 @@ if test "$CLASP" = ""; then
 else
     # the user supplied a 'CLASP=...'
     # check if it exists (with search path=/, since the user supplied
-    # an entire path!) and set DLVPATH to it!
+    # an entire path!) and set CLASPPATH to it!
     AC_CHECK_PROG(CLASPPATH, $CLASP, $CLASP, notfound, [/])
 fi
 
 if test "$CLASPPATH" = notfound; then
     AC_MSG_ERROR([clasp not found, get it from http://www.cs.uni-potsdam.de/clasp/])
+fi
+
+
+AC_MSG_CHECKING([for clasp version]) # check for clasp >= 1.3.4
+
+CLASPVERSION=`$CLASPPATH --version 2>&1 | sed -ne 's/^.*clasp[[^0-9]]*//p'`
+CLASPMAJOR=`echo $CLASPVERSION | sed "s/^\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/"`
+CLASPMINOR=`echo $CLASPVERSION | sed "s/^\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/"`
+CLASPMICRO=`echo $CLASPVERSION | sed "s/^\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/"`
+
+AC_MSG_RESULT([$CLASPVERSION])
+
+# for check clasp >= 1.99.68 we have to do some arithmetic here, but
+# for now it's good enough
+if test "$CLASPMAJOR"0"$CLASPMINOR"0"$CLASPMICRO" -lt 10304; then 
+   AC_MSG_ERROR([could not find clasp >= 1.3.4, please upgrade])
 fi
 
 #
