@@ -5,17 +5,19 @@
 #include "LocalKBBuilder.h"
 #include "BridgeRulesBuilder.h"
 #include "Signature.h"
-#include <iostream>
 #include "LocalLoopFormulaBuilder.h"
 #include "CNFLocalLoopFormulaBuilder.h"
 #include "EquiCNFLocalLoopFormulaBuilder.h"
 #include "LoopFormulaDirector.h"
-
+#include "QueryPlan.h"
 #include "DimacsVisitor.h"
+
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/thread.hpp>
 #include <boost/tokenizer.hpp>
+
+#include <iostream>
 
 
 #define BOOST_TEST_DYN_LINK
@@ -28,6 +30,8 @@ using namespace dmcs;
 
 BOOST_AUTO_TEST_CASE( testCNFTranslation )
 {
+  const std::size_t system_size = 4;
+
   // create signature
   SignaturePtr sig(new Signature);
 
@@ -43,7 +47,6 @@ BOOST_AUTO_TEST_CASE( testCNFTranslation )
 
   RulesPtr local_kb(new Rules);
   BridgeRulesPtr bridge_rules(new BridgeRules);
-  QueryPlanPtr query_plan(new QueryPlan);
 
   const char* ex = getenv("EXAMPLESDIR");
   std::string kb_file(ex);
@@ -59,8 +62,14 @@ BOOST_AUTO_TEST_CASE( testCNFTranslation )
   parser_director.setBuilder(&builder1);
   parser_director.parse(kb_file);
 
+
+  NeighborListPtr neighbor_list(new NeighborList);
+
+  SignatureVecPtr global_sigs(new SignatureVec(system_size));
+  global_sigs->at(contextId - 1) = sig;
+
   //parse BR
-  BridgeRulesBuilder<BRGrammar> builder_br(bridge_rules, sig, query_plan);
+  BridgeRulesBuilder<BRGrammar> builder_br(contextId, bridge_rules, neighbor_list, global_sigs);
   ParserDirector<BRGrammar> parser_director_br;
   parser_director_br.setBuilder(&builder_br);
   parser_director_br.parse(br_file);
