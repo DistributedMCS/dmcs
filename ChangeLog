@@ -1,3 +1,7 @@
+2010-07-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* TODO: Update.
+
 2010-06-17  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/ClaspResultGrammar.tcc: Fix to SAT'09 & clasp 1.3.4

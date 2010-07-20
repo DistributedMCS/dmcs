@@ -17,7 +17,9 @@ This is the TODO list for DMCS -*- org -*-
    http://www.princeton.edu/~chaff/mchaff.html
    http://www.princeton.edu/~chaff/zchaff.html
 ** TODO couple with ASP solvers
-** TODO use 1 integer to represent a bridge atom (possible in both static and dynamic cases)
+* TODO detect underspecified (too small) V and turn off computation then (UNKNOWN return?)
+* TODO currently we assume disjoint signature, merge with dynmcs for shared signatures
+* TODO use 1 integer to represent a bridge atom (possible in both static and dynamic cases)
 * TODO use projection feature from clasp
 * TODO use a better RNG than rand() in the test generators, dmcsGen generates the same files when called in short duration
 * TODO killing dmcsd and restart does not always work flawlessly, there is the famous socket restart thing going on
