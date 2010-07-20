@@ -1,16 +1,16 @@
-c clasp version 1.3.0
+c clasp version 1.3.4
 c Reading from ../../examples/dimacs.txt
 c Solving...
 c Answer: 1
-v -1 -2 -3 
+v -1 -2 -3 0
 c Answer: 2
-v -1 2 -3 
+v -1 2 -3 0
 c Answer: 3
-v 1 -2 3 
+v 1 -2 3 0
 c Answer: 4
-v 1 2 -3 
+v 1 2 3 0
 c Answer: 5
-v 1 2 3 
+v 1 2 -3 0
 s SATISFIABLE
 
 c Models    : 5     
