@@ -42,12 +42,37 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <map>
 
 using namespace dmcs;
+
+namespace dmcs {
+
+  ///@todo i don't like it, but what can we do, clasp disappears always...
+  static std::map<int,int> sigchlds;
+
+  void
+  sigchild_handler(int /* sig */, siginfo_t* info, void* /* uap */)
+  {
+    if (info == 0) return; //??
+
+    switch(info->si_signo)
+      {
+      case SIGCHLD:
+	sigchlds[info->si_pid] = info->si_status;
+	break;
+      default:
+	::perror("sigchild_handler");
+	::exit(1);
+      };
+  }
+
+}
 
 ProcessBuf::ProcessBuf()
   : std::streambuf(),
     process(-1),
+    status(0),
     bufsize(256)
 {
   // ignore SIGPIPE & SIGCHLD (otw. Boost.Test installs a signal
@@ -63,7 +88,11 @@ ProcessBuf::ProcessBuf()
       ::exit(1);
     }
 
- if (::sigaction(SIGCHLD, &sa, 0))
+  sa.sa_sigaction = sigchild_handler;
+  sa.sa_flags = SA_SIGINFO;
+  sigemptyset(&sa.sa_mask);
+
+  if (::sigaction(SIGCHLD, &sa, 0))
     {
       ::perror("sigaction");
       ::exit(1);
@@ -236,14 +265,19 @@ ProcessBuf::endoffile()
 
   if (inpipes[1] != -1)
     {
-      ::close(inpipes[1]); // send EOF to stdin of child process
+      int ret = ::close(inpipes[1]); // send EOF to stdin of child process
       inpipes[1] = -1;
+
+      if (ret < 0) perror("close()");
     }
 }
 
 int
 ProcessBuf::close()
 {
+  int retcode = 0;
+  pid_t pid = 0;
+
   // we're done writing
   endoffile();
 
@@ -253,17 +287,60 @@ ProcessBuf::close()
   // we're done reading
   if (outpipes[0] != -1)
     {
-      ::close(outpipes[0]);
+      int ret = ::close(outpipes[0]);
       outpipes[0] = -1;
+
+      if (ret < 0) perror("close()");
     }
 
   // obviously we do not want to leave zombies around, so get status
   // code of the process
-  ::waitpid(process, &status, 0);
+  do
+    {
+      pid = ::waitpid(process, &status, 0);
+    }
+  while (pid == -1 && errno != ECHILD);
+
+  if (pid == process)
+    {
+      retcode = WEXITSTATUS(status);
+    }
+  else if (pid == -1 && errno == ECHILD)
+    {
+      // get retval from map
+      retcode = sigchlds[process]; ///@todo find it and check if it exists
+    }
+  else
+    {
+      perror("waitpid()");
+      retcode = -1;
+    }
+
   process = -1;
 
+
+#if 0
+  // if (WIFEXITED(status))
+  //   {
+  //     std::cerr << "normal exit" << std::endl;
+  //   }
+  // else
+  if (WIFSIGNALED(status))
+    {
+      std::cerr << "signalled: signal " << WTERMSIG(status) << ", coredump " << WCOREDUMP(status) << std::endl;
+    }
+  else if (WIFSTOPPED(status))
+    {
+      std::cerr << "process stopped: " << WSTOPSIG(status) << std::endl;
+    }
+  else
+    {
+      std::cerr << "huh?" << std::endl;
+    }
+#endif // 0
+
   // exit code of process
-  return WEXITSTATUS(status);
+  return retcode;
 }
 
 
