@@ -1,5 +1,12 @@
 2010-07-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/ProcessBuf.cpp: Add SIGCHLD signal handler.
+
+	* src/tests/testClasp.cpp: Compileable again.
+	* src/tests/testTranslation.cpp: Likewise.
+
+	* examples/clasp-result.txt: Terminate models with 0.
+
 	* TODO: Update.
 
 2010-06-17  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
