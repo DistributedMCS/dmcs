@@ -165,6 +165,7 @@ int main(int argc, char* argv[])
 
       query_plan->read_graph(filename_topo);
       std::size_t system_size = query_plan->getSystemSize();
+      assert(system_size > 0);
       //NeighborListPtr neighbor_list = query_plan->getNeighbors(myid);
 
       // get the global signature from the query plan. Later we might
