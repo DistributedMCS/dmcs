@@ -1,3 +1,7 @@
+2010-07-23  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/dmcsd.cpp (main): Add assertion for system size
+
 2010-07-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/ProcessBuf.cpp: Add SIGCHLD signal handler.
