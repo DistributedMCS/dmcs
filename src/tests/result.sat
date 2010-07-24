@@ -1,0 +1,27 @@
+c clasp version 1.3.4
+c Reading from dimacs.txt
+c Solving...
+c Answer: 1
+v -1 -2 -3 4 0 c abc
+c Answer: 2
+v -1 2 -3 4 0
+c Answer: 3
+v 1 -2 3 -4 0
+c Answer: 4
+v 1 -2 3 4 0
+c Answer: 5
+v 1 2 
+v 3 -4 0
+c Answer: 6
+v 1 2 
+v -3 -4 0
+c Answer: 7
+v 1 2 
+v 3 4 0
+c Answer: 8
+v 1 2 
+v -3 4 0
+s SATISFIABLE
+
+c Models    : 8     
+c Time      : 0.000s (Solving: 0.00s/1st Model: 0.00s/Unsat: 0.00s)s
