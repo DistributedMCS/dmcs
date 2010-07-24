@@ -1,3 +1,7 @@
+2010-07-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/tests/clasp-parser-full.cpp: New file.
+
 2010-07-23  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
 
 	* src/dmcsd.cpp (main): Add assertion for system size
