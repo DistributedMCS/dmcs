@@ -1,5 +1,5 @@
 // Incrementally parse result from clasp (full vesion)
-// to compile: g++ -I/opt/local/include claspparser.cpp
+// to compile: g++ -I/opt/local/include clasp-parser-full.cpp
 
 #include <iostream>
 #include <string>
@@ -66,7 +66,8 @@ struct ClaspResultGrammar : qi::grammar<Iterator, ascii::space_type >
     
     literal = qi::int_ - sentinel;
 
-    //model = +literal[phoenix::push_back(phoenix::ref(*V), _1)] >> sentinel;
+    partial_model = qi::char_('v') >> +literal[handle_int(V)];
+
     model = qi::char_('v') >> +literal[handle_int(V)] >> sentinel;
 
     solution = qi::char_('s') >> (qi::string("SATISFIABLE") |
@@ -75,11 +76,13 @@ struct ClaspResultGrammar : qi::grammar<Iterator, ascii::space_type >
 
     comment = qi::char_('c') >> *(qi::char_ - qi::eol);
 
-    start = comment | solution | model[handle_model(got_answer)];
+    // order really matters here
+    start = model[handle_model(got_answer)] | partial_model | comment | solution;
   }
 
   qi::rule<Iterator, ascii::space_type > sentinel;
   qi::rule<Iterator, int(), ascii::space_type > literal;
+  qi::rule<Iterator, ascii::space_type > partial_model;
   qi::rule<Iterator, ascii::space_type > model;
   qi::rule<Iterator, ascii::space_type > solution;
   qi::rule<Iterator, ascii::space_type > comment;
@@ -102,11 +105,10 @@ main()
 
       while (!claspfile.eof())
 	{
-	  bool complete = false;
 	  IntVecPtr v(new IntVec(3, 0));
 	  ClaspResultGrammar<forward_iterator_type> crg(v);
 	  
-	  while (!complete && !claspfile.eof())
+	  while (!crg.got_answer && !claspfile.eof())
 	    {
 	      getline(claspfile, line);
 	      std::cout << "Processing: " << line << std::endl;
@@ -115,20 +117,26 @@ main()
 	      forward_iterator_type beg = line.begin();
 	      forward_iterator_type end = line.end();
 	      
-	      complete = qi::phrase_parse(beg, end, crg, ascii::space);
-	      if (complete)
+	      bool succeeded = qi::phrase_parse(beg, end, crg, ascii::space);
+	      if (succeeded)
 		{
-		  std::cout << "Parse succeeded!" << std::endl;
+		  std::cout << "Parsing succeeded!" << std::endl;
 		  if (crg.got_answer)
 		    {
-		      std::cout << "Got answer!" << std::endl;
+		      std::cout << "Got FULL answer:" << std::endl;
+
 		    }
+		  else
+		    {
+		      std::cout << "Got PARTIAL answer or (solution) or (comment)" << std::endl;
+		    }
+
 		  std::copy(v->begin(), v->end(), std::ostream_iterator<int>(std::cout, " "));
 		  std::cout << std::endl;
 		}
 	      else
 		{
-		  std::cout << "Parse failed!" << std::endl;
+		  std::cout << "Parsing failed!" << std::endl;
 		}
 	    }
 	}
