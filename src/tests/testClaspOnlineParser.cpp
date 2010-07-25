@@ -1,12 +1,16 @@
 // Incrementally parse result from clasp (full vesion)
-// to compile: g++ -I/opt/local/include clasp-parser-full.cpp
+
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "testClaspOnlineParser"
+#include <boost/test/unit_test.hpp>
+
+#include <boost/spirit/include/qi.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <iostream>
 #include <string>
 #include <fstream>
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
@@ -14,16 +18,21 @@ namespace phoenix = boost::phoenix;
 
 typedef std::vector<int> IntVec;
 typedef boost::shared_ptr<IntVec> IntVecPtr;
-typedef std::string::const_iterator forward_iterator_type;
+
 
 struct handle_int
 {
-  handle_int(IntVecPtr V_) 
+  IntVecPtr V;
+
+  handle_int(const IntVecPtr& V_) 
     : V(V_)
-  { }
+  { 
+    assert(V->size() > 0);
+  }
+
 
   void
-  operator()(int i, qi::unused_type, qi::unused_type) const
+  operator() (int i, qi::unused_type, qi::unused_type) const
   {
     if (i > 0)
       {
@@ -31,26 +40,29 @@ struct handle_int
 	// first need to look into the signature to find the original
 	// context and id from the local id
 
-	(*V)[0] |= (1 << i); 
+	int& b = V->at(0);
+
+	b |= (1 << i); 
       }
   }
 
-  IntVecPtr V;
 };
+
+
 
 struct handle_model
 {
+  bool& got_answer;
+
   handle_model(bool& got_answer_)
     : got_answer(got_answer_)
   { }
 
   void
-  operator()(qi::unused_type, qi::unused_type, qi::unused_type) const
+  operator() (qi::unused_type, qi::unused_type, qi::unused_type) const
   {
     got_answer = true;
   }
-  
-  bool& got_answer;
 };
 
 
@@ -58,6 +70,17 @@ struct handle_model
 template <typename Iterator>
 struct ClaspResultGrammar : qi::grammar<Iterator, ascii::space_type >
 {
+  qi::rule<Iterator, ascii::space_type > sentinel;
+  qi::rule<Iterator, int(), ascii::space_type > literal;
+  qi::rule<Iterator, ascii::space_type > partial_model;
+  qi::rule<Iterator, ascii::space_type > model;
+  qi::rule<Iterator, ascii::space_type > solution;
+  qi::rule<Iterator, ascii::space_type > comment;
+  qi::rule<Iterator, ascii::space_type > start;
+
+  IntVecPtr V;
+  bool got_answer;
+
 
   ClaspResultGrammar(IntVecPtr V_)
     : ClaspResultGrammar::base_type(start), V(V_), got_answer(false)
@@ -79,41 +102,37 @@ struct ClaspResultGrammar : qi::grammar<Iterator, ascii::space_type >
     // order really matters here
     start = model[handle_model(got_answer)] | partial_model | comment | solution;
   }
-
-  qi::rule<Iterator, ascii::space_type > sentinel;
-  qi::rule<Iterator, int(), ascii::space_type > literal;
-  qi::rule<Iterator, ascii::space_type > partial_model;
-  qi::rule<Iterator, ascii::space_type > model;
-  qi::rule<Iterator, ascii::space_type > solution;
-  qi::rule<Iterator, ascii::space_type > comment;
-  qi::rule<Iterator, ascii::space_type > start;
-
-  IntVecPtr V;
-  bool got_answer;
 };
 
 
-int 
-main()
+
+
+BOOST_AUTO_TEST_CASE( testClaspIncrementalParser )
 {
-  std::ifstream claspfile("result.sat");
+  const char* ex = getenv("EXAMPLESDIR");
+  assert (ex != 0);
+
+  std::string resultfile(ex);
+  resultfile += "/result.sat";
+
+  std::ifstream claspfile(resultfile.c_str());
 
   if (claspfile.is_open())
     {
- 
       std::string line;
 
       while (!claspfile.eof())
 	{
 	  IntVecPtr v(new IntVec(3, 0));
+
+	  typedef std::string::const_iterator forward_iterator_type;
 	  ClaspResultGrammar<forward_iterator_type> crg(v);
 	  
 	  while (!crg.got_answer && !claspfile.eof())
 	    {
-	      getline(claspfile, line);
+	      std::getline(claspfile, line);
 	      std::cout << "Processing: " << line << std::endl;
 
-	      
 	      forward_iterator_type beg = line.begin();
 	      forward_iterator_type end = line.end();
 	      
