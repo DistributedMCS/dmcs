@@ -1,3 +1,14 @@
+2010-07-25  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/testClaspOnlineParser.cpp: Make it a Boost.Test case.
+	Rename.
+	* src/tests/clasp-parser-full.cpp: Likewise.
+
+	* src/tests/result.sat: Move to examples.
+	* examples/result.sat: Likewise.
+
+	* src/tests/Makefile.am: Add testClaspOnlineParser test.
+
 2010-07-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/tests/clasp-parser-full.cpp: New file.
