@@ -16,7 +16,8 @@ TESTS = \
 	testParsers \
 	testTranslation \
 	testSignature \
-	testCombination 
+	testCombination \
+	testClaspOnlineParser
 
 TESTS_ENVIRONMENT = EXAMPLESDIR=$(top_srcdir)/examples
 
@@ -27,7 +28,8 @@ check_PROGRAMS = \
 	testTranslation \
 	testSignature \
 	testQueryPlan \
-	testCombination 
+	testCombination \
+	testClaspOnlineParser
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = $(top_builddir)/src/libsatsolver.a $(top_builddir)/src/libdmcs.a
@@ -49,7 +51,4 @@ testSignature_SOURCES = testSignature.cpp
 testQueryPlan_SOURCES = testQueryPlan.cpp
 testQueryPlan_LDADD = $(top_builddir)/src/libdmcs.a
 
-
-
-
-
+testClaspOnlineParser_SOURCES = testClaspOnlineParser.cpp
