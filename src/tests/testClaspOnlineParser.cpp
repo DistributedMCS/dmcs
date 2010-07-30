@@ -89,9 +89,7 @@ struct ClaspResultGrammar : qi::grammar<Iterator, ascii::space_type >
     
     literal = qi::int_ - sentinel;
 
-    partial_model = qi::char_('v') >> +literal[handle_int(V)];
-
-    model = qi::char_('v') >> +literal[handle_int(V)] >> sentinel;
+    partial_model = qi::char_('v') >> +literal[handle_int(V)] >> -(sentinel[handle_model(got_answer)]);
 
     solution = qi::char_('s') >> (qi::string("SATISFIABLE") |
 				  qi::string("UNSATISFIABLE") | 
@@ -99,15 +97,14 @@ struct ClaspResultGrammar : qi::grammar<Iterator, ascii::space_type >
 
     comment = qi::char_('c') >> *(qi::char_ - qi::eol);
 
-    // order really matters here
-    start = model[handle_model(got_answer)] | partial_model | comment | solution;
+    start = partial_model | comment | solution;
   }
 };
 
 
 
 
-BOOST_AUTO_TEST_CASE( testClaspIncrementalParser )
+BOOST_AUTO_TEST_CASE( testClaspOnlineParser )
 {
   const char* ex = getenv("EXAMPLESDIR");
   assert (ex != 0);
