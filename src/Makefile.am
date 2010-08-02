@@ -36,7 +36,8 @@ libsatsolver_a_SOURCES = \
                 ClaspProcess.cpp \
 		DimacsVisitor.cpp \
 		ProcessBuf.cpp \
-		LogicVisitor.cpp
+		LogicVisitor.cpp \
+		ClaspResultOnlineParser.cpp
 
 # the DMCS library
 libdmcs_a_SOURCES = \

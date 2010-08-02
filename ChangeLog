@@ -1,3 +1,14 @@
+2010-08-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/tests/testClaspOnlineParser.cpp: test getNextAnswer() strategy.
+
+	* include/ClaspResultOnlineParser.h: New file.
+	* src/ClaspResultOnlineParser.cpp: Likewise.
+
+	* src/Makefile.am: add ClaspResultOnlineParser.cpp
+
+	* include/Makefile.am: add ClaspResultOnlineParser.h
+
 2010-07-25  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/tests/testClaspOnlineParser.cpp: Make it a Boost.Test case.

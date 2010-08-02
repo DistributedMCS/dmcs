@@ -25,6 +25,7 @@ noinst_HEADERS =  \
 		ClaspResultBuilder.tcc \
 		ClaspResultGrammar.h \
 		ClaspResultGrammar.tcc \
+		ClaspResultOnlineParser.h \
 		Client.h \
 		Client.tcc \
 		CnfBuilder.h \
