@@ -41,15 +41,17 @@ namespace ascii = boost::spirit::ascii;
 
 namespace dmcs {
 
+typedef std::string::const_iterator forward_iterator_type;
+
 struct handle_int
 {
-  BeliefStatePtr V;
+  BeliefStatePtr belief_state;
   ProxySignatureByLocal local_sig;
 
-  handle_int(const BeliefStatePtr V_, const ProxySignatureByLocal local_sig_) 
-    : V(V_), local_sig(local_sig_)
+  handle_int(const BeliefStatePtr belief_state_, const ProxySignatureByLocal local_sig_) 
+    : belief_state(belief_state_), local_sig(local_sig_)
   { 
-    assert(V->size() > 0);
+    assert(belief_state->size() > 0);
   }
 
 
@@ -70,14 +72,13 @@ struct handle_int
 	std::size_t cid = loc_it->ctxId - 1;
 	std::size_t oid = loc_it->origId;
 
-	BeliefSet& b = V->at(cid);
+	BeliefSet& b = belief_state->at(cid);
 	b = setBeliefSet(b, oid, true);
 
 	// turn on the epsilon bit of the neighbor here
 	b = setEpsilon(b);
       }
   }
-
 };
 
 
@@ -107,14 +108,15 @@ struct ClaspResultOnlineGrammar : qi::grammar<Iterator, ascii::space_type >
   qi::rule<Iterator, ascii::space_type > comment;
   qi::rule<Iterator, ascii::space_type > start;
 
-  BeliefStatePtr V;
+  BeliefStatePtr belief_state;
   ProxySignatureByLocal local_sig;
   bool got_answer;
 
 
-  ClaspResultOnlineGrammar(BeliefStatePtr V_, ProxySignatureByLocal local_sig_)
+  ClaspResultOnlineGrammar(ProxySignatureByLocal local_sig_, std::size_t system_size)
     : ClaspResultOnlineGrammar::base_type(start), 
-      V(V_), local_sig(local_sig_), got_answer(false)
+      belief_state(new BeliefState(system_size, 0)),
+      local_sig(local_sig_), got_answer(false)
   {
     sentinel = qi::char_('0');
     
@@ -122,7 +124,7 @@ struct ClaspResultOnlineGrammar : qi::grammar<Iterator, ascii::space_type >
 
     // a partial model can be a model, and when it is the case, we
     // turn got_answer to true
-    partial_model = qi::char_('v') >> +literal[handle_int(V, local_sig)] 
+    partial_model = qi::char_('v') >> +literal[handle_int(belief_state, local_sig)] 
 				   >> -(sentinel[handle_model(got_answer)]);
 
     solution = qi::char_('s') >> (qi::string("SATISFIABLE") |
@@ -140,23 +142,15 @@ class ClaspResultOnlineParser
 {
 public:
   ClaspResultOnlineParser(std::istream& is_, ProxySignatureByLocal local_sig_, std::size_t system_size_)
-    : is(is_), local_sig(local_sig_), system_size(system_size_)
+    : is(is_), crog(local_sig_, system_size_)
   { }
   
-  bool
-  hasAnswerLeft();
-  
   BeliefStatePtr
-  getNextAnswer()
-  {
-    return bs;
-  }
+  getNextAnswer();
 
 private:
   std::istream& is;
-  BeliefStatePtr bs;
-  ProxySignatureByLocal local_sig;
-  std::size_t system_size;
+  ClaspResultOnlineGrammar<forward_iterator_type> crog;
 };
 
 } // namespace dmcs

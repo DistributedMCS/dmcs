@@ -51,5 +51,5 @@ testSignature_SOURCES = testSignature.cpp
 testQueryPlan_SOURCES = testQueryPlan.cpp
 testQueryPlan_LDADD = $(top_builddir)/src/libdmcs.a
 
-testClaspResultOnlineParser_SOURCES = testClaspOnlineParser.cpp
+testClaspResultOnlineParser_SOURCES = testClaspResultOnlineParser.cpp
 testClaspResultOnlineParser_LDADD = $(top_builddir)/src/libsatsolver.a

@@ -31,22 +31,23 @@
 
 namespace dmcs {
 
-bool
-ClaspResultOnlineParser::hasAnswerLeft()
+BeliefStatePtr
+ClaspResultOnlineParser::getNextAnswer()
 {
   std::string line;
-  BeliefStatePtr tmp(new BeliefState(system_size, 0));
 
-  typedef std::string::const_iterator forward_iterator_type;
-  ClaspResultOnlineGrammar<forward_iterator_type> crog(tmp, local_sig);
+  // reset this flag
+  crog.got_answer = false;
 
+  // reset the container for the model, all belief sets to zero
+  crog.belief_state->assign(crog.belief_state->size(), (BeliefSet)0);
+ 
   while (!crog.got_answer && !is.eof())
     {
       std::getline(is, line);
 
       if (!line.empty())
 	{
-
 #ifdef DEBUG
 	  std::cerr << "Processing line: \"" << line << "\""<< std::endl; 
 #endif
@@ -60,26 +61,13 @@ ClaspResultOnlineParser::hasAnswerLeft()
 	  
 	  if (crog.got_answer)
 	    {
-#ifdef DEBUG
-	      std::cerr << "Got a complete answer: ";
-	      std::copy(tmp->begin(), tmp->end(), std::ostream_iterator<BeliefSet>(std::cerr, " "));
-	      std::cerr << std::endl;
-#endif
-	      bs = tmp;
-	      return true;
+	      return crog.belief_state;
 	    }
-#ifdef DEBUG
-	  else
-	    {
-	      std::cerr << "Got a partial answer, or a (comment), or a (solution): ";
-	      std::copy(tmp->begin(), tmp->end(), std::ostream_iterator<BeliefSet>(std::cerr, " "));
-	      std::cerr << std::endl;
-	    }
-#endif
 	}
     }
 
-  return false;
+  // no more answer from clasp, return NULL
+  return boost::shared_ptr<BeliefState>();
 }
 
 } // namespace dmcs

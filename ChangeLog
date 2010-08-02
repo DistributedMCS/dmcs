@@ -1,5 +1,14 @@
 2010-08-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/tests/Makefile.am: Typo.
+
+	* include/ClaspResultOnlineParser.h: Update using getNextAnswer()
+	and return NULL at the end.k
+	* src/ClaspResultOnlineParser.cpp: Likewise.
+	* src/tests/testClaspResultOnlineParser.cpp: Likewise.
+
+2010-08-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
 	* include/ClaspResultBuilder.tcc: Typo.
 
 	* src/tests/testClaspOnlineParser.cpp: Test getNextAnswer() strategy.

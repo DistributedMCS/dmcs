@@ -42,11 +42,17 @@ BOOST_AUTO_TEST_CASE( testClaspResultOnlineParser )
   ClaspResultOnlineParser crop(claspfile, mixed_sig, 2);
   std::size_t count = 0;
   
-  while (crop.hasAnswerLeft())
+  BeliefStatePtr V;
+  do
     {
-      BeliefStatePtr V = crop.getNextAnswer();
-      count++;
+      V = crop.getNextAnswer();
+      if (V != boost::shared_ptr<BeliefState>())
+	{
+	  std::cerr << V << std::endl;
+	  count++;
+	}
     }
+  while (V != boost::shared_ptr<BeliefState>());
 
   // in this example, there are 8 models computed from clasp 
   BOOST_CHECK_EQUAL(count, 8);
