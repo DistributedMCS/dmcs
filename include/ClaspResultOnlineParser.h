@@ -41,65 +41,12 @@ namespace ascii = boost::spirit::ascii;
 
 namespace dmcs {
 
-typedef std::string::const_iterator forward_iterator_type;
 
-struct handle_int
-{
-  BeliefStatePtr belief_state;
-  ProxySignatureByLocal local_sig;
-
-  handle_int(const BeliefStatePtr belief_state_, const ProxySignatureByLocal local_sig_) 
-    : belief_state(belief_state_), local_sig(local_sig_)
-  { 
-    assert(belief_state->size() > 0);
-  }
-
-
-  void
-  operator() (int i, qi::unused_type, qi::unused_type) const
-  {
-    // we only need to take care of positive answer
-    if (i > 0)
-      {
-	// query the signature to get the context it comes from as
-	// well as its original id
-	SignatureByLocal::const_iterator loc_it = local_sig.find(i);
-
-	// it must show up in the Signature
-	assert(loc_it != local_sig.end());
-
-	// then set the bit in the right context, at the right position
-	std::size_t cid = loc_it->ctxId - 1;
-	std::size_t oid = loc_it->origId;
-
-	BeliefSet& b = belief_state->at(cid);
-	b = setBeliefSet(b, oid, true);
-
-	// turn on the epsilon bit of the neighbor here
-	b = setEpsilon(b);
-      }
-  }
-};
-
-
-struct handle_model
-{
-  bool& got_answer;
-
-  handle_model(bool& got_answer_)
-    : got_answer(got_answer_)
-  { }
-
-  void
-  operator() (qi::unused_type, qi::unused_type, qi::unused_type) const
-  {
-    got_answer = true;
-  }
-};
-
-
+/**
+ * Parses single model at-a-time.
+ */
 template <typename Iterator>
-struct ClaspResultOnlineGrammar : qi::grammar<Iterator, ascii::space_type >
+struct ClaspResultOnlineGrammar : public qi::grammar<Iterator, ascii::space_type >
 {
   qi::rule<Iterator, ascii::space_type > sentinel;
   qi::rule<Iterator, int(), ascii::space_type > literal;
@@ -108,36 +55,34 @@ struct ClaspResultOnlineGrammar : qi::grammar<Iterator, ascii::space_type >
   qi::rule<Iterator, ascii::space_type > comment;
   qi::rule<Iterator, ascii::space_type > start;
 
-  BeliefStatePtr belief_state;
-  ProxySignatureByLocal local_sig;
-  bool got_answer;
+  BeliefStatePtr belief_state;	/**< the current partial belief state */
+  ProxySignatureByLocal mixed_sig; /**< local signature + guessing signature */
+  bool got_answer;		/**< true iff we parsed a whole partial belief state */
 
+  /**
+   * Ctor.
+   */
+  ClaspResultOnlineGrammar(const ProxySignatureByLocal& m, std::size_t system_size);
 
-  ClaspResultOnlineGrammar(ProxySignatureByLocal local_sig_, std::size_t system_size)
-    : ClaspResultOnlineGrammar::base_type(start), 
-      belief_state(new BeliefState(system_size, 0)),
-      local_sig(local_sig_), got_answer(false)
+  /** 
+   * Reset the model.
+   */
+  inline void
+  reset()
   {
-    sentinel = qi::char_('0');
-    
-    literal = qi::int_ - sentinel;
+    // reset this flag
+    got_answer = false;
 
-    // a partial model can be a model, and when it is the case, we
-    // turn got_answer to true
-    partial_model = qi::char_('v') >> +literal[handle_int(belief_state, local_sig)] 
-				   >> -(sentinel[handle_model(got_answer)]);
-
-    solution = qi::char_('s') >> (qi::string("SATISFIABLE") |
-				  qi::string("UNSATISFIABLE") | 
-				  qi::string("UNKNOWN"));
-
-    comment = qi::char_('c') >> *(qi::char_ - qi::eol);
-
-    start = partial_model | comment | solution;
+    // reset the container for the model, all belief sets to zero
+    belief_state->assign(belief_state->size(), (BeliefSet)0);
   }
 };
 
 
+
+/**
+ * enumerate models.
+ */
 class ClaspResultOnlineParser
 {
 public:
@@ -145,17 +90,25 @@ public:
     : is(is_), crog(local_sig_, system_size_)
   { }
   
+  /** 
+   *
+   * @return the next BeliefStatePtr, or NULL
+   */  
   BeliefStatePtr
   getNextAnswer();
 
 private:
   std::istream& is;
-  ClaspResultOnlineGrammar<forward_iterator_type> crog;
+  ClaspResultOnlineGrammar<std::string::const_iterator> crog;
 };
 
 } // namespace dmcs
 
 #endif // CLASP_RESULT_ONLINE_PARSER_H
+
+
+#include "ClaspResultOnlineParser.tcc"
+
 
 // Local Variables:
 // mode: C++
