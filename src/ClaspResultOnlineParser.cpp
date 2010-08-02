@@ -34,34 +34,34 @@ namespace dmcs {
 BeliefStatePtr
 ClaspResultOnlineParser::getNextAnswer()
 {
-  std::string line;
-
-  // reset this flag
-  crog.got_answer = false;
-
-  // reset the container for the model, all belief sets to zero
-  crog.belief_state->assign(crog.belief_state->size(), (BeliefSet)0);
- 
-  while (!crog.got_answer && !is.eof())
+  if (is.good())
     {
-      std::getline(is, line);
+      std::string line;
 
-      if (!line.empty())
+      // reset the parser
+      crog.reset();
+
+      while (!crog.got_answer && is.good())
 	{
-#ifdef DEBUG
-	  std::cerr << "Processing line: \"" << line << "\""<< std::endl; 
-#endif
-
-	  forward_iterator_type beg = line.begin();
-	  forward_iterator_type end = line.end();
+	  std::getline(is, line);
 	  
-	  bool succeeded = boost::spirit::qi::phrase_parse(beg, end, crog, boost::spirit::ascii::space);
-	  
-	  assert (succeeded);
-	  
-	  if (crog.got_answer)
+	  if (!line.empty())
 	    {
-	      return crog.belief_state;
+#ifdef DEBUG
+	      std::cerr << "Processing line: \"" << line << "\""<< std::endl; 
+#endif
+	      
+	      std::string::const_iterator beg = line.begin();
+	      std::string::const_iterator end = line.end();
+	      
+	      bool succeeded = boost::spirit::qi::phrase_parse(beg, end, crog, boost::spirit::ascii::space);
+	      
+	      assert (succeeded);
+	      
+	      if (crog.got_answer)
+		{
+		  return crog.belief_state;
+		}
 	    }
 	}
     }
