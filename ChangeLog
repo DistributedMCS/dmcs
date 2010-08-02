@@ -1,3 +1,15 @@
+2010-08-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/ClaspResultOnlineParser.cpp: Only start instantiating things
+	when input stream is good.
+
+	* include/Makefile.am (noinst_HEADERS): Add ClaspResultOnlineParser.tcc.
+
+	* include/ClaspResultOnlineParser.h: Move ClaspResultOnlineGrammar
+	to tcc file.
+	Add ClaspResultOnlineGrammar::reset() method.
+	* include/ClaspResultOnlineParser.tcc: Likewise.
+
 2010-08-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/tests/Makefile.am: Typo.
