@@ -101,7 +101,7 @@ ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& 
   
   BeliefSet& b = (*bs)[cid];
 
-  // just to be save
+  // just to be safe
   assert(cid < system_size);
   
   // un/set bit in the right context at the right position

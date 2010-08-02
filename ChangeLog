@@ -1,6 +1,8 @@
 2010-08-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
-	* src/tests/testClaspOnlineParser.cpp: test getNextAnswer() strategy.
+	* include/ClaspResultBuilder.tcc: Typo.
+
+	* src/tests/testClaspOnlineParser.cpp: Test getNextAnswer() strategy.
 
 	* include/ClaspResultOnlineParser.h: New file.
 	* src/ClaspResultOnlineParser.cpp: Likewise.
