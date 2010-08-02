@@ -1,7 +1,7 @@
 // Incrementally parse result from clasp (full vesion)
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "testClaspOnlineParser"
+#define BOOST_TEST_MODULE "testClaspResultOnlineParser"
 #include <boost/test/unit_test.hpp>
 
 #include <boost/spirit/include/qi.hpp>
@@ -15,7 +15,7 @@
 
 using namespace dmcs;
 
-BOOST_AUTO_TEST_CASE( testClaspOnlineParser )
+BOOST_AUTO_TEST_CASE( testClaspResultOnlineParser )
 {
   // Prepare some ProxySignatureByLocal:
   // sig  = (a1 1 1 1), (b1 1 2 2), (c1 1 3 3)
