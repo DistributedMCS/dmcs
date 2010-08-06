@@ -125,6 +125,8 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
   std::string context_id = BaseBuilder<Grammar>::createStringFromNode(node.children[0]);
   std::string atom_name = BaseBuilder<Grammar>::createStringFromNode(node.children[1]);
 
+  assert (ctx_id <= global_sigs->size());
+
   SignaturePtr& local_sig = (*global_sigs)[ctx_id - 1];
   SignatureBySym& local_sig_sym = boost::get<Tag::Sym>(*local_sig);
   SignatureBySym::iterator loc_it = local_sig_sym.find(atom_name);   
@@ -144,6 +146,8 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
 	  NeighborPtr n(new Neighbor(neighbor_id, "", ""));
 	  neighbor_list->push_back(n);
 	}
+
+      assert (neighbor_id <= global_sigs->size());
 
       const SignaturePtr neighborSignature = (*global_sigs)[neighbor_id - 1];
     
