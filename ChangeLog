@@ -1,3 +1,10 @@
+2010-08-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/ParserDirector.tcc: Add debug output.
+
+	* include/BridgeRulesBuilder.tcc: Add some assertions for local
+	and neighbor ids.
+
 2010-07-25  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/tests/testClaspOnlineParser.cpp: Make it a Boost.Test case.
