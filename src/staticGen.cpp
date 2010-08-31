@@ -1,0 +1,311 @@
+/* DMCS -- Distributed Nonmonotonic Multi-Context Systems.
+ * Copyright (C) 2009, 2010 Minh Dao-Tran, Thomas Krennwallner
+ * 
+ * This file is part of DMCS.
+ *
+ *  DMCS is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  DMCS is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with DMCS.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file   staticGen.cpp
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Mon Aug  30 13:55:00 2010
+ * 
+ * @brief  
+ * 
+ * 
+ */
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+
+#include <boost/program_options.hpp>
+
+#include "generator/dmcsGen.h"
+#include "generator/DiamondTopoGenerator.h"
+#include "generator/ContextGenerator.h"
+#include "ProgramOptions.h"
+
+#include "Rule.h"
+#include "Signature.h"
+
+using namespace dmcs;
+using namespace dmcs::generator;
+
+#define DMCSD "dmcsd"
+#define DMCSC "dmcsc"
+#define TESTSDIR "tests"
+#define STR_LOCALHOST "localhost"
+#define LP_EXT  ".lp"
+#define BR_EXT  ".br"
+#define TOP_EXT ".top"
+#define OPT_EXT ".opt"
+#define ANS_EXT ".ans"
+#define CMD_EXT "_command_line.txt"
+#define SH_CMD_EXT "_command_line.sh"
+#define OPT_CMD_EXT "_command_line_opt.txt"
+#define OPT_SH_CMD_EXT "_command_line_opt.sh"
+#define DLV_EXT ".dlv"
+#define DLV_CMD_EXT "_dlv.txt"
+#define OPT_DLV_CMD_EXT "_dlv_opt.txt"
+
+#define HELP_MESSAGE_TOPO "Available topologies:\n\
+        0: Random Topology\n\
+        1: Chain of diamonds Topology (all ways down)\n\
+        2: Chain of diamonds Topology (arbitrary edges)\n\
+        3: Chain of zig-zag diamonds Topology\n\
+        4: Pure Ring Topology\n\
+        5: Ring Topology (with additional edges)\n\
+        6: Binary Tree Topology\n\
+        7: House Topology\n\
+        8: Multiple Ring Topology"
+
+SignatureVec sigmas;
+InterfaceVec context_interfaces;
+
+TopologyGenerator* orig_topo_gen;
+TopologyGenerator* opt_topo_gen;
+
+NeighborVecListPtr orig_topo;
+NeighborVecListPtr opt_topo;
+
+std::size_t no_contexts;
+std::size_t no_atoms;
+std::size_t no_interface_atoms;
+std::size_t no_bridge_rules;
+std::size_t topology_type;
+
+std::string prefix;
+std::string filename;
+
+std::ofstream file_rules;
+std::ofstream file_topo;
+std::ofstream file_command_line;
+std::ofstream file_command_line_sh;
+std::ofstream file_command_line_opt;
+std::ofstream file_command_line_opt_sh;
+std::ofstream file_dlv;
+std::ofstream file_command_line_dlv;
+std::ofstream file_command_line_dlv_opt;
+
+int 
+read_input(int argc, char* argv[])
+{
+  boost::program_options::options_description desc("Allowed options");
+  desc.add_options()
+    (HELP, "Help message")
+    (CONTEXTS, boost::program_options::value<std::size_t>(&no_contexts)->default_value(7), "Number of contexts")
+    (ATOMS, boost::program_options::value<std::size_t>(&no_atoms)->default_value(8), "Number of contexts")
+    (INTERFACE, boost::program_options::value<std::size_t>(&no_interface_atoms)->default_value(4), "Number of interface atoms")
+    (BRIDGE_RULES, boost::program_options::value<std::size_t>(&no_bridge_rules)->default_value(4), "Number of interface atoms")
+    (TOPOLOGY, boost::program_options::value<std::size_t>(&topology_type)->default_value(1), HELP_MESSAGE_TOPO)
+    (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Set up prefix for all files ")
+    ;
+
+  boost::program_options::variables_map vm;
+  boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+  boost::program_options::notify(vm);
+
+  if (vm.count(HELP) || prefix.compare("") == 0 || no_contexts == 0 || no_atoms == 0 ||
+       no_interface_atoms == 0 || no_bridge_rules == 0)
+    {
+      std::cerr << desc;
+      return 1;
+    }
+
+  switch (topology_type)
+    {
+    case 1:
+      { 
+	if (no_contexts == 1 || no_contexts % 3 != 1)
+	  {
+	    std::cerr << "For \"Chain of diamond\" topology, the number of contexts must be 3n+1." << std::endl;
+	    return 1;
+	  }
+      }
+      break;
+    case 2:
+      { 
+	if (no_contexts == 1 || no_contexts % 3 != 1)
+	  {
+	    std::cerr << "For \"Chain of diamond\" topology, the number of contexts must be 3n+1." << std::endl;
+	    return 1;
+	  }
+      }
+      break;
+    case 3:
+      { 
+	if (no_contexts == 1 || no_contexts % 3 != 1)
+	  {
+	    std::cerr << "For \"Chain of zig-zag diamond\" topology, the number of contexts must be 3n+1." << std::endl;
+	    return 1;
+	  }
+      }
+      break;
+    case 4:
+      { 
+	if (no_contexts == 1)
+	  {
+	    std::cerr << "For \"Pure Ring\" topology, the number of contexts must be at least 2." << std::endl;
+	    return 1;
+	  }
+      }
+      break;
+    case 5:
+      { 
+	if (no_contexts == 1)
+	  {
+	    std::cerr << "For \"Ring\" topology, the number of contexts must be at least 2." << std::endl;
+	    return 1;
+	  }
+      }
+      break;
+    case 6:
+      { 
+	if (no_contexts == 1)
+	  {
+	    std::cerr << "For \"binary tree\" topology, the number of contexts must be at least 2." << std::endl;
+	    return 1;
+	  }
+      }
+      break;
+    case 7:
+      { 
+	if (no_contexts == 1 || no_contexts % 4 != 1)
+	  {
+	    std::cerr << "For \"House\" topology, the number of contexts must be 4n+1." << std::endl;
+	    return 1;
+	  }
+      }
+      break;
+    case 8:
+      { 
+	if ((no_contexts < 6) && (no_contexts % 3 != 0))
+	  {
+	    std::cerr << "For \"Multiple Ring\" topology, the number of contexts must be 3(n-1) where n >= 3." << std::endl;
+	    return 1;
+	  }
+      }
+      break;
+    default:
+      {
+	std::cerr << "Topology type must be in the range of 0-8 inclusive" << std::endl;
+	return 1;
+      }
+    } // switch
+
+  std::cerr << "Number of context:                             " << no_contexts << std::endl;
+  std::cerr << "Number of atoms per context:                   " << no_atoms << std::endl;
+  std::cerr << "Number of maximum interface atoms per context: " << no_interface_atoms << std::endl;
+  std::cerr << "Number of maximum bridge rules per context:    " << no_bridge_rules << std::endl;
+  std::cerr << "Topology type:                                 " << topology_type << std::endl;
+  std::cerr << "Prefix for filename:                           " << filename << std::endl << std::endl;
+
+  return 0;
+
+}
+
+
+// will incrementally write to these file streams for each context,
+// and finally conclude with the dmcsc command
+void
+open_file_streams()
+{
+  std::string filename_command_line        = filename + CMD_EXT;
+  std::string filename_command_line_sh     = filename + SH_CMD_EXT;
+  std::string filename_command_line_opt    = filename + OPT_CMD_EXT;
+  std::string filename_command_line_opt_sh = filename + OPT_SH_CMD_EXT;
+
+  file_command_line.open(filename_command_line.c_str());
+  file_command_line_sh.open(filename_command_line_sh.c_str());
+  file_command_line_opt.open(filename_command_line_opt.c_str());
+  file_command_line_opt_sh.open(filename_command_line_opt_sh.c_str());
+}
+
+
+
+void
+close_file_streams()
+{
+  file_command_line_sh.close();
+  file_command_line.close();
+  file_command_line_opt_sh.close();
+  file_command_line_opt.close();
+}
+
+
+void
+setup_topos()
+{
+  NeighborVecListPtr tmp1(new NeighborVecList);
+  orig_topo = tmp1;
+
+  NeighborVecListPtr tmp2(new NeighborVecList);
+  opt_topo = tmp2;
+
+  for (std::size_t i = 0; i < no_contexts ++i)
+    {
+      NeighborListPtr tmp3(new NeighborList);
+      orig_topo->push_back(tmp3);
+      
+      NeighborListPtr tmp4(new NeighborList);
+      opt_topo->push_back(tmp4);
+    }
+}
+
+
+void 
+init()
+{
+  genSignatures(sigmas, no_contexts, no_atoms);
+  genInterface(sigmas, no_contexts, no_interface_atoms);
+  setup_topos();
+  open_file_streams();
+}
+
+
+
+void
+generate_topology()
+{
+  switch (topology_type)
+    {
+    case 1:
+      {
+	orig_topo_gen = new DiamondTopoGenerator(no_contexts, orig_topo);
+	break;
+      }
+    }
+
+  orig_topo_gen->generate();
+}
+
+
+
+int 
+main(int argc, char* argv[])
+{
+  if (read_input(argc, argv) == 1) // reading input not completed
+    {
+      return 0;
+    }
+
+  srand( time(NULL) );
+
+  init();
+
+  generate_topology();
+}
