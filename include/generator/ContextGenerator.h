@@ -37,9 +37,41 @@ namespace dmcs { namespace generator {
 class ContextGenerator
 {
 public:
+  ContextGenerator(NeighborVecListPtr orig_topo_, NeighborVecListPtr opt_topo_,
+		   InterfaceVecPtr context_interfaces_, std::size_t no_atoms_,
+		   std::size_t no_bridge_rules_)
+    : orig_topo(orig_topo_), opt_topo(opt_topo_), context_interfaces(context_interfaces_),
+      no_atoms(no_atoms_), no_bridge_rules(no_bridge_rules_)
+  { }
+
+  void
+  generate();
+
+  void
+  generate_local_kb(std::size_t id);
+
+  void
+  generate_bridge_rule(std::size_t id);
+
+  void
+  generate_bridge_rule_list(std::size_t id);
+
+protected:
+  int
+  sign();
+
+  bool
+  cover_neighbors(std::size_t id);
+
 protected:
   RulesPtr local_kb;
   BridgeRulesPtr bridge_rules;
+
+  NeighborVecListPtr orig_topo;
+  NeighborVecListPtr opt_topo;
+  InterfaceVecPtr context_interfaces;
+  std::size_t no_atoms;
+  std::size_t no_bridge_rules;
 };
 
   } // namespace generator

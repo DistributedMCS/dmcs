@@ -267,6 +267,7 @@ setup_topos()
 }
 
 
+
 void 
 init()
 {
@@ -286,14 +287,16 @@ generate_topology()
     case 1:
       {
 	orig_topo_gen = new DiamondTopoGenerator(no_contexts, orig_topo);
+	opt_topo_gen = new DiamondTopoGenerator(no_contexts, opt_topo);
 	break;
       }
     }
 
   orig_topo_gen->generate();
+  opt_topo_gen->generate();
 
 #ifdef DEBUG
-  std::cerr << "Generate topology:" << std::endl;
+  std::cerr << "Original topology:" << std::endl;
   for (std::size_t i = 1; i <= no_contexts; ++ i)
     {
       std::cerr << i << " --> ";
@@ -303,7 +306,32 @@ generate_topology()
 
       std::cerr << std::endl;
     }
+
+  std::cerr << std::endl;
+  std::cerr << "OPTIMAL topology:" << std::endl;
+  for (std::size_t i = 1; i <= no_contexts; ++ i)
+    {
+      std::cerr << i << " --> ";
+
+      NeighborListPtr neighbors = (*opt_topo)[i-1];
+      std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
+
+      std::cerr << std::endl;
+    }
 #endif
+}
+
+
+
+// including generating interface and writing to files
+void
+generate_contexts()
+{
+  // generate local knowledge bases
+
+  // generate bridge rules
+
+  // generate interfaces in the form of belief states
 }
 
 
@@ -321,4 +349,6 @@ main(int argc, char* argv[])
   init();
 
   generate_topology();
+
+  generate_contexts();
 }

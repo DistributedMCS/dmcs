@@ -27,7 +27,7 @@
  * 
  */
 
-#include "ContextGenerator.h"
+#include "generator/ContextGenerator.h"
 
 
 using namespace dmcs;
@@ -44,30 +44,93 @@ ContextGenerator::sign()
 void
 ContextGenerator::generate()
 {
-  for (Contexts::const_iterator i = contexts->begin(); i != contexts->end(); ++i)
+  std::size_t system_size = context_interfaces->size();
+
+  for (std::size_t i = 1; i <= system_size; ++i)
     {
-      generate_local_kb(*i);
-
-      int context_id = (*i)->getContextID();
-      //std::cerr << "In ContextGenerator::generate" << std::endl;
-      //query_plan->write_graph(std::cerr);
-      //std::cerr << std::endl;
-
-      NeighborListPtr neighbors = query_plan->getNeighbors1(context_id);
-      /*std::cerr << "Our neighbor:" << std::endl;
-      for (Neighbors_::const_iterator j = neighbors->begin(); j != neighbors->end(); ++j)
-	{
-	  std::cerr << *j << " ";
-	}
-	std::cerr << std::endl;*/
-	
+      generate_local_kb(i);
+      
+      NeighborListPtr neighbors = (*orig_topo)[i-1];
       if (neighbors->size() > 0)
 	{
-	  generate_bridge_rules(*i);
+	  generate_bridge_rules(i);
 	}
     }
 }
 
+
+
+void
+ContextGenerator::generate_local_kb(std::size_t id)
+{
+  // reset the local knowledge base
+  local_kb->clear();
+
+  for (std::size_t i = 1; i <= no_atoms; ++i)
+    {
+      HeadPtr head(new Head);
+      PositiveBodyPtr pbody(new PositiveBody);
+      NegativeBodyPtr nbody(new NegativeBody);
+      std::pair<PositiveBodyPtr, NegativeBodyPtr> body(pbody, nbody);
+      RulePtr r(new Rule(head, body));
+
+      head->push_back(i);
+      if (i % 2 == 0)
+	{
+	  if (rand() % 2)
+	    {
+	      // going backward, always possible
+	      nbody->push_back(i-1);
+	      local_kb->push_back(r);
+	    }
+	  else
+	    {
+	      // going forward, need to check
+	      if (i < no_atoms)
+		{
+		  nbody->push_back(i+1);
+		  local_kb->push_back(r);
+		}
+	    }
+	}
+      else
+	{
+	  // going forward, need to check
+	  if (i < no_atoms)
+	    {
+	      nbody->push_back(i+1);
+	      local_kb->push_back(r);
+	    }
+	}
+    }
+}
+
+
+
+void
+ContextGenerator::generate_bridge_rule(std::size_t id)
+{
+}
+
+
+
+void
+ContextGenerator::generate_bridge_rule_list(std::size_t id)
+{
+  do
+    {
+      bridge_rules->clear();
+
+      for (std::size_t i = 0; i < no_bridge_rules; ++i)
+	{
+	  if (rand() % 2)
+	    {
+	      generate_bridge_rule(id);
+	    }
+	}
+    }
+  while (!cover_neighbors(id));
+}
 
 std::size_t
 addUniqueBridgeAtom(BridgeRulePtr& r, std::size_t neighbor_id, int neighbor_atom)
@@ -100,14 +163,12 @@ addUniqueBridgeAtom(BridgeRulePtr& r, std::size_t neighbor_id, int neighbor_atom
 
 
 bool
-ContextGenerator::cover_neighbors(const ContextPtr& context)
+ContextGenerator::cover_neighbors(std::size_t id)
 {
   std::set<std::size_t> nbors;
   
-  BridgeRulesPtr br = context->getBridgeRules();
-
-
-  for (BridgeRules::const_iterator i = br->begin(); i != br->end(); ++i)
+  BridgeRules::const_iterator i = bridge_rules->begin(); 
+  for (; i != bridge_rules->end(); ++i)
     {
       const PositiveBridgeBody& pb = getPositiveBody(*i);
       const NegativeBridgeBody& nb = getNegativeBody(*i);
@@ -127,55 +188,13 @@ ContextGenerator::cover_neighbors(const ContextPtr& context)
   
   // this only works if we generate bridge rules from neighbors.
   // otw, we have to compare the actual neighbors, not just the number of them
-  int context_id = context->getContextID();
 
   // std::cerr << nbors.size() << std::endl;
-  //std::cerr << query_plan->getNeighbors(context_id)->size() << std::endl;
+  //std::cerr << (*orig_topo)[i-1]->size()) << std::endl;
 
-  return (nbors.size() == query_plan->getNeighbors1(context_id)->size());
+  return (nbors.size() == (*orig_topo)[i-1]->size());
 }
 
-void
-ContextGenerator::generate_local_kb(const ContextPtr& context)
-{
-  for (std::size_t i = 1; i <= no_atoms; ++i)
-    {
-      HeadPtr head(new Head);
-      PositiveBodyPtr pbody(new PositiveBody);
-      NegativeBodyPtr nbody(new NegativeBody);
-      std::pair<PositiveBodyPtr, NegativeBodyPtr> body(pbody, nbody);
-      RulePtr r(new Rule(head, body));
-
-      head->push_back(i);
-      if (i % 2 == 0)
-	{
-	  if (rand() % 2)
-	    {
-	      // going backward, always possible
-	      nbody->push_back(i-1);
-	      context->getLocalKB()->push_back(r);
-	    }
-	  else
-	    {
-	      // going forward, need to check
-	      if (i < no_atoms - 1)
-		{
-		  nbody->push_back(i+1);
-		  context->getLocalKB()->push_back(r);
-		}
-	    }
-	}
-      else
-	{
-	  // going forward, need to check
-	  if (i < no_atoms - 1)
-	    {
-	      nbody->push_back(i+1);
-	      context->getLocalKB()->push_back(r);
-	    }
-	}
-    }
-}
 
 
 void
@@ -250,20 +269,4 @@ ContextGenerator::generate_bridge_rule(const ContextPtr& context)
   context->getBridgeRules()->push_back(r);
 }
 
-void
-ContextGenerator::generate_bridge_rules(const ContextPtr& context)
-{
-  do
-    {
-      context->getBridgeRules()->clear();
 
-      for (std::size_t i = 0; i < no_bridge_rules; ++i)
-	{
-	  if (rand() % 2)
-	    {
-	      generate_bridge_rule(context);
-	    }
-	}
-    }
-  while (!cover_neighbors(context));
-}
