@@ -54,18 +54,18 @@ public:
       {
       case 1:
 	{
-	  genNeighbor(context, id+1);
-	  genNeighbor(context, id+2);
+	  genNeighbor(id, id+1);
+	  genNeighbor(id, id+2);
 	  break;
 	}
       case 0:
 	{
-	  genNeighbor(context, id+2);
+	  genNeighbor(id, id+1);
 	  break;
 	}
       case 2:
 	{
-	  genNeighbor(context, id+2);
+	  genNeighbor(id, id+2);
 	  break;
 	}	
       }

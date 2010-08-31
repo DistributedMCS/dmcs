@@ -26,7 +26,6 @@ libtranslation_a_SOURCES = \
 		CNFLocalLoopFormulaBuilder.cpp \
 		DimacsVisitor.cpp 
 
-
 # the cache library
 libcache_a_SOURCES = Cache.cpp
 
@@ -61,11 +60,15 @@ dmcsc_SOURCES = \
 dmcsc_LDADD = libdmcs.a
 
 # the dmcsGen binary
-dmcsGen_SOURCES = \
-                  ContextGenerator.cpp \
-                  LogicVisitor.cpp \
-		  DLVVisitor.cpp \
-                  QueryPlanGenerator.cpp \
-                  genTest.cpp
+#dmcsGen_SOURCES = \
+#                  ContextGenerator.cpp \
+#                  LogicVisitor.cpp \
+#		  DLVVisitor.cpp \
+#                  QueryPlanGenerator.cpp \
+#                  genTest.cpp
 
-dmcsGen_LDADD = libdmcs.a
+dmcsGen_SOURCES = \
+		dmcsGen.cpp \
+		staticGen.cpp
+
+#dmcsGen_LDADD = libdmcs.a

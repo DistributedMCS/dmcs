@@ -48,6 +48,7 @@ namespace dmcs {
 #define INTERFACE "interface"
 #define BRIDGE_RULES "bridge_rules"
 #define TEMPLATE "template"
+#define PREFIX "prefix"
 
 
 

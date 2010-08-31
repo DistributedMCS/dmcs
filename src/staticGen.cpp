@@ -63,18 +63,18 @@ using namespace dmcs::generator;
 #define OPT_DLV_CMD_EXT "_dlv_opt.txt"
 
 #define HELP_MESSAGE_TOPO "Available topologies:\n\
-        0: Random Topology\n\
-        1: Chain of diamonds Topology (all ways down)\n\
-        2: Chain of diamonds Topology (arbitrary edges)\n\
-        3: Chain of zig-zag diamonds Topology\n\
-        4: Pure Ring Topology\n\
-        5: Ring Topology (with additional edges)\n\
-        6: Binary Tree Topology\n\
-        7: House Topology\n\
-        8: Multiple Ring Topology"
+   0: Random Topology\n\
+   1: Chain of diamonds Topology (all ways down)\n\
+   2: Chain of diamonds Topology (arbitrary edges)\n\
+   3: Chain of zig-zag diamonds Topology\n\
+   4: Pure Ring Topology\n\
+   5: Ring Topology (with additional edges)\n\
+   6: Binary Tree Topology\n\
+   7: House Topology\n\
+   8: Multiple Ring Topology"
 
-SignatureVec sigmas;
-InterfaceVec context_interfaces;
+SignatureVecPtr sigmas(new SignatureVec);
+InterfaceVecPtr context_interfaces(new InterfaceVec);
 
 TopologyGenerator* orig_topo_gen;
 TopologyGenerator* opt_topo_gen;
@@ -112,7 +112,7 @@ read_input(int argc, char* argv[])
     (INTERFACE, boost::program_options::value<std::size_t>(&no_interface_atoms)->default_value(4), "Number of interface atoms")
     (BRIDGE_RULES, boost::program_options::value<std::size_t>(&no_bridge_rules)->default_value(4), "Number of interface atoms")
     (TOPOLOGY, boost::program_options::value<std::size_t>(&topology_type)->default_value(1), HELP_MESSAGE_TOPO)
-    (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Set up prefix for all files ")
+    (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Prefix for all files ")
     ;
 
   boost::program_options::variables_map vm;
@@ -212,7 +212,7 @@ read_input(int argc, char* argv[])
   std::cerr << "Number of maximum interface atoms per context: " << no_interface_atoms << std::endl;
   std::cerr << "Number of maximum bridge rules per context:    " << no_bridge_rules << std::endl;
   std::cerr << "Topology type:                                 " << topology_type << std::endl;
-  std::cerr << "Prefix for filename:                           " << filename << std::endl << std::endl;
+  std::cerr << "Prefix for filename:                           " << prefix << std::endl << std::endl;
 
   return 0;
 
@@ -224,10 +224,10 @@ read_input(int argc, char* argv[])
 void
 open_file_streams()
 {
-  std::string filename_command_line        = filename + CMD_EXT;
-  std::string filename_command_line_sh     = filename + SH_CMD_EXT;
-  std::string filename_command_line_opt    = filename + OPT_CMD_EXT;
-  std::string filename_command_line_opt_sh = filename + OPT_SH_CMD_EXT;
+  std::string filename_command_line        = prefix + CMD_EXT;
+  std::string filename_command_line_sh     = prefix + SH_CMD_EXT;
+  std::string filename_command_line_opt    = prefix + OPT_CMD_EXT;
+  std::string filename_command_line_opt_sh = prefix + OPT_SH_CMD_EXT;
 
   file_command_line.open(filename_command_line.c_str());
   file_command_line_sh.open(filename_command_line_sh.c_str());
@@ -256,11 +256,11 @@ setup_topos()
   NeighborVecListPtr tmp2(new NeighborVecList);
   opt_topo = tmp2;
 
-  for (std::size_t i = 0; i < no_contexts ++i)
+  for (std::size_t i = 0; i < no_contexts; ++i)
     {
       NeighborListPtr tmp3(new NeighborList);
       orig_topo->push_back(tmp3);
-      
+
       NeighborListPtr tmp4(new NeighborList);
       opt_topo->push_back(tmp4);
     }
@@ -271,7 +271,7 @@ void
 init()
 {
   genSignatures(sigmas, no_contexts, no_atoms);
-  genInterface(sigmas, no_contexts, no_interface_atoms);
+  genInterface(context_interfaces, no_contexts, no_atoms, no_interface_atoms);
   setup_topos();
   open_file_streams();
 }
@@ -291,6 +291,19 @@ generate_topology()
     }
 
   orig_topo_gen->generate();
+
+#ifdef DEBUG
+  std::cerr << "Generate topology:" << std::endl;
+  for (std::size_t i = 1; i <= no_contexts; ++ i)
+    {
+      std::cerr << i << " --> ";
+
+      NeighborListPtr neighbors = (*orig_topo)[i-1];
+      std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
+
+      std::cerr << std::endl;
+    }
+#endif
 }
 
 

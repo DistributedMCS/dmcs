@@ -27,6 +27,7 @@
  * 
  */
 
+#include <iostream>
 #include <sstream>
 
 #include "generator/dmcsGen.h"
@@ -58,8 +59,9 @@ genSignatures(SignatureVecPtr sigmas, std::size_t no_contexts, std::size_t no_at
 
 
 void
-genInterface(InterfaceVec& context_interfaces, 
+genInterface(InterfaceVecPtr context_interfaces, 
 	     std::size_t no_contexts, 
+	     std::size_t no_atoms,
 	     std::size_t no_interface_atoms)
 {
   for (std::size_t i = 1; i <= no_contexts; ++i)
@@ -78,7 +80,7 @@ genInterface(InterfaceVec& context_interfaces,
 		}
 	    };
 	}
-      context_interfaces.push_back(c_i_interface);
+      context_interfaces->push_back(c_i_interface);
     }
 
 #ifdef DEBUG
@@ -86,7 +88,7 @@ genInterface(InterfaceVec& context_interfaces,
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
       std::cerr << "C_" << i+1 << ": ";
-      Interface ci = context_interfaces[i];
+      Interface ci = (*context_interfaces)[i];
       for (std::size_t j = 0; j < no_interface_atoms; ++j)
 	{
 	  std::cerr << ci[j] << "=" << (char)(ci[j] +'a' - 1) << " ";

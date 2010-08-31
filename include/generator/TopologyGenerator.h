@@ -44,7 +44,7 @@ typedef boost::shared_ptr<NeighborVecList> NeighborVecListPtr;
 class TopologyGenerator
 {
 public:
-  TopologyGenerator(std::size_t system_size_, NeighborVecListPtr topo)
+  TopologyGenerator(std::size_t system_size_, NeighborVecListPtr topo_)
     : system_size(system_size_), topo(topo_)
   { }
 
@@ -63,7 +63,7 @@ public:
   void
   genNeighbor(std::size_t from, std::size_t to)
   {
-    orig_topo[from-1]->push_back(to);
+    (*topo)[from-1]->push_back(to);
   }
 
 protected:

@@ -30,6 +30,8 @@
 #ifndef GEN_CONTEXT_GENERATOR_H
 #define GEN_CONTEXT_GENERATOR_H
 
+#include "Rule.h"
+
 namespace dmcs { namespace generator {
 
 class ContextGenerator

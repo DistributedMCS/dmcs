@@ -36,11 +36,16 @@
 
 namespace dmcs { namespace generator {
 
+typedef std::vector<std::size_t> Interface;
+typedef std::vector<Interface> InterfaceVec;
+typedef boost::shared_ptr<InterfaceVec> InterfaceVecPtr;
+
 void
 genSignatures(SignatureVecPtr sigmas, std::size_t no_contexts, std::size_t no_atoms);
 
 void
-genInterface(InterfaceVecPtr context_interfaces, std::size_t no_contexts, std::size_t no_interface_atoms);
+genInterface(InterfaceVecPtr context_interfaces, std::size_t no_contexts, 
+	     std::size_t no_atoms, std::size_t no_interface_atoms);
 
   } // namespace generator
 } // dmcs

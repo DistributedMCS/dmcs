@@ -35,19 +35,7 @@ noinst_HEADERS =  \
 		CnfGrammar.tcc \
 		CommandType.h \
 		Context.h \
-                ContextGenerator.h \
-                DiamondQPGenerator.h \
                 DLVVisitor.h \
-                RingQPGenerator.h \
-                RingOptQPGenerator.h \
-                RingEdgeQPGenerator.h \
-                HouseQPGenerator.h \
-                HouseOptQPGenerator.h \
-                MultipleRingQPGenerator.h \
-                MultipleRingOptQPGenerator.h \
-                BinaryTreeQPGenerator.h \
-                DiamondZigZagQPGenerator.h \
-                DiamondZigZagOptQPGenerator.h \
 		DimacsVisitor.h \
 		LogicVisitor.h \
 		LocalKBBuilder.h \
@@ -78,5 +66,9 @@ noinst_HEADERS =  \
 		SpiritDebugging.h \
 		SpiritFilePositionNode.h \
 		Theory.h \
+		generator/ContextGenerator.h \
+		generator/DiamondTopoGenerator.h \
+		generator/TopologyGenerator.h \
+		generator/dmcsGen.h \
 		connection.hpp
 
