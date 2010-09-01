@@ -1,4 +1,19 @@
 2010-09-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/ContextGenerator.cpp: Generate local_interfaces and minV.
+
+	* include/generator/dmcsGen.h: More some typedef and #define to
+	ContextGenerator.h
+
+	* include/generator/ContextGenerator.h: More members for
+	ContextGenerator: prefix, minV.
+
+	* include/generator/TopologyGenerator.h: Use NeighborVec instead
+	of NeighborList.
+	* include/generator/DiamondTopoGenerator.h: Likewise.
+	* src/staticGen.cpp: Likewise.
+
+2010-09-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 	* include/generator/ContextGenerator.h: Finished generating
 	local_kb and bridge_rules.
 	* include/generator/dmcsGen.h: Likewise.

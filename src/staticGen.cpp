@@ -75,12 +75,13 @@ using namespace dmcs::generator;
 
 SignatureVecPtr sigmas(new SignatureVec);
 InterfaceVecPtr context_interfaces(new InterfaceVec);
+BeliefStatePtr  minV;
 
 TopologyGenerator* orig_topo_gen;
 TopologyGenerator* opt_topo_gen;
 
-NeighborVecListPtr orig_topo;
-NeighborVecListPtr opt_topo;
+NeighborVec2Ptr orig_topo;
+NeighborVec2Ptr opt_topo;
 
 std::size_t no_contexts;
 std::size_t no_atoms;
@@ -250,18 +251,18 @@ close_file_streams()
 void
 setup_topos()
 {
-  NeighborVecListPtr tmp1(new NeighborVecList);
+  NeighborVec2Ptr tmp1(new NeighborVec2);
   orig_topo = tmp1;
 
-  NeighborVecListPtr tmp2(new NeighborVecList);
+  NeighborVec2Ptr tmp2(new NeighborVec2);
   opt_topo = tmp2;
 
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
-      NeighborListPtr tmp3(new NeighborList);
+      NeighborVecPtr tmp3(new NeighborVec);
       orig_topo->push_back(tmp3);
 
-      NeighborListPtr tmp4(new NeighborList);
+      NeighborVecPtr tmp4(new NeighborVec);
       opt_topo->push_back(tmp4);
     }
 }
@@ -275,6 +276,16 @@ init()
   genInterface(context_interfaces, no_contexts, no_atoms, no_interface_atoms);
   setup_topos();
   open_file_streams();
+
+  // initialize minV as we now know the system size
+  BeliefStatePtr someV(new BeliefState(no_contexts, 0));
+  minV = someV;
+
+  // now set all epsilon bits to 1
+  for (std::size_t i = 0; i < no_contexts; ++i)
+    {
+      (*minV)[i] = setEpsilon((*minV)[i]);
+    }
 }
 
 
@@ -284,6 +295,7 @@ generate_topology()
 {
   switch (topology_type)
     {
+
     case 1:
       {
 	orig_topo_gen = new DiamondTopoGenerator(no_contexts, orig_topo);
@@ -301,7 +313,7 @@ generate_topology()
     {
       std::cerr << i << " --> ";
 
-      NeighborListPtr neighbors = (*orig_topo)[i-1];
+      NeighborVecPtr neighbors = (*orig_topo)[i-1];
       std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
 
       std::cerr << std::endl;
@@ -313,7 +325,7 @@ generate_topology()
     {
       std::cerr << i << " --> ";
 
-      NeighborListPtr neighbors = (*opt_topo)[i-1];
+      NeighborVecPtr neighbors = (*opt_topo)[i-1];
       std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
 
       std::cerr << std::endl;
@@ -328,15 +340,9 @@ void
 generate_contexts()
 {
   ContextGenerator cgen(orig_topo, opt_topo, context_interfaces, 
-			no_atoms, no_bridge_rules, prefix);
+			sigmas, minV, no_atoms, no_bridge_rules, prefix);
 
   cgen.generate();
-
-  // generate local knowledge bases
-
-  // generate bridge rules
-
-  // generate interfaces in the form of belief states
 }
 
 

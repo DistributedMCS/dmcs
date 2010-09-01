@@ -37,7 +37,7 @@ namespace dmcs { namespace generator {
 class DiamondTopoGenerator : public TopologyGenerator
 {
 public:
-  DiamondTopoGenerator(std::size_t system_size, NeighborVecListPtr topo)
+  DiamondTopoGenerator(std::size_t system_size, NeighborVec2Ptr topo)
     : TopologyGenerator(system_size, topo)
   { }
 

@@ -31,20 +31,21 @@
 #define GEN_TOPOLOGY_GENERATOR_H
 
 #include <vector>
+#include <list>
 
 #include <boost/shared_ptr.hpp>
 
 namespace dmcs { namespace generator {
 
-typedef std::vector<std::size_t> NeighborList;
-typedef boost::shared_ptr<NeighborList> NeighborListPtr;
-typedef std::vector<NeighborListPtr> NeighborVecList;
-typedef boost::shared_ptr<NeighborVecList> NeighborVecListPtr;
+typedef std::vector<std::size_t> NeighborVec;
+typedef boost::shared_ptr<NeighborVec> NeighborVecPtr;
+typedef std::vector<NeighborVecPtr> NeighborVec2;
+typedef boost::shared_ptr<NeighborVec2> NeighborVec2Ptr;
 
 class TopologyGenerator
 {
 public:
-  TopologyGenerator(std::size_t system_size_, NeighborVecListPtr topo_)
+  TopologyGenerator(std::size_t system_size_, NeighborVec2Ptr topo_)
     : system_size(system_size_), topo(topo_)
   { }
 
@@ -68,7 +69,7 @@ public:
 
 protected:
   std::size_t system_size;
-  NeighborVecListPtr topo;
+  NeighborVec2Ptr topo;
 };
 
   } // namespace generator
