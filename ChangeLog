@@ -1,3 +1,24 @@
+2010-08-31  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/generator: new sub directory for generators' header
+	files.
+	* include/generator/TopologyGenerator.h: New file.
+	* include/generator/ContextGenerator.h: Likewise.
+	* include/generator/DiamondTopoGenerator.h: Likewise.
+	* include/generator/DiamondOptTopoGenerator.h: Likewise.
+	* include/generator/dmcsGen.h: Likewise.
+
+	* src/dmcsGen.cpp: New file.
+	* src/staticGen.cpp: Likewise.
+
+	* include/Makefile.am: Add new header files for dmcsGen. Remove
+	header files from genTest.
+
+	* src/Makefile.am: add dmcsGen, remove genTest.
+
+	* src/ContextGenerator: light weight implementation. No more use
+	of Context, QueryPlan.
+
 2010-08-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/ClaspResultOnlineParser.cpp: Only start instantiating things
