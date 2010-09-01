@@ -34,6 +34,9 @@
 #include "Signature.h"
 #include "generator/ContextGenerator.h"
 
+#define LP_EXT  ".lp"
+#define BR_EXT  ".br"
+
 namespace dmcs { namespace generator {
 
 typedef std::vector<std::size_t> Interface;

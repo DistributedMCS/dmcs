@@ -27,18 +27,22 @@
  * 
  */
 
+#include <iostream>
+#include <sstream>
+#include <fstream>
+
+#include "LogicVisitor.h"
 #include "generator/ContextGenerator.h"
 
 
-using namespace dmcs;
-using namespace dmcs::generator;
-
+namespace dmcs { namespace generator {
 
 int
 ContextGenerator::sign()
 {
   return ( rand() % 2 )  ?  1  :  -1;
 }
+
 
 
 void
@@ -48,13 +52,19 @@ ContextGenerator::generate()
 
   for (std::size_t i = 1; i <= system_size; ++i)
     {
+      local_kb->clear();
+      bridge_rules->clear();
+
       generate_local_kb(i);
       
       NeighborListPtr neighbors = (*orig_topo)[i-1];
       if (neighbors->size() > 0)
 	{
-	  generate_bridge_rules(i);
+	  generate_bridge_rule_list(i);
 	}
+
+      write_local_kb(i);
+      write_bridge_rules(i);
     }
 }
 
@@ -63,9 +73,6 @@ ContextGenerator::generate()
 void
 ContextGenerator::generate_local_kb(std::size_t id)
 {
-  // reset the local knowledge base
-  local_kb->clear();
-
   for (std::size_t i = 1; i <= no_atoms; ++i)
     {
       HeadPtr head(new Head);
@@ -107,31 +114,6 @@ ContextGenerator::generate_local_kb(std::size_t id)
 
 
 
-void
-ContextGenerator::generate_bridge_rule(std::size_t id)
-{
-}
-
-
-
-void
-ContextGenerator::generate_bridge_rule_list(std::size_t id)
-{
-  do
-    {
-      bridge_rules->clear();
-
-      for (std::size_t i = 0; i < no_bridge_rules; ++i)
-	{
-	  if (rand() % 2)
-	    {
-	      generate_bridge_rule(id);
-	    }
-	}
-    }
-  while (!cover_neighbors(id));
-}
-
 std::size_t
 addUniqueBridgeAtom(BridgeRulePtr& r, std::size_t neighbor_id, int neighbor_atom)
 {
@@ -160,6 +142,70 @@ addUniqueBridgeAtom(BridgeRulePtr& r, std::size_t neighbor_id, int neighbor_atom
 
   return 0;
 }
+
+
+
+void
+ContextGenerator::generate_bridge_rule(std::size_t id)
+{
+  HeadPtr head(new Head);
+  PositiveBridgeBodyPtr pbody(new PositiveBridgeBody);
+  NegativeBridgeBodyPtr nbody(new NegativeBridgeBody);
+  std::pair<PositiveBridgeBodyPtr, NegativeBridgeBodyPtr> body(pbody, nbody);
+  BridgeRulePtr r(new BridgeRule(head, body));
+
+  std::size_t br_h = (rand() % no_atoms) + 1;
+  head->push_back(br_h);
+
+  // either 1 or 2 bridge atom(s)
+  int no_bridge_atoms = (rand() % 2) + 1; 
+
+  // loop until enough unique atoms
+  std::size_t count = 0;
+
+  NeighborListPtr nbors = (*orig_topo)[id-1];
+
+  do {
+    std::size_t nbors_size = nbors->size();
+
+    std::cerr << id << " ---> " << nbors_size << std::endl;
+
+    std::size_t nbor_pos  = (rand() % nbors_size);
+    std::size_t nbor_id   = (*nbors)[nbor_pos];
+
+    Interface nbor_interface = (*context_interfaces)[nbor_id - 1];
+    
+    std::size_t no_interface_atoms = nbor_interface.size();
+    std::size_t atom_pos = rand() % no_interface_atoms;
+    int atom = sign() * nbor_interface[atom_pos];
+
+    count += addUniqueBridgeAtom(r, nbor_id, atom);
+    
+  } while (count < no_bridge_atoms);
+
+  bridge_rules->push_back(r);
+}
+
+
+
+void
+ContextGenerator::generate_bridge_rule_list(std::size_t id)
+{
+  do
+    {
+      bridge_rules->clear();
+
+      for (std::size_t i = 0; i < no_bridge_rules; ++i)
+	{
+	  if (rand() % 2)
+	    {
+	      generate_bridge_rule(id);
+	    }
+	}
+    }
+  while (!cover_neighbors(id));
+}
+
 
 
 bool
@@ -192,81 +238,54 @@ ContextGenerator::cover_neighbors(std::size_t id)
   // std::cerr << nbors.size() << std::endl;
   //std::cerr << (*orig_topo)[i-1]->size()) << std::endl;
 
-  return (nbors.size() == (*orig_topo)[i-1]->size());
+  return (nbors.size() == (*orig_topo)[id-1]->size());
 }
 
 
 
 void
-ContextGenerator::generate_bridge_rule(const ContextPtr& context)
+ContextGenerator::write_local_kb(std::size_t id)
 {
-  HeadPtr head(new Head);
-  PositiveBridgeBodyPtr pbody(new PositiveBridgeBody);
-  NegativeBridgeBodyPtr nbody(new NegativeBridgeBody);
-  std::pair<PositiveBridgeBodyPtr, NegativeBridgeBodyPtr> body(pbody, nbody);
-  BridgeRulePtr r(new BridgeRule(head, body));
+  std::stringstream out;
+  out << id;
 
-  std::size_t br_h = (rand() % no_atoms) + 1;
-  head->push_back(br_h);
+  std::string filename_lp = prefix + "-" + out.str() + LP_EXT;
 
-  // either 1 or 2 bridge atom(s)
-  int no_bridge_atoms = (rand() % 2) + 1;
-
-  // loop until enough unique atoms
-  int i = 0;
-  int context_id = context->getContextID();
-  NeighborListPtr nbors = query_plan->getNeighbors1(context_id);
-
-  /*
-  std::cerr << "Our neighbor:" << std::endl;
-  for (Neighbors_::const_iterator i = nbors->begin(); i != nbors->end(); ++i)
+  std::ofstream file_lp;
+  file_lp.open(filename_lp.c_str());
+ 
+  std::ostringstream oss;
+  LogicVisitor lv(oss);
+  for (Rules::const_iterator it = local_kb->begin(); it != local_kb->end(); ++it)
     {
-      std::cerr << *i << " ";
+      lv.visitRule(*it, id);
     }
-    std::cerr << std::endl;*/
-  
-
-  do
-    {
-
-      int neighbors_size = nbors->size();
-      int neighbor_pos = (rand() % neighbors_size);
-      NeighborList::const_iterator it = nbors->begin();
-      std::advance(it, neighbor_pos);
-      NeighborPtr nb = *it;
-      std::size_t neighbor_id = nb->neighbor_id;//(*nbors)[neighbor_pos];
-
-      //int atom = sign() * ((rand() % no_atoms) + 1);
-      std::size_t atom_pos = rand() % no_interface_atoms;
-#ifdef DEBUG
-      std::cerr << "Neighbor = " << nb->neighbor_id << std::endl;
-#endif
-      Interface interface_neighbor = context_interfaces[neighbor_id-1];
-
-#ifdef DEBUG
-      for (std::size_t it = 0; it < no_interface_atoms; ++it)
-	{
-	  std::cerr << interface_neighbor[it] << " ";
-	}
-      std::cerr << std::endl;
-
-      std::cerr << "atom_pos = " << atom_pos << " --> atom = " << interface_neighbor[atom_pos] << std::endl;
-#endif
-      int atom = sign() * interface_neighbor[atom_pos];
-
-      i += addUniqueBridgeAtom(r, neighbor_id, atom);
-
-      /*
-      std::cerr << "i: " << i << std::endl;
-      std::cerr << "no bridge atoms: " << no_bridge_atoms << std::endl;
-      std::cerr << "neighbor id: " << neighbor_id << std::endl;      
-      std::cerr << "neighbor atom: " << atom << std::endl;
-      */
-    }
-  while (i < no_bridge_atoms);
-  //std::cerr << "Got out of the loop" << std::endl;
-
-  context->getBridgeRules()->push_back(r);
+  file_lp << oss.str();
+  file_lp.close();
 }
 
 
+
+void
+ContextGenerator::write_bridge_rules(std::size_t id)
+{
+  std::stringstream out;
+  out << id;
+
+  std::string filename_br = prefix + "-" + out.str() + BR_EXT;
+
+  std::ofstream file_br;
+  file_br.open(filename_br.c_str());
+ 
+  std::ostringstream oss;
+  LogicVisitor lv(oss);
+  for (BridgeRules::const_iterator it = bridge_rules->begin(); it != bridge_rules->end(); ++it)
+    {
+      lv.visitBridgeRule(*it, id);
+    }
+  file_br << oss.str();
+  file_br.close();  
+}
+
+} // namespace generator
+} // namespace dmcs 

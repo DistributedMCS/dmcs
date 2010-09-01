@@ -327,6 +327,11 @@ generate_topology()
 void
 generate_contexts()
 {
+  ContextGenerator cgen(orig_topo, opt_topo, context_interfaces, 
+			no_atoms, no_bridge_rules, prefix);
+
+  cgen.generate();
+
   // generate local knowledge bases
 
   // generate bridge rules

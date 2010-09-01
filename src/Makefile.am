@@ -69,6 +69,8 @@ dmcsc_LDADD = libdmcs.a
 
 dmcsGen_SOURCES = \
 		dmcsGen.cpp \
+		ContextGenerator.cpp \
+		LogicVisitor.cpp \
 		staticGen.cpp
 
 #dmcsGen_LDADD = libdmcs.a

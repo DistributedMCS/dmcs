@@ -31,18 +31,32 @@
 #define GEN_CONTEXT_GENERATOR_H
 
 #include "Rule.h"
+#include "generator/dmcsGen.h"
+#include "generator/TopologyGenerator.h"
 
 namespace dmcs { namespace generator {
+
+typedef std::vector<std::size_t> Interface;
+typedef std::vector<Interface> InterfaceVec;
+typedef boost::shared_ptr<InterfaceVec> InterfaceVecPtr;
 
 class ContextGenerator
 {
 public:
   ContextGenerator(NeighborVecListPtr orig_topo_, NeighborVecListPtr opt_topo_,
 		   InterfaceVecPtr context_interfaces_, std::size_t no_atoms_,
-		   std::size_t no_bridge_rules_)
-    : orig_topo(orig_topo_), opt_topo(opt_topo_), context_interfaces(context_interfaces_),
-      no_atoms(no_atoms_), no_bridge_rules(no_bridge_rules_)
-  { }
+		   std::size_t no_bridge_rules_, std::string& prefix_)
+    : orig_topo(orig_topo_), opt_topo(opt_topo_), 
+      context_interfaces(context_interfaces_),
+      no_atoms(no_atoms_), no_bridge_rules(no_bridge_rules_),
+      prefix(prefix_)
+  {
+    RulesPtr rs(new Rules);
+    BridgeRulesPtr brs(new BridgeRules);
+
+    local_kb = rs;
+    bridge_rules = brs;
+  }
 
   void
   generate();
@@ -55,6 +69,12 @@ public:
 
   void
   generate_bridge_rule_list(std::size_t id);
+
+  void
+  write_local_kb(std::size_t id);
+
+  void
+  write_bridge_rules(std::size_t id);
 
 protected:
   int
@@ -70,8 +90,11 @@ protected:
   NeighborVecListPtr orig_topo;
   NeighborVecListPtr opt_topo;
   InterfaceVecPtr context_interfaces;
+
   std::size_t no_atoms;
   std::size_t no_bridge_rules;
+
+  std::string& prefix;
 };
 
   } // namespace generator

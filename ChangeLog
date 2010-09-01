@@ -1,3 +1,13 @@
+2010-09-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+	* include/generator/ContextGenerator.h: Finished generating
+	local_kb and bridge_rules.
+	* include/generator/dmcsGen.h: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/staticGen.cpp: Likewise.
+
+	* src/Makefile.am: Add ContextGenerator.cpp and LogicVisitor.cpp
+	to dmcsGen_SOURCES
+
 2010-08-31  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/generator: new sub directory for generators' header
