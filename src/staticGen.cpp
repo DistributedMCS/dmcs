@@ -36,6 +36,7 @@
 
 #include "generator/dmcsGen.h"
 #include "generator/DiamondTopoGenerator.h"
+#include "generator/DiamondOptTopoGenerator.h"
 #include "generator/ContextGenerator.h"
 #include "ProgramOptions.h"
 
@@ -76,12 +77,14 @@ using namespace dmcs::generator;
 SignatureVecPtr sigmas(new SignatureVec);
 InterfaceVecPtr context_interfaces(new InterfaceVec);
 BeliefStatePtr  minV;
+LocalInterfaceMapPtr lcim(new LocalInterfaceMap);
+LocalInterfaceMapPtr opt_lcim;
 
 TopologyGenerator* orig_topo_gen;
 TopologyGenerator* opt_topo_gen;
 
-NeighborVec2Ptr orig_topo;
-NeighborVec2Ptr opt_topo;
+NeighborVec2Ptr orig_topo(new NeighborVec2);
+NeighborVec2Ptr opt_topo(new NeighborVec2);
 
 std::size_t no_contexts;
 std::size_t no_atoms;
@@ -251,12 +254,6 @@ close_file_streams()
 void
 setup_topos()
 {
-  NeighborVec2Ptr tmp1(new NeighborVec2);
-  orig_topo = tmp1;
-
-  NeighborVec2Ptr tmp2(new NeighborVec2);
-  opt_topo = tmp2;
-
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
       NeighborVecPtr tmp3(new NeighborVec);
@@ -291,23 +288,20 @@ init()
 
 
 void
-generate_topology()
+generate_orig_topology()
 {
   switch (topology_type)
     {
-
     case 1:
       {
-	orig_topo_gen = new DiamondTopoGenerator(no_contexts, orig_topo);
-	opt_topo_gen = new DiamondTopoGenerator(no_contexts, opt_topo);
+	orig_topo_gen = new DiamondTopoGenerator(orig_topo);
 	break;
       }
     }
 
   orig_topo_gen->generate();
-  opt_topo_gen->generate();
 
-#ifdef DEBUG
+  #ifdef DEBUG
   std::cerr << "Original topology:" << std::endl;
   for (std::size_t i = 1; i <= no_contexts; ++ i)
     {
@@ -318,8 +312,47 @@ generate_topology()
 
       std::cerr << std::endl;
     }
+    #endif
+}
 
-  std::cerr << std::endl;
+
+
+// including generating interface and writing to files
+void
+generate_contexts()
+{
+  ContextGenerator cgen(orig_topo, opt_topo, context_interfaces, 
+			sigmas, minV, lcim, no_atoms, no_bridge_rules, 
+			prefix);
+
+  cgen.generate();
+  // After this, we have local_kb, bridge rules of all contexts and
+  // minV of the system set up. Furthermore, we have the map from
+  // edsges to loca interfaces, which will be used to compte the
+  // interface in the optimal topology.
+}
+
+
+
+void
+generate_opt_topology()
+{
+  // Check whether we really copy lcim to opt_lcim
+  LocalInterfaceMapPtr tmp(new LocalInterfaceMap(*lcim));
+  opt_lcim = tmp;
+
+  switch (topology_type)
+    {
+    case 1:
+      {
+	opt_topo_gen = new DiamondOptTopoGenerator(opt_topo);
+	break;
+      }
+    }
+
+  opt_topo_gen->generate();
+
+#ifdef DEBUG
   std::cerr << "OPTIMAL topology:" << std::endl;
   for (std::size_t i = 1; i <= no_contexts; ++ i)
     {
@@ -331,18 +364,8 @@ generate_topology()
       std::cerr << std::endl;
     }
 #endif
-}
 
-
-
-// including generating interface and writing to files
-void
-generate_contexts()
-{
-  ContextGenerator cgen(orig_topo, opt_topo, context_interfaces, 
-			sigmas, minV, no_atoms, no_bridge_rules, prefix);
-
-  cgen.generate();
+  opt_topo_gen->create_opt_interface();
 }
 
 
@@ -359,7 +382,7 @@ main(int argc, char* argv[])
 
   init();
 
-  generate_topology();
+  generate_orig_topology();
 
   generate_contexts();
 }

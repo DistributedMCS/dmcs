@@ -35,6 +35,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "BeliefState.h"
+
 namespace dmcs { namespace generator {
 
 typedef std::vector<std::size_t> NeighborVec;
@@ -42,12 +44,23 @@ typedef boost::shared_ptr<NeighborVec> NeighborVecPtr;
 typedef std::vector<NeighborVecPtr> NeighborVec2;
 typedef boost::shared_ptr<NeighborVec2> NeighborVec2Ptr;
 
+typedef std::pair<std::size_t, std::size_t> ContextPair;
+typedef std::pair<ContextPair, BeliefStatePtr> LocalInterfacePair;
+typedef std::map<ContextPair, BeliefStatePtr> LocalInterfaceMap;
+typedef boost::shared_ptr<LocalInterfaceMap> LocalInterfaceMapPtr;
+
+
 class TopologyGenerator
 {
 public:
-  TopologyGenerator(std::size_t system_size_, NeighborVec2Ptr topo_)
-    : system_size(system_size_), topo(topo_)
+  TopologyGenerator(NeighborVec2Ptr topo_)
+    : topo(topo_), system_size(topo_->size())
   { }
+
+  TopologyGenerator(NeighborVec2Ptr topo_, 
+		    LocalInterfaceMapPtr lcim_)
+    : topo(topo_), lcim(lcim_), system_size(topo->size())
+    { }
 
   void
   generate()
@@ -67,10 +80,34 @@ public:
     (*topo)[from-1]->push_back(to);
   }
 
+  void
+  create_opt_interface()
+  {
+    for (std::size_t i = system_size; i > 0; --i)
+      {
+	create_opt_interface(i);
+      }
+  }
+
+  virtual void
+  create_opt_interface(std::size_t id) = 0;
+
 protected:
   std::size_t system_size;
   NeighborVec2Ptr topo;
+  LocalInterfaceMapPtr lcim;
 };
+
+
+inline
+BeliefStatePtr 
+getInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to)
+{
+  ContextPair cp(from, to);
+  LocalInterfaceMap::iterator it = lcim->find(cp);
+  
+  return it->second;
+}
 
   } // namespace generator
 } // namespace dmcs

@@ -57,7 +57,7 @@ ContextGenerator::generate()
 
       generate_local_kb(i);
       
-      NeighborListPtr neighbors = (*orig_topo)[i-1];
+      NeighborVecPtr neighbors = (*orig_topo)[i-1];
       if (neighbors->size() > 0)
 	{
 	  generate_bridge_rule_list(i);
@@ -65,6 +65,25 @@ ContextGenerator::generate()
 
       write_local_kb(i);
       write_bridge_rules(i);
+
+      // Update min V
+      update_min_V();
+
+      // Compute local interface between context i and all of its
+      // neighbors. Store this information in a map from pairs <i,j>
+      // to a BeliefSet. We need this information later for creating
+      // the optimal interface wrt. the optimal topology
+      
+      const NeighborVecPtr nbors = (*orig_topo)[i-1];
+      for (NeighborVec::const_iterator jt = nbors->begin(); jt != nbors->end(); ++jt)
+	{
+	  BeliefSet lci = local_interface(i, *jt);
+	  BeliefStatePtr V(new BeliefState(system_size, 0));
+	  (*V)[*jt - 1] = lci;
+	  
+	  ContextPair e(i, *jt);
+	  lcim->insert(LocalInterfacePair(e, V));
+	}
     }
 }
 
@@ -163,12 +182,10 @@ ContextGenerator::generate_bridge_rule(std::size_t id)
   // loop until enough unique atoms
   std::size_t count = 0;
 
-  NeighborListPtr nbors = (*orig_topo)[id-1];
+  NeighborVecPtr nbors = (*orig_topo)[id-1];
 
   do {
     std::size_t nbors_size = nbors->size();
-
-    std::cerr << id << " ---> " << nbors_size << std::endl;
 
     std::size_t nbor_pos  = (rand() % nbors_size);
     std::size_t nbor_id   = (*nbors)[nbor_pos];
@@ -287,5 +304,90 @@ ContextGenerator::write_bridge_rules(std::size_t id)
   file_br.close();  
 }
 
+
+
+BeliefSet
+ContextGenerator::local_interface(std::size_t id1, std::size_t id2)
+{
+  // with the assumption that bridge_rules now contains bridge rules
+  // of context id1 and id2 is one of its neighbors
+
+  BeliefSet lc = setEpsilon(0);
+
+  const SignaturePtr sig = (*sigmas)[id2-1];
+
+  for (BridgeRules::const_iterator r = bridge_rules->begin(); r != bridge_rules->end(); ++r)
+    {
+      const PositiveBridgeBody& pb = getPositiveBody(*r);
+      const NegativeBridgeBody& nb = getNegativeBody(*r);
+      
+      for (PositiveBridgeBody::const_iterator i = pb.begin(); i != pb.end(); ++i)
+	{
+	  if (i->first == id2)
+	    {
+	      const SignatureByLocal& local = boost::get<Tag::Local>(*sig);
+	      SignatureByLocal::const_iterator loc_it = local.find(i->second);
+	      lc = setBeliefSet(lc, loc_it->localId);
+	    }
+	}
+      
+      for (NegativeBridgeBody::const_iterator i = nb.begin(); i != nb.end(); ++i)
+	{
+	  if (i->first == id2)
+	    {
+	      const SignatureByLocal& local = boost::get<Tag::Local>(*sig);
+	      SignatureByLocal::const_iterator loc_it = local.find(i->second);
+	      lc = setBeliefSet(lc, loc_it->localId);
+	    }
+	}
+    }
+
+  return lc;
+}
+
+
+
+void
+ContextGenerator::update_min_V()
+{
+  std::size_t context_id;
+  std::size_t atom_id;
+
+  // update minV based on the bridge rules just been generated
+  BeliefState& v_state = *minV;
+
+  for (BridgeRules::const_iterator it = bridge_rules->begin(); it != bridge_rules->end(); ++it)
+    {
+      const PositiveBridgeBody& pb = getPositiveBody(*it);
+      const NegativeBridgeBody& nb = getNegativeBody(*it);
+      
+      for (PositiveBridgeBody::const_iterator k = pb.begin(); k != pb.end(); ++k)
+	{
+	  context_id = k->first;
+	  atom_id = k->second;
+	  
+	  BeliefSet& vb = v_state[context_id - 1];
+	  
+	  // in V: turn on the corresponding bit in the corresponding context
+	  vb = setBeliefSet(vb, atom_id);
+	}
+      
+      for (NegativeBridgeBody::const_iterator k = nb.begin(); k != nb.end(); ++k)
+	{
+	  context_id = k->first;
+	  atom_id = k->second;
+	  
+	  BeliefSet& vb = v_state[context_id - 1];
+	  
+	  // in V: turn on the corresponding bit in the corresponding context
+	  vb = setBeliefSet(vb, atom_id);
+	}
+    }
+}
+
 } // namespace generator
 } // namespace dmcs 
+
+// Local Variables:
+// mode: C++
+// End:
