@@ -223,6 +223,7 @@ read_input(int argc, char* argv[])
 }
 
 
+
 // will incrementally write to these file streams for each context,
 // and finally conclude with the dmcsc command
 void
@@ -249,6 +250,7 @@ close_file_streams()
   file_command_line_opt_sh.close();
   file_command_line_opt.close();
 }
+
 
 
 void
@@ -292,7 +294,7 @@ generate_orig_topology()
 {
   switch (topology_type)
     {
-    case 1:
+    case DIAMOND_DOWN_TOPOLOGY:
       {
 	orig_topo_gen = new DiamondTopoGenerator(orig_topo);
 	break;
@@ -321,15 +323,26 @@ generate_orig_topology()
 void
 generate_contexts()
 {
-  ContextGenerator cgen(orig_topo, opt_topo, context_interfaces, 
+  ContextGenerator cgen(orig_topo, context_interfaces, 
 			sigmas, minV, lcim, no_atoms, no_bridge_rules, 
-			prefix);
+			topology_type, prefix);
 
   cgen.generate();
   // After this, we have local_kb, bridge rules of all contexts and
   // minV of the system set up. Furthermore, we have the map from
   // edsges to loca interfaces, which will be used to compte the
   // interface in the optimal topology.
+
+#ifdef DEBUG
+  std::cerr << "minV = " << minV << std::endl;
+  std::cerr << "Original local interface:" << std::endl;
+  for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
+    {
+      ContextPair cp = it->first;
+      std::cerr << "(" << cp.first << ", " << cp.second << ") --> " 
+		<< it->second << std::endl;
+    }
+#endif
 }
 
 
@@ -345,7 +358,7 @@ generate_opt_topology()
     {
     case 1:
       {
-	opt_topo_gen = new DiamondOptTopoGenerator(opt_topo);
+	opt_topo_gen = new DiamondOptTopoGenerator(opt_topo, opt_lcim);
 	break;
       }
     }
@@ -366,6 +379,18 @@ generate_opt_topology()
 #endif
 
   opt_topo_gen->create_opt_interface();
+
+#ifdef DEBUG
+  #ifdef DEBUG
+  std::cerr << "Optimal local interface:" << std::endl;
+  for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
+    {
+      ContextPair cp = it->first;
+      std::cerr << "(" << cp.first << ", " << cp.second << ") --> " 
+		<< it->second << std::endl;
+    }
+#endif
+#endif
 }
 
 
@@ -381,8 +406,9 @@ main(int argc, char* argv[])
   srand( time(NULL) );
 
   init();
-
   generate_orig_topology();
-
   generate_contexts();
+  generate_opt_topology();
+
+
 }

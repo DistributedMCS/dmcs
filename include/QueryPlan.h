@@ -134,14 +134,6 @@ public:
   const Signature&
   getSignature(std::size_t context_id) const;
 
-  const Signature&
-  getSignature1(std::size_t context_id) const;
-
-  const std::string&
-  getHostname1(std::size_t context_id) const;
-
-  const std::string&
-  getPort1(std::size_t context_id) const;
 
   const std::string&
   getHostname(std::size_t context_id) const;
@@ -162,9 +154,6 @@ public:
   putPort(std::size_t context_id, const std::string& port_);
 
   const BeliefStatePtr&
-  getInterface1(std::size_t context1, std::size_t context2) const;
-
-  const BeliefStatePtr&
   getInterface(std::size_t context1, std::size_t context2) const;
 
   void
@@ -176,8 +165,6 @@ public:
   void
   remove_connection(std::size_t context1, std::size_t context2);
 
-  NeighborListPtr
-  getNeighbors1(std::size_t context_id);
 
   NeighborListPtr
   getNeighbors(std::size_t context_id);

@@ -101,14 +101,7 @@ QueryPlan::getSignature(std::size_t context_id) const
 #endif
 }
 
-const Signature&
-QueryPlan::getSignature1(std::size_t context_id) const
-{
 
-  Vertex v = boost::vertex(context_id -1, query_plan);
-
-  return boost::get(sigma_t(), query_plan, v);
-}
 
 const std::string&
 QueryPlan::getHostname(std::size_t context_id) const
@@ -120,13 +113,6 @@ QueryPlan::getHostname(std::size_t context_id) const
 }
 
 
-const std::string&
-QueryPlan::getHostname1(std::size_t context_id) const
-{
-  Vertex v = boost::vertex(context_id-1, query_plan);
-  return boost::get(hostname_t(), query_plan, v);
-}
-
 
 const std::string&
 QueryPlan::getPort(std::size_t context_id) const
@@ -134,14 +120,6 @@ QueryPlan::getPort(std::size_t context_id) const
   std::map<std::size_t,Vertex>::const_iterator it = vmap.find(context_id-1);
   assert(it != vmap.end());
   Vertex v = boost::vertex(it->second, query_plan);
-  return boost::get(port_t(), query_plan, v);
-}
-
-
-const std::string&
-QueryPlan::getPort1(std::size_t context_id) const
-{
-  Vertex v = boost::vertex(context_id-1, query_plan);
   return boost::get(port_t(), query_plan, v);
 }
 
@@ -179,25 +157,6 @@ QueryPlan::putPort(std::size_t context_id, const std::string& port_)
 }
 
 
-const BeliefStatePtr&
-QueryPlan::getInterface1(std::size_t context1, std::size_t context2) const
-{
-  EdgeIter ei, ei_end;
-  boost::tie(ei, ei_end) = boost::edges(query_plan);
-
-  for (; ei != ei_end; ++ei)
-    {
-      std::size_t id1 = index[boost::source(*ei, query_plan)];
-      std::size_t id2 = index[boost::target(*ei, query_plan)];
-      
-      if ((context1 - 1 == id1) && (context2 - 1 == id2))
-	{
-	  break;
-	}
-    }
-
-  return boost::get(interface_t(), query_plan, *ei);
-}
 
 
 const BeliefStatePtr&
@@ -277,31 +236,6 @@ QueryPlan::remove_connection(std::size_t context_id1, std::size_t context_id2)
   boost::remove_edge(u, v, query_plan);
 }
 
-
-NeighborListPtr
-QueryPlan::getNeighbors1(std::size_t context_id)
-{
-  NeighborListPtr nbs(new NeighborList);
-  
-  Vertex v = boost::vertex(context_id-1, query_plan);
-  
-  OutEdgeIter out_i;
-  OutEdgeIter out_end;
-  
-  boost::tie(out_i, out_end) = out_edges(v, query_plan); 
-  for (; out_i != out_end; ++out_i) 
-    {
-      Vertex t = boost::target(*out_i, query_plan);
-      std::size_t nid = index[t];
-      //std::cerr << "nid: " << nid << std::endl;
-
-      NeighborPtr nb(new Neighbor(nid+1, getHostname1(nid+1), getPort1(nid+1)));
-
-      nbs->push_back(nb);
-    }
-
-  return nbs;
-}
 
 
 NeighborListPtr

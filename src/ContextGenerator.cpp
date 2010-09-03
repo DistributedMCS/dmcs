@@ -85,6 +85,14 @@ ContextGenerator::generate()
 	  lcim->insert(LocalInterfacePair(e, V));
 	}
     }
+
+  // Finally, set interface of the root context to all 1, except for
+  // the case of ring.
+  if (topology_type != PURE_RING_TOPOLOGY && topology_type != RING_EDGE_TOPOLOGY
+      && topology_type != MULTIPLE_RING_TOPOLOGY)
+    {
+      (*minV)[0] = maxBeliefSet();
+    }
 }
 
 

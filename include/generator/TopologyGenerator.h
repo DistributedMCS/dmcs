@@ -37,6 +37,16 @@
 
 #include "BeliefState.h"
 
+#define RANDOM_TOPOLOGY            0
+#define DIAMOND_DOWN_TOPOLOGY      1
+#define DIAMOND_ARBITRARY_TOPOLOGY 2
+#define ZIGZAG_DIAMOND_TOPOLOGY    3
+#define PURE_RING_TOPOLOGY         4
+#define PURE_RING_TOPOLOGY         5
+#define RING_EDGE_TOPOLOGY         6
+#define BINARY_TREE_TOPOLOGY       7
+#define MULTIPLE_RING_TOPOLOGY     8
+
 namespace dmcs { namespace generator {
 
 typedef std::vector<std::size_t> NeighborVec;
@@ -57,9 +67,8 @@ public:
     : topo(topo_), system_size(topo_->size())
   { }
 
-  TopologyGenerator(NeighborVec2Ptr topo_, 
-		    LocalInterfaceMapPtr lcim_)
-    : topo(topo_), lcim(lcim_), system_size(topo->size())
+  TopologyGenerator(NeighborVec2Ptr topo_, LocalInterfaceMapPtr lcim_)
+    : topo(topo_), lcim(lcim_), system_size(topo_->size())
     { }
 
   void

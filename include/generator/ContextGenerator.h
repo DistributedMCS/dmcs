@@ -49,17 +49,19 @@ typedef boost::shared_ptr<InterfaceVec> InterfaceVecPtr;
 class ContextGenerator
 {
 public:
-  ContextGenerator(NeighborVec2Ptr orig_topo_, NeighborVec2Ptr opt_topo_,
+  ContextGenerator(NeighborVec2Ptr orig_topo_,
 		   InterfaceVecPtr context_interfaces_, SignatureVecPtr sigmas_,
 		   BeliefStatePtr minV_, LocalInterfaceMapPtr lcim_,
 		   std::size_t no_atoms_, 
-		   std::size_t no_bridge_rules_, std::string& prefix_)
-    : orig_topo(orig_topo_), opt_topo(opt_topo_), 
-      context_interfaces(context_interfaces_), sigmas(sigmas_),
-      minV(minV_), lcim(lcim_), no_atoms(no_atoms_), 
+		   std::size_t no_bridge_rules_, 
+		   std::size_t topology_type_,
+		   std::string& prefix_)
+    : orig_topo(orig_topo_), context_interfaces(context_interfaces_), 
+      sigmas(sigmas_), minV(minV_), lcim(lcim_), no_atoms(no_atoms_), 
       no_bridge_rules(no_bridge_rules_), prefix(prefix_),
-      local_kb(new Rules),
-      bridge_rules(new BridgeRules), system_size(context_interfaces->size())
+      topology_type(topology_type_),
+      local_kb(new Rules), bridge_rules(new BridgeRules), 
+      system_size(context_interfaces_->size())
   { }
 
   void
@@ -98,7 +100,6 @@ protected:
   BridgeRulesPtr bridge_rules;
 
   NeighborVec2Ptr orig_topo;
-  NeighborVec2Ptr opt_topo;
   InterfaceVecPtr context_interfaces;
   SignatureVecPtr sigmas;
   BeliefStatePtr minV;
@@ -106,6 +107,7 @@ protected:
 
   std::size_t no_atoms;
   std::size_t no_bridge_rules;
+  std::size_t topology_type;
   std::string& prefix;
   std::size_t system_size;
 };
