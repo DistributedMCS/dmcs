@@ -73,4 +73,4 @@ dmcsGen_SOURCES = \
 		LogicVisitor.cpp \
 		staticGen.cpp
 
-#dmcsGen_LDADD = libdmcs.a
+dmcsGen_LDADD = libdmcs.a
