@@ -1,3 +1,17 @@
+2010-09-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/Makefile.am: Use libdmcs.a for dmcsGen.
+
+	* src/ContextGenerator.cpp: Set V[root] to maxBeliefSet()
+
+	* include/generator/TopologyGenerator.h: Use constants for topology_type.
+
+	* include/generator/ContextGenerator.h: Add topology_type.
+	* src/staticGen.cpp: Adapt in the call.
+
+	* include/QueryPlan.h: Remove ***1() methods.
+	* src/QueryPlan.cpp: Likewise.
+
 2010-09-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/ContextGenerator.cpp: Generate local_interfaces and minV.
