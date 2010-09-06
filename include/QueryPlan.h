@@ -53,7 +53,6 @@ namespace dmcs {
 #define GNAME_LB     "name"
 
 
-
 struct sigma_t
 {
   typedef boost::vertex_property_tag kind;
@@ -109,18 +108,19 @@ typedef std::pair<std::size_t, std::size_t> EdgeInt;
 typedef std::vector<EdgeInt> Edges;
 typedef boost::shared_ptr<Edges> EdgesPtr;
 
-
+typedef std::map<std::size_t, Vertex> VertexMap;
+typedef boost::shared_ptr<VertexMap> VertexMapPtr;
 
   /// @todo maybe rename to a more appropriate name, this is not the QueryPlan
-class QueryPlan
+struct QueryPlan
 {
-private:
+  //private:
 
   void
   setupProperties();
 
 
-public:
+  //public:
   QueryPlan();
 
   //QueryPlan(std::size_t n);
@@ -187,7 +187,25 @@ public:
   void
   write_graph(std::ostream& os);
 
-private:
+  VertexMap
+  getVmap()
+  {
+    return vmap;
+  }
+
+  graph_t
+  graph()
+  {
+    return query_plan;
+  }
+
+  VertexNameProperty
+  getName()
+  {
+    return name;
+  }
+
+  //private:
   graph_t query_plan;
   boost::dynamic_properties dp;
   VertexNameProperty name;
@@ -197,12 +215,16 @@ private:
   VertexSigmaProperty sigma;
   EdgeInterfaceProperty interface;
   GraphNameProperty gname;
-  std::map<std::size_t, Vertex> vmap;
+  // Use Ptr?
+  VertexMap vmap;
 };
 
 typedef boost::shared_ptr<QueryPlan> QueryPlanPtr;
 
+
 } // namespace dmcs
+
+#include "QueryPlan.tcc"
 
 #endif // QUERY_PLAN_H
 

@@ -1,3 +1,13 @@
+2010-09-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/QueryPlan.tcc: Templatize get/put properties methods.
+
+	* src/staticGen.cpp: Write graph.
+
+	* include/QueryPlanWriter.h: make some methods inline.
+
+	* include/QueryPlan.h: Turn QueryPlan to a struct.
+
 2010-09-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/Makefile.am: Use libdmcs.a for dmcsGen.

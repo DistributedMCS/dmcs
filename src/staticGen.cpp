@@ -40,6 +40,8 @@
 #include "generator/ContextGenerator.h"
 #include "ProgramOptions.h"
 
+#include "QueryPlan.h"
+#include "QueryPlanWriter.h"
 #include "Rule.h"
 #include "Signature.h"
 
@@ -63,6 +65,8 @@ using namespace dmcs::generator;
 #define DLV_CMD_EXT "_dlv.txt"
 #define OPT_DLV_CMD_EXT "_dlv_opt.txt"
 
+#define BASE_PORT 5000
+
 #define HELP_MESSAGE_TOPO "Available topologies:\n\
    0: Random Topology\n\
    1: Chain of diamonds Topology (all ways down)\n\
@@ -79,6 +83,9 @@ InterfaceVecPtr context_interfaces(new InterfaceVec);
 BeliefStatePtr  minV;
 LocalInterfaceMapPtr lcim(new LocalInterfaceMap);
 LocalInterfaceMapPtr opt_lcim;
+
+QueryPlanPtr orig_qp(new QueryPlan);
+QueryPlanPtr opt_qp(new QueryPlan);
 
 TopologyGenerator* orig_topo_gen;
 TopologyGenerator* opt_topo_gen;
@@ -381,7 +388,6 @@ generate_opt_topology()
   opt_topo_gen->create_opt_interface();
 
 #ifdef DEBUG
-  #ifdef DEBUG
   std::cerr << "Optimal local interface:" << std::endl;
   for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
     {
@@ -390,9 +396,54 @@ generate_opt_topology()
 		<< it->second << std::endl;
     }
 #endif
-#endif
 }
 
+
+void
+write_query_plans(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
+{
+  for (std::size_t i = 1; i <= no_contexts; ++i)
+    {
+      boost::add_vertex(query_plan->query_plan);
+    }
+
+  std::string localhost = "localhost";
+  std::stringstream out;
+  for (std::size_t i = 1; i <= no_contexts; ++i)
+    {
+      out.str("");
+      out << BASE_PORT + i;
+      std::string port = out.str();
+
+      putProp<VertexHostnameProperty, std::string>(i, query_plan->hostname, localhost);
+      putProp<VertexPortProperty, std::string>(i, query_plan->port, port);
+      putProp<VertexSigmaProperty, Signature>(i, query_plan->sigma, *(*sigmas)[i-1]);
+    }
+
+  for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
+    {
+      ContextPair cp = it->first;
+      std::size_t from = cp.first;
+      std::size_t to   = cp.second;
+      BeliefStatePtr interface = it->second;
+
+      //add_edge(from, to, orig_qp);
+      Vertex u = boost::vertex(from-1, query_plan->query_plan);
+      Vertex v = boost::vertex(to-1, query_plan->query_plan);
+      
+      boost::add_edge(u, v, query_plan->query_plan);
+      putProp<EdgeInterfaceProperty, BeliefStatePtr>(query_plan, from, to, query_plan->interface, interface);
+
+      std::cerr << "put interface " << from << " --> " << to << std::endl;
+    }
+
+  out.str("");
+  out << minV;
+  boost::write_graphviz(std::cerr, query_plan->query_plan, 
+			make_vertex_writer(query_plan->hostname, query_plan->port, query_plan->sigma), 
+			make_edge_writer(query_plan->interface),
+			make_graph_writer(out.str()));
+}
 
 
 int 
@@ -409,6 +460,6 @@ main(int argc, char* argv[])
   generate_orig_topology();
   generate_contexts();
   generate_opt_topology();
-
-
+  write_query_plans(orig_qp, lcim);
+  write_query_plans(opt_qp, opt_lcim);
 }
