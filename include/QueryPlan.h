@@ -187,26 +187,7 @@ struct QueryPlan
   void
   write_graph(std::ostream& os);
 
-  VertexMap
-  getVmap()
-  {
-    return vmap;
-  }
-
-  graph_t
-  graph()
-  {
-    return query_plan;
-  }
-
-  VertexNameProperty
-  getName()
-  {
-    return name;
-  }
-
-  //private:
-  graph_t query_plan;
+  graph_t graph;
   boost::dynamic_properties dp;
   VertexNameProperty name;
   VertexIndexProperty index;
@@ -215,8 +196,7 @@ struct QueryPlan
   VertexSigmaProperty sigma;
   EdgeInterfaceProperty interface;
   GraphNameProperty gname;
-  // Use Ptr?
-  VertexMap vmap;
+  VertexMapPtr vmap;
 };
 
 typedef boost::shared_ptr<QueryPlan> QueryPlanPtr;

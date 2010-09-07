@@ -1,3 +1,18 @@
+2010-09-07  Minh Dao Tran  <minhdt@e195-180.eduroam.tuwien.ac.at>
+
+	* include/QueryPlan.h: Clean up.
+	* include/QueryPlan.tcc: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/QueryPlan.cpp: Likewise.
+	* src/staticGen.cpp: Likewise.
+
+2010-09-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/staticGen.cpp: Copy lcim to opt_lcim.
+
+	* include/QueryPlan.h: Use VertexMapPtr.
+	* src/QueryPlan.cpp: Likewise.
+
 2010-09-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/QueryPlan.tcc: Templatize get/put properties methods.

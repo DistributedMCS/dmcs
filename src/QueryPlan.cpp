@@ -34,8 +34,9 @@ using namespace dmcs;
 using namespace dmcs::generator;
 
 QueryPlan::QueryPlan()
-  : query_plan(0),
-    gname(boost::get_property(query_plan, boost::graph_name))
+  : graph(0),
+    gname(boost::get_property(graph, boost::graph_name)),
+    vmap(new VertexMap)
 {
   setupProperties();
 }
@@ -44,22 +45,22 @@ QueryPlan::QueryPlan()
 void
 QueryPlan::setupProperties()
 { 
-  name = get(boost::vertex_name, query_plan);
+  name = get(boost::vertex_name, graph);
   dp.property(NODE_ID_LB, name);
   
-  index = get(boost::vertex_index, query_plan);
+  index = get(boost::vertex_index, graph);
   dp.property(INDEX_LB, index);
   
-  hostname = get(hostname_t(), query_plan);
+  hostname = get(hostname_t(), graph);
   dp.property(HOSTNAME_LB, hostname);
   
-  port = get(port_t(), query_plan);
+  port = get(port_t(), graph);
   dp.property(PORT_LB, port);
   
-  sigma = get(sigma_t(), query_plan);
+  sigma = get(sigma_t(), graph);
   dp.property(SIGMA_LB, sigma);
   
-  interface = get(interface_t(), query_plan);
+  interface = get(interface_t(), graph);
   dp.property(INTERFACE_LB, interface);
 
   dp.property(GNAME_LB, gname);
@@ -70,27 +71,27 @@ QueryPlan::setupProperties()
 const BeliefStatePtr&
 QueryPlan::getGlobalV()
 {
-  return gname[&query_plan];
+  return gname[&graph];
 }
 
 void
 QueryPlan::putGlobalV(const BeliefStatePtr& V_)
 {
-  gname[&query_plan] = V_;
+  gname[&graph] = V_;
 }
 
 
 const Signature&
 QueryPlan::getSignature(std::size_t context_id) const
 {
-  std::map<std::size_t,Vertex>::const_iterator it = vmap.find(context_id-1);
-  assert(it != vmap.end());
-  Vertex v = boost::vertex(it->second, query_plan);
+  std::map<std::size_t,Vertex>::const_iterator it = vmap->find(context_id-1);
+  assert(it != vmap->end());
+  Vertex v = boost::vertex(it->second, graph);
 
-  return boost::get(sigma_t(), query_plan, v);
+  return boost::get(sigma_t(), graph, v);
 
 #if 0
-  std::string s = boost::get(sigma_t(), query_plan, v);
+  std::string s = boost::get(sigma_t(), graph, v);
 
   std::istringstream iss(s);
 
@@ -106,10 +107,10 @@ QueryPlan::getSignature(std::size_t context_id) const
 const std::string&
 QueryPlan::getHostname(std::size_t context_id) const
 {
-  std::map<std::size_t,Vertex>::const_iterator it = vmap.find(context_id-1);
-  assert(it != vmap.end());
-  Vertex v = boost::vertex(it->second, query_plan);
-  return boost::get(hostname_t(), query_plan, v);
+  std::map<std::size_t,Vertex>::const_iterator it = vmap->find(context_id-1);
+  assert(it != vmap->end());
+  Vertex v = boost::vertex(it->second, graph);
+  return boost::get(hostname_t(), graph, v);
 }
 
 
@@ -117,10 +118,10 @@ QueryPlan::getHostname(std::size_t context_id) const
 const std::string&
 QueryPlan::getPort(std::size_t context_id) const
 {
-  std::map<std::size_t,Vertex>::const_iterator it = vmap.find(context_id-1);
-  assert(it != vmap.end());
-  Vertex v = boost::vertex(it->second, query_plan);
-  return boost::get(port_t(), query_plan, v);
+  std::map<std::size_t,Vertex>::const_iterator it = vmap->find(context_id-1);
+  assert(it != vmap->end());
+  Vertex v = boost::vertex(it->second, graph);
+  return boost::get(port_t(), graph, v);
 }
 
 
@@ -128,7 +129,7 @@ QueryPlan::getPort(std::size_t context_id) const
 std::size_t
 QueryPlan::getSystemSize()
 {
-  return boost::num_vertices(query_plan);
+  return boost::num_vertices(graph);
 }
 
 
@@ -163,7 +164,7 @@ const BeliefStatePtr&
 QueryPlan::getInterface(std::size_t context1, std::size_t context2) const
 {
   EdgeIter ei, ei_end;
-  boost::tie(ei, ei_end) = boost::edges(query_plan);
+  boost::tie(ei, ei_end) = boost::edges(graph);
 
   bool got_edge = false;
 
@@ -171,8 +172,8 @@ QueryPlan::getInterface(std::size_t context1, std::size_t context2) const
     {
       //std::size_t id1 = index[boost::source(*ei, query_plan)];
       //std::size_t id2 = index[boost::target(*ei, query_plan)];
-      std::size_t id1 = name[boost::source(*ei, query_plan)];
-      std::size_t id2 = name[boost::target(*ei, query_plan)];
+      std::size_t id1 = name[boost::source(*ei, graph)];
+      std::size_t id2 = name[boost::target(*ei, graph)];
       
       if ((context1 - 1 == id1) && (context2 - 1 == id2))
 	{
@@ -183,7 +184,7 @@ QueryPlan::getInterface(std::size_t context1, std::size_t context2) const
 
   assert (got_edge);
 
-  return boost::get(interface_t(), query_plan, *ei);
+  return boost::get(interface_t(), graph, *ei);
 }
 
 
@@ -191,14 +192,14 @@ void
 QueryPlan::putInterface(std::size_t context1, std::size_t context2, const BeliefStatePtr& interface_)
 {
   EdgeIter ei, ei_end;
-  boost::tie(ei, ei_end) = boost::edges(query_plan);
+  boost::tie(ei, ei_end) = boost::edges(graph);
 
   for (; ei != ei_end; ++ei)
     {
       //std::size_t id1 = index[boost::source(*ei, query_plan)];
       //std::size_t id2 = index[boost::target(*ei, query_plan)];
-      std::size_t id1 = index[boost::source(*ei, query_plan)];
-      std::size_t id2 = index[boost::target(*ei, query_plan)];
+      std::size_t id1 = index[boost::source(*ei, graph)];
+      std::size_t id2 = index[boost::target(*ei, graph)];
 
       //std::cerr << "Putting interface to " << context1 << " " << context2 
       //		<< " (" << id1 << " " << id2 << ")" << std::endl;
@@ -217,10 +218,10 @@ QueryPlan::add_neighbor(std::size_t context_id1, std::size_t context_id2)
   //Vertex u = boost::vertex(vmap[context_id1-1], query_plan);
   //Vertex v = boost::vertex(vmap[context_id2-1], query_plan);
   //std::cerr << "Adding neighbors: " << context_id1 - 1 << " " << context_id2-1 << std::endl;
-  Vertex u = boost::vertex(context_id1-1, query_plan);
-  Vertex v = boost::vertex(context_id2-1, query_plan);
+  Vertex u = boost::vertex(context_id1-1, graph);
+  Vertex v = boost::vertex(context_id2-1, graph);
 
-  boost::add_edge(u, v, query_plan);
+  boost::add_edge(u, v, graph);
 }
 
 
@@ -229,11 +230,11 @@ QueryPlan::remove_connection(std::size_t context_id1, std::size_t context_id2)
 {
   //Vertex u = boost::vertex(vmap[context_id1-1], query_plan);
   //Vertex v = boost::vertex(vmap[context_id2-1], query_plan);
-  Vertex u = boost::vertex(context_id1-1, query_plan);
-  Vertex v = boost::vertex(context_id2-1, query_plan);
+  Vertex u = boost::vertex(context_id1-1, graph);
+  Vertex v = boost::vertex(context_id2-1, graph);
   //std::cerr << "removing connection" << std::endl;
   //std::cerr << "context_id1 " << context_id1 << ", context_id2 " << context_id2 << std::endl;
-  boost::remove_edge(u, v, query_plan);
+  boost::remove_edge(u, v, graph);
 }
 
 
@@ -244,14 +245,14 @@ QueryPlan::getNeighbors(std::size_t context_id)
   //std::cerr << "in get Neighbors with VMAP"<< std::endl;
   NeighborListPtr nbs(new NeighborList);
   
-  Vertex v = boost::vertex(vmap[context_id-1], query_plan);
+  Vertex v = boost::vertex((*vmap)[context_id-1], graph);
   OutEdgeIter out_i;
   OutEdgeIter out_end;
   
-  boost::tie(out_i, out_end) = out_edges(v, query_plan); 
+  boost::tie(out_i, out_end) = out_edges(v, graph); 
   for (; out_i != out_end; ++out_i) 
     {
-      Vertex t = boost::target(*out_i, query_plan);
+      Vertex t = boost::target(*out_i, graph);
       std::size_t nid = name[t];
 
       NeighborPtr nb(new Neighbor(nid+1, getHostname(nid+1), getPort(nid+1)));
@@ -270,12 +271,12 @@ QueryPlan::getEdges()
   EdgeIter ei;
   EdgeIter ei_end;
 
-  boost::tie(ei, ei_end) = boost::edges(query_plan);
+  boost::tie(ei, ei_end) = boost::edges(graph);
 
   for (; ei != ei_end; ++ei)
     {
-      Vertex s = boost::source(*ei, query_plan);
-      Vertex t = boost::target(*ei, query_plan);
+      Vertex s = boost::source(*ei, graph);
+      Vertex t = boost::target(*ei, graph);
 
       std::size_t s_id = index[s];
       std::size_t t_id = index[t];
@@ -290,29 +291,29 @@ QueryPlan::getEdges()
 graph_t
 QueryPlan::getGraph()
 {
-  return query_plan;
+  return graph;
 }
 
 
 void
-QueryPlan::putGraph(graph_t query_plan_)
+QueryPlan::putGraph(graph_t graph_)
 {
-  query_plan = query_plan_;
+  graph = graph_;
 }
 
 void
 QueryPlan::read_graph(std::istream& iss)
 {
-  boost::read_graphviz(iss, query_plan, dp, NODE_ID_LB);
+  boost::read_graphviz(iss, graph, dp, NODE_ID_LB);
 
   VertexIter it;
   VertexIter end;
 
-  for (boost::tie(it, end) = boost::vertices(query_plan); it != end; ++it)
+  for (boost::tie(it, end) = boost::vertices(graph); it != end; ++it)
     {
       // here we assume that name[n] is an integer
       ///@todo this should be a bimap...
-      vmap.insert(std::make_pair(name[*it], *it));
+      vmap->insert(std::make_pair(name[*it], *it));
     }
 }
 
@@ -331,9 +332,9 @@ void
 QueryPlan::write_graph(std::ostream& os)
 {
   std::stringstream ss;
-  ss << gname[&query_plan];
+  ss << gname[&graph];
   std::string s = ss.str();
-  boost::write_graphviz(os, query_plan, 
+  boost::write_graphviz(os, graph, 
 			make_vertex_writer(hostname, port, sigma), 
 			make_edge_writer(interface),
 			make_graph_writer(s));

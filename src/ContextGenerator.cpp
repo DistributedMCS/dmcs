@@ -147,7 +147,7 @@ addUniqueBridgeAtom(BridgeRulePtr& r, std::size_t neighbor_id, int neighbor_atom
   BridgeAtom bap = std::make_pair(neighbor_id, std::max(neighbor_atom, -neighbor_atom));
 
 #ifdef DEBUG
-  std::cerr << "Adding atom " << neighbor_atom << " of neighbor " << neighbor_id << std::endl;
+  //std::cerr << "Adding atom " << neighbor_atom << " of neighbor " << neighbor_id << std::endl;
 #endif
   PositiveBridgeBody& pb = getPositiveBody(r);
   NegativeBridgeBody& nb = getNegativeBody(r);

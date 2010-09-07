@@ -82,7 +82,7 @@ SignatureVecPtr sigmas(new SignatureVec);
 InterfaceVecPtr context_interfaces(new InterfaceVec);
 BeliefStatePtr  minV;
 LocalInterfaceMapPtr lcim(new LocalInterfaceMap);
-LocalInterfaceMapPtr opt_lcim;
+LocalInterfaceMapPtr opt_lcim(new LocalInterfaceMap);
 
 QueryPlanPtr orig_qp(new QueryPlan);
 QueryPlanPtr opt_qp(new QueryPlan);
@@ -263,6 +263,8 @@ close_file_streams()
 void
 setup_topos()
 {
+  // initialize both original and optimal topologies. At the beginning
+  // all neighbor vectors are empty.
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
       NeighborVecPtr tmp3(new NeighborVec);
@@ -357,10 +359,19 @@ generate_contexts()
 void
 generate_opt_topology()
 {
-  // Check whether we really copy lcim to opt_lcim
-  LocalInterfaceMapPtr tmp(new LocalInterfaceMap(*lcim));
-  opt_lcim = tmp;
+  // copy the content of lcim to opt_lcim
+  for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
+    {
+      ContextPair cp = it->first;
+      
+      BeliefStatePtr interface(new BeliefState(*it->second));
+      LocalInterfacePair lp(cp, interface);
+      opt_lcim->insert(lp);
+    }
 
+  // now the respective optimal topology generator will take care of
+  // tweaking opt_topo and opt_lcim to build the corresponding optimal
+  // query plan.
   switch (topology_type)
     {
     case 1:
@@ -370,6 +381,7 @@ generate_opt_topology()
       }
     }
 
+  // firstly generate optimal topology
   opt_topo_gen->generate();
 
 #ifdef DEBUG
@@ -384,7 +396,8 @@ generate_opt_topology()
       std::cerr << std::endl;
     }
 #endif
-
+  
+  // then adjust to get optimal local interface
   opt_topo_gen->create_opt_interface();
 
 #ifdef DEBUG
@@ -404,7 +417,7 @@ write_query_plans(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
 {
   for (std::size_t i = 1; i <= no_contexts; ++i)
     {
-      boost::add_vertex(query_plan->query_plan);
+      boost::add_vertex(query_plan->graph);
     }
 
   std::string localhost = "localhost";
@@ -428,18 +441,16 @@ write_query_plans(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
       BeliefStatePtr interface = it->second;
 
       //add_edge(from, to, orig_qp);
-      Vertex u = boost::vertex(from-1, query_plan->query_plan);
-      Vertex v = boost::vertex(to-1, query_plan->query_plan);
+      Vertex u = boost::vertex(from-1, query_plan->graph);
+      Vertex v = boost::vertex(to-1, query_plan->graph);
       
-      boost::add_edge(u, v, query_plan->query_plan);
+      boost::add_edge(u, v, query_plan->graph);
       putProp<EdgeInterfaceProperty, BeliefStatePtr>(query_plan, from, to, query_plan->interface, interface);
-
-      std::cerr << "put interface " << from << " --> " << to << std::endl;
     }
 
   out.str("");
   out << minV;
-  boost::write_graphviz(std::cerr, query_plan->query_plan, 
+  boost::write_graphviz(std::cerr, query_plan->graph, 
 			make_vertex_writer(query_plan->hostname, query_plan->port, query_plan->sigma), 
 			make_edge_writer(query_plan->interface),
 			make_graph_writer(out.str()));

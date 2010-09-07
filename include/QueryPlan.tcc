@@ -37,12 +37,12 @@ template<typename Prop, typename Ret>
 void
 getProp(QueryPlanPtr query_plan, std::size_t context_id, Ret& ret)
 {
-  VertexMap vmap = query_plan->vmap;
-  VertexMap::const_iterator it = vmap.find(context_id-1);
-  assert(it != vmap.end());
-  Vertex v = boost::vertex(it->second, query_plan->query_plan);
+  VertexMapPtr vmap = query_plan->vmap;
+  VertexMap::const_iterator it = vmap->find(context_id-1);
+  assert(it != vmap->end());
+  Vertex v = boost::vertex(it->second, query_plan->graph);
   
-  ret = boost::get(Prop(), query_plan->query_plan, v);
+  ret = boost::get(Prop(), query_plan->graph, v);
 }
 
 
@@ -51,14 +51,14 @@ void
 getProp(QueryPlanPtr query_plan, std::size_t context1, std::size_t context2, Ret& ret)
 {
   EdgeIter ei, ei_end;
-  boost::tie(ei, ei_end) = boost::edges(query_plan->query_plan);
+  boost::tie(ei, ei_end) = boost::edges(query_plan->graph);
 
   bool got_edge = false;
 
   for (; ei != ei_end; ++ei)
     {
-      std::size_t id1 = query_plan->name[boost::source(*ei, query_plan->query_plan)];
-      std::size_t id2 = query_plan->name[boost::target(*ei, query_plan->query_plan)];
+      std::size_t id1 = query_plan->name[boost::source(*ei, query_plan->graph)];
+      std::size_t id2 = query_plan->name[boost::target(*ei, query_plan->graph)];
       
       if ((context1 - 1 == id1) && (context2 - 1 == id2))
 	{
@@ -69,7 +69,7 @@ getProp(QueryPlanPtr query_plan, std::size_t context1, std::size_t context2, Ret
 
   assert (got_edge);
 
-  return boost::get(Prop(), query_plan->query_plan, *ei);
+  return boost::get(Prop(), query_plan->graph, *ei);
 }
 
 
@@ -90,7 +90,7 @@ putProp(QueryPlanPtr query_plan, std::size_t context_id1,
 {
   //@todo: remove iteration to find the edge
   EdgeIter ei, ei_end;
-  boost::tie(ei, ei_end) = boost::edges(query_plan->query_plan);
+  boost::tie(ei, ei_end) = boost::edges(query_plan->graph);
 
   bool got_edge = false;
 
@@ -98,8 +98,8 @@ putProp(QueryPlanPtr query_plan, std::size_t context_id1,
     {
       //std::size_t id1 = index[boost::source(*ei, query_plan)];
       //std::size_t id2 = index[boost::target(*ei, query_plan)];
-      std::size_t id1 = query_plan->index[boost::source(*ei, query_plan->query_plan)];
-      std::size_t id2 = query_plan->index[boost::target(*ei, query_plan->query_plan)];
+      std::size_t id1 = query_plan->index[boost::source(*ei, query_plan->graph)];
+      std::size_t id2 = query_plan->index[boost::target(*ei, query_plan->graph)];
       
       if ((context_id1 - 1 == id1) && (context_id2 - 1 == id2))
 	{
