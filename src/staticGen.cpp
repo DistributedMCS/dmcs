@@ -231,35 +231,6 @@ read_input(int argc, char* argv[])
 
 
 
-// will incrementally write to these file streams for each context,
-// and finally conclude with the dmcsc command
-void
-open_file_streams()
-{
-  std::string filename_command_line        = prefix + CMD_EXT;
-  std::string filename_command_line_sh     = prefix + SH_CMD_EXT;
-  std::string filename_command_line_opt    = prefix + OPT_CMD_EXT;
-  std::string filename_command_line_opt_sh = prefix + OPT_SH_CMD_EXT;
-
-  file_command_line.open(filename_command_line.c_str());
-  file_command_line_sh.open(filename_command_line_sh.c_str());
-  file_command_line_opt.open(filename_command_line_opt.c_str());
-  file_command_line_opt_sh.open(filename_command_line_opt_sh.c_str());
-}
-
-
-
-void
-close_file_streams()
-{
-  file_command_line_sh.close();
-  file_command_line.close();
-  file_command_line_opt_sh.close();
-  file_command_line_opt.close();
-}
-
-
-
 void
 setup_topos()
 {
@@ -283,7 +254,6 @@ init()
   genSignatures(sigmas, no_contexts, no_atoms);
   genInterface(context_interfaces, no_contexts, no_atoms, no_interface_atoms);
   setup_topos();
-  open_file_streams();
 
   // initialize minV as we now know the system size
   BeliefStatePtr someV(new BeliefState(no_contexts, 0));
@@ -413,7 +383,7 @@ generate_opt_topology()
 
 
 void
-write_query_plans(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
+generate_query_plan(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
 {
   for (std::size_t i = 1; i <= no_contexts; ++i)
     {
@@ -457,6 +427,138 @@ write_query_plans(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
 }
 
 
+
+void
+print_query_plan(QueryPlanPtr query_plan, const std::string& filename)
+{
+  std::ofstream file_topo;
+  file_topo.open(filename.c_str());
+  std::stringstream out;
+  out << minV;
+  boost::write_graphviz(file_topo, query_plan->graph, 
+			make_vertex_writer(query_plan->hostname, query_plan->port, query_plan->sigma), 
+			make_edge_writer(query_plan->interface),
+			make_graph_writer(out.str()));
+  file_topo.close();
+}
+
+
+
+void
+print_command_lines()
+{
+  std::string filename_command_line        = prefix + CMD_EXT;
+  std::string filename_command_line_sh     = prefix + SH_CMD_EXT;
+  std::string filename_command_line_opt    = prefix + OPT_CMD_EXT;
+  std::string filename_command_line_opt_sh = prefix + OPT_SH_CMD_EXT;
+
+  file_command_line.open(filename_command_line.c_str());
+  file_command_line_sh.open(filename_command_line_sh.c_str());
+  file_command_line_opt.open(filename_command_line_opt.c_str());
+  file_command_line_opt_sh.open(filename_command_line_opt_sh.c_str());
+
+  // Initialization for shell scripts
+  file_command_line_sh << "#!/bin/bash" << std::endl
+		       << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
+		       << "export TESTSPATH='" TESTSDIR "'" << std::endl
+		       << "export DMCSPATH='.'" << std::endl;
+
+  file_command_line_opt_sh << "#!/bin/bash" << std::endl
+			   << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
+			   << "export TESTSPATH='" TESTSDIR "'" << std::endl
+			   << "export DMCSPATH='.'" << std::endl;
+
+  // dmcsd commands
+  // ./dmcsd <id> <hostname> <port> <filename_lp> <filename_br> <filename_topo> 
+
+  std::string command_line_opt_sh;
+  std::string command_line_opt;
+  std::string command_line_sh;
+  std::string command_line;
+
+  for (std::size_t i = 1; i <= no_contexts; ++i)
+    {
+      std::stringstream out;
+      std::stringstream index;
+      std::stringstream port;
+      
+      index << i;
+      port << BASE_PORT + i;
+
+      // ID PortNo@Hostname
+      out << "--" << CONTEXT_ID << "=" << i << " " 
+	  << "--" << PORT << "=" << port.str();
+
+      command_line_opt_sh = "$DMCSPATH/" DMCSD " " + out.str() + 
+	" --" KB "=$TESTSPATH/" + prefix + "-" + index.str() + LP_EXT +
+	" --" BR "=$TESTSPATH/" + prefix + "-" + index.str() + BR_EXT +
+	" --"TOPOLOGY "=$TESTSPATH/" + prefix + OPT_EXT;
+
+      command_line_sh = "$DMCSPATH/" DMCSD " " + out.str() + 
+	" --" KB "=$TESTSPATH/" + prefix + "-" + index.str() + LP_EXT +
+	" --" BR "=$TESTSPATH/" + prefix + "-" + index.str() + BR_EXT +
+	" --" TOPOLOGY "=$TESTSPATH/" + prefix + TOP_EXT;
+
+      command_line_opt = "./" DMCSD " " + out.str() + 
+	" --" KB "=" TESTSDIR "/" + prefix + "-" + index.str() + LP_EXT +
+	" --" BR "=" TESTSDIR "/" + prefix + "-" + index.str() + BR_EXT +
+	" --" TOPOLOGY "=" TESTSDIR "/" + prefix + OPT_EXT;
+
+      command_line = "./" DMCSD " " + out.str() + 
+	" --" KB "=" TESTSDIR "/" + prefix + "-" + index.str() + LP_EXT +
+	" --" BR "=" TESTSDIR "/" + prefix + "-" + index.str() + BR_EXT +
+	" --" TOPOLOGY "=" TESTSDIR "/" + prefix + TOP_EXT;
+
+      file_command_line_opt_sh << command_line_opt_sh << " >/dev/null 2>&1 &" << std::endl;
+      file_command_line_opt << command_line_opt << std::endl;
+      file_command_line_sh << command_line_sh << " >/dev/null 2>&1 &" << std::endl;
+      file_command_line << command_line << std::endl;
+    }
+
+  // client command
+  // time | ./dmcsc localhost 5001
+  std::stringstream port1;
+  std::stringstream system_size;
+  std::stringstream globalV;
+
+  port1 << 5001;
+  system_size << no_contexts;
+  globalV << minV;
+
+  command_line_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcs-time.log $DMCSPATH/"  DMCSC
+    " --" HOSTNAME "=localhost"
+    " --" PORT "=" + port1.str() +
+    " --" SYSTEM_SIZE "=" + system_size.str() + 
+    " --" QUERY_VARS "=\"" + globalV.str() + "\" > "+ prefix +"-dmcs.log 2> " + prefix +"-dmcs-err.log";
+  
+  command_line = "time ./" DMCSC 
+    " --" HOSTNAME "=localhost" 
+    " --" PORT "=" + port1.str() +
+    " --" SYSTEM_SIZE "=" + system_size.str() + 
+    " --" QUERY_VARS "=\"" + globalV.str() + "\"";
+
+  command_line_opt_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcsopt-time.log $DMCSPATH/"  DMCSC
+    " --" HOSTNAME "=localhost" 
+    " --" PORT "=" + port1.str() +
+    " --" SYSTEM_SIZE "=" + system_size.str() + " > "+ prefix +"-dmcsopt.log 2> " + prefix +"-dmcsopt-err.log";
+  
+  command_line_opt = "time ./"  DMCSC 
+    " --" HOSTNAME "=localhost"
+    " --" PORT "=" + port1.str() +
+    " --" SYSTEM_SIZE "=" + system_size.str();
+  
+  file_command_line_sh << command_line_sh << std::endl << "killall " DMCSD << std::endl;
+  file_command_line << command_line << std::endl;
+  file_command_line_opt_sh << command_line_opt_sh << std::endl << "killall " DMCSD << std::endl;
+  file_command_line_opt << command_line_opt << std::endl;
+
+  file_command_line_sh.close();
+  file_command_line.close();
+  file_command_line_opt_sh.close();
+  file_command_line_opt.close();
+}
+
+
 int 
 main(int argc, char* argv[])
 {
@@ -468,9 +570,15 @@ main(int argc, char* argv[])
   srand( time(NULL) );
 
   init();
+
   generate_orig_topology();
   generate_contexts();
   generate_opt_topology();
-  write_query_plans(orig_qp, lcim);
-  write_query_plans(opt_qp, opt_lcim);
+  generate_query_plan(orig_qp, lcim);
+  generate_query_plan(opt_qp, opt_lcim);
+
+  print_query_plan(orig_qp, prefix + TOP_EXT);
+  print_query_plan(opt_qp,  prefix + OPT_EXT);
+
+  print_command_lines();
 }
