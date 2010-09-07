@@ -5,7 +5,8 @@
 	* src/ContextGenerator.cpp: Likewise.
 	* src/QueryPlan.cpp: Likewise.
 
-	* src/staticGen.cpp: Commandlines generated.
+	* src/staticGen.cpp: Commandlines generated. Adapt dlv command
+	lines generator. Now all the xxx1 methods are gone.
 
 
 2010-09-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>

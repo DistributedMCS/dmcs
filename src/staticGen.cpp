@@ -344,7 +344,7 @@ generate_opt_topology()
   // query plan.
   switch (topology_type)
     {
-    case 1:
+    case DIAMOND_DOWN_TOPOLOGY:
       {
 	opt_topo_gen = new DiamondOptTopoGenerator(opt_topo, opt_lcim);
 	break;
@@ -559,6 +559,181 @@ print_command_lines()
 }
 
 
+const std::string
+getOptimumDLVFilter() 
+{
+  std::string result;
+
+  // just want to see the result from the root context and its neighbors
+  NeighborVecPtr neighbors = (*opt_topo)[0];
+  BeliefStatePtr neighborsInterface(new BeliefState(no_contexts, 0));
+  
+  for (NeighborVec::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
+    {
+      const BeliefStatePtr& currentInterface = getInterface(opt_lcim, 1, *it);
+
+      BeliefState::iterator jt = currentInterface->begin();
+      BeliefState::iterator kt = neighborsInterface->begin();
+
+      for (; jt != currentInterface->end(); ++jt, ++kt)
+	{
+	  *kt |= *jt;
+	}
+    }
+
+  BeliefState::iterator kt = neighborsInterface->begin();
+  *kt |= std::numeric_limits<unsigned long>::max();
+  
+  if (topology_type == DIAMOND_DOWN_TOPOLOGY)
+    {
+      const BeliefStatePtr& interface24 =  getInterface(opt_lcim, 2, 4);
+      BeliefState::iterator jt = interface24->begin();
+      BeliefState::iterator kt = neighborsInterface->begin();
+      
+      for (; jt != interface24->end(); ++jt,++kt)
+	{
+	  *kt |= *jt;
+	}
+      
+      const BeliefStatePtr& interface34 =  getInterface(opt_lcim, 3, 4);
+      BeliefState::iterator jt1 = interface34->begin();
+      BeliefState::iterator kt1 = neighborsInterface->begin();
+      
+      for (; jt1 != interface34->end(); ++jt1,++kt1)
+	{
+	  *kt1 |= *jt1;
+	}
+      
+    }
+  else if (topology_type == ZIGZAG_DIAMOND_TOPOLOGY)
+    {
+      const BeliefStatePtr& interface23 =  getInterface(opt_lcim, 2, 3);
+      BeliefState::iterator jt1 = interface23->begin();
+      BeliefState::iterator kt1 = neighborsInterface->begin();
+      
+      for (; jt1 != interface23->end(); ++jt1,++kt1)
+	{
+	  *kt1 |= *jt1;
+	}
+    }
+  
+  
+  bool first = true;
+  
+  for (std::size_t contextID = 1; contextID <= no_contexts; ++contextID)
+    {
+      const SignaturePtr contextSignature  = (*sigmas)[contextID-1];
+      const SignatureByLocal& contextSigByLocal = boost::get<Tag::Local>(*contextSignature);
+
+      BeliefSet contextInterface = (*neighborsInterface)[contextID-1];
+      SignatureByLocal::const_iterator context_it; 
+      
+      if (!isEpsilon(contextInterface))
+	{
+	  for (std::size_t i = 1; // ignore epsilon bit
+	       i < sizeof(contextInterface)*8 ; ++i)
+	    {
+	      if (testBeliefSet(contextInterface, i) && i <= contextSignature->size())
+		{
+		  context_it = contextSigByLocal.find(i); 
+		  assert(context_it != contextSigByLocal.end());
+		  if (!first)
+		    {
+		      result += ",";
+		    }
+		  else 
+		    {
+		      first = false;
+		    }
+		  result += context_it->sym;
+		}
+	    }
+	}
+    }
+  
+  return result;
+  }
+
+
+std::string
+getGeneralDLVFilter()
+{
+  std::string result; 
+  bool first = true;
+  
+  for (std::size_t contextID = 1; contextID <= no_contexts; ++contextID)
+    {
+      const SignaturePtr contextSignature  = (*sigmas)[contextID-1];
+      const SignatureByLocal& contextSigByLocal = boost::get<Tag::Local>(*contextSignature);
+
+      BeliefSet contextInterface = (*minV)[contextID-1];
+      SignatureByLocal::const_iterator context_it; 
+
+      if (!isEpsilon(contextInterface))
+	{
+	  for (std::size_t i = 1; // ignore epsilon bit
+	       i < sizeof(contextInterface)*8;
+	       ++i)
+	    {
+	      if (contextID != 1)
+		{
+		  if (testBeliefSet(contextInterface, i))
+		    {
+		      context_it = contextSigByLocal.find(i);
+		      assert(context_it != contextSigByLocal.end());
+		      if (!first)
+			{
+			  result += ",";
+			}
+		      else 
+			{
+			  first = false;
+			}
+		      result += context_it->sym;
+		    }
+		} // this extra 'if' is used to make sure that all of sigma 1 is used, regardless of global V
+	      else if (i <= contextSignature->size())
+		{
+		  context_it = contextSigByLocal.find(i); 
+		  assert(context_it != contextSigByLocal.end());
+		  if (!first)
+		    {
+		      result += ",";
+		    }
+		  else 
+		    {
+		      first = false;
+		    }
+		  result += context_it->sym;
+		}
+	    }
+	}
+    }
+  return result;  
+}
+
+void
+print_dlv_command_lines()
+{
+  std::string filename_command_line_dlv      = prefix + DLV_CMD_EXT;
+  std::string filename_command_line_dlv_opt  = prefix + OPT_DLV_CMD_EXT;
+
+  file_command_line_dlv.open(filename_command_line_dlv.c_str());
+  file_command_line_dlv_opt.open(filename_command_line_dlv_opt.c_str());
+
+  std::string generalFilter = getGeneralDLVFilter();
+  file_command_line_dlv << "dlv -silent -filter=" << generalFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq "<< std::endl;
+  file_command_line_dlv << "dlv -silent -filter=" << generalFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq | wc -l"<< std::endl;
+
+  std::string optimumFilter = getOptimumDLVFilter();
+  file_command_line_dlv_opt << "dlv -silent -filter=" << optimumFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq "<< std::endl;
+  file_command_line_dlv_opt << "dlv -silent -filter=" << optimumFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq | wc -l"<< std::endl;
+
+  file_command_line_dlv.close();
+  file_command_line_dlv_opt.close();
+}
+
+
 int 
 main(int argc, char* argv[])
 {
@@ -581,4 +756,5 @@ main(int argc, char* argv[])
   print_query_plan(opt_qp,  prefix + OPT_EXT);
 
   print_command_lines();
+  print_dlv_command_lines();
 }
