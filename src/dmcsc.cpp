@@ -87,6 +87,7 @@ main(int argc, char* argv[])
 
       std::string hostName = "";
       std::string port = "";
+      std::string manager = "";
       std::size_t systemSize = 0;	
       BeliefStatePtr V(new BeliefState);
 
@@ -122,10 +123,13 @@ main(int argc, char* argv[])
 
       if (vm.count(MANAGER)) 
 	{
-	  optionalCount++;
-	  std::cerr << "We are sorry, but the manager feature is under implementation, please try the other alternatives";
+	  //optionalCount++;
+	  //std::cerr << "We are sorry, but the manager feature is under implementation, please try the other alternatives";
 	  //read manager host and port
-	  return 1;
+	  // quick hack: manager now stands for the topology file. 
+	  manager = vm[MANAGER].as<std::string>();
+	  
+	  //return 1;
 	}
 
       if (vm.count(SYSTEM_SIZE)) 
@@ -136,6 +140,7 @@ main(int argc, char* argv[])
 
       if(hostName.compare("") ==0 ||
 	 port.compare("") == 0 ||
+	 manager.compare("") == 0 ||
 	 systemSize == 0 ||
 	 (primitiveDMCS && V->size() == 0) ||
 	 (primitiveDMCS && V->size() != systemSize) ||
@@ -196,6 +201,62 @@ main(int argc, char* argv[])
 
 	  result = c.getResult();
  	}
+
+      // Print results
+      // but first read the topology file (quick hack) to get the signatures
+      QueryPlanPtr query_plan(new QueryPlan);
+
+      query_plan->read_graph(manager);
+      BeliefStateListPtr belief_state_list;
+#ifdef DMCS_STATS_INFO
+      belief_state_list = result->getBeliefStates();
+#else
+      belief_state_list = result;
+#endif
+
+      BeliefStateList::const_iterator bsl_it = belief_state_list->begin();
+      BeliefStateList::const_iterator bsl_end = belief_state_list->end();
+      --bsl_end;
+
+      for (; bsl_it != belief_state_list->end(); ++bsl_it)
+	{
+	  BeliefStatePtr belief_state = *bsl_it;
+
+	  BeliefState::const_iterator bs_it = belief_state->begin();
+	  BeliefState::const_iterator bs_end = belief_state->end();
+	  --bs_end;
+	  std::size_t i = 1;
+
+	  // Now print only atoms whose corresponding bits are on
+	  for (; bs_it != belief_state->end(); ++bs_it, ++i)
+	    {
+	      std::cerr << "{ ";
+	      const Signature& sig = query_plan->getSignature(i);
+	      const SignatureByLocal& local = boost::get<Tag::Local>(sig);
+	      for (std::size_t j = 1; j <= sig.size(); ++j)
+		{
+		  if (testBeliefSet(*bs_it, j))
+		    {
+		      SignatureByLocal::const_iterator loc_it = local.find(j);
+		      std::cerr << loc_it->sym << " ";
+		    }
+		}
+	      if (bs_it != bs_end)
+		{
+		  std::cerr << "}, ";
+		}
+	      else
+		{
+		  std::cerr << "}";
+		}
+	    }
+
+	  std::cerr << std::endl;
+	}
+
+      /*
+      std::cerr << "Signatures: " << std::endl << sigs << std::endl;*/
+
 
 #ifdef DEBUG
 
