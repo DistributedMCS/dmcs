@@ -227,12 +227,12 @@ main(int argc, char* argv[])
 	  --bs_end;
 	  std::size_t i = 1;
 
-	  std::cerr << "(";
+	  std::cout << "(";
 
 	  // Now print only atoms whose corresponding bits are on
 	  for (; bs_it != belief_state->end(); ++bs_it, ++i)
 	    {
-	      std::cerr << "{ ";
+	      std::cout << "{ ";
 	      const Signature& sig = query_plan->getSignature(i);
 	      const SignatureByLocal& local = boost::get<Tag::Local>(sig);
 	      for (std::size_t j = 1; j <= sig.size(); ++j)
@@ -240,20 +240,20 @@ main(int argc, char* argv[])
 		  if (testBeliefSet(*bs_it, j))
 		    {
 		      SignatureByLocal::const_iterator loc_it = local.find(j);
-		      std::cerr << loc_it->sym << " ";
+		      std::cout << loc_it->sym << " ";
 		    }
 		}
 	      if (bs_it != bs_end)
 		{
-		  std::cerr << "}, ";
+		  std::cout << "}, ";
 		}
 	      else
 		{
-		  std::cerr << "}";
+		  std::cout << "}";
 		}
 	    }
 
-	  std::cerr << ")" << std::endl;
+	  std::cout << ")" << std::endl;
 	}
 
       /*
@@ -275,7 +275,7 @@ main(int argc, char* argv[])
       std::cout << "# " << result->getBeliefStates()->size() << std::endl;
       std::cout << *result->getStatsInfo() << std::endl;
 #else
-      std::cerr << "Total Number of Equilibria: " << result->size() << std::endl;
+      std::cout << "Total Number of Equilibria: " << result->size() << std::endl;
 #endif
 
     }

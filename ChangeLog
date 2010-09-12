@@ -1,3 +1,8 @@
+2010-09-12  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp (main): Output of equilibria and number goes to
+	cout.
+
 2010-09-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Adapt output to format in the paper.
