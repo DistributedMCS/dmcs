@@ -227,6 +227,8 @@ main(int argc, char* argv[])
 	  --bs_end;
 	  std::size_t i = 1;
 
+	  std::cerr << "(";
+
 	  // Now print only atoms whose corresponding bits are on
 	  for (; bs_it != belief_state->end(); ++bs_it, ++i)
 	    {
@@ -251,7 +253,7 @@ main(int argc, char* argv[])
 		}
 	    }
 
-	  std::cerr << std::endl;
+	  std::cerr << ")" << std::endl;
 	}
 
       /*
@@ -273,7 +275,7 @@ main(int argc, char* argv[])
       std::cout << "# " << result->getBeliefStates()->size() << std::endl;
       std::cout << *result->getStatsInfo() << std::endl;
 #else
-      std::cerr << "Number of answers: " << result->size() << std::endl;
+      std::cerr << "Total Number of Equilibria: " << result->size() << std::endl;
 #endif
 
     }

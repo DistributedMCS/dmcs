@@ -1,10 +1,14 @@
+2010-09-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Adapt output to format in the paper.
+	* include/Server.tcc: Turn off "go to finalize" message.
+
 2010-09-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Quick hack to print output. Now one needs to
 	specify --mamanger=TEMPLATE.TOP in the commandline of dmcsc. For
 	example, in the scientist example, we need to put
 	--manager=scientist.top.
-	
 
 2010-08-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
