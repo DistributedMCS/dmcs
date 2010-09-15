@@ -17,7 +17,9 @@ TESTS = \
 	testTranslation \
 	testSignature \
 	testCombination \
-	testClaspResultOnlineParser
+	testClaspResultOnlineParser \
+	testBlockingClasp \
+	testGraphProp
 
 TESTS_ENVIRONMENT = EXAMPLESDIR=$(top_srcdir)/examples
 
@@ -29,7 +31,9 @@ check_PROGRAMS = \
 	testSignature \
 	testQueryPlan \
 	testCombination \
-	testClaspResultOnlineParser
+	testClaspResultOnlineParser \
+	testBlockingClasp \
+	testGraphProp
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = $(top_builddir)/src/libsatsolver.a $(top_builddir)/src/libdmcs.a
@@ -53,3 +57,9 @@ testQueryPlan_LDADD = $(top_builddir)/src/libdmcs.a
 
 testClaspResultOnlineParser_SOURCES = testClaspResultOnlineParser.cpp
 testClaspResultOnlineParser_LDADD = $(top_builddir)/src/libsatsolver.a
+
+testBlockingClasp_SOURCES = testBlockingClasp.cpp
+testBlockingClasp_LDADD = $(top_builddir)/src/libsatsolver.a
+
+testGraphProp_SOURCES = testGraphProp.cpp
+testGraphProp_LDADD = $(top_builddir)/src/libdmcs.a
