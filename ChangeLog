@@ -1,3 +1,14 @@
+2010-09-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/tests/testClaspResultOnlineParser.cpp: Rename V --> belief_state.
+
+	* include/generator/TopologyGenerator.h: Rename iterator.
+
+	* include/generator/DiamondOptTopoGenerator.h: New file.
+
+	* src/tests/testBlockingClasp.cpp: New testcase.
+	* src/tests/testGraphProp.cpp: Likewise.
+
 2010-09-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/QueryPlan.h: Clean up.
