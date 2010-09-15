@@ -60,6 +60,15 @@ typedef std::map<ContextPair, BeliefStatePtr> LocalInterfaceMap;
 typedef boost::shared_ptr<LocalInterfaceMap> LocalInterfaceMapPtr;
 
 
+inline
+BeliefStatePtr
+getInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to)
+{
+  ContextPair cp(from, to);
+  LocalInterfaceMap::const_iterator lcim_it = lcim->find(cp);
+  return lcim_it->second;
+}
+
 class TopologyGenerator
 {
 public:
@@ -106,17 +115,6 @@ protected:
   NeighborVec2Ptr topo;
   LocalInterfaceMapPtr lcim;
 };
-
-
-inline
-BeliefStatePtr 
-getInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to)
-{
-  ContextPair cp(from, to);
-  LocalInterfaceMap::iterator it = lcim->find(cp);
-  
-  return it->second;
-}
 
   } // namespace generator
 } // namespace dmcs
