@@ -31,20 +31,16 @@
 #define GEN_TOPOLOGY_GENERATOR_H
 
 #include <vector>
-#include <list>
-
 #include <boost/shared_ptr.hpp>
-
-#include "BeliefState.h"
 
 #define RANDOM_TOPOLOGY            0
 #define DIAMOND_DOWN_TOPOLOGY      1
 #define DIAMOND_ARBITRARY_TOPOLOGY 2
 #define ZIGZAG_DIAMOND_TOPOLOGY    3
 #define PURE_RING_TOPOLOGY         4
-#define PURE_RING_TOPOLOGY         5
-#define RING_EDGE_TOPOLOGY         6
-#define BINARY_TREE_TOPOLOGY       7
+#define RING_EDGE_TOPOLOGY         5
+#define BINARY_TREE_TOPOLOGY       6
+#define HOUSE_TOPOLOGY             7
 #define MULTIPLE_RING_TOPOLOGY     8
 
 namespace dmcs { namespace generator {
@@ -54,20 +50,6 @@ typedef boost::shared_ptr<NeighborVec> NeighborVecPtr;
 typedef std::vector<NeighborVecPtr> NeighborVec2;
 typedef boost::shared_ptr<NeighborVec2> NeighborVec2Ptr;
 
-typedef std::pair<std::size_t, std::size_t> ContextPair;
-typedef std::pair<ContextPair, BeliefStatePtr> LocalInterfacePair;
-typedef std::map<ContextPair, BeliefStatePtr> LocalInterfaceMap;
-typedef boost::shared_ptr<LocalInterfaceMap> LocalInterfaceMapPtr;
-
-
-inline
-BeliefStatePtr
-getInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to)
-{
-  ContextPair cp(from, to);
-  LocalInterfaceMap::const_iterator lcim_it = lcim->find(cp);
-  return lcim_it->second;
-}
 
 class TopologyGenerator
 {
@@ -75,10 +57,6 @@ public:
   TopologyGenerator(NeighborVec2Ptr topo_)
     : topo(topo_), system_size(topo_->size())
   { }
-
-  TopologyGenerator(NeighborVec2Ptr topo_, LocalInterfaceMapPtr lcim_)
-    : topo(topo_), lcim(lcim_), system_size(topo_->size())
-    { }
 
   void
   generate()
@@ -98,22 +76,9 @@ public:
     (*topo)[from-1]->push_back(to);
   }
 
-  void
-  create_opt_interface()
-  {
-    for (std::size_t i = system_size; i > 0; --i)
-      {
-	create_opt_interface(i);
-      }
-  }
-
-  virtual void
-  create_opt_interface(std::size_t id) = 0;
-
 protected:
   std::size_t system_size;
   NeighborVec2Ptr topo;
-  LocalInterfaceMapPtr lcim;
 };
 
   } // namespace generator

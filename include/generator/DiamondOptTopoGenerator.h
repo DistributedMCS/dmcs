@@ -31,19 +31,15 @@
 #define GEN_DIAMOND_OPT_TOPO_GENERATOR_H
 
 #include "BeliefCombination.h"
-#include "generator/TopologyGenerator.h"
+#include "generator/OptTopologyGenerator.h"
 
 namespace dmcs { namespace generator {
 
-class DiamondOptTopoGenerator : public TopologyGenerator
+class DiamondOptTopoGenerator : public OptTopologyGenerator
 {
 public:
-  DiamondOptTopoGenerator(NeighborVec2Ptr topo)
-    : TopologyGenerator(topo)
-  { }
-
   DiamondOptTopoGenerator(NeighborVec2Ptr topo, LocalInterfaceMapPtr lcim)
-    : TopologyGenerator(topo, lcim)
+    : OptTopologyGenerator(topo, lcim)
   { }
 
   void

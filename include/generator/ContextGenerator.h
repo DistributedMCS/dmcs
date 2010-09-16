@@ -37,7 +37,7 @@
 
 #include "BeliefState.h"
 #include "Rule.h"
-#include "generator/TopologyGenerator.h"
+#include "generator/OptTopologyGenerator.h"
 
 namespace dmcs { namespace generator {
 

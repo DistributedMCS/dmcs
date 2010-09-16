@@ -18,28 +18,42 @@
  */
 
 /**
- * @file   DiamondTopoGenerator.h
+ * @file   DiamondArbitraryTopoGenerator.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Aug  31 8:46:24 2010
+ * @date   Tue Sep  16 16:56:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef GEN_DIAMOND_TOPO_GENERATOR_H
-#define GEN_DIAMOND_TOPO_GENERATOR_H
+#ifndef GEN_DIAMOND_ARBITRARY_TOPO_GENERATOR_H
+#define GEN_DIAMOND_ARBITRARY_TOPO_GENERATOR_H
 
 #include "generator/TopologyGenerator.h"
 
 namespace dmcs { namespace generator {
 
-class DiamondTopoGenerator : public TopologyGenerator
+class DiamondArbitraryTopoGenerator : public TopologyGenerator
 {
 public:
-  DiamondTopoGenerator(NeighborVec2Ptr topo)
+  DiamondArbitraryTopoGenerator(NeighborVec2Ptr topo)
     : TopologyGenerator(topo)
   { }
+
+  void
+  genRandomEdge(std::size_t from, std::size_t to)
+  {
+    // 50-50 to decide whether an edge is up or down
+    if (rand() % 2)
+      {
+	genNeighbor(from, to);
+      }
+    else
+      {
+	genNeighbor(to, from);
+      }
+  }
 
   void
   genNeighborList(std::size_t id)
@@ -54,18 +68,18 @@ public:
       {
       case 1:
 	{
-	  genNeighbor(id, id+1);
-	  genNeighbor(id, id+2);
+	  genRandomEdge(id, id+1);
+	  genRandomEdge(id, id+2);
 	  break;
 	}
       case 0:
 	{
-	  genNeighbor(id, id+1);
+	  genRandomEdge(id, id+1);
 	  break;
 	}
       case 2:
 	{
-	  genNeighbor(id, id+2);
+	  genRandomEdge(id, id+2);
 	  break;
 	}	
       }
@@ -75,7 +89,7 @@ public:
   } // namespace generator
 } // namespace dmcs
 
-#endif // GEN_DIAMONDTOPO_GENERATOR_H
+#endif // GEN_DIAMOND_ARBITRARY_TOPO_GENERATOR_H
 
 // Local Variables:
 // mode: C++

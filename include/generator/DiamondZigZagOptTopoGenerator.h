@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   DiamondTopoGenerator.h
+ * @file   DiamondZigZagOptTopoGenerator.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
  * @date   Tue Aug  31 8:46:24 2010
  * 
@@ -27,22 +27,32 @@
  * 
  */
 
-#ifndef GEN_DIAMOND_TOPO_GENERATOR_H
-#define GEN_DIAMOND_TOPO_GENERATOR_H
+#ifndef GEN_DIAMOND_ZIGZAG_OPT_TOPO_GENERATOR_H
+#define GEN_DIAMOND_ZIGZAG_OPT_TOPO_GENERATOR_H
 
-#include "generator/TopologyGenerator.h"
+#include "BeliefCombination.h"
+#include "generator/OptTopologyGenerator.h"
 
 namespace dmcs { namespace generator {
 
-class DiamondTopoGenerator : public TopologyGenerator
+class DiamondZigZagOptTopoGenerator : public OptTopologyGenerator
 {
 public:
-  DiamondTopoGenerator(NeighborVec2Ptr topo)
-    : TopologyGenerator(topo)
+  DiamondZigZagOptTopoGenerator(NeighborVec2Ptr topo, LocalInterfaceMapPtr lcim)
+    : OptTopologyGenerator(topo, lcim)
   { }
 
   void
   genNeighborList(std::size_t id)
+  {
+    if (id < system_size)
+      {
+	genNeighbor(id, id+1);
+      }
+  }
+
+  void
+  create_opt_interface(std::size_t id)
   {
     if (id == system_size)
       {
@@ -50,24 +60,37 @@ public:
       }
 
     std::size_t remainder = id % 3;
-    switch (remainder)
+
+    switch(remainder)
       {
       case 1:
 	{
-	  genNeighbor(id, id+1);
-	  genNeighbor(id, id+2);
-	  break;
-	}
-      case 0:
-	{
-	  genNeighbor(id, id+1);
+	  BeliefStatePtr bs_12 = getInterface(lcim, id, id+1);
+	  BeliefStatePtr bs_23 = getInterface(lcim, id+1, id+2);
+	  
+	  update(bs_12, bs_23);
 	  break;
 	}
       case 2:
 	{
-	  genNeighbor(id, id+2);
+	  BeliefStatePtr bs_23 = getInterface(lcim, id, id+2);
+	  BeliefStatePtr bs_13 = getInterface(lcim, id-1, id+1);
+	  BeliefStatePtr bs_34 = getInterface(lcim, id+1, id+2);
+
+	  update(bs_23, bs_13);
+	  update(bs_23, bs_34);
+	  
 	  break;
-	}	
+	}
+      case 0:
+	{
+	  BeliefStatePtr bs_34 = getInterface(lcim, id, id+1);
+	  BeliefStatePtr bs_24 = getInterface(lcim, id-1, id+1);
+
+	  update(bs_34, bs_24);
+	  
+	  break;
+	}
       }
   }
 };
@@ -75,7 +98,7 @@ public:
   } // namespace generator
 } // namespace dmcs
 
-#endif // GEN_DIAMONDTOPO_GENERATOR_H
+#endif // GEN_DIAMOND_OPT_TOPO_GENERATOR_H
 
 // Local Variables:
 // mode: C++

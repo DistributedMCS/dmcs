@@ -37,6 +37,8 @@
 #include "generator/dmcsGen.h"
 #include "generator/DiamondTopoGenerator.h"
 #include "generator/DiamondOptTopoGenerator.h"
+#include "generator/DiamondArbitraryTopoGenerator.h"
+#include "generator/DiamondZigZagTopoGenerator.h"
 #include "generator/ContextGenerator.h"
 #include "ProgramOptions.h"
 
@@ -88,7 +90,7 @@ QueryPlanPtr orig_qp(new QueryPlan);
 QueryPlanPtr opt_qp(new QueryPlan);
 
 TopologyGenerator* orig_topo_gen;
-TopologyGenerator* opt_topo_gen;
+OptTopologyGenerator* opt_topo_gen;
 
 NeighborVec2Ptr orig_topo(new NeighborVec2);
 NeighborVec2Ptr opt_topo(new NeighborVec2);
@@ -278,6 +280,16 @@ generate_orig_topology()
 	orig_topo_gen = new DiamondTopoGenerator(orig_topo);
 	break;
       }
+    case DIAMOND_ARBITRARY_TOPOLOGY:
+      {
+	orig_topo_gen = new DiamondArbitraryTopoGenerator(orig_topo);
+	break;
+      }
+    case ZIGZAG_DIAMOND_TOPOLOGY:
+      {
+	orig_topo_gen = new DiamondZigZagTopoGenerator(orig_topo);
+	break;
+      }
     }
 
   orig_topo_gen->generate();
@@ -309,7 +321,7 @@ generate_contexts()
   cgen.generate();
   // After this, we have local_kb, bridge rules of all contexts and
   // minV of the system set up. Furthermore, we have the map from
-  // edsges to loca interfaces, which will be used to compte the
+  // edsges to local interfaces, which will be used to compte the
   // interface in the optimal topology.
 
 #ifdef DEBUG
@@ -449,13 +461,9 @@ print_command_lines()
 {
   std::string filename_command_line        = prefix + CMD_EXT;
   std::string filename_command_line_sh     = prefix + SH_CMD_EXT;
-  std::string filename_command_line_opt    = prefix + OPT_CMD_EXT;
-  std::string filename_command_line_opt_sh = prefix + OPT_SH_CMD_EXT;
 
   file_command_line.open(filename_command_line.c_str());
   file_command_line_sh.open(filename_command_line_sh.c_str());
-  file_command_line_opt.open(filename_command_line_opt.c_str());
-  file_command_line_opt_sh.open(filename_command_line_opt_sh.c_str());
 
   // Initialization for shell scripts
   file_command_line_sh << "#!/bin/bash" << std::endl
@@ -463,16 +471,9 @@ print_command_lines()
 		       << "export TESTSPATH='" TESTSDIR "'" << std::endl
 		       << "export DMCSPATH='.'" << std::endl;
 
-  file_command_line_opt_sh << "#!/bin/bash" << std::endl
-			   << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
-			   << "export TESTSPATH='" TESTSDIR "'" << std::endl
-			   << "export DMCSPATH='.'" << std::endl;
-
   // dmcsd commands
   // ./dmcsd <id> <hostname> <port> <filename_lp> <filename_br> <filename_topo> 
 
-  std::string command_line_opt_sh;
-  std::string command_line_opt;
   std::string command_line_sh;
   std::string command_line;
 
@@ -489,28 +490,16 @@ print_command_lines()
       out << "--" << CONTEXT_ID << "=" << i << " " 
 	  << "--" << PORT << "=" << port.str();
 
-      command_line_opt_sh = "$DMCSPATH/" DMCSD " " + out.str() + 
-	" --" KB "=$TESTSPATH/" + prefix + "-" + index.str() + LP_EXT +
-	" --" BR "=$TESTSPATH/" + prefix + "-" + index.str() + BR_EXT +
-	" --"TOPOLOGY "=$TESTSPATH/" + prefix + OPT_EXT;
-
       command_line_sh = "$DMCSPATH/" DMCSD " " + out.str() + 
 	" --" KB "=$TESTSPATH/" + prefix + "-" + index.str() + LP_EXT +
 	" --" BR "=$TESTSPATH/" + prefix + "-" + index.str() + BR_EXT +
 	" --" TOPOLOGY "=$TESTSPATH/" + prefix + TOP_EXT;
-
-      command_line_opt = "./" DMCSD " " + out.str() + 
-	" --" KB "=" TESTSDIR "/" + prefix + "-" + index.str() + LP_EXT +
-	" --" BR "=" TESTSDIR "/" + prefix + "-" + index.str() + BR_EXT +
-	" --" TOPOLOGY "=" TESTSDIR "/" + prefix + OPT_EXT;
 
       command_line = "./" DMCSD " " + out.str() + 
 	" --" KB "=" TESTSDIR "/" + prefix + "-" + index.str() + LP_EXT +
 	" --" BR "=" TESTSDIR "/" + prefix + "-" + index.str() + BR_EXT +
 	" --" TOPOLOGY "=" TESTSDIR "/" + prefix + TOP_EXT;
 
-      file_command_line_opt_sh << command_line_opt_sh << " >/dev/null 2>&1 &" << std::endl;
-      file_command_line_opt << command_line_opt << std::endl;
       file_command_line_sh << command_line_sh << " >/dev/null 2>&1 &" << std::endl;
       file_command_line << command_line << std::endl;
     }
@@ -537,6 +526,72 @@ print_command_lines()
     " --" SYSTEM_SIZE "=" + system_size.str() + 
     " --" QUERY_VARS "=\"" + globalV.str() + "\"";
 
+  file_command_line_sh << command_line_sh << std::endl << "killall " DMCSD << std::endl;
+  file_command_line << command_line << std::endl;
+
+  file_command_line_sh.close();
+  file_command_line.close();
+}
+
+
+void
+print_opt_command_lines()
+{
+  std::string filename_command_line_opt    = prefix + OPT_CMD_EXT;
+  std::string filename_command_line_opt_sh = prefix + OPT_SH_CMD_EXT;
+
+  file_command_line_opt.open(filename_command_line_opt.c_str());
+  file_command_line_opt_sh.open(filename_command_line_opt_sh.c_str());
+
+  // Initialization for shell scripts
+  file_command_line_opt_sh << "#!/bin/bash" << std::endl
+			   << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
+			   << "export TESTSPATH='" TESTSDIR "'" << std::endl
+			   << "export DMCSPATH='.'" << std::endl;
+
+  // dmcsd commands
+  // ./dmcsd <id> <hostname> <port> <filename_lp> <filename_br> <filename_topo> 
+
+  std::string command_line_opt_sh;
+  std::string command_line_opt;
+
+  for (std::size_t i = 1; i <= no_contexts; ++i)
+    {
+      std::stringstream out;
+      std::stringstream index;
+      std::stringstream port;
+      
+      index << i;
+      port << BASE_PORT + i;
+
+      // ID PortNo@Hostname
+      out << "--" << CONTEXT_ID << "=" << i << " " 
+	  << "--" << PORT << "=" << port.str();
+
+      command_line_opt_sh = "$DMCSPATH/" DMCSD " " + out.str() + 
+	" --" KB "=$TESTSPATH/" + prefix + "-" + index.str() + LP_EXT +
+	" --" BR "=$TESTSPATH/" + prefix + "-" + index.str() + BR_EXT +
+	" --"TOPOLOGY "=$TESTSPATH/" + prefix + OPT_EXT;
+
+      command_line_opt = "./" DMCSD " " + out.str() + 
+	" --" KB "=" TESTSDIR "/" + prefix + "-" + index.str() + LP_EXT +
+	" --" BR "=" TESTSDIR "/" + prefix + "-" + index.str() + BR_EXT +
+	" --" TOPOLOGY "=" TESTSDIR "/" + prefix + OPT_EXT;
+
+      file_command_line_opt_sh << command_line_opt_sh << " >/dev/null 2>&1 &" << std::endl;
+      file_command_line_opt << command_line_opt << std::endl;
+    }
+
+  // client command
+  // time | ./dmcsc localhost 5001
+  std::stringstream port1;
+  std::stringstream system_size;
+  std::stringstream globalV;
+
+  port1 << 5001;
+  system_size << no_contexts;
+  globalV << minV;
+
   command_line_opt_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcsopt-time.log $DMCSPATH/"  DMCSC
     " --" HOSTNAME "=localhost" 
     " --" PORT "=" + port1.str() +
@@ -547,13 +602,9 @@ print_command_lines()
     " --" PORT "=" + port1.str() +
     " --" SYSTEM_SIZE "=" + system_size.str();
   
-  file_command_line_sh << command_line_sh << std::endl << "killall " DMCSD << std::endl;
-  file_command_line << command_line << std::endl;
   file_command_line_opt_sh << command_line_opt_sh << std::endl << "killall " DMCSD << std::endl;
   file_command_line_opt << command_line_opt << std::endl;
 
-  file_command_line_sh.close();
-  file_command_line.close();
   file_command_line_opt_sh.close();
   file_command_line_opt.close();
 }
@@ -716,20 +767,26 @@ void
 print_dlv_command_lines()
 {
   std::string filename_command_line_dlv      = prefix + DLV_CMD_EXT;
-  std::string filename_command_line_dlv_opt  = prefix + OPT_DLV_CMD_EXT;
-
   file_command_line_dlv.open(filename_command_line_dlv.c_str());
-  file_command_line_dlv_opt.open(filename_command_line_dlv_opt.c_str());
 
   std::string generalFilter = getGeneralDLVFilter();
   file_command_line_dlv << "dlv -silent -filter=" << generalFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq "<< std::endl;
   file_command_line_dlv << "dlv -silent -filter=" << generalFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq | wc -l"<< std::endl;
 
+  file_command_line_dlv.close();
+}
+
+
+void
+print_opt_dlv_command_lines()
+{
+  std::string filename_command_line_dlv_opt  = prefix + OPT_DLV_CMD_EXT;
+  file_command_line_dlv_opt.open(filename_command_line_dlv_opt.c_str());
+
   std::string optimumFilter = getOptimumDLVFilter();
   file_command_line_dlv_opt << "dlv -silent -filter=" << optimumFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq "<< std::endl;
   file_command_line_dlv_opt << "dlv -silent -filter=" << optimumFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq | wc -l"<< std::endl;
 
-  file_command_line_dlv.close();
   file_command_line_dlv_opt.close();
 }
 
@@ -743,18 +800,22 @@ main(int argc, char* argv[])
     }
 
   srand( time(NULL) );
-
   init();
 
   generate_orig_topology();
   generate_contexts();
-  generate_opt_topology();
-  generate_query_plan(orig_qp, lcim);
-  generate_query_plan(opt_qp, opt_lcim);
-
   print_query_plan(orig_qp, prefix + TOP_EXT);
-  print_query_plan(opt_qp,  prefix + OPT_EXT);
-
+  generate_query_plan(orig_qp, lcim);
   print_command_lines();
   print_dlv_command_lines();
+
+  // only for some fixed topologies where optimization is possible
+  if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY)
+    {
+      generate_opt_topology();
+      generate_query_plan(opt_qp, opt_lcim);
+      print_query_plan(opt_qp,  prefix + OPT_EXT);
+      print_opt_command_lines();
+      print_opt_dlv_command_lines();
+    }
 }

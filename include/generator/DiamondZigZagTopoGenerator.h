@@ -18,26 +18,26 @@
  */
 
 /**
- * @file   DiamondTopoGenerator.h
+ * @file   DiamondZigZagTopoGenerator.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Aug  31 8:46:24 2010
+ * @date   Tue Sep  16 17:35:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef GEN_DIAMOND_TOPO_GENERATOR_H
-#define GEN_DIAMOND_TOPO_GENERATOR_H
+#ifndef GEN_DIAMOND_ZIGZAG_TOPO_GENERATOR_H
+#define GEN_DIAMOND_ZIGZAG_TOPO_GENERATOR_H
 
 #include "generator/TopologyGenerator.h"
 
 namespace dmcs { namespace generator {
 
-class DiamondTopoGenerator : public TopologyGenerator
+class DiamondZigZagTopoGenerator : public TopologyGenerator
 {
 public:
-  DiamondTopoGenerator(NeighborVec2Ptr topo)
+  DiamondZigZagTopoGenerator(NeighborVec2Ptr topo)
     : TopologyGenerator(topo)
   { }
 
@@ -53,6 +53,7 @@ public:
     switch (remainder)
       {
       case 1:
+      case 2:
 	{
 	  genNeighbor(id, id+1);
 	  genNeighbor(id, id+2);
@@ -62,11 +63,6 @@ public:
 	{
 	  genNeighbor(id, id+1);
 	  break;
-	}
-      case 2:
-	{
-	  genNeighbor(id, id+2);
-	  break;
 	}	
       }
   }
@@ -75,7 +71,7 @@ public:
   } // namespace generator
 } // namespace dmcs
 
-#endif // GEN_DIAMONDTOPO_GENERATOR_H
+#endif // GEN_DIAMOND_ZIGZAG_TOPO_GENERATOR_H
 
 // Local Variables:
 // mode: C++

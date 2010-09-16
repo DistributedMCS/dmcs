@@ -69,7 +69,11 @@ noinst_HEADERS =  \
 		generator/ContextGenerator.h \
 		generator/DiamondTopoGenerator.h \
 		generator/DiamondOptTopoGenerator.h \
+		generator/DiamondArbitraryTopoGenerator.h \
+		generator/DiamondZigZagTopoGenerator.h \
+		generator/DiamondZigZagOptTopoGenerator.h \
 		generator/TopologyGenerator.h \
+		generator/OptTopologyGenerator.h \
 		generator/dmcsGen.h \
 		connection.hpp
 

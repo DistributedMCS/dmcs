@@ -1,5 +1,24 @@
 2010-09-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/staticGen.cpp: Separate original topo generation from
+	optimal topo generation.
+
+	* include/generator/TopologyGenerator.h: Remove local interface map.
+
+	* include/generator/DiamondTopoGenerator.h (create_opt_interface): Remove.
+
+	* include/generator/DiamondOptTopoGenerator.h: Now inherits from
+	OptTopologyGenerator
+
+	* include/generator/ContextGenerator.h: include OptTopologyGenerator.h
+
+	* include/Makefile.am: Add new header files.
+
+	* include/generator/DiamondArbitraryTopoGenerator.h: New file.
+	* include/generator/OptTopologyGenerator.h: Likewise.
+	* include/generator/DiamondZigZagTopoGenerator.h: Likewise.
+	* include/generator/DiamondZigZagOptTopoGenerator.h: Likewise.
+
 	* m4/boost.m4: merged from trunk, to fix  the problem with boost 1.44 iostream lib check.
 
 2010-09-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
