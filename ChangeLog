@@ -1,3 +1,7 @@
+2010-09-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* m4/boost.m4: merged from trunk, to fix  the problem with boost 1.44 iostream lib check.
+
 2010-09-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/tests/testClaspResultOnlineParser.cpp: Rename V --> belief_state.
