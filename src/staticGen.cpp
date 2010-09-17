@@ -39,6 +39,7 @@
 #include "generator/DiamondOptTopoGenerator.h"
 #include "generator/DiamondArbitraryTopoGenerator.h"
 #include "generator/DiamondZigZagTopoGenerator.h"
+#include "generator/DiamondZigZagOptTopoGenerator.h"
 #include "generator/ContextGenerator.h"
 #include "ProgramOptions.h"
 
@@ -285,7 +286,7 @@ generate_orig_topology()
 	orig_topo_gen = new DiamondArbitraryTopoGenerator(orig_topo);
 	break;
       }
-    case ZIGZAG_DIAMOND_TOPOLOGY:
+    case DIAMOND_ZIGZAG_TOPOLOGY:
       {
 	orig_topo_gen = new DiamondZigZagTopoGenerator(orig_topo);
 	break;
@@ -359,6 +360,11 @@ generate_opt_topology()
     case DIAMOND_DOWN_TOPOLOGY:
       {
 	opt_topo_gen = new DiamondOptTopoGenerator(opt_topo, opt_lcim);
+	break;
+      }
+    case DIAMOND_ZIGZAG_TOPOLOGY:
+      {
+	opt_topo_gen = new DiamondZigZagOptTopoGenerator(opt_topo, opt_lcim);
 	break;
       }
     }
@@ -656,7 +662,7 @@ getOptimumDLVFilter()
 	}
       
     }
-  else if (topology_type == ZIGZAG_DIAMOND_TOPOLOGY)
+  else if (topology_type == DIAMOND_ZIGZAG_TOPOLOGY)
     {
       const BeliefStatePtr& interface23 =  getInterface(opt_lcim, 2, 3);
       BeliefState::iterator jt1 = interface23->begin();
@@ -808,6 +814,7 @@ main(int argc, char* argv[])
   generate_query_plan(orig_qp, lcim);
   print_command_lines();
   print_dlv_command_lines();
+
 
   // only for some fixed topologies where optimization is possible
   if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY)

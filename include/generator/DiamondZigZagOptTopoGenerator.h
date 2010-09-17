@@ -73,13 +73,16 @@ public:
 	}
       case 2:
 	{
-	  BeliefStatePtr bs_23 = getInterface(lcim, id, id+2);
+	  BeliefStatePtr bs_23 = getInterface(lcim, id, id+1);
 	  BeliefStatePtr bs_13 = getInterface(lcim, id-1, id+1);
 	  BeliefStatePtr bs_34 = getInterface(lcim, id+1, id+2);
 
 	  update(bs_23, bs_13);
 	  update(bs_23, bs_34);
 	  
+	  ContextPair p(id-1, id+1);
+	  lcim->erase(p);
+
 	  break;
 	}
       case 0:
@@ -88,6 +91,9 @@ public:
 	  BeliefStatePtr bs_24 = getInterface(lcim, id-1, id+1);
 
 	  update(bs_34, bs_24);
+
+	  ContextPair p(id-1, id+1);
+	  lcim->erase(p);
 	  
 	  break;
 	}

@@ -1,3 +1,12 @@
+2010-09-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/generator/TopologyGenerator.h: Rename
+	ZIGZAG_DIAMOND_TOPOLOGY to DIAMOND_ZIGZAG_TOPOLOGY.
+	* src/staticGen.cpp: Likewise.
+
+	* include/generator/DiamondZigZagOptTopoGenerator.h: Remove edges
+	when optimizing the topology.
+
 2010-09-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/staticGen.cpp: Separate original topo generation from
