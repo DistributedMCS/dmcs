@@ -355,36 +355,23 @@ generate_opt_topology()
   // now the respective optimal topology generator will take care of
   // tweaking opt_topo and opt_lcim to build the corresponding optimal
   // query plan.
+
   switch (topology_type)
     {
     case DIAMOND_DOWN_TOPOLOGY:
       {
-	opt_topo_gen = new DiamondOptTopoGenerator(opt_topo, opt_lcim);
+	opt_topo_gen = new DiamondOptTopoGenerator(no_contexts, opt_lcim);
 	break;
       }
     case DIAMOND_ZIGZAG_TOPOLOGY:
       {
-	opt_topo_gen = new DiamondZigZagOptTopoGenerator(opt_topo, opt_lcim);
+	opt_topo_gen = new DiamondZigZagOptTopoGenerator(no_contexts, opt_lcim);
 	break;
       }
     }
 
-  // firstly generate optimal topology
-  opt_topo_gen->generate();
 
-#ifdef DEBUG
-  std::cerr << "OPTIMAL topology:" << std::endl;
-  for (std::size_t i = 1; i <= no_contexts; ++ i)
-    {
-      std::cerr << i << " --> ";
 
-      NeighborVecPtr neighbors = (*opt_topo)[i-1];
-      std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
-
-      std::cerr << std::endl;
-    }
-#endif
-  
   // then adjust to get optimal local interface
   opt_topo_gen->create_opt_interface();
 

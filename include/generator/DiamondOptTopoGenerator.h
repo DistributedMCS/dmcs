@@ -38,43 +38,14 @@ namespace dmcs { namespace generator {
 class DiamondOptTopoGenerator : public OptTopologyGenerator
 {
 public:
-  DiamondOptTopoGenerator(NeighborVec2Ptr topo, LocalInterfaceMapPtr lcim)
-    : OptTopologyGenerator(topo, lcim)
+  DiamondOptTopoGenerator(std::size_t system_size, LocalInterfaceMapPtr lcim)
+    : OptTopologyGenerator(system_size, lcim)
   { }
-
-  void
-  genNeighborList(std::size_t id)
-  {
-    if (id == system_size)
-      {
-	return;
-      }
-
-    std::size_t remainder = id % 3;
-    switch (remainder)
-      {
-      case 1:
-	{
-	  genNeighbor(id, id+1);
-	  genNeighbor(id, id+2);
-	  break;
-	}
-      case 0:
-	{
-	  genNeighbor(id, id+1);
-	  break;
-	}
-      case 2:
-	{
-	  genNeighbor(id, id+2);
-	  break;
-	}	
-      }
-  }
 
   void
   create_opt_interface(std::size_t id)
   {
+    std::cerr << "system_size = " << system_size << std::endl;
     if (id == system_size)
       {
 	return;
@@ -82,7 +53,7 @@ public:
 
     std::size_t remainder = id % 3;
 
-    switch(remainder)
+    switch (remainder)
       {
       case 1:
 	{
@@ -90,7 +61,7 @@ public:
 	  BeliefStatePtr bs_13 = getInterface(lcim, id, id+2);
 	  BeliefStatePtr bs_24 = getInterface(lcim, id+1, id+3);
 	  BeliefStatePtr bs_34 = getInterface(lcim, id+2, id+3);
-	  
+
 	  update(bs_12, bs_24);
 	  update(bs_13, bs_34);
 	  
@@ -102,7 +73,7 @@ public:
 	  BeliefStatePtr bs_34 = getInterface(lcim, id+1, id+2);
 
 	  update(bs_24, bs_34);
-	  
+
 	  break;
 	}
       }

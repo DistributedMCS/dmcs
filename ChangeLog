@@ -1,5 +1,15 @@
 2010-09-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/generator/OptTopologyGenerator.h: Separate
+	OptTopoGenerator from TopoGenerator.
+	* include/generator/DiamondZigZagOptTopoGenerator.h: Likewise.
+	* include/generator/DiamondOptTopoGenerator.h: Likewise.
+	* src/staticGen.cpp: Likewise.
+
+	* include/generator/DiamondTopoGenerator.h: Typo.
+
+2010-09-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
 	* include/generator/TopologyGenerator.h: Rename
 	ZIGZAG_DIAMOND_TOPOLOGY to DIAMOND_ZIGZAG_TOPOLOGY.
 	* src/staticGen.cpp: Likewise.

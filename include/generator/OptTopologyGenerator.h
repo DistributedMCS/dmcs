@@ -50,20 +50,19 @@ getInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to)
 {
   ContextPair cp(from, to);
   LocalInterfaceMap::const_iterator lcim_it = lcim->find(cp);
+
+  assert (lcim_it != lcim->end());
+
   return lcim_it->second;
 }
 
 
-class OptTopologyGenerator : public TopologyGenerator
+class OptTopologyGenerator
 {
 public:
-  OptTopologyGenerator(NeighborVec2Ptr topo_, LocalInterfaceMapPtr lcim_)
-    : TopologyGenerator(topo_), lcim(lcim_)
+  OptTopologyGenerator(std::size_t system_size_, LocalInterfaceMapPtr lcim_)
+    : system_size(system_size_), lcim(lcim_)
     { }
-
-  // CHECK whether we need an empty implementation of this method!
-  virtual void
-  genNeighborList(std::size_t context_id) = 0;
 
   void
   create_opt_interface()
@@ -79,6 +78,7 @@ public:
 
 protected:
   LocalInterfaceMapPtr lcim;
+  std::size_t system_size;
 };
 
   } // namespace generator

@@ -75,7 +75,7 @@ public:
   } // namespace generator
 } // namespace dmcs
 
-#endif // GEN_DIAMONDTOPO_GENERATOR_H
+#endif // GEN_DIAMOND_TOPO_GENERATOR_H
 
 // Local Variables:
 // mode: C++

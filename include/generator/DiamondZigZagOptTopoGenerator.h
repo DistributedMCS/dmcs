@@ -38,18 +38,9 @@ namespace dmcs { namespace generator {
 class DiamondZigZagOptTopoGenerator : public OptTopologyGenerator
 {
 public:
-  DiamondZigZagOptTopoGenerator(NeighborVec2Ptr topo, LocalInterfaceMapPtr lcim)
-    : OptTopologyGenerator(topo, lcim)
+  DiamondZigZagOptTopoGenerator(std::size_t system_size, LocalInterfaceMapPtr lcim)
+    : OptTopologyGenerator(system_size, lcim)
   { }
-
-  void
-  genNeighborList(std::size_t id)
-  {
-    if (id < system_size)
-      {
-	genNeighbor(id, id+1);
-      }
-  }
 
   void
   create_opt_interface(std::size_t id)
