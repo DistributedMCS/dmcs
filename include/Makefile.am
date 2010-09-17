@@ -72,6 +72,7 @@ noinst_HEADERS =  \
 		generator/DiamondArbitraryTopoGenerator.h \
 		generator/DiamondZigZagTopoGenerator.h \
 		generator/DiamondZigZagOptTopoGenerator.h \
+		generator/HouseTopoGenerator.h \
 		generator/TopologyGenerator.h \
 		generator/OptTopologyGenerator.h \
 		generator/RingTopoGenerator.h \

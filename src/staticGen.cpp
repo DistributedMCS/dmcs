@@ -40,6 +40,7 @@
 #include "generator/DiamondArbitraryTopoGenerator.h"
 #include "generator/DiamondZigZagTopoGenerator.h"
 #include "generator/DiamondZigZagOptTopoGenerator.h"
+#include "generator/HouseTopoGenerator.h"
 #include "generator/RingTopoGenerator.h"
 #include "generator/RingOptTopoGenerator.h"
 #include "generator/RingEdgeTopoGenerator.h"
@@ -302,6 +303,11 @@ generate_orig_topology()
     case RING_EDGE_TOPOLOGY:
       {
 	orig_topo_gen = new RingEdgeTopoGenerator(orig_topo);
+	break;
+      }
+    case HOUSE_TOPOLOGY:
+      {
+	orig_topo_gen = new HouseTopoGenerator(orig_topo);
 	break;
       }
     }
@@ -821,7 +827,7 @@ main(int argc, char* argv[])
 
   // only for some fixed topologies where optimization is possible
   if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
-      topology_type != RING_EDGE_TOPOLOGY)
+      topology_type != RING_EDGE_TOPOLOGY && topology_type != HOUSE_TOPOLOGY)
     {
       generate_opt_topology();
       generate_query_plan(opt_qp, opt_lcim);

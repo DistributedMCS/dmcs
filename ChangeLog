@@ -3,6 +3,7 @@
 	* include/generator/RingEdgeTopoGenerator.h: New file.
 	* include/generator/RingTopoGenerator.h: Likewise.
 	* include/generator/RingOptTopoGenerator.h: Likewise.
+	* include/generator/HouseTopoGenerator.h: Likewise.
 
 	* include/Makefile.am: Add new header files.
 
