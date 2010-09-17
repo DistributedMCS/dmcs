@@ -74,6 +74,9 @@ noinst_HEADERS =  \
 		generator/DiamondZigZagOptTopoGenerator.h \
 		generator/TopologyGenerator.h \
 		generator/OptTopologyGenerator.h \
+		generator/RingTopoGenerator.h \
+		generator/RingOptTopoGenerator.h \
+		generator/RingEdgeTopoGenerator.h \
 		generator/dmcsGen.h \
 		connection.hpp
 

@@ -1,5 +1,15 @@
 2010-09-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/generator/RingEdgeTopoGenerator.h: New file.
+	* include/generator/RingTopoGenerator.h: Likewise.
+	* include/generator/RingOptTopoGenerator.h: Likewise.
+
+	* include/Makefile.am: Add new header files.
+
+	* src/staticGen.cpp: Add new topologies.
+
+2010-09-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
 	* include/generator/OptTopologyGenerator.h: Separate
 	OptTopoGenerator from TopoGenerator.
 	* include/generator/DiamondZigZagOptTopoGenerator.h: Likewise.

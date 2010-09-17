@@ -40,6 +40,9 @@
 #include "generator/DiamondArbitraryTopoGenerator.h"
 #include "generator/DiamondZigZagTopoGenerator.h"
 #include "generator/DiamondZigZagOptTopoGenerator.h"
+#include "generator/RingTopoGenerator.h"
+#include "generator/RingOptTopoGenerator.h"
+#include "generator/RingEdgeTopoGenerator.h"
 #include "generator/ContextGenerator.h"
 #include "ProgramOptions.h"
 
@@ -291,6 +294,16 @@ generate_orig_topology()
 	orig_topo_gen = new DiamondZigZagTopoGenerator(orig_topo);
 	break;
       }
+    case PURE_RING_TOPOLOGY:
+      {
+	orig_topo_gen = new RingTopoGenerator(orig_topo);
+	break;
+      }
+    case RING_EDGE_TOPOLOGY:
+      {
+	orig_topo_gen = new RingEdgeTopoGenerator(orig_topo);
+	break;
+      }
     }
 
   orig_topo_gen->generate();
@@ -368,9 +381,12 @@ generate_opt_topology()
 	opt_topo_gen = new DiamondZigZagOptTopoGenerator(no_contexts, opt_lcim);
 	break;
       }
+    case PURE_RING_TOPOLOGY:
+      {
+	opt_topo_gen = new RingOptTopoGenerator(no_contexts, opt_lcim);
+	break;
+      }
     }
-
-
 
   // then adjust to get optimal local interface
   opt_topo_gen->create_opt_interface();
@@ -804,7 +820,8 @@ main(int argc, char* argv[])
 
 
   // only for some fixed topologies where optimization is possible
-  if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY)
+  if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
+      topology_type != RING_EDGE_TOPOLOGY)
     {
       generate_opt_topology();
       generate_query_plan(opt_qp, opt_lcim);
