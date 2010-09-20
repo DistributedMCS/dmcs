@@ -35,12 +35,16 @@
 #include <boost/program_options.hpp>
 
 #include "generator/dmcsGen.h"
+#include "generator/BinaryTreeTopoGenerator.h"
 #include "generator/DiamondTopoGenerator.h"
 #include "generator/DiamondOptTopoGenerator.h"
 #include "generator/DiamondArbitraryTopoGenerator.h"
 #include "generator/DiamondZigZagTopoGenerator.h"
 #include "generator/DiamondZigZagOptTopoGenerator.h"
 #include "generator/HouseTopoGenerator.h"
+#include "generator/HouseOptTopoGenerator.h"
+#include "generator/MultipleRingTopoGenerator.h"
+#include "generator/MultipleRingOptTopoGenerator.h"
 #include "generator/RingTopoGenerator.h"
 #include "generator/RingOptTopoGenerator.h"
 #include "generator/RingEdgeTopoGenerator.h"
@@ -305,9 +309,19 @@ generate_orig_topology()
 	orig_topo_gen = new RingEdgeTopoGenerator(orig_topo);
 	break;
       }
+    case BINARY_TREE_TOPOLOGY:
+      {
+	orig_topo_gen = new BinaryTreeTopoGenerator(orig_topo);
+	break;
+      }
     case HOUSE_TOPOLOGY:
       {
 	orig_topo_gen = new HouseTopoGenerator(orig_topo);
+	break;
+      }
+    case MULTIPLE_RING_TOPOLOGY:
+      {
+	orig_topo_gen = new MultipleRingTopoGenerator(orig_topo);
 	break;
       }
     }
@@ -390,6 +404,16 @@ generate_opt_topology()
     case PURE_RING_TOPOLOGY:
       {
 	opt_topo_gen = new RingOptTopoGenerator(no_contexts, opt_lcim);
+	break;
+      }
+    case HOUSE_TOPOLOGY:
+      {
+	opt_topo_gen = new HouseOptTopoGenerator(no_contexts, opt_lcim);
+	break;
+      }
+    case MULTIPLE_RING_TOPOLOGY:
+      {
+	opt_topo_gen = new MultipleRingOptTopoGenerator(no_contexts, opt_lcim);
 	break;
       }
     }
@@ -824,10 +848,19 @@ main(int argc, char* argv[])
   print_command_lines();
   print_dlv_command_lines();
 
+  // binary tree topology is a special case, orig_qp can be reused to
+  // print opt_qp. Hence, we just need to print without any further
+  // construction for the opt case.
+  if (topology_type == BINARY_TREE_TOPOLOGY)
+    {
+      print_query_plan(orig_qp, prefix + OPT_EXT);
+      print_opt_command_lines();
+      print_opt_dlv_command_lines();
+    }
 
   // only for some fixed topologies where optimization is possible
   if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
-      topology_type != RING_EDGE_TOPOLOGY && topology_type != HOUSE_TOPOLOGY)
+      topology_type != RING_EDGE_TOPOLOGY && topology_type != BINARY_TREE_TOPOLOGY)
     {
       generate_opt_topology();
       generate_query_plan(opt_qp, opt_lcim);

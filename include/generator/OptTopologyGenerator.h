@@ -77,8 +77,8 @@ public:
   create_opt_interface(std::size_t id) = 0;
 
 protected:
-  LocalInterfaceMapPtr lcim;
   std::size_t system_size;
+  LocalInterfaceMapPtr lcim;
 };
 
   } // namespace generator

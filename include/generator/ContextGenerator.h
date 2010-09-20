@@ -58,8 +58,8 @@ public:
 		   std::string& prefix_)
     : orig_topo(orig_topo_), context_interfaces(context_interfaces_), 
       sigmas(sigmas_), minV(minV_), lcim(lcim_), no_atoms(no_atoms_), 
-      no_bridge_rules(no_bridge_rules_), prefix(prefix_),
-      topology_type(topology_type_),
+      no_bridge_rules(no_bridge_rules_), 
+      topology_type(topology_type_), prefix(prefix_),
       local_kb(new Rules), bridge_rules(new BridgeRules), 
       system_size(context_interfaces_->size())
   { }
@@ -68,7 +68,7 @@ public:
   generate();
 
   void
-  generate_local_kb(std::size_t id);
+  generate_local_kb();
 
   void
   generate_bridge_rule(std::size_t id);
@@ -90,15 +90,12 @@ protected:
   cover_neighbors(std::size_t id);
 
   BeliefSet
-  local_interface(std::size_t id1, std::size_t id2);
+  local_interface(/* std::size_t id1, */ std::size_t id2);
 
   void
   update_min_V();
 
 protected:
-  RulesPtr local_kb;
-  BridgeRulesPtr bridge_rules;
-
   NeighborVec2Ptr orig_topo;
   InterfaceVecPtr context_interfaces;
   SignatureVecPtr sigmas;
@@ -109,6 +106,9 @@ protected:
   std::size_t no_bridge_rules;
   std::size_t topology_type;
   std::string& prefix;
+
+  RulesPtr local_kb;
+  BridgeRulesPtr bridge_rules;
   std::size_t system_size;
 };
 

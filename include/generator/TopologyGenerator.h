@@ -77,8 +77,8 @@ public:
   }
 
 protected:
-  std::size_t system_size;
   NeighborVec2Ptr topo;
+  std::size_t system_size;
 };
 
   } // namespace generator

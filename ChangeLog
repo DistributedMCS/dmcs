@@ -1,3 +1,21 @@
+2010-09-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/staticGen.cpp: Add new topologies.
+
+	* include/generator/OptTopologyGenerator.h: Fix some warnings.
+	* include/generator/TopologyGenerator.h: Likewise.
+
+	* include/generator/ContextGenerator.h: Remove uneccessary
+	parameters.
+	* src/ContextGenerator.cpp: Likewise.
+
+	* include/Makefile.am: Add new header files for new topologies.
+
+	* include/generator/BinaryTreeTopoGenerator.h: New file.
+	* include/generator/MultipleRingTopoGenerator.h: Likewise.
+	* include/generator/MultipleRingOptTopoGenerator.h: Likewise.
+	* include/generator/HouseOptTopoGenerator.h: Likewise.
+
 2010-09-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/generator/RingEdgeTopoGenerator.h: New file.

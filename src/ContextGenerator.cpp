@@ -55,7 +55,7 @@ ContextGenerator::generate()
       local_kb->clear();
       bridge_rules->clear();
 
-      generate_local_kb(i);
+      generate_local_kb();
       
       NeighborVecPtr neighbors = (*orig_topo)[i-1];
       if (neighbors->size() > 0)
@@ -77,7 +77,8 @@ ContextGenerator::generate()
       const NeighborVecPtr nbors = (*orig_topo)[i-1];
       for (NeighborVec::const_iterator jt = nbors->begin(); jt != nbors->end(); ++jt)
 	{
-	  BeliefSet lci = local_interface(i, *jt);
+	  // get local interface from context[i] to context[*jt]
+	  BeliefSet lci = local_interface(*jt);
 	  BeliefStatePtr V(new BeliefState(system_size, 0));
 	  (*V)[*jt - 1] = lci;
 	  
@@ -98,7 +99,7 @@ ContextGenerator::generate()
 
 
 void
-ContextGenerator::generate_local_kb(std::size_t id)
+ContextGenerator::generate_local_kb()
 {
   for (std::size_t i = 1; i <= no_atoms; ++i)
     {
@@ -185,7 +186,7 @@ ContextGenerator::generate_bridge_rule(std::size_t id)
   head->push_back(br_h);
 
   // either 1 or 2 bridge atom(s)
-  int no_bridge_atoms = (rand() % 2) + 1; 
+  std::size_t no_bridge_atoms = (rand() % 2) + 1; 
 
   // loop until enough unique atoms
   std::size_t count = 0;
@@ -315,7 +316,7 @@ ContextGenerator::write_bridge_rules(std::size_t id)
 
 
 BeliefSet
-ContextGenerator::local_interface(std::size_t id1, std::size_t id2)
+ContextGenerator::local_interface(/* std::size_t id1, */ std::size_t id2)
 {
   // with the assumption that bridge_rules now contains bridge rules
   // of context id1 and id2 is one of its neighbors
