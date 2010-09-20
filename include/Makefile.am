@@ -67,12 +67,16 @@ noinst_HEADERS =  \
 		SpiritFilePositionNode.h \
 		Theory.h \
 		generator/ContextGenerator.h \
+		generator/BinaryTreeTopoGenerator.h \
 		generator/DiamondTopoGenerator.h \
 		generator/DiamondOptTopoGenerator.h \
 		generator/DiamondArbitraryTopoGenerator.h \
 		generator/DiamondZigZagTopoGenerator.h \
 		generator/DiamondZigZagOptTopoGenerator.h \
 		generator/HouseTopoGenerator.h \
+		generator/HouseOptTopoGenerator.h \
+		generator/MultipleRingTopoGenerator.h \
+		generator/MultipleRingOptTopoGenerator.h \
 		generator/TopologyGenerator.h \
 		generator/OptTopologyGenerator.h \
 		generator/RingTopoGenerator.h \
