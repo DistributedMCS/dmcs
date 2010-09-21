@@ -83,5 +83,9 @@ noinst_HEADERS =  \
 		generator/RingOptTopoGenerator.h \
 		generator/RingEdgeTopoGenerator.h \
 		generator/dmcsGen.h \
+		generator/DynTopologyGenerator.h \
+		generator/DynGridTopoGenerator.h \
+		generator/DynRakeTopoGenerator.h \
+		generator/DynRandomTopoGenerator.h \
 		connection.hpp
 

@@ -1,3 +1,13 @@
+2010-09-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Makefile.am: Add new header files.
+
+	* include/generator/DynGridTopoGenerator.h: New file.
+	* include/generator/DynRakeTopoGenerator.h: Likewise.
+	* include/generator/DynRandomTopoGenerator.h: Likewise.
+	* include/generator/DynTopologyGenerator.h: Likewise.
+	* src/dynGen.cpp: Likewise.
+
 2010-09-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/staticGen.cpp: Add new topologies.
