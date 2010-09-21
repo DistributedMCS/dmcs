@@ -17,7 +17,7 @@ LIBS = $(BOOST_DATE_TIME_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_SYSTEM_LIBS
 bin_PROGRAMS = dmcsd dmcsc 
 noinst_LIBRARIES = libsatsolver.a libcache.a libtranslation.a libdmcs.a
 
-noinst_PROGRAMS = dmcsGen
+noinst_PROGRAMS = dmcsGen dynGen
 
 # the translation library
 libtranslation_a_SOURCES = \
@@ -74,3 +74,5 @@ dmcsGen_SOURCES = \
 		staticGen.cpp
 
 dmcsGen_LDADD = libdmcs.a
+
+dynGen_SOURCES = dynGen.cpp

@@ -38,6 +38,7 @@
 #include "generator/DynGridTopoGenerator.h"
 #include "generator/DynRandomTopoGenerator.h"
 #include "generator/DynRakeTopoGenerator.h"
+#include "generator/DynSocialTopoGenerator.h"
 
 using namespace dmcs::generator;
 
@@ -381,24 +382,31 @@ int main(int argc, char* argv[])
     case RANDOM_TOPO:
       {
 	generator = new DynRandomTopoGenerator(mt, initial_topology, bridge_rules, 
-					 pattern_bridge_rules, no_sbridge_atoms, 
-					 density, poolsize);
+					       pattern_bridge_rules, no_sbridge_atoms, 
+					       density, poolsize);
+	break;
       }
-      break;
     case RAKE_TOPO:
       {
 	generator = new DynRakeTopoGenerator(mt, initial_topology, bridge_rules, 
-				       pattern_bridge_rules, no_sbridge_atoms, 
-				       poolsize);
-      }
+					     pattern_bridge_rules, no_sbridge_atoms, 
+					     poolsize);
       break;
+      }
     case GRID_TOPO:
       {
 	generator = new DynGridTopoGenerator(mt, initial_topology, bridge_rules, 
-				       pattern_bridge_rules, no_sbridge_atoms, 
-				       m, n);
+					     pattern_bridge_rules, no_sbridge_atoms, 
+					     m, n);
+	break;
       }
-      break;
+    case SOCIAL_TOPO:
+      {
+	generator = new DynSocialTopoGenerator(mt, initial_topology, bridge_rules, 
+					       pattern_bridge_rules, no_sbridge_atoms, 
+					       poolsize);
+	break;
+      }
     }
   
   generator->generate_dynamic_system();
