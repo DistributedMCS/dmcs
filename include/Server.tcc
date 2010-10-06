@@ -152,7 +152,9 @@ Server<CmdType>::handle_session(const boost::system::error_code& e, SessionMsgPt
 	}
       else
 	{
+#ifdef DEBUG
 	  std::cerr << "go to finalize"  << std::endl;
+#endif
 	  handle_finalize(e, sesh);
 	}
     }

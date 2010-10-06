@@ -88,6 +88,12 @@ ParserDirector<Grammar>::parse(std::istream& is)
   buf << is.rdbuf();
   std::string input = buf.str();
 
+#ifdef DEBUG
+  std::cerr << std::endl;
+  std::cerr << "parsing input (size=" << input.size() << "):" << std::endl;
+  std::cerr << input << std::endl;
+#endif //DEBUG
+
   typename BaseBuilder<Grammar>::iterator_t it_begin(input.c_str(), input.c_str()+input.size());
   typename BaseBuilder<Grammar>::iterator_t it_end;
 

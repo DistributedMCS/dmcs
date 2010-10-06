@@ -1,3 +1,4 @@
+<<<<<<< .working
 2010-09-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/Makefile.am: Add new header files.
@@ -90,6 +91,23 @@
 	* src/tests/testBlockingClasp.cpp: New testcase.
 	* src/tests/testGraphProp.cpp: Likewise.
 
+2010-09-12  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp (main): Output of equilibria and number goes to
+	cout.
+
+2010-09-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Adapt output to format in the paper.
+	* include/Server.tcc: Turn off "go to finalize" message.
+
+2010-09-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Quick hack to print output. Now one needs to
+	specify --mamanger=TEMPLATE.TOP in the commandline of dmcsc. For
+	example, in the scientist example, we need to put
+	--manager=scientist.top.
+
 2010-09-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/QueryPlan.h: Clean up.
@@ -99,7 +117,6 @@
 
 	* src/staticGen.cpp: Commandlines generated. Adapt dlv command
 	lines generator. Now all the xxx1 methods are gone.
-
 
 2010-09-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
@@ -177,6 +194,13 @@
 
 	* src/ContextGenerator: light weight implementation. No more use
 	of Context, QueryPlan.
+
+2010-08-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/ParserDirector.tcc: Add debug output.
+
+	* include/BridgeRulesBuilder.tcc: Add some assertions for local
+	and neighbor ids.
 
 2010-08-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
