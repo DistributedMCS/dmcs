@@ -17,7 +17,7 @@ LIBS = $(BOOST_DATE_TIME_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_SYSTEM_LIBS
 bin_PROGRAMS = dmcsd dmcsc 
 noinst_LIBRARIES = libsatsolver.a libcache.a libtranslation.a libdmcs.a
 
-noinst_PROGRAMS = dmcsGen
+noinst_PROGRAMS = dmcsGen dynGen
 
 # the translation library
 libtranslation_a_SOURCES = \
@@ -25,7 +25,6 @@ libtranslation_a_SOURCES = \
 		LocalLoopFormulaBuilder.cpp \
 		CNFLocalLoopFormulaBuilder.cpp \
 		DimacsVisitor.cpp 
-
 
 # the cache library
 libcache_a_SOURCES = Cache.cpp
@@ -36,7 +35,8 @@ libsatsolver_a_SOURCES = \
                 ClaspProcess.cpp \
 		DimacsVisitor.cpp \
 		ProcessBuf.cpp \
-		LogicVisitor.cpp
+		LogicVisitor.cpp \
+		ClaspResultOnlineParser.cpp
 
 # the DMCS library
 libdmcs_a_SOURCES = \
@@ -60,11 +60,19 @@ dmcsc_SOURCES = \
 dmcsc_LDADD = libdmcs.a
 
 # the dmcsGen binary
+#dmcsGen_SOURCES = \
+#                  ContextGenerator.cpp \
+#                  LogicVisitor.cpp \
+#		  DLVVisitor.cpp \
+#                  QueryPlanGenerator.cpp \
+#                  genTest.cpp
+
 dmcsGen_SOURCES = \
-                  ContextGenerator.cpp \
-                  LogicVisitor.cpp \
-		  DLVVisitor.cpp \
-                  QueryPlanGenerator.cpp \
-                  genTest.cpp
+		dmcsGen.cpp \
+		ContextGenerator.cpp \
+		LogicVisitor.cpp \
+		staticGen.cpp
 
 dmcsGen_LDADD = libdmcs.a
+
+dynGen_SOURCES = dynGen.cpp

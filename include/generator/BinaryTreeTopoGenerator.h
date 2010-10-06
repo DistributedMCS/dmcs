@@ -18,43 +18,50 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   BinaryTreeTopoGenerator.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Mon Sep  20 9:38:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef GEN_BINARY_TREE_TOPO_GENERATOR_H
+#define GEN_BINARY_TREE_TOPO_GENERATOR_H
 
-namespace dmcs {
+#include "generator/TopologyGenerator.h"
 
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
+namespace dmcs { namespace generator {
 
+class BinaryTreeTopoGenerator : public TopologyGenerator
+{
+public:
+  BinaryTreeTopoGenerator(NeighborVec2Ptr topo)
+    : TopologyGenerator(topo)
+  { }
 
+  void
+  genNeighborList(std::size_t id)
+  {
+    std::size_t child_id = 2*id;
+    if (child_id <= system_size)
+      {
+	genNeighbor(id, child_id);
 
+	++child_id;
+	if (child_id <= system_size)
+	  {
+	    genNeighbor(id, child_id);
+	  }
+      }
+  }
+};
+
+  } // namespace generator
 } // namespace dmcs
 
-#endif // PROGRAM_OPTIONS_H_
+#endif // GEN_BINARY_TREE_TOPO_GENERATOR_H
 
 // Local Variables:
 // mode: C++

@@ -18,43 +18,36 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   dmcsGen.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Mon Aug  30 13:48:00 2010
  * 
- * @brief  
+ * @brief Here stay all common methods used in generating test cases
+ * for both static and dynamic dmcs.
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef DMCS_GEN_H
+#define DMCS_GEN_H
 
-namespace dmcs {
-
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
+#include "Signature.h"
+#include "generator/ContextGenerator.h"
 
 
+namespace dmcs { namespace generator {
 
-} // namespace dmcs
+void
+genSignatures(SignatureVecPtr sigmas, std::size_t no_contexts, std::size_t no_atoms);
 
-#endif // PROGRAM_OPTIONS_H_
+void
+genInterface(InterfaceVecPtr context_interfaces, std::size_t no_contexts, 
+	     std::size_t no_atoms, std::size_t no_interface_atoms);
+
+  } // namespace generator
+} // dmcs
+
+#endif // DMCS_GEN_H
 
 // Local Variables:
 // mode: C++

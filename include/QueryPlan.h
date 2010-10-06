@@ -53,7 +53,6 @@ namespace dmcs {
 #define GNAME_LB     "name"
 
 
-
 struct sigma_t
 {
   typedef boost::vertex_property_tag kind;
@@ -109,18 +108,19 @@ typedef std::pair<std::size_t, std::size_t> EdgeInt;
 typedef std::vector<EdgeInt> Edges;
 typedef boost::shared_ptr<Edges> EdgesPtr;
 
-
+typedef std::map<std::size_t, Vertex> VertexMap;
+typedef boost::shared_ptr<VertexMap> VertexMapPtr;
 
   /// @todo maybe rename to a more appropriate name, this is not the QueryPlan
-class QueryPlan
+struct QueryPlan
 {
-private:
+  //private:
 
   void
   setupProperties();
 
 
-public:
+  //public:
   QueryPlan();
 
   //QueryPlan(std::size_t n);
@@ -134,14 +134,6 @@ public:
   const Signature&
   getSignature(std::size_t context_id) const;
 
-  const Signature&
-  getSignature1(std::size_t context_id) const;
-
-  const std::string&
-  getHostname1(std::size_t context_id) const;
-
-  const std::string&
-  getPort1(std::size_t context_id) const;
 
   const std::string&
   getHostname(std::size_t context_id) const;
@@ -162,9 +154,6 @@ public:
   putPort(std::size_t context_id, const std::string& port_);
 
   const BeliefStatePtr&
-  getInterface1(std::size_t context1, std::size_t context2) const;
-
-  const BeliefStatePtr&
   getInterface(std::size_t context1, std::size_t context2) const;
 
   void
@@ -176,8 +165,6 @@ public:
   void
   remove_connection(std::size_t context1, std::size_t context2);
 
-  NeighborListPtr
-  getNeighbors1(std::size_t context_id);
 
   NeighborListPtr
   getNeighbors(std::size_t context_id);
@@ -200,8 +187,7 @@ public:
   void
   write_graph(std::ostream& os);
 
-private:
-  graph_t query_plan;
+  graph_t graph;
   boost::dynamic_properties dp;
   VertexNameProperty name;
   VertexIndexProperty index;
@@ -210,12 +196,15 @@ private:
   VertexSigmaProperty sigma;
   EdgeInterfaceProperty interface;
   GraphNameProperty gname;
-  std::map<std::size_t, Vertex> vmap;
+  VertexMapPtr vmap;
 };
 
 typedef boost::shared_ptr<QueryPlan> QueryPlanPtr;
 
+
 } // namespace dmcs
+
+#include "QueryPlan.tcc"
 
 #endif // QUERY_PLAN_H
 

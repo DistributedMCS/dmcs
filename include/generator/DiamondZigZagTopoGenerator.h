@@ -18,43 +18,60 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   DiamondZigZagTopoGenerator.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Tue Sep  16 17:35:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef GEN_DIAMOND_ZIGZAG_TOPO_GENERATOR_H
+#define GEN_DIAMOND_ZIGZAG_TOPO_GENERATOR_H
 
-namespace dmcs {
+#include "generator/TopologyGenerator.h"
 
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
+namespace dmcs { namespace generator {
 
+class DiamondZigZagTopoGenerator : public TopologyGenerator
+{
+public:
+  DiamondZigZagTopoGenerator(NeighborVec2Ptr topo)
+    : TopologyGenerator(topo)
+  { }
 
+  void
+  genNeighborList(std::size_t id)
+  {
+    if (id == system_size)
+      {
+	return;
+      }
 
+    std::size_t remainder = id % 3;
+    switch (remainder)
+      {
+      case 1:
+      case 2:
+	{
+	  genNeighbor(id, id+1);
+	  genNeighbor(id, id+2);
+	  break;
+	}
+      case 0:
+	{
+	  genNeighbor(id, id+1);
+	  break;
+	}	
+      }
+  }
+};
+
+  } // namespace generator
 } // namespace dmcs
 
-#endif // PROGRAM_OPTIONS_H_
+#endif // GEN_DIAMOND_ZIGZAG_TOPO_GENERATOR_H
 
 // Local Variables:
 // mode: C++

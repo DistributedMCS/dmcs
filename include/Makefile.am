@@ -25,6 +25,8 @@ noinst_HEADERS =  \
 		ClaspResultBuilder.tcc \
 		ClaspResultGrammar.h \
 		ClaspResultGrammar.tcc \
+		ClaspResultOnlineParser.h \
+		ClaspResultOnlineParser.tcc \
 		Client.h \
 		Client.tcc \
 		CnfBuilder.h \
@@ -33,19 +35,7 @@ noinst_HEADERS =  \
 		CnfGrammar.tcc \
 		CommandType.h \
 		Context.h \
-                ContextGenerator.h \
-                DiamondQPGenerator.h \
                 DLVVisitor.h \
-                RingQPGenerator.h \
-                RingOptQPGenerator.h \
-                RingEdgeQPGenerator.h \
-                HouseQPGenerator.h \
-                HouseOptQPGenerator.h \
-                MultipleRingQPGenerator.h \
-                MultipleRingOptQPGenerator.h \
-                BinaryTreeQPGenerator.h \
-                DiamondZigZagQPGenerator.h \
-                DiamondZigZagOptQPGenerator.h \
 		DimacsVisitor.h \
 		LogicVisitor.h \
 		LocalKBBuilder.h \
@@ -76,5 +66,26 @@ noinst_HEADERS =  \
 		SpiritDebugging.h \
 		SpiritFilePositionNode.h \
 		Theory.h \
+		generator/ContextGenerator.h \
+		generator/BinaryTreeTopoGenerator.h \
+		generator/DiamondTopoGenerator.h \
+		generator/DiamondOptTopoGenerator.h \
+		generator/DiamondArbitraryTopoGenerator.h \
+		generator/DiamondZigZagTopoGenerator.h \
+		generator/DiamondZigZagOptTopoGenerator.h \
+		generator/HouseTopoGenerator.h \
+		generator/HouseOptTopoGenerator.h \
+		generator/MultipleRingTopoGenerator.h \
+		generator/MultipleRingOptTopoGenerator.h \
+		generator/TopologyGenerator.h \
+		generator/OptTopologyGenerator.h \
+		generator/RingTopoGenerator.h \
+		generator/RingOptTopoGenerator.h \
+		generator/RingEdgeTopoGenerator.h \
+		generator/dmcsGen.h \
+		generator/DynTopologyGenerator.h \
+		generator/DynGridTopoGenerator.h \
+		generator/DynRakeTopoGenerator.h \
+		generator/DynRandomTopoGenerator.h \
 		connection.hpp
 

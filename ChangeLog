@@ -1,3 +1,95 @@
+2010-09-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Makefile.am: Add new header files.
+
+	* include/generator/DynGridTopoGenerator.h: New file.
+	* include/generator/DynRakeTopoGenerator.h: Likewise.
+	* include/generator/DynRandomTopoGenerator.h: Likewise.
+	* include/generator/DynTopologyGenerator.h: Likewise.
+	* src/dynGen.cpp: Likewise.
+
+2010-09-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/staticGen.cpp: Add new topologies.
+
+	* include/generator/OptTopologyGenerator.h: Fix some warnings.
+	* include/generator/TopologyGenerator.h: Likewise.
+
+	* include/generator/ContextGenerator.h: Remove uneccessary
+	parameters.
+	* src/ContextGenerator.cpp: Likewise.
+
+	* include/Makefile.am: Add new header files for new topologies.
+
+	* include/generator/BinaryTreeTopoGenerator.h: New file.
+	* include/generator/MultipleRingTopoGenerator.h: Likewise.
+	* include/generator/MultipleRingOptTopoGenerator.h: Likewise.
+	* include/generator/HouseOptTopoGenerator.h: Likewise.
+
+2010-09-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/generator/RingEdgeTopoGenerator.h: New file.
+	* include/generator/RingTopoGenerator.h: Likewise.
+	* include/generator/RingOptTopoGenerator.h: Likewise.
+	* include/generator/HouseTopoGenerator.h: Likewise.
+
+	* include/Makefile.am: Add new header files.
+
+	* src/staticGen.cpp: Add new topologies.
+
+2010-09-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/generator/OptTopologyGenerator.h: Separate
+	OptTopoGenerator from TopoGenerator.
+	* include/generator/DiamondZigZagOptTopoGenerator.h: Likewise.
+	* include/generator/DiamondOptTopoGenerator.h: Likewise.
+	* src/staticGen.cpp: Likewise.
+
+	* include/generator/DiamondTopoGenerator.h: Typo.
+
+2010-09-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/generator/TopologyGenerator.h: Rename
+	ZIGZAG_DIAMOND_TOPOLOGY to DIAMOND_ZIGZAG_TOPOLOGY.
+	* src/staticGen.cpp: Likewise.
+
+	* include/generator/DiamondZigZagOptTopoGenerator.h: Remove edges
+	when optimizing the topology.
+
+2010-09-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/staticGen.cpp: Separate original topo generation from
+	optimal topo generation.
+
+	* include/generator/TopologyGenerator.h: Remove local interface map.
+
+	* include/generator/DiamondTopoGenerator.h (create_opt_interface): Remove.
+
+	* include/generator/DiamondOptTopoGenerator.h: Now inherits from
+	OptTopologyGenerator
+
+	* include/generator/ContextGenerator.h: include OptTopologyGenerator.h
+
+	* include/Makefile.am: Add new header files.
+
+	* include/generator/DiamondArbitraryTopoGenerator.h: New file.
+	* include/generator/OptTopologyGenerator.h: Likewise.
+	* include/generator/DiamondZigZagTopoGenerator.h: Likewise.
+	* include/generator/DiamondZigZagOptTopoGenerator.h: Likewise.
+
+	* m4/boost.m4: merged from trunk, to fix  the problem with boost 1.44 iostream lib check.
+
+2010-09-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/tests/testClaspResultOnlineParser.cpp: Rename V --> belief_state.
+
+	* include/generator/TopologyGenerator.h: Rename iterator.
+
+	* include/generator/DiamondOptTopoGenerator.h: New file.
+
+	* src/tests/testBlockingClasp.cpp: New testcase.
+	* src/tests/testGraphProp.cpp: Likewise.
+
 2010-09-12  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp (main): Output of equilibria and number goes to
@@ -15,12 +107,133 @@
 	example, in the scientist example, we need to put
 	--manager=scientist.top.
 
+2010-09-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/QueryPlan.h: Clean up.
+	* include/QueryPlan.tcc: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/QueryPlan.cpp: Likewise.
+
+	* src/staticGen.cpp: Commandlines generated. Adapt dlv command
+	lines generator. Now all the xxx1 methods are gone.
+
+2010-09-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/staticGen.cpp: Copy lcim to opt_lcim.
+
+	* include/QueryPlan.h: Use VertexMapPtr.
+	* src/QueryPlan.cpp: Likewise.
+
+2010-09-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/QueryPlan.tcc: Templatize get/put properties methods.
+
+	* src/staticGen.cpp: Write graph.
+
+	* include/QueryPlanWriter.h: make some methods inline.
+
+	* include/QueryPlan.h: Turn QueryPlan to a struct.
+
+2010-09-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/Makefile.am: Use libdmcs.a for dmcsGen.
+
+	* src/ContextGenerator.cpp: Set V[root] to maxBeliefSet()
+
+	* include/generator/TopologyGenerator.h: Use constants for topology_type.
+
+	* include/generator/ContextGenerator.h: Add topology_type.
+	* src/staticGen.cpp: Adapt in the call.
+
+	* include/QueryPlan.h: Remove ***1() methods.
+	* src/QueryPlan.cpp: Likewise.
+
+2010-09-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/ContextGenerator.cpp: Generate local_interfaces and minV.
+
+	* include/generator/dmcsGen.h: More some typedef and #define to
+	ContextGenerator.h
+
+	* include/generator/ContextGenerator.h: More members for
+	ContextGenerator: prefix, minV.
+
+	* include/generator/TopologyGenerator.h: Use NeighborVec instead
+	of NeighborList.
+	* include/generator/DiamondTopoGenerator.h: Likewise.
+	* src/staticGen.cpp: Likewise.
+
+2010-09-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+	* include/generator/ContextGenerator.h: Finished generating
+	local_kb and bridge_rules.
+	* include/generator/dmcsGen.h: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/staticGen.cpp: Likewise.
+
+	* src/Makefile.am: Add ContextGenerator.cpp and LogicVisitor.cpp
+	to dmcsGen_SOURCES
+
+2010-08-31  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/generator: new sub directory for generators' header
+	files.
+	* include/generator/TopologyGenerator.h: New file.
+	* include/generator/ContextGenerator.h: Likewise.
+	* include/generator/DiamondTopoGenerator.h: Likewise.
+	* include/generator/DiamondOptTopoGenerator.h: Likewise.
+	* include/generator/dmcsGen.h: Likewise.
+
+	* src/dmcsGen.cpp: New file.
+	* src/staticGen.cpp: Likewise.
+
+	* include/Makefile.am: Add new header files for dmcsGen. Remove
+	header files from genTest.
+
+	* src/Makefile.am: add dmcsGen, remove genTest.
+
+	* src/ContextGenerator: light weight implementation. No more use
+	of Context, QueryPlan.
+
 2010-08-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/ParserDirector.tcc: Add debug output.
 
 	* include/BridgeRulesBuilder.tcc: Add some assertions for local
 	and neighbor ids.
+
+2010-08-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/ClaspResultOnlineParser.cpp: Only start instantiating things
+	when input stream is good.
+
+	* include/Makefile.am (noinst_HEADERS): Add ClaspResultOnlineParser.tcc.
+
+	* include/ClaspResultOnlineParser.h: Move ClaspResultOnlineGrammar
+	to tcc file.
+	Add ClaspResultOnlineGrammar::reset() method.
+	* include/ClaspResultOnlineParser.tcc: Likewise.
+
+2010-08-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/tests/Makefile.am: Typo.
+
+	* include/ClaspResultOnlineParser.h: Update using getNextAnswer()
+	and return NULL at the end.k
+	* src/ClaspResultOnlineParser.cpp: Likewise.
+	* src/tests/testClaspResultOnlineParser.cpp: Likewise.
+
+2010-08-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/ClaspResultBuilder.tcc: Typo.
+
+	* src/tests/testClaspOnlineParser.cpp: Test getNextAnswer() strategy.
+
+	* include/ClaspResultOnlineParser.h: New file.
+	* src/ClaspResultOnlineParser.cpp: Likewise.
+
+	* src/Makefile.am: add ClaspResultOnlineParser.cpp
+
+	* include/Makefile.am: add ClaspResultOnlineParser.h
 
 2010-07-25  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 

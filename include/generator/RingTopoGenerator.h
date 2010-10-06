@@ -18,43 +18,47 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   RingTopoGenerator.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Fri Sep  17 14:00:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef GEN_RING_TOPO_GENERATOR_H
+#define GEN_RING_TOPO_GENERATOR_H
 
-namespace dmcs {
+#include "generator/TopologyGenerator.h"
 
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
+namespace dmcs { namespace generator {
 
+class RingTopoGenerator : public TopologyGenerator
+{
+public:
+  RingTopoGenerator(NeighborVec2Ptr topo)
+    : TopologyGenerator(topo)
+  { }
 
+  void
+  genNeighborList(std::size_t id)
+  {
+    if (id == system_size)
+      {
+	genNeighbor(id, 1);
+      }
+    else
+      {
+	genNeighbor(id, id+1);
+      }
+  }
+};
 
+  } // namespace generator
 } // namespace dmcs
 
-#endif // PROGRAM_OPTIONS_H_
+#endif // GEN_RING_TOPO_GENERATOR_H
 
 // Local Variables:
 // mode: C++

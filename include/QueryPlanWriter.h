@@ -59,7 +59,7 @@ private:
   const std::string& name;
 };
 
-
+inline
 GraphWriter
 make_graph_writer(const std::string& name)
 {
@@ -93,7 +93,7 @@ private:
 };
 
 
-
+inline
 VertexWriter
 make_vertex_writer(VertexHostnameProperty hostname_, 
 		   VertexPortProperty port_, 
@@ -116,7 +116,7 @@ private:
   EdgeInterfaceProperty interface;
 };
 
-
+inline
 EdgeWriter
 make_edge_writer(EdgeInterfaceProperty interface_)
 {
