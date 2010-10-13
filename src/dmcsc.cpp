@@ -140,7 +140,7 @@ main(int argc, char* argv[])
 
       if(hostName.compare("") ==0 ||
 	 port.compare("") == 0 ||
-	 manager.compare("") == 0 ||
+	 //	 manager.compare("") == 0 ||
 	 systemSize == 0 ||
 	 (primitiveDMCS && V->size() == 0) ||
 	 (primitiveDMCS && V->size() != systemSize) ||
