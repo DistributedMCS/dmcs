@@ -145,10 +145,10 @@ read_input(int argc, char* argv[])
     (HELP, "Help message")
     (CONTEXTS, boost::program_options::value<std::size_t>(&poolsize)->default_value(3), "Contexts pool size")
     (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Set up prefix for all files ")
-    (LIMIT_ANSWERS, boost::program_options::value<std::size_t>(&limit_answers)->default_value(5), "Set up limit of answers ")
-    (LIMIT_BIND_RULES, boost::program_options::value<std::size_t>(&limit_bind_rules)->default_value(10), "Set up limit of binding rules ")
+    (LIMIT_ANSWERS, boost::program_options::value<std::size_t>(&limit_answers)->default_value(3), "Set up limit of answers ")
+    (LIMIT_BIND_RULES, boost::program_options::value<std::size_t>(&limit_bind_rules)->default_value(8), "Set up limit of binding rules ")
     (TOPOLOGY, boost::program_options::value<std::size_t>(&topology)->default_value(0), HELP_MESSAGE_TOPO)
-    (HEURISTICS, boost::program_options::value<std::size_t>(&no_heuristics)->default_value(4), "Set number of heuristics ")
+    (HEURISTICS, boost::program_options::value<std::size_t>(&no_heuristics)->default_value(5), "Set number of heuristics ")
     (SLEEP, boost::program_options::value<std::size_t>(&time_sleep)->default_value(2), "Sleeping time before call dmcsc ")
     (LOG, boost::program_options::value<bool>(&want_log)->default_value(false), "Specify whether we want log information ")
     (DENSITY, boost::program_options::value<std::size_t>(&density)->default_value(3), "Specify the density of the random topology. Value should be in [1,10] ")
@@ -304,7 +304,8 @@ generate_command_lines(std::size_t heuristics)
   file_script << "#!/bin/bash" << std::endl
 	      << "export TESTSPATH=\'tests\'" << std::endl
 	      << "export DMCSPATH=\'.\'" << std::endl;
-  
+
+  file_script << "killall dmcsd\n";
 
   for (std::size_t i = 1; i <= poolsize; ++i)
     {
@@ -333,6 +334,7 @@ generate_command_lines(std::size_t heuristics)
   // need to sleep for some second for all contexts to start up
   file_script << "sleep " << out.str() << std::endl;
   file_script << "$DMCSPATH/dmcsc --hostname=localhost --port=5001 --dynamic=1\n";
+
   file_script << "killall dmcsd\n";
 
   file_command_lines.close();
@@ -375,6 +377,8 @@ int main(int argc, char* argv[])
 
       
   }
+
+  std::cerr << "poolsize = " << poolsize << std::endl;
 
   // Topology choosing
   switch (topology)
