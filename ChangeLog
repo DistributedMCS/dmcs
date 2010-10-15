@@ -1,3 +1,8 @@
+2010-10-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Create helper functions for reading
+	data. Reorganize dynamic/static case.
+
 2010-10-14  Dao Tran Minh  <dao@kr.tuwien.ac.at>
 
 	* src/dynGen.cpp: Add killall dmcsd at the beginning of the shell script.

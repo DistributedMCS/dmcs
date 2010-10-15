@@ -74,6 +74,149 @@ using namespace dmcs;
 const char* TOP_EXT = ".top";
 const char* OPT_EXT = ".opt";
 
+
+void
+read_all_signatures(SignatureVecPtr& global_sigs, std::vector<std::string>& str_sigs)
+{
+  for (std::vector<std::string>::const_iterator it = str_sigs.begin();
+       it != str_sigs.end(); ++it)
+    {
+      SignaturePtr tmp_sig(new Signature);
+      
+      std::istringstream in(*it);
+      
+      in >> *tmp_sig;
+      
+      global_sigs->push_back(tmp_sig);
+    }
+
+#ifdef DEBUG
+  std::cerr << "Signatures from match maker:" << std::endl << global_sigs << std::endl;
+#endif
+}
+
+
+void
+read_all_contexts(NeighborListPtr& context_info, std::vector<std::string>& str_contexts)
+{
+  for (std::vector<std::string>::const_iterator it = str_contexts.begin();
+       it != str_contexts.end(); ++it)
+    {
+      NeighborPtr tmp_context(new Neighbor);
+      
+#ifdef DEBUG
+      std::cerr << "it = " << *it << std::endl;
+#endif
+      
+      std::istringstream in(*it);
+      
+      in >> *tmp_context;
+      context_info->push_back(tmp_context);
+    }
+#ifdef DEBUG
+  std::cerr << "Contexts in the pool:" << *context_info<< std::endl;
+#endif
+}
+
+
+void
+read_all_matches(MatchTablePtr& mt, const std::string& all_matches,
+		 SignatureVecPtr& global_sigs, SignaturePtr& sig)
+{
+#ifdef DEBUG
+  std::cerr << "All matches from match maker:" << std::endl << all_matches << std::endl;
+#endif
+
+  std::istringstream iss(all_matches);
+
+  typedef boost::escaped_list_separator<char> StringSeparator;
+     
+  StringSeparator ssep("\\", ",", "()");
+  boost::tokenizer<StringSeparator> tok(all_matches, ssep);
+	  
+  StringSeparator esep("()", " ", "");
+	  
+  // Store matches in our internal format [(int)src, (int)sym, (int)tar, (int)img, (float)quality]
+  
+  SignatureBySym& sig_src = boost::get<Tag::Sym>(*sig);
+  SignatureBySym::const_iterator src_it;
+  
+  for (boost::tokenizer<StringSeparator>::iterator it = tok.begin(); it != tok.end(); ++it)
+    {
+      std::string trimmed = *it;
+      
+      boost::trim(trimmed);
+      boost::tokenizer<StringSeparator> mtok(trimmed, esep);
+      
+      boost::tokenizer<StringSeparator>::iterator m_it = mtok.begin();
+      
+      if (m_it == mtok.end())
+	{
+	  throw boost::escaped_list_error("Got no match");
+	}
+      
+      std::size_t src_ctx = std::atoi(m_it->c_str());
+      
+      ++m_it;
+      if (m_it == mtok.end())
+	{
+	  throw boost::escaped_list_error("Match length == 1");
+	}
+      
+      src_it = sig_src.find(*m_it);
+      if (src_it == sig_src.end())
+	{
+	  std::cerr << "Uknown atom: " << m_it->c_str() << " in context " << src_ctx << std::endl;
+	  exit(1);
+	}
+      std::size_t sym = src_it->origId;
+      
+      ++m_it;
+      if (m_it == mtok.end())
+	{
+	  throw boost::escaped_list_error("Match length == 2");
+	}
+      
+      std::size_t tar_ctx = std::atoi(m_it->c_str());
+      
+      ++m_it;
+      if (m_it == mtok.end())
+	{
+	  throw boost::escaped_list_error("Match length == 3");
+	}
+      
+      SignaturePtr target_signature = (*global_sigs)[tar_ctx - 1];
+      SignatureBySym& tar_sig = boost::get<Tag::Sym>(*target_signature);
+      SignatureBySym::iterator tar_it = tar_sig.find(*m_it);
+      
+      if (tar_it == tar_sig.end())
+	{
+	  std::cerr << "Uknown atom: " << *m_it << " in context " << tar_ctx << std::endl;
+	  exit(1);
+	}
+      std::size_t img = tar_it->origId;
+      
+      ++m_it;
+      if (m_it == mtok.end())
+	{
+	  throw boost::escaped_list_error("Match length == 4");
+	}
+      
+      std::istringstream iss(*m_it);
+      float qual;
+      if (!(iss >> qual))
+	{
+	  throw boost::escaped_list_error("quality not a float");
+	}
+      
+      mt->insert(Match(src_ctx, sym, tar_ctx, img, qual));
+    }
+#ifdef DEBUG
+  std::cerr << "All matches in our internal format:" << std::endl << *mt << std::endl;
+#endif
+}
+
+
 int main(int argc, char* argv[])
 {
   try
@@ -99,7 +242,7 @@ int main(int argc, char* argv[])
 	(KB, boost::program_options::value<std::string>(&filename_local_kb), "set Knowledge Base file name")
 	(BR, boost::program_options::value<std::string>(&filename_bridge_rules), "set Bridge Rules file name")
 	(MANAGER, boost::program_options::value<std::string>(), "set Manager HOST:PORT")
-	(TOPOLOGY, boost::program_options::value<std::string>(), "set Topology file name")
+	(TOPOLOGY, boost::program_options::value<std::string>(&filename_topo), "set Topology file name")
 	(DYNAMIC, boost::program_options::value<bool>(&dynamic)->default_value(false), "set to dynamic mode")
 	(MATCH_MAKER, boost::program_options::value<std::string>(&filename_match_maker), "set Match-Maker file name")
 	(LIMIT_ANSWERS, boost::program_options::value<std::size_t>(&limit_answers)->default_value(10), "set the limitation of answers to be computed")
@@ -117,34 +260,52 @@ int main(int argc, char* argv[])
 	  return 1;
 	}
       
-      int optionalCount = 0;
-      
       if (vm.count(MANAGER)) 
 	{
-	  optionalCount++;
 	  std::cerr << "We are sorry, but the manager feature is under implementation, please try the other alternatives";
 	  //read manager host and port
 	  return 1;
 	}
 
-      if (vm.count(TOPOLOGY)) 
+      if (myid == 0 || 
+	  filename_local_kb.compare("") == 0 ||
+	  filename_bridge_rules.compare("") == 0)
 	{
-	  filename_topo = vm[TOPOLOGY].as<std::string>();
-	  optionalCount++;
+	  std::cerr << desc << std::endl;
+	  return 1;
 	}
 
-      // ignore the static case for now
-      //assert( dynamic == 1 );
+#ifdef DEBUG
+      std::cerr << "myid:          " << myid << std::endl
+		<< "local KB:      " << filename_local_kb << std::endl
+		<< "Bridge Rules:  " << filename_bridge_rules << std::endl
+		<< "Topology:      " << filename_topo << std::endl;
+#endif
 
       boost::asio::io_service io_service;
-
       boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), myport);
       
-      if (dynamic)
-	{
-	  if (myid == 0 || 
-	      filename_bridge_rules.compare("") == 0|| 
-	      (filename_match_maker.compare("") == 0))
+      // for dynamic mode 
+      MatchTablePtr mt(new MatchTable);
+      NeighborListPtr context_info(new NeighborList);
+      CountVecPtr sba_count(new CountVec);
+      BridgeRulesPtr schematic_bridge_rules(new BridgeRules);
+      NeighborListPtr schematic_neighbor_list(new NeighborList);
+
+      // for static mode
+      QueryPlanPtr query_plan(new QueryPlan);
+      RulesPtr local_kb(new Rules);
+      BridgeRulesPtr bridge_rules(new BridgeRules);
+      TheoryPtr loopFormula(new Theory);
+      NeighborListPtr neighbor_list(new NeighborList);
+
+      // shared between two modes
+      SignatureVecPtr global_sigs(new SignatureVec);
+      SignaturePtr sig;
+
+      if (dynamic) 
+	{ // in dynamic mode
+	  if (filename_match_maker.compare("") == 0)
 	    {
 	      std::cout << desc << "\n";
 	      return 1;
@@ -156,11 +317,12 @@ int main(int argc, char* argv[])
 
 	  std::size_t dot_pos = pure_filename.find_last_of("-");
 	  prefix = pure_filename.substr(0, dot_pos);
-
+	  
 	  // in dynamic mode
 #ifdef DEBUG
-	  std::cerr << "In dynamic mode" << std::endl;
-#endif
+	  std::cerr << "Match Maker:    " << filename_match_maker << std::endl
+		    << "In dynamic mode." << std::endl;
+#endif 
 
 	  // open connection to Mr. Match-Maker
 	  std::ifstream ifs(filename_match_maker.c_str());
@@ -174,68 +336,48 @@ int main(int argc, char* argv[])
 	  config.add_options()
 	    ("PoolSize", boost::program_options::value< std::size_t >(&pool_size), "number of dynamic contexts");
 
+	  // First run just to get the pool size
 	  boost::program_options::store(boost::program_options::parse_config_file(ifs, config, true), vm);
 	  boost::program_options::notify(vm);
 
-	  if (pool_size == 0)
+	  // Empty pool is not allowed!
+	  assert ( pool_size > 0);
+
+	  // reopen the config file to read the signatures
+	  ifs.close();
+	  ifs.open(filename_match_maker.c_str());
+	
+	  // prepare for all signatures from Mr. Match-Maker
+	  std::stringstream out;
+	  std::string signature_location;
+	  std::string context_info_location;
+	  std::vector<std::string> str_sigs(pool_size);
+	  std::vector<std::string> str_contexts(pool_size);
+	  
+	  std::string nosba;
+	  std::string all_matches;
+	  config.add_options()
+	    ("MM.nosba", boost::program_options::value< std::string >(&nosba), "Number of schematic bridge atoms of contexts")
+	    ("MM.matches", boost::program_options::value< std::string >(&all_matches), "All matches");
+	  
+	  // get the global signature from the query plan. Later we might
+	  // find another way to pass it to dmcsd, so that we don't have
+	  // to depend on the query plan, which is just for the purpose of
+	  // opt-dmcs and should be computed from neighbors + global_sigs,
+	  // by the manager.
+	
+	  for (std::size_t i = 1; i <= pool_size; ++i)
 	    {
-	      std::cerr << "Empty pool of context!" << std::endl;
-	      return 1;
+	      out.str("");
+	      out << i;
+	      signature_location = "Signature.C" + out.str();
+	      context_info_location = "ContextsInfo.C" + out.str();
+	      
+	      config.add_options()
+		(signature_location.c_str(), boost::program_options::value< std::string >(&str_sigs[i-1]), "signature of this context")
+		(context_info_location.c_str(), boost::program_options::value< std::string >(&str_contexts[i-1]), "identification of this context");
 	    }
-
-
-
- #ifdef DEBUG
-	std::cerr << "myid: " << myid <<std::endl;
-	std::cerr << "local KB: " << filename_local_kb <<std::endl;
-	std::cerr << "Bridge Rules: " << filename_bridge_rules <<std::endl;
-	std::cerr << "Topology: " << filename_topo <<std::endl;
- #endif 
-	///@todo change when the manager is added
-	QueryPlanPtr query_plan(new QueryPlan);
-
-	query_plan->read_graph(filename_topo);
-	std::size_t system_size = query_plan->getSystemSize();
-	//NeighborListPtr neighbor_list = query_plan->getNeighbors(myid);
-
-	// reopen the config file to read the signatures
-	ifs.close();
-	ifs.open(filename_match_maker.c_str());
-	
-	//assert(system_size > 0);
-	//NeighborListPtr neighbor_list = query_plan->getNeighbors(myid);
-
-	// get all signatures from Mr. Match-Maker
-	std::stringstream out;
-	std::string signature_location;
-	std::string context_info_location;
-	std::vector<std::string> str_sigs(pool_size);
-	std::vector<std::string> str_contexts(pool_size);
-
-	std::string nosba;
-	std::string all_matches;
-	config.add_options()
-	  ("MM.nosba", boost::program_options::value< std::string >(&nosba), "Number of schematic bridge atoms of contexts")
-	  ("MM.matches", boost::program_options::value< std::string >(&all_matches), "All matches");
-
-	// get the global signature from the query plan. Later we might
-	// find another way to pass it to dmcsd, so that we don't have
-	// to depend on the query plan, which is just for the purpose of
-	// opt-dmcs and should be computed from neighbors + global_sigs,
-	// by the manager.
-	
-	for (std::size_t i = 1; i <= pool_size; ++i)
-	  {
-	    out.str("");
-	    out << i;
-	    signature_location = "Signature.C" + out.str();
-	    context_info_location = "ContextsInfo.C" + out.str();
-	    
-	    config.add_options()
-	      (signature_location.c_str(), boost::program_options::value< std::string >(&str_sigs[i-1]), "signature of this context")
-	      (context_info_location.c_str(), boost::program_options::value< std::string >(&str_contexts[i-1]), "identification of this context");
-	  }
-
+	  
 	  // get the local signature and all matches from Mr. Match-Maker
 	  boost::program_options::store(boost::program_options::parse_config_file(ifs, config, true), vm);
 	  boost::program_options::notify(vm);
@@ -243,148 +385,20 @@ int main(int argc, char* argv[])
 	  // convert strings read to our internal data structure
 
 	  // signatures
-	  SignatureVecPtr global_sigs(new SignatureVec);
-	  for (std::vector<std::string>::const_iterator it = str_sigs.begin();
-	       it != str_sigs.end(); ++it)
-	    {
-	      SignaturePtr tmp_sig(new Signature);
-	      
-	      std::istringstream in(*it);
-
-	      in >> *tmp_sig;
-
-	      global_sigs->push_back(tmp_sig);
-	    }
-
+	  read_all_signatures(global_sigs, str_sigs);
 	  SignaturePtr sig = (*global_sigs)[myid-1];
-
+	  
 	  // context information == all contexts in the pool 
-	  NeighborListPtr context_info(new NeighborList);
-	  for (std::vector<std::string>::const_iterator it = str_contexts.begin();
-	       it != str_contexts.end(); ++it)
-	    {
-	      NeighborPtr tmp_context(new Neighbor);
+	  read_all_contexts(context_info, str_contexts);
 
-#ifdef DEBUG
-	      std::cerr << "it = " << *it << std::endl;
-#endif
-
-	      std::istringstream in(*it);
-	      
-	      in >> *tmp_context;
-	      context_info->push_back(tmp_context);
-	    }
-
-#ifdef DEBUG
-	  std::cerr << "Contexts in the pool:" << *context_info<< std::endl;
-#endif
-
-#ifdef DEBUG
-	  std::cerr << "Signatures from match maker:" << std::endl << global_sigs << std::endl;
-	  /*for (Signatures::const_iterator s_it = global_sigs->begin();
-	       s_it != global_sigs->end(); ++s_it)
-	    {
-	      std::cerr << *s_it << std::endl;
-	      }*/
-
-	  std::cerr << "All matches from match maker:" << std::endl << all_matches << std::endl;
-#endif
-
-	  std::istringstream iss(all_matches);
-	  MatchTablePtr mt(new MatchTable);
-
-	  typedef boost::escaped_list_separator<char> StringSeparator;
-     
-	  StringSeparator ssep("\\", ",", "()");
-	  boost::tokenizer<StringSeparator> tok(all_matches, ssep);
-	  
-	  StringSeparator esep("()", " ", "");
-	  
-	  // Store matches in our internal format [(int)src, (int)sym, (int)tar, (int)img, (float)quality]
-
-	  SignatureBySym& sig_src = boost::get<Tag::Sym>(*sig);
-	  SignatureBySym::const_iterator src_it;
-
-	  for (boost::tokenizer<StringSeparator>::iterator it = tok.begin(); it != tok.end(); ++it)
-	    {
-	      std::string trimmed = *it;
-	      
-	      boost::trim(trimmed);
-	      boost::tokenizer<StringSeparator> mtok(trimmed, esep);
-	      
-	      boost::tokenizer<StringSeparator>::iterator m_it = mtok.begin();
-	      
-	      if (m_it == mtok.end())
-		{
-		  throw boost::escaped_list_error("Got no match");
-		}
-	      
-	      std::size_t src_ctx = std::atoi(m_it->c_str());
-	      
-	      ++m_it;
-	      if (m_it == mtok.end())
-		{
-		  throw boost::escaped_list_error("Match length == 1");
-		}
-	      
-	      src_it = sig_src.find(*m_it);
-	      if (src_it == sig_src.end())
-		{
-		  std::cerr << "Uknown atom: " << m_it->c_str() << " in context " << src_ctx << std::endl;
-		  return 1;
-		}
-	      std::size_t sym = src_it->origId;
-	      
-	      ++m_it;
-	      if (m_it == mtok.end())
-		{
-		  throw boost::escaped_list_error("Match length == 2");
-		}
-	      
-	      std::size_t tar_ctx = std::atoi(m_it->c_str());
-	      
-	      ++m_it;
-	      if (m_it == mtok.end())
-		{
-		  throw boost::escaped_list_error("Match length == 3");
-		}
-	      
-	      SignaturePtr target_signature = (*global_sigs)[tar_ctx - 1];
-	      SignatureBySym& tar_sig = boost::get<Tag::Sym>(*target_signature);
-	      SignatureBySym::iterator tar_it = tar_sig.find(*m_it);
-	      
-	      if (tar_it == tar_sig.end())
-		{
-		  std::cerr << "Uknown atom: " << *m_it << " in context " << tar_ctx << std::endl;
-		  return 1;
-		}
-	      std::size_t img = tar_it->origId;
-	      
-	      ++m_it;
-	      if (m_it == mtok.end())
-		{
-		  throw boost::escaped_list_error("Match length == 4");
-		}
-
-	      std::istringstream iss(*m_it);
-	      float qual;
-	      if (!(iss >> qual))
-		{
-		  throw boost::escaped_list_error("quality not a float");
-		}
-	      
-	      mt->insert(Match(src_ctx, sym, tar_ctx, img, qual));
-	    }
-#ifdef DEBUG
-	  std::cerr << "All matches in our internal format:" << std::endl << *mt << std::endl;
-#endif
+	  // all matches from the Match Maker, and store them in the Match Table
+	  read_all_matches(mt, all_matches, global_sigs, sig);
 
 	  // Now extract information concerning the number of
-	  // schematic bridge atoms in each context.  Now we use
+	  // schematic bridge atoms in each context. Now we use
 	  // hardcoding, but later this information must be computed
 	  // from bridge rules parsing.
 
-	  CountVecPtr sba_count(new CountVec);
 	  boost::tokenizer<> no_sbatoms(nosba);
 	  for (boost::tokenizer<>::const_iterator n_it = no_sbatoms.begin();
 	       n_it != no_sbatoms.end(); ++n_it)
@@ -394,8 +408,6 @@ int main(int argc, char* argv[])
 	    }
 
 	  // Let's not read the local kb now and concentrate on the schematic bridge rules
-	  BridgeRulesPtr schematic_bridge_rules(new BridgeRules);
-	  NeighborListPtr schematic_neighbor_list(new NeighborList);
 	  BridgeRulesBuilder<BRGrammar> builder_br(myid, schematic_bridge_rules, schematic_neighbor_list, global_sigs);
 	  ParserDirector<BRGrammar> parser_director_br;
 	  parser_director_br.setBuilder(&builder_br);
@@ -475,99 +487,48 @@ int main(int argc, char* argv[])
 	      // and store this sorted list to use in the configuration
 	      reduced_bridge_bodies_iterators_list_vec->push_back(rb_iter);
 	    }
-
-	  // For the information concerning the static DMCS, which we
-	  // cannot have at the beginning of a dynamic situation,
-	  // let's just create pointers to empty objects.
-
-	  RulesPtr local_kb(new Rules);
-	  BridgeRulesPtr bridge_rules(new BridgeRules);
-	  TheoryPtr loopFormula(new Theory);
-	  NeighborListPtr neighbor_list(new NeighborList);
-	  //QueryPlanPtr query_plan(new QueryPlan);
-
-	  // Store all information into a CommandTypeFactory, which is responsible 
-
-	  CommandTypeFactoryPtr ctf(new CommandTypeFactory(myid, pool_size, local_kb, 
-							   neighbor_list, schematic_bridge_rules, 
-							   bridge_rules, context_info,
-							   mt, sba_count, limit_answers, 
-							   limit_bind_rules, heuristics, 
-							   prefix, global_sigs, sig, query_plan,
-							   loopFormula));
-
-	  // Server can deal with different kinds of messages
-	  ServerPtr server(new Server(ctf, io_service, endpoint));
-
-	  boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
-	  io_service.run();
-	  t.join();
 	}
       // ***************************************************************************************************************************
       else // ground mode
 	{
-	  // in ground mode
-
-	  if (myid == 0 || 
-	      filename_local_kb.compare("") == 0 || 
-	      filename_bridge_rules.compare("") == 0|| 
-	      optionalCount == 0 || 
-	      optionalCount == 2) 
+	  if (filename_local_kb.compare("") == 0)
 	    {
 	      std::cout << desc << "\n";
 	      return 1;
 	    }
 
-
 #ifdef DEBUG
-	  std::cerr << "In ground mode" << std::endl;
+	  std::cerr << "In ground mode." << std::endl;
 #endif
+
 	  ///@todo change when the manager is added
-	  QueryPlanPtr query_plan(new QueryPlan);
-	  
 	  query_plan->read_graph(filename_topo);
-	  
 	  std::size_t system_size = query_plan->getSystemSize();
 
+	  // Empty MSCs are not allowed!
 	  assert ( system_size > 0 );
 	  
-#ifdef DEBUG
-	  std::cerr << "Server information              " << std::endl;
-	  std::cerr << "Id:                             " << myid << std::endl;
-	  std::cerr << "Port:                           " << myport << std::endl;
-	  std::cerr << "Filename for local KB:          " << filename_local_kb << std::endl;
-	  std::cerr << "Filename for bridge rules:      " << filename_bridge_rules << std::endl;
-	  std::cerr << "Filename for topology:          " << filename_topo << std::endl;
-#endif
-	  
 	  // extract the global signature from the query plan
-	  SignatureVecPtr global_sigs(new SignatureVec);
-	  
 	  for (std::size_t i = 1; i <= system_size; ++i)
 	    {
 	      const Signature& loc_sig = query_plan->getSignature(i);
 	      SignaturePtr loc_sig_ptr(new Signature(loc_sig));
 	      global_sigs->push_back(loc_sig_ptr);
 	    }
+
 #ifdef DEBUG
 	  std::cerr << "Global signatures: " << std::endl << global_sigs << std::endl;
 #endif	  
 	  
-	  //TheoryPtr theory(new Theory);
-	  RulesPtr local_kb(new Rules);
-	  BridgeRulesPtr bridge_rules(new BridgeRules);
-	  //BridgeAtomSetPtr br(new BridgeAtomSet);
 	  SignaturePtr sig = (*global_sigs)[myid - 1];
 	  
-	  LocalKBBuilder<PropositionalASPGrammar> builder1(local_kb, sig);
+	  // parsing local kb
+	  LocalKBBuilder<PropositionalASPGrammar> builder_local_kb(local_kb, sig);
 	  ParserDirector<PropositionalASPGrammar> parser_director;
-	  parser_director.setBuilder(&builder1);
+	  parser_director.setBuilder(&builder_local_kb);
 	  parser_director.parse(filename_local_kb);
-	  
-	  // now we got the local KB,
-	  // going to parse the bridge rules
-	  
-	  NeighborListPtr neighbor_list(new NeighborList);
+
+	  // parse the bridge rules
 	  BridgeRulesBuilder<BRGrammar> builder_br(myid, bridge_rules, neighbor_list, global_sigs);
 	  ParserDirector<BRGrammar> parser_director_br;
 	  parser_director_br.setBuilder(&builder_br);
@@ -593,30 +554,24 @@ int main(int argc, char* argv[])
 	  // setup my context
 	  ContextPtr ctx(new Context(myid, system_size, sig, local_kb, bridge_rules, neighbor_list));
 	  
-	  
 	  //compute size local signature
 	  const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
 	  
 	  SignatureByCtx::const_iterator low = local_sig.lower_bound(myid);
 	  SignatureByCtx::const_iterator up  = local_sig.upper_bound(myid);
-	  
-#ifdef DEBUG
-	  std::cerr << myid << std::endl;
-#endif
-	  
+	  	  
 	  std::size_t size = std::distance(low, up);
 	  
 #ifdef DEBUG
 	  std::cerr << "Sig input to LF" << *sig <<std::endl;
 #endif
 	  
-	  //construct loop formulae
+	  //construct loop formulas
 	  CNFLocalLoopFormulaBuilder lf_builder(sig, size);
 	  LoopFormulaDirector director;
 	  director.setBuilder(&lf_builder);
 	  director.construct(local_kb, bridge_rules);
-	  
-	  TheoryPtr loopFormula;
+
 	  loopFormula = lf_builder.getFormula();
 	  
 #ifdef DEBUG      
@@ -627,29 +582,24 @@ int main(int argc, char* argv[])
 	  // this result Sig will only be different in case of using an EquiCNF builder
 	  //      SignaturePtr resultSig;
 	  //      resultSig = lf_builder.getSignature();
-
-	  // create some empty stuff for the dynamic case. Later
-	  // everything will be merged.
-	  BridgeRulesPtr schematic_bridge_rules(new BridgeRules);
-	  CountVecPtr sba_count(new CountVec);
-	  MatchTablePtr mt(new MatchTable);
-	  NeighborListPtr context_info(new NeighborList);
-
-	  CommandTypeFactoryPtr ctf(new CommandTypeFactory(myid, system_size, local_kb, 
-							   neighbor_list, schematic_bridge_rules, 
-							   bridge_rules, context_info,
-							   mt, sba_count, limit_answers, 
-							   limit_bind_rules, heuristics, 
-							   prefix, global_sigs, sig, query_plan,
-							   loopFormula));
-
-	  ServerPtr server(new Server(ctf, io_service, endpoint));
-
-
-	  boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
-	  io_service.run();
-	  t.join();
 	}
+
+      // Store all information into a CommandTypeFactory, which is
+      // responsible for creating the command types later
+      CommandTypeFactoryPtr ctf(new CommandTypeFactory(myid, pool_size, local_kb, 
+						       neighbor_list, schematic_bridge_rules, 
+						       bridge_rules, context_info,
+						       mt, sba_count, limit_answers, 
+						       limit_bind_rules, heuristics, 
+						       prefix, global_sigs, sig, query_plan,
+						       loopFormula));
+      
+      // Server can deal with different kinds of messages
+      ServerPtr server(new Server(ctf, io_service, endpoint));
+      
+      boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+      io_service.run();
+      t.join();
     }
   catch (std::exception& e)
     {
