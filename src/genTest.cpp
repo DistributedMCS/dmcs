@@ -43,6 +43,7 @@
 #include "RingQPGenerator.h"
 #include "RingEdgeQPGenerator.h"
 #include "RingOptQPGenerator.h"
+#include "RandomQPGenerator.h"
 #include "QueryPlan.h"
 #include "QueryPlanGenerator.h"
 #include "Rule.h"
@@ -198,8 +199,7 @@ read_input(int argc, char* argv[])
 	   no_contexts == 0 ||
 	   no_atoms == 0 ||
 	   no_interface_atoms == 0 ||
-	   no_bridge_rules == 0 ||
-	   topology_type == 0 ) 
+	   no_bridge_rules == 0) 
 	{
 	  std::cerr << desc << std::endl;
 	  return 1;
@@ -209,6 +209,8 @@ read_input(int argc, char* argv[])
       // dispatch topology type
       switch (topology_type)
 	{
+	case 0:
+	  break;
 	case 1:
 	  { 
 	    if (no_contexts == 1 || no_contexts % 3 != 1)
@@ -435,6 +437,9 @@ void generate_topology()
 {
   switch (topology_type)
     {
+    case 0:
+      qpgen = new RandomQPGenerator(contexts, original_qp);
+      break;
     case 1:
       qpgen = new DiamondQPGenerator(contexts, original_qp);
       opt_qpgen = new DiamondOptQPGenerator(contexts, optimal_qp);
@@ -905,7 +910,7 @@ int main(int argc, char* argv[])
 
   optimal_qp->putGraph(original_qp->getGraph());
   
-  opt_qpgen->create_interfaces(topology_type);
+  //opt_qpgen->create_interfaces(topology_type);
   
 #ifdef DEBUG
     std::cerr << "Printing .." << std::endl;

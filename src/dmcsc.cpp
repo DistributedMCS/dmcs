@@ -38,6 +38,11 @@
 #include "Message.h"
 #include "QueryPlan.h"
 #include "ProgramOptions.h"
+#include "OptCommandType.h"
+#include "PrimitiveCommandType.h"
+#include "DynamicCommandType.h"
+#include "DynamicConfiguration.h"
+#include "InstantiatorCommandType.h"
 
 #include <fstream>
 #include <iostream>
@@ -51,8 +56,37 @@
 #include <boost/functional/hash.hpp>
 #include <boost/program_options.hpp>
 
+
 using namespace dmcs;
 
+
+//@todo: can we reuse endpoint, io_service from main()?
+void
+instantiate(ContextSubstitutionPtr ctx_sub, const std::string& hostName, const std::string& port)
+{
+  // tell the root context to start the instantiation process with the
+  // substitution ctx_sub
+  
+  boost::asio::io_service io_service;
+  boost::asio::ip::tcp::resolver resolver(io_service);
+  boost::asio::ip::tcp::resolver::query query(hostName, port);
+  boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
+  boost::asio::ip::tcp::endpoint endpoint = *it;
+
+  std::string header = HEADER_REQ_INSTANTIATE;
+  InstantiateForwardMessage mess(ctx_sub);
+  Client<InstantiatorCommandType> c(io_service, it, header, mess);
+  io_service.run();
+
+  InstantiateBackwardMessagePtr answer = c.getResult();
+
+  if (answer->getStatus() == true)
+    {
+      std::cerr << "Instantiation finished successfully!" << std::endl;
+
+      // Now call the evaluation
+    }
+}
 
 int
 main(int argc, char* argv[])
@@ -61,6 +95,7 @@ main(int argc, char* argv[])
     {
       std::string hostName = "";
       std::string port = "";
+      std::string manager = "";
       std::size_t systemSize = 0;
       std::size_t root_ctx;
       bool dynamic;
@@ -87,7 +122,7 @@ main(int argc, char* argv[])
 	{
 	  std::cerr << desc << std::endl;
 	  return 1;
-	}
+        }
       
       bool primitiveDMCS = false;
       if (vm.count(QUERY_VARS)) // reading V for basic DMCS
@@ -106,14 +141,6 @@ main(int argc, char* argv[])
 	      V->push_back(bs);
 	    }
 	}
-
-	  for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
-	    {
-	      std::istringstream iss(it->c_str());
-	      BeliefSet bs;
-	      iss >> bs;
-	      V->push_back(bs);
-	    }
 
       int optionalCount = 0;
 
@@ -144,23 +171,37 @@ main(int argc, char* argv[])
 	{
 	  // dynamic mode
 
-	  if(hostName.compare("") ==0 ||
+	  if(hostName.compare("") == 0 ||
 	     port.compare("") == 0)
 	    {
 	      std::cerr << desc << "\n";
 	      return 1;
 	    }
 
-
 	  ContextSubstitutionPtr ctx_sub(new ContextSubstitution);
 	  ConfigMessage mess(root_ctx, ctx_sub, false);
 	  
-#ifdef DEBUG
+	  //#ifdef DEBUG
 	  std::cerr << "Message = " << mess << std::endl;
-#endif
+	  //#endif
 	  
-	  Client<DynamicCommandType> c(io_service, it, mess);
+	  std::string header = HEADER_REQ_DYN_DMCS;
+	  Client<DynamicCommandType> c(io_service, it, header, mess);
 	  io_service.run();
+
+	  DynamicConfiguration::dynmcs_return_type result = c.getResult();
+
+	  std::cerr << "FINAL RESULT: " << std::endl
+		    << *result << std::endl;
+
+
+	  // instantiate the system, then write .br and .sh files
+	  /*for (ContextSubstitutionList::const_iterator it = result->begin(); it != result->end(); ++it)
+	    {
+	      instantiate(*it);
+	      }*/
+	  ContextSubstitutionList::const_iterator it = result->begin();
+	  instantiate(*it, hostName, port);
 	}
       else
 	{
@@ -178,12 +219,17 @@ main(int argc, char* argv[])
 	    }
 
 
-	  // our result
-	  BeliefStateListPtr belief_states(new BeliefStateList);
+      // our result
+#ifdef DMCS_STATS_INFO
+      ReturnMessagePtr result(new ReturnMessage);
+#else
+      BeliefStateListPtr result(new BeliefStateList);
+#endif // DMCS_STATS_INFO
 	
 #ifdef DEBUG
 	  std::cerr << "Starting the DMCS with " << systemSize << std::endl;
 #endif
+
       
 	  if (primitiveDMCS) //primitive DMCS
 	    {
@@ -192,27 +238,27 @@ main(int argc, char* argv[])
 	      std::cerr << "Going to send: ";
 	      std::cerr << V << std::endl;
 #endif 
-	  
+	      std::string header = HEADER_REQ_PRI_DMCS;
 	      PrimitiveMessage mess(V);
-	      Client<PrimitiveCommandType> c(io_service, it, mess);
-
+	      Client<PrimitiveCommandType> c(io_service, it, header, mess);
+	      
 #ifdef DEBUG
 	      std::cerr << "Running ioservice" <<std::endl;
 #endif
 	  
 	      io_service.run();
-	  
-#ifdef DEBUG
-	  std::cerr << "Getting results" <<std::endl;
+
+#ifdef DEBUG	  
+	      std::cerr << "Getting results" <<std::endl;
 #endif
 	  
-	  result = c.getResult();
-
+	      result = c.getResult();
 	    }
 	  else // Opt DMCS
 	    {
+	      std::string header = HEADER_REQ_OPT_DMCS;
 	      OptCommandType::input_type mess(0); // invoker ID ?
-	      Client<OptCommandType> c(io_service, it, mess);
+	      Client<OptCommandType> c(io_service, it, header, mess);
 	      io_service.run();
 	      
 	      result = c.getResult();

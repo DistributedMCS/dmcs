@@ -843,8 +843,8 @@ main(int argc, char* argv[])
 
   generate_orig_topology();
   generate_contexts();
-  print_query_plan(orig_qp, prefix + TOP_EXT);
   generate_query_plan(orig_qp, lcim);
+  print_query_plan(orig_qp, prefix + TOP_EXT);
   print_command_lines();
   print_dlv_command_lines();
 

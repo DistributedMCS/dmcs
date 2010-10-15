@@ -2,6 +2,250 @@
 
 	* src/dynGen.cpp: Add killall dmcsd at the beginning of the shell script.
 
+2010-10-13  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/ParserDirector.tcc: Use getline() to fill up buf instead
+	of rdbuf().
+
+2010-10-13  Minh Dao Tran  <dao@.kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Add new heuristics.
+
+	* include/BaseSortingStrategy.h: Define constants for heuristic cases.
+
+	* include/Makefile.am: Add QualityCtxSortingStrategy.h.
+	* include/QualityCtxSortingStrategy.h: New file.
+
+	* include/NoSBACtxSortingStrategy.h: Changed guarding macro.
+	* include/ChosenQualityCtxSortingStrategy.h: Likewise.
+	* include/ChosenCtxSortingStrategy.h: Likewise.
+	* include/NoSBAQualityCtxSortingStrategy.h: Likewise.
+
+2010-10-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/CommandTypeFactory.h: Return new objects for create().
+
+	* include/DynamicCommandType.h: Remove some debugging information.
+
+2010-10-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Enable static mode.
+
+	* include/PrimitiveCommandType.h: Add PrimitiveCommandTypePtr.
+
+	* include/OptCommandType.h: Add OptCommandTypePtr.
+
+	* include/Handler.tcc: Remove #include "Handler.h"
+
+	* include/CommandTypeFactory.h: Add support for PrimitiveDMCS and OptDMCS.
+	* src/Server.cpp: Likewise.
+
+2010-10-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Fix the case where we get a
+	constant context id and still need to bind the schematic belief.
+
+2010-10-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/Instantiator.cpp: Remove duplicate code.
+
+	* include/Instantiator.tcc: New file.
+	* include/Instantiator.h: include Instantiator.tcc.
+
+2010-10-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Server.tcc: Remove.
+
+	* include/Makefile.am: Add
+	InstantiateForwardMessage.h and InstantiateBackwardMessage.h.
+
+	* include/Instantiator.h: Adapt to new types of
+	instantiating messages.
+	* include/InstantiatorCommandType.h: Likewise.
+	* src/Instantiator.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/InstantiateMessage.h: Make it a base class for
+	forward/backward messages in instantiating.
+
+2010-10-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Clean up.
+
+	* src/Instantiator.cpp Add some debugging information. Create
+	instantiated bridge rules.
+
+	* src/DynamicConfiguration.cpp: Cover the case where the context
+	was already used for instantiation but the atom was not.
+
+	* include/Match.h: Index by SrcSymTar.
+
+	* include/CommandTypeFactory.h: Move inst, cmt_inst as a member of
+	CommandTypeFactory.
+
+2010-10-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Message.h: Refine header messages.
+
+	* include/Handler.h: Add send_eof().
+	* include/Handler.tcc: Likewise.
+
+	* include/Client.tcc: Add some debugging information
+
+2010-10-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Remove calling specific servers
+	just for configuration.
+
+	* src/Server.cpp: Clean up.
+	* include/Handler.tcc: Likewise.
+
+2010-10-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Use Server with dispatch ability.
+
+	* src/Makefile.am: Add Server.cpp.
+
+	* src/Server.cpp: New file.
+
+	* include/Server.h: Add dispatch method.
+
+	* include/Handler.h: Pass cmd as a parameter of the
+	handling operators. This fix the problem of cmd (as a member
+	variable) being changed after async_ operator. This is a very
+	weird bug!
+	* include/Handler.tcc: Likewise.
+
+	* include/DynamicCommandType.h: Add some debugging information.
+	* include/DynamicConfiguration.h: Likewise.
+	* src/DynamicConfiguration.cpp: Likewise.
+
+	* include/CommandTypeFactory.h: Use member dconf and
+	cmt_dyn_conf. This fixed losing dconf/cmt_dyn_dconf through the
+	dynamic creation of the commandtype.
+
+	* include/Client.tcc: Directly use async_write from connection.h.
+
+2010-09-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Handler.tcc: Likewise.
+
+	* include/Handler.h: Change to CmdTypePtr member.
+
+	* include/Instantiator.h: Add context_info.
+	* src/Instantiator.cpp: Get neighbors' information from context_info.
+
+	* include/Server.tcc: Create specific CommandTypes based on the
+	header received.
+
+	* include/Server.h: Add a CommandTypeFactory member.
+	* src/dmcsd.cpp: Adapt construction of Server.
+
+	* include/Makefile.am: Add CommandTypeFactory.h.
+
+	* include/DynamicCommandType.h: Introduce DynamicCommandTypePtr.
+	* include/InstantiatorCommandType.h: Introduce InstantiatorCommandTypePtr.
+
+	* include/CommandTypeFactory.h: New file.
+
+
+2010-09-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Remove template from Server.
+
+	* include/Server.h: Turning to a dispatcher (remove template).
+	* include/Server.tcc: Likewise.
+
+	* include/Message.h: Add HEADER_ANS.
+
+	* include/Makefile.am: Add Handler.h.
+
+	* include/Handler.h: New file.
+	* include/Handler.tcc: Likewise.
+
+2010-09-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Message.h: Add header constants.
+
+	* include/Client.h: Add header stuff to Client. Rearrange handling
+	methods.
+	* include/Client.tcc: Likewise.
+	* src/DynamicConfiguration.cpp: Likewise.
+	* src/Instantiator.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+2010-09-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/Instantiator.cpp: Properly call uninstantiated neighbors.
+
+	* include/Server.tcc: Show result sent back.
+
+	* include/InstantiateMessage.h: Output history.
+	* include/InstantiateReturnMessage.h: Likewise.
+
+2010-09-27  Minh Dao Tran  <minhdt@e195-105.eduroam.tuwien.ac.at>
+
+	* src/Instantiator.cpp: Invoke neighbors to instantiate.
+
+	* include/Message.h: Move History here.
+
+	* include/Makefile.am: Add InstantiateReturnMessage.h.
+
+	* include/Instantiator.h: Use InstantiateReturnMessage (with
+	history) instead of just returning bool.
+	* include/InstantiatorCommandType.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/InstantiateReturnMessage.h: New file.
+
+	* include/InstantiateMessage.h: Use HistoryPtr.
+
+2010-09-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/Instantiator.cpp: Collect neighbors from ctx_subs.
+
+	* include/PrimitiveMessage.h: Move typedef History to Message.h
+	* include/Message.h: Likewise.
+
+	* include/Instantiator.h: Add ctx_id.
+
+	* include/InstantiateMessage.h: Add history.
+
+2010-09-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Server.h: Add ports for different purposes.
+	* include/Server.tcc: Comment out the output result.
+
+	* src/dmcsc.cpp: Change port to call config server, call
+	instantiate sever.
+
+	* src/Instantiator.cpp: Build global_sigs during instantiation.
+
+	* src/DynamicConfiguration.cpp: Call config server at port 7000+cid.
+
+2010-09-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/Instantiator.cpp: Working on instantiation.
+
+	* include/Instantiator.h: Add global_sigs.
+
+	* include/ContextSubstitution.h: Add ContextSubstitutionBySrcSym.
+
+2010-09-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/Makefile.am: Add Instantiator.cpp
+
+	* include/Makefile.am: Add new header files.
+
+	* include/InstantiateMessage.h: New file.
+	* include/Instantiator.h: Likewise.
+	* include/InstantiatorCommandType.h: Likewise.
+	* src/Instantiator.cpp: Likewise.
+
+	* include/CommandType.h: Add a specialized case with RetVal == bool
+
 2010-09-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/Makefile.am: Add new header files.
@@ -82,6 +326,24 @@
 	* include/generator/DiamondZigZagOptTopoGenerator.h: Likewise.
 
 	* m4/boost.m4: merged from trunk, to fix  the problem with boost 1.44 iostream lib check.
+
+2010-09-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/ProcessBuf.cpp: Merged SIGCHILD signal handler from trunk.
+
+	* src/QueryPlanGenerator.cpp: Add random case.
+
+	* include/RandomQPGenerator.h: Reduce probability for generating neighbors.
+
+	* include/DynCtxGenRandomBuilder.h: Add density parameter.
+
+	* src/dynGen.cpp: Generate Grid topology.
+
+	* include/Makefile.am: add DynCtxGenGridBuilder.h.
+
+	* include/BodySortingStrategy.h: New file.
+	* include/ContextSortStrategy.h: Likewise.
+	* include/DynCtxGenGridBuilder.h: Likewise.
 
 2010-09-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
@@ -269,6 +531,312 @@
 
 	* TODO: Update.
 
+2010-07-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/ProcessBuf.cpp: Add SIGCHLD signal handler.
+
+	* src/tests/testClasp.cpp: Compileable again.
+	* src/tests/testTranslation.cpp: Likewise.
+
+	* examples/clasp-result.txt: Terminate models with 0.
+
+	* TODO: Update.
+
+2010-07-14  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Take a longer prefix.
+
+	* src/DynamicConfiguration.cpp: Add new heuristics.
+	* src/dynGen.cpp: Likewise.
+
+	* include/Makefile.am: Add new header files.
+
+	* include/ChosenQualityCtxSortingStrategy.h: New file.
+	* include/NoSBANeighborSortingStrategy.h: Likewise.
+	* include/NoSBAQualityCtxSortingStrategy.h: Likewise.
+
+	* include/ChosenCtxSortingStrategy.h: Update quality calculation.
+	* include/NoSBACtxSortingStrategy.h: Likewise.
+
+2010-07-13  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Makefile.am: Add NoSBACtxSortingStrategy.h
+
+	* include/ContextSubstitution.h: ContextSubstitution as a
+	multi-index container now.
+
+	* include/ContextSortingStrategy.h: Use MatchTableIteratorVec::iterator
+	* include/ChosenCtxSortingStrategy.h: Likewise.
+	* include/NoSBASortingStrategy.h (dmcs): Likewise.
+
+	* include/NoSBACtxSortingStrategy.h: New file.
+
+	* include/DynamicConfiguration.h: Compute statistical information.
+	* src/DynamicConfiguration.cpp: Likewise.
+	* include/Match.h: Likewise.
+
+2010-07-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/BridgeRulesBuilder.tcc: Update debugging information.
+	* src/dmcsc.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+
+	* src/dynGen.cpp: Output log information to files.
+
+	* src/genTest.cpp: Add random topology.
+	* include/RandomQPGenerator.h: New file.
+
+2010-07-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dynGen.cpp: Generate different sets
+	of command lines wrt. different heuristics.
+
+	* src/dmcsd.cpp: Transfer prefix to dconf.
+
+	* src/DynamicConfiguration.cpp: Output resulted topologies indexed
+	by heuristics type and result number.
+
+	* include/DynamicConfiguration.h: Add prefix.
+
+2010-07-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Add option for choosing heuristics.
+	* include/DynamicConfiguration.h: Likewise.
+	* include/ProgramOptions.h: Likewise.
+	* src/DynamicConfiguration.cpp: Likewise.
+	* src/dynGen.cpp: Likewise.
+
+2010-07-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dynGen.cpp: Add Rake topology.
+
+	* include/DynCtxGenRakeBuilder.h: New file.
+
+2010-07-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dynGen.cpp: Initialize some ptr.
+
+	* include/DynCtxGenRandomBuilder.h: Lower the probability to have
+	matches between contexts.
+
+	* include/DynCtxGenBaseBuilder.h: Initialize
+	pattern_bridge_rules. Fixed Segmentation fault.
+
+	* include/ChosenCtxSortingStrategy.h: Make this heuristic very
+	simple: just give the chosen contexts more priority.
+
+2010-07-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/DynCtxGenBaseBuilder.h: New file.
+	* include/DynCtxGenRandomBuilder.h: Likewise.
+
+	* include/Makefile.am: Add DynCtxGenBaseBuilder.h and
+	DynCtxGenRandomBuilder.h
+
+	* src/dynGen.cpp: Update the generator to generate different type
+	of intial topologies.
+
+2010-07-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dynGen.cpp: Generate script to run test cases automatically.
+
+	* src/dmcsd.cpp: Sort sbridge atoms before binding.
+	* include/RedBBodySortingStrategy.h: Likewise.
+	* include/NoSBARedBBodySortingStrategy.h: Likewise.
+
+2010-07-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Extract reduced bridge bodies from bridge rules
+	for sorting (next).
+
+	* include/Rule.h: New typedef for representing reduced
+	bridge bodies.
+
+	* include/NoSBARedBBodySortingStrategy.h: New file.
+	* include/RedBBodySortingStrategy.h: Likewise.
+
+	* include/Makefile.am: Add NoSBARedBBodySortingStrategy.h and
+	RedBBodySortingStrategy.h
+
+2010-07-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Sort new contexts before invoke.
+
+	* include/DynamicConfiguration.h: Control DFS by iterators of
+	iterators to a vector of contexts.
+
+2010-07-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Use sorted list of iterators to
+	contexts for binding.
+
+	* include/NoSBASortingStrategy.h: Fix quality calculation.
+
+	* include/ContextSortingStrategy.h: Add dfs_level.
+	* include/ChosenCtxSortingStrategy.h: Likewise.
+
+	* include/BaseSortingStrategy.h: Move TABS(dfs_level) here.
+	* include/DynamicConfiguration.h: Remove TABS(dfs_level) from here.
+
+2010-07-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dynGen.cpp: Fix bug in generating nosbas.
+
+2010-07-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Makefile.am: Add ContextSortingStrategy.h
+
+	* include/ContextSortingStrategy.h: New file.
+
+	* include/ContextSubstitution.h: Need ContextVec and list of its iterator.
+
+	* include/BaseSortingStrategy.h: Templatize the sorting
+	strategies.
+	* include/NoSBASortingStrategy.h: Likewise.
+	* include/ChosenCtxSortingStrategy.h: Likewise.
+	* src/DynamicConfiguration.cpp: Likewise.
+
+2010-07-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Use limit_answers, limit_bind_rules.
+	* src/dynGen.cpp: Likewise.
+	* include/ProgramOptions.h: Likewise.
+	* src/DynamicConfiguration.cpp: Likewise.
+	* src/DynamicConfiguration.cpp: Likewise.
+
+2010-07-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dynGen.cpp: Generate empty file for the last context if it
+	has no pointer to other contexts.
+
+	* src/DynamicConfiguration.cpp: Write output topology on separate
+	files, without duplications of edges.
+
+	* include/DynamicConfiguration.h: Add parameter dfs_level to compute_topology.
+
+2010-07-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Compute output topolofy.
+
+	* include/DynamicConfiguration.h: Add graph for output topology.
+
+	* include/ContextSubstitution.h: Use ContextID.
+
+	* include/ChosenCtxSortingStrategy.h: Fix bug for querying with
+	source context id.
+
+2010-07-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: We can now stop at a limit number
+	of answers.
+
+	* include/DynamicConfiguration.h: Move limit_answers to be
+	member of dynconf. Also introduce new members no_answers and stop.
+
+	* include/BaseSortingStrategy.h: quality needs to be initialized.
+
+2010-06-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dynGen.cpp: Tests generated. Build initial topology for
+	later comparison with the instantiated topology. Add program options.
+
+2010-06-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/Makefile.am: Add dynGen
+
+	* src/dynGen.cpp: New file.
+
+2010-06-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Match.h: Add possibility to query by srcCtx.
+
+	* include/Makefile.am: Add ChosenCtxSortingStrategy.h
+
+	* include/DynamicConfiguration.h: Add limit_answers.
+  	* src/DynamicConfiguration.cpp: Likewise.
+
+	* include/ContextSubstitution.h: Another quick, dirty hack for
+	already_chosen check.
+
+	* include/ChosenCtxSortingStrategy.h: New strategy.
+
+	* include/BaseSortingStrategy.h: Use map for quality storage.
+	* include/NoSBASortingStrategy.h: Update quality calculation.
+
+2010-06-28  Minh Dao Tran  <minhdt@e194-209.eduroam.tuwien.ac.at>
+
+	* include/Makefile.am: Add BaseSortingStrategy.h and NoSBASortingStrategy.h
+
+	* include/BaseSortingStrategy.h: New file.
+	* include/NoSBASortingStrategy.h: Likewise.
+
+	* src/DynamicConfiguration.cpp: Sort potential neighbors before binding.
+
+	* src/dmcsd.cpp: Read number of schematic bridge atoms from mm file.
+
+	* include/Match.h: MatchMaker --> MatchTable.
+	* include/DynamicConfiguration.h (dmcs): Likewise.
+	* src/tests/testMatch.cpp: Likewise.
+
+	* include/ContextSubstitution.h: Some new typedef.
+
+2010-06-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: More intuitive debugging output.
+
+2010-06-25  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Hierachical debugging information
+	for the DFS.
+	* include/DynamicConfiguration.h: Likewise.
+
+2010-06-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Consider case of inconsistent
+	substitutions on 1 context variable.
+
+2010-06-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Fix bug: calculating new neighbors.
+
+	* src/dmcsc.cpp: Print final result.
+
+2010-06-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/ContextSubstitution.h: minor changes.
+
+	* src/DynamicConfiguration.cpp: Working on lconfig + bind_rule + invoke_neighbors.
+
+2010-06-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Add some comments.
+
+	* include/DynamicConfiguration.h: Add invoke_neighbors.
+	* src/DynamicConfiguration.cpp: Likewise.
+
+	* include/ContextSubstitution.h (already_chosen): A quick hack to
+	get new chosen contexts, will be replaced by STL stuff later.
+
+2010-06-18  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Fix bind_rule and lconfig. Both
+	now return a list of context substitution. lconfig is not yet
+	completed, invoke_neighbors is missing when R = \emptyset.
+
+	* include/Rule.h: Better debugging information.
+	* include/Server.tcc: Likewise.
+	* src/dmcsd.cpp: Like wise.
+
+	* include/Variable.h: Add some helper functions for outputing
+	context terms and schematic believes nicely.
+
+	* include/ContextSubstitution.h: Fix some output operator.
+
+	* include/ConfigMessage.h: Print context substitution's content.
+
+	* include/BridgeRulesBuilder.tcc: Add some debugging information.
+
+
 2010-06-17  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/ClaspResultGrammar.tcc: Fix to SAT'09 & clasp 1.3.4
@@ -285,7 +853,77 @@
 
 	* include/Cache.h: Include map.
 
-2010-05-07  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+2010-05-31  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Read context information from match maker and
+	give it to dconf. We need this to invoke neighbors from a dynamic
+	configuration.
+
+	* include/Neighbor.h: Add operator>> for Neighbor.
+
+	* include/ContextSubstitution.h: ContextSubstitutions -->
+	ContextSubstitutionList.
+	* include/DynamicCommandType.h: Likewise.
+	* src/DynamicConfiguration.cpp: Likewise.
+
+	* examples/student.inp: Update input with context information.
+
+2010-05-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/DynamicConfiguration.cpp: Add missing header files.
+	* src/OptDMCS.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+2010-05-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/CommandType.h: Split sub command types to new files.
+	* include/Makefile.am: Adapt to this change.
+
+	* include/DynamicCommandType.h: New file.
+	* include/OptCommandType.h: Likewise.
+	* include/PrimitiveCommandType.h: Likewise.
+
+2010-05-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Variable.h: Casted 1 to ContextTerm for safe shifting.
+
+	* include/BridgeRulesBuilder.tcc: More beautiful bit style debug
+	informaiton.
+
+	* src/dmcsc.cpp: Clean a bit.
+
+2010-05-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Fix neighbor list construction.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+
+2010-05-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Get sig from global_sigs, not from query_plan.
+
+	* include/CommandType.h: Clean up.
+	* include/Server.tcc: Likewise.
+
+	* include/DynamicConfiguration: Define dynmcs_value_type for
+	non-statistic case.
+
+2010-05-26  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Fixed merging bugs. It's now compiled.
+	* include/BridgeRulesBuilder.h: Likewise.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+	* include/CommandType.h: Likewise.
+	* include/DynamicConfiguration.h: Likewise.
+	* include/Message.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* include/Signature.h: Likewise.
+	* include/Makefile.am: Likewise.
+
+	* include/ConfigMessage.h: New file.
+
+2010-05-07  Minh Tran Dao  <dao@kr.tuwien.ac.at>
 
 	* src/DLVVisitor.cpp: Need 'a' - 1.
 	* src/LogicVisitor.cpp: Likewise.
@@ -300,7 +938,7 @@
 
 2010-05-07  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
-	* src/genTest.cpp: Use a single srand(). 
+	* src/genTest.cpp: Use a single srand().
 	* src/QueryPlanGenerator.cpp: Likewise.
 
 2010-05-07  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
@@ -316,6 +954,352 @@
 2010-05-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* TODO: Update.
+
+2010-05-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/run-tests.sh: New file.
+
+2010-05-06  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Fix cerr here and there.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/StatsInfo.h: Add time_in_secs()
+
+	* src/OptDMCS.cpp: Fix: incoming V for guessing, outgoing V
+	for combining.
+	* include/OptDMCS.h: Likewise.
+
+	* include/PrimitiveMessage.h: Use history as a list.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+2010-05-06  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* src/OptDMCS.cpp: Clean up.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+2010-05-06  Minh Tran Dao  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Initialize OptDMCS with global_sigs.
+
+	* src/OptDMCS.cpp: Use ProxySignatureByLocal.
+
+	* include/OptDMCS.h: Now inherits global sigs from BaseDMCS.
+	* include/PrimitiveDMCS.h: Likewise.
+
+	* include/BaseDMCS.h: Move global_sigs up here.
+	* src/BaseDMCS.cpp: Likewise.
+
+2010-05-06  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+
+	* include/ProxySignatureByLocal.h: Use ProxySignatureByLocal in PrimitiveDMCS.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/BaseDMCS.cpp: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/BaseDMCS.h: Likewise.
+
+2010-05-06  Minh Tran Dao  <dao@kr.tuwien.ac.at>
+
+	* include/Neighbor.h: Use Neighbor instead of QueryPlan to
+	get hostname and port
+	* src/genTest.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/QueryPlan.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/BaseDMCS.cpp: Likewise.
+	* include/QueryPlan.h: Likewise.
+	* include/OptDMCS.h: Likewise.
+	* include/Context.h: Likewise.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+	* include/BridgeRulesBuilder.h: Likewise.
+	* include/BaseDMCS.h (dmcs): Likewise.
+
+	* src/OptDMCS.cpp: Use the right V at the right place.
+
+2010-05-06  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Get neighbor_list from bridge rules parsing.
+
+	* src/PrimitiveDMCS.cpp: Use neighbors from context.
+	* src/OptDMCS.cpp: Likewise.
+
+	* src/ContextGenerator.cpp: Adapt to neighbor_list.
+	* src/genTest.cpp: Likewise.
+
+	* include/Context.h: Let neighbor_list be a member of context.
+
+	* include/ClaspResultGrammar.tcc: #if --> #ifdef
+
+	* include/BridgeRulesBuilder.tcc: Update neighbor_list based on
+	bridge atoms.
+
+2010-05-06  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/genTest.cpp: Fix neighbor access
+
+	* src/QueryPlan.cpp: used getHostName1 and getPort1 as we are still in generation mode
+
+	* include/Context.h: Add setNeighbors method
+
+2010-05-05  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* include/QueryPlan.h: Replace Neighbors by NeighborList.
+	* include/Signature.h: Replace Signatures by SignatureVec.
+	* src/genTest.cpp: Likewise.
+	* src/dmcsd.cpp): Likewise.
+	* src/QueryPlan.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/Neighbor.h: Likewise.
+	* include/Context.h: Likewise.
+
+	* include/BridgeRulesBuilder.tcc: Build neighbor_list from
+	bridge rules.
+	* include/BridgeRulesBuilder.h: Likewise.
+
+2010-05-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/OptDMCS.cpp: Adapt generation of V.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+	* src/BaseDMCS.cpp: Add case distinction whether to initiate sis
+	in the constructor
+
+	* include/Makefile.am: Add ProxySignatureByLocal.h
+
+	* include/ProxySignatureByLocal.h: Detail the methods.
+
+
+	* src/dmcsd.cpp: Create global_sigs and pass it to PrimitiveDMCS.
+
+	* src/OptDMCS.cpp (getBeliefStates): Move construction of
+	signatures from SatSolver here. Will be replaced by
+	ProxySignatureByLocal.
+	* src/PrimitiveDMCS.cpp (getBeliefStates): Likewise.
+
+	* include/Signature.h: Add Signatures and SignaturesPtr.
+
+	* include/Server.tcc: update debug information.
+
+	* include/Process.h: templatized with ModelBuilder.
+
+	* include/PrimitiveDMCS.h: Add sis for statistic information, add
+	createGuessingSignature(). Add global_sigs.
+
+	* include/OptDMCS.h: Add createGuessingSignature().
+
+	* include/Context.h: Add getNeighbors().
+
+	* include/ClaspResultBuilder.tcc: Remove sig_size and use
+	local_sig.size()
+
+	* include/ClaspResultBuilder.h: Use BeliefStateListPtr instead of
+	BeliefStateListPtr&.
+
+	* include/ClaspProcess.h: Instantiated with
+	Process<ClaspResultBuilder<ClaspResultGrammar> >
+	* include/ClaspProcess.h: Likewise.
+
+	* src/BaseDMCS.cpp (localSolve): Use ClaspResultBuilder with sig,
+	local_belief_states and sis_size. @todo: remove dependency on
+	query_plan.
+	+ new methods for creating guessing signature.
+
+	* include/BaseSolver.h: Pass theory and sig_size to solve()
+	instead of context_signature, belief_states, and theory.
+	* include/SatSolver.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+
+2010-05-05  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/OptDMCS.cpp : Adjust code syntax for compilation purposes.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+	* include/ProxySignatureByLocal.h: Cleanup
+
+	* include/ClaspResultBuilder.h : Adapt Builder to use SignatureByLocal instead of BeliefStatePtr
+	* include/ClaspResultBuilder.tcc: Likewise.
+
+	* include/BaseDMCS.h: Adapt solve to use SignatureByLocal instead of BeliefStatePtr
+	* include/SatSolver.h : Likewise.
+	* include/BaseSolver.h: Likewise.
+	* include/SatSolver.tcc : Likewise.
+	* src/BaseDMCS.cpp : Likewise.
+
+2010-05-05  Minh Tran Dao  <dao@kr.tuwien.ac.at>
+
+	* include/BridgeRulesBuilder.h: add a remark for removing sig.
+
+2010-05-04  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/PrimitiveDMCS.cpp : Add ProxySignature todo items.
+	* src/OptDMCS.cpp: Likewise.
+	* include/SatSolver.tcc : Likewise.
+
+	* include/ProxySignatureByLocal.h: New file.
+
+	* include/HouseOptQPGenerator.h : Update queryplan computation.
+
+2010-05-04  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+
+	* include/StatsInfo.h: Use PTime/TimeDuration instead of
+	PTimePtr/TimeDurationPtr. Provide (time + #models) in statistic
+	information.
+	* include/ReturnMessage.h: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+
+	* include/SatSolver.tcc: Fix segmetation fault.
+
+2010-05-04  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* src/dmcsc.cpp: Fix output info.
+
+	* include/ClaspResultGrammar.tcc: Fix parsing models with older
+	boost.
+
+2010-05-04  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+	* src/BeliefCombination.cpp: remove some debug output.
+
+	* include/OptDMCS.h: Adapt OptDMCS to returning
+	statistic information.
+	* src/OptDMCS.cpp: Likewise.
+	* include/CommandType.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/BeliefState.h: Update operator<<
+	* include/PrimitiveMessage.h: Likewise.
+	* include/StatsInfo.h: Likewise.
+
+	* src/PrimitiveDMCS.cpp: Fix SegFault and get transfer time.
+
+	* include/ReturnMessage.h: Update outputting result.
+
+	* include/StatsInfo.h: Update outputting result, update transfer
+	time from neighbors.
+
+2010-05-04  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/StatsInfo.h: Add STATS_DIFF and STATS_DIFF_REUSE macros.
+	Do some code clean-ups.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* include/BaseDMCS.h: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/CommandType.h: Likewise.
+
+2010-05-03  Minh Tran Dao  <dao@kr.tuwien.ac.at>
+
+	* configure.ac: Add BOOST_DATE_TIME
+
+	* src/PrimitiveDMCS.cpp: Add statistic information.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/StatsInfo.h: Define operator<< and combine()
+
+	* include/Server.tcc: Add some debug information.
+
+	* include/Message.h: Remove sub-messages and put them to
+	separated files.
+	* include/OptDMCS.h: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/Session.h: Likewise.
+	* include/Makefile.am: Likewise.
+
+	* include/OptMessage.h: New file.
+	* include/PrimitiveMessage.h: Likewise.
+	* include/ReturnMessage.h: Likewise.
+
+	* include/CommandType.h: Realize continues().
+
+	* include/BaseDMCS.h: Add case distinction for StatisticInformation.
+
+2010-05-02  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* src/Makefile.am: Add date_time library.
+	* include/Makefile.am: Add StatsInfo.h
+
+	* include/Client.h: Use CmdType instead of Message_t.
+	* include/Client.tcc: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* include/Message.h: Likewise.
+	* include/CommandType.h: Likewise.
+
+	* include/Message.h: Add ReturnMessage.
+	* include/StatsInfo.h: New file.
+
+2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/BeliefCombination.cpp: Fix debug output.
+	(dmcs::project_to): Sort and unique projection result.
+
+	* include/SatSolver.tcc (dmcs::solve): Throw exception when there
+	was an error during SAT solving.
+
+	* include/Client.tcc: Throw a runtime_error when there is a
+	network error.
+
+	* include/BaseDMCS.h: Move localSolve to BaseDMCS.
+	Do not use global belief states.
+	* include/OptDMCS.h: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* src/BaseDMCS.cpp: Likewise.
+	* src/Makefile.am: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+2010-05-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/ClaspResultGrammar.tcc: Simplify rule value. Fixed the
+	bug with single line result from clasp.
+
+2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* examples/dimacs-small.txt: New file.
+	* examples/dimacs-small-result.txt: Likewise.
+
+	* examples/dia-4-4-2-2-1.opt1: Remove.
+
+	* examples/dia-4-4-2-2-1_command_line.txt: Fix V for basic DMCS.
+	* examples/dia-4-4-2-2-1_command_line.sh: Likewise.
+	* examples/dia-4-4-2-2-1.top: Likewise.
+	* examples/dia-4-4-2-2-1.opt: Likewise.
+
+	* src/dmcsd.cpp: Do not include CnfBuilder.h and CnfGrammar.h.
+
+	* include/LoopFormula.h: Add documentation.
+	* include/SatSolver.tcc: Likewise.
+	* include/Theory.h: Likewise.
+
+	* include/CnfBuilder.h: Deprecate file.
+	* include/CnfBuilder.tcc: Likewise.
+	* include/CnfGrammar.h: Likewise.
+	* include/CnfGrammar.tcc: Likewise.
+
+	* include/ClaspResultBuilder.tcc: De-obfuscate code.
+
+2010-05-01  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* src/tests/testMatch.cpp: Add one more
+	case where we don't find a match.
+
+	* include/DynamicConfiguration.h: Use iterator for
+	controlling backtracking. Update algorithm to return context
+	substitutions in stead of outputting to a queue.
+	* src/DynamicConfiguration.cpp: Likewise.
+
+	* include/ContextSubstitution.h: Add ContextMatch. Add todo.
+
+	* include/CommandType.h: Update continues()
+
+	* src/DynamicConfiguration.cpp: Fixed Segmentation Fault.
 
 2010-05-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
@@ -552,7 +1536,7 @@
 	* include/PrimitiveDMCS.h: Likewise.
 	* include/CommandType.h: Likewise.
 
-2010-05-03  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+2010-05-03  Minh Tran Dao  <dao@kr.tuwien.ac.at>
 
 	* configure.ac: Add BOOST_DATE_TIME
 
@@ -578,10 +1562,32 @@
 
 	* include/BaseDMCS.h: Add case distinction for StatisticInformation.
 
-2010-05-02  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+2010-05-02  Minh Tran Dao  <dao@kr.tuwien.ac.at>
 
 	* src/Makefile.am: Add date_time library.
 	* include/Makefile.am: Add StatsInfo.h
+
+	* include/BridgeRulesBuilder.tcc: Add some debug output.
+	* include/Client.tcc: Likewise.
+
+	* include/CommandType.h: Add check for continuation.
+
+	* include/ContextSubstitution.h: Add operator<<
+
+	* include/Message.h (ConfigMess): Add flag LAST.
+
+	* include/Server.h: New diagram for maintaining
+	connection is case of dynamic MCS.
+	* include/Server.tcc: Likewise.
+
+	* src/dmcsc.cpp: Fix checking program options for
+	dynamic/non-dynamic case.
+	* src/dmcsd.cpp: Like wise.
+
+	* src/DynamicConfiguration.cpp: doing lconfig, bind_rule
+	* include/DynamicConfiguration.h: Likewise.
+
+	* include/Rule.h: Fix operator<<
 
 	* include/Signature.h (<<): Simplified.
 
@@ -614,56 +1620,6 @@
 	* include/Message.h: Add ReturnMessage.
 	* include/StatsInfo.h: New file.
 
-2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* src/BeliefCombination.cpp: Fix debug output.
-	(dmcs::project_to): Sort and unique projection result.
-
-	* include/SatSolver.tcc (dmcs::solve): Throw exception when there
-	was an error during SAT solving.
-
-	* include/Client.tcc: Throw a runtime_error when there is a
-	network error.
-
-	* include/BaseDMCS.h: Move localSolve to BaseDMCS.
-	Do not use global belief states.
-	* include/OptDMCS.h: Likewise.
-	* include/PrimitiveDMCS.h: Likewise.
-	* src/BaseDMCS.cpp: Likewise.
-	* src/Makefile.am: Likewise.
-	* src/OptDMCS.cpp: Likewise.
-	* src/PrimitiveDMCS.cpp: Likewise.
-
-2010-05-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
-
-	* include/ClaspResultGrammar.tcc: Simplify rule value. Fixed the
-	bug with single line result from clasp.
-
-2010-05-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* examples/dimacs-small.txt: New file.
-	* examples/dimacs-small-result.txt: Likewise.
-
-	* examples/dia-4-4-2-2-1.opt1: Remove.
-
-	* examples/dia-4-4-2-2-1_command_line.txt: Fix V for basic DMCS.
-	* examples/dia-4-4-2-2-1_command_line.sh: Likewise.
-	* examples/dia-4-4-2-2-1.top: Likewise.
-	* examples/dia-4-4-2-2-1.opt: Likewise.
-
-	* src/dmcsd.cpp: Do not include CnfBuilder.h and CnfGrammar.h.
-
-	* include/LoopFormula.h: Add documentation.
-	* include/SatSolver.tcc: Likewise.
-	* include/Theory.h: Likewise.
-
-	* include/CnfBuilder.h: Deprecate file.
-	* include/CnfBuilder.tcc: Likewise.
-	* include/CnfGrammar.h: Likewise.
-	* include/CnfGrammar.tcc: Likewise.
-
-	* include/ClaspResultBuilder.tcc: De-obfuscate code.
-
 2010-04-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/Makefile.am (dmcsd_LDADD): Linker on Linux is
@@ -672,11 +1628,6 @@
 2010-04-29  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
 
 	* src/genTest.cpp: Fixed warning with number comparison.
-
-2010-04-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* src/Makefile.am (dmcsd_LDADD): Linker on Linux is
-	order-sensitive.
 
 2010-04-28  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
@@ -1411,9 +2362,9 @@
 	* src/LocalLoopFormulaBuilder.cpp: Code refactoring and optimisation
 	* src/ImpLocalLoopFormulaBuilder.cpp: Likewise.
 	* src/CNFLocalLoopFormulaBuilder.cpp: Likewise.
-	* include/Theory.h:Likewise. 
-	* include/LoopFormulaBuilder.h: Likewise. 
-	* include/LoopFormulaDirector.h:Likewise. 
+	* include/Theory.h:Likewise.
+	* include/LoopFormulaBuilder.h: Likewise.
+	* include/LoopFormulaDirector.h:Likewise.
 	* include/LoopFormula.h: Likewise.
 	* include/LocalLoopFormulaBuilder.h: Likewise.
 	* include/IMPLocalLoopFormulaBuilder.h: Likewise.
@@ -1439,7 +2390,7 @@
 
 	* include/CNFLocalLoopFormulaBuilder.h: Update to accomodate the new Signature.
 	* include/DimacsVisitor.h: likewise.
-	* include/LocalLoopFormulaBuilder.h:Likwise. 
+	* include/LocalLoopFormulaBuilder.h:Likwise.
 	* src/DimacsVisitor.cpp: Likwise.
 
 	* include/BaseSolver.h: Modify solve to take theory as input.

@@ -68,7 +68,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const TheoryPtr& theory, std::s
       
       Builder builder(proc->getOutput());
       builder.visitTheory(theory, sig_size);
- 
+
 #ifdef DEBUG
       Builder evil_builder(std::cerr);
       evil_builder.visitTheory(theory, sig_size);
@@ -79,7 +79,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const TheoryPtr& theory, std::s
       //
       // parse result and set belief states
       //
-      
+
 #if defined(DEBUG)
       std::cerr << "Parsing the models..." << std::endl;
 #endif // DEBUG

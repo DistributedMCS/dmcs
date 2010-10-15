@@ -41,6 +41,7 @@
 #include "DimacsVisitor.h"
 #include "ParserDirector.h"
 #include "OptDMCS.h"
+#include "OptCommandType.h"
 #include "Cache.h"
 
 #include <vector>
@@ -65,10 +66,7 @@ OptDMCS::~OptDMCS()
 SignaturePtr 
 OptDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig)
 {
-
-
-
-SignaturePtr guessing_sig(new Signature);
+  SignaturePtr guessing_sig(new Signature);
 
   // local id in guessing_sig will start from my signature's size + 1
   std::size_t guessing_sig_local_id = my_sig->size() + 1;
@@ -213,6 +211,9 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       localV = query_plan->getInterface(c, k);
     }
 
+#if defined(DEBUG)
+  std::cerr << "context " << c << " is calling context " << k << std::endl;
+#endif // DEBUG
 
   ///@todo use cache in DMCS
   //  BeliefStatesPtr bs = cache->cacheHit(V);
@@ -309,9 +310,10 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
       boost::asio::ip::tcp::endpoint endpoint = *res_it;
       
-
+      std::string header = HEADER_REQ_OPT_DMCS;
       OptMessage neighbourMess(k);
-      Client<OptCommandType> client(io_service, res_it, neighbourMess);
+
+      Client<OptCommandType> client(io_service, res_it, header, neighbourMess);
       
       io_service.run();
 
@@ -333,7 +335,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 #else
       BeliefStateListPtr neighbor_belief_states = client.getResult();
 #endif // DMCS_STATS_INFO
-      
+
 #if defined(DEBUG)
       std::cerr << "Belief states received from neighbor " << *it << std::endl;	  
       std::cerr << *neighbor_belief_states << std::endl;      

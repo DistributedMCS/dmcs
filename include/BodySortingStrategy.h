@@ -18,49 +18,38 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   BodySortingStrategy.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Sun Jul  4  17:05:21 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef BODY_SORTING_STRATEGY
+#define BODY_SORTING_STRATEGY
+
+#include "BaseSortingStrategy.h"
 
 namespace dmcs {
 
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
-#define DYNAMIC "dynamic"
-#define MATCH_MAKER "mm"
-#define ROOT_CTX "root"
-#define LIMIT_ANSWERS "n"
-#define LIMIT_BIND_RULES "b"
-#define HEURISTICS "h"
+class BodySortingStrategy : public BaseSortingStrategy<BridgeAtomListPtr, ContextID>
+{
+public:
+  ContextSortingStrategy(ContextListPtr context_list_)
+    : BaseSortingStrategy<ContextListPtr, ContextID>(context_list_)
+  { }
 
+  virtual void
+  calculateQuality() = 0;
+};
 
-} // namespace dmcs
+}
 
-#endif // PROGRAM_OPTIONS_H_
+#endif // BODY_SORTING_STRATEGY
 
 // Local Variables:
 // mode: C++
 // End:
+

@@ -149,7 +149,7 @@ operator<< (std::ostream& os, const SignaturePtr& sig)
 
 // output the whole Signature
 inline std::ostream&
-operator<< (std::ostream& os, const SignaturesPtr& sigs)
+operator<< (std::ostream& os, const SignatureVecPtr& sigs)
 {
   std::copy(sigs->begin(), sigs->end(), std::ostream_iterator<SignaturePtr>(os, "\n\n"));
 

@@ -9,16 +9,6 @@ This is the TODO list for DMCS -*- org -*-
 ** TODO create more test cases and running examples, see http://asparagus.cs.uni-potsdam.de/
 ** TODO setup make check that runs some dmscd processes and makes some computation
 * Features
-** DONE use boost program_options (ini parser, command line options)
-   CLOSED: [2010-04-25 Sun 12:01]
-*** dmcsm
-**** [--config=/etc/dmcs/dmcsm.conf] [--config=~/.dmcs/dmcsm.conf]
-*** DONE dmcsd
-**** --context=ID [--port=PORT] --kb=LOCAL_KB(FN) --br=BRIDGE_RULES(FN) [--manager=HOSTNAME:PORT|--topology=TOPOLOGY(FN)]
-*** DONE dmcsc
-**** --hostname=<HOST> --port=<PORT> --query-variables=V [--manager=HOSTNAME:PORT|--systemsize=<SIZE>]
-*** DONE dmcsGen
-**** --contexts=<no_contexts> --atoms=<no_atoms> --interface=<no_interface_atoms> --bridgerules=<no_bridge_rules> --topology=<TYPE> --template=<FILE>
 ** TODO implement query plan generator
 ** TODO compile on Windows
 ** TODO belief state streaming support
@@ -39,6 +29,16 @@ This is the TODO list for DMCS -*- org -*-
 ** TODO sanitize combination functions
 ** TODO add timing values to the transferred messages like solver time, combination time
 ** TODO query plans should have the possibility of querying in a special order
+* TODO create optimal plan for instantiating, similar to OptDMCS v.s. PrimitiveDMCS
+* TODO use a better RNG than rand() in the test generators, dmcsGen generates the same files when called in short duration
+* TODO killing dmcsd and restart does not always work flawlessly, there is the famous socket restart thing going on
+* DONE currently in dmcsd, when the Server is initialized, it is given a specific CmdType (which is attached with a specific type of Message). This makes the Server able to receive only this type of message. One needs to think how to make this flexible, i.e., a Server can receive different kinds of message during its life time.
+* TODO detect underspecified (too small) V and turn off computation then (UNKNOWN return?)
+* TODO currently we assume disjoint signature, merge with dynmcs for shared signatures
+* TODO use 1 integer to represent a bridge atom (possible in both static and dynamic cases)
+* TODO use projection feature from clasp
+* TODO use a better RNG than rand() in the test generators, dmcsGen generates the same files when called in short duration
+* TODO killing dmcsd and restart does not always work flawlessly, there is the famous socket restart thing going on
 * TODO checking "sizeof(Signature)" in the parsers
 * TODO create README file
 * DONE setup http://www.kr.tuwien.ac.at/research/systems/dmcs/

@@ -156,7 +156,6 @@ Client<CmdType>::read_header(const boost::system::error_code& error, connection_
     {
       std::cerr << "Client::read_header: " << error.message() << std::endl;
       throw std::runtime_error(error.message());
-      throw std::runtime_error(error.message());
     }
 }
 
@@ -205,7 +204,6 @@ Client<CmdType>::read_answer(const boost::system::error_code& error, connection_
   else
     {
       std::cerr << "Client::read_answer: " << error.message() << std::endl;
-      throw std::runtime_error(error.message());
       throw std::runtime_error(error.message());
     }
 }

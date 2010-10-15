@@ -85,7 +85,21 @@ ParserDirector<Grammar>::parse(std::istream& is)
   // (an alternative would be the boost::spirit::multi_pass iterator
   // but it was not possible to setup/simply did not compile)
   std::ostringstream buf;
-  buf << is.rdbuf();
+  std::string line;
+
+  while (!is.fail())
+    {
+      std::getline(is, line);
+      buf << line << std::endl;
+      //std::cerr << "Read >>" << line << "<<" << std::endl;
+    }
+
+  if (is.fail() )
+    {
+      is.clear();
+    }
+
+  //  buf << is.rdbuf();
   std::string input = buf.str();
 
 #ifdef DEBUG

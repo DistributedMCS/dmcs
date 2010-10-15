@@ -68,10 +68,11 @@ operator<< (std::ostream& os, const Match& m)
 
 
 
-/// tags used to access Signature columns by name
+/// tags used to access Match columns by name
 namespace Tag
 {
   struct SrcSym       {};
+  struct SrcSymTar    {};
   struct SrcSymTarImg {};
   struct SrcCtx       {};
   struct TarCtx       {};
@@ -80,7 +81,7 @@ namespace Tag
 }
 
 
-/// a MatchMaker is a table with 5 columns named SrcCtx, Sym, TarCtx, Image, Quality
+/// a MatchTable is a table with 5 columns named SrcCtx, Sym, TarCtx, Image, Quality
 /// in which the first 4 columns form a key
 typedef boost::multi_index_container<
   Match,
@@ -103,27 +104,77 @@ typedef boost::multi_index_container<
 	boost::multi_index::member<Match, std::size_t, &Match::srcCtx>,
 	boost::multi_index::member<Match, std::size_t, &Match::sym>
 	>
+      >,
+
+    boost::multi_index::ordered_non_unique<
+      boost::multi_index::tag<Tag::SrcSymTar>,
+      boost::multi_index::composite_key<
+	Match,
+	boost::multi_index::member<Match, std::size_t, &Match::srcCtx>,
+	boost::multi_index::member<Match, std::size_t, &Match::sym>,
+	boost::multi_index::member<Match, std::size_t, &Match::tarCtx>
+	>
+      >,
+
+    boost::multi_index::ordered_non_unique<
+      boost::multi_index::tag<Tag::SrcCtx>,
+	boost::multi_index::member<Match, std::size_t, &Match::srcCtx>
       >
     >
-  > MatchMaker;
+  > MatchTable;
 
 
-typedef boost::shared_ptr<MatchMaker> MatchMakerPtr;
+typedef boost::shared_ptr<MatchTable> MatchTablePtr;
 
-// output the whole MatchMaker
-inline std::ostream&
-operator<< (std::ostream& os, const MatchMaker& mm)
+/// query MatchTable by source context 
+typedef boost::multi_index::index<MatchTable, Tag::SrcCtx>::type MatchTableBySrcCtx;
+
+/// query MatchTable by source context and source belief
+typedef boost::multi_index::index<MatchTable, Tag::SrcSym>::type MatchTableBySrcSym;
+
+/// query MatchTable by source context, source belief, and target context
+typedef boost::multi_index::index<MatchTable, Tag::SrcSymTar>::type MatchTableBySrcSymTar;
+
+/// query MatchTable by source context, source belief, target context, image
+typedef boost::multi_index::index<MatchTable, Tag::SrcSymTarImg>::type MatchTableBySrcSymTarImg;
+
+typedef std::vector<MatchTableBySrcSym::iterator> MatchTableIteratorVec;
+typedef boost::shared_ptr<MatchTableIteratorVec> MatchTableIteratorVecPtr;
+
+typedef std::list<MatchTableIteratorVec::iterator> MatchTableIteratorVecIteratorList;
+typedef boost::shared_ptr<MatchTableIteratorVecIteratorList> MatchTableIteratorVecIteratorListPtr;
+
+class CompareMatch
 {
-  if (!mm.empty())
-    {
-      MatchMaker::const_iterator end = --mm.end();
+public:
+  CompareMatch(std::size_t ctx_id_)
+    : ctx_id(ctx_id_)
+  { }
 
-      if (mm.size() > 1)
+  bool
+  operator()(const MatchTableBySrcSym::iterator it)
+  {
+    return (it->tarCtx == ctx_id);
+  }
+
+private:
+  std::size_t ctx_id;
+};
+
+// output the whole MatchTable
+inline std::ostream&
+operator<< (std::ostream& os, const MatchTable& mt)
+{
+  if (!mt.empty())
+    {
+      MatchTable::const_iterator end = --mt.end();
+
+      if (mt.size() > 1)
 	{
-	  std::copy(mm.begin(), end, std::ostream_iterator<Match>(os, "\n"));
+	  std::copy(mt.begin(), end, std::ostream_iterator<Match>(os, "\n"));
 	}
 
-      if (mm.size() > 0)
+      if (mt.size() > 0)
 	{
 	  os << *end;
 	}
@@ -134,17 +185,9 @@ operator<< (std::ostream& os, const MatchMaker& mm)
 
 
 
-// output the whole content of MatchMakerPtr
-inline std::ostream&
-operator<< (std::ostream& os, const MatchMakerPtr& mm)
-{
-  return os << *mm;
-}
-
-
 // read from stream and update Signature
 inline std::istream&
-operator>> (std::istream& is, MatchMaker& mm)
+operator>> (std::istream& is, MatchTable& mt)
 {
   std::string s;
 
@@ -162,12 +205,13 @@ operator>> (std::istream& is, MatchMaker& mm)
   for (boost::tokenizer<StringSeparator>::iterator it = tok.begin(); it != tok.end(); ++it)
     {
       std::string trimmed = *it;
+
       boost::trim(trimmed);
       
       boost::tokenizer<StringSeparator> stok(trimmed, esep);
       
       boost::tokenizer<StringSeparator>::iterator sit = stok.begin();
-      
+
       if (sit == stok.end())
 	{
 	  throw boost::escaped_list_error("Got no symbol list");
@@ -183,7 +227,7 @@ operator>> (std::istream& is, MatchMaker& mm)
       
       std::size_t sym = std::atoi(sit->c_str());
       ++sit;
-      
+
       if (sit == stok.end())
 	{
 	  throw boost::escaped_list_error("symbol list length == 2");
@@ -197,6 +241,7 @@ operator>> (std::istream& is, MatchMaker& mm)
 	  throw boost::escaped_list_error("symbol list length == 3");
 	}
       
+
       std::size_t img = std::atoi(sit->c_str());
       ++sit;
 
@@ -212,19 +257,52 @@ operator>> (std::istream& is, MatchMaker& mm)
 	  throw boost::escaped_list_error("quality not a float");
 	}
 
-      mm.insert(Match(src_ctx, sym, tar_ctx, img, qual));
+      mt.insert(Match(src_ctx, sym, tar_ctx, img, qual));
     }
 
   return is;
 }
 
 
-/// query MatchMaker by source context and source belief
-typedef boost::multi_index::index<MatchMaker, Tag::SrcSym>::type MatchMakerBySrcSym;
+// need to find a proper location for this type
 
-/// query MatchMaker by source context, source belief, target context, image
-typedef boost::multi_index::index<MatchMaker, Tag::SrcSymTarImg>::type MatchMakerBySrcSymTarImg;
+typedef std::vector<std::size_t> CountVec;
+typedef boost::shared_ptr<CountVec> CountVecPtr;
 
+
+// used to calculate the number of edges in the intial topology
+inline
+std::size_t
+no_unique_connections(MatchTablePtr mt, std::size_t poolsize)
+{
+  std::size_t nuc = 0;
+  bool mark[poolsize][poolsize];
+
+  for (std::size_t i = 0; i < poolsize; ++i)
+    {
+      for (std::size_t j = 0; j < poolsize; ++j)
+	{
+	  mark[i][j] = false;
+	}
+    }
+
+  const MatchTableBySrcCtx& sc = boost::get<Tag::SrcCtx>(*mt);
+
+  for (MatchTableBySrcCtx::const_iterator it = sc.begin(); it != sc.end(); ++it)
+    {
+      ///@todo: std::size_t ~~> ContextID
+      std::size_t s = it->srcCtx;
+      std::size_t t = it->tarCtx;
+
+      if (!mark[s-1][t-1])
+	{
+	  nuc++;
+	  mark[s-1][t-1] = true;
+	}
+    }
+
+  return nuc;
+}
 
 } // namespace dmcs
 

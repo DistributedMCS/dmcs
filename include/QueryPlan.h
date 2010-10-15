@@ -162,7 +162,6 @@ struct QueryPlan
   remove_connection(std::size_t context1, std::size_t context2);
 
   NeighborListPtr
-
   getNeighbors(std::size_t context_id);
 
   EdgesPtr

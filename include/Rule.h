@@ -33,6 +33,7 @@
 #include <iterator>
 #include <list>
 #include <set>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 
 #include "Variable.h"
@@ -59,6 +60,7 @@ typedef std::list<RulePtr> Rules;
 typedef boost::shared_ptr<Rules> RulesPtr;
 
 typedef std::pair<ContextTerm, Atom> BridgeAtom;
+typedef boost::shared_ptr<BridgeAtom> BridgeAtomPtr;
 typedef std::list<BridgeAtom> PositiveBridgeBody;
 typedef std::list<BridgeAtom> NegativeBridgeBody;
 typedef boost::shared_ptr<PositiveBridgeBody> PositiveBridgeBodyPtr;
@@ -70,9 +72,20 @@ typedef std::pair<HeadPtr, BridgeBody> BridgeRule;
 typedef boost::shared_ptr<BridgeRule> BridgeRulePtr;
 typedef std::list<BridgeRulePtr> BridgeRules;
 typedef boost::shared_ptr<BridgeRules> BridgeRulesPtr;
-
 typedef std::set<BridgeAtom> BridgeAtomSet;
 typedef boost::shared_ptr<BridgeAtomSet> BridgeAtomSetPtr;
+
+typedef std::vector<BridgeAtom> BridgeAtomVec;
+typedef boost::shared_ptr<BridgeAtomVec> BridgeAtomVecPtr;
+typedef BridgeAtomVec ReducedBridgeBody;
+typedef BridgeAtomVecPtr ReducedBridgeBodyPtr;
+typedef std::vector<ReducedBridgeBodyPtr> ReducedBridgeBodyVec;
+typedef boost::shared_ptr<ReducedBridgeBodyVec> ReducedBridgeBodyVecPtr;
+
+typedef std::list<ReducedBridgeBody::iterator> ReducedBridgeBodyIteratorList;
+typedef boost::shared_ptr<ReducedBridgeBodyIteratorList> ReducedBridgeBodyIteratorListPtr;
+typedef std::vector<ReducedBridgeBodyIteratorListPtr> ReducedBridgeBodyIteratorListVec;
+typedef boost::shared_ptr<ReducedBridgeBodyIteratorListVec> ReducedBridgeBodyIteratorListVecPtr;
 
 
 inline const Head&
@@ -117,8 +130,15 @@ getBody(const BridgeRulePtr& r)
 }
 
 
+inline PositiveBridgeBody&
+getPositiveBody(BridgeBody& B)
+{
+  return *(B.first);
+}
+
+
 inline const PositiveBridgeBody&
-getPositiveBody(const BridgeBody& B)
+getPositiveBody(const BridgeBody& B) 
 {
   return *(B.first);
 }
@@ -135,6 +155,13 @@ inline PositiveBridgeBody&
 getPositiveBody(BridgeRulePtr& r)
 {
   return *(r->second.first);
+}
+
+
+inline NegativeBridgeBody&
+getNegativeBody(BridgeBody& B)
+{
+  return *(B.second);
 }
 
 
@@ -162,7 +189,7 @@ getNegativeBody(BridgeRulePtr& r)
 inline std::ostream&
 operator<< (std::ostream& os, const BridgeAtom& ba)
 {
-  return os << "(" << ba.first << ":" << ba.second << ")";
+  return os << "(" << ctx2string(ba.first) << ":" << sb2string(ba.second) << ")";
 }
 
 
@@ -170,7 +197,7 @@ inline std::ostream&
 operator<< (std::ostream& os, const BridgeBody& B)
 {
   const PositiveBridgeBody& pbody = getPositiveBody(B);
-  PositiveBridgeBody::const_iterator p_end = pbody.end();
+  PositiveBridgeBody::const_iterator p_end = --pbody.end();
 
   if (!pbody.empty())
     {
@@ -187,7 +214,7 @@ operator<< (std::ostream& os, const BridgeBody& B)
     }
 
   const NegativeBridgeBody& nbody = getNegativeBody(B);
-  NegativeBridgeBody::const_iterator n_end = nbody.end();
+  NegativeBridgeBody::const_iterator n_end = --nbody.end();
 
   if (!nbody.empty())
     {
@@ -232,7 +259,11 @@ operator<< (std::ostream& os, const BridgeRulePtr& r)
 inline std::ostream&
 operator<< (std::ostream& os, const BridgeRulesPtr& R)
 {
-  std::copy(R->begin(), R->end(), std::ostream_iterator<BridgeRulePtr>(os, "\n"));
+  for (BridgeRules::const_iterator it = R->begin(); it != R->end(); ++it)
+    {
+      os << *it << "\n";
+    }
+
   return os;
 }
 

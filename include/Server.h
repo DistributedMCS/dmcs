@@ -38,6 +38,8 @@
 #include "Theory.h"
 #include "Session.h"
 #include "CommandType.h"
+#include "CommandTypeFactory.h"
+
 
 #include <algorithm>
 #include <cstdlib>
@@ -49,6 +51,8 @@
 
 namespace dmcs {
 
+
+
 struct BaseServer
 {};
 
@@ -57,38 +61,38 @@ struct BaseServer
  * @brief
  * 
  */
-template<typename CmdType>
 class Server : public BaseServer
 {
 public:
-  typedef Session<typename CmdType::input_type> SessionMsg;
-  typedef typename boost::shared_ptr<SessionMsg> SessionMsgPtr;
-
-
-  Server(const CmdType& cmd_,
-	 boost::asio::io_service& io_service,
+  Server(CommandTypeFactoryPtr& ctf_, boost::asio::io_service& io_service,
 	 const boost::asio::ip::tcp::endpoint& endpoint);
 
   void 
   handle_accept(const boost::system::error_code& e, connection_ptr conn);
 
+  void
+  dispatch_header(const boost::system::error_code& e, connection_ptr conn);
+
+  /*
   void 
   handle_next_message(const boost::system::error_code& e, SessionMsgPtr sesh);
 
   void 
+
   handle_read_message(const boost::system::error_code& e, SessionMsgPtr sesh);
 
   void 
-  handle_session(const boost::system::error_code& e, SessionMsgPtr sesh);
+  handle_session(const boost::system::error_code& e, SessionMsgPtr sesh);*/
 
   void 
-  handle_finalize(const boost::system::error_code& e, SessionMsgPtr sesh);
-  
+  handle_finalize(const boost::system::error_code& e, connection_ptr conn);
+
+
  private:
+  CommandTypeFactoryPtr& ctf;
   boost::asio::io_service& io_service_;
   boost::asio::ip::tcp::acceptor acceptor_;
-
-  CmdType cmd;
+  std::string header;
 };
 
 typedef boost::shared_ptr<BaseServer> ServerPtr;
@@ -96,7 +100,7 @@ typedef boost::shared_ptr<BaseServer> ServerPtr;
 } // namespace dmcs
 
 
-#include "Server.tcc"
+//#include "Server.tcc"
 
 #endif // SERVER_H
 

@@ -164,7 +164,6 @@ QueryPlanGenerator::compute_min_V(int topology)
 	  const PositiveBridgeBody& pb = getPositiveBody(*j);
 	  const NegativeBridgeBody& nb = getNegativeBody(*j);
 
- 
 	  for (PositiveBridgeBody::const_iterator k = pb.begin(); k != pb.end(); ++k)
 	    {
 	      context_id = k->first;
@@ -193,7 +192,7 @@ QueryPlanGenerator::compute_min_V(int topology)
   // epsilon) to get all variables for k
   switch(topology)
     {
-    case 0:
+    case 0: // random case
     case 4: // ring case
       {
 	break;
@@ -218,3 +217,7 @@ QueryPlanGenerator::getMinV() const
 {
   return V;
 }
+
+// Local Variables:
+// mode: C++
+// End:

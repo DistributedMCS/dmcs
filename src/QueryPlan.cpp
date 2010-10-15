@@ -239,9 +239,7 @@ QueryPlan::remove_connection(std::size_t context_id1, std::size_t context_id2)
 
 
 
-
-
-NeighborsListPtr
+NeighborListPtr
 QueryPlan::getNeighbors(std::size_t context_id)
 {
   //std::cerr << "in get Neighbors with VMAP"<< std::endl;
@@ -341,3 +339,7 @@ QueryPlan::write_graph(std::ostream& os)
 			make_edge_writer(interface),
 			make_graph_writer(s));
 }
+
+// Local Variables:
+// mode: C++
+// End:

@@ -18,49 +18,34 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   RedBBodySortingStrategy.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Mon Jul  5  16:57:21 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef REDUCED_BRIDGE_BODY_SORTING_STRATEGY
+#define REDUCED_BRIDGE_BODY_SORTING_STRATEGY
+
+#include "BaseSortingStrategy.h"
 
 namespace dmcs {
 
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
-#define DYNAMIC "dynamic"
-#define MATCH_MAKER "mm"
-#define ROOT_CTX "root"
-#define LIMIT_ANSWERS "n"
-#define LIMIT_BIND_RULES "b"
-#define HEURISTICS "h"
+class RedBBodySortingStrategy : public BaseSortingStrategy<ReducedBridgeBody::iterator>
+{
+public:
+  RedBBodySortingStrategy(IteratorListPtr list_to_sort_, std::size_t dfs_level_)
+    : BaseSortingStrategy<ReducedBridgeBody::iterator>(list_to_sort_, dfs_level_)
+  { }
 
+  virtual void
+  calculateQuality() = 0;
+};
 
 } // namespace dmcs
 
-#endif // PROGRAM_OPTIONS_H_
+#endif // REDUCED_BRIDGE_BODY_SORTING_STRATEGY
 
-// Local Variables:
-// mode: C++
-// End:

@@ -1,25 +1,4 @@
-AUTOMAKE_OPTIONS = gnu
-
-# including headers for make dist
-noinst_HEADERS =  \
-	  ProgramOptions.h \
-	  Signature.h \
-	  CNFLocalLoopFormulaBuilder.h \
-	  IMPLocalLoopFormulaBuilder.h \
-	  EquiCNFLocalLoopFormulaBuilder.h \
-          LocalLoopFormulaBuilder.h \
-          LoopFormula.h \
-          LoopFormulaBuilder.h \
-          LoopFormulaDirector.h \
-		BaseBuilder.h \
-		BaseDMCS.h \
-		BaseSolver.h \
-		BaseVisitor.h \
-		BeliefCombination.h \
-		BeliefState.h \
-		BridgeRulesBuilder.h \
-		BridgeRulesBuilder.tcc \
-		Cache.h \
+trategy.h \
 		ClaspProcess.h \
 		ClaspResultBuilder.h \
 		ClaspResultBuilder.tcc \
@@ -34,17 +13,24 @@ noinst_HEADERS =  \
 		CnfGrammar.h \
 		CnfGrammar.tcc \
 		CommandType.h \
+		CommandTypeFactory.h \
+		ConfigMessage.h \
 		Context.h \
                 ContextGenerator.h \
-	ContextSubstitution.h \
+		ContextSortingStrategy.h \
+		ContextSubstitution.h \
                 DiamondQPGenerator.h \
                 DLVVisitor.h \
+		DynCtxGenBaseBuilder.h \
+		DynCtxGenGridBuilder.h \
+		DynCtxGenRandomBuilder.h \
                 RingQPGenerator.h \
                 RingOptQPGenerator.h \
                 RingEdgeQPGenerator.h \
+		Handler.h \
                 HouseQPGenerator.h \
                 HouseOptQPGenerator.h \
-	Match.h \
+		Match.h \
                 MultipleRingQPGenerator.h \
                 MultipleRingOptQPGenerator.h \
                 BinaryTreeQPGenerator.h \
@@ -52,23 +38,37 @@ noinst_HEADERS =  \
                 DiamondZigZagOptQPGenerator.h \
 		DimacsVisitor.h \
 		DynamicConfiguration.h \
+		DynamicCommandType.h \
+		Instantiator.h \
+		InstantiatorCommandType.h \
+		InstantiateMessage.h \
+		InstantiateBackwardMessage.h \
+		InstantiateForwardMessage.h \
 		LogicVisitor.h \
 		LocalKBBuilder.h \
 		LocalKBBuilder.tcc \
 		OptMessage.h \
+		OptCommandType.h \
 		PropositionalASPGrammar.h \
 		PropositionalASPGrammar.tcc \
 		Message.h \
 		Neighbor.h \
+		NoSBACtxSortingStrategy.h \
+		NoSBAQualityCtxSortingStrategy.h \
+		NoSBANeighborSortingStrategy.h \
+		NoSBARedBBodySortingStrategy.h \
 		ParserDirector.h \
 		ParserDirector.tcc \
 		PrimitiveDMCS.h \
 		PrimitiveMessage.h \
+		PrimitiveCommandType.h \
 		Process.h \
 		ProcessBuf.h \
 		ProxySignatureByLocal.h \
+		QualityCtxSortingStrategy.h \
                 QueryPlanWriter.h \
                 QueryPlan.h \
+		RedBBodySortingStrategy.h \
 		ReturnMessage.h \
 		Rule.h \
 		SatSolver.h \

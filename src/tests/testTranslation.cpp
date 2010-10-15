@@ -47,7 +47,6 @@ BOOST_AUTO_TEST_CASE( testCNFTranslation )
 
   RulesPtr local_kb(new Rules);
   BridgeRulesPtr bridge_rules(new BridgeRules);
-  QueryPlanPtr query_plan(new QueryPlan);
 
   const char* ex = getenv("EXAMPLESDIR");
   std::string kb_file(ex);

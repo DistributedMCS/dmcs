@@ -30,12 +30,15 @@ check_PROGRAMS = \
 	testTranslation \
 	testSignature \
 	testQueryPlan \
-	testCombination \
 	testClaspResultOnlineParser \
 	testBlockingClasp \
 	testGraphProp \
 	testVariable \
 	testMatch
+	testCombination \
+	testClaspResultOnlineParser \
+	testBlockingClasp \
+	testGraphProp
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = $(top_builddir)/src/libsatsolver.a $(top_builddir)/src/libdmcs.a
@@ -67,9 +70,14 @@ testBlockingClasp_LDADD = $(top_builddir)/src/libsatsolver.a
 testCombination_SOURCES = testCombination.cpp
 
 
-
 testMatch_SOURCES = testMatch.cpp
+
 
 testGraphProp_SOURCES = testGraphProp.cpp
 testGraphProp_LDADD = $(top_builddir)/src/libdmcs.a
 testVariable_SOURCES = testVariable.cpp
+
+
+testGraphProp_SOURCES = testGraphProp.cpp
+testGraphProp_LDADD = $(top_builddir)/src/libdmcs.a
+

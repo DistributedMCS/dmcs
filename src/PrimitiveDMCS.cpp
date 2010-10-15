@@ -40,6 +40,7 @@
 #include "DimacsVisitor.h"
 #include "ParserDirector.h"
 #include "PrimitiveDMCS.h"
+#include "PrimitiveCommandType.h"
 #include "Cache.h"
 #include "QueryPlan.h"
 #include "BeliefState.h"
@@ -115,12 +116,13 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   assert(n > 0 && k <= n);
     
 #if defined(DEBUG)
-  std::cerr << "In PrimitiveDMCS, at context " << k << "n = " << n << std::endl;
+  std::cerr << "In PrimitiveDMCS, at context " << k << std::endl 
+	    << "n = " << n << std::endl;
 #endif // DEBUG
+
 
 #ifdef DMCS_STATS_INFO
   initStatsInfos(n);
-
   TimeDuration time_combine(0, 0, 0, 0);
   TransferTimesPtr time_transfer(new TransferTimes);
   StatsInfo& my_stats_info = (*sis)[k-1];
@@ -171,7 +173,6 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
       std::cerr << "local belief states size: " << my_stats_info.lsolve.second << " == " << local_belief_states->size() << std::endl;
       std::cerr << local_belief_states->size() << std::endl;
 #endif // DEBUG
-
 
 #endif // DMCS_STATS_INFO
 
@@ -259,7 +260,8 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	    std::cerr << "Invoking neighbor " << neighbor_id << std::endl;
 #endif // DEBUG
 
-	    Client<PrimitiveCommandType> client(io_service, res_it, mess);
+	    std::string header = HEADER_REQ_PRI_DMCS;
+	    Client<PrimitiveCommandType> client(io_service, res_it, header, mess);
 	  
 	    io_service.run();
 
