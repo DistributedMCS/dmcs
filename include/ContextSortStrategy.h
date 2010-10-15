@@ -18,46 +18,38 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   ContextSortingStrategy.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Sun Jul  4  14:43:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef CONTEXT_SORTING_STRATEGY
+#define CONTEXT_SORTING_STRATEGY
+
+#include "BaseSortingStrategy.h"
 
 namespace dmcs {
 
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
-#define DYNAMIC "dynamic"
-#define MATCH_MAKER "mm"
-#define ROOT_CTX "root"
+class ContextSortingStrategy : public BaseSortingStrategy<ContextListPtr, ContextID>
+{
+public:
+  ContextSortingStrategy(ContextListPtr context_list_)
+    : BaseSortingStrategy(context_list_)
+  { }
 
+  virtual void
+  calculateQuality() = 0;
+};
 
-} // namespace dmcs
+}
 
-#endif // PROGRAM_OPTIONS_H_
+#endif
 
 // Local Variables:
 // mode: C++
 // End:
+

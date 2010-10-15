@@ -30,9 +30,14 @@
 #ifndef RULE_H
 #define RULE_H
 
+#include <iterator>
 #include <list>
 #include <set>
 #include <boost/shared_ptr.hpp>
+
+#include "Variable.h"
+
+
 
 
 namespace dmcs {
@@ -53,7 +58,7 @@ typedef boost::shared_ptr<Rule> RulePtr;
 typedef std::list<RulePtr> Rules;
 typedef boost::shared_ptr<Rules> RulesPtr;
 
-typedef std::pair<std::size_t, Atom> BridgeAtom;
+typedef std::pair<ContextTerm, Atom> BridgeAtom;
 typedef std::list<BridgeAtom> PositiveBridgeBody;
 typedef std::list<BridgeAtom> NegativeBridgeBody;
 typedef boost::shared_ptr<PositiveBridgeBody> PositiveBridgeBodyPtr;
@@ -105,6 +110,20 @@ getHead(const BridgeRulePtr& r)
 }
 
 
+inline const BridgeBody&
+getBody(const BridgeRulePtr& r)
+{
+  return r->second;
+}
+
+
+inline const PositiveBridgeBody&
+getPositiveBody(const BridgeBody& B)
+{
+  return *(B.first);
+}
+
+
 inline const PositiveBridgeBody&
 getPositiveBody(const BridgeRulePtr& r)
 {
@@ -118,6 +137,12 @@ getPositiveBody(BridgeRulePtr& r)
   return *(r->second.first);
 }
 
+
+inline const NegativeBridgeBody&
+getNegativeBody(const BridgeBody& B)
+{
+  return *(B.second);
+}
 
 
 inline const NegativeBridgeBody&
@@ -133,6 +158,83 @@ getNegativeBody(BridgeRulePtr& r)
   return *(r->second.second);
 }
 
+
+inline std::ostream&
+operator<< (std::ostream& os, const BridgeAtom& ba)
+{
+  return os << "(" << ba.first << ":" << ba.second << ")";
+}
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const BridgeBody& B)
+{
+  const PositiveBridgeBody& pbody = getPositiveBody(B);
+  PositiveBridgeBody::const_iterator p_end = pbody.end();
+
+  if (!pbody.empty())
+    {
+      if (pbody.size() > 1)
+	{
+	  //std::copy(pbody.begin(), p_end, std::ostream_iterator<BridgeAtom>(os, ", "));
+	  for (PositiveBridgeBody::const_iterator p_it = pbody.begin(); p_it != p_end; ++p_it)
+	    {
+	      os << *p_it << ", ";
+	    }
+	}
+
+      os << *p_end;
+    }
+
+  const NegativeBridgeBody& nbody = getNegativeBody(B);
+  NegativeBridgeBody::const_iterator n_end = nbody.end();
+
+  if (!nbody.empty())
+    {
+      os << ", not ";
+      
+      if (nbody.size() > 1)
+	{
+	  //std::copy(nbody.begin(), n_end, std::ostream_iterator<BridgeAtom>(os, ", not "));
+	  for (NegativeBridgeBody::const_iterator n_it = nbody.begin(); n_it != n_end; ++n_it)
+	    {
+	      os << *n_it << ", not ";
+	    }
+	}
+      os << *n_end;
+    }
+
+  return os;
+}
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const BridgeRulePtr& r)
+{
+  const Head& head = getHead(r);
+  Head::const_iterator h_end = --head.end();
+
+  if (!head.empty())
+    {
+      if (head.size() > 1)
+	{
+	  std::copy(head.begin(), h_end, std::ostream_iterator<Atom>(os, " v "));
+	}
+      os << *h_end;
+    }
+
+  os << ":- " << getBody(r);
+
+  return os;
+}
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const BridgeRulesPtr& R)
+{
+  std::copy(R->begin(), R->end(), std::ostream_iterator<BridgeRulePtr>(os, "\n"));
+  return os;
+}
 
 } // namespace dmcs
 

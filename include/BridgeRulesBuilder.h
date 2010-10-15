@@ -30,11 +30,14 @@
 #ifndef BRIDGE_RULES_BUILDER_H
 #define BRIDGE_RULES_BUILDER_H
 
+#include <map>
+
 #include "BaseBuilder.h"
 #include "Neighbor.h"
 #include "Rule.h"
 #include "Theory.h"
 #include "Signature.h"
+#include "Variable.h"
 
 namespace dmcs {
 
@@ -42,6 +45,7 @@ template<class Grammar>
 class BridgeRulesBuilder : public BaseBuilder<Grammar>
 {
 public:
+  // with ctx_id_ present, we can remove sig_ and take global_sigs[ctx_id-1]
   BridgeRulesBuilder(std::size_t ctx_id, 
 		     BridgeRulesPtr& bridge_rules_, 
 		     NeighborListPtr& neighbor_list_,
@@ -60,9 +64,10 @@ private:
   BridgeAtom
   build_bridge_atom(typename BaseBuilder<Grammar>::node_t& node);
 
-  std::size_t ctx_id; // ctx_id can later be used with sym to make a
-		      // composite key of the signature. With this we
-		      // can have shared signatures.
+private:
+  std::size_t ctx_id; 
+  std::size_t ctx_var_counter;
+  std::map<std::string, ContextTerm> vm;
   BridgeRulesPtr& bridge_rules;
   NeighborListPtr& neighbor_list;
   SignatureVecPtr& global_sigs;

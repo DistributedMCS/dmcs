@@ -50,32 +50,41 @@ BRGrammar::definition<ScannerT>::definition(BRGrammar const&)
 
   BOOST_SPIRIT_CLASSIC_NS::chset<> alnum_("a-zA-Z0-9_");
 
-atom_ =
+  atom_ =
     BOOST_SPIRIT_CLASSIC_NS::token_node_d[BOOST_SPIRIT_CLASSIC_NS::lower_p >> *alnum_];
 
-  bridge_atom_ =
-    rm[BOOST_SPIRIT_CLASSIC_NS::ch_p('(')] 
-    >> num_
-    >> rm[BOOST_SPIRIT_CLASSIC_NS::ch_p(':')]
+  schematic_atom_ =
+    !BOOST_SPIRIT_CLASSIC_NS::ch_p('@') 
+    >> BOOST_SPIRIT_CLASSIC_NS::ch_p('[')
     >> atom_
+    >> rm[BOOST_SPIRIT_CLASSIC_NS::ch_p(']')];
+
+  context_holder_ =
+    BOOST_SPIRIT_CLASSIC_NS::token_node_d[BOOST_SPIRIT_CLASSIC_NS::upper_p >> *alnum_];
+
+  schematic_bridge_atom_ =
+    rm[BOOST_SPIRIT_CLASSIC_NS::ch_p('(')] 
+    >> (num_ | context_holder_)
+    >> rm[BOOST_SPIRIT_CLASSIC_NS::ch_p(':')]
+    >> (atom_ | schematic_atom_)
     >> rm[BOOST_SPIRIT_CLASSIC_NS::ch_p(')')];
 
-  bridge_literal_
-    = !naf_ >> bridge_atom_;
+  schematic_bridge_literal_
+    = !naf_ >> schematic_bridge_atom_;
 
   disj_
     = atom_ >> *(rm[BOOST_SPIRIT_CLASSIC_NS::ch_p('v')] >> atom_);
 
-  bridge_body_
-    = bridge_literal_ >> *(rm[BOOST_SPIRIT_CLASSIC_NS::ch_p(',')] >> bridge_literal_);
+  schematic_bridge_body_
+    = schematic_bridge_literal_ >> *(rm[BOOST_SPIRIT_CLASSIC_NS::ch_p(',')] >> schematic_bridge_literal_);
 
   cons_
     = BOOST_SPIRIT_CLASSIC_NS::str_p(":-");
 
-  bridge_rule_
-    = disj_ >> !(rm[cons_] >> bridge_body_) >> rm[BOOST_SPIRIT_CLASSIC_NS::ch_p('.')];
+  schematic_bridge_rule_
+    = disj_ >> !(rm[cons_] >> schematic_bridge_body_) >> rm[BOOST_SPIRIT_CLASSIC_NS::ch_p('.')];
 
-  root_ = *(rm[BOOST_SPIRIT_CLASSIC_NS::comment_p("%")] | bridge_rule_)
+  root_ = *(rm[BOOST_SPIRIT_CLASSIC_NS::comment_p("%")] | schematic_bridge_rule_)
     >> rm[!BOOST_SPIRIT_CLASSIC_NS::end_p];
 }
 

@@ -18,63 +18,42 @@
  */
 
 /**
- * @file   Message.h
+ * @file   InstantiateBackwardMessage.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Wed Nov  18 11:53:24 2009
+ * @date   Tue Oct  05 10:02:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#ifndef INSTANTIATE_BACKWARD_MESSAGE_H
+#define INSTANTIATE_BACKWARD_MESSAGE_H
 
-#include "BeliefState.h"
+#include <boost/serialization/shared_ptr.hpp>
+
+#include "InstantiateMessage.h"
 #include "StatsInfo.h"
-#include "Context.h"
-#include "ContextSubstitution.h"
-
-#include <set>
-#include <boost/serialization/set.hpp>
-
 
 namespace dmcs {
 
-class Message
+class InstantiateBackwardMessage : public InstantiateMessage
 {
 public:
-  virtual ~Message() 
-  {}
-  // templates cant be virtual
-  template<class Archive>
-  void serialize(Archive & /* ar */, const unsigned int /* version */)
-  {}
-};
-
-class ConfigMessage : public Message
-{
-public:
-  ConfigMessage()
+  InstantiateBackwardMessage()
   { }
 
-  virtual ~ConfigMessage() 
+  virtual ~InstantiateBackwardMessage() 
   { }
 
-  ConfigMessage(std::size_t root_ctx_, ContextSubstitutionsPtr ctx_substitutions_)
-    : root_ctx(root_ctx_), ctx_substitutions(ctx_substitutions_)
+  InstantiateBackwardMessage(bool status_, HistoryPtr history_, BeliefStatePtr interface_vars_)
+    : InstantiateMessage(history_, interface_vars_), status(status_)
   { }
 
-  std::size_t
-  getStartingContext() const
+  const bool
+  getStatus() const
   {
-    return sctx;
-  }
-
-  ContextSubstitutionsPtr
-  getCtxSubstitution()
-  {
-    return ctx_substitutions;
+    return status;
   }
 
 public:
@@ -82,28 +61,31 @@ public:
   void
   serialize(Archive& ar, const unsigned int /* version */)
   {
-    ar & sctx;
-    ar & ctx_substitutions;
+    ar & history;
+    ar & status;
   }
 
 private:
-  std::size_t root_ctx;
-  ContextSubstitutionsPtr ctx_substitutions;
+  bool status;
 };
 
 
+typedef boost::shared_ptr<InstantiateBackwardMessage> InstantiateBackwardMessagePtr;
+
+
 inline std::ostream&
-operator<< (std::ostream& os, const ConfigMessage& config_mess)
+operator<< (std::ostream& os, const InstantiateBackwardMessage& mess)
 {
+  os << "(" << mess.getStatus() << ")" << std::endl 
+     << "[" << *mess.getHistory() << "]" << std::endl
+     << "[" << *mess.getInterfaceVars() << "]" << std::endl;
   return os;
 }
 
-
-typedef boost::shared_ptr<ConfigMessage> ConfigMessagePtr;
-
 } // namespace dmcs
 
-#endif // MESSAGE_H
+
+#endif // INSTANTIATE_RETURN_MESSAGE_H
 
 // Local Variables:
 // mode: C++

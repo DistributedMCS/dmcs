@@ -44,6 +44,8 @@
 #include <list>
 #include <set>
 
+#include <boost/shared_ptr.hpp>
+
 
 namespace dmcs {
 
@@ -89,7 +91,10 @@ public:
   CmdType cmd;
 };
 
+typedef boost::shared_ptr<BaseServer> ServerPtr;
+
 } // namespace dmcs
+
 
 #include "Server.tcc"
 

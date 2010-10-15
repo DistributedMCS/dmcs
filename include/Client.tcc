@@ -46,46 +46,55 @@ namespace dmcs {
 
 template<typename CmdType>
 Client<CmdType>::Client(boost::asio::io_service& io_service,
-	       boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-			  typename CmdType::input_type& mess_)
-  : io_service_(io_service),
-    conn(new connection(io_service)),
-    mess(mess_),
+			boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+			const std::string& my_header_,
+			typename CmdType::input_type& mess_)
+  : io_service_(io_service), conn(new connection(io_service)),
+    my_header(my_header_), mess(mess_), 
     result(new (typename CmdType::value_type))
 {
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 
 #if defined(DEBUG)
-  std::cerr << "Client::Client " << endpoint << std::endl;
+  std::cerr << "Client::Client()  " << endpoint << std::endl
+	    << "Header to send  = " << my_header << std::endl
+	    << "Message to send = " << mess << std::endl;
 #endif //DEBUG
 
   conn->socket().async_connect(endpoint,
-			       boost::bind(&Client::handle_connect, this,
+			       boost::bind(&Client::send_header, this,
 					   boost::asio::placeholders::error,
-					   ++endpoint_iterator)
-			       );
+					   ++endpoint_iterator));
 }
 
 
 
 template<typename CmdType>
 void
-Client<CmdType>::handle_connect(const boost::system::error_code& error,
-		       boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
+Client<CmdType>::send_header(const boost::system::error_code& error,
+			     boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
 {
 #ifdef DEBUG
-  std::cerr << "Handling connect" <<std::endl;
+  std::cerr << "Client::send_header" << std::endl;
 #endif
 
   if (!error)
     {
-#if defined(DEBUG)
-      std::cerr << "Client::handle_connect " << mess << std::endl;
-#endif //DEBUG
+      // first send the header so that the neighbor can recognize what
+      // kind of message will be sent. Notice that the neighbor
+      // receives just characters; hence, without the header, he won't
+      // be able to choose the proper type for the message.
 
-      conn->async_write(mess,
-			boost::bind(&Client::handle_write_message, this,
-				    boost::asio::placeholders::error, conn));
+      conn->async_write(my_header, boost::bind(&Client::send_message, this,
+					       boost::asio::placeholders::error, conn));
+
+      /*
+      std::vector<char> write_buf(my_header.begin(), my_header.end());
+      std::cerr << "write_buf.size() = " << write_buf.size() << std::endl;
+      
+      boost::asio::async_write(conn->socket(), boost::asio::buffer(write_buf),
+			       boost::bind(&Client::send_message, this,
+			       boost::asio::placeholders::error, conn));*/
     }
   else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator())
     {
@@ -94,16 +103,13 @@ Client<CmdType>::handle_connect(const boost::system::error_code& error,
       
       boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
       conn->socket().async_connect(endpoint,
-				   boost::bind(&Client::handle_connect, this,
+				   boost::bind(&Client::send_header, this,
 					       boost::asio::placeholders::error,
 					       ++endpoint_iterator));
     }
   else
     {
-      // An error occurred. Log it and return. Since we are not starting a new
-      // operation the io_service will run out of work to do and the client will
-      // exit.
-      std::cerr << "handle_connect: " << error.message() << std::endl;
+      std::cerr << "Client::send_header: " << error.message() << std::endl;
     }
 }
 
@@ -111,57 +117,119 @@ Client<CmdType>::handle_connect(const boost::system::error_code& error,
 
 template<typename CmdType>
 void
-Client<CmdType>::handle_write_message(const boost::system::error_code& error, 
-					connection_ptr /* c */)
+Client<CmdType>::send_message(const boost::system::error_code& error, connection_ptr conn)
 {
-
 #ifdef DEBUG
-  std::cerr << "writing message" << std::endl;
-#endif
+  std::cerr << "Client::send_message" << std::endl;
+#endif // DEBUG
 
   if (!error)
     {
-#if defined(DEBUG)
-      std::cerr << "Client::handle_write_message" << std::endl;
-#endif // DEBUG
-      
-      conn->async_read(result,
-		       boost::bind(&Client::handle_read_models, this,
-				   boost::asio::placeholders::error)
-		       );
+      std::cerr << mess << std::endl;
+      conn->async_write(mess,
+			boost::bind(&Client::read_header, this,
+				    boost::asio::placeholders::error, conn));
     }
   else
     {
-      std::cerr << "handle_write_message: " << error.message() << std::endl;
+      std::cerr << "Client::send_message: " << error.message() << std::endl;
+    }
+}
+
+
+
+template<typename CmdType>
+void
+Client<CmdType>::read_header(const boost::system::error_code& error, connection_ptr conn)
+{
+  if (!error)
+    {
+#if defined(DEBUG)
+      std::cerr << "Client::read_header" << std::endl;
+#endif // DEBUG
+      
+      conn->async_read(received_header,
+		       boost::bind(&Client::handle_read_header, this,
+				   boost::asio::placeholders::error, conn));
+    }
+  else
+    {
+      std::cerr << "Client::read_header: " << error.message() << std::endl;
+      throw std::runtime_error(error.message());
       throw std::runtime_error(error.message());
     }
 }
 
 
 template<typename CmdType>
-void 
-Client<CmdType>::handle_read_models(const boost::system::error_code& error)
+void
+Client<CmdType>::handle_read_header(const boost::system::error_code& error, connection_ptr conn)
 {
-
-#ifdef DEBUG
-  std::cerr << "reading models" << std::endl;
-#endif
-
   if (!error)
     {
-#if defined(DEBUG)
-      std::cerr << "At client: got some belief states..." << std::endl;
-#endif //DEBUG
+#ifdef DEBUG
+      std::cerr << "Client::handle_read_header" << std::endl
+		<< "Received header = " << received_header << std::endl;
+#endif
+
+      if (received_header.compare("DMCS EOF") == 0)
+	{
+	  finalize(error, conn);
+	}
+      else
+	{
+	  read_answer(error, conn);
+	}
     }
   else
     {
-      std::cerr << "handle_read_models: " << error.message() << std::endl;
+      std::cerr << "Client::handle_read_header: " << error.message() << std::endl;
       throw std::runtime_error(error.message());
     }
-
-  // Since we are not starting a new operation the io_service will run out of
-  // work to do and the client will exit.
 }
+
+template<typename CmdType>
+void 
+Client<CmdType>::read_answer(const boost::system::error_code& error, connection_ptr conn)
+{
+  if (!error)
+    {
+#if defined(DEBUG)
+      std::cerr << "Client::read_answer" << std::endl;
+#endif //DEBUG
+
+      conn->async_read(result,
+		       boost::bind(&Client::read_header, this,
+				   boost::asio::placeholders::error, conn));
+    }
+  else
+    {
+      std::cerr << "Client::read_answer: " << error.message() << std::endl;
+      throw std::runtime_error(error.message());
+      throw std::runtime_error(error.message());
+    }
+}
+
+template<typename CmdType>
+void
+Client<CmdType>::finalize(const boost::system::error_code& error, connection_ptr /* conn */)
+{
+  if (!error)
+    {
+#if defined(DEBUG)
+      std::cerr << "Client::finalize" << std::endl;
+#endif //DEBUG
+      // Do nothing. Since we are not starting a new operation the
+      // io_service will run out of work to do and the client will
+      // exit.
+    }
+  else
+    {
+      std::cerr << "Client::finalize: " << error.message() << std::endl;
+      throw std::runtime_error(error.message());
+    }
+}
+
 
 } // namespace dmcs
 

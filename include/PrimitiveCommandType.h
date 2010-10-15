@@ -18,45 +18,55 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   PrimitiveCommandType.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Fri May  28 16:18:04 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef PRIMITIVE_COMMAND_TYPE
+#define PRIMITIVE_COMMAND_TYPE
+
+#include "CommandType.h"
+#include "PrimitiveDMCS.h"
 
 namespace dmcs {
 
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
-#define DYNAMIC "dynamic"
-#define MATCH_MAKER "mm"
-#define ROOT_CTX "root"
+class PrimitiveCommandType 
+  : public CommandType<PrimitiveMessage, PrimitiveDMCS::dmcs_value_type>
+{
+public:
+  typedef PrimitiveDMCS::dmcs_value_type value_type;
 
+  PrimitiveCommandType(PrimitiveDMCSPtr pdmcs_)
+    : pdmcs(pdmcs_)
+  { }
+
+  return_type
+  execute(PrimitiveMessage& mess)
+  {
+    return pdmcs->getBeliefStates(mess);
+  }
+
+  bool
+  continues(PrimitiveMessage& /* mess */)
+  {
+    return false;
+  }
+
+private:
+  PrimitiveDMCSPtr pdmcs;
+};
+
+
+typedef boost::shared_ptr<PrimitiveCommandType> PrimitiveCommandTypePtr;
 
 } // namespace dmcs
 
-#endif // PROGRAM_OPTIONS_H_
+#endif // PRIMITIVE_COMMAND_TYPE
 
 // Local Variables:
 // mode: C++

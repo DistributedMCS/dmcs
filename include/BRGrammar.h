@@ -51,11 +51,13 @@ struct BRGrammar
       Cons,
       Num,
       Atom,
-      BridgeAtom,
-      BridgeLiteral,
+      SchematicAtom,
+      ContextHolder,
+      SchematicBridgeAtom,
+      SchematicBridgeLiteral,
       Disj,
-      BridgeBody,
-      BridgeRule
+      SchematicBridgeBody,
+      SchematicBridgeRule
     };
 
   // S = ScannerT
@@ -69,16 +71,18 @@ struct BRGrammar
     definition(BRGrammar const& self);
     BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Root> > const& start() const { return root_; }
 
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Num> >           num_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Naf> >           naf_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S>                           cons_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Atom> >          atom_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<BridgeAtom> >    bridge_atom_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<BridgeLiteral> > bridge_literal_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Disj> >          disj_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<BridgeBody> >    bridge_body_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<BridgeRule> >    bridge_rule_;
-    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Root> >          root_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Num> >                    num_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Naf> >                    naf_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S>                                    cons_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Atom> >                   atom_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<SchematicAtom> >          schematic_atom_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<ContextHolder> >          context_holder_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<SchematicBridgeAtom> >    schematic_bridge_atom_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<SchematicBridgeLiteral> > schematic_bridge_literal_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Disj> >                   disj_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<SchematicBridgeBody> >    schematic_bridge_body_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<SchematicBridgeRule> >    schematic_bridge_rule_;
+    BOOST_SPIRIT_CLASSIC_NS :: rule<S, Ctx, tag<Root> >                   root_;
   };
 };
 

@@ -44,7 +44,10 @@ libdmcs_a_SOURCES = \
 		OptDMCS.cpp \
 		PrimitiveDMCS.cpp \
                 QueryPlan.cpp \
-                BeliefCombination.cpp
+                BeliefCombination.cpp \
+	PrimitiveDMCS.cpp \
+	OptDMCS.cpp \
+	DynamicConfiguration.cpp
 
 # the dmcsd binary
 dmcsd_SOURCES = \

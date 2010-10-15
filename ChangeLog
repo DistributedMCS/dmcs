@@ -1,4 +1,4 @@
-2010-10-14  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+2010-10-14  Dao Tran Minh  <dao@kr.tuwien.ac.at>
 
 	* src/dynGen.cpp: Add killall dmcsd at the beginning of the shell script.
 
@@ -583,6 +583,26 @@
 	* src/Makefile.am: Add date_time library.
 	* include/Makefile.am: Add StatsInfo.h
 
+	* include/Signature.h (<<): Simplified.
+
+	* include/ContextSubstitution.h: Add operator<<
+
+2010-04-29  Minh Tran Dao  <dao@kr.tuwien.ac.at>
+
+	* include/ProgramOptions.h: Add ROOT
+
+	* src/dmcsc.cpp: Add dynamic stuff.
+
+	* include/ContextSubstitution.h: Use ContextSubstitutions
+	* include/CommandType.h: Likewise.
+	* include/Message.h: Likewise.
+	* src/dmcsd.cpp: Likewise.
+
+	* src/DynamicConfiguration.cpp: Start implementing lconfig.
+	* include/DynamicConfiguration.h: Likewise.
+
+	* include/Rule.h: Define operator<< for BridgeRulePtr, BridgeRulesPtr
+
 	* include/Client.h: Use CmdType instead of Message_t.
 	* include/Client.tcc: Likewise.
 	* src/dmcsc.cpp: Likewise.
@@ -649,6 +669,15 @@
 	* src/Makefile.am (dmcsd_LDADD): Linker on Linux is
 	order-sensitive.
 
+2010-04-29  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* src/genTest.cpp: Fixed warning with number comparison.
+
+2010-04-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/Makefile.am (dmcsd_LDADD): Linker on Linux is
+	order-sensitive.
+
 2010-04-28  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/tests/testQueryPlan.cpp: Resuscitate testQueryPlan.
@@ -667,6 +696,35 @@
 	* include/Client.h: Remove system size from ctor.
 	* include/Client.tcc: Likewise.
 	* src/dmcsc.cpp: Likewise.
+
+2010-04-27  Minh Tran Dao  <dao@dvorak.kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Adapt the call of static DMCS to new design of
+	Server, CommandType.
+
+	* include/PrimitiveDMCS.h: Add PrimitiveDMCSPtr.
+	* include/OptDMCS.h: Add OptDMCSPtr.
+
+	* include/Message.h: Add ConfigMessage and operator<< for it.
+
+	* include/CommandType.h: New design for CommandType
+	* include/Server.h: Likewise.
+	* include/Server.tcc: Likewise.
+
+	* include/Neighbor.h: Move type Neighbor* into Neighbor.h
+	* include/QueryPlan.h: Likewise.
+
+	* include/BridgeRulesBuilder.tcc (dmcs): Fix waring regarding schematic_type.
+
+	* include/DynamicConfiguration.h: New file.
+	* src/DynamicConfiguration.cpp: Likewise.
+	* include/ContextSubstitution.h: Likewise.
+
+	* src/OptDMCS.cpp: New file.
+	* src/PrimitiveDMCS.cpp: Likewise.
+
+	* include/OptDMCS.tcc: Remove.
+	* include/PrimitiveDMCS.tcc: Likewise.
 
 2010-04-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
@@ -800,6 +858,224 @@
 	* src/tests/Makefile.am: Likewise.
 	* examples/clasp-result-big.txt: Likewise.
 	* examples/dimacs-big.txt: Likewise.
+
+2010-04-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	Release internal version 0.0.1.
+
+	* configure.ac: Bump version to 0.1.0.
+
+2010-04-20  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/BaseSolver.h: Do not use global interface variables from QueryPlan.
+	* include/BaseVisitor.h: Likewise.
+	* include/BeliefCombination.h: Likewise.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+	* include/DimacsVisitor.h: Likewise.
+	* include/LogicVisitor.h: Likewise.
+	* include/OptDMCS.h: Likewise.
+	* include/OptDMCS.tcc: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/PrimitiveDMCS.tcc: Likewise.
+	* include/SatSolver.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* src/BeliefCombination.cpp: Likewise.
+	* src/DimacsVisitor.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+
+2010-04-20  Seif El-Din Bairakdar  <seif.bairakdar@gmail.com>
+
+	* include/ProgramOptions.h: Add missing file.
+
+2010-04-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/testParsers.cpp: Resuscitate testParsers testcase.
+	* src/tests/Makefile.am: Likewise.
+	* examples/dia-4-4-2-2-1_opt_dlv.txt: Likewise.
+	* examples/dia-4-4-2-2-1_dlv.txt: Likewise.
+	* examples/dia-4-4-2-2-1_command_line_opt.txt: Likewise.
+	* examples/dia-4-4-2-2-1_command_line_opt.sh: Likewise.
+	* examples/dia-4-4-2-2-1_command_line.txt: Likewise.
+	* examples/dia-4-4-2-2-1_command_line.sh: Likewise.
+	* examples/dia-4-4-2-2-1.top: Likewise.
+	* examples/dia-4-4-2-2-1.opt: Likewise.
+	* examples/dia-4-4-2-2-1.dlv: Likewise.
+	* examples/dia-4-4-2-2-1-4.lp: Likewise.
+	* examples/dia-4-4-2-2-1-3.lp: Likewise.
+	* examples/dia-4-4-2-2-1-3.br: Likewise.
+	* examples/dia-4-4-2-2-1-2.lp: Likewise.
+	* examples/dia-4-4-2-2-1-2.br: Likewise.
+	* examples/dia-4-4-2-2-1-1.lp: Likewise.
+	* examples/dia-4-4-2-2-1-1.br: Likewise.
+
+	* include/ParserDirector.tcc: Include stdexcept.
+
+	* include/BeliefState.h (operator>>): Initialize BeliefStatePtr.
+	Add documentation.
+
+2010-04-26  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/genTest.cpp: Sanitize.
+
+	* include/RingQPGenerator.h: Fix warning.
+	* include/RingEdgeQPGenerator.h: Likewise.
+	* include/MultipleRingQPGenerator.h: Likewise.
+	* include/HouseQPGenerator.h: Likewise.
+	* include/DiamondZigZagQPGenerator.h: Likewise.
+	* include/DiamondQPGenerator.h: Likewise.
+	* include/BinaryTreeQPGenerator.h: Likewise.
+
+	* include/BeliefState.h: Add some BeliefSet helper functions.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/QueryPlanGenerator.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* src/BeliefCombination.cpp: Likewise.
+	* src/tests/testBeliefComparison.cpp: Likewise.
+	* src/QueryPlanGenerator.cpp: Likewise.
+
+	* src/genTest.cpp: Rename Neighbors_ and NeigborsPtr_ to Neighbors
+	and NeighbordPtr.
+	* src/QueryPlan.cpp: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* include/SatSolver.tcc: Likewise.
+
+	* include/QueryPlan.h: Likewise.
+	* include/PrimitiveDMCS.tcc: Likewise.
+	* include/OptDMCS.tcc: Likewise.
+
+2010-04-25  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/testBeliefComparison.cpp: Resuscitate testBeliefComparison.
+	* src/tests/Makefile.am: Likewise.
+
+	* INSTALL: Remove.
+
+	* TODO: Update.
+
+	* include/LogicVisitor.h: Fix warning.
+
+	* m4/boost.m4: Update from
+	<http://github.com/tsuna/boost.m4/raw/master/build-aux/boost.m4>.
+
+	* include/BeliefState.h: Simplify BeliefState types.
+	(setEpsilon): Sets epsilon flag.
+	(BeliefStateEq): Returns true iff both parameters are equal.
+	* src/genTest.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/QueryPlanGenerator.cpp: Likewise.
+	* src/Cache.cpp: Likewise.
+	* src/BeliefCombination.cpp: Likewise.
+	* src/tests/testClasp.cpp: Likewise.
+	* include/Server.tcc: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* include/SatSolver.h: Likewise.
+	* include/PrimitiveDMCS.tcc: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/OptDMCS.tcc: Likewise.
+	* include/OptDMCS.h: Likewise.
+	* include/CommandType.h: Likewise.
+	* include/Client.tcc: Likewise.
+	* include/Client.h: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/Cache.h: Likewise.
+	* include/BeliefCombination.h: Likewise.
+	* include/BaseSolver.h: Likewise.
+
+2010-04-25  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+
+	* include/BridgeRulesBuilder.h: Update parsing for schematic
+	bridge rules.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+
+	* include/Variable.h: Add helper function for creating schematic
+	belief.
+
+2010-04-24  Minh Tran Dao  <dao@.kr.tuwien.ac.at>
+
+	* include/BridgeRulesBuilder.tcc: Adapting the parsing with
+	ContextTerm involved.
+	* include/BridgeRulesBuilder.h: Likewise.
+
+	* include/Variable.h: Use assertion here and there, 2 term
+	construction methods.
+	* src/tests/testVariable.cpp: Adapted to changes in Variable.h.
+
+	* include/Rule.h: Use ContextTerm in BridgeAtom.
+
+	* src/dmcsd.cpp: Matches read and stored in our internal format
+	with integers.
+
+	* examples/student.inp (matches): Change input format of matches
+
+	* include/Match.h: Fixed copy-and-paste bug from Symbol.
+
+	* src/tests/testMatch.cpp: New file.
+
+	* include/Makefile.am: Add Match.h
+	* src/tests/Makefile.am: Add testMatch.cpp
+
+2010-04-23  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Remove VSignature.h.
+
+2010-04-22  Dao Tran Minh  <dao@kr.tuwien.ac.at>
+
+	* include/Variable.h: New file.
+	* src/tests/testVariable.cpp: Likewise.
+	* include/Match.h: Likewise.
+
+2010-04-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/clasp-wrapper.sh: Remove.
+
+	* src/BeliefCombination.cpp: Remove debug output.
+	Check that V has the same size as all other belief states.
+
+	* include/SpiritFilePositionNode.h: Add operator<< for
+	FilePositionNodeData to get suport for BOOST_SPIRIT_DEBUG.
+
+	* include/SatSolver.tcc: Fix signed comparison.
+
+	* include/OptDMCS.tcc: Remove debug output.
+	* include/PrimitiveDMCS.tcc: Likewise.
+
+	* include/ClaspResultGrammar.h: Add support for multi-line models
+	and simplify belief state building.
+	* include/ClaspResultGrammar.tcc: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/BaseBuilder.h: Likewise.
+
+	* src/tests/testClasp.cpp: New test case for clasp result parsing.
+	* src/tests/Makefile.am: Likewise.
+	* examples/clasp-result-big.txt: Likewise.
+	* examples/dimacs-big.txt: Likewise.
+
+2010-04-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Dynamically read signatures from config files,
+	depending on the number of contexts in the pool.
+
+	* include/BRGrammar.h: Update grammar for schematic bridge rules.
+	* include/BRGrammar.tcc: Likewise.
+
+	* include/BridgeRulesBuilder.h: Replace query_plan by global_signatures.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+
+	* src/ContextGenerator.cpp: Replace Neighbors_ by Neighbors
+	* src/QueryPlan.cpp: Likewise.
+	* src/genTest.cpp: Likewise.
+	* include/QueryPlan.h: Likewise.
+	* include/PrimitiveDMCS.tcc: Likewise.
+	* include/OptDMCS.tcc: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/SatSolver.tcc: Likewise.
+
+	* include/Signature.h: Update Signature to deal with shared signatures between contexts.
+	* src/tests/testSignature.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* include/ProgramOptions.h: Likewise.
 
 2010-04-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 

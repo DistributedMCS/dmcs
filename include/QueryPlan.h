@@ -100,10 +100,6 @@ typedef boost::property_map<graph_t, sigma_t>::type               VertexSigmaPro
 typedef boost::property_map<graph_t, interface_t>::type           EdgeInterfaceProperty;
 typedef boost::ref_property_map<graph_t*, BeliefStatePtr>         GraphNameProperty;
 
-/// Neighbors is a list of context ids
-//typedef std::list<std::size_t> NeighborList;
-//typedef boost::shared_ptr<NeighborList> NeighborListPtr;
-
 typedef std::pair<std::size_t, std::size_t> EdgeInt;
 typedef std::vector<EdgeInt> Edges;
 typedef boost::shared_ptr<Edges> EdgesPtr;
@@ -111,7 +107,7 @@ typedef boost::shared_ptr<Edges> EdgesPtr;
 typedef std::map<std::size_t, Vertex> VertexMap;
 typedef boost::shared_ptr<VertexMap> VertexMapPtr;
 
-  /// @todo maybe rename to a more appropriate name, this is not the QueryPlan
+/// @todo maybe rename to a more appropriate name, this is not the QueryPlan
 struct QueryPlan
 {
   //private:
@@ -165,8 +161,8 @@ struct QueryPlan
   void
   remove_connection(std::size_t context1, std::size_t context2);
 
-
   NeighborListPtr
+
   getNeighbors(std::size_t context_id);
 
   EdgesPtr

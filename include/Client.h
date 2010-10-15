@@ -51,7 +51,7 @@ class Client
  public:
   Client(boost::asio::io_service& io_service,
 	 boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-	 typename CmdType::input_type& mess);
+	 const std::string& header_, typename CmdType::input_type& mess);
 
   typename CmdType::return_type
   getResult()
@@ -61,19 +61,29 @@ class Client
 
  private:
   void 
-  handle_connect(const boost::system::error_code& error,
-		 boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
+  send_header(const boost::system::error_code& error,
+	      boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
+
+  void
+  send_message(const boost::system::error_code& error, connection_ptr conn);
+
+  void
+  read_header(const boost::system::error_code& error, connection_ptr conn);
 
   void 
-  handle_read_models(const boost::system::error_code& error);
+  handle_read_header(const boost::system::error_code& error, connection_ptr conn);
 
   void 
-  handle_write_message(const boost::system::error_code& error,
-		       connection_ptr c);
+  read_answer(const boost::system::error_code& error, connection_ptr conn);
+
+  void 
+  finalize(const boost::system::error_code& error, connection_ptr /* conn */);
 
 
   boost::asio::io_service& io_service_;
 
+  const std::string& my_header; 
+  std::string received_header;
   connection_ptr conn;
   typename CmdType::input_type mess;
   typename CmdType::return_type result;

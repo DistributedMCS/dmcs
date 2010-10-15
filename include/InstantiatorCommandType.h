@@ -18,45 +18,53 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   InstantiatorCommandType.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Fri May  28 16:18:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef INSTANTIATOR_COMMAND_TYPE
+#define INSTANTIATOR_COMMAND_TYPE
+
+#include "CommandType.h"
+#include "Instantiator.h"
+#include "ContextSubstitution.h"
 
 namespace dmcs {
 
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
-#define DYNAMIC "dynamic"
-#define MATCH_MAKER "mm"
-#define ROOT_CTX "root"
+class InstantiatorCommandType : public CommandType<InstantiateForwardMessage, InstantiateBackwardMessage>
+{
+public:
+  
+  InstantiatorCommandType(InstantiatorPtr& inst_)
+    : inst(inst_)
+  { }
 
+  return_type
+  execute(InstantiateForwardMessage& mess)
+  {
+    return inst->instantiate(mess);
+  }
+
+  bool
+  continues(InstantiateForwardMessage& /* mess */)
+  {
+    return false;
+  }
+
+private:
+  InstantiatorPtr inst;
+};
+
+typedef boost::shared_ptr<InstantiatorCommandType> InstantiatorCommandTypePtr;
 
 } // namespace dmcs
 
-#endif // PROGRAM_OPTIONS_H_
+#endif // INSTANTIATOR_COMMAND_TYPE
 
 // Local Variables:
 // mode: C++

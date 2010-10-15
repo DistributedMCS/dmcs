@@ -55,7 +55,6 @@ private:
   void
   add_literal(typename BaseBuilder<Grammar>::node_t& node, BeliefStatePtr& bs);
 
-
   const ProxySignatureByLocal& local_sig;
 
   std::size_t system_size;

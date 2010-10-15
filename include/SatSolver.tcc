@@ -68,7 +68,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const TheoryPtr& theory, std::s
       
       Builder builder(proc->getOutput());
       builder.visitTheory(theory, sig_size);
-
+ 
 #ifdef DEBUG
       Builder evil_builder(std::cerr);
       evil_builder.visitTheory(theory, sig_size);
@@ -106,7 +106,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const TheoryPtr& theory, std::s
       std::cerr << "Error: " << e.what() << std::endl;
       throw e;
     }
-
+  
   return retcode;
 }
   

@@ -35,8 +35,23 @@ noinst_HEADERS =  \
 		CnfGrammar.tcc \
 		CommandType.h \
 		Context.h \
+                ContextGenerator.h \
+	ContextSubstitution.h \
+                DiamondQPGenerator.h \
                 DLVVisitor.h \
+                RingQPGenerator.h \
+                RingOptQPGenerator.h \
+                RingEdgeQPGenerator.h \
+                HouseQPGenerator.h \
+                HouseOptQPGenerator.h \
+	Match.h \
+                MultipleRingQPGenerator.h \
+                MultipleRingOptQPGenerator.h \
+                BinaryTreeQPGenerator.h \
+                DiamondZigZagQPGenerator.h \
+                DiamondZigZagOptQPGenerator.h \
 		DimacsVisitor.h \
+		DynamicConfiguration.h \
 		LogicVisitor.h \
 		LocalKBBuilder.h \
 		LocalKBBuilder.tcc \
@@ -87,5 +102,6 @@ noinst_HEADERS =  \
 		generator/DynGridTopoGenerator.h \
 		generator/DynRakeTopoGenerator.h \
 		generator/DynRandomTopoGenerator.h \
+		Variable.h \
 		connection.hpp
 

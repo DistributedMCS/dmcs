@@ -61,7 +61,6 @@ public:
   dmcs_return_type
   getBeliefStates(const OptMessage& mess);
 
-
 protected:
 
   SignaturePtr

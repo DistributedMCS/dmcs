@@ -18,45 +18,55 @@
  */
 
 /**
- * @file   ProgramOptions.h
- * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
- * @date   Thu March  25 2010
+ * @file   OptCommandType.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Fri May  28 16:18:01 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef PROGRAM_OPTIONS_H_
-#define PROGRAM_OPTIONS_H_
+#ifndef OPT_COMMAND_TYPE
+#define OPT_COMMAND_TYPE
+
+#include "CommandType.h"
+#include "OptDMCS.h"
 
 namespace dmcs {
 
-#define HELP "help"
-#define PORT "port"
-#define DEFAULT_PORT 5001
-#define QUERY_VARS "query-variables"
-#define SYSTEM_SIZE "system-size"
-#define MANAGER "manager"
-#define HOSTNAME "hostname"
-#define CONTEXT_ID "context"
-#define KB "kb"
-#define BR "br"
-#define TOPOLOGY "topology"
-#define CONTEXTS "contexts"
-#define ATOMS "atoms"
-#define INTERFACE "interface"
-#define BRIDGE_RULES "bridge_rules"
-#define TEMPLATE "template"
-#define PREFIX "prefix"
-#define DYNAMIC "dynamic"
-#define MATCH_MAKER "mm"
-#define ROOT_CTX "root"
+class OptCommandType : public CommandType<OptMessage, OptDMCS::dmcs_value_type>
+{
+public:
+  typedef OptMessage input_type;
+  typedef OptDMCS::dmcs_value_type value_type;
 
+  OptCommandType(OptDMCSPtr odmcs_)
+    : odmcs(odmcs_)
+  { }
+
+  return_type
+  execute(const OptMessage& mess)
+  {
+    return odmcs->getBeliefStates(mess);
+  }
+
+  bool
+  continues(OptMessage& /* mess */)
+  {
+    return false;
+  }
+
+private:
+  OptDMCSPtr odmcs;
+};
+
+
+typedef boost::shared_ptr<OptCommandType> OptCommandTypePtr;
 
 } // namespace dmcs
 
-#endif // PROGRAM_OPTIONS_H_
+#endif // OPT_COMMAND_TYPE
 
 // Local Variables:
 // mode: C++

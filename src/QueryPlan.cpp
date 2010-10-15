@@ -239,7 +239,9 @@ QueryPlan::remove_connection(std::size_t context_id1, std::size_t context_id2)
 
 
 
-NeighborListPtr
+
+
+NeighborsListPtr
 QueryPlan::getNeighbors(std::size_t context_id)
 {
   //std::cerr << "in get Neighbors with VMAP"<< std::endl;
