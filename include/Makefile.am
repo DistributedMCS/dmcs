@@ -1,4 +1,28 @@
-trategy.h \
+AUTOMAKE_OPTIONS = gnu
+
+# including headers for make dist
+noinst_HEADERS =  \
+	  	ProgramOptions.h
+		Signature.h \
+	  	CNFLocalLoopFormulaBuilder.h \
+	  	IMPLocalLoopFormulaBuilder.h \
+	  	EquiCNFLocalLoopFormulaBuilder.h \
+		LocalLoopFormulaBuilder.h \
+		LoopFormula.h \
+		LoopFormulaBuilder.h \
+	 	LoopFormulaDirector.h \
+		BaseBuilder.h \
+		BaseDMCS.h \
+		BaseSolver.h \
+		BaseSortingStrategy.h \
+		BaseVisitor.h \
+		BeliefCombination.h \
+		BeliefState.h \
+		BridgeRulesBuilder.h \
+		BridgeRulesBuilder.tcc \
+		Cache.h \
+		ChosenCtxSortingStrategy.h \
+		ChosenQualityCtxSortingStrategy.h \
 		ClaspProcess.h \
 		ClaspResultBuilder.h \
 		ClaspResultBuilder.tcc \
