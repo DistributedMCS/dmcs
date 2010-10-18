@@ -30,7 +30,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "connection.hpp"
+#include "network/connection.hpp"
 #include "BeliefState.h"
 #include "Context.h"
 #include "BaseDMCS.h"
@@ -99,8 +99,6 @@ typedef boost::shared_ptr<BaseServer> ServerPtr;
 
 } // namespace dmcs
 
-
-//#include "Server.tcc"
 
 #endif // SERVER_H
 

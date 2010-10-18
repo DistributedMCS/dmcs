@@ -30,7 +30,7 @@
 #include "OptMessage.h"
 #include "PrimitiveMessage.h"
 #include "Theory.h"
-#include "connection.hpp"
+#include "network/connection.hpp"
 
 #include <boost/shared_ptr.hpp>
 

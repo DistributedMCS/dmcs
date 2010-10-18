@@ -32,7 +32,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "connection.hpp"
+#include "network/connection.hpp"
 #include "BeliefState.h"
 #include "CommandType.h"
 #include "Message.h"
@@ -91,7 +91,7 @@ class Client
 
 } // namespace dmcs
 
-#include "Client.tcc"
+#include "network/Client.tcc"
 
 #endif
 

@@ -30,10 +30,10 @@
 #ifndef HANDLER_H
 #define HANDLER_H
 
-#include "connection.hpp"
+#include "network/connection.hpp"
 #include "Session.h"
 #include "CommandType.h"
-#include "InstantiatorCommandType.h"
+#include "dyndmcs/InstantiatorCommandType.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -80,7 +80,7 @@ private:
 } // namespace dmcs
 
 
-#include "Handler.tcc"
+#include "network/Handler.tcc"
 
 #endif // HANDLER_H
 
