@@ -36,7 +36,7 @@
 #include "ClaspResultGrammar.h"
 #include "ClaspResultBuilder.h"
 #include "ClaspProcess.h"
-#include "Client.h"
+#include "network/Client.h"
 #include "CommandType.h"
 #include "DimacsVisitor.h"
 #include "ParserDirector.h"

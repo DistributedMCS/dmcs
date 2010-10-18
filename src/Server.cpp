@@ -33,8 +33,8 @@
 
 #include <iostream>
 
-#include "Handler.h"
-#include "Server.h"
+#include "network/Handler.h"
+#include "network/Server.h"
 
 
 namespace dmcs {

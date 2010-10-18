@@ -31,12 +31,13 @@
 #define SERVER_H
 
 #include "network/connection.hpp"
+#include "network/Session.h"
+
 #include "BeliefState.h"
 #include "Context.h"
 #include "BaseDMCS.h"
 #include "Rule.h"
 #include "Theory.h"
-#include "Session.h"
 #include "CommandType.h"
 #include "CommandTypeFactory.h"
 

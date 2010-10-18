@@ -32,7 +32,11 @@
 #include "config.h"
 #endif
 
-#include "Client.h"
+#include "dyndmcs/DynamicCommandType.h"
+#include "dyndmcs/DynamicConfiguration.h"
+#include "dyndmcs/InstantiatorCommandType.h"
+
+#include "network/Client.h"
 #include "Theory.h"
 #include "BeliefState.h"
 #include "Message.h"
@@ -40,9 +44,6 @@
 #include "ProgramOptions.h"
 #include "OptCommandType.h"
 #include "PrimitiveCommandType.h"
-#include "DynamicCommandType.h"
-#include "DynamicConfiguration.h"
-#include "InstantiatorCommandType.h"
 
 #include <fstream>
 #include <iostream>
@@ -96,7 +97,8 @@ main(int argc, char* argv[])
       std::string hostName = "";
       std::string port = "";
       std::string manager = "";
-      std::size_t systemSize = 0;
+      std::string qvs = "";
+      std::size_t system_size = 0;
       std::size_t root_ctx;
       bool dynamic;
       BeliefStatePtr V(new BeliefState);
@@ -105,11 +107,11 @@ main(int argc, char* argv[])
 
       desc.add_options()
 	(HELP, "produce help and usage message")
-	(HOSTNAME, boost::program_options::value<std::string>(&hostName), "set host name")
+	(HOSTNAME, boost::program_options::value<std::string>(&hostName)->default_value("localhost"), "set host name")
 	(PORT, boost::program_options::value<std::string>(&port), "set port")
-	(QUERY_VARS, boost::program_options::value<std::string>(), "set query variables")
-	(SYSTEM_SIZE, boost::program_options::value<std::size_t>(), "set system size")
-	(MANAGER, boost::program_options::value<std::string>(), "set Manager HOST:PORT")
+	(QUERY_VARS, boost::program_options::value<std::string>(&qvs), "set query variables")
+	(SYSTEM_SIZE, boost::program_options::value<std::size_t>(&system_size), "set system size")
+	(MANAGER, boost::program_options::value<std::string>(&manager), "set Manager HOST:PORT")
 	(DYNAMIC, boost::program_options::value<bool>(&dynamic)->default_value(false), "set to dynamic mode")
 	(ROOT_CTX, boost::program_options::value<std::size_t>(&root_ctx)->default_value(1), "set root context id")
 	;
@@ -125,12 +127,10 @@ main(int argc, char* argv[])
         }
       
       bool primitiveDMCS = false;
-      if (vm.count(QUERY_VARS)) // reading V for basic DMCS
+      if (qvs.compare("") != 0) // reading V for basic DMCS
 	{
 	  primitiveDMCS = true;
 	  
-	  const std::string& qvs = vm[QUERY_VARS].as<std::string>();
-	    
 	  boost::tokenizer<> tok(qvs);
 
 	  for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
@@ -142,23 +142,10 @@ main(int argc, char* argv[])
 	    }
 	}
 
-      int optionalCount = 0;
-
-      if (vm.count(MANAGER)) 
+      if (port.compare("") == 0)
 	{
-	  //optionalCount++;
-	  //std::cerr << "We are sorry, but the manager feature is under implementation, please try the other alternatives";
-	  //read manager host and port
-	  // quick hack: manager now stands for the topology file. 
-	  manager = vm[MANAGER].as<std::string>();
-	  
-	  //return 1;
-	}
-
-      if (vm.count(SYSTEM_SIZE)) 
-	{
-	  systemSize = vm[SYSTEM_SIZE].as<std::size_t>();
-	  optionalCount++;
+	  std::cerr << desc << "\n";
+	  return 1;
 	}
 
       boost::asio::io_service io_service;
@@ -168,22 +155,16 @@ main(int argc, char* argv[])
       boost::asio::ip::tcp::endpoint endpoint = *it;
 
       if (dynamic)
-	{
-	  // dynamic mode
+	{ // dynamic mode
 
-	  if(hostName.compare("") == 0 ||
-	     port.compare("") == 0)
-	    {
-	      std::cerr << desc << "\n";
-	      return 1;
-	    }
+	  std::cerr << "In dynamic mode"<< std::endl;
 
 	  ContextSubstitutionPtr ctx_sub(new ContextSubstitution);
 	  ConfigMessage mess(root_ctx, ctx_sub, false);
 	  
-	  //#ifdef DEBUG
+#ifdef DEBUG
 	  std::cerr << "Message = " << mess << std::endl;
-	  //#endif
+#endif
 	  
 	  std::string header = HEADER_REQ_DYN_DMCS;
 	  Client<DynamicCommandType> c(io_service, it, header, mess);
@@ -204,34 +185,27 @@ main(int argc, char* argv[])
 	  instantiate(*it, hostName, port);
 	}
       else
-	{
-	  // ground mode
-
-	  if(hostName.compare("") ==0 ||
-	     port.compare("") == 0 ||
-	     systemSize == 0 ||
+	{ // ground mode
+	  if(system_size == 0 ||
 	     (primitiveDMCS && V->size() == 0) ||
-	     (primitiveDMCS && V->size() != systemSize) ||
-	     optionalCount == 0 || optionalCount == 2) 
+	     (primitiveDMCS && V->size() != system_size))
 	    {
 	      std::cerr << desc << "\n";
 	      return 1;
 	    }
 
-
-      // our result
+	  // our result
 #ifdef DMCS_STATS_INFO
-      ReturnMessagePtr result(new ReturnMessage);
+	  ReturnMessagePtr result(new ReturnMessage);
 #else
-      BeliefStateListPtr result(new BeliefStateList);
+	  BeliefStateListPtr result(new BeliefStateList);
 #endif // DMCS_STATS_INFO
-	
+	  
 #ifdef DEBUG
-	  std::cerr << "Starting the DMCS with " << systemSize << std::endl;
+	  std::cerr << "Starting DMCS with " << system_size << std::endl;
 #endif
-
-      
-	  if (primitiveDMCS) //primitive DMCS
+	  
+	  if (primitiveDMCS) // primitive DMCS
 	    {
 #ifdef DEBUG
 	      std::cerr << "Primitive" << std::endl;

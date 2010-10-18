@@ -35,7 +35,7 @@
 #include "ClaspResultGrammar.h"
 #include "ClaspResultBuilder.h"
 #include "ClaspProcess.h"
-#include "Client.h"
+#include "network/Client.h"
 #include "CommandType.h"
 #include "DimacsVisitor.h"
 #include "ParserDirector.h"
@@ -112,14 +112,13 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 {
   const std::size_t n = ctx->getSystemSize();
   const std::size_t k = ctx->getContextID(); // my local id
-  
-  assert(n > 0 && k <= n);
-    
+
 #if defined(DEBUG)
   std::cerr << "In PrimitiveDMCS, at context " << k << std::endl 
 	    << "n = " << n << std::endl;
 #endif // DEBUG
 
+  assert(n > 0 && k <= n);
 
 #ifdef DMCS_STATS_INFO
   initStatsInfos(n);
@@ -144,11 +143,11 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #endif
 
     // No cache found, we need to compute from scratch
-
-    const SignaturePtr& sig = ctx->getSignature();
-
+  
+  const SignaturePtr& sig = ctx->getSignature();
+  
 #ifdef DEBUG
-    std::cerr << "Original signature: " << *sig << std::endl;
+  std::cerr << "Original signature: " << *sig << std::endl;
 #endif
       
     // create the guessing signature using global V and my signature

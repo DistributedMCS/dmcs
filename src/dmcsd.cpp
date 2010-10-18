@@ -32,13 +32,13 @@
 #include "config.h"
 #endif
 
-#include "Server.h"
+
+#include "network/Server.h"
+#include "network/Session.h"
+
 #include "Message.h"
-#include "DynamicConfiguration.h"
 #include "DimacsVisitor.h"
-#include "Session.h"
 #include "LocalKBBuilder.h"
-#include "Match.h"
 #include "PropositionalASPGrammar.h"
 #include "BRGrammar.h"
 #include "BridgeRulesBuilder.h"
@@ -51,13 +51,12 @@
 #include "OptDMCS.h"
 #include "OptCommandType.h"
 #include "PrimitiveCommandType.h"
-#include "DynamicCommandType.h"
 #include "ProgramOptions.h"
 #include "Neighbor.h"
-#include "NoSBARedBBodySortingStrategy.h"
-#include "Instantiator.h"
-#include "InstantiatorCommandType.h"
 #include "CommandTypeFactory.h"
+
+#include "dyndmcs/Match.h"
+#include "dyndmcs/NoSBARedBBodySortingStrategy.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <string>
@@ -224,6 +223,7 @@ int main(int argc, char* argv[])
       int myport = 0;
       std::size_t myid = 0;
       std::size_t pool_size = 0;
+      std::size_t system_size = 0;
       std::string filename_local_kb = "";
       std::string filename_bridge_rules = "";
       std::string filename_topo = "";
@@ -386,7 +386,7 @@ int main(int argc, char* argv[])
 
 	  // signatures
 	  read_all_signatures(global_sigs, str_sigs);
-	  SignaturePtr sig = (*global_sigs)[myid-1];
+	  sig = (*global_sigs)[myid-1];
 	  
 	  // context information == all contexts in the pool 
 	  read_all_contexts(context_info, str_contexts);
@@ -503,7 +503,7 @@ int main(int argc, char* argv[])
 
 	  ///@todo change when the manager is added
 	  query_plan->read_graph(filename_topo);
-	  std::size_t system_size = query_plan->getSystemSize();
+	  system_size = query_plan->getSystemSize();
 
 	  // Empty MSCs are not allowed!
 	  assert ( system_size > 0 );
@@ -520,7 +520,7 @@ int main(int argc, char* argv[])
 	  std::cerr << "Global signatures: " << std::endl << global_sigs << std::endl;
 #endif	  
 	  
-	  SignaturePtr sig = (*global_sigs)[myid - 1];
+	  sig = (*global_sigs)[myid - 1];
 	  
 	  // parsing local kb
 	  LocalKBBuilder<PropositionalASPGrammar> builder_local_kb(local_kb, sig);
@@ -552,6 +552,7 @@ int main(int argc, char* argv[])
 #endif // DEBUG
 	  
 	  // setup my context
+	  std::cerr << "system_size = " << system_size << std::endl;
 	  ContextPtr ctx(new Context(myid, system_size, sig, local_kb, bridge_rules, neighbor_list));
 	  
 	  //compute size local signature
@@ -586,7 +587,7 @@ int main(int argc, char* argv[])
 
       // Store all information into a CommandTypeFactory, which is
       // responsible for creating the command types later
-      CommandTypeFactoryPtr ctf(new CommandTypeFactory(myid, pool_size, local_kb, 
+      CommandTypeFactoryPtr ctf(new CommandTypeFactory(myid, system_size, local_kb, 
 						       neighbor_list, schematic_bridge_rules, 
 						       bridge_rules, context_info,
 						       mt, sba_count, limit_answers, 

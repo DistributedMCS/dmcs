@@ -30,13 +30,15 @@
 #ifndef COMMAND_TYPE_FACTORY_H
 #define COMMAND_TYPE_FACTORY_H
 
+
+#include "dyndmcs/DynamicConfiguration.h"
+#include "dyndmcs/Match.h"
+#include "dyndmcs/DynamicCommandType.h"
+#include "dyndmcs/InstantiatorCommandType.h"
+
 #include "Message.h"
-#include "DynamicConfiguration.h"
-#include "Match.h"
 #include "OptCommandType.h"
 #include "PrimitiveCommandType.h"
-#include "DynamicCommandType.h"
-#include "InstantiatorCommandType.h"
 #include "ProgramOptions.h"
 #include "Neighbor.h"
 

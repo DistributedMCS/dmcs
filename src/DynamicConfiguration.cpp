@@ -27,16 +27,17 @@
  * 
  */
 
-#include "NoSBANeighborSortingStrategy.h"
-#include "NoSBACtxSortingStrategy.h"
-#include "NoSBAQualityCtxSortingStrategy.h"
-#include "ChosenCtxSortingStrategy.h"
-#include "ChosenQualityCtxSortingStrategy.h"
-#include "QualityCtxSortingStrategy.h"
-#include "Client.h"
-#include "DynamicConfiguration.h"
-#include "DynamicCommandType.h"
-#include "Match.h"
+#include "dyndmcs/NoSBANeighborSortingStrategy.h"
+#include "dyndmcs/NoSBACtxSortingStrategy.h"
+#include "dyndmcs/NoSBAQualityCtxSortingStrategy.h"
+#include "dyndmcs/ChosenCtxSortingStrategy.h"
+#include "dyndmcs/ChosenQualityCtxSortingStrategy.h"
+#include "dyndmcs/QualityCtxSortingStrategy.h"
+#include "dyndmcs/DynamicConfiguration.h"
+#include "dyndmcs/DynamicCommandType.h"
+#include "dyndmcs/Match.h"
+
+#include "network/Client.h"
 
 #include <boost/asio.hpp>
 #include <boost/serialization/vector.hpp>

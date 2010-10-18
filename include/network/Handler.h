@@ -31,7 +31,7 @@
 #define HANDLER_H
 
 #include "network/connection.hpp"
-#include "Session.h"
+#include "network/Session.h"
 #include "CommandType.h"
 #include "dyndmcs/InstantiatorCommandType.h"
 

@@ -29,10 +29,10 @@
 
 #include <boost/asio.hpp>
 
-#include "Client.h"
-#include "Instantiator.h"
-#include "InstantiatorCommandType.h"
-#include "Server.h"
+#include "dyndmcs/Instantiator.h"
+#include "dyndmcs/InstantiatorCommandType.h"
+
+#include "network/Client.h"
 
 namespace dmcs {
 

@@ -1,5 +1,53 @@
 2010-10-18  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+
+
+	* include/CommandTypeFactory.h: Adapt including header files.
+	* include/network/Handler.h: Likewise.
+	* include/network/Server.h: Likewise.
+	* src/DynamicConfiguration.cpp: Likewise.
+	* src/Instantiator.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/Server.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+
+	* include/dyndmcs: New subdir.
+	* include/BaseSortingStrategy.h: Move to include/dyndmcs.
+	* include/BodySortingStrategy.h: Likewise.
+	* include/ChosenCtxSortingStrategy.h: Likewise.
+	* include/ChosenQualityCtxSortingStategy.h: Likewise.
+	* include/ConfigMessage.h: Likewise.
+	* include/ContextSortStrategy.h: Likewise.
+	* include/ContextSortingStrategy.h: Likewise.
+	* include/ContextSubstitution.h: Likewise.
+	* include/DynamicCommandType.h: Likewise.
+	* include/DynamicConfiguration.h: Likewise.
+	* include/InstantiateBackwardMessage.h: Likewise.
+	* include/InstantiateForwardMessage.h: Likewise.
+	* include/InstantiateMessage.h: Likewise.
+	* include/InstantiateReturnMessage.h: Likewise.
+	* include/Instantiator.h: Likewise.
+	* include/Instantiator.tcc: Likewise.
+	* include/InstantiatorCommandType.h: Likewise.
+	* include/Match.h: Likewise.
+	* include/NoSBACtxSortingStrategy.h: Likewise.
+	* include/NoSBANeighborSortingStrategy.h: Likewise.
+	* include/NoSBAQualityCtxSortingStrategy.h: Likewise.
+	* include/NoSBARedBBodySortingStrategy.h: Likewise.
+	* include/QualityCtxSorting.h: Likewise.
+	* include/RedBBodySortingStrategy.h: Likewise.
+
+	* include/network: New subdir.
+	* include/Client.h: Move to include/network.
+	* include/Client.tcc: Likewise.
+	* include/Handler.h: Likewise.
+	* include/Handler.tcc: Likewise.
+	* include/Server.h: Likewise.
+	* include/Session.h: Likewise.
+	* include/connection.h: Likewise.
+
 	* include/BinaryTreeQPGenerator.h: Remove.
 	* include/DiamondOptQPGenerator.h: Likewise.
 	* include/DiamondQPGenerator.h: Likewise.
@@ -16,6 +64,7 @@
 	* include/RingEdgeQPGenerator.h: Likewise.
 	* include/RingOptQPGenerator.h: Likewise.
 	* include/RingQPGenerator.h: Likewise.
+	* include/Server.tcc: Likewise.
 
 2010-10-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
