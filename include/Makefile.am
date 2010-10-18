@@ -14,15 +14,12 @@ noinst_HEADERS =  \
 		BaseBuilder.h \
 		BaseDMCS.h \
 		BaseSolver.h \
-		BaseSortingStrategy.h \
 		BaseVisitor.h \
 		BeliefCombination.h \
 		BeliefState.h \
 		BridgeRulesBuilder.h \
 		BridgeRulesBuilder.tcc \
 		Cache.h \
-		ChosenCtxSortingStrategy.h \
-		ChosenQualityCtxSortingStrategy.h \
 		ClaspProcess.h \
 		ClaspResultBuilder.h \
 		ClaspResultBuilder.tcc \
@@ -30,44 +27,18 @@ noinst_HEADERS =  \
 		ClaspResultGrammar.tcc \
 		ClaspResultOnlineParser.h \
 		ClaspResultOnlineParser.tcc \
-		Client.h \
-		Client.tcc \
 		CnfBuilder.h \
 		CnfBuilder.tcc \
 		CnfGrammar.h \
 		CnfGrammar.tcc \
 		CommandType.h \
 		CommandTypeFactory.h \
-		ConfigMessage.h \
 		Context.h \
                 ContextGenerator.h \
-		ContextSortingStrategy.h \
-		ContextSubstitution.h \
                 DiamondQPGenerator.h \
                 DLVVisitor.h \
-		DynCtxGenBaseBuilder.h \
-		DynCtxGenGridBuilder.h \
-		DynCtxGenRandomBuilder.h \
-                RingQPGenerator.h \
-                RingOptQPGenerator.h \
-                RingEdgeQPGenerator.h \
-		Handler.h \
-                HouseQPGenerator.h \
-                HouseOptQPGenerator.h \
 		Match.h \
-                MultipleRingQPGenerator.h \
-                MultipleRingOptQPGenerator.h \
-                BinaryTreeQPGenerator.h \
-                DiamondZigZagQPGenerator.h \
-                DiamondZigZagOptQPGenerator.h \
 		DimacsVisitor.h \
-		DynamicConfiguration.h \
-		DynamicCommandType.h \
-		Instantiator.h \
-		InstantiatorCommandType.h \
-		InstantiateMessage.h \
-		InstantiateBackwardMessage.h \
-		InstantiateForwardMessage.h \
 		LogicVisitor.h \
 		LocalKBBuilder.h \
 		LocalKBBuilder.tcc \
@@ -77,10 +48,6 @@ noinst_HEADERS =  \
 		PropositionalASPGrammar.tcc \
 		Message.h \
 		Neighbor.h \
-		NoSBACtxSortingStrategy.h \
-		NoSBAQualityCtxSortingStrategy.h \
-		NoSBANeighborSortingStrategy.h \
-		NoSBARedBBodySortingStrategy.h \
 		ParserDirector.h \
 		ParserDirector.tcc \
 		PrimitiveDMCS.h \
@@ -89,22 +56,36 @@ noinst_HEADERS =  \
 		Process.h \
 		ProcessBuf.h \
 		ProxySignatureByLocal.h \
-		QualityCtxSortingStrategy.h \
                 QueryPlanWriter.h \
                 QueryPlan.h \
-		RedBBodySortingStrategy.h \
+		dyndmcs/RedBBodySortingStrategy.h \
 		ReturnMessage.h \
 		Rule.h \
 		SatSolver.h \
 		SatSolver.tcc \
 		StatsInfo.h \
-		Server.h \
-		Server.tcc \
-		Session.h \
                 Signature.h \
 		SpiritDebugging.h \
 		SpiritFilePositionNode.h \
 		Theory.h \
+		dyndmcs/BaseSortingStrategy.h \
+		dyndmcs/ChosenCtxSortingStrategy.h \
+		dyndmcs/ChosenQualityCtxSortingStrategy.h \
+		dyndmcs/ConfigMessage.h \
+		dyndmcs/DynamicConfiguration.h \
+		dyndmcs/DynamicCommandType.h \
+		dyndmcs/Instantiator.h \
+		dyndmcs/InstantiatorCommandType.h \
+		dyndmcs/InstantiateMessage.h \
+		dyndmcs/InstantiateBackwardMessage.h \
+		dyndmcs/InstantiateForwardMessage.h \
+		dyndmcs/ContextSortingStrategy.h \
+		dyndmcs/ContextSubstitution.h \
+		dyndmcs/NoSBACtxSortingStrategy.h \
+		dyndmcs/NoSBAQualityCtxSortingStrategy.h \
+		dyndmcs/NoSBANeighborSortingStrategy.h \
+		dyndmcs/NoSBARedBBodySortingStrategy.h \
+		dyndmcs/QualityCtxSortingStrategy.h \
 		generator/ContextGenerator.h \
 		generator/BinaryTreeTopoGenerator.h \
 		generator/DiamondTopoGenerator.h \
@@ -126,6 +107,13 @@ noinst_HEADERS =  \
 		generator/DynGridTopoGenerator.h \
 		generator/DynRakeTopoGenerator.h \
 		generator/DynRandomTopoGenerator.h \
-		Variable.h \
-		connection.hpp
+		network/Client.h \
+		network/Client.tcc \
+		network/Handler.h \
+		network/Handler.tcc \
+		network/Server.h \
+		network/Session.h \
+		network/connection.hpp \
+		Variable.h
+
 

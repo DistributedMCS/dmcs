@@ -1,6 +1,7 @@
 2010-10-18  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
-
+	* include/Makefile.am: Adapt Makefile.am to new organization of
+	header files.
 
 	* include/CommandTypeFactory.h: Adapt including header files.
 	* include/network/Handler.h: Likewise.
