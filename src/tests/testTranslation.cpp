@@ -1,12 +1,13 @@
 #include "Rule.h"
 
 #include "Signature.h"
-#include "LocalLoopFormulaBuilder.h"
-#include "CNFLocalLoopFormulaBuilder.h"
-#include "EquiCNFLocalLoopFormulaBuilder.h"
-#include "LoopFormulaDirector.h"
 #include "QueryPlan.h"
 #include "DimacsVisitor.h"
+
+#include "loopformula/LocalLoopFormulaBuilder.h"
+#include "loopformula/CNFLocalLoopFormulaBuilder.h"
+#include "loopformula/EquiCNFLocalLoopFormulaBuilder.h"
+#include "loopformula/LoopFormulaDirector.h"
 
 #include "parser/BRGrammar.h"
 #include "parser/BridgeRulesBuilder.h"

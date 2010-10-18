@@ -31,8 +31,9 @@
 #include "config.h"
 #endif
 
-#include "IMPLocalLoopFormulaBuilder.h"
-#include "LoopFormula.h"
+#include "loopformula/IMPLocalLoopFormulaBuilder.h"
+#include "loopformula/LoopFormula.h"
+
 #include <iostream>
 
 #include <boost/shared_ptr.hpp>

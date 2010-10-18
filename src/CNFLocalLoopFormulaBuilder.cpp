@@ -32,7 +32,7 @@
 #endif
 
 
-#include "CNFLocalLoopFormulaBuilder.h"
+#include "loopformula/CNFLocalLoopFormulaBuilder.h"
 
 #include <iostream>
 

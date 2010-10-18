@@ -15,6 +15,7 @@
 	* include/generator/Makefile.cam: Likewise.
 	* include/parser/Makefile.am: Likewise.
 	* include/network/Makefile.am: Likewise.
+	* include/loopformula/Makefile.am: Likewise.
 
 	* include/CommandTypeFactory.h: Adapt including header files.
 	* include/network/Handler.h: Likewise.
@@ -31,10 +32,23 @@
 	* src/Server.cpp: Likewise.
 	* src/dmcsc.cpp: Likewise.
 	* src/dmcsd.cpp: Likewise.
+	* src/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/IMPLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/LocalLoopFormulaBuilder.cpp: Likewise.
 	* src/tests/testClasp.cpp: Likewise.
 	* src/tests/testParser.cpp: Likewise.
 	* src/tests/testResult.cpp: Likewise.
 	* src/tests/testTranslation.cpp: Likewise.
+
+	* include/loopformula: New sub dir.
+	* include/CNFLocalLoopFormulaBuilder.h: Move to
+	include/loopformula.
+	* include/EquiCNFLocalLoopFormulaBuilder.h: Likewise.
+	* include/IMPLocalLoopFormulaBuilder.h: Likewise.
+	* include/LocalLoopFormulaBuilder.h: Likewise.
+	* include/LoopFormula.h: Likewise.
+	* include/LoopFormulaBuidler.h: Likewise.
+	* include/LoopFormulaDirector.h: Likewise.
 
 	* include/parser: New subdir.
 	* include/BRGrammar.h: Move to include/parser.

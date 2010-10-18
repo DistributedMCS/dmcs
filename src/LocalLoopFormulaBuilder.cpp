@@ -32,8 +32,8 @@
 #endif
 
 
-#include "LocalLoopFormulaBuilder.h"
-#include "LoopFormula.h"
+#include "loopformula/LocalLoopFormulaBuilder.h"
+#include "loopformula/LoopFormula.h"
 #include <iostream>
 #include <functional>
 #include <iostream>
