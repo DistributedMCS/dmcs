@@ -35,11 +35,12 @@
 #include "ClaspProcess.h"
 #include "CommandType.h"
 #include "DimacsVisitor.h"
-#include "PrimitiveDMCS.h"
-#include "PrimitiveCommandType.h"
 #include "Cache.h"
 #include "QueryPlan.h"
 #include "BeliefState.h"
+
+#include "dmcs/PrimitiveDMCS.h"
+#include "dmcs/PrimitiveCommandType.h"
 
 #include "network/Client.h"
 

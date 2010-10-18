@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   OptDMCS.h
+ * @file   PrimitiveDMCS.h
  * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
  * @date   Wed Nov  4 11:14:01 2009
  * 
@@ -27,24 +27,24 @@
  * 
  */
 
-#ifndef OPT_DMCS_H
-#define OPT_DMCS_H
+#ifndef PRIMITIVE_DMCS_H
+#define PRIMITIVE_DMCS_H
 
 #include <boost/shared_ptr.hpp>
 
-#include "BaseDMCS.h"
-#include "OptMessage.h"
+#include "dmcs/BaseDMCS.h"
+#include "dmcs/PrimitiveMessage.h"
 #include "ReturnMessage.h"
 #include "Cache.h"
 #include "Theory.h"
-#include "QueryPlan.h"
+
 
 namespace dmcs {
 
-class OptDMCS : public BaseDMCS
+
+class PrimitiveDMCS : public BaseDMCS
 {
 public:
-
 #if defined(DMCS_STATS_INFO)
   typedef ReturnMessage      dmcs_value_type;
   typedef ReturnMessagePtr   dmcs_return_type;
@@ -53,13 +53,13 @@ public:
   typedef BeliefStateListPtr dmcs_return_type;
 #endif
 
-  OptDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s, const QueryPlanPtr& query_plan_);
+  PrimitiveDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s);
 
   virtual
-  ~OptDMCS();
+  ~PrimitiveDMCS();
 
   dmcs_return_type
-  getBeliefStates(const OptMessage& mess);
+  getBeliefStates(PrimitiveMessage& mess);
 
 protected:
 
@@ -67,17 +67,16 @@ protected:
   createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
 
 private:
-  QueryPlanPtr query_plan;
   CacheStatsPtr cacheStats;
   CachePtr cache;
 };
 
-typedef boost::shared_ptr<OptDMCS> OptDMCSPtr;
+typedef boost::shared_ptr<PrimitiveDMCS> PrimitiveDMCSPtr;
 
 } // namespace dmcs
 
 
-#endif // OPT_DMCS_H
+#endif // PRIMITIVE_DMCS_H
 
 // Local Variables:
 // mode: C++

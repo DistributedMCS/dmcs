@@ -32,6 +32,9 @@
 #include "config.h"
 #endif
 
+#include "dmcs/OptCommandType.h"
+#include "dmcs/PrimitiveCommandType.h"
+
 #include "dyndmcs/DynamicCommandType.h"
 #include "dyndmcs/DynamicConfiguration.h"
 #include "dyndmcs/InstantiatorCommandType.h"
@@ -42,8 +45,6 @@
 #include "Message.h"
 #include "QueryPlan.h"
 #include "ProgramOptions.h"
-#include "OptCommandType.h"
-#include "PrimitiveCommandType.h"
 
 #include <fstream>
 #include <iostream>

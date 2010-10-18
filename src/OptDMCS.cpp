@@ -36,9 +36,10 @@
 #include "ClaspProcess.h"
 #include "CommandType.h"
 #include "DimacsVisitor.h"
-#include "OptDMCS.h"
-#include "OptCommandType.h"
 #include "Cache.h"
+
+#include "dmcs/OptDMCS.h"
+#include "dmcs/OptCommandType.h"
 
 #include "parser/ClaspResultGrammar.h"
 #include "parser/ClaspResultBuilder.h"

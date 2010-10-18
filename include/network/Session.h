@@ -27,8 +27,8 @@
  * 
  */
 
-#include "OptMessage.h"
-#include "PrimitiveMessage.h"
+//#include "dmcs/OptMessage.h"
+//#include "PrimitiveMessage.h"
 #include "Theory.h"
 #include "network/connection.hpp"
 
@@ -49,8 +49,8 @@ struct Session
 };
 
 
-typedef boost::shared_ptr<Session<PrimitiveMessage> > SessionPrimitivePtr;
-typedef boost::shared_ptr<Session<OptMessage> > SessionOptPtr;
+  //typedef boost::shared_ptr<Session<PrimitiveMessage> > SessionPrimitivePtr;
+  //typedef boost::shared_ptr<Session<OptMessage> > SessionOptPtr;
 
 } // namespace dmcs
 

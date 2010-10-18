@@ -16,6 +16,7 @@
 	* include/parser/Makefile.am: Likewise.
 	* include/network/Makefile.am: Likewise.
 	* include/loopformula/Makefile.am: Likewise.
+	* include/dmcs/Makefile.am: Likewise.
 
 	* include/CommandTypeFactory.h: Adapt including header files.
 	* include/network/Handler.h: Likewise.
@@ -32,6 +33,7 @@
 	* src/Server.cpp: Likewise.
 	* src/dmcsc.cpp: Likewise.
 	* src/dmcsd.cpp: Likewise.
+	* src/BaseDMCS.cpp: Likewise.
 	* src/CNFLocalLoopFormulaBuilder.cpp: Likewise.
 	* src/IMPLocalLoopFormulaBuilder.cpp: Likewise.
 	* src/LocalLoopFormulaBuilder.cpp: Likewise.
@@ -49,6 +51,15 @@
 	* include/LoopFormula.h: Likewise.
 	* include/LoopFormulaBuidler.h: Likewise.
 	* include/LoopFormulaDirector.h: Likewise.
+
+	* include/dmcs: New subdir.
+	* include/BaseDMCS.h: Move to include/dmcs.
+	* include/OptDMCS.h: Likewise.
+	* include/OptCommandType.h: Likewise.
+	* include/OptMessage.h: Likewise.
+	* include/PrimitiveCommandType.h: Likewise.
+	* include/PrimitiveDMCS.h: Likewise.
+	* include/PrimitiveMessage.h: Likewise.
 
 	* include/parser: New subdir.
 	* include/BRGrammar.h: Move to include/parser.

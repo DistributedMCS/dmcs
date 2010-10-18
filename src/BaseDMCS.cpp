@@ -32,7 +32,7 @@
 #include "config.h"
 #endif
 
-#include "BaseDMCS.h"
+#include "dmcs/BaseDMCS.h"
 #include "ClaspProcess.h"
 #include "StatsInfo.h"
 

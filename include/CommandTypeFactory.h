@@ -36,9 +36,10 @@
 #include "dyndmcs/DynamicCommandType.h"
 #include "dyndmcs/InstantiatorCommandType.h"
 
+#include "dmcs/OptCommandType.h"
+#include "dmcs/PrimitiveCommandType.h"
+
 #include "Message.h"
-#include "OptCommandType.h"
-#include "PrimitiveCommandType.h"
 #include "ProgramOptions.h"
 #include "Neighbor.h"
 

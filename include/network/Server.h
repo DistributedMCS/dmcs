@@ -30,12 +30,13 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+//#include "dmcs/BaseDMCS.h"
+
 #include "network/connection.hpp"
 #include "network/Session.h"
 
 #include "BeliefState.h"
 #include "Context.h"
-#include "BaseDMCS.h"
 #include "Rule.h"
 #include "Theory.h"
 #include "CommandType.h"
