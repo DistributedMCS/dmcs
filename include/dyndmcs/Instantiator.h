@@ -73,7 +73,7 @@ typedef boost::shared_ptr<Instantiator> InstantiatorPtr;
 
 #endif // INSTANTIATOR_H
 
-#include "Instantiator.tcc"
+#include "dyndmcs/Instantiator.tcc"
 
 // Local Variables:
 // mode: C++

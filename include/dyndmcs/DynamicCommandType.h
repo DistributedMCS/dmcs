@@ -31,7 +31,7 @@
 #define DYNAMIC_COMMAND_TYPE
 
 #include "CommandType.h"
-#include "DynamicConfiguration.h"
+#include "dyndmcs/DynamicConfiguration.h"
 
 namespace dmcs {
 

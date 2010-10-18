@@ -36,7 +36,7 @@
 #include <boost/graph/graphviz.hpp>
 
 #include "ConfigMessage.h"
-#include "Match.h"
+#include "dyndmcs/Match.h"
 #include "Message.h"
 #include "Neighbor.h"
 #include "Rule.h"
