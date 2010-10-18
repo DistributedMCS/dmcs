@@ -1,3 +1,22 @@
+2010-10-18  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/BinaryTreeQPGenerator.h: Remove.
+	* include/DiamondOptQPGenerator.h: Likewise.
+	* include/DiamondQPGenerator.h: Likewise.
+	* include/DiamondZigZagOptQPGenerator.h: Likewise.
+	* include/DiamondZigZagQPGenerator.h: Likewise.
+	* include/DynCtxGenBaseBuilder.h: Likewise.
+	* include/DynCtxGenGridBuilder.h: Likewise.
+	* include/DynCtxGenRakeBuilder.h: Likewise.
+	* include/DynCtxGenRandomBuilder.h: Likewise.
+	* include/HouseOptQPGenerator.h: Likewise.
+	* include/HouseQPGenerator.h: Likewise.
+	* include/MultipleRingOptQPGenerator.h: Likewise.
+	* include/MultipleRingQPGenerator.h: Likewise.
+	* include/RingEdgeQPGenerator.h: Likewise.
+	* include/RingOptQPGenerator.h: Likewise.
+	* include/RingQPGenerator.h: Likewise.
+
 2010-10-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsd.cpp: Create helper functions for reading
