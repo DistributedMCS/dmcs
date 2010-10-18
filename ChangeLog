@@ -11,6 +11,8 @@
 	* include/Makefile.am: Adapt Makefile.am to new organization of
 	header files.
 
+	* src/genTest.cpp: Remove.
+
 	* include/dyndmcs/Makefile.am: New file.
 	* include/generator/Makefile.cam: Likewise.
 	* include/parser/Makefile.am: Likewise.
