@@ -1,10 +1,11 @@
-#include "ParserDirector.h"
 #include "BeliefState.h"
 #include "Rule.h"
 #include "Signature.h"
 #include "QueryPlan.h"
-#include "LocalKBBuilder.h"
-#include "PropositionalASPGrammar.h"
+
+#include "parser/LocalKBBuilder.h"
+#include "parser/ParserDirector.h"
+#include "parser/PropositionalASPGrammar.h"
 
 #include <algorithm>
 #include <cstdlib>

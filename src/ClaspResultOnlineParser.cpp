@@ -27,7 +27,7 @@
  * 
  */
 
-#include "ClaspResultOnlineParser.h"
+#include "parser/ClaspResultOnlineParser.h"
 
 namespace dmcs {
 

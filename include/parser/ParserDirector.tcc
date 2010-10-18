@@ -31,7 +31,7 @@
 #if !defined(_PARSER_DIRECTOR_TCC)
 #define _PARSER_DIRECTOR_TCC
 
-#include "BaseBuilder.h"
+#include "parser/BaseBuilder.h"
 
 #include <iostream>
 #include <fstream>

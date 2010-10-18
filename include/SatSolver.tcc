@@ -30,10 +30,10 @@
 #if !defined(_SAT_SOLVER_TCC)
 #define _SAT_SOLVER_TCC
 
-#include "BaseBuilder.h"
-#include "ClaspResultGrammar.h"
-#include "ClaspResultBuilder.h"
-#include "ParserDirector.h"
+#include "parser/BaseBuilder.h"
+#include "parser/ClaspResultGrammar.h"
+#include "parser/ClaspResultBuilder.h"
+#include "parser/ParserDirector.h"
 
 #include <exception>
 

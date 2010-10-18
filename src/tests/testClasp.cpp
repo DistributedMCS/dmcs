@@ -1,7 +1,7 @@
 #include "ClaspProcess.h"
-#include "ClaspResultGrammar.h"
-#include "ClaspResultBuilder.h"
-#include "ParserDirector.h"
+#include "parser/ClaspResultGrammar.h"
+#include "parser/ClaspResultBuilder.h"
+#include "parser/ParserDirector.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testClasp"

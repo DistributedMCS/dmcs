@@ -32,20 +32,21 @@
 #endif
 
 #include "BeliefCombination.h"
-#include "ClaspResultGrammar.h"
-#include "ClaspResultBuilder.h"
 #include "ClaspProcess.h"
-#include "network/Client.h"
 #include "CommandType.h"
 #include "DimacsVisitor.h"
-#include "ParserDirector.h"
 #include "PrimitiveDMCS.h"
 #include "PrimitiveCommandType.h"
 #include "Cache.h"
 #include "QueryPlan.h"
 #include "BeliefState.h"
-#include "BaseBuilder.h"
-#include "ParserDirector.h"
+
+#include "network/Client.h"
+
+#include "parser/BaseBuilder.h"
+#include "parser/ClaspResultGrammar.h"
+#include "parser/ClaspResultBuilder.h"
+#include "parser/ParserDirector.h"
 #include "ProxySignatureByLocal.h"
 
 

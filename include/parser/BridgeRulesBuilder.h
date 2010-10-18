@@ -32,7 +32,7 @@
 
 #include <map>
 
-#include "BaseBuilder.h"
+#include "parser/BaseBuilder.h"
 #include "Neighbor.h"
 #include "Rule.h"
 #include "Theory.h"

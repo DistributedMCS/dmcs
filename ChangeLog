@@ -1,11 +1,29 @@
 2010-10-18  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* configure.ac: Add locations of the new Makefile files.
+
+	* src/dynGen.cpp: Now also generate local kb for the student
+	example.
+
+	* src/staticGen.cpp: Use topology constant name instead of plain
+	number.
+
 	* include/Makefile.am: Adapt Makefile.am to new organization of
 	header files.
+
+	* include/dyndmcs/Makefile.am: New file.
+	* include/generator/Makefile.cam: Likewise.
+	* include/parser/Makefile.am: Likewise.
+	* include/network/Makefile.am: Likewise.
 
 	* include/CommandTypeFactory.h: Adapt including header files.
 	* include/network/Handler.h: Likewise.
 	* include/network/Server.h: Likewise.
+	* include/ClaspProcess.h: Likewise.
+	* include/CommandType.h: Likewise.
+	* include/SatSolver.tcc: Likewise.
+	* include/Message.h: Likewise.
+	* src/ClaspResultOnlineParser.cpp: Likewise.
 	* src/DynamicConfiguration.cpp: Likewise.
 	* src/Instantiator.cpp: Likewise.
 	* src/OptDMCS.cpp: Likewise.
@@ -13,6 +31,35 @@
 	* src/Server.cpp: Likewise.
 	* src/dmcsc.cpp: Likewise.
 	* src/dmcsd.cpp: Likewise.
+	* src/tests/testClasp.cpp: Likewise.
+	* src/tests/testParser.cpp: Likewise.
+	* src/tests/testResult.cpp: Likewise.
+	* src/tests/testTranslation.cpp: Likewise.
+
+	* include/parser: New subdir.
+	* include/BRGrammar.h: Move to include/parser.
+	* include/BRGGrammar.tcc: Likewise.
+	* include/BaseBuilder.h: Likewise.
+	* include/BridgeRulesBuilder.h: Likewise.
+	* include/BridgeRulesBuilder.tcc: Likewise.
+	* include/ClaspResultBuilder.h: Likewise.
+	* include/ClaspResultBuilder.tcc: Likewise.
+	* include/ClaspResultGrammar.h: Likewise.
+	* include/ClaspResultGrammar.tcc: Likewise.
+	* include/ClaspResultOnlineParser.h: Likewise.
+	* include/ClaspResultOnlineParser.tcc: Likewise.
+	* include/CnfBuilder.h: Likewise.
+	* include/CnfBuilder.tcc: Likewise.
+	* include/CnfGrammar.h: Likewise.
+	* include/CnfGrammar.tcc: Likewise.
+	* include/LocalKBBuilder.h: Likewise.
+	* include/LocalKBBuilder.tcc: Likewise.
+	* include/ParserDirector.h: Likewise.
+	* include/ParserDirector.tcc: Likewise.
+	* include/PropositionalASPGrammar.h: Likewise.
+	* include/PropositionalASPGrammar.tcc: Likewise.
+	* include/SpiritDebugging.h: Likewise.
+	* include/SpiritFilePositionNode.h: Likewise.
 
 	* include/dyndmcs: New subdir.
 	* include/BaseSortingStrategy.h: Move to include/dyndmcs.

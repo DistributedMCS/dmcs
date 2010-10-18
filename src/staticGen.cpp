@@ -150,7 +150,7 @@ read_input(int argc, char* argv[])
 
   switch (topology_type)
     {
-    case 1:
+    case DIAMOND_DOWN_TOPOLOGY:
       { 
 	if (no_contexts == 1 || no_contexts % 3 != 1)
 	  {
@@ -159,7 +159,7 @@ read_input(int argc, char* argv[])
 	  }
       }
       break;
-    case 2:
+    case DIAMOND_ARBITRARY_TOPOLOGY:
       { 
 	if (no_contexts == 1 || no_contexts % 3 != 1)
 	  {
@@ -168,7 +168,7 @@ read_input(int argc, char* argv[])
 	  }
       }
       break;
-    case 3:
+    case DIAMOND_ZIGZAG_TOPOLOGY:
       { 
 	if (no_contexts == 1 || no_contexts % 3 != 1)
 	  {
@@ -177,7 +177,7 @@ read_input(int argc, char* argv[])
 	  }
       }
       break;
-    case 4:
+    case PURE_RING_TOPOLOGY:
       { 
 	if (no_contexts == 1)
 	  {
@@ -186,7 +186,7 @@ read_input(int argc, char* argv[])
 	  }
       }
       break;
-    case 5:
+    case RING_EDGE_TOPOLOGY:
       { 
 	if (no_contexts == 1)
 	  {
@@ -195,7 +195,7 @@ read_input(int argc, char* argv[])
 	  }
       }
       break;
-    case 6:
+    case BINARY_TREE_TOPOLOGY:
       { 
 	if (no_contexts == 1)
 	  {
@@ -204,7 +204,7 @@ read_input(int argc, char* argv[])
 	  }
       }
       break;
-    case 7:
+    case HOUSE_TOPOLOGY:
       { 
 	if (no_contexts == 1 || no_contexts % 4 != 1)
 	  {
@@ -213,7 +213,7 @@ read_input(int argc, char* argv[])
 	  }
       }
       break;
-    case 8:
+    case MULTIPLE_RING_TOPOLOGY:
       { 
 	if ((no_contexts < 6) && (no_contexts % 3 != 0))
 	  {
@@ -237,7 +237,6 @@ read_input(int argc, char* argv[])
   std::cerr << "Prefix for filename:                           " << prefix << std::endl << std::endl;
 
   return 0;
-
 }
 
 

@@ -30,7 +30,7 @@
 #ifndef PARSER_DIRECTOR_H
 #define PARSER_DIRECTOR_H
 
-#include "BaseBuilder.h"
+#include "parser/BaseBuilder.h"
 
 #include <iosfwd>
 #include <fstream>

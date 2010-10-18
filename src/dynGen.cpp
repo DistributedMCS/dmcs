@@ -96,6 +96,7 @@ using namespace dmcs::generator;
 std::size_t poolsize;
 std::string filename;
 std::string prefix;
+std::ofstream file_local_kb;
 std::ofstream file_bridge_rules;
 std::ofstream file_match_maker;
 std::ofstream file_command_lines;
@@ -309,10 +310,15 @@ generate_command_lines(std::size_t heuristics)
 
   for (std::size_t i = 1; i <= poolsize; ++i)
     {
-      file_command_lines << "./dmcsd --context=" << i << " --port=" << 5000+i << " --br=tests/" << prefix << "-" << i 
-			   << ".br --dynamic=1 --mm=tests/" << prefix << ".inp --n=" << limit_answers << " --b=" << limit_bind_rules << " --h=" << out.str() << "\n";
+      file_command_lines << "./dmcsd --context=" << i << " --port=" << 5000+i 
+			 << " --kb=tests/" << prefix << "-" << i 
+			 << ".lp --br=tests/" << prefix << "-" << i 
+			 << ".br --dynamic=1 --mm=tests/" << prefix << ".inp --n=" 
+			 << limit_answers << " --b=" << limit_bind_rules << " --h=" << out.str() << "\n";
 
-      file_script << "$DMCSPATH/dmcsd --context=" << i << " --port=" << 5000+i << " --br=$TESTSPATH/" << prefix << "-" << i
+      file_script << "$DMCSPATH/dmcsd --context=" << i << " --port=" << 5000+i 
+		  << " --kb=$TESTSPATH/" << prefix << "-" << i
+		  << ".lp --br=$TESTSPATH/" << prefix << "-" << i
 		  << ".br --dynamic=1 --mm=$TESTSPATH/" << prefix << ".inp --n=" << limit_answers << " --b=" << limit_bind_rules 
 		  << " --h=" << out.str();
       
@@ -339,6 +345,54 @@ generate_command_lines(std::size_t heuristics)
 
   file_command_lines.close();
   file_script.close();
+}
+
+
+void
+generate_local_kb(std::size_t i)
+{
+  std::stringstream out;
+  out << i;
+  std::string filename_local_kb = prefix + "-" + out.str() + ".lp";
+ 
+  file_local_kb.open(filename_local_kb.c_str());
+  
+  // The basic rules
+  file_local_kb << "s :- ps, not h, not e." << std::endl;
+  file_local_kb << "s :- ph, not ps, not h, not e, inc." << std::endl;
+  file_local_kb << "h :- ps, not e, dec." << std::endl;
+  file_local_kb << "h :- ph, not inc, not dec." << std::endl;
+  file_local_kb << "h :- pe, not ph, inc." << std::endl;
+  file_local_kb << "e :- pe, not h, not inc." << std::endl;
+  file_local_kb << "e :- ph, dec." << std::endl;
+  file_local_kb << "ps :- interesting." << std::endl;
+  file_local_kb << "pe :- hard_prof." << std::endl;
+  file_local_kb << "ph :- ps, pe." << std::endl;
+  file_local_kb << "ph :- not ps, not pe." << std::endl;
+
+  // And then optional facts
+  std::size_t choose_fact = rand() % 4;
+  switch (choose_fact)
+    {
+    case 0:
+      {
+	file_local_kb << "interesting." << std::endl;
+	break;
+      }
+    case 1:
+      {
+	file_local_kb << "hard_prof." << std::endl;
+	break;
+      }
+    case 2:
+      {
+	file_local_kb << "interesting." << std::endl;
+	file_local_kb << "hard_prof." << std::endl;
+	break;
+      }
+    }
+
+  file_local_kb.close();
 }
 
 
@@ -375,11 +429,11 @@ int main(int argc, char* argv[])
       lid << end + 1;
       signatures = signatures + "(" + signature[end] + " " + id.str() + " " + lid.str() + " " + lid.str() + ")\n";      
 
-      
-  }
+      generate_local_kb(i);
+    }
 
   std::cerr << "poolsize = " << poolsize << std::endl;
-
+  
   // Topology choosing
   switch (topology)
     {

@@ -1,5 +1,7 @@
 AUTOMAKE_OPTIONS = gnu
 
+SUBDIRS = dyndmcs generator network parser
+
 # including headers for make dist
 noinst_HEADERS =  \
 	  	ProgramOptions.h
@@ -58,7 +60,6 @@ noinst_HEADERS =  \
 		ProxySignatureByLocal.h \
                 QueryPlanWriter.h \
                 QueryPlan.h \
-		dyndmcs/RedBBodySortingStrategy.h \
 		ReturnMessage.h \
 		Rule.h \
 		SatSolver.h \
@@ -68,52 +69,6 @@ noinst_HEADERS =  \
 		SpiritDebugging.h \
 		SpiritFilePositionNode.h \
 		Theory.h \
-		dyndmcs/BaseSortingStrategy.h \
-		dyndmcs/ChosenCtxSortingStrategy.h \
-		dyndmcs/ChosenQualityCtxSortingStrategy.h \
-		dyndmcs/ConfigMessage.h \
-		dyndmcs/DynamicConfiguration.h \
-		dyndmcs/DynamicCommandType.h \
-		dyndmcs/Instantiator.h \
-		dyndmcs/InstantiatorCommandType.h \
-		dyndmcs/InstantiateMessage.h \
-		dyndmcs/InstantiateBackwardMessage.h \
-		dyndmcs/InstantiateForwardMessage.h \
-		dyndmcs/ContextSortingStrategy.h \
-		dyndmcs/ContextSubstitution.h \
-		dyndmcs/NoSBACtxSortingStrategy.h \
-		dyndmcs/NoSBAQualityCtxSortingStrategy.h \
-		dyndmcs/NoSBANeighborSortingStrategy.h \
-		dyndmcs/NoSBARedBBodySortingStrategy.h \
-		dyndmcs/QualityCtxSortingStrategy.h \
-		generator/ContextGenerator.h \
-		generator/BinaryTreeTopoGenerator.h \
-		generator/DiamondTopoGenerator.h \
-		generator/DiamondOptTopoGenerator.h \
-		generator/DiamondArbitraryTopoGenerator.h \
-		generator/DiamondZigZagTopoGenerator.h \
-		generator/DiamondZigZagOptTopoGenerator.h \
-		generator/HouseTopoGenerator.h \
-		generator/HouseOptTopoGenerator.h \
-		generator/MultipleRingTopoGenerator.h \
-		generator/MultipleRingOptTopoGenerator.h \
-		generator/TopologyGenerator.h \
-		generator/OptTopologyGenerator.h \
-		generator/RingTopoGenerator.h \
-		generator/RingOptTopoGenerator.h \
-		generator/RingEdgeTopoGenerator.h \
-		generator/dmcsGen.h \
-		generator/DynTopologyGenerator.h \
-		generator/DynGridTopoGenerator.h \
-		generator/DynRakeTopoGenerator.h \
-		generator/DynRandomTopoGenerator.h \
-		network/Client.h \
-		network/Client.tcc \
-		network/Handler.h \
-		network/Handler.tcc \
-		network/Server.h \
-		network/Session.h \
-		network/connection.hpp \
 		Variable.h
 
 

@@ -36,7 +36,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/spirit/include/classic_position_iterator.hpp>
 
-#include "SpiritFilePositionNode.h"
+#include "parser/SpiritFilePositionNode.h"
 
 
 namespace dmcs {

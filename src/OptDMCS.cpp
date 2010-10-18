@@ -33,16 +33,18 @@
 
 #include "BeliefState.h"
 #include "BeliefCombination.h"
-#include "ClaspResultGrammar.h"
-#include "ClaspResultBuilder.h"
 #include "ClaspProcess.h"
-#include "network/Client.h"
 #include "CommandType.h"
 #include "DimacsVisitor.h"
-#include "ParserDirector.h"
 #include "OptDMCS.h"
 #include "OptCommandType.h"
 #include "Cache.h"
+
+#include "parser/ClaspResultGrammar.h"
+#include "parser/ClaspResultBuilder.h"
+#include "parser/ParserDirector.h"
+
+#include "network/Client.h"
 
 #include <vector>
 #include <boost/bind.hpp>

@@ -31,7 +31,7 @@
 #define COMMAND_TYPE_H
 
 #include "BeliefState.h"
-#include "DynamicConfiguration.h"
+//#include "DynamicConfiguration.h"
 
 namespace dmcs {
 
