@@ -15,7 +15,6 @@ noinst_HEADERS =  \
 		Context.h \
                 ContextGenerator.h \
                 DLVVisitor.h \
-		Match.h \
 		DimacsVisitor.h \
 		LogicVisitor.h \
 		Message.h \

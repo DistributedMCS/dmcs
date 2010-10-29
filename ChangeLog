@@ -1,3 +1,10 @@
+2010-10-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* configure.ac: Add include/loopformula/Makefile.
+
+	* include/network/Makefile.am: Remove network relative path.
+	* include/Makefile.am: Remove Match.h
+
 2010-10-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/dyndmcs/Makefile.am (noinst_HEADERS): Remove dyndmcs
