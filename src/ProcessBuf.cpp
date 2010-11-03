@@ -39,8 +39,11 @@
 #include <csignal>
 #include <cstring>
 #include <cstdlib>
+
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include <map>
 
@@ -68,6 +71,10 @@ namespace dmcs {
   }
 
 }
+
+
+#define NAMEDPIPETMPDIR "/tmp/dmcs-XXXXXX"
+
 
 ProcessBuf::ProcessBuf()
   : std::streambuf(),
@@ -106,10 +113,11 @@ ProcessBuf::ProcessBuf(const ProcessBuf& sb)
   : std::streambuf(),
     process(sb.process),
     status(sb.status),
-    bufsize(sb.bufsize)
+    fifo(sb.fifo),
+    bufsize(sb.bufsize),
+    fifoname(sb.fifoname)
 {
   ::memcpy(inpipes, sb.inpipes, 2);
-  ::memcpy(outpipes, sb.outpipes, 2);
   initBuffers(); // don't call virtual methods in the ctor
 }
 
@@ -119,6 +127,18 @@ ProcessBuf::ProcessBuf(const ProcessBuf& sb)
 ProcessBuf::~ProcessBuf()
 {
   close();
+
+  if (::unlink(fifoname.c_str()))
+    {
+      ::perror("unlink");
+      ::exit(1);
+    }
+      
+  if (::rmdir(fifoname.substr(0, strlen(NAMEDPIPETMPDIR)).c_str()))
+    {
+      ::perror("rmdir");
+      ::exit(1);
+    }
 
   if (ibuf)
     {
@@ -158,22 +178,50 @@ ProcessBuf::open(const std::vector<std::string>& av)
 	}
     }
 
-  outpipes[0] = 0;
-  outpipes[1] = 0;
   inpipes[0] = 0;
   inpipes[1] = 0;
 
-  // we want a full-duplex stream -> create two pairs of pipes
+  // we want a full-duplex stream -> create one unnamed pipe for
+  // writing and one temporary named pipe for reading
 
-  if (::pipe(outpipes) < 0)
+  if (!fifoname.empty()) // remove old temp-files
     {
-      ::perror("pipes");
+      if (::unlink(fifoname.c_str()))
+	{
+	  ::perror("unlink");
+	  return -1;
+	}
+      
+      if (::rmdir(fifoname.substr(0, strlen(NAMEDPIPETMPDIR)).c_str()))
+	{
+	  ::perror("rmdir");
+	  return -1;
+	}
+    }
+
+
+  ///@todo respect $TMPDIR
+  char tmpdir[] = NAMEDPIPETMPDIR;
+  char* tmp = 0;
+
+  if ((tmp = mkdtemp(tmpdir)) == 0)
+    {
+      ::perror("mkdtemp");
+      return -1;
+    }
+
+  fifoname = tmp;
+  fifoname += "/fifo";
+
+  if (::mkfifo(fifoname.c_str(), 0600))
+    {
+      ::perror("mkfifo");
       return -1;
     }
 
   if (::pipe(inpipes) < 0)
     {
-      ::perror("pipes");
+      ::perror("pipe");
       return -1;
     }
 
@@ -206,20 +254,28 @@ ProcessBuf::open(const std::vector<std::string>& av)
 	
 	argv[i] = '\0';
 
+	// open writing end of fifo
+
+	if ((fifo = ::open(fifoname.c_str(), O_WRONLY)) < 0)
+	  {
+	    ::perror("open");
+	    return -1;
+	  }
+
 	// redirect stdin and stdout and stderr
 
-	if (::dup2(outpipes[1], STDOUT_FILENO) < 0)
+	if (::dup2(fifo, STDOUT_FILENO) < 0)
 	  {
 	    ::perror("dup2");
 	    ::exit(1);
 	  }
 	
-	if (::dup2(outpipes[1], STDERR_FILENO) < 0)
+	if (::dup2(fifo, STDERR_FILENO) < 0)
 	  {
 	    ::perror("dup2");
 	    ::exit(1);
 	  }
-	
+
 	if (::dup2(inpipes[0], STDIN_FILENO) < 0)
 	  {
 	    ::perror("dup2");
@@ -227,8 +283,7 @@ ProcessBuf::open(const std::vector<std::string>& av)
 	  }
 	
 	// stdout and stdin is redirected, close unneeded filedescr.
-	::close(outpipes[0]);
- 	::close(outpipes[1]);
+	::close(fifo);
  	::close(inpipes[0]);
 	::close(inpipes[1]);
 	
@@ -243,9 +298,14 @@ ProcessBuf::open(const std::vector<std::string>& av)
 
     default: // parent
 
-      // close writing end of the output pipe
-      ::close(outpipes[1]);
-      outpipes[1] = -1;
+      // open reading end of fifo
+
+      if ((fifo = ::open(fifoname.c_str(), O_RDONLY)) < 0)
+	{
+	  ::perror("open");
+	  return -1;
+	}
+
       // close reading end of the input pipe
       ::close(inpipes[0]);
       inpipes[0] = -1;
@@ -275,6 +335,9 @@ ProcessBuf::endoffile()
 int
 ProcessBuf::close()
 {
+  if (process == -1)
+    return 0;
+
   int retcode = 0;
   pid_t pid = 0;
 
@@ -285,10 +348,10 @@ ProcessBuf::close()
   setg(ibuf, ibuf, ibuf);
 
   // we're done reading
-  if (outpipes[0] != -1)
+  if (fifo != -1)
     {
-      int ret = ::close(outpipes[0]);
-      outpipes[0] = -1;
+      int ret = ::close(fifo);
+      fifo = -1;
 
       if (ret < 0) perror("close()");
     }
@@ -373,13 +436,26 @@ ProcessBuf::underflow()
   if (gptr() >= egptr()) // empty ibuf -> get data
     {
       errno = 0;
+      int count = 0;
+      ssize_t n = 0;
 
       // try to receive at most bufsize bytes
-      ssize_t n = ::read(outpipes[0], ibuf, bufsize);
+      do
+	{
+	  count++;
+	  n = ::read(fifo, ibuf, bufsize);
+	}
+      while (n < 0 && errno == EINTR && count < 10);
 
       if (n == 0) // EOF
 	{
 	  return traits_type::eof();
+	}
+      else if (count >= 10)
+	{
+	  std::ostringstream oss;
+	  oss << "Interrupted read (errno = " << errno << ").";
+	  throw std::ios_base::failure(oss.str());
 	}
       else if (n < 0) // a failure occured while receiving from the stream
 	{

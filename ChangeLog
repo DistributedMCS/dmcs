@@ -1,3 +1,8 @@
+2010-11-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/ProcessBuf.cpp: Use unnamed/named pipes for IPC.
+	* include/ProcessBuf.h: Likewise.
+
 2010-10-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* configure.ac: Add include/loopformula/Makefile.

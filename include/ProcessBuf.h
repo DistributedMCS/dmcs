@@ -67,11 +67,12 @@ private:
 
   int status;
 
-  int outpipes[2];
+  int fifo;
   int inpipes[2];
 
   unsigned bufsize;
 
+  std::string fifoname;
 
   std::streambuf::char_type* obuf;
   std::streambuf::char_type* ibuf;
