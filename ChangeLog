@@ -1,3 +1,55 @@
+2010-11-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dyndmcs/Makefile.am: New file.
+	* src/network/Makefile.am: Likewise.
+	* src/loopformula/Makefile.am: Likewise.
+	* src/generator/Makefile.am: Likewise.
+
+	* src/Makefile.am: Add new subdirs.
+	* configure.ac: Likewise.
+
+	* src/dmcs/BaseDMCS.cpp: Move from src.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+	* src/dmcs/ClaspProcess.cpp: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+	* src/dmcs/ProcessBuf.cpp: Likewise.
+	* src/dmcs/QueryPlan.cpp: Likewise.
+	* src/dyndmcs/DynamicConfiguration.cpp: Likewise.
+	* src/dyndmcs/Instantiator.cpp: Likewise.
+	* src/generator/DLVVisitor.cpp: Likewise.
+	* src/generator/ContextGenerator.cpp: Likewise.
+	* src/generator/LogicVisitor.cpp: Likewise.
+	* src/generator/dmcsGen.cpp: Likewise.
+	* src/generator/dynGen.cpp: Likewise.
+	* src/generator/staticGen.cpp: Likewise.
+	* src/loopformula/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/loopformula/IMPLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/loopformula/DimacsVisitor.cpp: Likewise.
+	* src/loopformula/LocalLoopFormulaBuilder.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+
+	* src/BaseDMCS.cpp: Remove.
+	* src/BeliefCombination.cpp: Likewise.
+	* src/ClaspProcess.cpp: Likewise.
+	* src/OptDMCS.cpp: Likewise.
+	* src/PrimitiveDMCS.cpp: Likewise.
+	* src/ProcessBuf.cpp: Likewise.
+	* src/QueryPlan.cpp: Likewise.
+	* src/DynamicConfiguration.cpp: Likewise.
+	* src/Instantiator.cpp: Likewise.
+	* src/DLVVisitor.cpp: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/LogicVisitor.cpp: Likewise.
+	* src/dmcsGen.cpp: Likewise.
+	* src/dynGen.cpp: Likewise.
+	* src/staticGen.cpp: Likewise.
+	* src/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/IMPLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/DimacsVisitor.cpp: Likewise.
+	* src/LocalLoopFormulaBuilder.cpp: Likewise.
+	* src/Server.cpp: Likewise.
+
 2010-11-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/ProcessBuf.cpp: Use unnamed/named pipes for IPC.
