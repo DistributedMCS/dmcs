@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = tests
+SUBDIRS = dmcs dyndmcs generator network loopformula tests
 
 # global preprocessor flags
 AM_CPPFLAGS = \
@@ -15,70 +15,19 @@ LIBS = $(BOOST_DATE_TIME_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_SYSTEM_LIBS
 
 # install dmcsd and dmcsc into $prefix/bin
 bin_PROGRAMS = dmcsd dmcsc 
-noinst_LIBRARIES = libsatsolver.a libcache.a libtranslation.a libdmcs.a
-
-noinst_PROGRAMS = dmcsGen dynGen
-
-# the translation library
-libtranslation_a_SOURCES = \
-		IMPLocalLoopFormulaBuilder.cpp \
-		LocalLoopFormulaBuilder.cpp \
-		CNFLocalLoopFormulaBuilder.cpp \
-		DimacsVisitor.cpp 
 
 # the cache library
 libcache_a_SOURCES = Cache.cpp
-
-
-# the satsolver library
-libsatsolver_a_SOURCES = \
-                ClaspProcess.cpp \
-		DimacsVisitor.cpp \
-		ProcessBuf.cpp \
-		LogicVisitor.cpp \
-		ClaspResultOnlineParser.cpp
-
-# the DMCS library
-libdmcs_a_SOURCES = \
-		BaseDMCS.cpp \
-		OptDMCS.cpp \
-		PrimitiveDMCS.cpp \
-                QueryPlan.cpp \
-                BeliefCombination.cpp \
-		PrimitiveDMCS.cpp \
-		OptDMCS.cpp \
-		DynamicConfiguration.cpp \
-		Instantiator.cpp \
-		Server.cpp
 
 # the dmcsd binary
 dmcsd_SOURCES = \
 		dmcsd.cpp
 
-dmcsd_LDADD = libdmcs.a libsatsolver.a libcache.a libtranslation.a
+dmcsd_LDADD = $(top_builddir)/src/dmcs/libdmcs.a $(top_builddir)/src/dmcs/libsatsolver.a libcache.a $(top_builddir)/src/network/libnetwork.a $(top_builddir)/src/loopformula/libtranslation.a $(top_builddir)/src/dyndmcs/libdyndmcs.a
 
 
 # the dmcsc binary
 dmcsc_SOURCES = \
 		dmcsc.cpp 
 
-dmcsc_LDADD = libdmcs.a
-
-# the dmcsGen binary
-#dmcsGen_SOURCES = \
-#                  ContextGenerator.cpp \
-#                  LogicVisitor.cpp \
-#		  DLVVisitor.cpp \
-#                  QueryPlanGenerator.cpp \
-#                  genTest.cpp
-
-dmcsGen_SOURCES = \
-		dmcsGen.cpp \
-		ContextGenerator.cpp \
-		LogicVisitor.cpp \
-		staticGen.cpp
-
-dmcsGen_LDADD = libdmcs.a
-
-dynGen_SOURCES = dynGen.cpp
-
+dmcsc_LDADD = $(top_builddir)/src/dmcs/libdmcs.a

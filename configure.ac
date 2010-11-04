@@ -121,6 +121,11 @@ AC_CONFIG_FILES([
            include/network/Makefile
            include/parser/Makefile
            src/Makefile
+           src/dmcs/Makefile
+           src/dyndmcs/Makefile
+           src/generator/Makefile
+           src/network/Makefile
+           src/loopformula/Makefile
            src/tests/Makefile
 ])
 
