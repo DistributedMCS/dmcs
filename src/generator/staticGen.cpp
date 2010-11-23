@@ -27,6 +27,8 @@
  * 
  */
 
+#include <sys/time.h>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -837,7 +839,14 @@ main(int argc, char* argv[])
       return 0;
     }
 
-  srand( time(NULL) );
+
+  // this is a very bad idea, it will only change the seed every second!
+  // srand( time(NULL) );
+  {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    srand(tv.tv_sec + tv.tv_usec);
+  }
   init();
 
   generate_orig_topology();
