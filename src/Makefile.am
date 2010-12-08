@@ -16,6 +16,8 @@ LIBS = $(BOOST_DATE_TIME_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_SYSTEM_LIBS
 # install dmcsd and dmcsc into $prefix/bin
 bin_PROGRAMS = dmcsd dmcsc 
 
+noinst_LIBRARIES = libcache.a
+
 # the cache library
 libcache_a_SOURCES = Cache.cpp
 
