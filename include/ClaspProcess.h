@@ -34,8 +34,8 @@
 #include "Process.h"
 #include "ProcessBuf.h"
 #include "BaseSolver.h"
-#include "ClaspResultGrammar.h"
-#include "ClaspResultBuilder.h"
+#include "parser/ClaspResultGrammar.h"
+#include "parser/ClaspResultBuilder.h"
 
 #include <iosfwd>
 #include <string>

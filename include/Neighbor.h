@@ -34,6 +34,7 @@
 #include <list>
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include <boost/tokenizer.hpp>
 
 
 namespace dmcs {
@@ -106,6 +107,44 @@ operator<< (std::ostream& os, const NeighborList& neighbors)
   return os;
 }
 
+
+inline std::istream&
+operator>> (std::istream& is, Neighbor& nb)
+{
+  std::string s;
+  std::getline(is, s);
+
+  boost::tokenizer<> context_details(s);
+  boost::tokenizer<>::const_iterator it = context_details.begin();
+ 
+  if (it == context_details.end())
+    {
+      throw boost::escaped_list_error("Got no context id!");
+    }
+
+  std::size_t context_id = std::atoi(it->c_str());
+  ++it;
+
+  if (it == context_details.end())
+    {
+      throw boost::escaped_list_error("Got no hostname!");
+    }
+
+  std::string ctx_hostname = *it;
+  ++it;
+
+  if (it == context_details.end())
+    {
+      throw boost::escaped_list_error("Got no port!");
+    }
+
+  std::string ctx_port = *it;
+
+  nb.neighbor_id = context_id;
+  nb.hostname = ctx_hostname;
+  nb.port = ctx_port;
+  return is;
+}
 
 } // namespace dmcs
 

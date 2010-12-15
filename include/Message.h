@@ -33,18 +33,39 @@
 #include "BeliefState.h"
 #include "StatsInfo.h"
 #include "Context.h"
+//#include "ContextSubstitution.h"
+#include "StatsInfo.h"
 
-#include <set>
-#include <boost/serialization/set.hpp>
+#include <list>
+#include <boost/shared_ptr.hpp>
+#include <boost/serialization/list.hpp>
 
 
 namespace dmcs {
+
+#define HEADER_REQ_PRI_DMCS "DMCS REQ PRI_DMCS"
+#define HEADER_REQ_OPT_DMCS "DMCS REQ OPT_DMCS"
+#define HEADER_REQ_DYN_DMCS "DMCS REQ DYN_DMCS"
+#define HEADER_REQ_INSTANTIATE "DMCS REQ INSTANTIATE"
+#define HEADER_ANS "DMCS ANS"
+#define HEADER_EOF "DMCS EOF"
+
+typedef std::list<std::size_t> History;
+typedef boost::shared_ptr<History> HistoryPtr;
+
+inline std::ostream&
+operator<< (std::ostream& os, const History& hist)
+{
+  std::copy(hist.begin(), hist.end(), std::ostream_iterator<std::size_t>(os, " "));
+  return os;
+}
 
 class Message
 {
 public:
   virtual ~Message() 
   {}
+
   // templates cant be virtual
   template<class Archive>
   void serialize(Archive & /* ar */, const unsigned int /* version */)

@@ -1,6 +1,6 @@
 /* DMCS -- Distributed Nonmonotonic Multi-Context Systems.
  * Copyright (C) 2009, 2010 Minh Dao-Tran, Thomas Krennwallner
- * 
+ *
  * This file is part of DMCS.
  *
  *  DMCS is free software: you can redistribute it and/or modify
@@ -21,19 +21,17 @@
  * @file   CommandType.h
  * @author Seif El-Din Bairakdar <bairakdar@kr.tuwien.ac.at>
  * @date   Wed Jan 25 2010
- * 
- * @brief  
- * 
- * 
+ *
+ * @brief 
+ *
+ *
  */
 
 #ifndef COMMAND_TYPE_H
 #define COMMAND_TYPE_H
 
 #include "BeliefState.h"
-#include "OptDMCS.h"
-#include "PrimitiveDMCS.h"
-
+//#include "DynamicConfiguration.h"
 
 namespace dmcs {
 
@@ -53,59 +51,19 @@ public:
 };
 
 
-
-class OptCommandType : public CommandType<OptMessage, OptDMCS::dmcs_value_type>
+template<typename MessageType>
+class CommandType<MessageType, bool>
 {
 public:
-  typedef OptMessage input_type;
-  typedef OptDMCS::dmcs_value_type value_type;
-
-  OptCommandType(OptDMCSPtr odmcs_)
-    : odmcs(odmcs_)
-  { }
+  typedef MessageType input_type;
+  typedef bool value_type;
+  typedef bool return_type;
 
   return_type
-  execute(const OptMessage& mess)
-  {
-    return odmcs->getBeliefStates(mess);
-  }
+  execute(input_type& mess);
 
-  bool
-  continues(OptMessage& /* mess */)
-  {
-    return false;
-  }
-
-private:
-  OptDMCSPtr odmcs;
-};
-
-
-
-class PrimitiveCommandType 
-  : public CommandType<PrimitiveMessage, PrimitiveDMCS::dmcs_value_type>
-{
-public:
-  typedef PrimitiveDMCS::dmcs_value_type value_type;
-
-  PrimitiveCommandType(PrimitiveDMCSPtr pdmcs_)
-    : pdmcs(pdmcs_)
-  { }
-
-  return_type
-  execute(PrimitiveMessage& mess)
-  {
-    return pdmcs->getBeliefStates(mess);
-  }
-
-  bool
-  continues(PrimitiveMessage& /* mess */)
-  {
-    return false;
-  }
-
-private:
-  PrimitiveDMCSPtr pdmcs;
+  virtual bool
+  continues(input_type& mess) = 0;
 };
 
 

@@ -49,7 +49,12 @@ namespace dmcs {
 #define BRIDGE_RULES "bridge_rules"
 #define TEMPLATE "template"
 #define PREFIX "prefix"
-
+#define DYNAMIC "dynamic"
+#define MATCH_MAKER "mm"
+#define ROOT_CTX "root"
+#define LIMIT_ANSWERS "n"
+#define LIMIT_BIND_RULES "b"
+#define HEURISTICS "h"
 
 
 } // namespace dmcs

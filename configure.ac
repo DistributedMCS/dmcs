@@ -114,7 +114,18 @@ AC_ARG_ENABLE(debug,
 AC_CONFIG_FILES([
            Makefile 
            include/Makefile
+           include/dmcs/Makefile
+           include/dyndmcs/Makefile
+           include/generator/Makefile
+           include/loopformula/Makefile
+           include/network/Makefile
+           include/parser/Makefile
            src/Makefile
+           src/dmcs/Makefile
+           src/dyndmcs/Makefile
+           src/generator/Makefile
+           src/network/Makefile
+           src/loopformula/Makefile
            src/tests/Makefile
 ])
 

@@ -1,0 +1,2 @@
+inc :- (X:[pos]), not (Y:[neg]), not (1:dec).
+dec :- (X:[neg]), not (Y:[pos]), not (1:inc).

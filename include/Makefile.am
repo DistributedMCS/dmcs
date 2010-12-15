@@ -1,24 +1,13 @@
 AUTOMAKE_OPTIONS = gnu
 
+SUBDIRS = dmcs dyndmcs generator loopformula network parser
+
 # including headers for make dist
 noinst_HEADERS =  \
-	  ProgramOptions.h \
-	  Signature.h \
-	  CNFLocalLoopFormulaBuilder.h \
-	  IMPLocalLoopFormulaBuilder.h \
-	  EquiCNFLocalLoopFormulaBuilder.h \
-          LocalLoopFormulaBuilder.h \
-          LoopFormula.h \
-          LoopFormulaBuilder.h \
-          LoopFormulaDirector.h \
-		BaseBuilder.h \
-		BaseDMCS.h \
 		BaseSolver.h \
 		BaseVisitor.h \
 		BeliefCombination.h \
 		BeliefState.h \
-		BridgeRulesBuilder.h \
-		BridgeRulesBuilder.tcc \
 		Cache.h \
 		ClaspProcess.h \
 		ClaspResultBuilder.h \
@@ -34,23 +23,16 @@ noinst_HEADERS =  \
 		CnfGrammar.h \
 		CnfGrammar.tcc \
 		CommandType.h \
+		CommandTypeFactory.h \
 		Context.h \
                 DLVVisitor.h \
 		DimacsVisitor.h \
 		LogicVisitor.h \
-		LocalKBBuilder.h \
-		LocalKBBuilder.tcc \
-		OptMessage.h \
-		PropositionalASPGrammar.h \
-		PropositionalASPGrammar.tcc \
 		Message.h \
 		Neighbor.h \
-		ParserDirector.h \
-		ParserDirector.tcc \
-		PrimitiveDMCS.h \
-		PrimitiveMessage.h \
 		Process.h \
 		ProcessBuf.h \
+	  	ProgramOptions.h \
 		ProxySignatureByLocal.h \
                 QueryPlanWriter.h \
                 QueryPlan.h \
@@ -59,12 +41,7 @@ noinst_HEADERS =  \
 		SatSolver.h \
 		SatSolver.tcc \
 		StatsInfo.h \
-		Server.h \
-		Server.tcc \
-		Session.h \
                 Signature.h \
-		SpiritDebugging.h \
-		SpiritFilePositionNode.h \
 		Theory.h \
 		generator/ContextGenerator.h \
 		generator/BinaryTreeTopoGenerator.h \
@@ -88,4 +65,5 @@ noinst_HEADERS =  \
 		generator/DynRakeTopoGenerator.h \
 		generator/DynRandomTopoGenerator.h \
 		connection.hpp
+
 

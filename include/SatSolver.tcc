@@ -30,10 +30,10 @@
 #if !defined(_SAT_SOLVER_TCC)
 #define _SAT_SOLVER_TCC
 
-#include "BaseBuilder.h"
-#include "ClaspResultGrammar.h"
-#include "ClaspResultBuilder.h"
-#include "ParserDirector.h"
+#include "parser/BaseBuilder.h"
+#include "parser/ClaspResultGrammar.h"
+#include "parser/ClaspResultBuilder.h"
+#include "parser/ParserDirector.h"
 
 #include <exception>
 
@@ -79,7 +79,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const TheoryPtr& theory, std::s
       //
       // parse result and set belief states
       //
-      
+
 #if defined(DEBUG)
       std::cerr << "Parsing the models..." << std::endl;
 #endif // DEBUG
@@ -106,7 +106,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const TheoryPtr& theory, std::s
       std::cerr << "Error: " << e.what() << std::endl;
       throw e;
     }
-
+  
   return retcode;
 }
   

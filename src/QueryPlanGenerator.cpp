@@ -192,6 +192,7 @@ QueryPlanGenerator::compute_min_V(int topology)
   // epsilon) to get all variables for k
   switch(topology)
     {
+    case 0: // random case
     case 4: // ring case
       {
 	break;
@@ -216,3 +217,7 @@ QueryPlanGenerator::getMinV() const
 {
   return V;
 }
+
+// Local Variables:
+// mode: C++
+// End:

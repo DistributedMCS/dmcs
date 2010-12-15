@@ -36,6 +36,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/multi_index/composite_key.hpp>
+
 
 #include <string>
 #include <iosfwd>
@@ -75,22 +77,35 @@ namespace Tag
   struct Sym {};
   struct Ctx {};
   struct Local {};
+  struct SymCtx {};
 }
 
 
 /// a Signature is a table with 3 columns named Sym, Ctx, and Local,
-/// where Sym and Local are unique, and Ctx is non-unique
+/// where Sym and Ctx are non-unique, but their composition is unique,
+/// Local is unique
 typedef boost::multi_index_container<
   Symbol,
   boost::multi_index::indexed_by<
     boost::multi_index::ordered_unique<
+      boost::multi_index::tag<Tag::SymCtx>,
+      boost::multi_index::composite_key<
+	Symbol,
+	boost::multi_index::member<Symbol, std::string, &Symbol::sym>,
+	boost::multi_index::member<Symbol, std::size_t, &Symbol::ctxId>
+	>
+      >,
+
+    boost::multi_index::ordered_non_unique<
       boost::multi_index::tag<Tag::Sym>,
       boost::multi_index::member<Symbol, std::string, &Symbol::sym>
       >,
+
     boost::multi_index::ordered_non_unique<
       boost::multi_index::tag<Tag::Ctx>,
       boost::multi_index::member<Symbol, std::size_t, &Symbol::ctxId>
       >,
+
     boost::multi_index::ordered_unique<
       boost::multi_index::tag<Tag::Local>,
       boost::multi_index::member<Symbol, std::size_t, &Symbol::localId>
@@ -115,12 +130,28 @@ operator<< (std::ostream& os, const Signature& sig)
 	{
 	  std::copy(sig.begin(), end, std::ostream_iterator<Symbol>(os, ","));
 	}
-
-      if (sig.size() > 0)
-	{
-	  os << *end;
-	}
+      os << *end;
     }
+
+  return os;
+}
+
+
+
+// output the whole content of SignaturePtr
+inline std::ostream&
+operator<< (std::ostream& os, const SignaturePtr& sig)
+{
+  return os << *sig;
+}
+
+
+
+// output the whole Signature
+inline std::ostream&
+operator<< (std::ostream& os, const SignatureVecPtr& sigs)
+{
+  std::copy(sigs->begin(), sigs->end(), std::ostream_iterator<SignaturePtr>(os, "\n\n"));
 
   return os;
 }
@@ -156,7 +187,7 @@ operator>> (std::istream& is, Signature& sig)
 	{
 	  throw boost::escaped_list_error("Got no symbol list");
 	}
-      
+
       std::string sym = *sit;
       ++sit;
       
@@ -164,7 +195,7 @@ operator>> (std::istream& is, Signature& sig)
 	{
 	  throw boost::escaped_list_error("symbol list length == 1");
 	}
-      
+
       std::size_t ctx = std::atoi(sit->c_str());
       ++sit;
       
@@ -172,7 +203,7 @@ operator>> (std::istream& is, Signature& sig)
 	{
 	  throw boost::escaped_list_error("symbol list length == 2");
 	}
-      
+
       std::size_t local = std::atoi(sit->c_str());
       ++sit;
       
@@ -180,7 +211,7 @@ operator>> (std::istream& is, Signature& sig)
 	{
 	  throw boost::escaped_list_error("symbol list length == 3");
 	}
-      
+
       std::size_t orig = std::atoi(sit->c_str());
       
       sig.insert(Symbol(sym, ctx, local, orig));
@@ -191,13 +222,16 @@ operator>> (std::istream& is, Signature& sig)
 
 
 /// query Signature by symbol string
-typedef boost::multi_index::index<Signature,Tag::Sym>::type SignatureBySym;
+typedef boost::multi_index::index<Signature, Tag::Sym>::type SignatureBySym;
 
 /// query Signature by context ID
-typedef boost::multi_index::index<Signature,Tag::Ctx>::type SignatureByCtx;
+typedef boost::multi_index::index<Signature, Tag::Ctx>::type SignatureByCtx;
+
+/// query Signature by symbol string and context ID
+typedef boost::multi_index::index<Signature, Tag::SymCtx>::type SignatureBySymCtx;
 
 /// query Signature by local ID
-typedef boost::multi_index::index<Signature,Tag::Local>::type SignatureByLocal;
+typedef boost::multi_index::index<Signature, Tag::Local>::type SignatureByLocal;
 
 } // namespace dmcs
 

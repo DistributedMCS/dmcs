@@ -4,11 +4,12 @@
 #include <boost/tokenizer.hpp>
 
 #include "ClaspProcess.h"
-#include "CnfBuilder.h"
-#include "CnfGrammar.h"
 #include "DimacsVisitor.h"
-#include "ParserDirector.h"
 #include "Theory.h"
+
+#include "parser/CnfBuilder.h"
+#include "parser/CnfGrammar.h"
+#include "parser/ParserDirector.h"
 
 using namespace dmcs;
 using namespace dmcs::generator;

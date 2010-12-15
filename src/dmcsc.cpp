@@ -32,7 +32,14 @@
 #include "config.h"
 #endif
 
-#include "Client.h"
+#include "dmcs/OptCommandType.h"
+#include "dmcs/PrimitiveCommandType.h"
+
+#include "dyndmcs/DynamicCommandType.h"
+#include "dyndmcs/DynamicConfiguration.h"
+#include "dyndmcs/InstantiatorCommandType.h"
+
+#include "network/Client.h"
 #include "Theory.h"
 #include "BeliefState.h"
 #include "Message.h"
@@ -51,23 +58,63 @@
 #include <boost/functional/hash.hpp>
 #include <boost/program_options.hpp>
 
+
 using namespace dmcs;
 
+
+//@todo: can we reuse endpoint, io_service from main()?
+void
+instantiate(ContextSubstitutionPtr ctx_sub, const std::string& hostName, const std::string& port)
+{
+  // tell the root context to start the instantiation process with the
+  // substitution ctx_sub
+  
+  boost::asio::io_service io_service;
+  boost::asio::ip::tcp::resolver resolver(io_service);
+  boost::asio::ip::tcp::resolver::query query(hostName, port);
+  boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
+  boost::asio::ip::tcp::endpoint endpoint = *it;
+
+  std::string header = HEADER_REQ_INSTANTIATE;
+  InstantiateForwardMessage mess(ctx_sub);
+  Client<InstantiatorCommandType> c(io_service, it, header, mess);
+  io_service.run();
+
+  InstantiateBackwardMessagePtr answer = c.getResult();
+
+  if (answer->getStatus() == true)
+    {
+      std::cerr << "Instantiation finished successfully!" << std::endl;
+
+      // Now call the evaluation
+    }
+}
 
 int
 main(int argc, char* argv[])
 {
   try 
     {
+      std::string hostName = "";
+      std::string port = "";
+      std::string manager = "";
+      std::string qvs = "";
+      std::size_t system_size = 0;
+      std::size_t root_ctx;
+      bool dynamic;
+      BeliefStatePtr V(new BeliefState);
+
       boost::program_options::options_description desc("Allowed options");
 
       desc.add_options()
 	(HELP, "produce help and usage message")
-	(HOSTNAME, boost::program_options::value<std::string>(), "set host name")
-	(PORT, boost::program_options::value<std::string>(), "set port")
-	(QUERY_VARS, boost::program_options::value<std::string>(), "set port")
-	(SYSTEM_SIZE, boost::program_options::value<std::size_t>(), "set system size")
-	(MANAGER, boost::program_options::value<std::string>(), "set Manager HOST:PORT")
+	(HOSTNAME, boost::program_options::value<std::string>(&hostName)->default_value("localhost"), "set host name")
+	(PORT, boost::program_options::value<std::string>(&port), "set port")
+	(QUERY_VARS, boost::program_options::value<std::string>(&qvs), "set query variables")
+	(SYSTEM_SIZE, boost::program_options::value<std::size_t>(&system_size), "set system size")
+	(MANAGER, boost::program_options::value<std::string>(&manager), "set Manager HOST:PORT")
+	(DYNAMIC, boost::program_options::value<bool>(&dynamic)->default_value(false), "set to dynamic mode")
+	(ROOT_CTX, boost::program_options::value<std::size_t>(&root_ctx)->default_value(1), "set root context id")
 	;
 	
       boost::program_options::variables_map vm;        
@@ -76,38 +123,15 @@ main(int argc, char* argv[])
 
       if (vm.count(HELP))
 	{
-	  std::cerr << "Usage: " << argv[0] 
-		    << " --" << HOSTNAME << "=<HOST>"
-		    << " --" << PORT << "=<PORT>"
-		    << " --" << QUERY_VARS << "=V"
-		    << " [--" << MANAGER << "=HOSTNAME:PORT|--" << SYSTEM_SIZE << "=<SIZE>]"
-		    << std::endl;
+	  std::cerr << desc << std::endl;
 	  return 1;
         }
-
-      std::string hostName = "";
-      std::string port = "";
-      std::string manager = "";
-      std::size_t systemSize = 0;	
-      BeliefStatePtr V(new BeliefState);
-
-      if (vm.count(HOSTNAME)) 
-	{
-	  hostName = vm[HOSTNAME].as<std::string>();
-	}
-      
-      if (vm.count(PORT)) 
-	{
-	  port = vm[PORT].as<std::string>();
-	}
       
       bool primitiveDMCS = false;
-      if (vm.count(QUERY_VARS)) // reading V for basic DMCS
+      if (qvs.compare("") != 0) // reading V for basic DMCS
 	{
 	  primitiveDMCS = true;
 	  
-	  const std::string& qvs = vm[QUERY_VARS].as<std::string>();
-	    
 	  boost::tokenizer<> tok(qvs);
 
 	  for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
@@ -119,32 +143,7 @@ main(int argc, char* argv[])
 	    }
 	}
 
-      int optionalCount = 0;
-
-      if (vm.count(MANAGER)) 
-	{
-	  //optionalCount++;
-	  //std::cerr << "We are sorry, but the manager feature is under implementation, please try the other alternatives";
-	  //read manager host and port
-	  // quick hack: manager now stands for the topology file. 
-	  manager = vm[MANAGER].as<std::string>();
-	  
-	  //return 1;
-	}
-
-      if (vm.count(SYSTEM_SIZE)) 
-	{
-	  systemSize = vm[SYSTEM_SIZE].as<std::size_t>();
-	  optionalCount++;
-	}
-
-      if(hostName.compare("") ==0 ||
-	 port.compare("") == 0 ||
-	 manager.compare("") == 0 ||
-	 systemSize == 0 ||
-	 (primitiveDMCS && V->size() == 0) ||
-	 (primitiveDMCS && V->size() != systemSize) ||
-	 optionalCount == 0 || optionalCount == 2) 
+      if (port.compare("") == 0)
 	{
 	  std::cerr << desc << "\n";
 	  return 1;
@@ -155,52 +154,90 @@ main(int argc, char* argv[])
       boost::asio::ip::tcp::resolver::query query(hostName, port);
       boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
       boost::asio::ip::tcp::endpoint endpoint = *it;
-      
-      // our result
-#ifdef DMCS_STATS_INFO
-      ReturnMessagePtr result(new ReturnMessage);
-#else
-      BeliefStateListPtr result(new BeliefStateList);
-#endif // DMCS_STATS_INFO
-	
-#ifdef DEBUG
-      std::cerr << "Starting the DMCS with " << systemSize << std::endl;
-#endif
 
-      
-      if (primitiveDMCS) //primitive DMCS
-	{
-#ifdef DEBUG
-	  std::cerr << "Primitive" << std::endl;
-	  std::cerr << "Going to send: ";
-	  std::cerr << V << std::endl;
-#endif 
-	  
-	  PrimitiveMessage mess(V);
+      if (dynamic)
+	{ // dynamic mode
 
-	  Client<PrimitiveCommandType> c(io_service, it, mess);
+	  std::cerr << "In dynamic mode"<< std::endl;
+
+	  ContextSubstitutionPtr ctx_sub(new ContextSubstitution);
+	  ConfigMessage mess(root_ctx, ctx_sub, false);
 	  
 #ifdef DEBUG
-	  std::cerr << "Running ioservice" <<std::endl;
+	  std::cerr << "Message = " << mess << std::endl;
 #endif
 	  
+	  std::string header = HEADER_REQ_DYN_DMCS;
+	  Client<DynamicCommandType> c(io_service, it, header, mess);
 	  io_service.run();
+
+	  DynamicConfiguration::dynmcs_return_type result = c.getResult();
+
+	  std::cerr << "FINAL RESULT: " << std::endl
+		    << *result << std::endl;
+
+
+	  // instantiate the system, then write .br and .sh files
+	  /*for (ContextSubstitutionList::const_iterator it = result->begin(); it != result->end(); ++it)
+	    {
+	      instantiate(*it);
+	      }*/
+	  ContextSubstitutionList::const_iterator it = result->begin();
+	  instantiate(*it, hostName, port);
+	}
+      else
+	{ // ground mode
+	  if(system_size == 0 ||
+	     (primitiveDMCS && V->size() == 0) ||
+	     (primitiveDMCS && V->size() != system_size))
+	    {
+	      std::cerr << desc << "\n";
+	      return 1;
+	    }
+
+	  // our result
+#ifdef DMCS_STATS_INFO
+	  ReturnMessagePtr result(new ReturnMessage);
+#else
+	  BeliefStateListPtr result(new BeliefStateList);
+#endif // DMCS_STATS_INFO
 	  
 #ifdef DEBUG
-	  std::cerr << "Getting results" <<std::endl;
+	  std::cerr << "Starting DMCS with " << system_size << std::endl;
 #endif
 	  
-	  result = c.getResult();
+	  if (primitiveDMCS) // primitive DMCS
+	    {
+#ifdef DEBUG
+	      std::cerr << "Primitive" << std::endl;
+	      std::cerr << "Going to send: ";
+	      std::cerr << V << std::endl;
+#endif 
+	      std::string header = HEADER_REQ_PRI_DMCS;
+	      PrimitiveMessage mess(V);
+	      Client<PrimitiveCommandType> c(io_service, it, header, mess);
+	      
+#ifdef DEBUG
+	      std::cerr << "Running ioservice" <<std::endl;
+#endif
+	  
+	      io_service.run();
 
- 	}
-      else // Opt DMCS
- 	{
-	  OptCommandType::input_type mess(0); // invoker ID ?
- 	  Client<OptCommandType> c(io_service, it, mess);
- 	  io_service.run();
-
-	  result = c.getResult();
- 	}
+#ifdef DEBUG	  
+	      std::cerr << "Getting results" <<std::endl;
+#endif
+	  
+	      result = c.getResult();
+	    }
+	  else // Opt DMCS
+	    {
+	      std::string header = HEADER_REQ_OPT_DMCS;
+	      OptCommandType::input_type mess(0); // invoker ID ?
+	      Client<OptCommandType> c(io_service, it, header, mess);
+	      io_service.run();
+	      
+	      result = c.getResult();
+	    }
 
       // Print results
       // but first read the topology file (quick hack) to get the signatures
@@ -277,7 +314,7 @@ main(int argc, char* argv[])
 #else
       std::cout << "Total Number of Equilibria: " << result->size() << std::endl;
 #endif
-
+	}
     }
   catch (std::exception& e)
     {
@@ -291,3 +328,7 @@ main(int argc, char* argv[])
   
   return 0;
 }
+
+// Local Variables:
+// mode: C++
+// End:
