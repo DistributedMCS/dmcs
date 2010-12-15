@@ -1,4 +1,9 @@
-2010-12-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+2010-12-15  Thomas Krennwallner <tkren@kr.tuwien.ac.at>
+
+	* minisat-20100906: Add current minisat master branch from
+	  git://github.com/niklasso/minisat.git.
+
+22010-12-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/Makefile.am: Add missing noinst_LIBRARIES = libcache.a
 
