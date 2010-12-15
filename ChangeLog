@@ -1,3 +1,7 @@
+2010-12-15  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* configure.ac: Require Boost >= 1.42.
+
 2010-12-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/Makefile.am: Add missing noinst_LIBRARIES = libcache.a
