@@ -1,0 +1,6 @@
+2010-12-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* RandGen.h (RandGen::N, RandGen::M): Use static member variables
+	for N and M prevents compile errors when including relsat together
+	with bitmagic headers.
+

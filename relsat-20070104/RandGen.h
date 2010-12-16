@@ -32,9 +32,6 @@
 /* ACM Transactions on Modeling and Computer Simulation,           */
 /* Vol. 8, No. 1, January 1998, pp 3--30.                          */
 
-/* Period parameters */
-#define N 624
-#define M 397
 #define MATRIX_A 0x9908b0df   /* constant vector a */
 #define UPPER_MASK 0x80000000 /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffff /* least significant r bits */
@@ -49,6 +46,10 @@
 
 class RandGen {
   private:
+  /* Period parameters */
+  static const int N = 624;
+  static const int M = 397;
+
   unsigned long mt[N]; /* the array for the state vector  */
   int mti;
 
