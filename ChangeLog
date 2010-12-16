@@ -1,3 +1,8 @@
+2010-12-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* relsat-20070104: Add current relsat trunk from
+	http://relsat.googlecode.com/svn/trunk/.
+
 2010-12-15  Thomas Krennwallner <tkren@kr.tuwien.ac.at>
 
 	* minisat-20100906: Add current minisat master branch from
