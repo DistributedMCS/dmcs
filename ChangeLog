@@ -1,5 +1,7 @@
 2010-12-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* bm3.7.0: Add bm3.7.0 from http://bmagic.sourceforge.net/.
+
 	* relsat-20070104: Add current relsat trunk from
 	http://relsat.googlecode.com/svn/trunk/.
 
