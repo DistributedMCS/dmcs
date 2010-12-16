@@ -1,6 +1,6 @@
 GMPDIR = /home/bayardo/gmp-3.1
 
-CFLAGS= -DNDEBUG -O3 -DNO_GMP
+CFLAGS= -DNDEBUG -O3 -DNO_GMP -I../bm3.7.0/src
 #CFLAGS= -DNDEBUG -O3 -I$(GMPDIR)
 #CFLAGS= -g -I$(GMPDIR)
 

@@ -1,3 +1,7 @@
+2010-12-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* Makefile.linux (CFLAGS): Add path to bm3.7.0
+
 2010-12-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* RandGen.h (RandGen::N, RandGen::M): Use static member variables

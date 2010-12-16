@@ -1,3 +1,7 @@
+2010-12-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Makefile.am: Remove header files in subdirs.
+
 2010-12-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* bm3.7.0: Add bm3.7.0 from http://bmagic.sourceforge.net/.
