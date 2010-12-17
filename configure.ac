@@ -89,8 +89,49 @@ AC_CONFIG_MACRO_DIR([m4])
 # Check for external libraries
 #
 
+
+#
+# check for bmagic
+#
+AC_ARG_WITH(bmagic,
+            [  --with-bmagic=DIR       Prefix of bitmagic library (DIR=local forces local bmagic)]
+)
+
+BM_CPPFLAGS=""
+BM_VERSION=""
+
+if test x$with_bmagic != xlocal; then
+
+   TMP_CPPFLAGS=$CPPFLAGS
+   CPPFLAGS="$CPPFLAGS -I$with_bmagic"
+   AC_LANG_PUSH([C++])
+   AC_CHECK_HEADER([bm/bm.h], [have_bm=true], [have_bm=false])
+   # todo: do some sanity compilations with this bmagic
+   AC_LANG_POP([C++])
+   CPPFLAGS=$TMP_CPPFLAGS
+
+   if test x$have_bm = xfalse; then
+         AC_MSG_WARN([bmagic not found. Using local bmagic.])
+   else
+      BM_CPPFLAGS="-I$with_bmagic"
+      have_bm=true
+   fi
+
+fi
+
+if test x$have_bm != xtrue; then
+   # force local bmagic
+   BM_CPPFLAGS="-I\${top_srcdir}/bm3.7.0/"
+   BM_VERSION=3.7.0
+fi
+
+AC_SUBST([BM_CPPFLAGS])
+
+
+
+
 # checking for boost libs
-BOOST_REQUIRE([1.40.0])
+BOOST_REQUIRE([1.42.0])
 BOOST_SMART_PTR
 BOOST_STRING_ALGO
 BOOST_TOKENIZER
@@ -136,17 +177,35 @@ dnl output configuration
 cat <<EOF
  
 $PACKAGE_TARNAME $PACKAGE_VERSION configuration:
- 
+
+ - Compiler settings
+ CC: $CC
+ CXX: $CXX
+ CFLAGS: $CFLAGS
+ CPPFLAGS: $CPPFLAGS
+ CXXFLAGS: $CXXFLAGS
+ LDFLAGS: $LDFLAGS
+
+ - Path settings
  prefix: $prefix
  exec_prefix: $exec_prefix
- 
+
  bindir: $bindir
  libdir: $libdir
  pkglibdir: $libdir/$PACKAGE_TARNAME
  datadir: $datadir
 
- Using the following settings:
+ - Using the following binaries:
  clasp: $CLASPPATH
- Boost: $BOOST_CPPFLAGS
+
+ - Using the following libraries:
+ Bitmagic: $BM_VERSION $BM_CPPFLAGS
+ Boost: $boost_major_version $BOOST_CPPFLAGS
+ relsat:
+ minisat:
+ picosat:
+
+ - Options:
+ Debug: $debug_support
 
 EOF

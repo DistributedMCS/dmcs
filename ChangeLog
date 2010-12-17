@@ -1,3 +1,15 @@
+2010-12-17  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/Makefile.am (AM_CPPFLAGS): Use BM_CPPFLAGS.
+	* src/tests/Makefile.am: Likewise.
+	* src/network/Makefile.am: Likewise.
+	* src/loopformula/Makefile.am: Likewise.
+	* src/generator/Makefile.am: Likewise.
+	* src/dyndmcs/Makefile.am: Likewise.
+	* src/dmcs/Makefile.am: Likewise.
+
+	* configure.ac: Checks for bitmagic library.
+
 2010-12-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/Makefile.am: Remove header files in subdirs.
@@ -9,7 +21,9 @@
 	* relsat-20070104: Add current relsat trunk from
 	http://relsat.googlecode.com/svn/trunk/.
 
-2010-12-15  Thomas Krennwallner <tkren@kr.tuwien.ac.at>
+2010-12-15  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* configure.ac: Require Boost >= 1.42.
 
 	* minisat-20100906: Add current minisat master branch from
 	  git://github.com/niklasso/minisat.git.
