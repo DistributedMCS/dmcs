@@ -66,10 +66,10 @@ struct handle_int
 	std::size_t oid = loc_it->origId;
 
 	BeliefSet& b = belief_state->at(cid);
-	b = setBeliefSet(b, oid, true);
+	b.set(oid, true);
 
 	// turn on the epsilon bit of the neighbor here
-	b = setEpsilon(b);
+	setEpsilon(b);
       }
   }
 };

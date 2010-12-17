@@ -274,7 +274,7 @@ init()
   // now set all epsilon bits to 1
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
-      (*minV)[i] = setEpsilon((*minV)[i]);
+      setEpsilon((*minV)[i]);
     }
 }
 

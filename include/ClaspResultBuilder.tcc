@@ -107,17 +107,17 @@ ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& 
   // un/set bit in the right context at the right position
   if (local_lit > 0) // positive literal
     {
-      b = setBeliefSet(b, loc_it->origId, true);
+      b.set(loc_it->origId, true);
     }
   else // negative literal (this is probably not needed)
     {
-      b = setBeliefSet(b, loc_it->origId, false);
+      b.set(loc_it->origId, false);
     }
   
   // turn on epsilon of neighbor here, because we don't have
   // enough information about neighbors from the graph (some edges
   // were removed).
-  b = setEpsilon(b);
+  setEpsilon(b);
 }
 
 } // namespace dmcs

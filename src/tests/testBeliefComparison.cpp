@@ -28,12 +28,12 @@ BOOST_AUTO_TEST_CASE( testBeliefStates )
   BeliefState::iterator it = s1->begin();
 
   BeliefSet& s11 = *it;
-  s11 = setBeliefSet(s11, 1);
-  s11 = setBeliefSet(s11, 3);
-  s11 = setEpsilon(s11);
+  s11.set(1);
+  s11.set(3);
+  setEpsilon(s11);
   
   BeliefSet& s12 = *(++it);
-  s12 = setEpsilon(s12);
+  setEpsilon(s12);
 
 
   //
@@ -42,12 +42,12 @@ BOOST_AUTO_TEST_CASE( testBeliefStates )
   it = s2->begin();
 
   BeliefSet& s21 = *it;
-  s21 = setBeliefSet(s21, 1);
-  s21 = setBeliefSet(s21, 2);
-  s21 = setEpsilon(s21);
+  s21.set(1);
+  s21.set(2);
+  setEpsilon(s21);
   
   BeliefSet& s22 = *(++it);
-  s22 = setEpsilon(s22);
+  setEpsilon(s22);
 
   cs->push_back(s1);
   cs->push_back(s2);
@@ -59,13 +59,13 @@ BOOST_AUTO_TEST_CASE( testBeliefStates )
   it = t1->begin();
 
   BeliefSet& t11 = *it;
-  t11 = setBeliefSet(t11, 1);
-  t11 = setBeliefSet(t11, 2);
-  t11 = setBeliefSet(t11, 3);
-  t11 = setEpsilon(t11);
+  t11.set(1);
+  t11.set(2);
+  t11.set(3);
+  setEpsilon(t11);
   
   BeliefSet& t12 = *(++it);
-  t12 = setEpsilon(t12);
+  setEpsilon(t12);
 
   //
   // T2 = (000111, 000001)
@@ -73,12 +73,12 @@ BOOST_AUTO_TEST_CASE( testBeliefStates )
   it = t2->begin();
 
   BeliefSet& t21 = *it;
-  t21 = setBeliefSet(t21, 1);
-  t21 = setBeliefSet(t21, 2);
-  t21 = setEpsilon(t21);
+  t21.set(1);
+  t21.set(2);
+  setEpsilon(t21);
   
   BeliefSet& t22 = *(++it);
-  t22 = setEpsilon(t22);
+  setEpsilon(t22);
   
   ct->push_back(t1);
   ct->push_back(t2);
@@ -145,12 +145,12 @@ BOOST_AUTO_TEST_CASE( testBeliefStateSorting )
   BeliefState::iterator it = s1->begin();
 
   BeliefSet& s11 = *it;
-  s11 = setBeliefSet(s11, 1);
-  s11 = setBeliefSet(s11, 3);
-  s11 = setEpsilon(s11);
+  s11.set(1);
+  s11.set(3);
+  setEpsilon(s11);
   
   BeliefSet& s12 = *(++it);
-  s12 = setEpsilon(s12);
+  setEpsilon(s12);
 
 
   //
@@ -159,12 +159,12 @@ BOOST_AUTO_TEST_CASE( testBeliefStateSorting )
   it = s2->begin();
 
   BeliefSet& s21 = *it;
-  s21 = setBeliefSet(s21, 1);
-  s21 = setBeliefSet(s21, 3);
-  s21 = setEpsilon(s21);
+  s21.set(1);
+  s21.set(3);
+  setEpsilon(s21);
   
   BeliefSet& s22 = *(++it);
-  s22 = setEpsilon(s22);
+  setEpsilon(s22);
 
  
   //
@@ -173,11 +173,11 @@ BOOST_AUTO_TEST_CASE( testBeliefStateSorting )
   it = s3->begin();
 
   BeliefSet& s31 = *it;
-  s31 = setBeliefSet(s31, 1);
-  s31 = setEpsilon(s31);
+  s31.set(1);
+  setEpsilon(s31);
   
   BeliefSet& s32 = *(++it);
-  s32 = setEpsilon(s32);
+  setEpsilon(s32);
 
   cs->push_back(s1);
   cs->push_back(s2);

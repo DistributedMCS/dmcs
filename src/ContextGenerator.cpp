@@ -321,7 +321,8 @@ ContextGenerator::local_interface(/* std::size_t id1, */ std::size_t id2)
   // with the assumption that bridge_rules now contains bridge rules
   // of context id1 and id2 is one of its neighbors
 
-  BeliefSet lc = setEpsilon(0);
+  BeliefSet lc;
+  setEpsilon(lc);
 
   const SignaturePtr sig = (*sigmas)[id2-1];
 
@@ -336,7 +337,7 @@ ContextGenerator::local_interface(/* std::size_t id1, */ std::size_t id2)
 	    {
 	      const SignatureByLocal& local = boost::get<Tag::Local>(*sig);
 	      SignatureByLocal::const_iterator loc_it = local.find(i->second);
-	      lc = setBeliefSet(lc, loc_it->localId);
+	      lc.set(loc_it->localId);
 	    }
 	}
       
@@ -346,7 +347,7 @@ ContextGenerator::local_interface(/* std::size_t id1, */ std::size_t id2)
 	    {
 	      const SignatureByLocal& local = boost::get<Tag::Local>(*sig);
 	      SignatureByLocal::const_iterator loc_it = local.find(i->second);
-	      lc = setBeliefSet(lc, loc_it->localId);
+	      lc.set(loc_it->localId);
 	    }
 	}
     }
@@ -378,7 +379,7 @@ ContextGenerator::update_min_V()
 	  BeliefSet& vb = v_state[context_id - 1];
 	  
 	  // in V: turn on the corresponding bit in the corresponding context
-	  vb = setBeliefSet(vb, atom_id);
+	  vb.set(atom_id);
 	}
       
       for (NegativeBridgeBody::const_iterator k = nb.begin(); k != nb.end(); ++k)
@@ -389,7 +390,7 @@ ContextGenerator::update_min_V()
 	  BeliefSet& vb = v_state[context_id - 1];
 	  
 	  // in V: turn on the corresponding bit in the corresponding context
-	  vb = setBeliefSet(vb, atom_id);
+	  vb.set(atom_id);
 	}
     }
 }

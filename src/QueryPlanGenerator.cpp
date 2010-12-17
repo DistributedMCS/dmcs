@@ -85,7 +85,8 @@ QueryPlanGenerator::create_interfaces(int topology)
 BeliefSet
 QueryPlanGenerator::local_interface(std::size_t context_id1, std::size_t context_id2)
 {
-  BeliefSet local_interface = setEpsilon(0);
+  BeliefSet local_interface;
+  setEpsilon(local_interface);
   Contexts::const_iterator c1 = contexts->begin();
   Contexts::const_iterator c2 = contexts->begin();
   
@@ -116,7 +117,7 @@ QueryPlanGenerator::local_interface(std::size_t context_id1, std::size_t context
 	    {
 	      const SignatureByLocal& local = boost::get<Tag::Local>(*sig);
 	      SignatureByLocal::const_iterator loc_it = local.find(i->second);
-	      local_interface = setBeliefSet(local_interface, loc_it->localId);
+	      local_interface.set(loc_it->localId);
 	    }
 	}
     }
@@ -155,7 +156,7 @@ QueryPlanGenerator::compute_min_V(int topology)
     {
 
       // set epsilon bit for current context id, by sending its belief set as a input
-      v_state[(*i)->getContextID() - 1] = setEpsilon(v_state[(*i)->getContextID() - 1]); 
+      setEpsilon(v_state[(*i)->getContextID() - 1]); 
       
       const BridgeRulesPtr& br = (*i)->getBridgeRules();
       
@@ -172,7 +173,7 @@ QueryPlanGenerator::compute_min_V(int topology)
 	      BeliefSet& vb = v_state[context_id - 1];
 
 	      // in V: turn on the corresponding bit in the corresponding context
-	      vb = setBeliefSet(vb, atom_id);
+	      vb.set(atom_id);
 	    }
 
 	  for (NegativeBridgeBody::const_iterator k = nb.begin(); k != nb.end(); ++k)
@@ -183,7 +184,7 @@ QueryPlanGenerator::compute_min_V(int topology)
 	      BeliefSet& vb = v_state[context_id - 1];
 
 	      // in V: turn on the corresponding bit in the corresponding context
-	      vb = setBeliefSet(vb, atom_id);
+	      vb.set(atom_id);
 	    }
 	}
     }

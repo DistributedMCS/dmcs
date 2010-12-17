@@ -80,7 +80,8 @@ public:
     std::advance(iv_it, d);
 
     // then set the bit at atom_position
-    setBeliefSet(*iv_it, atom_position);
+    BeliefSet bs = *iv_it;
+    bs.set(atom_position);
   }
 
   void

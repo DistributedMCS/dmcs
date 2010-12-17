@@ -43,11 +43,15 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 
+#include "bm/bm.h"
+#include "bm/bmserial.h"
+
 
 namespace dmcs {
 
 /// a belief set
-typedef uint64_t BeliefSet;
+typedef bm::bvector<> BeliefSet;
+  //typedef uint64_t BeliefSet;
 
 /// a belief state
 typedef std::vector<BeliefSet> BeliefState;
@@ -58,6 +62,9 @@ typedef std::list<BeliefStatePtr> BeliefStateList;
 typedef boost::shared_ptr<BeliefStateList> BeliefStateListPtr;
 
 
+
+
+
 /** 
  * @param b 
  * @param pos
@@ -65,10 +72,10 @@ typedef boost::shared_ptr<BeliefStateList> BeliefStateListPtr;
  * @return true if the pos'th bit in b is 1
  */
 inline bool
-testBeliefSet(BeliefSet b, std::size_t pos)
+testBeliefSet(const BeliefSet& b, std::size_t pos)
 {
-  assert (pos > 0 && pos < sizeof(b)*8);
-  return b & ((BeliefSet)1 << pos);
+  assert (pos > 0 && pos < b.size());
+  return b.get_bit(pos);
 }
 
 
@@ -79,11 +86,11 @@ testBeliefSet(BeliefSet b, std::size_t pos)
  * 
  * @return set the pos'th bit in b to val
  */
-inline BeliefSet
-setBeliefSet(BeliefSet b, std::size_t pos, bool val = true)
+inline void
+setBeliefSet(BeliefSet& b, std::size_t pos, bool val = true)
 {
-  assert (pos > 0 && pos < sizeof(b)*8);
-  return val ? ( b | ((BeliefSet)1 << pos) ) : ( b & ~((BeliefSet)1 << pos) );
+  assert (pos > 0 && pos < b.size());
+  b.set(pos, val);
 }
 
 
@@ -93,14 +100,13 @@ setBeliefSet(BeliefSet b, std::size_t pos, bool val = true)
 inline BeliefSet
 maxBeliefSet()
 {
-  return std::numeric_limits<BeliefSet>::max();
+  BeliefSet b;
+  b.set();
+  return b;
 }
 
 
 
-
-/// the first bit is used to enable a BeliefSet
-#define EPSILONMASK ((BeliefSet)1 << 0)
 
 /** 
  * @param b 
@@ -108,11 +114,11 @@ maxBeliefSet()
  * @return true if b is epsilon, false otw.
  */
 inline bool
-isEpsilon(BeliefSet b)
+isEpsilon(const BeliefSet& b)
 {
   // we need the first bit true in b for efficient subset checking in
   // non-epsilon BeliefSet's
-  return !(b & EPSILONMASK); 
+  return !(b[0]); 
 }
 
 
@@ -121,12 +127,12 @@ isEpsilon(BeliefSet b)
  * 
  * @return an enabled BeliefSet with epsilon-bit set to 1
  */
-inline BeliefSet
-setEpsilon(BeliefSet b)
+inline void
+setEpsilon(BeliefSet& b)
 {
   // we need the first bit true in b for efficient subset checking in
   // non-epsilon BeliefSet's
-  return b | EPSILONMASK;
+  b.set(0);
 }
 
 
@@ -213,6 +219,31 @@ operator>> (std::istream& is, BeliefStatePtr& bs)
 }
 
 
+inline std::ostream&
+operator<< (std::ostream& os, const BeliefSet& bv)
+{
+  os << "[";
+  std::size_t bit = bv.get_first();
+  do
+    {
+      os << bit;
+      bit = bv.get_next(bit);
+      if (bit)
+	{
+	  os << ", ";
+	}
+      else
+	{
+	  break;
+	}
+    }
+  while (1);
+  os << "]";
+
+  return os;
+}
+
+
 /**
  * Output a space-separated belief state bs.
  *
@@ -224,18 +255,26 @@ operator>> (std::istream& is, BeliefStatePtr& bs)
 inline std::ostream&
 operator<< (std::ostream& os, const BeliefState& bs)
 {
-  std::copy(bs.begin(), bs.end(),
+  /*std::copy(bs.begin(), bs.end(),
 	    std::ostream_iterator<BeliefSet>(os, " ")
-	    );
+	    );*/
+  for (BeliefState::const_iterator it = bs.begin(); it != bs.end(); ++it)
+    {
+      os << *it << " ";
+    }
   return os;
 }
 
 inline std::ostream&
 operator<< (std::ostream& os, const BeliefStatePtr& bs)
 {
-  std::copy(bs->begin(), bs->end(),
+  /*std::copy(bs->begin(), bs->end(),
 	    std::ostream_iterator<BeliefSet>(os, " ")
-	    );
+	    );*/
+  for (BeliefState::const_iterator it = bs->begin(); it != bs->end(); ++it)
+    {
+      os << *it << " ";
+    }
   return os;
 }
 
@@ -273,6 +312,117 @@ operator<< (std::ostream& os, const BeliefStateListPtr& l)
 
 
 } // namespace dmcs
+
+
+namespace boost {
+
+namespace serialization {
+
+///Non intrusive implementation of serialization methods for BeliefSet.
+///The main serialization method is implemented outside the BeliefSet class
+///and splitted in the save/load functions
+///See http://www.boost.org/doc/libs/1_43_0/libs/serialization/doc/index.html
+
+/**
+ * Serialization Method Save.
+ * @param Archive ar
+ * @param BeliefSet belief
+ * @param int version
+ *
+ */
+template<class Archive>
+inline void save(Archive & ar, const dmcs::BeliefSet& belief, unsigned int version)
+{
+  ///@todo TK: hack a new archive thingie, we copy things twice in here
+
+  bm::serializer<dmcs::BeliefSet> bvs;
+  
+  //belief.optimize();
+
+  dmcs::BeliefSet::statistics st;
+  belief.calc_stat(&st);
+
+#ifdef DEBUG
+  std::cerr << "Serializing " << belief << std::endl;
+  std::cerr << "Bits count:" << belief.count() << std::endl;
+  std::cerr << "Bit blocks:" << st.bit_blocks << std::endl;  
+  std::cerr << "GAP blocks:" << st.gap_blocks << std::endl;  
+  std::cerr << "Memory used:"<< st.memory_used << std::endl;  
+  std::cerr << "Max.serialize mem.:" << st.max_serialize_mem << std::endl;
+#endif
+
+  unsigned char buf[st.max_serialize_mem];
+  unsigned char* b = buf;
+
+  const std::size_t len = bvs.serialize(belief, buf, st.max_serialize_mem);
+
+  ar << len;
+
+#ifdef DEBUG
+  std::cerr << "Serialized size:" << len << std::endl;
+#endif
+
+  for (std::size_t i = 0; i < len; ++i)
+    {
+      ar << *b++;
+    }
+  
+  ar << version;
+}
+
+
+
+/**
+ * Serialization Method Load.
+ * @param Archive ar
+ * @param BeliefSet belief
+ * @param int version
+ *
+ */
+template<class Archive>
+inline void load(Archive & ar, dmcs::BeliefSet & belief, unsigned int version)
+{
+  std::size_t len = 0;
+
+  ar >> len;
+
+  assert(len > 0);
+
+  ///@todo TK: hack a new archive thingie, we copy things twice in here
+
+  unsigned char buf[len];
+  unsigned char* b = buf;
+
+  for (std::size_t i = 0; i < len; i++)
+    {
+      ar >> *b++;
+    }
+
+  ar >> version;
+
+  bm::deserialize(belief, buf);
+}
+
+
+
+/**
+ * Serialization Method Serialize.
+ * @param Archive ar
+ * @param BeliefSet belief
+ * @param int file_version
+ *
+ */
+template<class Archive>
+inline void serialize(Archive& ar, dmcs::BeliefSet& belief, const unsigned int file_version)
+{
+  split_free(ar, belief, file_version);
+}
+
+
+} // namespace serialization
+
+} // namespace boost
+
 
 #endif // BELIEF_STATE_H
 
