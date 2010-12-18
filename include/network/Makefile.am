@@ -6,6 +6,7 @@ noinst_HEADERS =  \
 		Client.tcc \
 		Handler.h \
 		Handler.tcc \
+		MessageQueue.h \
 		Server.h \
 		Session.h \
 		connection.hpp
