@@ -1,3 +1,8 @@
+2010-12-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* Makefile.am: Build with relsat-20070104.
+	* configure.ac: Likewise.
+
 2010-12-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: directly read V.

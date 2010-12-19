@@ -127,8 +127,8 @@ fi
 
 AC_SUBST([BM_CPPFLAGS])
 
-
-
+# Call relsat's ./configure script recursively.
+AC_CONFIG_SUBDIRS([relsat-20070104])
 
 # checking for boost libs
 BOOST_REQUIRE([1.42.0])
