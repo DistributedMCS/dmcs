@@ -61,7 +61,7 @@ typedef boost::shared_ptr<BeliefState> BeliefStatePtr;
 typedef std::list<BeliefStatePtr> BeliefStateList;
 typedef boost::shared_ptr<BeliefStateList> BeliefStateListPtr;
 
-
+typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 
 
@@ -187,34 +187,23 @@ operator<= (const BeliefStatePtr& bs1, const BeliefStatePtr& bs2)
 }
 
 
-/**
- * Read a space-separated belief state from is and store it in bs.
- *
- * @param is
- * @param bs
- *
- * @return is
- */
-inline std::istream& 
-operator>> (std::istream& is, BeliefStatePtr& bs)
+
+
+
+inline std::istream&
+operator>> (std::istream& is, BeliefSet& belief)
 {
-  // bs may be NULL, set it up
-  if (!bs)
+  std::string s;
+  std::getline(is, s);
+ 
+  boost::char_separator<char> sep("{ }");
+  tokenizer tok(s, sep);
+  for (tokenizer::const_iterator it = tok.begin(); it != tok.end(); ++it)
     {
-      BeliefStatePtr tmp(new BeliefState);
-      bs = tmp;
+      std::size_t bit = std::atoi(it->c_str());
+      belief.set(bit);
     }
 
-  std::string input;
-  std::getline(is, input);
-
-  boost::tokenizer<> s(input);
-  for (boost::tokenizer<>::iterator it = s.begin(); it != s.end(); ++it)
-    {
-      ///@todo TK: this should be fixed
-      bs->push_back(std::atoi(it->c_str()));
-    }
-  
   return is;
 }
 
@@ -242,6 +231,68 @@ operator<< (std::ostream& os, const BeliefSet& bv)
 
   return os;
 }
+
+
+/**
+ * Read a belief state from is and store it in bs.
+ *
+ * @param is
+ * @param bs
+ *
+ * @return is
+ */
+inline std::istream& 
+operator>> (std::istream& is, BeliefStatePtr& bs)
+{
+  // bs may be NULL, set it up
+  if (!bs)
+    {
+      BeliefStatePtr tmp(new BeliefState);
+      bs = tmp;
+    }
+
+  std::string s;
+  std::getline(is, s);
+
+
+  // A BeliefState is of the form {belief} {belief} ... {belief}
+  // where a belief is a list of integers indicating the on bits
+  boost::char_separator<char> sep(" ", "{}");
+  tokenizer tok(s, sep);
+
+  std::size_t state = 0;
+
+  for (tokenizer::const_iterator it = tok.begin(); it != tok.end(); ++it)
+    {
+      switch (state)
+	{
+	case 0:
+	  {
+	    assert( std::string(it->c_str()).compare("{") == 0);
+	    BeliefSet belief;
+	    bs->push_back(belief);
+	    state = 1;
+	    break;
+	  }
+	case 1:
+	  {
+	    if (std::string(it->c_str()).compare("}") == 0)
+	      {
+		state = 0;
+	      }
+	    else
+	      {
+		std::size_t bit = std::atoi(it->c_str());
+		bs->back().set(bit);
+	      }
+	    break;
+	  }
+	}
+    }
+  
+  return is;
+}
+
 
 
 /**

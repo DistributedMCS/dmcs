@@ -1,7 +1,30 @@
+2010-12-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: directly read V.
+
+	* include/BeliefState.h: operator>> for BeliefSet and BeliefState.
+
 2010-12-18  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/Makefile.am: Add MessageQueue.h.
 	* include/network/MessageQueue.h: Likewise.
+
+2010-12-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/BeliefState.h: Use bitmagic for BeliefSet. Add
+	serialization methods for BeliefSet.
+	* src/tests/testCombination.cpp: Likewise.
+	* src/tests/testBeliefComparison.cpp: Likewise.
+	* src/staticGen.cpp: Likewise.
+	* src/generator/staticGen.cpp: Likewise.
+	* src/generator/ContextGenerator.cpp: Likewise.
+	* src/QueryPlanGenerator.cpp: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* include/parser/ClaspResultOnlineParser.tcc: Likewise.
+	* include/parser/ClaspResultBuilder.tcc: Likewise.
+	* include/dyndmcs/InstantiateMessage.h: Likewise.
+	* include/ClaspResultOnlineParser.tcc: Likewise.
+	* include/ClaspResultBuilder.tcc: Adapt to new type of BeliefSet.
 
 2010-12-17  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 

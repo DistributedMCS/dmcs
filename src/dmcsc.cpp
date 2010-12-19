@@ -131,16 +131,22 @@ main(int argc, char* argv[])
       if (qvs.compare("") != 0) // reading V for basic DMCS
 	{
 	  primitiveDMCS = true;
-	  
-	  boost::tokenizer<> tok(qvs);
+	  std::istringstream iss(qvs);
+	  iss >> V;
 
-	  for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
+	  
+	  //	  boost::tokenizer<> tok(qvs);
+
+
+
+	  /*	  for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
 	    {
 	      std::istringstream iss(it->c_str());
 	      BeliefSet bs;
 	      iss >> bs;
 	      V->push_back(bs);
 	    }
+	  */
 	}
 
       if (port.compare("") == 0)
