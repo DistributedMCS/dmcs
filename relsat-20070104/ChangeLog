@@ -1,3 +1,7 @@
+2010-12-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* configure: Creates a wrapper Makefile for librelsat.a.
+
 2010-12-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.h: Add facilities to return models in the form of
