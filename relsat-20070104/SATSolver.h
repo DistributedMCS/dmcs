@@ -25,6 +25,9 @@
 #include "VariableSet.h"
 #include "Random.h"
 
+#include "BeliefState.h"
+#include "ProxySignatureByLocal.h"
+
 /////////////
 // Defines
 
@@ -79,6 +82,7 @@ class SATSolver {
   friend class SATPreprocessor;
 public:
   SATSolver(SATInstance*, ostream&);
+  SATSolver(SATInstance*, ostream&, ProxySignatureByLocal&, std::size_t, MQPtr);
   ~SATSolver();
 
   // Use to modify runtime parameters.
@@ -124,6 +128,7 @@ public:
 private:
   boolean _bVerifySolution();
   boolean _bOutputSolution();
+  boolean _bOutputBeliefState();
   boolean _bInitialize();
   boolean _bInitializeClause(Clause*);
   boolean _bInitializeLearnedClause(Clause*);
@@ -259,6 +264,11 @@ private:
 
   // primary variable related vars
   VariableSet* _pPrimaryVariables;
+
+  // for porting models to BeliefState form
+  MQPtr mq;
+  ProxySignatureByLocal& local_sig;
+  std::size_t system_size;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

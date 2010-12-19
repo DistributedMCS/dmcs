@@ -23,6 +23,36 @@
 SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_)
 : xOutputStream(xOutputStream_),
   _pPrimaryVariables(0)
+
+{
+  _pInstance = pSATInstance_;
+  _aAssignment = 0;
+
+  // Set intelligent defaults for runtime parameters:
+  _bFindAll = 1; // default to finding one solution
+  _iMaxSolutions = 1;
+  _fFudgeFactor = .9;
+  _iLearnOrder = 3;
+  _bNoTimeLimit = 0;
+  _iMaxTime = 43200; // 12 hours
+  _bFavorSmallClauses = 1;
+  _bRelevanceBounding = 1;
+  _bPrintStack = 1;
+  _iPrintStackPeriod = 10;
+  _bRestarts = 0;
+  _iRestartIncrement = 0;
+}
+
+
+// for outputting models in the form of BeliefState
+SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_, 
+		     ProxySignatureByLocal& local_sig_, std::size_t sys_size,
+		     MQPtr mq_)
+  : xOutputStream(xOutputStream_),
+    _pPrimaryVariables(0),
+    local_sig(local_sig_),
+    system_size(sys_size),
+    mq(mq_)
 {
   _pInstance = pSATInstance_;
   _aAssignment = 0;
@@ -246,6 +276,57 @@ boolean SATSolver::_bOutputSolution()
   }
   return 0;
 }
+
+
+// feed relsat's model into a BeliefState
+boolean
+SATSolver::_bOutputBeliefState()
+{
+  _iSolutionCount++;
+
+  BeliefState* bs = new BeliefState();
+  for (std::size_t i = 0; i < system_size; ++i)
+    {
+      BeliefSet belief;
+      bs->push_back(belief);
+    }
+
+  for (int i = 0; i < _iVariableCount; ++i)
+    {
+      assert(_aAssignment[i] != NON_VALUE);
+
+      if (_aAssignment[i])
+	{
+	  SignatureByLocal::const_iterator loc_it = local_sig.find(i);
+	  
+	  // it must show up in the signature
+	  assert (loc_it != local_sig.end());
+	  
+	  std::size_t cid = loc_it->ctxId - 1;
+	  
+	  // just to be safe
+	  assert (cid < system_size);
+	  
+	  BeliefSet& belief = (*bs[cid]);
+
+	  belief.set(loc_it->origId);
+	}
+    }
+
+  // put the computed BeliefState in to message queue.
+
+  // The queue will be blocked when it's full. We exploy this property
+  // to have automatic streaming of models.
+
+  BeliefState** address_bs = &bs;
+  mq->send(address_bs, sizeof(bs), 0);
+
+  if (_bFindAll && _iSolutionCount >= _iMaxSolutions && _iMaxSolutions) {
+    return 1;
+  }
+  return 0;
+}
+
 
 boolean SATSolver::_bVerifySolution()
 {

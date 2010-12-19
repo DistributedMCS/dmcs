@@ -1,3 +1,9 @@
+2010-12-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.h: Add facilities to return models in the form of
+	BeliefState in a message queue.
+	* SATSolver.cpp (_bOutputBeliefState): Likewise.
+
 2010-12-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* Makefile.linux (CFLAGS): Add path to bm3.7.0
