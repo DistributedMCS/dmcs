@@ -1,3 +1,11 @@
+2010-12-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* configure: Remove.
+
+	* configure.ac: Use autoconf and automake for building relsat.
+	* bootstrap.sh: Likewise.
+	* Makefile.am: Likewise.
+
 2010-12-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* configure: Creates a wrapper Makefile for librelsat.a.
