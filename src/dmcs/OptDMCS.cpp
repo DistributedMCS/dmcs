@@ -214,10 +214,6 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
       localV = query_plan->getInterface(c, k);
     }
 
-#if defined(DEBUG)
-  std::cerr << "context " << c << " is calling context " << k << std::endl;
-#endif // DEBUG
-
   ///@todo use cache in DMCS
   //  BeliefStatesPtr bs = cache->cacheHit(V);
 

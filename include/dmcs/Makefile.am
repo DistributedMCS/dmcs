@@ -8,7 +8,10 @@ noinst_HEADERS =  \
 		OptMessage.h \
 		PrimitiveCommandType.h \
 		PrimitiveDMCS.h \
-		PrimitiveMessage.h 
+		PrimitiveMessage.h \
+		StreamingCommandType.h \
+		StreamingDMCS.h \
+		StreamingForwardMessage.h
 
 
 

@@ -29,12 +29,12 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/../include \
 	-I$(top_srcdir)/../bm3.7.0
 
-bin_PROGRAMS = relsat
+#bin_PROGRAMS = relsat
 
 noinst_LIBRARIES = librelsat.a
 
-relsat_SOURCES = main.cpp sat_solve.cpp
-relsat_LDADD = librelsat.a
+#relsat_SOURCES = main.cpp sat_solve.cpp
+#relsat_LDADD = librelsat.a
 
 librelsat_a_SOURCES = \
 	Debug.cpp \

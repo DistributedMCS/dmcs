@@ -34,6 +34,7 @@
 
 #include "dmcs/OptCommandType.h"
 #include "dmcs/PrimitiveCommandType.h"
+#include "dmcs/StreamingCommandType.h"
 
 #include "dyndmcs/DynamicCommandType.h"
 #include "dyndmcs/DynamicConfiguration.h"

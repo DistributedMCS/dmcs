@@ -22,7 +22,8 @@ libdmcs_a_SOURCES = \
                 QueryPlan.cpp \
                 BeliefCombination.cpp \
 		PrimitiveDMCS.cpp \
-		OptDMCS.cpp
+		OptDMCS.cpp \
+		StreamingDMCS.cpp
 
 # the SATSOLVER library
 libsatsolver_a_SOURCES = \

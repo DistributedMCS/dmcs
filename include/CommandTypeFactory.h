@@ -38,6 +38,7 @@
 
 #include "dmcs/OptCommandType.h"
 #include "dmcs/PrimitiveCommandType.h"
+#include "dmcs/StreamingCommandType.h"
 
 #include "Message.h"
 #include "ProgramOptions.h"
@@ -67,7 +68,8 @@ public:
 		     SignatureVecPtr global_sigs_,
 		     SignaturePtr sig_,
 		     QueryPlanPtr query_plan_,
-		     TheoryPtr loopFormula_)
+		     TheoryPtr loopFormula_,
+		     std::size_t buf_count_ = 100)
     : ctx_id(ctx_id_),
       system_size(system_size_),
       schematic_bridge_rules(schematic_bridge_rules_),
@@ -83,7 +85,8 @@ public:
       sig(sig_),
       query_plan(query_plan_),
       loopFormula(loopFormula_),
-      ctx(new Context(ctx_id_, system_size_, sig_, local_kb_, bridge_rules_, neighbor_list_))
+      ctx(new Context(ctx_id_, system_size_, sig_, local_kb_, bridge_rules_, neighbor_list_)),
+      buf_count(buf_count_)
   { }
 
   template<typename aCommandTypePtr>
@@ -93,6 +96,10 @@ public:
 private:
   std::size_t ctx_id;
   std::size_t system_size;
+  std::size_t buf_count;                    // the number of BeliefState(s) that we
+					    // are willing to store in a buffer. This is a
+					    // middle solution between having exponential space 
+                                            // and total recomputation.
   BridgeRulesPtr schematic_bridge_rules;
   BridgeRulesPtr bridge_rules;
   NeighborListPtr context_info;
@@ -111,6 +118,7 @@ private:
 
 
 typedef boost::shared_ptr<CommandTypeFactory> CommandTypeFactoryPtr;
+
 
 
 template<>
@@ -138,6 +146,18 @@ CommandTypeFactory::create<OptCommandTypePtr>()
 
 
 template<>
+inline StreamingCommandTypePtr
+CommandTypeFactory::create<StreamingCommandTypePtr>()
+{
+  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, query_plan, buf_count));
+  StreamingCommandTypePtr stm_opt_dmcs(new StreamingCommandType(stm_dmcs));
+
+  return stm_opt_dmcs;
+}
+
+
+
+template<>
 inline DynamicCommandTypePtr
 CommandTypeFactory::create<DynamicCommandTypePtr>()
 {
@@ -145,28 +165,6 @@ CommandTypeFactory::create<DynamicCommandTypePtr>()
   DynamicCommandTypePtr cmt_dyn_conf(new DynamicCommandType(dconf));
   return cmt_dyn_conf;
 }
-/*
-{
-  //std::cerr << "CommandTypeFactory::create<DynamicCommandType> (begin)" << std::endl 
-  //	    << schematic_bridge_rules << std::endl;
-
-  DynamicConfigurationPtr dconf(new DynamicConfiguration(ctx_id, schematic_bridge_rules, context_info, mt, sba_count, 
-							 limit_answers, limit_bind_rules, heuristics, prefix));
-  
-  //std::cerr << "dconf->getBridgeRules()" << dconf->getBridgeRules() << std::endl;
-
-  DynamicCommandTypePtr cmt_dyn_conf(new DynamicCommandType(dconf));
-
-  //DynamicConfigurationPtr& dconf1 = cmt_dyn_conf->getDconf();
-
-  //std::cerr << "" << std::endl;
-  //std::cerr << "dconf1->getBridgeRules()" << dconf1->getBridgeRules() << std::endl;
-
-  //std::cerr << "CommandTypeFactory::create<DynamicCommandType> (end)" << std::endl 
-  //	    << schematic_bridge_rules << std::endl;
-  
-  return cmt_dyn_conf;
-  }*/
 
 
 

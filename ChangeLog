@@ -1,3 +1,24 @@
+2010-12-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/StreamingDMCS.cpp: New file.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+
+	* include/Makefile.am (noinst_HEADERS): Remove ContextGenerator.h
+
+	* include/dmcs/Makefile.am: Add new headers.
+
+	* include/Message.h: Add header for streaming models.
+
+	* include/CommandTypeFactory.h: Create StreamingCommandType.
+
+	* src/network/Server.cpp: Handle request for streaming models.
+
+	* src/dmcsc.cpp: Include dmcs/StreamingCommandType.h
+
+	* src/dmcs/Makefile.am (libsatsolver_a_SOURCES): Add StreamingDMCS.cpp
+
 2010-12-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* Makefile.am: Build with relsat-20070104.

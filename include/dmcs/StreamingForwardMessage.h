@@ -18,57 +18,45 @@
  */
 
 /**
- * @file   ReturnMessage.h
+ * @file   StreamingForwardMessage.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Mon May  3 10:52:24 2010
+ * @date   Mon Dec  20 8:05:24 2010
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef RETURN_MESSAGE_H
-#define RETURN_MESSAGE_H
+#ifndef STREAMING_FORWARD_MESSAGE_H
+#define STREAMING_FORWARD_MESSAGE_H
 
 #include "Message.h"
-#include "StatsInfo.h"
-
 
 namespace dmcs {
 
-class ReturnMessage : public Message
+class StreamingForwardMessage : public Message
 {
 public:
-  ReturnMessage()
+  StreamingForwardMessage()
   { }
 
-  virtual ~ReturnMessage() 
+  virtual ~StreamingForwardMessage() 
+  {}
+
+  StreamingForwardMessage(std::size_t invoker_, bool restart_)
+    : invoker(invoker_), restart(restart_)
   { }
 
-  ReturnMessage(BeliefStateListPtr belief_states_,
-		PTime sending_moment_,
-		StatsInfosPtr info_)
-    : belief_states(belief_states_), 
-      sending_moment(sending_moment_),
-      info(info_)
-  { }
-
-  BeliefStateListPtr
-  getBeliefStates() const
+  std::size_t
+  getInvoker() const
   {
-    return belief_states;
+    return invoker;
   }
 
-  StatsInfosPtr
-  getStatsInfo() const
+  bool
+  isRestarted()
   {
-    return info;
-  }
-
-  PTime
-  getSendingMoment() const
-  {
-    return sending_moment;
+    return restart;
   }
 
 public:
@@ -76,35 +64,27 @@ public:
   void
   serialize(Archive& ar, const unsigned int /* version */)
   {
-    ar & belief_states;
-    ar & sending_moment;
-    ar & info;
+    ar & invoker;
   }
 
 private:
-  BeliefStateListPtr belief_states;
-  PTime sending_moment;
-  StatsInfosPtr info;
+  std::size_t invoker;   // ID of the invoking context
+  bool        restart;   // true:  ask for fresh pack of BeliefState(s)
+                         // false: ask for the next pack of BeliefState(s)
 };
 
-
-typedef boost::shared_ptr<ReturnMessage> ReturnMessagePtr;
-
-
 inline std::ostream&
-operator<< (std::ostream& os, const ReturnMessage& mess)
+operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
 {
-  os << *mess.getBeliefStates() << std::endl
-     << boost::posix_time::to_simple_string(mess.getSendingMoment()) << std::endl
-     << *mess.getStatsInfo();
 
+  os << sfMess.getInvoker() << " ";
+  
   return os;
 }
 
 } // namespace dmcs
 
-
-#endif // RETURN_MESSAGE_H
+#endif // STREAMING_FORWARD_MESSAGE_H
 
 // Local Variables:
 // mode: C++

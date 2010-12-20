@@ -90,7 +90,7 @@ public:
   handle_finalize(const boost::system::error_code& e, connection_ptr conn);
 
 
- private:
+private:
   CommandTypeFactoryPtr& ctf;
   boost::asio::io_service& io_service_;
   boost::asio::ip::tcp::acceptor acceptor_;

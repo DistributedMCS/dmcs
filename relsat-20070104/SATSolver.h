@@ -28,6 +28,8 @@
 #include "BeliefState.h"
 #include "ProxySignatureByLocal.h"
 
+#include "network/MessageQueue.h"
+
 /////////////
 // Defines
 
@@ -81,8 +83,8 @@ class VariableStruct {
 class SATSolver {
   friend class SATPreprocessor;
 public:
-  SATSolver(SATInstance*, ostream&);
-  SATSolver(SATInstance*, ostream&, ProxySignatureByLocal&, std::size_t, MQPtr);
+  //SATSolver(SATInstance*, ostream&);
+  SATSolver(SATInstance*, ostream&, dmcs::ProxySignatureByLocal&, std::size_t, dmcs::MQPtr);
   ~SATSolver();
 
   // Use to modify runtime parameters.
@@ -266,8 +268,11 @@ private:
   VariableSet* _pPrimaryVariables;
 
   // for porting models to BeliefState form
-  MQPtr mq;
-  ProxySignatureByLocal& local_sig;
+  dmcs::MQPtr mq;
+  
+  // Need a reference here. Just do the copy at the moment to allow
+  // the other constructor
+  dmcs::ProxySignatureByLocal& local_sig;
   std::size_t system_size;
 };
 

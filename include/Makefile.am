@@ -13,7 +13,6 @@ noinst_HEADERS =  \
 		CommandType.h \
 		CommandTypeFactory.h \
 		Context.h \
-                ContextGenerator.h \
                 DLVVisitor.h \
 		DimacsVisitor.h \
 		LogicVisitor.h \

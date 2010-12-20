@@ -1,3 +1,11 @@
+2010-12-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.h: Integrate dmcs stuff into relsat.
+	* SATSolver.cpp: Likewise.
+
+	* Makefile.am (librelsat_a_SOURCES): Temporarily comment out
+	relsal lib.
+
 2010-12-20  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* configure: Remove.

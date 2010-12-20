@@ -110,6 +110,11 @@ Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
       PrimitiveCommandTypePtr cmt_pri_dmcs = ctf->create<PrimitiveCommandTypePtr>();
       Handler<PrimitiveCommandType> handler(cmt_pri_dmcs, conn);
     }
+  else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
+    {
+      StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
+      Handler<StreamingCommandType> handler(cmt_stm_dmcs, conn);
+    }
   else if (header.find(HEADER_REQ_OPT_DMCS) != std::string::npos)
     {
       OptCommandTypePtr cmt_opt_dmcs = ctf->create<OptCommandTypePtr>();

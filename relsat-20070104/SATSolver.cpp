@@ -20,10 +20,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Public Methods
 
+/*
 SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_)
 : xOutputStream(xOutputStream_),
   _pPrimaryVariables(0)
-
 {
   _pInstance = pSATInstance_;
   _aAssignment = 0;
@@ -41,13 +41,13 @@ SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_)
   _iPrintStackPeriod = 10;
   _bRestarts = 0;
   _iRestartIncrement = 0;
-}
+}*/
 
 
 // for outputting models in the form of BeliefState
 SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_, 
-		     ProxySignatureByLocal& local_sig_, std::size_t sys_size,
-		     MQPtr mq_)
+		     dmcs::ProxySignatureByLocal& local_sig_, std::size_t sys_size,
+		     dmcs::MQPtr mq_)
   : xOutputStream(xOutputStream_),
     _pPrimaryVariables(0),
     local_sig(local_sig_),
@@ -284,10 +284,10 @@ SATSolver::_bOutputBeliefState()
 {
   _iSolutionCount++;
 
-  BeliefState* bs = new BeliefState();
+  dmcs::BeliefState* bs = new dmcs::BeliefState();
   for (std::size_t i = 0; i < system_size; ++i)
     {
-      BeliefSet belief;
+      dmcs::BeliefSet belief;
       bs->push_back(belief);
     }
 
@@ -297,7 +297,7 @@ SATSolver::_bOutputBeliefState()
 
       if (_aAssignment[i])
 	{
-	  SignatureByLocal::const_iterator loc_it = local_sig.find(i);
+	  dmcs::SignatureByLocal::const_iterator loc_it = local_sig.find(i);
 	  
 	  // it must show up in the signature
 	  assert (loc_it != local_sig.end());
@@ -307,7 +307,7 @@ SATSolver::_bOutputBeliefState()
 	  // just to be safe
 	  assert (cid < system_size);
 	  
-	  BeliefSet& belief = (*bs[cid]);
+	  dmcs::BeliefSet& belief = (*bs)[cid];
 
 	  belief.set(loc_it->origId);
 	}
@@ -318,7 +318,7 @@ SATSolver::_bOutputBeliefState()
   // The queue will be blocked when it's full. We exploy this property
   // to have automatic streaming of models.
 
-  BeliefState** address_bs = &bs;
+  dmcs::BeliefState** address_bs = &bs;
   mq->send(address_bs, sizeof(bs), 0);
 
   if (_bFindAll && _iSolutionCount >= _iMaxSolutions && _iMaxSolutions) {
