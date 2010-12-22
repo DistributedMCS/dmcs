@@ -40,6 +40,7 @@
 #include "dmcs/StreamingDMCS.h"
 #include "dmcs/StreamingCommandType.h"
 
+
 #include "parser/ClaspResultGrammar.h"
 #include "parser/ClaspResultBuilder.h"
 #include "parser/ParserDirector.h"
@@ -51,20 +52,26 @@
 #include <sstream>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 namespace dmcs {
 
-  StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, 
-			       const SignatureVecPtr& s, 
-			       const QueryPlanPtr& query_plan_,
-			       std::size_t buf_count_)
+
+StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, 
+			     const SignatureVecPtr& s, 
+			     const QueryPlanPtr& query_plan_,
+			     std::size_t buf_count_,
+			     MQPtr mq_joined_input,
+			     MQPtr mq_sat_output)
   : BaseDMCS(c, t, s),
     query_plan(query_plan_),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats)),
     system_size(c->getSystemSize()),
     my_id(c->getContextID()),
-    buf_count(buf_count_)
+    buf_count(buf_count_),
+    xInstance(std::cerr),
+    xSATSolver(&xInstance, std::cerr, system_size, mq_sat_output)
 { }
 
 
@@ -72,6 +79,26 @@ namespace dmcs {
 StreamingDMCS::~StreamingDMCS()
 { }
 
+
+ContextPtr
+StreamingDMCS::getContext()
+{
+  return ctx;
+}
+
+
+// Transfer local theory to internal clause representation of relsat
+void
+StreamingDMCS::init_SATSolver()
+{
+  for (Theory::const_iterator it = theory->begin(); it != theory->end(); ++it)
+    {
+      const ClausePtr& cl = *it;
+      for (Clause::const_iterator jt = cl->begin(); jt != cl->end(); ++jt)
+	{
+	}
+    }
+}
 
 
 SignaturePtr 
@@ -206,43 +233,61 @@ StreamingDMCS::handleFirstRequest(const StreamingForwardMessage& mess)
   else // this is an intermediate context
     {
       // send request to neighbors
-      sendFirstRequest(nb);
+      //sendFirstRequest(nb);
     }
 }
+
+
 
 
 // create multiple threads to send requests to neighbors in
 // parallel. Each thread then is responsible for receiving the
 // BeliefState(s) from the respective neighbor.
-void
+/*void
 StreamingDMCS::sendFirstRequest(const NeighborListPtr& nb)
 {
+  ThreadVec tv;
+
   for (NeighborList::const_iterator it = nb->begin(); it != nb->end(); ++it)
     {
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::resolver resolver(io_service);
 
-      NeighborPtr nb = *it;
+      const NeighborPtr nb = *it;
 
-#if defined(DEBUG)
-      std::cerr << "Send first request to neighbor " << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port << std::endl;
-#endif // DEBUG
+      SendSingleFirstRequest s(nb, my_id);
 
-      
-      boost::asio::ip::tcp::resolver::query query(nb->hostname, nb->port);
-
-      boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
-      boost::asio::ip::tcp::endpoint endpoint = *res_it;
-      
-      std::string header = HEADER_REQ_STM_DMCS;
-      StreamingForwardMessage neighbourMess(my_id, true);
-
-      //      Client<OptCommandType> client(io_service, res_it, header, neighbourMess);
-      
-      //io_service.run();
+      boost::thread* sendingThread = new boost::thread(s);
+      tv.push_back(sendingThread);
     }
+
+#ifdef DEBUG
+  std::cerr << "sendFirstRequest threads started. Now waiting..." << std::endl;
+#endif
+
+  for (ThreadVec::const_iterator it = tv.begin(); it != tv.end(); ++it)
+    {
+      (*it)->join();
+    }
+
+  // Now we have input from all neighbors, we can start the joining
+  // business
+
+  // Read off pointers to BeliefStates from message queues. 
+  }*/
+
+
+
+void
+StreamingDMCS::localCompute(BeliefState* input, BeliefState* conflict)
+{
+  // remove input clauses from previous localCompute
+
+  // add input and conflict (in the same shape of BeliefState, but have different meanings)
+  // input: facts 
+
+  // conflict: clause
 }
-				
 
 } // namespace dmcs
 

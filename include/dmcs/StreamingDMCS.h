@@ -19,7 +19,7 @@
 
 /**
  * @file   StreamingDMCS.h
- * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
  * @date   Mon Dec  2010 09:48:21 2010
  * 
  * @brief  
@@ -30,14 +30,17 @@
 #ifndef STREAMING_DMCS_H
 #define STREAMING_DMCS_H
 
+#include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
-
 #include "dmcs/BaseDMCS.h"
 #include "dmcs/StreamingForwardMessage.h"
 #include "ReturnMessage.h"
 #include "Cache.h"
 #include "Theory.h"
 #include "QueryPlan.h"
+
+#include "../../relsat-20070104/SATInstance.h"
+#include "../../relsat-20070104/SATSolver.h"
 
 namespace dmcs {
 
@@ -54,7 +57,7 @@ public:
   typedef bool dmcs_return_type;
 #endif
 
-  StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s, const QueryPlanPtr& query_plan_, std::size_t buf_count_);
+  StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s, const QueryPlanPtr& query_plan_, std::size_t buf_count_, MQPtr, MQPtr);
 
   virtual
   ~StreamingDMCS();
@@ -62,12 +65,18 @@ public:
   bool
   handleFirstRequest(const StreamingForwardMessage& mess);
 
+  ContextPtr
+  getContext();
+
 protected:
 
   SignaturePtr
   createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
 
 private:
+  void
+  init_SATSolver();
+
   void
   init_mqs();
 
@@ -77,6 +86,9 @@ private:
   void
   sendFirstRequest(const NeighborListPtr&);
 
+  void
+  localCompute(BeliefState*, BeliefState*);
+
 private:
   QueryPlanPtr query_plan;
   CacheStatsPtr cacheStats;
@@ -85,9 +97,13 @@ private:
   std::size_t system_size;
   std::size_t my_id;
   std::size_t buf_count;
+
+  SATInstance xInstance;
+  SATSolver   xSATSolver;
 };
 
 typedef boost::shared_ptr<StreamingDMCS> StreamingDMCSPtr;
+
 
 } // namespace dmcs
 
