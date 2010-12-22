@@ -31,6 +31,7 @@
 #define HANDLER_H
 
 #include "network/connection.hpp"
+//#include "network/Thread.h"
 #include "network/Session.h"
 #include "CommandType.h"
 #include "dyndmcs/InstantiatorCommandType.h"
@@ -41,10 +42,9 @@
 #include <set>
 
 #include <boost/shared_ptr.hpp>
-
+#include <boost/thread.hpp>
 
 namespace dmcs {
-
 
 template<typename CmdType>
 class Handler
@@ -60,9 +60,11 @@ public:
   void 
   do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
 
+  void
+  send_header_result(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
+
   void 
-  send_result(typename CmdType::return_type result,
-	      const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
+  send_result(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
 
   void 
   handle_session(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
@@ -75,6 +77,12 @@ public:
   
 private:
   connection_ptr conn;
+
+  // need some MQ gateway here
+  
+  ThreadVecPtr neighbor_input_threads;
+  boost::thread* dmcs_thread;
+  boost::thread* sat_thread;
 };
 
 } // namespace dmcs
