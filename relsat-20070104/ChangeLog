@@ -1,3 +1,13 @@
+2010-12-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.cpp: Use local_sig as a member.
+	* SATSolver.h: Likewise.
+
+	* Makefile.am: Fix compiling problem when integrating relsat into
+	dmcs.
+	* SATInstance.h: Likewise.
+	* BigNum.h: Likewise.
+
 2010-12-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.h: Integrate dmcs stuff into relsat.
