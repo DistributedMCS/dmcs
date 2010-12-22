@@ -39,6 +39,8 @@
 namespace dmcs {
 
 /// a propositional Literal is either a positive or negative integer
+/// positive Literal <--> positive integer
+/// negative Literal <--> negative integer
 typedef int Variable;
 
 /// a clause is a list of literals
