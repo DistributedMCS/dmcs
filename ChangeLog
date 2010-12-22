@@ -1,3 +1,27 @@
+2010-12-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.h: Setup MQs, threads.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Start to integrate relsat.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/Theory.h: Add some comments.
+
+	* include/CommandTypeFactory.h: Add some dummy MQs to simulate
+	later MQGateWay.
+
+	* src/dmcs/Makefile.am (libdmcs_a_SOURCES): Add StreamCommandType.cpp.
+
+	* src/dmcs/StreamingCommandType.cpp: New file.
+
+	* include/CommandType.h: Add methods for creating threads.
+	* include/dyndmcs/InstantiatorCommandType.h: Likewise.
+	* include/dyndmcs/DynamicCommandType.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+	* include/dmcs/PrimitiveCommandType.h: Likewise.
+	* include/dmcs/OptCommandType.h: Likewise.
+
 2010-12-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcs/StreamingDMCS.cpp: New file.
