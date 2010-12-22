@@ -46,11 +46,10 @@ SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_)
 
 // for outputting models in the form of BeliefState
 SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_, 
-		     dmcs::ProxySignatureByLocal& local_sig_, std::size_t sys_size,
+		     std::size_t sys_size,
 		     dmcs::MQPtr mq_)
   : xOutputStream(xOutputStream_),
     _pPrimaryVariables(0),
-    local_sig(local_sig_),
     system_size(sys_size),
     mq(mq_)
 {
@@ -297,7 +296,7 @@ SATSolver::_bOutputBeliefState()
 
       if (_aAssignment[i])
 	{
-	  dmcs::SignatureByLocal::const_iterator loc_it = local_sig.find(i);
+	  dmcs::SignatureByLocal::const_iterator loc_it = local_sig->find(i);
 	  
 	  // it must show up in the signature
 	  assert (loc_it != local_sig.end());

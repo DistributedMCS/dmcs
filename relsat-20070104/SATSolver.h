@@ -84,7 +84,7 @@ class SATSolver {
   friend class SATPreprocessor;
 public:
   //SATSolver(SATInstance*, ostream&);
-  SATSolver(SATInstance*, ostream&, dmcs::ProxySignatureByLocal&, std::size_t, dmcs::MQPtr);
+  SATSolver(SATInstance*, ostream&, std::size_t, dmcs::MQPtr);
   ~SATSolver();
 
   // Use to modify runtime parameters.
@@ -125,6 +125,12 @@ public:
   // the setting of another primary variable list.
   void vSetPrimaryVariables(VariableSet* pPrimaryVariables_) {
     _pPrimaryVariables = pPrimaryVariables_;
+  }
+
+  // methods for interfacing with dmcs
+  void setProxySignature(dmcs::ProxySignatureByLocal* local_sig_)
+  {
+    local_sig = local_sig_;
   }
 
 private:
@@ -270,9 +276,7 @@ private:
   // for porting models to BeliefState form
   dmcs::MQPtr mq;
   
-  // Need a reference here. Just do the copy at the moment to allow
-  // the other constructor
-  dmcs::ProxySignatureByLocal& local_sig;
+  dmcs::ProxySignatureByLocal* local_sig;
   std::size_t system_size;
 };
 
