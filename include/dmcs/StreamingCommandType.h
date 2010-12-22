@@ -33,8 +33,15 @@
 #include "CommandType.h"
 #include "StreamingForwardMessage.h"
 #include "StreamingDMCS.h"
+//#include "network/Thread.h"
+#include "network/Client.h"
+
+#include <boost/thread.hpp>
 
 namespace dmcs {
+
+class SendingRequest;
+
 
 class StreamingCommandType : public CommandType<StreamingForwardMessage, bool>
 {
@@ -46,6 +53,8 @@ public:
     : sdmcs(sdmcs_)
   { }
 
+  // return true/false indicating whether the execution was successful
+  // while sending local models to message queue.
   bool
   execute(const StreamingForwardMessage& mess)
   {
@@ -58,12 +67,66 @@ public:
     return false;
   }
 
+  void
+  createNeighborInputThreads(ThreadVecPtr);
+
+  void
+  createDMCSThread(boost::thread*, const StreamingForwardMessage& mess);
+
+  void
+  createLocalSolveThread(boost::thread*);
+
 private:
   StreamingDMCSPtr sdmcs;
 };
 
 
 typedef boost::shared_ptr<StreamingCommandType> StreamingCommandTypePtr;
+
+
+// Functors for threads
+class NeighborInputThreadStarter
+{
+public:
+  NeighborInputThreadStarter(const NeighborPtr nb_, std::size_t ctx_id_);
+
+  void
+  operator()();
+
+private:
+  const NeighborPtr& nb;
+  std::size_t ctx_id;
+};
+
+
+
+class DMCSThreadStarter
+{
+public:
+  DMCSThreadStarter(StreamingDMCSPtr sdmcs_, const StreamingForwardMessage& mess_);
+
+  void 
+  operator()();
+
+private:
+  StreamingDMCSPtr sdmcs;
+  const StreamingForwardMessage& mess;
+};
+
+
+
+class LocalSolverThreadStarter
+{
+public:
+  LocalSolverThreadStarter(StreamingDMCSPtr sdmcs_);
+
+  void
+  operator()();
+
+private:
+  // may be we need less than sdmcs
+  StreamingDMCSPtr sdmcs;
+};
 
 } // namespace dmcs
 

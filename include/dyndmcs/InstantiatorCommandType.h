@@ -56,6 +56,18 @@ public:
     return false;
   }
 
+  void
+  createNeighborInputThreads(ThreadVecPtr /* tv */)
+  { }
+
+  void
+  createDMCSThread(boost::thread* /* t */, const InstantiateForwardMessage&)
+  { }
+
+  void
+  createLocalSolveThread(boost::thread* /* t */)
+  { }
+
 private:
   InstantiatorPtr inst;
 };

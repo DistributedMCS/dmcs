@@ -30,10 +30,18 @@
 #ifndef COMMAND_TYPE_H
 #define COMMAND_TYPE_H
 
+#include <vector>
+
+#include <boost/thread.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include "BeliefState.h"
 //#include "DynamicConfiguration.h"
 
 namespace dmcs {
+
+typedef std::vector<boost::thread*> ThreadVec;
+typedef boost::shared_ptr<ThreadVec> ThreadVecPtr;
 
 template<typename MessageType, typename RetVal>
 class CommandType
@@ -48,6 +56,15 @@ public:
 
   virtual bool
   continues(input_type& mess) = 0;
+
+  virtual void
+  createNeighborInputThreads(ThreadVecPtr) = 0;
+
+  virtual void
+  createDMCSThread(boost::thread*, const MessageType&) = 0;
+
+  virtual void
+  createLocalSolveThread(boost::thread*) = 0;
 };
 
 
@@ -64,6 +81,15 @@ public:
 
   virtual bool
   continues(input_type& mess) = 0;
+
+  virtual void
+  createNeighborInputThreads(ThreadVecPtr) = 0;
+
+  virtual void
+  createDMCSThread(boost::thread*, const MessageType&) = 0;
+
+  virtual void
+  createLocalSolveThread(boost::thread*) = 0;
 };
 
 

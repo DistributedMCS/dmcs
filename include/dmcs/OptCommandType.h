@@ -57,6 +57,18 @@ public:
     return false;
   }
 
+  void
+  createNeighborInputThreads(ThreadVecPtr /* tv */)
+  { }
+
+  void
+  createDMCSThread(boost::thread* /* t */, const OptMessage&)
+  { }
+
+  void
+  createLocalSolveThread(boost::thread* /* t */)
+  { }
+
 private:
   OptDMCSPtr odmcs;
 };
