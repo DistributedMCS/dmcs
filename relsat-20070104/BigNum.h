@@ -6,7 +6,8 @@
 
 /////////////////
 // OS Includes
-#include <gmp.h>
+//#include <gmp.h>
+#include "my_gmp.h"
 
 //////////////
 // Includes

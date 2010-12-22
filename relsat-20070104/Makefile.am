@@ -27,7 +27,8 @@ noinst_HEADERS = \
 AM_CPPFLAGS = \
 	-I/opt/local/include \
 	-I$(top_srcdir)/../include \
-	-I$(top_srcdir)/../bm3.7.0
+	-I$(top_srcdir)/../bm3.7.0 \
+	-DNO_GMP
 
 #bin_PROGRAMS = relsat
 

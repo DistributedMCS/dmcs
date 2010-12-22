@@ -10,6 +10,7 @@
 //////////////
 // Includes
 #include "ClauseList.h"
+#include "VariableSet.h"
 
 /////////////
 // Defines
