@@ -35,7 +35,7 @@
 #include "BeliefCombination.h"
 #include "CommandType.h"
 #include "DimacsVisitor.h"
-#include "Cache.h"
+#include "dmcs/Cache.h"
 
 #include "dmcs/StreamingDMCS.h"
 #include "dmcs/StreamingCommandType.h"

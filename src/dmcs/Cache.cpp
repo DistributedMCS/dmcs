@@ -30,8 +30,8 @@
 #include "config.h"
 #endif
 
+#include "dmcs/Cache.h"
 
-#include "Cache.h"
 #include "BeliefState.h"
 #include "BeliefCombination.h"
 

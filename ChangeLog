@@ -1,3 +1,16 @@
+2010-12-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcs/Makefile.am: Move cache to dmcs directory.
+	* src/dmcs/Cache.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* include/dmcs/Cache.h: Likewise.
+	* include/Makefile.am: Likewise.
+	* include/dmcs/Makefile.am: Likewise.
+
+	* src/Makefile.am (dmcsd_LDADD): Reorder to fix FTBFS on linux.
+
 2010-12-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Handler.h: Setup MQs, threads.

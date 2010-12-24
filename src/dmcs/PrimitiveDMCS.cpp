@@ -35,7 +35,8 @@
 #include "ClaspProcess.h"
 #include "CommandType.h"
 #include "DimacsVisitor.h"
-#include "Cache.h"
+#include "dmcs/Cache.h"
+
 #include "QueryPlan.h"
 #include "BeliefState.h"
 
