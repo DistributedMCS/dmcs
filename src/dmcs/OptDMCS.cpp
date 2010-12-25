@@ -36,7 +36,7 @@
 #include "ClaspProcess.h"
 #include "CommandType.h"
 #include "DimacsVisitor.h"
-#include "Cache.h"
+#include "dmcs/Cache.h"
 
 #include "dmcs/OptDMCS.h"
 #include "dmcs/OptCommandType.h"

@@ -8,7 +8,6 @@ noinst_HEADERS =  \
 		BaseVisitor.h \
 		BeliefCombination.h \
 		BeliefState.h \
-		Cache.h \
 		ClaspProcess.h \
 		CommandType.h \
 		CommandTypeFactory.h \
