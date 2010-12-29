@@ -42,6 +42,8 @@
 #include <string>
 #include <sstream>
 #include <iosfwd>
+#include <list>
+#include <vector>
 
 namespace dmcs {
 
