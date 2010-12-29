@@ -1,6 +1,11 @@
 2010-12-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/parser/Makefile.am: Compile libparser.a.
+	* configure.ac: Likewise.
+	* src/Makefile.am: Likewise.
+
 	* src/tests/Makefile.am: Fixed FTBFS on linux.
+	Link testClaspResultOnlineParser and testBlockingClasp with libparser.a.
 
 	* src/tests/testQueryPlan.cpp: Fixed FTBFS of testsuite.
 	* src/tests/testMatch.cpp: Likewise.
