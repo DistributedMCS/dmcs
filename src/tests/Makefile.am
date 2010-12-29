@@ -50,7 +50,10 @@ check_PROGRAMS = \
 	testGraphProp
 
 testClasp_SOURCES = testClasp.cpp 
-testClasp_LDADD = $(top_builddir)/src/dmcs/libsatsolver.a $(top_builddir)/src/dmcs/libdmcs.a
+testClasp_LDADD = \
+	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/dmcs/libsatsolver.a \
+	$(top_builddir)/src/loopformula/libtranslation.a
 
 testBeliefComparison_SOURCES = testBeliefComparison.cpp
 testBeliefComparison_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
@@ -62,7 +65,9 @@ testCombination_SOURCES = testCombination.cpp
 testCombination_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testTranslation_SOURCES = testTranslation.cpp
-testTranslation_LDADD = $(top_builddir)/src/dmcs/libdmcs.a $(top_builddir)/src/loopformula/libtranslation.a
+testTranslation_LDADD = \
+	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/loopformula/libtranslation.a
 
 testSignature_SOURCES = testSignature.cpp
 
@@ -70,10 +75,14 @@ testQueryPlan_SOURCES = testQueryPlan.cpp
 testQueryPlan_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testClaspResultOnlineParser_SOURCES = testClaspResultOnlineParser.cpp
-testClaspResultOnlineParser_LDADD = $(top_builddir)/src/dmcs/libsatsolver.a
+testClaspResultOnlineParser_LDADD = \
+	$(top_builddir)/src/dmcs/libsatsolver.a \
+	$(top_builddir)/src/loopformula/libtranslation.a
 
 testBlockingClasp_SOURCES = testBlockingClasp.cpp
-testBlockingClasp_LDADD = $(top_builddir)/src/dmcs/libsatsolver.a
+testBlockingClasp_LDADD = \
+	$(top_builddir)/src/dmcs/libsatsolver.a \
+	$(top_builddir)/src/loopformula/libtranslation.a
 
 testMatch_SOURCES = testMatch.cpp
 testMatch_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
