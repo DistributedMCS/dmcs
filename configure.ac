@@ -126,6 +126,7 @@ AC_CONFIG_FILES([
            src/generator/Makefile
            src/network/Makefile
            src/loopformula/Makefile
+           src/parser/Makefile
            src/tests/Makefile
 ])
 
