@@ -57,6 +57,6 @@ int main()
   std::cerr << "Finish writing" << std::endl;
   //BeliefStatePtr T = qp.getInterface(1, 2);
   //std::cerr << T.belief_state_ptr->belief_state[1] << std::endl;
-  std::cerr << qp.getInterface1(1, 2) << std::endl;
+  std::cerr << qp.getInterface(1, 2) << std::endl;
   std::cerr << V << std::endl;
 }

@@ -1,13 +1,22 @@
 # global preprocessor flags
 AM_CPPFLAGS = \
-    -I$(top_srcdir)/include \
-    $(BOOST_CPPFLAGS)
+	-I$(top_srcdir)/include \
+	$(BOOST_CPPFLAGS)
 
 # global linker flags
-AM_LDFLAGS = $(BOOST_SYSTEM_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_SERIALIZATION_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS)
+AM_LDFLAGS = \
+	$(BOOST_SYSTEM_LDFLAGS) \
+	$(BOOST_THREAD_LDFLAGS) \
+	$(BOOST_SERIALIZATION_LDFLAGS) \
+	$(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS)
 
 # global libs
-LIBS = $(BOOST_THREAD_LIBS) $(BOOST_GRAPH_LIBS) $(BOOST_SERIALIZATION_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) $(BOOST_SYSTEM_LIBS)
+LIBS = \
+	$(BOOST_THREAD_LIBS) \
+	$(BOOST_GRAPH_LIBS) \
+	$(BOOST_SERIALIZATION_LIBS) \
+	$(BOOST_UNIT_TEST_FRAMEWORK_LIBS) \
+	$(BOOST_SYSTEM_LIBS)
 
 
 TESTS = \
@@ -34,50 +43,43 @@ check_PROGRAMS = \
 	testBlockingClasp \
 	testGraphProp \
 	testVariable \
-	testMatch
+	testMatch \
 	testCombination \
 	testClaspResultOnlineParser \
 	testBlockingClasp \
 	testGraphProp
 
 testClasp_SOURCES = testClasp.cpp 
-testClasp_LDADD = $(top_builddir)/src/libsatsolver.a $(top_builddir)/src/libdmcs.a
+testClasp_LDADD = $(top_builddir)/src/dmcs/libsatsolver.a $(top_builddir)/src/dmcs/libdmcs.a
 
 testBeliefComparison_SOURCES = testBeliefComparison.cpp
-testBeliefComparison_LDADD = $(top_builddir)/src/libdmcs.a
+testBeliefComparison_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testParsers_SOURCES = testParsers.cpp
-testParsers_LDADD = $(top_builddir)/src/libdmcs.a
+testParsers_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testCombination_SOURCES = testCombination.cpp
-testCombination_LDADD = $(top_builddir)/src/libdmcs.a
+testCombination_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testTranslation_SOURCES = testTranslation.cpp
-testTranslation_LDADD = $(top_builddir)/src/libdmcs.a $(top_builddir)/src/libtranslation.a
+testTranslation_LDADD = $(top_builddir)/src/dmcs/libdmcs.a $(top_builddir)/src/loopformula/libtranslation.a
 
 testSignature_SOURCES = testSignature.cpp
 
 testQueryPlan_SOURCES = testQueryPlan.cpp
-testQueryPlan_LDADD = $(top_builddir)/src/libdmcs.a
+testQueryPlan_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testClaspResultOnlineParser_SOURCES = testClaspResultOnlineParser.cpp
-testClaspResultOnlineParser_LDADD = $(top_builddir)/src/libsatsolver.a
-
+testClaspResultOnlineParser_LDADD = $(top_builddir)/src/dmcs/libsatsolver.a
 
 testBlockingClasp_SOURCES = testBlockingClasp.cpp
-testBlockingClasp_LDADD = $(top_builddir)/src/libsatsolver.a
-
-testCombination_SOURCES = testCombination.cpp
-
+testBlockingClasp_LDADD = $(top_builddir)/src/dmcs/libsatsolver.a
 
 testMatch_SOURCES = testMatch.cpp
+testMatch_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-
-testGraphProp_SOURCES = testGraphProp.cpp
-testGraphProp_LDADD = $(top_builddir)/src/libdmcs.a
 testVariable_SOURCES = testVariable.cpp
-
+testVariable_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testGraphProp_SOURCES = testGraphProp.cpp
-testGraphProp_LDADD = $(top_builddir)/src/libdmcs.a
-
+testGraphProp_LDADD = $(top_builddir)/src/dmcs/libdmcs.a

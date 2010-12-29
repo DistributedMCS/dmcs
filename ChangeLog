@@ -1,3 +1,14 @@
+2010-12-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/tests/testQueryPlan.cpp: Fixed FTBFS of testsuite.
+	* src/tests/testMatch.cpp: Likewise.
+	* src/tests/testGraphProp.cpp: Likewise.
+	* src/tests/testClaspResultOnlineParser.cpp: Likewise.
+	* src/tests/testBlockingClasp.cpp: Likewise.
+	* src/tests/Makefile.am: Likewise.
+
+	* include/dyndmcs/Match.h: Include missing list and vector.
+
 2010-12-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcs/Makefile.am: Move cache to dmcs directory.

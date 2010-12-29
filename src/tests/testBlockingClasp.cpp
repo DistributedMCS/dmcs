@@ -1,5 +1,5 @@
 #include "ClaspProcess.h"
-#include "ClaspResultOnlineParser.h"
+#include "parser/ClaspResultOnlineParser.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testBlockingClasp"

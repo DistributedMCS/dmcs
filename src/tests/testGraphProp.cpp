@@ -19,8 +19,10 @@ BOOST_AUTO_TEST_CASE( testGraphProp )
   QueryPlanPtr query_plan(new QueryPlan);
   query_plan->read_graph(graphfile);
 
+#if 0
   for (std::size_t i = 0; i < 31; ++i)
     {
       query_plan->print_vertex_info(i);
     }
+#endif
 }
