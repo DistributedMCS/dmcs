@@ -11,7 +11,7 @@
 #include <string>
 #include <fstream>
 
-#include "ClaspResultOnlineParser.h"
+#include "parser/ClaspResultOnlineParser.h"
 
 using namespace dmcs;
 

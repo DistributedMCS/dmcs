@@ -1,9 +1,10 @@
-#include <iostream>
-#include "Match.h"
+#include "dyndmcs/Match.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testMatch"
 #include <boost/test/unit_test.hpp>
+
+#include <iostream>
 
 using namespace dmcs;
 
