@@ -1,3 +1,7 @@
+2010-12-30  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/parser/Makefile.am (AM_CPPFLAGS): Add BM_CPPFLAGS.
+
 2010-12-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/parser/Makefile.am: Compile libparser.a.
