@@ -1,3 +1,9 @@
+2011-01-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Let Handler<StreamingCommandType>
+	take care of incoming messages only.
+	* include/network/Handler.h: Likewise.
+
 2011-01-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/ClaspResultOnlineParser.cpp: Remove X-Mas leftover casserole.

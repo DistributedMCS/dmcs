@@ -223,11 +223,36 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
   SessionMsgPtr sesh(new SessionMsg(conn));
 
   // read and process this message
-  /*  conn->async_read(sesh->mess,
-		   boost::bind(&Handler<CmdType>::do_local_job, this,
-		   boost::asio::placeholders::error, sesh, cmd)
-		   );*/
+  conn->async_read(sesh->mess,
+		   boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
+			       boost::asio::placeholders::error, sesh, cmd)
+		   );
 }
+
+
+void
+Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd)
+{
+  // write sesh->mess to QueryMessageQueue
+
+  sesh->conn->async_read(header,
+			 boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
+				     boost::asio::placeholders::error, sesh, cmd)
+			 );
+}
+
+
+void
+Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd)
+{
+  // check header
+
+  sesh->conn->async_read(sesh->mess,
+			 boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
+				     boost::asio::placeholders::error, sesh, cmd)
+			 );
+}
+
 
 } // namespace dmcs
 

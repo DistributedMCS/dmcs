@@ -92,23 +92,12 @@ public:
   //Handler(const CmdTypePtr cmd_, connection_ptr conn_);
   Handler(StreamingCommandTypePtr cmd, connection_ptr conn_);
 
-  /*
   void 
   do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd);
 
-  void 
-  send_result(StreamingCommandType::return_type result,
-	      const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd);
+  void
+  handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd);
 
-  void 
-  handle_session(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd);
-
-  void 
-  send_eof(const boost::system::error_code& e, SessionMsgPtr sesh);
-
-  void 
-  handle_finalize(const boost::system::error_code& e, SessionMsgPtr sesh);*/
-  
 private:
   connection_ptr conn;
 
@@ -116,6 +105,8 @@ private:
   boost::thread* dmcs_thread;
   boost::thread* sat_thread;
   boost::thread* output_thread;
+
+  std::string header;
 };
 
 } // namespace dmcs
