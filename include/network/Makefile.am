@@ -9,6 +9,7 @@ noinst_HEADERS =  \
 		MessageQueue.h \
 		Server.h \
 		Session.h \
+		ThreadFactory.h \
 		connection.hpp
 
 

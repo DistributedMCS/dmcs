@@ -16,4 +16,5 @@ noinst_LIBRARIES = libnetwork.a
 
 # the NETWORK library
 libnetwork_a_SOURCES = \
-		Server.cpp
+		Server.cpp \
+		ThreadFactory.cpp
