@@ -159,14 +159,17 @@ AC_CONFIG_FILES([
            include/dyndmcs/Makefile
            include/generator/Makefile
            include/loopformula/Makefile
+           include/mcs/Makefile
            include/network/Makefile
            include/parser/Makefile
+           include/process/Makefile
+           include/solver/Makefile
            src/Makefile
            src/dmcs/Makefile
            src/dyndmcs/Makefile
            src/generator/Makefile
-           src/network/Makefile
            src/loopformula/Makefile
+           src/network/Makefile
            src/parser/Makefile
            testsuite/Makefile
 ])

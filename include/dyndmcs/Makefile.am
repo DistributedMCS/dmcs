@@ -20,6 +20,5 @@ noinst_HEADERS =  \
 		NoSBANeighborSortingStrategy.h \
 		NoSBARedBBodySortingStrategy.h \
 		QualityCtxSortingStrategy.h \
-		RedBBodySortingStrategy.h 
-
-
+		RedBBodySortingStrategy.h \
+		Variable.h
