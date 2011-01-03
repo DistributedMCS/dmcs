@@ -1,5 +1,13 @@
 2011-01-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/ClaspResultOnlineParser.cpp: Remove X-Mas leftover casserole.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/QueryPlan.cpp: Likewise.
+	* src/QueryPlanGenerator.cpp: Likewise.
+	* src/dmcsGen.cpp: Likewise.
+	* src/dynGen.cpp: Likewise.
+	* src/staticGen.cpp: Likewise.
+
 	* configure.ac: Move src/tests to testsuite.
 	* Makefile.am: Likewise.
 	* src/Makefile.am: Likewise.
