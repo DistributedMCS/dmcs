@@ -70,19 +70,6 @@ public:
     return dconf;
   }
 
-  void
-  createNeighborInputThreads(ThreadVecPtr /* tv */)
-  { }
-
-  void
-  createDMCSThread(boost::thread* /* t */, const ConfigMessage&)
-  { }
-
-  void
-  createLocalSolveThread(boost::thread* /* t */)
-  { }
-
-
 private:
   DynamicConfigurationPtr dconf;
 };
