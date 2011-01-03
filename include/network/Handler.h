@@ -31,8 +31,8 @@
 #define HANDLER_H
 
 #include "network/connection.hpp"
-//#include "network/Thread.h"
 #include "network/Session.h"
+#include "network/ThreadFactory.h"
 #include "CommandType.h"
 #include "dyndmcs/InstantiatorCommandType.h"
 
@@ -42,9 +42,10 @@
 #include <set>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/thread.hpp>
+
 
 namespace dmcs {
+
 
 template<typename CmdType>
 class Handler
@@ -60,11 +61,9 @@ public:
   void 
   do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
 
-  void
-  send_header_result(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
-
   void 
-  send_result(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
+  send_result(typename CmdType::return_type result,
+	      const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
 
   void 
   handle_session(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
@@ -74,15 +73,49 @@ public:
 
   void 
   handle_finalize(const boost::system::error_code& e, SessionMsgPtr sesh);
+
+
+private:
+  connection_ptr conn;
+};
+
+
+// Specialized handler for streaming dmcs
+template<>
+class Handler<StreamingCommandType>
+{
+public:
+  typedef Session<StreamingCommandType::input_type> SessionMsg;
+  typedef boost::shared_ptr<SessionMsg> SessionMsgPtr;
+  typedef boost::shared_ptr<StreamingCommandType> StreamingCommandTypePtr;
+
+  //Handler(const CmdTypePtr cmd_, connection_ptr conn_);
+  Handler(StreamingCommandTypePtr cmd, connection_ptr conn_);
+
+  /*
+  void 
+  do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd);
+
+  void 
+  send_result(StreamingCommandType::return_type result,
+	      const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd);
+
+  void 
+  handle_session(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd);
+
+  void 
+  send_eof(const boost::system::error_code& e, SessionMsgPtr sesh);
+
+  void 
+  handle_finalize(const boost::system::error_code& e, SessionMsgPtr sesh);*/
   
 private:
   connection_ptr conn;
 
-  // need some MQ gateway here
-  
   ThreadVecPtr neighbor_input_threads;
   boost::thread* dmcs_thread;
   boost::thread* sat_thread;
+  boost::thread* output_thread;
 };
 
 } // namespace dmcs

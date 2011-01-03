@@ -28,20 +28,18 @@
  */
 
 
-//#include "Handler.h"
-#include "dmcs/StreamingDMCS.h"
-
 namespace dmcs {
 
 template<typename CmdType>
 //Handler<CmdType>::Handler(const CmdTypePtr cmd_, connection_ptr conn_)
 Handler<CmdType>::Handler(CmdTypePtr cmd, connection_ptr conn_)
 //: cmd(cmd_), conn(conn_)
-  : conn(conn_),
-    neighbor_input_threads(new ThreadVec)
+  : conn(conn_)
 {
+#ifdef DEBUG
   std::cerr << "Handler::Handler, going to read message" << std::endl;
-  
+#endif
+
   SessionMsgPtr sesh(new SessionMsg(conn));
 
   // read and process this message
@@ -63,27 +61,25 @@ Handler<CmdType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr
       std::cerr << "Handler::do_local_job " << std::endl
 		<< "Message = " << sesh->mess << std::endl;
 #endif //DEBUG
-      // create the message queue for holding results from local
-      // solving. Then spawn another thread which keeps reading the
-      // queue and returns each single computed BeliefState to the
-      // invoker through the network. Since the receiver also gets the
-      // results into a message queue, it will automatically block us
-      // here when its queue is full.
 
-
-      // initialize threads for: (i) receiving answers from
-      // neighbor(s), (ii) joining partial equilibria from
-      // neighbor(s), and (iii) SAT solving
-      cmd->createNeighborInputThreads(neighbor_input_threads);
-      cmd->createDMCSThread(dmcs_thread, sesh->mess);
-      cmd->createLocalSolveThread(sat_thread);
-
+      // do the local job
+      typename CmdType::return_type result = cmd->execute(sesh->mess);
+      std::string header = HEADER_ANS;
+      
+#if defined(DEBUG)
+      std::cerr << "Got local result, now send back to the invoker the header and then the real result!" << std::endl
+		<< "Header = " << header << std::endl
+		<< "Result = " << *result <<std::endl;
+#endif //DEBUG
 	  
-      // asynchronously look at the output message queue, pick up each
-      // new coming BeliefState and send back to the invoker. Using
-      // boost::asio, we need to loop between functions using
-      // boost::bind(), and of course outside of this do_local_job()
-      send_header_result(e, sesh, cmd);
+      // Send the result to the client. The connection::async_write()
+      // function will automatically serialize the data structure for
+      // us.
+
+      // first send the invoker some header
+      sesh->conn->async_write(header,
+			      boost::bind(&Handler<CmdType>::send_result, this, result,
+					  boost::asio::placeholders::error, sesh, cmd));
     }
   else
     {
@@ -96,49 +92,18 @@ Handler<CmdType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr
 }
 
 
-
-/// MD: watch out! We might lose cmd if we don't pass it as an argument. This happened before.
 template<typename CmdType>
 void
-Handler<CmdType>::send_header_result(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd)
+Handler<CmdType>::send_result(typename CmdType::return_type result, 
+			      const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd)
 {
   if (!e)
     {
-#ifdef DEBUG
-      std::cerr << "Handler::send_header_result" << std::endl;
-#endif
-
-      std::string header = HEADER_ANS;
-
-      sesh->conn->async_write(header,
-			      boost::bind(&Handler<CmdType>::send_result, this,
-					  boost::asio::placeholders::error, sesh, cmd));
-    }
-  else
-    {
-#ifdef DEBUG
-      std::cerr << "Handler::send_header_result: " << e.message() << std::endl;
-#endif
-    }
-}
-
-template<typename CmdType>
-void
-Handler<CmdType>::send_result(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd)
-{
-  if (!e)
-    {
-#ifdef DEBUG
+ #ifdef DEBUG
       std::cerr << "Handler::send_result" << std::endl;
 #endif
-      // read result from the output message queue
-      typename CmdType::return_type result;
-
-      // Send the result to the client. The connection::async_write()
-      // function will automatically serialize the data structure for
-      // us.
       sesh->conn->async_write(result,
-			boost::bind(&Handler<CmdType>::send_header_result, this,
+			boost::bind(&Handler<CmdType>::handle_session, this,
 				    boost::asio::placeholders::error, sesh, cmd));      
     }
   else
@@ -233,6 +198,35 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
       std::cerr << "Handler::handle_finalize: " << e.message() << std::endl;
 #endif
     }
+}
+
+
+// specialized methods for streaming dmcs
+Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
+  : conn(conn_)
+{ 
+#ifdef DEBUG
+  std::cerr << "Handler<StreamingCommandType>::Handler, initialize threads" << std::endl;
+#endif
+  StreamingDMCSPtr sdmcs = cmd->getSDMCS();
+  ThreadFactory tf(sdmcs);
+
+  tf.createNeighborInputThreads(neighbor_input_threads);
+  dmcs_thread   = tf.createDMCSThread();
+  sat_thread    = tf.createLocalSolveThread();
+  output_thread = tf.createOutputThread();
+
+#ifdef DEBUG
+  std::cerr << "Handler<StreamingCommandType>::Handler, going to read message" << std::endl;
+#endif
+
+  SessionMsgPtr sesh(new SessionMsg(conn));
+
+  // read and process this message
+  /*  conn->async_read(sesh->mess,
+		   boost::bind(&Handler<CmdType>::do_local_job, this,
+		   boost::asio::placeholders::error, sesh, cmd)
+		   );*/
 }
 
 } // namespace dmcs
