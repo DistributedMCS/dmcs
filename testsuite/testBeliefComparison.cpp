@@ -1,4 +1,4 @@
-#include "BeliefState.h"
+#include "mcs/BeliefState.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testBeliefComparison"

@@ -34,8 +34,7 @@
 #include "config.h"
 #endif
 
-#include "Client.h"
-#include "Theory.h"
+#include "mcs/Theory.h"
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>

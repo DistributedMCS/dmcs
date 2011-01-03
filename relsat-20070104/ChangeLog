@@ -1,3 +1,7 @@
+2011-01-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* SATSolver.h: Refactoring.
+
 2010-12-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.cpp: Use local_sig as a member.

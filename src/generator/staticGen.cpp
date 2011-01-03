@@ -51,12 +51,13 @@
 #include "generator/RingOptTopoGenerator.h"
 #include "generator/RingEdgeTopoGenerator.h"
 #include "generator/ContextGenerator.h"
-#include "ProgramOptions.h"
+#include "generator/QueryPlanWriter.h"
 
-#include "QueryPlan.h"
-#include "QueryPlanWriter.h"
-#include "Rule.h"
-#include "Signature.h"
+#include "dmcs/ProgramOptions.h"
+#include "dmcs/QueryPlan.h"
+
+#include "mcs/Rule.h"
+#include "mcs/Signature.h"
 
 using namespace dmcs;
 using namespace dmcs::generator;

@@ -31,8 +31,8 @@
 #ifndef LOOP_FORMULA_H
 #define LOOP_FORMULA_H
 
-#include "Rule.h"
-#include "Theory.h"
+#include "mcs/Rule.h"
+#include "mcs/Theory.h"
 
 #include <iostream>
 #include <vector>

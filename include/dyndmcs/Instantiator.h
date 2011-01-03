@@ -32,9 +32,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "Rule.h"
-#include "InstantiateForwardMessage.h"
-#include "InstantiateBackwardMessage.h"
+#include "dyndmcs/InstantiateForwardMessage.h"
+#include "dyndmcs/InstantiateBackwardMessage.h"
+#include "mcs/Rule.h"
 
 namespace dmcs {
 

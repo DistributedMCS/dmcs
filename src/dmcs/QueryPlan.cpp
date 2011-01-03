@@ -27,8 +27,8 @@
  * 
  */
 
-#include "QueryPlan.h"
-#include "QueryPlanWriter.h"
+#include "dmcs/QueryPlan.h"
+#include "generator/QueryPlanWriter.h"
 
 using namespace dmcs;
 using namespace dmcs::generator;

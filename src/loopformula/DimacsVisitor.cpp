@@ -31,8 +31,8 @@
 #include "config.h"
 #endif
 
-#include "DimacsVisitor.h"
-#include "Theory.h"
+#include "loopformula/DimacsVisitor.h"
+#include "mcs/Theory.h"
 
 #include <iostream> 
 #include <iterator>

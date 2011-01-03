@@ -35,12 +35,12 @@
 #include "network/connection.hpp"
 #include "network/Session.h"
 
-#include "BeliefState.h"
-#include "Context.h"
-#include "Rule.h"
-#include "Theory.h"
-#include "CommandType.h"
-#include "CommandTypeFactory.h"
+#include "mcs/BeliefState.h"
+#include "mcs/Rule.h"
+#include "mcs/Theory.h"
+#include "dmcs/Context.h"
+#include "dmcs/CommandType.h"
+#include "dmcs/CommandTypeFactory.h"
 
 
 #include <algorithm>

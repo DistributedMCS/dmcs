@@ -33,8 +33,8 @@
 #endif
 
 #include "dmcs/BaseDMCS.h"
-#include "ClaspProcess.h"
-#include "StatsInfo.h"
+#include "process/ClaspProcess.h"
+#include "dmcs/StatsInfo.h"
 
 namespace dmcs {
 

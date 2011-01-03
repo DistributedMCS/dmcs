@@ -1,10 +1,90 @@
-2011-01-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-	* include/network/Handler.tcc: Let Handler<StreamingCommandType>
-	take care of incoming messages only.
-	* include/network/Handler.h: Likewise.
-
 2011-01-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/testVariable.cpp: Refactoring.
+	* testsuite/testTranslation.cpp: Likewise.
+	* testsuite/testSignature.cpp: Likewise.
+	* testsuite/testResult.cpp: Likewise.
+	* testsuite/testQueryPlan.cpp: Likewise.
+	* testsuite/testParsers.cpp: Likewise.
+	* testsuite/testGraphProp.cpp: Likewise.
+	* testsuite/testCombination.cpp: Likewise.
+	* testsuite/testClaspResultOnlineParser.cpp: Likewise.
+	* testsuite/testClasp.cpp: Likewise.
+	* testsuite/testBlockingClasp.cpp: Likewise.
+	* testsuite/testBeliefComparison.cpp: Likewise.
+	* src/loopformula/DimacsVisitor.cpp: Likewise.
+	* src/generator/staticGen.cpp: Likewise.
+	* src/generator/LogicVisitor.cpp: Likewise.
+	* src/generator/ContextGenerator.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/dmcs/QueryPlan.cpp: Likewise.
+	* src/dmcs/ProcessBuf.cpp: Likewise.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* src/dmcs/ClaspProcess.cpp: Likewise.
+	* src/dmcs/Cache.cpp: Likewise.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+	* src/dmcs/BaseDMCS.cpp: Likewise.
+	* include/solver/BaseSolver.h: Likewise.
+	* include/process/ClaspProcess.h: Likewise.
+	* include/parser/LocalKBBuilder.tcc: Likewise.
+	* include/parser/LocalKBBuilder.h: Likewise.
+	* include/parser/CnfBuilder.h: Likewise.
+	* include/parser/ClaspResultOnlineParser.h: Likewise.
+	* include/parser/ClaspResultBuilder.tcc: Likewise.
+	* include/parser/ClaspResultBuilder.h: Likewise.
+	* include/parser/BridgeRulesBuilder.tcc: Likewise.
+	* include/parser/BridgeRulesBuilder.h: Likewise.
+	* include/network/Session.h: Likewise.
+	* include/network/Server.h: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/network/Client.tcc: Likewise.
+	* include/network/Client.h: Likewise.
+	* include/mcs/Rule.h: Likewise.
+	* include/loopformula/LoopFormulaBuilder.h: Likewise.
+	* include/loopformula/LoopFormula.h: Likewise.
+	* include/loopformula/LocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/IMPLocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/DimacsVisitor.h: Likewise.
+	* include/generator/dmcsGen.h: Likewise.
+	* include/generator/RingOptTopoGenerator.h: Likewise.
+	* include/generator/QueryPlanWriter.h: Likewise.
+	* include/generator/OptTopologyGenerator.h: Likewise.
+	* include/generator/MultipleRingOptTopoGenerator.h: Likewise.
+	* include/generator/LogicVisitor.h: Likewise.
+	* include/generator/HouseOptTopoGenerator.h: Likewise.
+	* include/generator/DiamondZigZagOptTopoGenerator.h: Likewise.
+	* include/generator/DiamondOptTopoGenerator.h: Likewise.
+	* include/generator/ContextGenerator.h: Likewise.
+	* include/dyndmcs/InstantiatorCommandType.h: Likewise.
+	* include/dyndmcs/Instantiator.h: Likewise.
+	* include/dyndmcs/InstantiateMessage.h: Likewise.
+	* include/dyndmcs/InstantiateBackwardMessage.h: Likewise.
+	* include/dyndmcs/DynamicConfiguration.h: Likewise.
+	* include/dyndmcs/DynamicCommandType.h: Likewise.
+	* include/dyndmcs/ConfigMessage.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/QueryPlan.h: Likewise.
+	* include/dmcs/PrimitiveDMCS.h: Likewise.
+	* include/dmcs/OptDMCS.h: Likewise.
+	* include/dmcs/Message.h: Likewise.
+	* include/dmcs/Context.h: Likewise.
+	* include/dmcs/CommandType.h: Likewise.
+	* include/dmcs/Cache.h: Likewise.
+	* include/dmcs/BeliefCombination.h: Likewise.
+	* include/dmcs/BaseDMCS.h: Likewise.
+
+	* configure.ac: Move header files to the appropriate directory.
+	* include/Makefile.am: Likewise.
+	* include/dmcs/Makefile.am: Likewise.
+	* include/dyndmcs/Makefile.am: Likewise.
+	* include/generator/Makefile.am: Likewise.
+	* include/loopformula/Makefile.am: Likewise.
+	* include/mcs/Makefile.am: Likewise.
+	* include/process/Makefile.am: Likewise.
+	* include/solver/Makefile.am: Likewise.
 
 	* src/ClaspResultOnlineParser.cpp: Remove X-Mas leftover casserole.
 	* src/ContextGenerator.cpp: Likewise.
@@ -13,12 +93,19 @@
 	* src/dmcsGen.cpp: Likewise.
 	* src/dynGen.cpp: Likewise.
 	* src/staticGen.cpp: Likewise.
+	* include/LPGrammar.h: Likewise.
+	* include/QueryPlanGenerator.h: Likewise.
 
 	* configure.ac: Move src/tests to testsuite.
+
 	* Makefile.am: Likewise.
 	* src/Makefile.am: Likewise.
 
 2011-01-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Let Handler<StreamingCommandType>
+	take care of incoming messages only.
+	* include/network/Handler.h: Likewise.
 
 	* src/network/Makefile.am: Add ThreadFactory.cpp
 	* include/network/Makefile.am: Add ThreadFactory.h

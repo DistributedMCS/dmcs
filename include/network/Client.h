@@ -33,10 +33,10 @@
 #define CLIENT_H
 
 #include "network/connection.hpp"
-#include "BeliefState.h"
-#include "CommandType.h"
-#include "Message.h"
-#include "Theory.h"
+#include "mcs/BeliefState.h"
+#include "mcs/Theory.h"
+#include "dmcs/CommandType.h"
+#include "dmcs/Message.h"
 
 #include <boost/asio.hpp>
 

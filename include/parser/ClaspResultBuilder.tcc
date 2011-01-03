@@ -31,7 +31,7 @@
 #if !defined(_CLASP_RESULT_BUILDER_TCC)
 #define _CLASP_RESULT_BUILDER_TCC
 
-#include "SpiritDebugging.h"
+#include "parser/SpiritDebugging.h"
 
 namespace dmcs {
 

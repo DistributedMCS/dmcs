@@ -32,12 +32,12 @@
 #define BASE_DMCS_H
 
 #ifdef DMCS_STATS_INFO
-#include "StatsInfo.h"
+#include "dmcs/StatsInfo.h"
 #endif // DMCS_STATS_INFO
 
-#include "BeliefState.h"
-#include "Context.h"
-#include "ProxySignatureByLocal.h"
+#include "mcs/BeliefState.h"
+#include "mcs/ProxySignatureByLocal.h"
+#include "dmcs/Context.h"
 
 namespace dmcs {
 

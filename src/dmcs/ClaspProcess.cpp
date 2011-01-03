@@ -31,9 +31,9 @@
 #include "config.h"
 #endif
 
-#include "ClaspProcess.h"
-#include "SatSolver.h"
-#include "DimacsVisitor.h"
+#include "process/ClaspProcess.h"
+#include "solver/SatSolver.h"
+#include "loopformula/DimacsVisitor.h"
 
 #include <iostream>
 #include <assert.h>

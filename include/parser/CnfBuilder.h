@@ -32,8 +32,8 @@
 #ifndef CNF_BUILDER_H
 #define CNF_BUILDER_H
 
-#include "BaseBuilder.h"
-#include "Theory.h"
+#include "parser/BaseBuilder.h"
+#include "mcs/Theory.h"
 
 namespace dmcs {
 

@@ -30,8 +30,8 @@
 #ifndef BRIDGE_RULES_BUILDER_TCC
 #define BRIDGE_RULES_BUILDER_TCC
 
-#include "Rule.h"
-#include "SpiritDebugging.h"
+#include "parser/SpiritDebugging.h"
+
 #include <boost/functional/hash.hpp>
 #include <iostream>
 #include <algorithm>

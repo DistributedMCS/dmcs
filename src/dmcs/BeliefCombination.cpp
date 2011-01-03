@@ -27,7 +27,7 @@
  * 
  */
 
-#include "BeliefCombination.h"
+#include "dmcs/BeliefCombination.h"
 
 #include <algorithm>
 

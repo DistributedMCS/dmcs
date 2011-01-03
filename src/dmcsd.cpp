@@ -45,13 +45,14 @@
 #include "loopformula/LocalLoopFormulaBuilder.h"
 #include "loopformula/CNFLocalLoopFormulaBuilder.h"
 #include "loopformula/LoopFormulaDirector.h"
+#include "loopformula/DimacsVisitor.h"
 
-#include "Message.h"
-#include "DimacsVisitor.h"
-#include "Signature.h"
-#include "ProgramOptions.h"
-#include "Neighbor.h"
-#include "CommandTypeFactory.h"
+#include "dmcs/Message.h"
+#include "dmcs/ProgramOptions.h"
+#include "dmcs/Neighbor.h"
+#include "dmcs/CommandTypeFactory.h"
+
+#include "mcs/Signature.h"
 
 #include "dyndmcs/Match.h"
 #include "dyndmcs/NoSBARedBBodySortingStrategy.h"

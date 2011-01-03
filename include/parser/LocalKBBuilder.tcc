@@ -30,7 +30,7 @@
 #ifndef LOCAL_KB_BUILDER_TCC
 #define LOCAL_KB_BUILDER_TCC
 
-#include "SpiritDebugging.h"
+#include "parser/SpiritDebugging.h"
 #include <boost/functional/hash.hpp>
 
 namespace dmcs {

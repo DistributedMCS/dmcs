@@ -31,7 +31,7 @@
 #include "config.h"
 #endif
 
-#include "ProcessBuf.h"
+#include "process/ProcessBuf.h"
 
 #include <sstream>
 #include <cerrno>

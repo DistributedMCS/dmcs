@@ -32,11 +32,11 @@
 #ifndef CLASP_RESULT_BUILDER_H
 #define CLASP_RESULT_BUILDER_H
 
-#include "BaseBuilder.h"
-#include "BeliefState.h"
-#include "Context.h"
-#include "Theory.h"
-#include "ProxySignatureByLocal.h"
+#include "parser/BaseBuilder.h"
+#include "mcs/BeliefState.h"
+#include "mcs/Theory.h"
+#include "mcs/ProxySignatureByLocal.h"
+#include "dmcs/Context.h"
 
 #include <boost/functional/hash.hpp>
 

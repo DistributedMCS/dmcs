@@ -32,9 +32,9 @@
 
 #include <boost/spirit/include/qi.hpp>
 
-#include "BeliefState.h"
-#include "ProxySignatureByLocal.h"
-#include "Signature.h"
+#include "mcs/BeliefState.h"
+#include "mcs/ProxySignatureByLocal.h"
+#include "mcs/Signature.h"
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;

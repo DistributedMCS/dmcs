@@ -31,8 +31,9 @@
 #include "config.h"
 #endif
 
-#include "Context.h"
-#include "LogicVisitor.h"
+#include "dmcs/Context.h"
+#include "generator/LogicVisitor.h"
+
 #include <set>
 #include <iostream> 
 

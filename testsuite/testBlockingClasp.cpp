@@ -1,4 +1,4 @@
-#include "ClaspProcess.h"
+#include "process/ClaspProcess.h"
 #include "parser/ClaspResultOnlineParser.h"
 
 #define BOOST_TEST_DYN_LINK

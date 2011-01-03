@@ -33,8 +33,8 @@
 #include "network/connection.hpp"
 #include "network/Session.h"
 #include "network/ThreadFactory.h"
-#include "CommandType.h"
 #include "dyndmcs/InstantiatorCommandType.h"
+#include "dmcs/CommandType.h"
 
 #include <algorithm>
 #include <cstdlib>

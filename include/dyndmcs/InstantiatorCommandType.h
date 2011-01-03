@@ -30,9 +30,9 @@
 #ifndef INSTANTIATOR_COMMAND_TYPE
 #define INSTANTIATOR_COMMAND_TYPE
 
-#include "CommandType.h"
-#include "Instantiator.h"
-#include "ContextSubstitution.h"
+#include "dyndmcs/Instantiator.h"
+#include "dyndmcs/ContextSubstitution.h"
+#include "dmcs/CommandType.h"
 
 namespace dmcs {
 

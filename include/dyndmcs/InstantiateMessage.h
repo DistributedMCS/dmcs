@@ -33,9 +33,9 @@
 #include <iterator>
 #include <list>
 
-#include "Message.h"
-#include "BeliefState.h"
-#include "ContextSubstitution.h"
+#include "dyndmcs/ContextSubstitution.h"
+#include "dmcs/Message.h"
+#include "mcs/BeliefState.h"
 
 namespace dmcs {
 

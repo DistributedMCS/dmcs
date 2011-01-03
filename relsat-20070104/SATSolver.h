@@ -25,10 +25,10 @@
 #include "VariableSet.h"
 #include "Random.h"
 
-#include "BeliefState.h"
-#include "ProxySignatureByLocal.h"
+#include <mcs/BeliefState.h>
+#include <mcs/ProxySignatureByLocal.h>
 
-#include "network/MessageQueue.h"
+#include <network/MessageQueue.h>
 
 /////////////
 // Defines

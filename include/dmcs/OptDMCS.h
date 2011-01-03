@@ -34,10 +34,10 @@
 
 #include "dmcs/BaseDMCS.h"
 #include "dmcs/OptMessage.h"
-#include "ReturnMessage.h"
-#include "Cache.h"
-#include "Theory.h"
-#include "QueryPlan.h"
+#include "dmcs/ReturnMessage.h"
+#include "dmcs/Cache.h"
+#include "dmcs/QueryPlan.h"
+#include "mcs/Theory.h"
 
 namespace dmcs {
 

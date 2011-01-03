@@ -1,4 +1,5 @@
 // Incrementally parse result from clasp (full vesion)
+#include "parser/ClaspResultOnlineParser.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testClaspResultOnlineParser"
@@ -10,8 +11,6 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-
-#include "parser/ClaspResultOnlineParser.h"
 
 using namespace dmcs;
 

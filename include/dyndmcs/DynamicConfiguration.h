@@ -35,12 +35,12 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graphviz.hpp>
 
-#include "ConfigMessage.h"
+#include "dyndmcs/ConfigMessage.h"
 #include "dyndmcs/Match.h"
-#include "Message.h"
-#include "Neighbor.h"
-#include "Rule.h"
-#include "Signature.h"
+#include "dmcs/Message.h"
+#include "dmcs/Neighbor.h"
+#include "mcs/Rule.h"
+#include "mcs/Signature.h"
 
 namespace dmcs {
 

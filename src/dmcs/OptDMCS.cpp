@@ -31,12 +31,12 @@
 #include "config.h"
 #endif
 
-#include "BeliefState.h"
-#include "BeliefCombination.h"
-#include "ClaspProcess.h"
-#include "CommandType.h"
-#include "DimacsVisitor.h"
+#include "mcs/BeliefState.h"
+#include "dmcs/BeliefCombination.h"
 #include "dmcs/Cache.h"
+#include "dmcs/CommandType.h"
+#include "process/ClaspProcess.h"
+#include "loopformula/DimacsVisitor.h"
 
 #include "dmcs/OptDMCS.h"
 #include "dmcs/OptCommandType.h"

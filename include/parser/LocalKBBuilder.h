@@ -31,10 +31,10 @@
 #ifndef LOCAL_KB_BUILDER_H
 #define LOCAL_KB_BUILDER_H
 
-#include "BaseBuilder.h"
-#include "Rule.h"
-#include "Theory.h"
-#include "Signature.h"
+#include "parser/BaseBuilder.h"
+#include "mcs/Rule.h"
+#include "mcs/Theory.h"
+#include "mcs/Signature.h"
 
 namespace dmcs {
 

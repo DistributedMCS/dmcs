@@ -34,13 +34,13 @@
 #include <boost/shared_ptr.hpp>
 #include "dmcs/BaseDMCS.h"
 #include "dmcs/StreamingForwardMessage.h"
-#include "ReturnMessage.h"
-#include "Cache.h"
-#include "Theory.h"
-#include "QueryPlan.h"
+#include "dmcs/ReturnMessage.h"
+#include "dmcs/Cache.h"
+#include "dmcs/QueryPlan.h"
+#include "mcs/Theory.h"
 
-#include "../../relsat-20070104/SATInstance.h"
-#include "../../relsat-20070104/SATSolver.h"
+#include "relsat-20070104/SATInstance.h"
+#include "relsat-20070104/SATSolver.h"
 
 namespace dmcs {
 

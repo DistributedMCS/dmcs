@@ -30,10 +30,10 @@
 #ifndef IMP_LOCAL_LOOP_FORMULA_BUILDER_H
 #define IMP_LOCAL_LOOP_FORMULA_BUILDER_H
 
-#include "LocalLoopFormulaBuilder.h"
-#include "LoopFormula.h"
-#include "Theory.h"
-#include "Signature.h"
+#include "loopformula/LocalLoopFormulaBuilder.h"
+#include "loopformula/LoopFormula.h"
+#include "mcs/Theory.h"
+#include "mcs/Signature.h"
 
 #include <boost/graph/subgraph.hpp>
 #include <boost/graph/adjacency_list.hpp>

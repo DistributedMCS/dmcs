@@ -34,9 +34,9 @@
 
 #include "dmcs/BaseDMCS.h"
 #include "dmcs/PrimitiveMessage.h"
-#include "ReturnMessage.h"
-#include "Cache.h"
-#include "Theory.h"
+#include "dmcs/ReturnMessage.h"
+#include "dmcs/Cache.h"
+#include "mcs/Theory.h"
 
 
 namespace dmcs {

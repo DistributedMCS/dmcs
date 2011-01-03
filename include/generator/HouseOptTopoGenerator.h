@@ -30,7 +30,7 @@
 #ifndef GEN_HOUSE_OPT_TOPO_GENERATOR_H
 #define GEN_HOUSE_OPT_TOPO_GENERATOR_H
 
-#include "BeliefCombination.h"
+#include "dmcs/BeliefCombination.h"
 #include "generator/OptTopologyGenerator.h"
 
 namespace dmcs { namespace generator {

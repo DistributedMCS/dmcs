@@ -31,9 +31,9 @@
 #endif
 
 #include "dmcs/Cache.h"
+#include "dmcs/BeliefCombination.h"
 
-#include "BeliefState.h"
-#include "BeliefCombination.h"
+#include "mcs/BeliefState.h"
 
 #include <iterator>
 #include <functional>

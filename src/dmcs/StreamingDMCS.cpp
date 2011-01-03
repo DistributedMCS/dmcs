@@ -31,11 +31,11 @@
 #include "config.h"
 #endif
 
-#include "BeliefState.h"
-#include "BeliefCombination.h"
-#include "CommandType.h"
-#include "DimacsVisitor.h"
+#include "mcs/BeliefState.h"
+#include "dmcs/BeliefCombination.h"
+#include "dmcs/CommandType.h"
 #include "dmcs/Cache.h"
+#include "loopformula/DimacsVisitor.h"
 
 #include "dmcs/StreamingDMCS.h"
 #include "dmcs/StreamingCommandType.h"

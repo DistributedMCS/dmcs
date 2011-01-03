@@ -1,11 +1,12 @@
-#include "BeliefState.h"
-#include "Rule.h"
-#include "Signature.h"
-#include "QueryPlan.h"
+#include "dmcs/QueryPlan.h"
 
 #include "parser/LocalKBBuilder.h"
 #include "parser/ParserDirector.h"
 #include "parser/PropositionalASPGrammar.h"
+
+#include "mcs/BeliefState.h"
+#include "mcs/Rule.h"
+#include "mcs/Signature.h"
 
 #include <algorithm>
 #include <cstdlib>

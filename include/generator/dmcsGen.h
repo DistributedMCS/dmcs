@@ -31,8 +31,8 @@
 #ifndef DMCS_GEN_H
 #define DMCS_GEN_H
 
-#include "Signature.h"
 #include "generator/ContextGenerator.h"
+#include "mcs/Signature.h"
 
 
 namespace dmcs { namespace generator {

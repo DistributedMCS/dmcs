@@ -1,9 +1,9 @@
-#include "Rule.h"
+#include "mcs/Rule.h"
+#include "mcs/Signature.h"
 
-#include "Signature.h"
-#include "QueryPlan.h"
-#include "DimacsVisitor.h"
+#include "dmcs/QueryPlan.h"
 
+#include "loopformula/DimacsVisitor.h"
 #include "loopformula/LocalLoopFormulaBuilder.h"
 #include "loopformula/CNFLocalLoopFormulaBuilder.h"
 #include "loopformula/EquiCNFLocalLoopFormulaBuilder.h"

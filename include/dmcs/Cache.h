@@ -32,7 +32,7 @@
 #ifndef _CACHE_H
 #define _CACHE_H
 
-#include "BeliefState.h"
+#include "mcs/BeliefState.h"
 
 #include <map>
 #include <set>

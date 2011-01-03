@@ -35,9 +35,10 @@
 
 #include <map>
 
-#include "BeliefState.h"
-#include "Rule.h"
 #include "generator/OptTopologyGenerator.h"
+#include "mcs/BeliefState.h"
+#include "mcs/Rule.h"
+#include "mcs/Signature.h"
 
 namespace dmcs { namespace generator {
 

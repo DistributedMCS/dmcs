@@ -33,8 +33,8 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
-#include "BeliefState.h"
 #include "generator/TopologyGenerator.h"
+#include "mcs/BeliefState.h"
 
 namespace dmcs { namespace generator {
 

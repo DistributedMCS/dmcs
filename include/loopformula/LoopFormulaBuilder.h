@@ -30,8 +30,8 @@
 #ifndef LOOPFORMULABUILDER_H
 #define LOOPFORMULABUILDER_H
 
-#include "Rule.h"
-#include "Theory.h"
+#include "mcs/Rule.h"
+#include "mcs/Theory.h"
 
 
 namespace dmcs {

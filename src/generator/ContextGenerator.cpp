@@ -31,7 +31,7 @@
 #include <sstream>
 #include <fstream>
 
-#include "LogicVisitor.h"
+#include "generator/LogicVisitor.h"
 #include "generator/ContextGenerator.h"
 
 

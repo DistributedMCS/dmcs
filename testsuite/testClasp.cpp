@@ -1,4 +1,4 @@
-#include "ClaspProcess.h"
+#include "process/ClaspProcess.h"
 #include "parser/ClaspResultGrammar.h"
 #include "parser/ClaspResultBuilder.h"
 #include "parser/ParserDirector.h"

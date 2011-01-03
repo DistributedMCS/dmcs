@@ -30,7 +30,7 @@
 #ifndef CONFIG_MESSAGE_H
 #define CONFIG_MESSAGE_H
 
-#include "Message.h"
+#include "dmcs/Message.h"
 #include "dyndmcs/ContextSubstitution.h"
 
 namespace dmcs {

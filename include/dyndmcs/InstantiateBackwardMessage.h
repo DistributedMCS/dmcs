@@ -32,8 +32,8 @@
 
 #include <boost/serialization/shared_ptr.hpp>
 
-#include "InstantiateMessage.h"
-#include "StatsInfo.h"
+#include "dyndmcs/InstantiateMessage.h"
+#include "dmcs/StatsInfo.h"
 
 namespace dmcs {
 

@@ -33,11 +33,11 @@
 #include <map>
 
 #include "parser/BaseBuilder.h"
-#include "Neighbor.h"
-#include "Rule.h"
-#include "Theory.h"
-#include "Signature.h"
-#include "Variable.h"
+#include "mcs/Rule.h"
+#include "mcs/Theory.h"
+#include "mcs/Signature.h"
+#include "dmcs/Neighbor.h"
+#include "dyndmcs/Variable.h"
 
 namespace dmcs {
 

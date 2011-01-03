@@ -30,8 +30,8 @@
 #ifndef DYNAMIC_COMMAND_TYPE
 #define DYNAMIC_COMMAND_TYPE
 
-#include "CommandType.h"
 #include "dyndmcs/DynamicConfiguration.h"
+#include "dmcs/CommandType.h"
 
 namespace dmcs {
 

@@ -31,17 +31,18 @@
 #include "config.h"
 #endif
 
-#include "BeliefCombination.h"
-#include "ClaspProcess.h"
-#include "CommandType.h"
-#include "DimacsVisitor.h"
+#include "process/ClaspProcess.h"
+#include "loopformula/DimacsVisitor.h"
+
+#include "mcs/BeliefState.h"
+#include "mcs/ProxySignatureByLocal.h"
+
 #include "dmcs/Cache.h"
-
-#include "QueryPlan.h"
-#include "BeliefState.h"
-
+#include "dmcs/CommandType.h"
+#include "dmcs/BeliefCombination.h"
 #include "dmcs/PrimitiveDMCS.h"
 #include "dmcs/PrimitiveCommandType.h"
+#include "dmcs/QueryPlan.h"
 
 #include "network/Client.h"
 
@@ -49,7 +50,6 @@
 #include "parser/ClaspResultGrammar.h"
 #include "parser/ClaspResultBuilder.h"
 #include "parser/ParserDirector.h"
-#include "ProxySignatureByLocal.h"
 
 
 #include <vector>

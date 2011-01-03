@@ -41,11 +41,13 @@
 #include "dyndmcs/InstantiatorCommandType.h"
 
 #include "network/Client.h"
-#include "Theory.h"
-#include "BeliefState.h"
-#include "Message.h"
-#include "QueryPlan.h"
-#include "ProgramOptions.h"
+
+#include "dmcs/Message.h"
+#include "dmcs/QueryPlan.h"
+#include "dmcs/ProgramOptions.h"
+
+#include "mcs/Theory.h"
+#include "mcs/BeliefState.h"
 
 #include <fstream>
 #include <iostream>
