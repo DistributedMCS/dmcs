@@ -1,3 +1,22 @@
+2011-01-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/Makefile.am: Add ThreadFactory.cpp
+	* include/network/Makefile.am: Add ThreadFactory.h
+
+	* src/network/ThreadFactory.cpp: New file.
+	* include/network/ThreadFactory.h: Likewise.
+
+	* include/network/Handler.h: Add specialized Handler for streaming dmcs.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/CommandType.h: Remove thread creation methods.
+	* include/dyndmcs/InstantiatorCommandType.h: Likewise.
+	* include/dyndmcs/DynamicCommandType.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+	* include/dmcs/PrimitiveCommandType.h: Likewise.
+	* include/dmcs/OptCommandType.h: Likewise.
+	* src/dmcs/StreamingCommandType.cpp: Likewise.
+
 2010-12-30  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/parser/Makefile.am (AM_CPPFLAGS): Add BM_CPPFLAGS.
