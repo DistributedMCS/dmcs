@@ -168,7 +168,7 @@ AC_CONFIG_FILES([
            src/network/Makefile
            src/loopformula/Makefile
            src/parser/Makefile
-           src/tests/Makefile
+           testsuite/Makefile
 ])
 
 

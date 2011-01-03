@@ -1,3 +1,9 @@
+2011-01-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* configure.ac: Move src/tests to testsuite.
+	* Makefile.am: Likewise.
+	* src/Makefile.am: Likewise.
+
 2011-01-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/Makefile.am: Add ThreadFactory.cpp
