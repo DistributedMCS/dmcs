@@ -18,34 +18,51 @@
  */
 
 /**
- * @file   MessageQueue.h
+ * @file   MessagingGateway.h
  * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
- * @date   Sat Dec 18 14:02:46 2010
+ * @date   Tue Dec 21 06:04:11 2010
  * 
- * @brief  Basic message queues for IPC.
+ * @brief  Encapsulates the messaging system of DMCS.
  * 
  * 
  */
 
 
-#ifndef _MESSAGE_QUEUE_H
-#define _MESSAGE_QUEUE_H
 
-#include <boost/interprocess/ipc/message_queue.hpp>
-#include <boost/shared_ptr.hpp>
+#ifndef _MESSAGING_GATEWAY_H
+#define _MESSAGING_GATEWAY_H
+
+#include <cstddef>
 
 namespace dmcs {
 
-  /// a message queue
-  typedef boost::interprocess::message_queue MQ;
+  /** 
+   * @brief Base class for sending and receiving models and conflicts
+   * within a dmcsd.
+   */
+  template <typename MODEL, typename CONFLICT>
+  class MessagingGateway
+  {
+  public:
 
-  /// a message queue shared pointer
-  typedef boost::shared_ptr<MQ> MQPtr;
-  
+    virtual void
+    sendModel(MODEL*, std::size_t from, std::size_t to, std::size_t prio) = 0;
+
+    virtual void
+    sendConflict(CONFLICT*, std::size_t from, std::size_t to, std::size_t prio) = 0;
+
+    virtual MODEL*
+    recvModel(std::size_t from, std::size_t& prio) = 0;
+
+    virtual CONFLICT*
+    recvConflict(std::size_t from, std::size_t& prio) = 0;
+    
+  };
+
 } // namespace dmcs
 
 
-#endif // _MESSAGE_QUEUE_H
+#endif // _MESSAGING_GATEWAY_H
 
 // Local Variables:
 // mode: C++

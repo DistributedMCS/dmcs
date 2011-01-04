@@ -18,4 +18,6 @@ noinst_LIBRARIES = libnetwork.a
 # the NETWORK library
 libnetwork_a_SOURCES = \
 		Server.cpp \
+		MessageDispatcher.cpp \
+		MessageQueueFactory.cpp \
 		ThreadFactory.cpp

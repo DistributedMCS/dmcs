@@ -7,6 +7,9 @@ noinst_HEADERS =  \
 		Handler.h \
 		Handler.tcc \
 		MessageQueue.h \
+		MessageQueueFactory.h \
+		MessageDispatcher.h \
+		MessagingGateway.h \
 		Server.h \
 		Session.h \
 		ThreadFactory.h \

@@ -18,34 +18,63 @@
  */
 
 /**
- * @file   MessageQueue.h
+ * @file   MessageQueueFactory.h
  * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
- * @date   Sat Dec 18 14:02:46 2010
+ * @date   Tue Jan  4 11:22:45 2011
  * 
- * @brief  Basic message queues for IPC.
+ * @brief  
  * 
  * 
  */
 
 
-#ifndef _MESSAGE_QUEUE_H
-#define _MESSAGE_QUEUE_H
+#ifndef _MESSAGE_QUEUE_FACTORY_H
+#define _MESSAGE_QUEUE_FACTORY_H
 
-#include <boost/interprocess/ipc/message_queue.hpp>
-#include <boost/shared_ptr.hpp>
+
+#include "network/MessagingGateway.h"
+#include "network/MessageQueue.h"
+
+#include "mcs/BeliefState.h"
+#include "solver/Conflict.h"
 
 namespace dmcs {
 
-  /// a message queue
-  typedef boost::interprocess::message_queue MQ;
 
-  /// a message queue shared pointer
-  typedef boost::shared_ptr<MQ> MQPtr;
-  
+  class MessageQueueFactory
+  {
+  private:
+    MQPtr
+    createMessageQueue(const char* name, std::size_t max_k, std::size_t max_size);
+
+  public:
+    enum MQIDs
+      {
+	IN_MQ = 0,
+	OUT_MQ,
+	CONFLICT_MQ,
+	JOIN_OUT_MQ,
+	JOIN_IN_MQ
+      };
+
+
+    MessageQueueFactory();
+
+
+    virtual
+    ~MessageQueueFactory();
+
+
+    boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >
+    createMessagingGateway(std::size_t uid, std::size_t no_nbs);
+
+  };
+
+
 } // namespace dmcs
 
 
-#endif // _MESSAGE_QUEUE_H
+#endif // _MESSAGE_QUEUE_FACTORY_H
 
 // Local Variables:
 // mode: C++

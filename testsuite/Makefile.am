@@ -29,7 +29,8 @@ TESTS = \
 	testCombination \
 	testClaspResultOnlineParser \
 	testBlockingClasp \
-	testGraphProp
+	testGraphProp \
+	testMessagingGateway
 
 TESTS_ENVIRONMENT = EXAMPLESDIR=$(top_srcdir)/examples
 
@@ -48,7 +49,8 @@ check_PROGRAMS = \
 	testCombination \
 	testClaspResultOnlineParser \
 	testBlockingClasp \
-	testGraphProp
+	testGraphProp \
+	testMessagingGateway
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -95,3 +97,6 @@ testVariable_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testGraphProp_SOURCES = testGraphProp.cpp
 testGraphProp_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+
+testMessagingGateway_SOURCES = testMessagingGateway.cpp
+testMessagingGateway_LDADD = $(top_builddir)/src/network/libnetwork.a

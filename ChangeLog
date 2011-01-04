@@ -1,3 +1,21 @@
+2011-01-04  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcs/StreamingDMCS.cpp: Remove message queue handling.
+
+	* include/solver/Conflict.h: Add simple conflict representation.
+	* include/solver/Makefile.am: Likewise.
+
+	* include/network/MessagingGateway.h: Initial message queue infrastructure.
+	* include/network/MessageQueueFactory.h: Likewise.
+	* include/network/MessageQueue.h: Likewise.
+	* include/network/MessageDispatcher.h: Likewise.
+	* include/network/Makefile.am: Likewise.
+	* src/network/Makefile.am: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+	* testsuite/Makefile.am: Likewise.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+
 2011-01-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Handler.tcc: Adapt to SatSolver creation from
