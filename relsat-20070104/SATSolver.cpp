@@ -46,12 +46,10 @@ SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_)
 
 // for outputting models in the form of BeliefState
 SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_, 
-		     std::size_t sys_size,
-		     dmcs::MQPtr mq_)
+		     std::size_t sys_size)
   : xOutputStream(xOutputStream_),
     _pPrimaryVariables(0),
-    system_size(sys_size),
-    mq(mq_)
+    system_size(sys_size)
 {
   _pInstance = pSATInstance_;
   _aAssignment = 0;
@@ -318,7 +316,7 @@ SATSolver::_bOutputBeliefState()
   // to have automatic streaming of models.
 
   dmcs::BeliefState** address_bs = &bs;
-  mq->send(address_bs, sizeof(bs), 0);
+  //  mq->send(address_bs, sizeof(bs), 0);
 
   if (_bFindAll && _iSolutionCount >= _iMaxSolutions && _iMaxSolutions) {
     return 1;

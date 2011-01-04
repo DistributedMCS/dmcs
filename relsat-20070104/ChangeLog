@@ -1,5 +1,8 @@
 2011-01-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* SATSolver.h:Remove MQ, wait for MQGateway.
+	* SATSolver.cpp: Likewise.
+
 	* SATSolver.cpp: Fix . to -> of local_sig.
 
 2011-01-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>

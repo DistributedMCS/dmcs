@@ -84,7 +84,7 @@ class SATSolver {
   friend class SATPreprocessor;
 public:
   //SATSolver(SATInstance*, ostream&);
-  SATSolver(SATInstance*, ostream&, std::size_t, dmcs::MQPtr);
+  SATSolver(SATInstance*, ostream&, std::size_t);
   ~SATSolver();
 
   // Use to modify runtime parameters.
@@ -274,7 +274,6 @@ private:
   VariableSet* _pPrimaryVariables;
 
   // for porting models to BeliefState form
-  dmcs::MQPtr mq;
   
   dmcs::ProxySignatureByLocal* local_sig;
   std::size_t system_size;
