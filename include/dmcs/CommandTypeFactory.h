@@ -154,7 +154,7 @@ CommandTypeFactory::create<StreamingCommandTypePtr>()
   MQPtr mq_joined_input;
   MQPtr mq_sat_output;
 
-  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, query_plan, buf_count, mq_joined_input, mq_sat_output));
+  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, query_plan, buf_count));
   StreamingCommandTypePtr stm_opt_dmcs(new StreamingCommandType(stm_dmcs));
 
   return stm_opt_dmcs;

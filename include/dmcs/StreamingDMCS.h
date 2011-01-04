@@ -40,9 +40,6 @@
 #include "network/MessageQueue.h"
 #include "mcs/Theory.h"
 
-#include "relsat-20070104/SATInstance.h"
-#include "relsat-20070104/SATSolver.h"
-
 namespace dmcs {
 
 class StreamingDMCS : public BaseDMCS
@@ -58,7 +55,7 @@ public:
   typedef bool dmcs_return_type;
 #endif
 
-  StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s, const QueryPlanPtr& query_plan_, std::size_t buf_count_, MQPtr, MQPtr);
+  StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s, const QueryPlanPtr& query_plan_, std::size_t buf_count_);
 
   virtual
   ~StreamingDMCS();
@@ -98,9 +95,6 @@ private:
   std::size_t system_size;
   std::size_t my_id;
   std::size_t buf_count;
-
-  SATInstance xInstance;
-  SATSolver   xSATSolver;
 };
 
 typedef boost::shared_ptr<StreamingDMCS> StreamingDMCSPtr;

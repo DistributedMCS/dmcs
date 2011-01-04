@@ -1,5 +1,13 @@
 2011-01-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/Handler.h: Move SATSolver to Handler.
+	* include/network/Handler.tcc: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/CommandTypeFactory.h: Likewise.
+
 	* include/dmcs/StreamingDMCS.h: include MessageQueue.h
 
 	* include/network/ThreadFactory.h: Segfault fixed.

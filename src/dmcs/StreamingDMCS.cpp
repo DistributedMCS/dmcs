@@ -60,18 +60,14 @@ namespace dmcs {
 StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, 
 			     const SignatureVecPtr& s, 
 			     const QueryPlanPtr& query_plan_,
-			     std::size_t buf_count_,
-			     MQPtr mq_joined_input,
-			     MQPtr mq_sat_output)
+			     std::size_t buf_count_)
   : BaseDMCS(c, t, s),
     query_plan(query_plan_),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats)),
     system_size(c->getSystemSize()),
     my_id(c->getContextID()),
-    buf_count(buf_count_),
-    xInstance(std::cerr),
-    xSATSolver(&xInstance, std::cerr, system_size, mq_sat_output)
+    buf_count(buf_count_)
 { }
 
 

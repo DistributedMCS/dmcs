@@ -204,7 +204,9 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 // specialized methods for streaming dmcs
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
   : conn(conn_),
-    neighbor_input_threads(new ThreadVec)
+    neighbor_input_threads(new ThreadVec),
+    xInstance(std::cerr),
+    xSATSolver(&xInstance, std::cerr, cmd->getSDMCS()->getContext()->getSystemSize())
 { 
 #ifdef DEBUG
   std::cerr << "Handler<StreamingCommandType>::Handler, initialize threads" << std::endl;
@@ -219,7 +221,7 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
   dmcs_thread   = tf.createDMCSThread();
 
   std::cerr << "sat' thread" << std::endl;
-  sat_thread    = tf.createLocalSolveThread();
+  sat_thread    = tf.createLocalSolveThread(xSATSolver);
 
   std::cerr << "output' thread" << std::endl;
   output_thread = tf.createOutputThread();

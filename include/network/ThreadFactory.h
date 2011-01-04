@@ -36,6 +36,9 @@
 #include "dmcs/StreamingDMCS.h"
 #include "dmcs/StreamingForwardMessage.h"
 
+#include "relsat-20070104/SATSolver.h"
+#include "relsat-20070104/SATInstance.h"
+
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -69,7 +72,7 @@ public:
   operator()();
 
 private:
-  StreamingDMCSPtr& sdmcs;
+  StreamingDMCSPtr sdmcs;
 };
 
 
@@ -77,14 +80,13 @@ private:
 class LocalSolverThreadStarter
 {
 public:
-  LocalSolverThreadStarter(StreamingDMCSPtr& sdmcs_);
+  LocalSolverThreadStarter(SATSolver& xSATSolver_);
 
   void
   operator()();
 
 private:
-  // may be we need less than sdmcs
-  StreamingDMCSPtr& sdmcs;
+  SATSolver& xSATSolver;
 };
 
 
@@ -103,7 +105,7 @@ public:
 class ThreadFactory
 {
 public:
-  ThreadFactory(StreamingDMCSPtr sdmcs_);
+  ThreadFactory(StreamingDMCSPtr& sdmcs_);
 
   void
   createNeighborInputThreads(ThreadVecPtr);
@@ -112,7 +114,7 @@ public:
   createDMCSThread();
 
   boost::thread*
-  createLocalSolveThread();
+  createLocalSolveThread(SATSolver&);
 
   boost::thread*
   createOutputThread();

@@ -31,10 +31,14 @@
 #define HANDLER_H
 
 #include "network/connection.hpp"
+#include "network/MessageQueue.h"
 #include "network/Session.h"
 #include "network/ThreadFactory.h"
 #include "dyndmcs/InstantiatorCommandType.h"
 #include "dmcs/CommandType.h"
+
+#include "relsat-20070104/SATInstance.h"
+#include "relsat-20070104/SATSolver.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -105,6 +109,9 @@ private:
   boost::thread* dmcs_thread;
   boost::thread* sat_thread;
   boost::thread* output_thread;
+
+  SATInstance xInstance;
+  SATSolver   xSATSolver;
 
   std::string header;
 };

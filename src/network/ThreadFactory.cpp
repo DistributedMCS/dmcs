@@ -80,8 +80,8 @@ DMCSThreadStarter::operator()()
 
 
 
-LocalSolverThreadStarter::LocalSolverThreadStarter(StreamingDMCSPtr& sdmcs_)
-  : sdmcs(sdmcs_)
+LocalSolverThreadStarter::LocalSolverThreadStarter(SATSolver& xSATSolver_)
+  : xSATSolver(xSATSolver_)
 { 
 }
 
@@ -100,6 +100,7 @@ LocalSolverThreadStarter::operator()()
 #endif
 
   // (3)
+
 }
 
 
@@ -119,7 +120,7 @@ OutputThreadStarter::operator()()
 
 
 
-ThreadFactory::ThreadFactory(StreamingDMCSPtr sdmcs_)
+ThreadFactory::ThreadFactory(StreamingDMCSPtr& sdmcs_)
   : sdmcs(sdmcs_)
 { }
 
@@ -151,9 +152,9 @@ ThreadFactory::createDMCSThread()
 }
   
 boost::thread*
-ThreadFactory::createLocalSolveThread()
+ThreadFactory::createLocalSolveThread(SATSolver& xSATSolver)
 {
-  LocalSolverThreadStarter lts(sdmcs);
+  LocalSolverThreadStarter lts(xSATSolver);
   boost::thread* t = new boost::thread(lts);
   
   return t;
