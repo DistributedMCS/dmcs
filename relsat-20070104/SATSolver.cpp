@@ -299,7 +299,7 @@ SATSolver::_bOutputBeliefState()
 	  dmcs::SignatureByLocal::const_iterator loc_it = local_sig->find(i);
 	  
 	  // it must show up in the signature
-	  assert (loc_it != local_sig.end());
+	  assert (loc_it != local_sig->end());
 	  
 	  std::size_t cid = loc_it->ctxId - 1;
 	  
