@@ -29,6 +29,7 @@
 
 
 #include "network/ThreadFactory.h"
+#include "solver/SatSolverFactory.h"
 
 namespace dmcs {
 
@@ -80,10 +81,9 @@ DMCSThreadStarter::operator()()
 
 
 
-LocalSolverThreadStarter::LocalSolverThreadStarter(SATSolver& xSATSolver_)
-  : xSATSolver(xSATSolver_)
-{ 
-}
+LocalSolverThreadStarter::LocalSolverThreadStarter(const RelSatSolverPtr& relsatsolver_)
+  : relsatsolver(relsatsolver_)
+{ }
 
 
 
@@ -152,11 +152,16 @@ ThreadFactory::createDMCSThread()
 }
   
 boost::thread*
-ThreadFactory::createLocalSolveThread(SATSolver& xSATSolver)
+ThreadFactory::createLocalSolveThread()
 {
-  LocalSolverThreadStarter lts(xSATSolver);
+  ContextPtr context = sdmcs->getContext();
+  SatSolverFactory ssf(context);
+
+  RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
+
+  LocalSolverThreadStarter lts(relsatsolver);
   boost::thread* t = new boost::thread(lts);
-  
+
   return t;
 }
 

@@ -1,5 +1,33 @@
 2011-01-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/Handler.tcc: Adapt to SatSolver creation from
+	factory.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/solver/Makefile.am: Add new header files.
+
+	* src/Makefile.am: Add new libs for satsolver and process.
+	* include/Makefile.am: Likewise.
+
+	* src/process: New subdir.
+	* src/solver: Likewise.
+
+	* configure.ac: Add paths to new subdirs.
+
+	* src/process/ClaspProcess.cpp: New file.
+	* src/process/ProcessBuf.cpp: Likewise.
+	* src/process/Makefile.am: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/solver/Makefile.am: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* src/dmcs/Makefile.am: Remove libsatsolver.
+
+	* src/dmcs/ClaspProcess.cpp: Remove.
+	* src/dmcs/ProcessBuf.cpp: Likewise.
+
 	* include/network/Handler.h: Move SATSolver to Handler.
 	* include/network/Handler.tcc: Likewise.
 	* src/network/ThreadFactory.cpp: Likewise.

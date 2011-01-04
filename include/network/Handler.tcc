@@ -214,16 +214,9 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
   StreamingDMCSPtr sdmcs = cmd->getSDMCS();
   ThreadFactory tf(sdmcs);
 
-  std::cerr << "neighbors' thread" << std::endl;
   tf.createNeighborInputThreads(neighbor_input_threads);
-
-  std::cerr << "dmcs' thread" << std::endl;
   dmcs_thread   = tf.createDMCSThread();
-
-  std::cerr << "sat' thread" << std::endl;
-  sat_thread    = tf.createLocalSolveThread(xSATSolver);
-
-  std::cerr << "output' thread" << std::endl;
+  sat_thread    = tf.createLocalSolveThread();
   output_thread = tf.createOutputThread();
 
 #ifdef DEBUG

@@ -26,19 +26,9 @@ LIBS = \
 	$(BOOST_GRAPH_LIBS)
 
 
-noinst_LIBRARIES = libdmcs.a libcache.a
+noinst_LIBRARIES = libsolver.a
 
-# the cache library
-libcache_a_SOURCES = Cache.cpp
+# the solver library
+libsolver_a_SOURCES = \
+		RelSatSolver.cpp
 
-# the DMCS library
-libdmcs_a_SOURCES = \
-		BaseDMCS.cpp \
-		OptDMCS.cpp \
-		PrimitiveDMCS.cpp \
-                QueryPlan.cpp \
-                BeliefCombination.cpp \
-		PrimitiveDMCS.cpp \
-		OptDMCS.cpp \
-		StreamingCommandType.cpp \
-		StreamingDMCS.cpp

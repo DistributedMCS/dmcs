@@ -4,4 +4,6 @@ AUTOMAKE_OPTIONS = gnu
 noinst_HEADERS =  \
 		BaseSolver.h \
 		SatSolver.h \
-		SatSolver.tcc
+		SatSolver.tcc \
+		SatSolverFactory.h \
+		RelSatSolver.h
