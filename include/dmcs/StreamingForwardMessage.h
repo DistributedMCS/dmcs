@@ -31,6 +31,7 @@
 #define STREAMING_FORWARD_MESSAGE_H
 
 #include "Message.h"
+#include "mcs/BeliefState.h"
 
 namespace dmcs {
 
@@ -43,8 +44,12 @@ public:
   virtual ~StreamingForwardMessage() 
   {}
 
-  StreamingForwardMessage(std::size_t invoker_, bool restart_)
-    : invoker(invoker_), restart(restart_)
+  StreamingForwardMessage(std::size_t invoker_)
+    : invoker(invoker_), conflict(new BeliefState)
+  { }
+
+  StreamingForwardMessage(std::size_t invoker_, BeliefStatePtr conflict_)
+    : invoker(invoker_), conflict(conflict_)
   { }
 
   std::size_t
@@ -53,10 +58,10 @@ public:
     return invoker;
   }
 
-  bool
-  isRestarted()
+  BeliefStatePtr
+  getConflict() const
   {
-    return restart;
+    return conflict;
   }
 
 public:
@@ -65,19 +70,20 @@ public:
   serialize(Archive& ar, const unsigned int /* version */)
   {
     ar & invoker;
+    ar & conflict;
   }
 
 private:
-  std::size_t invoker;   // ID of the invoking context
-  bool        restart;   // true:  ask for fresh pack of BeliefState(s)
-                         // false: ask for the next pack of BeliefState(s)
+  std::size_t invoker;     // ID of the invoking context
+  BeliefStatePtr conflict; // a conflict that the receiver should obey
 };
 
 inline std::ostream&
 operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
 {
 
-  os << sfMess.getInvoker() << " ";
+  os << sfMess.getInvoker() << " ["
+     << sfMess.getConflict() << "] ";
   
   return os;
 }

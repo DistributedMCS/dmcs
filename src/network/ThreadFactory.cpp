@@ -55,7 +55,7 @@ NeighborInputThreadStarter::operator()()
     boost::asio::ip::tcp::endpoint endpoint = *res_it;
     
     std::string header = HEADER_REQ_STM_DMCS;
-    StreamingForwardMessage neighbourMess(ctx_id, true);
+    StreamingForwardMessage neighbourMess(ctx_id);
     
     Client<StreamingCommandType> client(io_service, res_it, header, neighbourMess);
     
