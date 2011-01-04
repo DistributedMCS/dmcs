@@ -3,6 +3,7 @@
 	* include/dmcs/StreamingDMCS.h: include MessageQueue.h
 
 	* include/network/ThreadFactory.h: Segfault fixed.
+	* src/network/ThreadFactory.cpp: Likewise.
 	* include/network/Handler.tcc: Likewise.
 
 	* src/network/Makefile.am: Add relative path to allow compiling

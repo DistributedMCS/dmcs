@@ -394,7 +394,7 @@ inline void save(Archive & ar, const dmcs::BeliefSet& belief, unsigned int versi
   belief.calc_stat(&st);
 
 #ifdef DEBUG
-  std::cerr << "Serializing " << belief << std::endl;
+  //  std::cerr << "Serializing " << belief << std::endl;
   std::cerr << "Bits count:" << belief.count() << std::endl;
   std::cerr << "Bit blocks:" << st.bit_blocks << std::endl;  
   std::cerr << "GAP blocks:" << st.gap_blocks << std::endl;  

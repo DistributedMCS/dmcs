@@ -33,7 +33,7 @@
 namespace dmcs {
 
 
-NeighborInputThreadStarter::NeighborInputThreadStarter(const NeighborPtr& nb_, std::size_t ctx_id_)
+NeighborInputThreadStarter::NeighborInputThreadStarter(const NeighborPtr nb_, std::size_t ctx_id_)
   : nb(nb_),
     ctx_id(ctx_id_)
 { }
