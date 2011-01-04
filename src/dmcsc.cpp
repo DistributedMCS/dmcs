@@ -105,6 +105,7 @@ main(int argc, char* argv[])
       std::size_t system_size = 0;
       std::size_t root_ctx;
       bool dynamic;
+      bool streaming;
       BeliefStatePtr V(new BeliefState);
 
       boost::program_options::options_description desc("Allowed options");
@@ -118,6 +119,7 @@ main(int argc, char* argv[])
 	(MANAGER, boost::program_options::value<std::string>(&manager), "set Manager HOST:PORT")
 	(DYNAMIC, boost::program_options::value<bool>(&dynamic)->default_value(false), "set to dynamic mode")
 	(ROOT_CTX, boost::program_options::value<std::size_t>(&root_ctx)->default_value(1), "set root context id")
+	(STREAMING, boost::program_options::value<bool>(&streaming)->default_value(true), "set streaming mode")
 	;
 	
       boost::program_options::variables_map vm;        
@@ -240,12 +242,27 @@ main(int argc, char* argv[])
 	    }
 	  else // Opt DMCS
 	    {
-	      std::string header = HEADER_REQ_OPT_DMCS;
-	      OptCommandType::input_type mess(0); // invoker ID ?
-	      Client<OptCommandType> c(io_service, it, header, mess);
-	      io_service.run();
+	      // for now, we work on streaming DMCS for the opt topology. 
+	      if (streaming)
+		{
+		  std::string header = HEADER_REQ_STM_DMCS;
+		  StreamingCommandType::input_type mess(0);
+
+		  BeliefStatePtr conflict = mess.getConflict();
+		  std::cerr << "Empty starting conflict: [" << *conflict << "]" << std::endl;
+
+		  Client<StreamingCommandType> c(io_service, it, header, mess);
+		  io_service.run();
+		}
+	      else
+		{
+		  std::string header = HEADER_REQ_OPT_DMCS;
+		  OptCommandType::input_type mess(0); // invoker ID ?
+		  Client<OptCommandType> c(io_service, it, header, mess);
+		  io_service.run();
 	      
-	      result = c.getResult();
+		  result = c.getResult();
+		}
 	    }
 
       // Print results
