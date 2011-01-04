@@ -149,6 +149,7 @@ StreamingDMCS::init_mqs()
   // message queues for holding answers from neighbors
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
 
+#if 0
   for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
     {
       NeighborPtr nb = *it;
@@ -171,6 +172,7 @@ StreamingDMCS::init_mqs()
   mq_label = DMCS_OUT_MQ "-" + str_my_id.str();
   MQ mq_out(boost::interprocess::create_only,
 	    mq_label.c_str(), buf_count, buf_count * DMCS_MQ_MSG_SIZE);
+#endif // 0
 }
 
 
@@ -188,6 +190,7 @@ StreamingDMCS::remove_mqs()
   // message queues for holding answers from neighbors
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
 
+#if 0
   for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
     {
       NeighborPtr nb = *it;
@@ -207,6 +210,7 @@ StreamingDMCS::remove_mqs()
   // message queue for holding local answers from SAT solver
   mq_label = DMCS_OUT_MQ "-" + str_my_id.str();
   MQ::remove(mq_label.c_str());
+#endif //0
 }
 
 
