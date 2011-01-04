@@ -1,3 +1,14 @@
+2011-01-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+
+
+	* src/dmcsc.cpp: Allow streaming mode (by default).
+	* include/dmcs/ProgramOptions.h: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Add conflict to
+	streaming message, remove restart flag.
+	* src/network/ThreadFactory.cpp: Likewise.
+
 2011-01-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* testsuite/testVariable.cpp: Refactoring.
