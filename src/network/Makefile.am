@@ -3,6 +3,7 @@ AUTOMAKE_OPTIONS = gnu
 # global preprocessor flags
 AM_CPPFLAGS = \
     -I$(top_srcdir)/include \
+    -I$(top_srcdir) \
     $(BM_CPPFLAGS) \
     $(BOOST_CPPFLAGS)
 

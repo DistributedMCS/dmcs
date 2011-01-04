@@ -5,6 +5,7 @@ SUBDIRS = dmcs dyndmcs generator network loopformula parser
 # global preprocessor flags
 AM_CPPFLAGS = \
     -I$(top_srcdir)/include \
+    -I$(top_srcdir) \
     $(BM_CPPFLAGS) \
     $(BOOST_CPPFLAGS) \
     -DNO_GMP
