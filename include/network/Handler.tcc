@@ -203,7 +203,8 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 
 // specialized methods for streaming dmcs
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
-  : conn(conn_)
+  : conn(conn_),
+    neighbor_input_threads(new ThreadVec)
 { 
 #ifdef DEBUG
   std::cerr << "Handler<StreamingCommandType>::Handler, initialize threads" << std::endl;
@@ -211,9 +212,16 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
   StreamingDMCSPtr sdmcs = cmd->getSDMCS();
   ThreadFactory tf(sdmcs);
 
+  std::cerr << "neighbors' thread" << std::endl;
   tf.createNeighborInputThreads(neighbor_input_threads);
+
+  std::cerr << "dmcs' thread" << std::endl;
   dmcs_thread   = tf.createDMCSThread();
+
+  std::cerr << "sat' thread" << std::endl;
   sat_thread    = tf.createLocalSolveThread();
+
+  std::cerr << "output' thread" << std::endl;
   output_thread = tf.createOutputThread();
 
 #ifdef DEBUG

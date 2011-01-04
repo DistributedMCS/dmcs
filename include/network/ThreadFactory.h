@@ -48,13 +48,13 @@ typedef boost::shared_ptr<ThreadVec> ThreadVecPtr;
 class NeighborInputThreadStarter
 {
 public:
-  NeighborInputThreadStarter(const NeighborPtr& nb_, std::size_t ctx_id_);
+  NeighborInputThreadStarter(const NeighborPtr nb_, std::size_t ctx_id_);
 
   void
   operator()();
 
 private:
-  const NeighborPtr& nb;
+  const NeighborPtr nb;
   std::size_t ctx_id;
 };
 

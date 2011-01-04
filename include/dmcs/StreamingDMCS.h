@@ -37,6 +37,7 @@
 #include "dmcs/ReturnMessage.h"
 #include "dmcs/Cache.h"
 #include "dmcs/QueryPlan.h"
+#include "network/MessageQueue.h"
 #include "mcs/Theory.h"
 
 #include "relsat-20070104/SATInstance.h"

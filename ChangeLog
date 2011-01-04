@@ -1,5 +1,10 @@
 2011-01-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/dmcs/StreamingDMCS.h: include MessageQueue.h
+
+	* include/network/ThreadFactory.h: Segfault fixed.
+	* include/network/Handler.tcc: Likewise.
+
 	* src/network/Makefile.am: Add relative path to allow compiling
 	from build directory.
 	* src/dmcs/Makefile.am: Likewise.
