@@ -1,3 +1,21 @@
+2011-01-05  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/testTranslation.cpp: Fix signature.
+
+	* include/parser/BridgeRulesBuilder.tcc: Add more meaningful
+	assertions.
+
+	* include/network/Client.tcc: Fix ctor initialisation list.
+
+	* include/mcs/BeliefState.h: Some beautifications.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+
+	* examples/dia-4-4-2-2-1.opt: Fix representation of the interfaces.
+
+	* examples/clasp-result-big.txt: Add terminal 0 to the models.
+
+	* configure.ac: Bump version and fix email address.
+
 2011-01-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* examples/pingpong.cmd: New file.

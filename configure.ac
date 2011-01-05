@@ -1,5 +1,5 @@
 AC_PREREQ(2.61)
-AC_INIT([dmcs],[0.1.0],[(dao|tkren)@kr.tuwien.ac.at])
+AC_INIT([dmcs],[1.0.0alpha],[dmcs-devel@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([src/dmcsd.cpp])
 AC_CONFIG_HEADER([config.h])
 
