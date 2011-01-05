@@ -187,8 +187,7 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
   SchematicBelief schematic_belief;
 
   std::size_t c = str_context_term[0];
-  if ((c >= 'A') && (c <= 'Z'))
-    // face a context variable
+  if ((c >= 'A') && (c <= 'Z')) // context variable
     {
       // check whether this variable already parsed in this rule
       std::map<std::string, ContextTerm>::const_iterator v_it = vm.find(str_context_term);
@@ -197,8 +196,7 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
 	  context_term = ctxVarTerm(ctx_id, ++ctx_var_counter);
 	  vm.insert(std::pair<std::string, ContextTerm>(str_context_term, context_term));
 	}
-      else
-	// this context varialbe already appeared IN THIS RULE
+      else // this context variable already appeared IN THIS RULE
 	{
 	  context_term = v_it->second;
 	}
@@ -206,6 +204,9 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
       // in the case of context variable, the schematic constant must
       // be in the signature of the current context
       const SignaturePtr& local_sig = (*global_sigs)[ctx_id - 1];
+
+      assert (local_sig != 0);
+
       const SignatureBySym& local_sig_sym = boost::get<Tag::Sym>(*local_sig);
       SignatureBySym::const_iterator loc_it = local_sig_sym.find(str_schematic_const);
 
@@ -230,33 +231,40 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
       std::cerr << "type =" << sBeliefType(schematic_belief) << ", schematic_const = " << sBelief(schematic_belief) << std::endl;
 #endif
     }
-  else
+  else // context id
     {
-      // face a context id
-      // for the moment, assume that there is no nasty input
-      // concerning the context id
+      ///@todo for the moment, assume that there is no nasty input concerning the context id
       std::size_t context_id = std::atoi(str_context_term.c_str());
       context_term = ctxConstTerm(context_id);
 
       NeighborList::const_iterator it = std::find_if(neighbor_list->begin(), neighbor_list->end(), compareNeighbors(context_id));
 
-      if (it == neighbor_list->end())
+      if (it == neighbor_list->end()) // add new neighbor to NeighborList
 	{
 	  NeighborPtr n(new Neighbor(context_id, "", ""));
 	  neighbor_list->push_back(n);
 	}
 
+      assert (ctx_id <= global_sigs->size());
 
       const SignaturePtr& local_sig = (*global_sigs)[ctx_id - 1];
+
+      assert (local_sig != 0);
+
       SignatureBySym& local_sig_sym = boost::get<Tag::Sym>(*local_sig);
       SignatureBySym::iterator loc_it = local_sig_sym.find(str_schematic_const);
 
       // did not find local id for the schematic constant, generate one
       if(loc_it == local_sig_sym.end())
 	{
+	  assert (context_id <= global_sigs->size());
+
 	  const SignaturePtr& neighborSignature = (*global_sigs)[context_id-1];
+
+	  assert (neighborSignature != 0);
 	  
 	  const SignatureBySym& neighbor_sig = boost::get<Tag::Sym>(*neighborSignature);
+
 	  SignatureBySym::const_iterator neighbor_it = neighbor_sig.find(str_schematic_const);
 	  
 	  assert(neighbor_it != neighbor_sig.end());
