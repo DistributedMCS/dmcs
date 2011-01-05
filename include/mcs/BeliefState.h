@@ -43,15 +43,15 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "bm/bm.h"
-#include "bm/bmserial.h"
+#include <bm/bm.h>
+#include <bm/bmserial.h>
 
 
 namespace dmcs {
 
 /// a belief set
 typedef bm::bvector<> BeliefSet;
-  //typedef uint64_t BeliefSet;
+//typedef uint64_t BeliefSet;
 
 /// a belief state
 typedef std::vector<BeliefSet> BeliefState;
@@ -60,9 +60,6 @@ typedef boost::shared_ptr<BeliefState> BeliefStatePtr;
 /// a list of belief states, use BeliefStateCmp and BeliefStateEq for sort() and unique(), resp.
 typedef std::list<BeliefStatePtr> BeliefStateList;
 typedef boost::shared_ptr<BeliefStateList> BeliefStateListPtr;
-
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-
 
 
 /** 
@@ -188,16 +185,19 @@ operator<= (const BeliefStatePtr& bs1, const BeliefStatePtr& bs2)
 
 
 
-
-
+/// @brief read BeliefSet from stream
 inline std::istream&
 operator>> (std::istream& is, BeliefSet& belief)
 {
   std::string s;
   std::getline(is, s);
  
-  boost::char_separator<char> sep("{ }");
+  typedef boost::char_separator<char> separator;
+  typedef boost::tokenizer<separator> tokenizer;
+
+  separator sep("{ }");
   tokenizer tok(s, sep);
+
   for (tokenizer::const_iterator it = tok.begin(); it != tok.end(); ++it)
     {
       std::size_t bit = std::atoi(it->c_str());
@@ -208,10 +208,18 @@ operator>> (std::istream& is, BeliefSet& belief)
 }
 
 
+}//dmcs
+
+
+namespace std {
+
+/// @brief write BeliefSet to stream
 inline std::ostream&
-operator<< (std::ostream& os, const BeliefSet& bv)
+operator<< (std::ostream& os, const dmcs::BeliefSet& bv)
 {
   os << "[";
+
+  ///@todo TK: looks fishy
   std::size_t bit = bv.get_first();
   do
     {
@@ -221,16 +229,15 @@ operator<< (std::ostream& os, const BeliefSet& bv)
 	{
 	  os << ", ";
 	}
-      else
-	{
-	  break;
-	}
     }
-  while (1);
-  os << "]";
+  while (bit);
 
-  return os;
+  return os << "]";
 }
+
+}
+
+namespace dmcs {
 
 
 /**
@@ -254,35 +261,45 @@ operator>> (std::istream& is, BeliefStatePtr& bs)
   std::string s;
   std::getline(is, s);
 
+  typedef boost::char_separator<char> separator;
+  typedef boost::tokenizer<separator> tokenizer;
 
   // A BeliefState is of the form {belief} {belief} ... {belief}
-  // where a belief is a list of integers indicating the on bits
-  boost::char_separator<char> sep(" ", "{}");
+  // where a belief is a list of integers representing the true bits
+  separator sep(" ", "{}");
   tokenizer tok(s, sep);
 
-  std::size_t state = 0;
+  enum State
+  {
+    START,
+    BELIEFSET
+  };
 
+  State state = START;
+  BeliefSet empty; // an empty belief set
+  
   for (tokenizer::const_iterator it = tok.begin(); it != tok.end(); ++it)
     {
+      const char *t = it->c_str();
+
       switch (state)
 	{
-	case 0:
+	case START:
 	  {
-	    assert( std::string(it->c_str()).compare("{") == 0);
-	    BeliefSet belief;
-	    bs->push_back(belief);
-	    state = 1;
+	    assert( *t == '{' ); // we expect an open curly bracket
+	    bs->push_back(empty);
+	    state = BELIEFSET;
 	    break;
 	  }
-	case 1:
+	case BELIEFSET:
 	  {
-	    if (std::string(it->c_str()).compare("}") == 0)
+	    if (*t == '}') // are we there yet?
 	      {
-		state = 0;
+		state = START;
 	      }
 	    else
 	      {
-		std::size_t bit = std::atoi(it->c_str());
+		std::size_t bit = std::atoi(t); ///@todo we expect integers here
 		bs->back().set(bit);
 	      }
 	    break;
