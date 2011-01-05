@@ -46,17 +46,18 @@ SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_)
 
 // for outputting models in the form of BeliefState
 SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_, 
-		     std::size_t sys_size)
+		     std::size_t system_size_)
   : xOutputStream(xOutputStream_),
     _pPrimaryVariables(0),
-    system_size(sys_size)
+    system_size(system_size_)
 {
+  std::cerr << "SATSolver::SATSolver, _iVariableCount = " << _iVariableCount << std::endl;
   _pInstance = pSATInstance_;
   _aAssignment = 0;
 
   // Set intelligent defaults for runtime parameters:
-  _bFindAll = 1; // default to finding one solution
-  _iMaxSolutions = 1;
+  _bFindAll = 1; // relsal: default to finding one solution
+  _iMaxSolutions = 0; // dmcs: we want to find all solutions
   _fFudgeFactor = .9;
   _iLearnOrder = 3;
   _bNoTimeLimit = 0;
@@ -249,6 +250,7 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
 
 boolean SATSolver::_bOutputSolution()
 {
+  std::cerr << "_bOutputSolution, _iVariableCount = " << _iVariableCount << std::endl;
   _iSolutionCount++;
   if (_bFindAll || _iSolutionCount == 1) { // output only first solution found if counting
     xOutputStream << "Solution " << _iSolutionCount << ": ";

@@ -12,6 +12,9 @@
 #include "ClauseList.h"
 #include "VariableSet.h"
 
+#include "mcs/Theory.h"
+
+
 /////////////
 // Defines
 
@@ -40,9 +43,19 @@ public:
   int iVariableCount;
 
   ostream& xOutputStream;
+
+  void
+  readTheory(const dmcs::TheoryPtr& theory, std::size_t sig_size);
+
+  bool
+  hasTheory();
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Inlines
 
 #endif // SATInstance_h
+
+// Local Variables:
+// mode: C++
+// End:

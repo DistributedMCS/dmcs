@@ -21,6 +21,21 @@ void ClauseList::vDestroy()
   _iClauseCount = 0;
 }
 
+
+// remove all clauses from tail to the end. This is used when we want
+// to refresh the SAT solver by removing constraints/facts/conflicts
+// from the last call.
+void
+ClauseList::vRemoveBack(std::size_t tail)
+{
+  for (std::size_t i = tail; i < _iClauseCount; ++i)
+    {
+      delete _aClause[i];
+    }
+  _iClauseCount = tail;
+}
+
+
 void ClauseList::vRemoveDeletedClauses()
 {
   int i=0; 

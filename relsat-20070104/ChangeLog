@@ -1,3 +1,16 @@
+2011-01-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.cpp: We want to have all solutions.
+
+	* SATInstance.h: Read dmcs' theory and convert it into internal
+	clauses of relsat.
+	* SATInstance.cpp: Likewise.
+
+	* ClauseList.cpp (vRemoveDeletedClauses): New method. Will be used
+	later to refresh the SAT solver by removing
+	constraints/facts/conflicts from the last call.
+	* ClauseList.h: Likewise.
+
 2011-01-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.h:Remove MQ, wait for MQGateway.

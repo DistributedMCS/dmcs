@@ -30,6 +30,7 @@ public:
   ~ClauseList() {delete [] _aClause;}
   inline void vAddClause(Clause*);
   inline void vDeleteClause(Clause*);
+  void vRemoveBack(std::size_t tail);
   void vRemoveDeletedClauses();
   void vRemoveRequiredClauses();
   void vDestroyDeletedClauses();
