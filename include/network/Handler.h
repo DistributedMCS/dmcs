@@ -110,9 +110,6 @@ private:
   boost::thread* sat_thread;
   boost::thread* output_thread;
 
-  SATInstance xInstance;
-  SATSolver   xSATSolver;
-
   std::string header;
 };
 

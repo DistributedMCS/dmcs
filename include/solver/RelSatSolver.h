@@ -28,6 +28,7 @@
  */
 
 #include "BaseSolver.h"
+#include "dmcs/Context.h"
 
 #include "relsat-20070104/SATInstance.h"
 #include "relsat-20070104/SATSolver.h"
@@ -43,7 +44,9 @@ namespace dmcs {
 class RelSatSolver : public BaseSolver
 {
 public:
-  RelSatSolver(const TheoryPtr& theory, std::size_t sig_size);
+  RelSatSolver(const ContextPtr& context_,
+	       const TheoryPtr& theory_, 
+	       const SignatureVecPtr& global_sigs_);
 
   int
   solve(const TheoryPtr& theory, std::size_t sig_size);
@@ -51,11 +54,14 @@ public:
   int
   solve();
 
-  // might need some methods to update theory
-
 private:
-  TheoryPtr theory;
-  std::size_t sig_size;
+  ContextPtr      context;
+  TheoryPtr       theory;
+  SignatureVecPtr global_sigs;
+  std::size_t     sig_size;
+
+  SATInstance     xInstance;
+  SATSolver       xSATSolver;
 };
 
 typedef boost::shared_ptr<RelSatSolver> RelSatSolverPtr;

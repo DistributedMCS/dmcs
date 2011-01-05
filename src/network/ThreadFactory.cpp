@@ -77,6 +77,7 @@ DMCSThreadStarter::operator()()
 #ifdef DEBUG
   std::cerr << "DMCSThreadStarter::operator()()" << std::endl;
 #endif
+  sdmcs->start_up();
 }
 
 
@@ -100,7 +101,7 @@ LocalSolverThreadStarter::operator()()
 #endif
 
   // (3)
-
+  relsatsolver->solve();
 }
 
 
@@ -154,8 +155,10 @@ ThreadFactory::createDMCSThread()
 boost::thread*
 ThreadFactory::createLocalSolveThread()
 {
-  ContextPtr context = sdmcs->getContext();
-  SatSolverFactory ssf(context);
+  ContextPtr context          = sdmcs->getContext();
+  TheoryPtr  theory           = sdmcs->getTheory();
+  SignatureVecPtr global_sigs = sdmcs->getGlobalSigs();
+  SatSolverFactory ssf(context, theory, global_sigs);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

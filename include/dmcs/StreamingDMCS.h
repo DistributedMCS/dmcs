@@ -66,15 +66,21 @@ public:
   ContextPtr
   getContext();
 
+  TheoryPtr
+  getTheory();
+
+  SignatureVecPtr
+  getGlobalSigs();
+
+  void
+  start_up();
+
 protected:
 
   SignaturePtr
   createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
 
 private:
-  void
-  init_SATSolver();
-
   void
   init_mqs();
 

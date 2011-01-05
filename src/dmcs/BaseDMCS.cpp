@@ -89,9 +89,9 @@ BaseDMCS::updateGuessingSignature(SignaturePtr& guessing_sig,
 	  
 	  SignatureBySym::const_iterator my_it = my_sig_sym.find(neighbor_it->sym);
 	  
-	  // only add to guessing_sig ig this atom is not in
-	  // my_sig, i.e., it's in the neighbor's interface but
-		  // does not show up in my bridge rules
+	  // only add to guessing_sig if this atom is not in my_sig,
+	  // i.e., it's in the neighbor's interface but does not show
+	  // up in my bridge rules
 	  if (my_it == my_sig_sym.end())
 	    {
 	      // add new symbol for neighbor

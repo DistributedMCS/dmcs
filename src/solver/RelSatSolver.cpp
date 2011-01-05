@@ -32,20 +32,53 @@
 
 namespace dmcs {
 
-RelSatSolver::RelSatSolver(const TheoryPtr& theory_, std::size_t sig_size_)
-  : theory(theory_), sig_size(sig_size_)
+RelSatSolver::RelSatSolver(const ContextPtr& context_,
+			   const TheoryPtr& theory_, 
+			   const SignatureVecPtr& global_sigs_)
+  : context(context_),
+    theory(theory_), 
+    global_sigs(global_sigs_),
+    xInstance(std::cerr),
+    xSATSolver(&xInstance, std::cerr, context->getSystemSize()),
+    sig_size(0)
 { }
+
 
 
 int
 RelSatSolver::solve(const TheoryPtr& theory, std::size_t sig_size)
 {
+  relsat_enum eResult = xSATSolver.eSolve();
 }
+
 
 
 int
 RelSatSolver::solve()
 {
+  // read the query from QueryMessageQueue
+
+  // from this we get (invoker), (conflict)
+
+  // then we can create guessing signature based on the interface from
+  // query_plan(invoker, myself)
+
+  std::size_t invoker = 0;
+  BeliefStatePtr conflict(new BeliefState);
+
+  std::size_t my_id = context->getContextID();
+
+  // compute the size of the mixed signature, just once.
+  if (sig_size == 0)
+    {
+      
+    }
+
+  if (!xInstance.hasTheory())
+    {
+      xInstance.readTheory(theory, sig_size);
+    }
+
   return solve(theory, sig_size);
 }
 

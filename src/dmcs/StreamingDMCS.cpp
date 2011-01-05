@@ -83,18 +83,21 @@ StreamingDMCS::getContext()
 }
 
 
-// Transfer local theory to internal clause representation of relsat
-void
-StreamingDMCS::init_SATSolver()
+
+TheoryPtr
+StreamingDMCS::getTheory()
 {
-  for (Theory::const_iterator it = theory->begin(); it != theory->end(); ++it)
-    {
-      const ClausePtr& cl = *it;
-      for (Clause::const_iterator jt = cl->begin(); jt != cl->end(); ++jt)
-	{
-	}
-    }
+  return theory;
 }
+
+
+
+SignatureVecPtr
+StreamingDMCS::getGlobalSigs()
+{
+  return global_sigs;
+}
+
 
 
 SignaturePtr 
@@ -240,41 +243,28 @@ StreamingDMCS::handleFirstRequest(const StreamingForwardMessage& mess)
 
 
 
-// create multiple threads to send requests to neighbors in
-// parallel. Each thread then is responsible for receiving the
-// BeliefState(s) from the respective neighbor.
-/*void
-StreamingDMCS::sendFirstRequest(const NeighborListPtr& nb)
+void
+StreamingDMCS::start_up()
 {
-  ThreadVec tv;
-
-  for (NeighborList::const_iterator it = nb->begin(); it != nb->end(); ++it)
+  const NeighborListPtr& nb = query_plan->getNeighbors(my_id);
+  if (nb->size() == 0) // this is a leaf context
     {
-      boost::asio::io_service io_service;
-      boost::asio::ip::tcp::resolver resolver(io_service);
-
-      const NeighborPtr nb = *it;
-
-      SendSingleFirstRequest s(nb, my_id);
-
-      boost::thread* sendingThread = new boost::thread(s);
-      tv.push_back(sendingThread);
-    }
-
 #ifdef DEBUG
-  std::cerr << "sendFirstRequest threads started. Now waiting..." << std::endl;
+      std::cerr << "StreamingDMCS::start_up. Leaf context. Put an epsilon model into SatInputMQ to start the SAT solver without input" << std::endl;
+#endif
+      // put an epsilon model into SatInputMQ to start the SAT solver without input
+
+    }
+  else // this is an intermediate context
+    {
+#ifdef DEBUG
+      std::cerr << "StreamingDMCS::start_up. Intermediate context. Send requests to neighbors by placing a message in each of the NeighborQueryMQ" << std::endl;
 #endif
 
-  for (ThreadVec::const_iterator it = tv.begin(); it != tv.end(); ++it)
-    {
-      (*it)->join();
-    }
+      // send requests to neighbors by placing a message in each of the NeighborQueryMQ
 
-  // Now we have input from all neighbors, we can start the joining
-  // business
-
-  // Read off pointers to BeliefStates from message queues. 
-  }*/
+    }  
+}
 
 
 

@@ -18,6 +18,22 @@
 
 2011-01-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/dmcs/BaseDMCS.cpp: Clean up.
+
+	* include/solver/SatSolverFactory.h: Add more support for SAT solving.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/solver/RelSatSolver.h: Add SAT related members
+	and more support for the SAT solving.
+
+	* include/network/Handler.h: Remove SAT related members.
+	* include/network/Handler.tcc: Likewise.
+
+
+
 	* examples/pingpong.cmd: New file.
 	* examples/pingpong.opt: Likewise.
 	* examples/pingpong1.lp: Likewise.

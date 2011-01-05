@@ -204,9 +204,7 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 // specialized methods for streaming dmcs
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
   : conn(conn_),
-    neighbor_input_threads(new ThreadVec),
-    xInstance(std::cerr),
-    xSATSolver(&xInstance, std::cerr, cmd->getSDMCS()->getContext()->getSystemSize())
+    neighbor_input_threads(new ThreadVec)
 { 
 #ifdef DEBUG
   std::cerr << "Handler<StreamingCommandType>::Handler, initialize threads" << std::endl;
@@ -225,7 +223,7 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 
   SessionMsgPtr sesh(new SessionMsg(conn));
 
-  // read and process this message
+  // read and put this message into QueryQueue
   conn->async_read(sesh->mess,
 		   boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
 			       boost::asio::placeholders::error, sesh, cmd)
