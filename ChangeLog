@@ -1,3 +1,12 @@
+2011-01-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* examples/pingpong.cmd: New file.
+	* examples/pingpong.opt: Likewise.
+	* examples/pingpong1.lp: Likewise.
+	* examples/pingpong2.lp: Likewise.
+	* examples/pingpong1.br: Likewise.
+	* examples/pingpong1.br: Likewise.
+
 2011-01-04  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcs/StreamingDMCS.cpp: Remove message queue handling.
