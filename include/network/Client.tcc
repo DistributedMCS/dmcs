@@ -48,8 +48,10 @@ Client<CmdType>::Client(boost::asio::io_service& io_service,
 			boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
 			const std::string& my_header_,
 			typename CmdType::input_type& mess_)
-  : io_service_(io_service), conn(new connection(io_service)),
-    my_header(my_header_), mess(mess_), 
+  : io_service_(io_service),
+    my_header(my_header_),
+    conn(new connection(io_service)),
+    mess(mess_), 
     result(new (typename CmdType::value_type))
 {
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
