@@ -1,3 +1,27 @@
+2011-01-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/OptDMCS.cpp: Add a remark.
+
+	* include/solver/SatSolverFactory.h: Add query_plan.
+
+	* include/solver/RelSatSolver.h: create guessing signature
+	here. Need to rethink where to put this.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/ThreadFactory.h: Add system_size.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/mcs/ProxySignatureByLocal.h: Add ProxySignatureByLocalPtr.
+
+	* include/loopformula/LoopFormula.h: sort the Head for set_difference.
+
+	* include/dmcs/StreamingDMCS.h: Return query_plan.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Adapt initialization of
+	BeliefState in message.
+
 2011-01-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* testsuite/Makefile.am: Use libprocess.a and libsolver.a instead
