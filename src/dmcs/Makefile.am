@@ -34,6 +34,7 @@ libcache_a_SOURCES = Cache.cpp
 # the DMCS library
 libdmcs_a_SOURCES = \
 		BaseDMCS.cpp \
+		Debug.cpp \
 		OptDMCS.cpp \
 		PrimitiveDMCS.cpp \
                 QueryPlan.cpp \

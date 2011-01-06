@@ -18,41 +18,37 @@
  */
 
 /**
- * @file   BeliefCombination.h
- * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Nov  17 16:53:24 2009
+ * @file   Debug.h
+ * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
+ * @date   Thu Jan  6 10:41:06 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef BELIEF_COMBINATION_H
-#define BELIEF_COMBINATION_H
+#ifndef _DMCS_DEBUG_H
+#define _DMCS_DEBUG_H
 
 #include "mcs/BeliefState.h"
-#include "mcs/Theory.h"
+#include "dmcs/QueryPlan.h"
 
-#include <iostream>
+#include <iosfwd>
 
 
 namespace dmcs {
 
-void
-update(BeliefStatePtr& s, const BeliefStatePtr& t);
+  void
+  printBeliefStateNicely(std::ostream& os, const BeliefStatePtr& b_ptr, 
+			 const BeliefStatePtr& V, const QueryPlanPtr& query_plan);
 
-bool
-combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u, const BeliefStatePtr& V);
-
-BeliefStateListPtr
-combine(const BeliefStateListPtr& cs, const BeliefStateListPtr& ct, const BeliefStatePtr& V);
-
-void
-project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateListPtr& cu);
+  void
+  printBeliefStatesNicely(std::ostream& os, const BeliefStateListPtr& bs_ptr, 
+			  const BeliefStatePtr& V, const QueryPlanPtr& query_plan);
 
 } // namespace dmcs
 
-#endif // BELIEF_COMBINATION_H
+#endif // _DMCS_DEBUG_H
 
 // Local Variables:
 // mode: C++

@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   BeliefCombination.h
+ * @file   BeliefCombination.cpp
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
  * @date   Tue Nov  17 16:53:24 2009
  * 
@@ -36,69 +36,6 @@
 #endif
 
 namespace dmcs {
-
-void
-printBeliefStateNicely(std::ostream& os, const BeliefStatePtr& b_ptr, 
-		       const BeliefStatePtr& V, const QueryPlanPtr& query_plan)
-{
-  const BeliefState& belief_sets = *b_ptr;
-  const BeliefState& mask = *V;
-
-  assert(belief_sets.size() == mask.size());
-
-  const std::size_t n = belief_sets.size();
-
-  BeliefState::const_iterator bt = belief_sets.begin();
-  BeliefState::const_iterator vt = mask.begin();
-
-  for(std::size_t j = 1; j <= n; ++bt, ++vt, ++j)
-     {
-       const BeliefSet b = *bt;
-       const BeliefSet v = *vt;
-       os << "{";
-       const Signature& sig = query_plan->getSignature(j);
-       const SignatureByLocal& sig_local = boost::get<Tag::Local>(sig);
-       std::size_t sig_size = sig.size();
-       
-       if (!isEpsilon(b))
- 	{
-	  for (std::size_t i = 1; // ignore epsilon bit
-	       i <= sig_size; ++i)
- 	    {
- 	      if (testBeliefSet(v, i))
- 		{
-		  SignatureByLocal::const_iterator local_it = sig_local.find(i);
-
-		  if (testBeliefSet(b, i))
-		    {
-		      os  << local_it->sym << " ";
-		    }
-		  else
-		    {
-		      os  << "-" << local_it->sym << " ";	
-		    }
-		}
-	    }
-	}
-      os << "}, ";
-    }
-  os << std::endl;
-}
-
-
-
-void
-printBeliefStatesNicely(std::ostream& os, const BeliefStateListPtr& bs_ptr, 
-			const BeliefStatePtr& V, const QueryPlanPtr& query_plan)
-{
-  for(BeliefStateList::const_iterator it = bs_ptr->begin();
-      it != bs_ptr->end();
-      ++it)
-    {
-      printBeliefStateNicely(os, *it, V, query_plan);
-    }
-}
-
 
 /** 
  * Update s by t. Just approriate for genTest.

@@ -47,6 +47,10 @@
 
 #include "network/Client.h"
 
+#if defined(DEBUG)
+#include "dmcs/Debug.h"
+#endif // DEBUG
+
 #include <vector>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>

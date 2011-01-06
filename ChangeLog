@@ -1,3 +1,15 @@
+2011-01-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/generator/QueryPlanWriter.h: Include QueryPlan.h.
+
+	* include/dmcs/Debug.h (printBeliefStateNicely): Move to Debug.
+	* include/dmcs/Makefile.am: Likewise.
+	* include/dmcs/BeliefCombination.h: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* src/dmcs/Makefile.am: Likewise.
+	* src/dmcs/Debug.cpp: Likewise.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+
 2011-01-05  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* testsuite/testTranslation.cpp: Fix signature.
