@@ -1,5 +1,8 @@
 2011-01-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* testsuite/Makefile.am: Use libprocess.a and libsolver.a instead
+	of libsatsolver.a
+
 	* testsuite/testGraphProp.cpp: Disable for now.
 
 	* testsuite/testClasp.cpp: Fix signature creation for
