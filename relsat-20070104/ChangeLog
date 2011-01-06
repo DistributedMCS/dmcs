@@ -1,3 +1,9 @@
+2011-01-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.h: Changed local_sig to mixed_sig, as a Ptr.
+
+	* SATSolver.cpp: Output models in form of BeliefStates.
+
 2011-01-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.cpp: We want to have all solutions.

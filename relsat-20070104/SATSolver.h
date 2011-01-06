@@ -128,9 +128,21 @@ public:
   }
 
   // methods for interfacing with dmcs
-  void setProxySignature(dmcs::ProxySignatureByLocal* local_sig_)
+  void setMixedSignature(const dmcs::ProxySignatureByLocalPtr& mixed_sig_)
   {
-    local_sig = local_sig_;
+    mixed_sig = mixed_sig_;
+  }
+
+  std::size_t
+  getSystemSize()
+  {
+    return system_size;
+  }
+
+  void
+  setSystemSize(const std::size_t system_size_)
+  {
+    // system_size = system_size_;
   }
 
 private:
@@ -275,8 +287,8 @@ private:
 
   // for porting models to BeliefState form
   
-  dmcs::ProxySignatureByLocal* local_sig;
-  std::size_t system_size;
+  dmcs::ProxySignatureByLocalPtr mixed_sig;
+  const std::size_t system_size;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

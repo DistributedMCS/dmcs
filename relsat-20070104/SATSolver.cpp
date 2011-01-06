@@ -51,7 +51,7 @@ SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_,
     _pPrimaryVariables(0),
     system_size(system_size_)
 {
-  std::cerr << "SATSolver::SATSolver, _iVariableCount = " << _iVariableCount << std::endl;
+  std::cerr << "SATSolver::SATSolver, _iVariableCount = " << _iVariableCount << ", system_size = " << system_size << std::endl;
   _pInstance = pSATInstance_;
   _aAssignment = 0;
 
@@ -219,7 +219,8 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
     if (eBestID == -1) {
       bReturnValue = 1;
       if (_iCurrentVariable == _iVariableCount) {
-	if (_bOutputSolution()) {
+        if (_bOutputSolution()) {
+	  //if (_bOutputBeliefState()) {
 	  xOutputStream << "c   Solution limit reached. " << endl;
 	  return bReturnValue;
 	}
@@ -250,7 +251,7 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
 
 boolean SATSolver::_bOutputSolution()
 {
-  std::cerr << "_bOutputSolution, _iVariableCount = " << _iVariableCount << std::endl;
+  std::cerr << "_bOutputSolution, _iVariableCount = " << _iVariableCount << ", system_size = " << system_size << std::endl;
   _iSolutionCount++;
   if (_bFindAll || _iSolutionCount == 1) { // output only first solution found if counting
     xOutputStream << "Solution " << _iSolutionCount << ": ";
@@ -262,6 +263,7 @@ boolean SATSolver::_bOutputSolution()
     }
     xOutputStream << endl;
   }
+
 #ifndef NDEBUG
   if (_bVerifySolution()) {
     // xOutputStream << "c   Solution verified" << endl;
@@ -270,9 +272,11 @@ boolean SATSolver::_bOutputSolution()
     Debug::vErrorReport("Found an invalid solution.");
   }
 #endif
+
   if (_bFindAll && _iSolutionCount >= _iMaxSolutions && _iMaxSolutions) {
     return 1;
   }
+
   return 0;
 }
 
@@ -281,25 +285,35 @@ boolean SATSolver::_bOutputSolution()
 boolean
 SATSolver::_bOutputBeliefState()
 {
+  std::cerr << "SATSolver::_bOutputBeliefState(), _iVariableCount = " << _iVariableCount << std::endl;
+
   _iSolutionCount++;
 
-  dmcs::BeliefState* bs = new dmcs::BeliefState();
-  for (std::size_t i = 0; i < system_size; ++i)
+  std::cerr << "Make bs, system_size = " << system_size << std::endl;
+
+  dmcs::BeliefState* bs = new dmcs::BeliefState(system_size, dmcs::BeliefSet());
+
+  std::cerr << "done" << std::endl;
+
+  /*  for (std::size_t i = 0; i < system_size; ++i)
     {
       dmcs::BeliefSet belief;
       bs->push_back(belief);
-    }
+      }*/
 
   for (int i = 0; i < _iVariableCount; ++i)
     {
+      std::cerr << "i = " << i << std::endl;
       assert(_aAssignment[i] != NON_VALUE);
 
       if (_aAssignment[i])
 	{
-	  dmcs::SignatureByLocal::const_iterator loc_it = local_sig->find(i);
+	  std::cerr << "Check local_sig" << std::endl;
+	  dmcs::SignatureByLocal::const_iterator loc_it = mixed_sig->find(i);
+	  std::cerr << "done" << std::endl;
 	  
 	  // it must show up in the signature
-	  assert (loc_it != local_sig->end());
+	  assert (loc_it != mixed_sig->end());
 	  
 	  std::size_t cid = loc_it->ctxId - 1;
 	  
@@ -311,6 +325,9 @@ SATSolver::_bOutputBeliefState()
 	  belief.set(loc_it->origId);
 	}
     }
+
+  using namespace dmcs;
+  std::cerr << "Solution " << _iSolutionCount << ": " << *bs << std::endl;
 
   // put the computed BeliefState in to message queue.
 
