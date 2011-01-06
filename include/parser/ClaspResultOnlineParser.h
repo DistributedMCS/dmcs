@@ -74,7 +74,7 @@ struct ClaspResultOnlineGrammar : public qi::grammar<Iterator, ascii::space_type
     got_answer = false;
 
     // reset the container for the model, all belief sets to zero
-    belief_state->assign(belief_state->size(), (BeliefSet)0);
+    belief_state->assign(belief_state->size(), BeliefSet());
   }
 };
 
