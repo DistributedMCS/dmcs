@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif // HAVE_CONFIG_H
+
 #include "dmcs/BeliefCombination.h"
 
 #define BOOST_TEST_DYN_LINK
@@ -16,10 +20,17 @@ BOOST_AUTO_TEST_CASE( testBeliefStateCombination )
   BeliefStateListPtr cs(new BeliefStateList);
   BeliefStateListPtr ct(new BeliefStateList);
 
-  BeliefStatePtr s1(new BeliefState(system_size, 0));
-  BeliefStatePtr s2(new BeliefState(system_size, 0));
-  BeliefStatePtr t1(new BeliefState(system_size, 0));
-  BeliefStatePtr t2(new BeliefState(system_size, 0));
+  // create fresh BeliefState of length system_size.
+  //
+  // attention, we need to construct it with the empty BeliefSet, if
+  // we call BeliefState(system_size, 0) we implicitly call it like
+  // BeliefState(system_size, BeliefSet(0)) which gives us BeliefSets
+  // that have 0 size and results in unpredictable behaviour later on
+
+  BeliefStatePtr s1(new BeliefState(system_size, BeliefSet()));
+  BeliefStatePtr s2(new BeliefState(system_size, BeliefSet()));
+  BeliefStatePtr t1(new BeliefState(system_size, BeliefSet()));
+  BeliefStatePtr t2(new BeliefState(system_size, BeliefSet()));
 
 
   //
@@ -92,20 +103,25 @@ BOOST_AUTO_TEST_CASE( testBeliefStateCombination )
 
   BOOST_CHECK_EQUAL(cu->size(), 1); // only S2 matches with T2 on Vmax
 
-  BeliefStatePtr Vmin(new BeliefState(system_size, 0));
+  BeliefStatePtr Vmin(new BeliefState(system_size, BeliefSet()));
 
   // now combine
   cu = combine(cs, ct, Vmin);
 
   BOOST_CHECK_EQUAL(cu->size(), 4); // everything matches with everything on Vmin
 
+  // == 111b == 0x07
+  BeliefSet v7;
+  v7.set(0);
+  v7.set(1);
+  v7.set(2);
 
-  BeliefStatePtr V07(new BeliefState(system_size, 0x07));
+  BeliefStatePtr V7(new BeliefState(system_size, v7));
 
   // now combine
-  cu = combine(cs, ct, V07);
+  cu = combine(cs, ct, V7);
   
-  BOOST_CHECK_EQUAL(cu->size(), 2); // S2 matches with T1,T2 on V07
+  BOOST_CHECK_EQUAL(cu->size(), 2); // S2 matches with T1,T2 on V7
 
   cu->sort(BeliefStateCmp());
   cu->unique(BeliefStateEq());
