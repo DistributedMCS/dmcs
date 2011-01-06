@@ -136,7 +136,14 @@ supportFormula(AtomSetIterator abeg, AtomSetIterator aend,
       std::back_insert_iterator<EpsilonConjunction::Conjunction> nlins(literals.negLiterals);
 
       const Head& head = getHead(**it);
-      std::set_difference(head.begin(), head.end(), abeg, aend, nlins);
+
+      Head copyh;
+      for(Head::const_iterator ith=head.begin();ith!=head.end();ith++)
+          	  copyh.push_back(*ith);
+
+      copyh.sort();
+
+      std::set_difference(copyh.begin(), copyh.end(), abeg, aend, nlins);
 
       const NegativeBody& nbody = getNegativeBody(**it);
       std::copy(nbody.begin(), nbody.end(), nlins);
@@ -202,8 +209,16 @@ supportFormula(AtomSetIterator abeg, AtomSetIterator aend,
       ///@todo rewrite the copying with negation in a better way
       ClausePtr currentRuleHeadPrime (new Clause);
       const Head& head = getHead(**it);
+
+      Head copyh;
+      for(Head::const_iterator ith=head.begin();ith!=head.end();ith++)
+          	  copyh.push_back(*ith);
+
+      copyh.sort();
+
       std::back_insert_iterator<Clause> nlins1(*currentRuleHeadPrime);
-      std::set_difference(head.begin(), head.end(), abeg, aend, nlins1);
+
+      std::set_difference(copyh.begin(), copyh.end(), abeg, aend, nlins1);
       currentRuleHeadPrime = createNegatedConjunction(currentRuleHeadPrime->begin(),
 						      currentRuleHeadPrime->end());
 
