@@ -34,9 +34,12 @@
 namespace dmcs {
 
 
-NeighborInputThreadStarter::NeighborInputThreadStarter(const NeighborPtr nb_, std::size_t ctx_id_)
+NeighborInputThreadStarter::NeighborInputThreadStarter(const NeighborPtr& nb_, 
+						       std::size_t ctx_id_,
+						       std::size_t system_size_)
   : nb(nb_),
-    ctx_id(ctx_id_)
+    ctx_id(ctx_id_),
+    system_size(system_size_)
 { }
 
 
@@ -56,7 +59,7 @@ NeighborInputThreadStarter::operator()()
     boost::asio::ip::tcp::endpoint endpoint = *res_it;
     
     std::string header = HEADER_REQ_STM_DMCS;
-    StreamingForwardMessage neighbourMess(ctx_id);
+    StreamingForwardMessage neighbourMess(ctx_id, system_size);
     
     Client<StreamingCommandType> client(io_service, res_it, header, neighbourMess);
     
@@ -132,11 +135,12 @@ ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
   ContextPtr ctx = sdmcs->getContext();
   NeighborListPtr neighbors = ctx->getNeighbors();
   std::size_t ctx_id = ctx->getContextID();
+  std::size_t system_size = ctx->getSystemSize();
 
   for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
     {
       const NeighborPtr nb = *it;
-      NeighborInputThreadStarter nits(nb, ctx_id);
+      NeighborInputThreadStarter nits(nb, ctx_id, system_size);
       
       boost::thread* nit = new boost::thread(nits);
       neighbor_input_threads->push_back(nit);
@@ -155,10 +159,11 @@ ThreadFactory::createDMCSThread()
 boost::thread*
 ThreadFactory::createLocalSolveThread()
 {
-  ContextPtr context          = sdmcs->getContext();
-  TheoryPtr  theory           = sdmcs->getTheory();
+  ContextPtr   context        = sdmcs->getContext();
+  TheoryPtr    theory         = sdmcs->getTheory();
+  QueryPlanPtr query_plan     = sdmcs->getQueryPlan();
   SignatureVecPtr global_sigs = sdmcs->getGlobalSigs();
-  SatSolverFactory ssf(context, theory, global_sigs);
+  SatSolverFactory ssf(context, theory, query_plan, global_sigs);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

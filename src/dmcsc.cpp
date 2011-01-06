@@ -246,7 +246,8 @@ main(int argc, char* argv[])
 	      if (streaming)
 		{
 		  std::string header = HEADER_REQ_STM_DMCS;
-		  StreamingCommandType::input_type mess(0);
+		  // USER <--> invoker == 0
+		  StreamingCommandType::input_type mess(0, system_size);
 
 		  BeliefStatePtr conflict = mess.getConflict();
 		  std::cerr << "Empty starting conflict: [" << *conflict << "]" << std::endl;

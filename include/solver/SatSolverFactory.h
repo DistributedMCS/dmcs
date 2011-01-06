@@ -41,8 +41,10 @@ class SatSolverFactory
 {
 public:
   SatSolverFactory(const ContextPtr& context_, const TheoryPtr& theory_,
+		   const QueryPlanPtr& query_plan_,
 		   const SignatureVecPtr& global_sigs_)
     : context(context_), theory(theory_),
+      query_plan(query_plan_),
       global_sigs(global_sigs_)
   { }
 
@@ -53,6 +55,7 @@ public:
 private:
   ContextPtr      context;
   TheoryPtr       theory;
+  QueryPlanPtr    query_plan;
   SignatureVecPtr global_sigs;
 };
 
@@ -61,7 +64,7 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(context, theory, global_sigs));
+  RelSatSolverPtr relsatsolver(new RelSatSolver(context, theory, query_plan, global_sigs));
 
   return relsatsolver;
 }

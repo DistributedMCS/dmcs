@@ -69,6 +69,9 @@ public:
   TheoryPtr
   getTheory();
 
+  QueryPlanPtr
+  getQueryPlan();
+
   SignatureVecPtr
   getGlobalSigs();
 

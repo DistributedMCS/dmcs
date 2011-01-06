@@ -84,6 +84,7 @@ private:
   const SignatureByLocal& gsig;
 };
 
+typedef boost::shared_ptr<ProxySignatureByLocal> ProxySignatureByLocalPtr;
 
 } // namespace dmcs
 

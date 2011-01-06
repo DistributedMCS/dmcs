@@ -44,8 +44,8 @@ public:
   virtual ~StreamingForwardMessage() 
   {}
 
-  StreamingForwardMessage(std::size_t invoker_)
-    : invoker(invoker_), conflict(new BeliefState)
+  StreamingForwardMessage(std::size_t invoker_, std::size_t system_size)
+    : invoker(invoker_), conflict(new BeliefState(system_size, BeliefSet()))
   { }
 
   StreamingForwardMessage(std::size_t invoker_, BeliefStatePtr conflict_)

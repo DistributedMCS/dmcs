@@ -76,6 +76,7 @@ StreamingDMCS::~StreamingDMCS()
 { }
 
 
+
 ContextPtr
 StreamingDMCS::getContext()
 {
@@ -88,6 +89,13 @@ TheoryPtr
 StreamingDMCS::getTheory()
 {
   return theory;
+}
+
+
+QueryPlanPtr
+StreamingDMCS::getQueryPlan()
+{
+  return query_plan;
 }
 
 
