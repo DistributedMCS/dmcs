@@ -46,12 +46,11 @@ SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_)
 
 // for outputting models in the form of BeliefState
 SATSolver::SATSolver(SATInstance* pSATInstance_, ostream& xOutputStream_, 
-		     std::size_t system_size_)
+		     dmcs::RelSatSolver* wrapper_)
   : xOutputStream(xOutputStream_),
     _pPrimaryVariables(0),
-    system_size(system_size_)
+    wrapper(wrapper_)
 {
-  std::cerr << "SATSolver::SATSolver, _iVariableCount = " << _iVariableCount << ", system_size = " << system_size << std::endl;
   _pInstance = pSATInstance_;
   _aAssignment = 0;
 
@@ -220,7 +219,6 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
       bReturnValue = 1;
       if (_iCurrentVariable == _iVariableCount) {
         if (_bOutputSolution()) {
-	  //if (_bOutputBeliefState()) {
 	  xOutputStream << "c   Solution limit reached. " << endl;
 	  return bReturnValue;
 	}
@@ -251,17 +249,20 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
 
 boolean SATSolver::_bOutputSolution()
 {
-  std::cerr << "_bOutputSolution, _iVariableCount = " << _iVariableCount << ", system_size = " << system_size << std::endl;
   _iSolutionCount++;
   if (_bFindAll || _iSolutionCount == 1) { // output only first solution found if counting
     xOutputStream << "Solution " << _iSolutionCount << ": ";
+    
+    wrapper->receiveSolution(_aAssignment, _iVariableCount);
+
+    /*
     for (int i=0; i<_iVariableCount; i++) {
       assert(_aAssignment[i] != NON_VALUE);
       if (_aAssignment[i]) {
 	xOutputStream << i+1 << " ";
       }
     }
-    xOutputStream << endl;
+    xOutputStream << endl;*/
   }
 
 #ifndef NDEBUG
@@ -282,7 +283,7 @@ boolean SATSolver::_bOutputSolution()
 
 
 // feed relsat's model into a BeliefState
-boolean
+/*boolean
 SATSolver::_bOutputBeliefState()
 {
   std::cerr << "SATSolver::_bOutputBeliefState(), _iVariableCount = " << _iVariableCount << std::endl;
@@ -294,12 +295,6 @@ SATSolver::_bOutputBeliefState()
   dmcs::BeliefState* bs = new dmcs::BeliefState(system_size, dmcs::BeliefSet());
 
   std::cerr << "done" << std::endl;
-
-  /*  for (std::size_t i = 0; i < system_size; ++i)
-    {
-      dmcs::BeliefSet belief;
-      bs->push_back(belief);
-      }*/
 
   for (int i = 0; i < _iVariableCount; ++i)
     {
@@ -341,7 +336,7 @@ SATSolver::_bOutputBeliefState()
     return 1;
   }
   return 0;
-}
+}*/
 
 
 boolean SATSolver::_bVerifySolution()

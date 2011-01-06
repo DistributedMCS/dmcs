@@ -30,6 +30,8 @@
 
 #include <network/MessageQueue.h>
 
+#include "solver/RelSatSolver.h"
+
 /////////////
 // Defines
 
@@ -39,6 +41,8 @@ class SATInstance;
 class SATPreprocessor;
 class VariableList;
 class VariableSet;
+
+class dmcs::RelSatSolver;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Class Definitions
@@ -84,7 +88,7 @@ class SATSolver {
   friend class SATPreprocessor;
 public:
   //SATSolver(SATInstance*, ostream&);
-  SATSolver(SATInstance*, ostream&, std::size_t);
+  SATSolver(SATInstance*, ostream&, dmcs::RelSatSolver*);
   ~SATSolver();
 
   // Use to modify runtime parameters.
@@ -127,28 +131,9 @@ public:
     _pPrimaryVariables = pPrimaryVariables_;
   }
 
-  // methods for interfacing with dmcs
-  void setMixedSignature(const dmcs::ProxySignatureByLocalPtr& mixed_sig_)
-  {
-    mixed_sig = mixed_sig_;
-  }
-
-  std::size_t
-  getSystemSize()
-  {
-    return system_size;
-  }
-
-  void
-  setSystemSize(const std::size_t system_size_)
-  {
-    // system_size = system_size_;
-  }
-
 private:
   boolean _bVerifySolution();
   boolean _bOutputSolution();
-  boolean _bOutputBeliefState();
   boolean _bInitialize();
   boolean _bInitializeClause(Clause*);
   boolean _bInitializeLearnedClause(Clause*);
@@ -287,8 +272,7 @@ private:
 
   // for porting models to BeliefState form
   
-  dmcs::ProxySignatureByLocalPtr mixed_sig;
-  const std::size_t system_size;
+  dmcs::RelSatSolver* wrapper;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
