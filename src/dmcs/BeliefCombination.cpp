@@ -54,6 +54,7 @@ update(BeliefStatePtr& s, const BeliefStatePtr& t)
 
   for (; s_it != s->end(); ++s_it, ++t_it)
     {
+      assert (s_it->size() > 0 && t_it->size() > 0); // just to be sure
       *s_it |= *t_it;
     }
 }
@@ -77,6 +78,8 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
   assert((s->size() == t->size()) &&
 	 (t->size() == u->size()) &&
 	 (u->size() == V->size()));
+
+  // .. and we do not support system sizes <= 0
   assert(V->size() > 0);
 
   BeliefState::const_iterator s_it = s->begin();
@@ -87,6 +90,11 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
   // walk through the belief sets
   for (; s_it != s->end(); ++s_it, ++t_it, ++u_it, ++v_it)
     {
+      assert (s_it->size() > 0 &&
+	      t_it->size() > 0 &&
+	      u_it->size() > 0 &&
+	      v_it->size() > 0); // just to be sure
+
 #if 0
       std::bitset<sizeof(BeliefSet)*8> sbs = *s_it;
       std::bitset<sizeof(BeliefSet)*8> tbs = *t_it;
@@ -116,6 +124,9 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
 	  return false;
 	}
 
+#if 0
+      std::cerr << "u_it: " << *u_it << std::endl;
+#endif
     } // for
   
 #if 0
@@ -163,8 +174,9 @@ combine(const BeliefStateListPtr& cs, const BeliefStateListPtr& ct,
 	  std::cerr << "with: " << std::endl;
 	  printBeliefStateNicely(std::cerr, t, V, query_plan);
 #endif
-	  
-	  BeliefStatePtr u(new BeliefState(n, 0)); // start with empty belief state
+
+	  // start with empty belief state
+	  BeliefStatePtr u(new BeliefState(n, BeliefSet()));
 
 	  if (combine(*s_it, *t_it, u, V))
 	    {
