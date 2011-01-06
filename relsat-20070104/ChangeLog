@@ -1,8 +1,10 @@
 2011-01-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
-	* SATSolver.h: Changed local_sig to mixed_sig, as a Ptr.
+	* Makefile.am: Add path so that RelSatSolver.h can be included.
 
-	* SATSolver.cpp: Output models in form of BeliefStates.
+	* SATSolver.h: Let the wrapper convert our models into
+	BeliefStates format.
+	* SATSolver.cpp: Likewise.
 
 2011-01-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
