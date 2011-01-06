@@ -31,6 +31,7 @@
 #define QUERY_PLAN_WRITER_H
 
 #include "mcs/BeliefState.h"
+#include "dmcs/QueryPlan.h"
 
 #include <iostream>
 
