@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif // HAVE_CONFIG_H
+
 #include "process/ClaspProcess.h"
 #include "parser/ClaspResultGrammar.h"
 #include "parser/ClaspResultBuilder.h"
@@ -120,7 +124,7 @@ BOOST_AUTO_TEST_CASE( testClaspResultSmall )
   NeighborListPtr nb(new NeighborList);
 
   // setup basic signature from 'a' (==1) to 'g' (==7) for context k
-  for (char c = 'a'; c <= 'k'; ++c)
+  for (char c = 'a'; c <= 'g'; ++c)
     {
       std::size_t i = c - 'a' + 1;
       std::string s;
