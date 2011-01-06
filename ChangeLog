@@ -1,5 +1,7 @@
 2011-01-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* testsuite/testGraphProp.cpp: Disable for now.
+
 	* testsuite/testClasp.cpp: Fix signature creation for
 	testClaspResultSmall testcase.
 
