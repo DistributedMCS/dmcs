@@ -39,6 +39,7 @@
 #ifndef REL_SAT_SOLVER_H
 #define REL_SAT_SOLVER_H
 
+
 namespace dmcs {
 
 // Wrapper for relsat
@@ -56,6 +57,10 @@ public:
   int
   solve();
 
+  void
+  receiveSolution(DomainValue* _aAssignment, int _iVariableCount);
+
+
 private:
 
 ///@todo: move this to an appropriate place. This is code duplication with DMCS stuff.
@@ -70,16 +75,16 @@ updateGuessingSignature(SignaturePtr& guessing_sig,
 SignaturePtr 
 createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
 
-
 private:
   ContextPtr      context;
   TheoryPtr       theory;
   QueryPlanPtr    query_plan;
   SignatureVecPtr global_sigs;
+  ProxySignatureByLocalPtr mixed_sig;
   std::size_t     sig_size;
 
-  SATInstance     xInstance;
-  SATSolver       xSATSolver;
+  SATInstance*    xInstance;
+  SATSolver*      xSATSolver;
 };
 
 typedef boost::shared_ptr<RelSatSolver> RelSatSolverPtr;

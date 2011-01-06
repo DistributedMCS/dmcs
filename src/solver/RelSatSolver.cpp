@@ -40,13 +40,10 @@ RelSatSolver::RelSatSolver(const ContextPtr& context_,
     theory(theory_), 
     query_plan(query_plan_),
     global_sigs(global_sigs_),
-    xInstance(std::cerr),
-    xSATSolver(&xInstance, std::cerr, context->getSystemSize()),
+    xInstance(new SATInstance(std::cerr)),
+    xSATSolver(new SATSolver(xInstance, std::cerr, this)),
     sig_size(0)
-{
-  xSATSolver.setSystemSize(context->getSystemSize());
-  std::cerr << "RelSatSolver::constructor, system_size = " << xSATSolver.getSystemSize() << std::endl;
-}
+{ }
 
 
 
@@ -150,10 +147,48 @@ RelSatSolver::createGuessingSignature(const BeliefStatePtr& V, const SignaturePt
 
 
 
+void
+RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
+{
+#ifdef DEBUG
+  std::cerr << "RelSatSolver::receiveSolution" << std::endl;
+#endif
+
+  std::size_t system_size = context->getSystemSize();
+
+  BeliefState* bs = new dmcs::BeliefState(system_size, dmcs::BeliefSet());
+
+  for (int i=0; i<_iVariableCount; i++) 
+    {
+      assert(_aAssignment[i] != NON_VALUE);
+      if (_aAssignment[i]) 
+	{
+	  dmcs::SignatureByLocal::const_iterator loc_it = mixed_sig->find(i+1);
+	  
+	  // it must show up in the signature
+	  assert (loc_it != mixed_sig->end());
+	  
+	  std::size_t cid = loc_it->ctxId - 1;
+	  
+	  // just to be safe
+	  assert (cid < system_size);
+	  
+	  dmcs::BeliefSet& belief = (*bs)[cid];
+
+	  belief.set(loc_it->origId);
+	}
+    }
+
+#ifdef DEBUG
+  std::cerr << "Solution: " << *bs << std::endl;
+#endif
+}
+
+
+
 int
 RelSatSolver::solve()
 {
-  std::cerr << "in RelSatSolver::solve(), system_size = " << xSATSolver.getSystemSize() << std::endl;
   // read the query from QueryMessageQueue
 
   // from this we get (invoker), (conflict)
@@ -184,25 +219,25 @@ RelSatSolver::solve()
     {
       const SignaturePtr& sig = context->getSignature();
       const SignaturePtr& gsig = createGuessingSignature(localV, sig);
-      ProxySignatureByLocalPtr mixed_sig(new ProxySignatureByLocal(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig)));
+
+      mixed_sig = ProxySignatureByLocalPtr(new ProxySignatureByLocal(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig)));
+
       sig_size = mixed_sig->size();
-      xSATSolver.setMixedSignature(mixed_sig);
 
 #ifdef DEBUG
       std::cerr << "Mixed sig size = " << sig_size << std::endl;
 #endif
     }
 
-  if (!xInstance.hasTheory())
+  if (!xInstance->hasTheory())
     {
-      xInstance.readTheory(theory, sig_size);
+      xInstance->readTheory(theory, sig_size);
     }
 
   //return solve(theory, sig_size);
 
 
-  std::cerr << "Going to call esolve, system_size = " << xSATSolver.getSystemSize() << std::endl;
-  relsat_enum eResult = xSATSolver.eSolve();
+  relsat_enum eResult = xSATSolver->eSolve();
 
   return 10;
 }
