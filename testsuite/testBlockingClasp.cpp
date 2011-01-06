@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE ( testBlockingClasp )
   clasp.spawn();
 
   std::ostream& os = clasp.getOutput();
-  os << "p cnf 10000 0" << std::endl;
+  os << "p cnf 20 0" << std::endl;
  
   clasp.endoffile();
 
@@ -58,21 +58,25 @@ BOOST_AUTO_TEST_CASE ( testBlockingClasp )
   
   std::size_t count = 0;
   BeliefStatePtr belief_state;
-  std::size_t n;
+
   do
     {
       belief_state = crop.getNextAnswer();
+
       if (belief_state != boost::shared_ptr<BeliefState>())
 	{
 #ifdef DEBUG
 	  std::cerr << belief_state << std::endl;
 #endif
-	  count++;
 
-	  //	  std::cerr << "Input number: ";
-	  sleep(2);
-	  // std::cin >> n;
+	  count++;
+	  sleep(1);
+
+#ifdef DEBUG
+	  std::cerr << "read " << count << std::endl;
+#endif
 	}
     }
-  while (belief_state != boost::shared_ptr<BeliefState>());
+  while (belief_state != boost::shared_ptr<BeliefState>() &&
+	 count < 3);
 }
