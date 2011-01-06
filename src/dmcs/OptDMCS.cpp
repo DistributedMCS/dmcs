@@ -70,6 +70,7 @@ OptDMCS::~OptDMCS()
 { }
 
 
+///@todo: check code duplication with PrimitiveDMCS::createGuessingSignature
 SignaturePtr 
 OptDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig)
 {
