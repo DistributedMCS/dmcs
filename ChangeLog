@@ -1,5 +1,9 @@
 2011-01-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/solver/RelSatSolver.h: Responsible to convert relsat's
+	model into BeliefState format.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
 	* src/dmcs/OptDMCS.cpp: Add a remark.
 
 	* include/solver/SatSolverFactory.h: Add query_plan.
