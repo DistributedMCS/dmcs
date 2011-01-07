@@ -58,19 +58,25 @@
 #include "dyndmcs/NoSBARedBBodySortingStrategy.h"
 
 #include <boost/algorithm/string/trim.hpp>
-#include <string>
-#include <fstream>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/thread.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/program_options.hpp>
 
+#include <log4cxx/logger.h>
+#include <log4cxx/basicconfigurator.h>
+
+#include <string>
+#include <fstream>
+
 
 using namespace dmcs;
 
 const char* TOP_EXT = ".top";
 const char* OPT_EXT = ".opt";
+
+log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("dmcsd"));
 
 
 void
@@ -88,9 +94,8 @@ read_all_signatures(SignatureVecPtr& global_sigs, std::vector<std::string>& str_
       global_sigs->push_back(tmp_sig);
     }
 
-#ifdef DEBUG
-  std::cerr << "Signatures from match maker:" << std::endl << global_sigs << std::endl;
-#endif
+  LOG4CXX_DEBUG(logger, "Signatures from match maker:");
+  LOG4CXX_DEBUG(logger, global_sigs);
 }
 
 
@@ -101,19 +106,16 @@ read_all_contexts(NeighborListPtr& context_info, std::vector<std::string>& str_c
        it != str_contexts.end(); ++it)
     {
       NeighborPtr tmp_context(new Neighbor);
-      
-#ifdef DEBUG
-      std::cerr << "it = " << *it << std::endl;
-#endif
+
+      LOG4CXX_DEBUG(logger, "it = " << *it);
       
       std::istringstream in(*it);
       
       in >> *tmp_context;
       context_info->push_back(tmp_context);
     }
-#ifdef DEBUG
-  std::cerr << "Contexts in the pool:" << *context_info<< std::endl;
-#endif
+
+  LOG4CXX_DEBUG(logger, "Contexts in the pool: " << *context_info);
 }
 
 
@@ -121,9 +123,8 @@ void
 read_all_matches(MatchTablePtr& mt, const std::string& all_matches,
 		 SignatureVecPtr& global_sigs, SignaturePtr& sig)
 {
-#ifdef DEBUG
-  std::cerr << "All matches from match maker:" << std::endl << all_matches << std::endl;
-#endif
+  LOG4CXX_DEBUG(logger, "All matches from match maker:");
+  LOG4CXX_DEBUG(logger, all_matches);
 
   std::istringstream iss(all_matches);
 
@@ -164,9 +165,10 @@ read_all_matches(MatchTablePtr& mt, const std::string& all_matches,
       src_it = sig_src.find(*m_it);
       if (src_it == sig_src.end())
 	{
-	  std::cerr << "Uknown atom: " << m_it->c_str() << " in context " << src_ctx << std::endl;
+	  LOG4CXX_ERROR(logger, "Unknown atom: " << m_it->c_str() << " in context " << src_ctx);
 	  exit(1);
 	}
+
       std::size_t sym = src_it->origId;
       
       ++m_it;
@@ -189,9 +191,10 @@ read_all_matches(MatchTablePtr& mt, const std::string& all_matches,
       
       if (tar_it == tar_sig.end())
 	{
-	  std::cerr << "Uknown atom: " << *m_it << " in context " << tar_ctx << std::endl;
+	  LOG4CXX_ERROR(logger, "Unknown atom: " << *m_it << " in context " << tar_ctx);
 	  exit(1);
 	}
+
       std::size_t img = tar_it->origId;
       
       ++m_it;
@@ -209,13 +212,14 @@ read_all_matches(MatchTablePtr& mt, const std::string& all_matches,
       
       mt->insert(Match(src_ctx, sym, tar_ctx, img, qual));
     }
-#ifdef DEBUG
-  std::cerr << "All matches in our internal format:" << std::endl << *mt << std::endl;
-#endif
+
+  LOG4CXX_DEBUG(logger, "All matches in our internal format:");
+  LOG4CXX_DEBUG(logger, *mt);
 }
 
 
-int main(int argc, char* argv[])
+int
+main(int argc, char* argv[])
 {
   try
     {
@@ -231,7 +235,7 @@ int main(int argc, char* argv[])
       std::size_t limit_answers;
       std::size_t limit_bind_rules;
       std::size_t heuristics;
-      bool dynamic;
+      bool dynamic = false;
 
       boost::program_options::options_description desc("Allowed options");
       desc.add_options()
@@ -261,7 +265,7 @@ int main(int argc, char* argv[])
       
       if (vm.count(MANAGER)) 
 	{
-	  std::cerr << "We are sorry, but the manager feature is under implementation, please try the other alternatives";
+	  std::cerr << "We are sorry, but the manager feature is under implementation, please try the other alternatives" << std::endl;
 	  //read manager host and port
 	  return 1;
 	}
@@ -274,12 +278,17 @@ int main(int argc, char* argv[])
 	  return 1;
 	}
 
-#ifdef DEBUG
-      std::cerr << "myid:          " << myid << std::endl
-		<< "local KB:      " << filename_local_kb << std::endl
-		<< "Bridge Rules:  " << filename_bridge_rules << std::endl
-		<< "Topology:      " << filename_topo << std::endl;
-#endif
+
+      // setup log4cxx
+      logger->setLevel(log4cxx::Level::getDebug());
+      log4cxx::BasicConfigurator::configure();
+
+
+      LOG4CXX_DEBUG(logger, "myid:          " << myid);
+      LOG4CXX_DEBUG(logger, "local KB:      " << filename_local_kb);
+      LOG4CXX_DEBUG(logger, "Bridge Rules:  " << filename_bridge_rules);
+      LOG4CXX_DEBUG(logger, "Topology:      " << filename_topo);
+
 
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), myport);
@@ -306,7 +315,7 @@ int main(int argc, char* argv[])
 	{ // in dynamic mode
 	  if (filename_match_maker.compare("") == 0)
 	    {
-	      std::cout << desc << "\n";
+	      std::cerr << desc << std::endl;
 	      return 1;
 	    }
 
@@ -318,10 +327,8 @@ int main(int argc, char* argv[])
 	  prefix = pure_filename.substr(0, dot_pos);
 	  
 	  // in dynamic mode
-#ifdef DEBUG
-	  std::cerr << "Match Maker:    " << filename_match_maker << std::endl
-		    << "In dynamic mode." << std::endl;
-#endif 
+	  LOG4CXX_DEBUG(logger, "In dynamic mode.");
+	  LOG4CXX_DEBUG(logger, "Match Maker:    " << filename_match_maker);
 
 	  // open connection to Mr. Match-Maker
 	  std::ifstream ifs(filename_match_maker.c_str());
@@ -340,7 +347,11 @@ int main(int argc, char* argv[])
 	  boost::program_options::notify(vm);
 
 	  // Empty pool is not allowed!
-	  assert ( pool_size > 0);
+	  if (pool_size == 0)
+	    {
+	      LOG4CXX_ERROR(logger, "Empty pool is not allowed.");
+	      return 1;
+	    }
 
 	  // reopen the config file to read the signatures
 	  ifs.close();
@@ -412,9 +423,8 @@ int main(int argc, char* argv[])
 	  parser_director_br.setBuilder(&builder_br);
 	  parser_director_br.parse(filename_bridge_rules);
 
-#ifdef DEBUG
-	  std::cerr << "Schematic bridge rules = " << std::endl << schematic_bridge_rules << std::endl;
-#endif
+	  LOG4CXX_DEBUG(logger, "Schematic bridge rules:");
+	  LOG4CXX_DEBUG(logger, schematic_bridge_rules);
 
 	  // extract non-ordinary schematic bridge atoms, sort the
 	  // corresponding iterators according to some quality, and
@@ -471,7 +481,7 @@ int main(int argc, char* argv[])
 	      sort_strategy.sort();
 	      
 #ifdef DEBUG
-	      std::cerr << "Order in which sbridge atoms will be bound:" << std::endl;
+	      LOG4CXX_DEBUG(logger, "Order in which sbridge atoms will be bound:");
 	      for (ReducedBridgeBodyIteratorList::const_iterator it = rb_iter->begin();
 		   it != rb_iter->end(); ++it)
 		{
@@ -479,7 +489,7 @@ int main(int argc, char* argv[])
 		  ContextTerm ctt = sba.first;
 		  SchematicBelief sb = sba.second;
 
-		  std::cerr << ctx2string(ctt) << ", " << sb2string(sb) << std::endl;
+		  LOG4CXX_DEBUG(logger, ctx2string(ctt) << ", " << sb2string(sb));
 		}
 #endif
 
@@ -492,20 +502,23 @@ int main(int argc, char* argv[])
 	{
 	  if (filename_local_kb.compare("") == 0)
 	    {
-	      std::cout << desc << "\n";
+	      std::cerr << desc << std::endl;
 	      return 1;
 	    }
 
-#ifdef DEBUG
-	  std::cerr << "In ground mode." << std::endl;
-#endif
+	  LOG4CXX_DEBUG(logger, "In ground mode.");
 
 	  ///@todo change when the manager is added
 	  query_plan->read_graph(filename_topo);
 	  system_size = query_plan->getSystemSize();
 
 	  // Empty MSCs are not allowed!
-	  assert ( system_size > 0 );
+	  //assert ( system_size > 0 );
+	  if (system_size == 0)
+	    {
+	      LOG4CXX_ERROR(logger, "MCS with no contexts are not allowed.");
+	      return 1;
+	    }
 	  
 	  // extract the global signature from the query plan
 	  for (std::size_t i = 1; i <= system_size; ++i)
@@ -515,10 +528,10 @@ int main(int argc, char* argv[])
 	      global_sigs->push_back(loc_sig_ptr);
 	    }
 
-#ifdef DEBUG
-	  std::cerr << "Global signatures: " << std::endl << global_sigs << std::endl;
-#endif	  
-	  
+	  LOG4CXX_DEBUG(logger, "Global signatures:");
+	  LOG4CXX_DEBUG(logger, global_sigs);
+
+	  // my local signature
 	  sig = (*global_sigs)[myid - 1];
 	  
 	  // parsing local kb
@@ -533,9 +546,7 @@ int main(int argc, char* argv[])
 	  parser_director_br.setBuilder(&builder_br);
 	  parser_director_br.parse(filename_bridge_rules);
 	  
-#ifdef DEBUG
-	  std::cerr << "Finished parsing bridge rules" << std::endl;
-#endif
+	  LOG4CXX_DEBUG(logger, "Finished parsing bridge rules.");
 	  
 	  for (NeighborList::const_iterator it = neighbor_list->begin(); it != neighbor_list->end(); ++it)
 	    {
@@ -544,17 +555,17 @@ int main(int argc, char* argv[])
 	      nb->port     = query_plan->getPort(nb->neighbor_id);
 	    }
 	  
-#ifdef DEBUG
-	  std::cerr << "My neighbors: " << *neighbor_list << std::endl;
-	  std::cerr << "Neighbor list size = " << neighbor_list->size() << std::endl;
-	  std::cerr << "Global signatures: " << std::endl << global_sigs << std::endl;
-#endif // DEBUG
-	  
+
+	  LOG4CXX_DEBUG(logger, "My neighbors: " << *neighbor_list);
+	  LOG4CXX_DEBUG(logger, "Neighbor list size: " << neighbor_list->size());
+	  LOG4CXX_DEBUG(logger, "Global signatures:");
+	  LOG4CXX_DEBUG(logger, global_sigs);
+	  LOG4CXX_DEBUG(logger, "System size: " << system_size);
+
 	  // setup my context
-	  std::cerr << "system_size = " << system_size << std::endl;
 	  ContextPtr ctx(new Context(myid, system_size, sig, local_kb, bridge_rules, neighbor_list));
 	  
-	  //compute size local signature
+	  // compute size of local signature
 	  const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
 	  
 	  SignatureByCtx::const_iterator low = local_sig.lower_bound(myid);
@@ -562,11 +573,9 @@ int main(int argc, char* argv[])
 	  	  
 	  std::size_t size = std::distance(low, up);
 	  
-#ifdef DEBUG
-	  std::cerr << "Sig input to LF" << *sig <<std::endl;
-#endif
+	  LOG4CXX_DEBUG(logger, "Sig input to LF: " << *sig);
 	  
-	  //construct loop formulas
+	  // construct loop formulas
 	  CNFLocalLoopFormulaBuilder lf_builder(sig, size);
 	  LoopFormulaDirector director;
 	  director.setBuilder(&lf_builder);
@@ -603,7 +612,9 @@ int main(int argc, char* argv[])
     }
   catch (std::exception& e)
     {
-      std::cerr << "Exception: " << e.what() << std::endl;
+      LOG4CXX_ERROR(logger, "Exception: ");
+      LOG4CXX_ERROR(logger, e.what());
+      return 1;
     }
 
   return 0;
