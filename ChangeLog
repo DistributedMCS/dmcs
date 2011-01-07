@@ -1,3 +1,13 @@
+2011-01-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am (TESTS_ENVIRONMENT): Make detailed Boost.Test reports.
+
+	* src/dmcsc.cpp: Initial support for log4cxx.
+	* src/dmcsd.cpp: Likewise.
+
+	* configure.ac: Check for log4cxx and Boost.Asio.
+	* src/Makefile.am: Likewise.
+
 2011-01-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/dmcs/StreamingDMCS.h: Give StreamingDMCS the master power.

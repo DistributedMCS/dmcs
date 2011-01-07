@@ -32,7 +32,10 @@ TESTS = \
 	testGraphProp \
 	testMessagingGateway
 
-TESTS_ENVIRONMENT = EXAMPLESDIR=$(top_srcdir)/examples
+TESTS_ENVIRONMENT = \
+	EXAMPLESDIR=$(top_srcdir)/examples \
+	BOOST_TEST_REPORT_LEVEL=detailed \
+	BOOST_TEST_LOG_LEVEL=all
 
 check_PROGRAMS = \
 	testClasp \
