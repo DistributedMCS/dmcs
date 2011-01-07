@@ -31,9 +31,7 @@
 namespace dmcs {
 
 template<typename CmdType>
-//Handler<CmdType>::Handler(const CmdTypePtr cmd_, connection_ptr conn_)
 Handler<CmdType>::Handler(CmdTypePtr cmd, connection_ptr conn_)
-//: cmd(cmd_), conn(conn_)
   : conn(conn_)
 {
 #ifdef DEBUG
@@ -234,24 +232,46 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd)
 {
-  // write sesh->mess to QueryMessageQueue
+  if (!e)
+    {
+      // write sesh->mess to QueryMessageQueue
+      
+      sesh->conn->async_read(header,
+			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
+					 boost::asio::placeholders::error, sesh, cmd)
+			     );
+    }
+  else
+    {
+      // An error occurred.
 
-  sesh->conn->async_read(header,
-			 boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
-				     boost::asio::placeholders::error, sesh, cmd)
-			 );
+#ifdef DEBUG
+      std::cerr << "Handler::do_local_job: " << e.message() << std::endl;
+#endif
+    }
 }
 
 
 void
 Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd)
 {
-  // check header
+  if (!e)
+    {
+      // check header
+      
+      sesh->conn->async_read(sesh->mess,
+			     boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
+					 boost::asio::placeholders::error, sesh, cmd)
+			     );
+    }
+  else
+    {
+      // An error occurred.
 
-  sesh->conn->async_read(sesh->mess,
-			 boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
-				     boost::asio::placeholders::error, sesh, cmd)
-			 );
+#ifdef DEBUG
+      std::cerr << "Handler::handle_read_header: " << e.message() << std::endl;
+#endif
+    }
 }
 
 

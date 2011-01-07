@@ -96,144 +96,53 @@ Server::handle_accept(const boost::system::error_code& error, connection_ptr con
 void
 Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
 {
+  if (!e)
+    {
 #ifdef DEBUG
-  std::cerr << "Server::dispatch_header" << std::endl;
+      std::cerr << "Server::dispatch_header" << std::endl;
 #endif // DEBUG
-
-#ifdef DEBUG
-  std::cerr << "Header = \"" << header << "\"" << std::endl;
-#endif
-
-  // Create the respective handler and give him the connection
-  if (header.find(HEADER_REQ_PRI_DMCS) != std::string::npos)
-    {
-      PrimitiveCommandTypePtr cmt_pri_dmcs = ctf->create<PrimitiveCommandTypePtr>();
-      Handler<PrimitiveCommandType> handler(cmt_pri_dmcs, conn);
-    }
-  else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
-    {
-      StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
-      Handler<StreamingCommandType> handler(cmt_stm_dmcs, conn);
-    }
-  else if (header.find(HEADER_REQ_OPT_DMCS) != std::string::npos)
-    {
-      OptCommandTypePtr cmt_opt_dmcs = ctf->create<OptCommandTypePtr>();
-      Handler<OptCommandType> handler(cmt_opt_dmcs, conn);
-    }
-  else if (header.find(HEADER_REQ_DYN_DMCS) != std::string::npos)
-    {
-      DynamicCommandTypePtr cmt_dyn_conf = ctf->create<DynamicCommandTypePtr>();
-      Handler<DynamicCommandType> handler(cmt_dyn_conf, conn);
-    }
-  else if (header.find(HEADER_REQ_INSTANTIATE) != std::string::npos)
-    {
-      InstantiatorCommandTypePtr cmt_inst = ctf->create<InstantiatorCommandTypePtr>();
-      Handler<InstantiatorCommandType> handler(cmt_inst, conn);
-    }
-}
-
-  /*
-
-void
-Server::handle_next_message(const boost::system::error_code& e, SessionMsgPtr sesh)
-{
-  if (!e)
-    {
-#if defined(DEBUG)
-      std::cerr << "in handle_next_message with mess =  " << sesh->mess << std::endl;
-#endif //DEBUG
       
-      // do the local job
-      typename CmdType::return_type result = cmd.execute(sesh->mess);
-      
-#if defined(DEBUG)
-      std::cerr << "Sending result back to invoker" << std::endl;
-      std::cerr << "Sending " << std::endl << *result <<std::endl;
-#endif //DEBUG
-	  
-      // Send the result to the client. The connection::async_write()
-      // function will automatically serialize the data structure for
-      // us.
-      sesh->conn->async_write(result,
-			      boost::bind(&Server::handle_session, this,
-					  boost::asio::placeholders::error, sesh));
-    }
-  else
-    {
-      // An error occurred.
-
 #ifdef DEBUG
-      std::cerr << "handle_next_message: " << e.message() << std::endl;
+      std::cerr << "Header = \"" << header << "\"" << std::endl;
 #endif
-    }
-}
-
-
-void
-Server::handle_session(const boost::system::error_code& e, SessionMsgPtr sesh)
-{
-  if (!e)
-    {
-
-#if defined(DEBUG)
-      //std::cerr << "in handle session with mess = " << sesh->mess << std::endl;
-#endif //DEBUG
-
-      // after processing the message, check whether it's the last
-      // one. PrimitiveCommandType and OptCommandType should always
-      // return STOP independently from the message, while
-      // DynamicCommandType check whether the flag LAST was turned on
-      // in the message.
-      if (cmd.continues(sesh->mess))
+      
+      // Create the respective handler and give him the connection
+      if (header.find(HEADER_REQ_PRI_DMCS) != std::string::npos)
 	{
-	  std::cerr << "still continue, going to read messages"  << std::endl;
-	  handle_read_message(e, sesh);
+	  PrimitiveCommandTypePtr cmt_pri_dmcs = ctf->create<PrimitiveCommandTypePtr>();
+	  Handler<PrimitiveCommandType> handler(cmt_pri_dmcs, conn);
 	}
-      else
+      else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
-	  std::cerr << "go to finalize"  << std::endl;
-	  handle_finalize(e, sesh);
+	  StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
+	  Handler<StreamingCommandType> handler(cmt_stm_dmcs, conn);
+	}
+      else if (header.find(HEADER_REQ_OPT_DMCS) != std::string::npos)
+	{
+	  OptCommandTypePtr cmt_opt_dmcs = ctf->create<OptCommandTypePtr>();
+	  Handler<OptCommandType> handler(cmt_opt_dmcs, conn);
+	}
+      else if (header.find(HEADER_REQ_DYN_DMCS) != std::string::npos)
+	{
+	  DynamicCommandTypePtr cmt_dyn_conf = ctf->create<DynamicCommandTypePtr>();
+	  Handler<DynamicCommandType> handler(cmt_dyn_conf, conn);
+	}
+      else if (header.find(HEADER_REQ_INSTANTIATE) != std::string::npos)
+	{
+	  InstantiatorCommandTypePtr cmt_inst = ctf->create<InstantiatorCommandTypePtr>();
+	  Handler<InstantiatorCommandType> handler(cmt_inst, conn);
 	}
     }
   else
     {
       // An error occurred.
-
+      
 #ifdef DEBUG
-      std::cerr << "handle_session: " << e.message() << std::endl;
+      std::cerr << "Server::dispatch_header: " << e.message() << std::endl;
 #endif
     }
 }
-
-
-
-void
-Server::handle_read_message(const boost::system::error_code& e, SessionMsgPtr sesh)
-{
-  if (!e)
-    {
-
-#if defined(DEBUG)
-      std::cerr << "in handle read message: " << std::endl;
-#endif //DEBUG
-
-      sesh->conn->async_read(sesh->mess,
-		       boost::bind(&Server<CmdType>::handle_next_message, this,
-				   boost::asio::placeholders::error, sesh)
-		       );
-    }
-  else
-    {
-      // An error occurred.
-
-#ifdef DEBUG
-      std::cerr << "handle_read_message: " << e.message() << std::endl;
-#endif
-    }
-
-}*/
-
-
+  
 
 void
 Server::handle_finalize(const boost::system::error_code& e, connection_ptr /* conn */)
