@@ -8,6 +8,7 @@ AM_CPPFLAGS = \
     -I$(top_srcdir) \
     $(BM_CPPFLAGS) \
     $(BOOST_CPPFLAGS) \
+    $(LOG4CXX_CFLAGS) \
     -DNO_GMP
 
 # global linker flags
@@ -17,6 +18,7 @@ AM_LDFLAGS = \
 	$(BOOST_SYSTEM_LDFLAGS) \
 	$(BOOST_THREAD_LDFLAGS) \
 	$(BOOST_SERIALIZATION_LDFLAGS) \
+	$(BOOST_ASIO_LDFLAGS) \
 	$(BOOST_GRAPH_LDFLAGS) 
 
 # global libs
@@ -26,7 +28,9 @@ LIBS = \
 	$(BOOST_SYSTEM_LIBS) \
 	$(BOOST_THREAD_LIBS) \
 	$(BOOST_SERIALIZATION_LIBS) \
-	$(BOOST_GRAPH_LIBS) 
+	$(BOOST_ASIO_LIBS) \
+	$(BOOST_GRAPH_LIBS) \
+	$(LOG4CXX_LIBS)
 
 # install dmcsd and dmcsc into $prefix/bin
 bin_PROGRAMS = dmcsd dmcsc 
