@@ -1,3 +1,27 @@
+2011-01-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingDMCS.h: Give StreamingDMCS the master power.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+
+	* include/mcs/ProxySignatureByLocal.h: Let the references refer to
+	stable sigs.
+
+	* include/dmcs/BaseDMCS.h: Move createGuessingSignature to the
+	base class.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* src/dmcs/BaseDMCS.cpp: Likewise.
+	* include/dmcs/PrimitiveDMCS.h: Likewise.
+	* include/dmcs/OptDMCS.h: Likewise.
+
 2011-01-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/parser/ClaspResultBuilder.tcc: Fix BeliefSet instantiation.
