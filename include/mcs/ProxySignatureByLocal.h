@@ -40,48 +40,58 @@ class ProxySignatureByLocal // : public SignatureByLocal
 {
 
 public:
-  ProxySignatureByLocal(const SignatureByLocal& sig_, const SignatureByLocal& gsig_)
+  ProxySignatureByLocal(const SignaturePtr& sig_, const SignaturePtr& gsig_)
     : sig(sig_),
-      gsig(gsig_)
+      gsig(gsig_),
+      sig_by_local(boost::get<Tag::Local>(*sig_)),
+      gsig_by_local(boost::get<Tag::Local>(*gsig_))
+  { }
+
+  /// @todo kept for historic reasons now
+  ProxySignatureByLocal(const SignatureByLocal& sig_, const SignatureByLocal& gsig_)
+    : sig_by_local(sig_),
+      gsig_by_local(gsig_)
   { }
 
   SignatureByLocal::const_iterator
   find(std::size_t local_id) const
   {
-    if (local_id <= sig.size())
+    if (local_id <= sig_by_local.size())
       {
-	return sig.find(local_id);
+	return sig_by_local.find(local_id);
       }
 
-    if (local_id <= sig.size() + gsig.size())
+    if (local_id <= sig_by_local.size() + gsig_by_local.size())
       {
-	return gsig.find(local_id);
+	return gsig_by_local.find(local_id);
       }
     
-    return gsig.end();
+    return gsig_by_local.end();
   }
 
   std::size_t
   size() const
   {
-    return sig.size() + gsig.size();
+    return sig_by_local.size() + gsig_by_local.size();
   }
 
   SignatureByLocal::const_iterator
   begin() const
   {
-    return sig.begin();
+    return sig_by_local.begin();
   }
 
   SignatureByLocal::const_iterator
   end() const
   {
-    return gsig.end();
+    return gsig_by_local.end();
   }
 
 private:
-  const SignatureByLocal& sig;
-  const SignatureByLocal& gsig;
+  const SignaturePtr sig;
+  const SignaturePtr gsig;
+  const SignatureByLocal& sig_by_local;
+  const SignatureByLocal& gsig_by_local;
 };
 
 typedef boost::shared_ptr<ProxySignatureByLocal> ProxySignatureByLocalPtr;
