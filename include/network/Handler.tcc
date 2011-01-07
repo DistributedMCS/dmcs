@@ -159,7 +159,7 @@ Handler<CmdType>::handle_session(const boost::system::error_code& e, SessionMsgP
 	  sesh->conn->async_read(sesh->mess,
 				 boost::bind(&Handler<CmdType>::do_local_job, this,
 					     boost::asio::placeholders::error, sesh, cmd)
-			   );
+				 );
 	}
       else
 	{
@@ -201,20 +201,8 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 
 // specialized methods for streaming dmcs
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
-  : conn(conn_),
-    neighbor_input_threads(new ThreadVec)
+  : conn(conn_)
 { 
-#ifdef DEBUG
-  std::cerr << "Handler<StreamingCommandType>::Handler, initialize threads" << std::endl;
-#endif
-  StreamingDMCSPtr sdmcs = cmd->getSDMCS();
-  ThreadFactory tf(sdmcs);
-
-  tf.createNeighborInputThreads(neighbor_input_threads);
-  dmcs_thread   = tf.createDMCSThread();
-  sat_thread    = tf.createLocalSolveThread();
-  output_thread = tf.createOutputThread();
-
 #ifdef DEBUG
   std::cerr << "Handler<StreamingCommandType>::Handler, going to read message" << std::endl;
 #endif
@@ -244,6 +232,10 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
   else
     {
       // An error occurred.
+#ifdef DEBUG
+  std::cerr << "Handler<StreamingCommandType>::do_local_job" << std::endl;
+#endif
+  cmd->execute(sesh->mess);
 
 #ifdef DEBUG
       std::cerr << "Handler::do_local_job: " << e.message() << std::endl;
@@ -267,6 +259,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
   else
     {
       // An error occurred.
+  std::cerr << "header = " << header << std::endl;
 
 #ifdef DEBUG
       std::cerr << "Handler::handle_read_header: " << e.message() << std::endl;

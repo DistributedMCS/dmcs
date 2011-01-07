@@ -34,6 +34,7 @@
 #include "network/MessageQueue.h"
 #include "network/Session.h"
 #include "network/ThreadFactory.h"
+#include "dmcs/StreamingCommandType.h"
 #include "dyndmcs/InstantiatorCommandType.h"
 #include "dmcs/CommandType.h"
 
@@ -104,11 +105,6 @@ public:
 
 private:
   connection_ptr conn;
-
-  ThreadVecPtr neighbor_input_threads;
-  boost::thread* dmcs_thread;
-  boost::thread* sat_thread;
-  boost::thread* output_thread;
 
   std::string header;
 };

@@ -38,6 +38,7 @@
 #include "dmcs/Cache.h"
 #include "dmcs/QueryPlan.h"
 #include "network/MessageQueue.h"
+#include "network/ThreadFactory.h"
 #include "mcs/Theory.h"
 
 namespace dmcs {
@@ -61,7 +62,7 @@ public:
   ~StreamingDMCS();
 
   bool
-  handleFirstRequest(const StreamingForwardMessage& mess);
+  start_up(const StreamingForwardMessage& mess);
 
   ContextPtr
   getContext();
@@ -75,15 +76,10 @@ public:
   SignatureVecPtr
   getGlobalSigs();
 
-  void
-  start_up();
-
-protected:
-
-  SignaturePtr
-  createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
-
 private:
+  void
+  start_threads(std::size_t invoker);
+
   void
   init_mqs();
 
@@ -100,6 +96,15 @@ private:
   QueryPlanPtr query_plan;
   CacheStatsPtr cacheStats;
   CachePtr cache;
+
+  bool thread_started;
+
+  ThreadVecPtr neighbor_input_threads;
+  boost::thread* dmcs_thread;
+  boost::thread* sat_thread;
+  boost::thread* output_thread;
+
+  ProxySignatureByLocalPtr mixed_sig;
 
   std::size_t system_size;
   std::size_t my_id;

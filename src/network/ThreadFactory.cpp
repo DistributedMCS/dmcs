@@ -27,7 +27,9 @@
  * 
  */
 
-
+#include "dmcs/StreamingForwardMessage.h"
+#include "dmcs/StreamingCommandType.h"
+#include "network/Client.h"
 #include "network/ThreadFactory.h"
 #include "solver/SatSolverFactory.h"
 
@@ -68,26 +70,27 @@ NeighborInputThreadStarter::operator()()
 
 
 
-DMCSThreadStarter::DMCSThreadStarter(StreamingDMCSPtr& sdmcs_)
-  : sdmcs(sdmcs_)
+JoinThreadStarter::JoinThreadStarter()
 { }
 
 
 
 void
-DMCSThreadStarter::operator()()
+JoinThreadStarter::operator()()
 {
 #ifdef DEBUG
-  std::cerr << "DMCSThreadStarter::operator()()" << std::endl;
+  std::cerr << "JoinThreadStarter::operator()()" << std::endl;
 #endif
-  sdmcs->start_up();
 }
 
 
 
 LocalSolverThreadStarter::LocalSolverThreadStarter(const RelSatSolverPtr& relsatsolver_)
   : relsatsolver(relsatsolver_)
-{ }
+{
+  std::cerr << "LocalSolverThreadStarter::ctor" << std::endl;
+  relsatsolver->show();
+}
 
 
 
@@ -104,6 +107,7 @@ LocalSolverThreadStarter::operator()()
 #endif
 
   // (3)
+  relsatsolver->show();
   relsatsolver->solve();
 }
 
@@ -124,18 +128,18 @@ OutputThreadStarter::operator()()
 
 
 
-ThreadFactory::ThreadFactory(StreamingDMCSPtr& sdmcs_)
-  : sdmcs(sdmcs_)
+ThreadFactory::ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory_,
+			     const ProxySignatureByLocalPtr& mixed_sig_)
+  : context(context_), theory(theory_), mixed_sig(mixed_sig_)
 { }
 
 
 void
 ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
 {
-  ContextPtr ctx = sdmcs->getContext();
-  NeighborListPtr neighbors = ctx->getNeighbors();
-  std::size_t ctx_id = ctx->getContextID();
-  std::size_t system_size = ctx->getSystemSize();
+  NeighborListPtr neighbors = context->getNeighbors();
+  std::size_t ctx_id = context->getContextID();
+  std::size_t system_size = context->getSystemSize();
 
   for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
     {
@@ -148,9 +152,9 @@ ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
 }
   
 boost::thread*
-ThreadFactory::createDMCSThread()
+ThreadFactory::createJoinThread()
 {
-  DMCSThreadStarter dts(sdmcs);
+  JoinThreadStarter dts;
   boost::thread* t = new boost::thread(dts);
 
   return t;
@@ -159,11 +163,8 @@ ThreadFactory::createDMCSThread()
 boost::thread*
 ThreadFactory::createLocalSolveThread()
 {
-  ContextPtr   context        = sdmcs->getContext();
-  TheoryPtr    theory         = sdmcs->getTheory();
-  QueryPlanPtr query_plan     = sdmcs->getQueryPlan();
-  SignatureVecPtr global_sigs = sdmcs->getGlobalSigs();
-  SatSolverFactory ssf(context, theory, query_plan, global_sigs);
+  std::size_t system_size = context->getSystemSize();
+  SatSolverFactory ssf(theory, mixed_sig, system_size);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

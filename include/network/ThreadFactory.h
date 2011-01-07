@@ -30,12 +30,9 @@
 #ifndef THREAD_FACTORY_H
 #define THREAD_FACTORY_H
 
-#include "network/Client.h"
-
-#include "dmcs/StreamingCommandType.h"
-#include "dmcs/StreamingDMCS.h"
-#include "dmcs/StreamingForwardMessage.h"
-
+#include "dmcs/Context.h"
+#include "mcs/ProxySignatureByLocal.h"
+#include "mcs/Theory.h"
 #include "solver/RelSatSolver.h"
 
 #include <boost/asio.hpp>
@@ -64,16 +61,13 @@ private:
 
 
 
-class DMCSThreadStarter
+class JoinThreadStarter
 {
 public:
-  DMCSThreadStarter(StreamingDMCSPtr& sdmcs_);
+  JoinThreadStarter();
 
   void 
   operator()();
-
-private:
-  StreamingDMCSPtr sdmcs;
 };
 
 
@@ -106,13 +100,14 @@ public:
 class ThreadFactory
 {
 public:
-  ThreadFactory(StreamingDMCSPtr& sdmcs_);
+  ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory_,
+		const ProxySignatureByLocalPtr& mixed_sig_);
 
   void
   createNeighborInputThreads(ThreadVecPtr);
 
   boost::thread*
-  createDMCSThread();
+  createJoinThread();
 
   boost::thread*
   createLocalSolveThread();
@@ -121,7 +116,9 @@ public:
   createOutputThread();
 
 private:
-  StreamingDMCSPtr sdmcs;
+  const ContextPtr               context;
+  const TheoryPtr                theory;
+  const ProxySignatureByLocalPtr mixed_sig;
 };
 
 

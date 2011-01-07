@@ -34,22 +34,23 @@
 #include "StreamingForwardMessage.h"
 #include "StreamingDMCS.h"
 #include "network/Client.h"
-#include "network/ThreadFactory.h"
 
-#include <boost/thread.hpp>
+//#include <boost/thread.hpp>
 
 namespace dmcs {
 
 class SendingRequest;
+  //class StreamingDMCS;
 
+  //  typedef boost::shared_ptr<StreamingDMCS> StreamingDMCSPtr;
 
 class StreamingCommandType : public CommandType<StreamingForwardMessage, bool>
 {
 public:
   typedef StreamingForwardMessage input_type;
-  typedef StreamingDMCS::dmcs_value_type value_type;
+  //typedef StreamingDMCS::dmcs_value_type value_type;
 
-  StreamingCommandType(StreamingDMCSPtr sdmcs_)
+  StreamingCommandType(StreamingDMCSPtr& sdmcs_)
     : sdmcs(sdmcs_)
   { }
 
@@ -58,7 +59,7 @@ public:
   bool
   execute(const StreamingForwardMessage& mess)
   {
-    return sdmcs->handleFirstRequest(mess);
+    return sdmcs->start_up(mess);
   }
 
   bool

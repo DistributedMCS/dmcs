@@ -38,7 +38,6 @@
 #include "loopformula/DimacsVisitor.h"
 
 #include "dmcs/StreamingDMCS.h"
-#include "dmcs/StreamingCommandType.h"
 
 
 #include "parser/ClaspResultGrammar.h"
@@ -67,7 +66,9 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     cache(new Cache(cacheStats)),
     system_size(c->getSystemSize()),
     my_id(c->getContextID()),
-    buf_count(buf_count_)
+    buf_count(buf_count_),
+    thread_started(false),
+    neighbor_input_threads(new ThreadVec)
 { }
 
 
@@ -104,45 +105,6 @@ SignatureVecPtr
 StreamingDMCS::getGlobalSigs()
 {
   return global_sigs;
-}
-
-
-
-SignaturePtr 
-StreamingDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig)
-{
-  SignaturePtr guessing_sig(new Signature);
-
-  // local id in guessing_sig will start from my signature's size + 1
-  std::size_t guessing_sig_local_id = my_sig->size() + 1;
-
-  const SignatureBySym& my_sig_sym = boost::get<Tag::Sym>(*my_sig);
-
-  const NeighborListPtr& neighbors = ctx->getNeighbors();
-
-  for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
-    {
-      NeighborPtr nb = *n_it;
-      const std::size_t neighbor_id = nb->neighbor_id;
-      const BeliefSet neighbor_V = (*V)[neighbor_id - 1];
-      const Signature& neighbor_sig = *((*global_sigs)[neighbor_id - 1]);
-
-#ifdef DEBUG
-      std::cerr << "Interface variable of neighbor[" << nb->neighbor_id <<"]: " << neighbor_V << std::endl;
-#endif
-
-      guessing_sig_local_id = updateGuessingSignature(guessing_sig,
-						      my_sig_sym,
-						      neighbor_sig,
-						      neighbor_V,
-						      guessing_sig_local_id);
-    }
-      
-#ifdef DEBUG
-    std::cerr << "Guessing signature: " << *guessing_sig << std::endl;
-#endif
-
-    return guessing_sig;
 }
 
 
@@ -225,7 +187,7 @@ StreamingDMCS::remove_mqs()
 }
 
 
-
+/*
 bool
 StreamingDMCS::handleFirstRequest(const StreamingForwardMessage& mess)
 {
@@ -247,13 +209,53 @@ StreamingDMCS::handleFirstRequest(const StreamingForwardMessage& mess)
       //sendFirstRequest(nb);
     }
 }
-
+*/
 
 
 
 void
-StreamingDMCS::start_up()
+StreamingDMCS::start_threads(std::size_t invoker)
 {
+  BeliefStatePtr localV;
+  if (invoker == 0)
+    {
+      localV = query_plan->getGlobalV();
+    }
+  else
+    {
+      std::size_t my_id = ctx->getContextID();
+      localV = query_plan->getInterface(invoker, my_id);
+    }
+
+  const SignaturePtr& sig = ctx->getSignature();
+  const SignaturePtr& gsig = createGuessingSignature(localV, sig);
+
+  mixed_sig = ProxySignatureByLocalPtr(new ProxySignatureByLocal(sig, gsig));
+
+  std::cerr << "StreamingDMCS::start_threads. mixed_sig.size() = " << mixed_sig->size() << std::endl;
+
+  ThreadFactory tf(ctx, theory, mixed_sig);
+
+  tf.createNeighborInputThreads(neighbor_input_threads);
+  dmcs_thread   = tf.createJoinThread();
+  sat_thread    = tf.createLocalSolveThread();
+  output_thread = tf.createOutputThread();
+
+  thread_started = true;
+}
+
+
+
+bool
+StreamingDMCS::start_up(const StreamingForwardMessage& mess)
+{
+  if (!thread_started)
+    {
+      std::size_t invoker = mess.getInvoker();
+      start_threads(invoker);
+    }
+
+  /*
   const NeighborListPtr& nb = query_plan->getNeighbors(my_id);
   if (nb->size() == 0) // this is a leaf context
     {
@@ -271,7 +273,7 @@ StreamingDMCS::start_up()
 
       // send requests to neighbors by placing a message in each of the NeighborQueryMQ
 
-    }  
+      }  */
 }
 
 

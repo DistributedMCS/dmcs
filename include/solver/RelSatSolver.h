@@ -46,10 +46,11 @@ namespace dmcs {
 class RelSatSolver : public BaseSolver
 {
 public:
-  RelSatSolver(const ContextPtr& context_,
-	       const TheoryPtr& theory_,
-	       const QueryPlanPtr& query_plan_,
-	       const SignatureVecPtr& global_sigs_);
+  RelSatSolver(const TheoryPtr& theory_,
+	       const ProxySignatureByLocalPtr& mixed_sig_,
+	       std::size_t system_size_);
+
+  ~RelSatSolver();
 
   int
   solve(const TheoryPtr& theory, std::size_t sig_size);
@@ -60,31 +61,20 @@ public:
   void
   receiveSolution(DomainValue* _aAssignment, int _iVariableCount);
 
+  void
+  show()
+  {
+    std::cerr << "mixed_sig        = " << mixed_sig << std::endl;
+    std::cerr << "mixed_sig.size() = " << mixed_sig->size() << std::endl;
+  }
 
 private:
+  const TheoryPtr                theory;
+  const ProxySignatureByLocalPtr mixed_sig;
+  std::size_t                    system_size;
 
-///@todo: move this to an appropriate place. This is code duplication with DMCS stuff.
-std::size_t
-updateGuessingSignature(SignaturePtr& guessing_sig, 
-				      const SignatureBySym& my_sig_sym,
-				      const Signature& neighbor_sig,
-				      const BeliefSet& neighbor_V,
-				      std::size_t guessing_sig_local_id);
-
-
-SignaturePtr 
-createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
-
-private:
-  ContextPtr      context;
-  TheoryPtr       theory;
-  QueryPlanPtr    query_plan;
-  SignatureVecPtr global_sigs;
-  ProxySignatureByLocalPtr mixed_sig;
-  std::size_t     sig_size;
-
-  SATInstance*    xInstance;
-  SATSolver*      xSATSolver;
+  SATInstance*                   xInstance;
+  SATSolver*                     xSATSolver;
 };
 
 typedef boost::shared_ptr<RelSatSolver> RelSatSolverPtr;

@@ -40,12 +40,13 @@ namespace dmcs {
 class SatSolverFactory
 {
 public:
-  SatSolverFactory(const ContextPtr& context_, const TheoryPtr& theory_,
-		   const QueryPlanPtr& query_plan_,
-		   const SignatureVecPtr& global_sigs_)
-    : context(context_), theory(theory_),
-      query_plan(query_plan_),
-      global_sigs(global_sigs_)
+  SatSolverFactory(const TheoryPtr& theory_,
+		   const ProxySignatureByLocalPtr mixed_sig_,
+		   std::size_t system_size_)
+    : theory(theory_),
+      mixed_sig(mixed_sig_),
+      system_size(system_size_)
+
   { }
 
   template<typename aSatSolverTypePtr>
@@ -53,10 +54,9 @@ public:
   create();
 
 private:
-  ContextPtr      context;
-  TheoryPtr       theory;
-  QueryPlanPtr    query_plan;
-  SignatureVecPtr global_sigs;
+  const TheoryPtr                theory;
+  const ProxySignatureByLocalPtr mixed_sig;
+  std::size_t                    system_size;
 };
 
 
@@ -64,7 +64,7 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(context, theory, query_plan, global_sigs));
+  RelSatSolverPtr relsatsolver(new RelSatSolver(theory, mixed_sig, system_size));
 
   return relsatsolver;
 }
