@@ -75,7 +75,7 @@ class CompareQuality
 {
 public:
   CompareQuality(typename BaseSortingStrategy<IteratorType>::QualityMapPtr quality_,
-		 std::size_t dfs_level_ = 0)
+		 std::size_t /* dfs_level_ */ = 0)
     : quality(quality_)
   { }
   
@@ -126,8 +126,8 @@ public:
 
 protected:
   IteratorListPtr list_to_sort;
-  QualityMapPtr quality;
   std::size_t dfs_level;
+  QualityMapPtr quality;
 };
 
 } // namespace dmcs

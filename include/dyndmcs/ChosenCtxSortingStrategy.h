@@ -30,9 +30,9 @@
 #ifndef CHOSEN_CTX_SORTING_STRATEGY_H
 #define CHOSEN_CTX_SORTING_STRATEGY_H
 
-#include "ContextSubstitution.h"
-#include "ContextSortingStrategy.h"
-#include "Match.h"
+#include "dyndmcs/ContextSubstitution.h"
+#include "dyndmcs/ContextSortingStrategy.h"
+#include "dyndmcs/Match.h"
 
 namespace dmcs {
 
@@ -53,13 +53,13 @@ public:
 
 #ifdef DEBUG
     std::cerr << TABS(dfs_level) << "Calculating qualities:" << std::endl;
-    std::cerr << TABS(dfs_level) << "" << std::endl;
+    std::cerr << TABS(dfs_level) << std::endl;
 #endif
 
     for (IteratorList::const_iterator it = list_to_sort->begin(); it != list_to_sort->end(); ++it)
       {
 	ContextID cid = (**it)->tarCtx;
-	float mq = (**it)->quality;
+	//float mq = (**it)->quality;
 	
 	// try a very simple quality measurement: if the context was
 	// chosen, then give it a high priority than the unchosen

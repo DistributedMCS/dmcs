@@ -47,7 +47,8 @@
 namespace dmcs 
 {
 
-DynamicConfiguration::DynamicConfiguration(std::size_t ctx_id_, BridgeRulesPtr bridge_rules_, 
+DynamicConfiguration::DynamicConfiguration(std::size_t ctx_id_,
+					   BridgeRulesPtr bridge_rules_, 
 					   const NeighborListPtr context_info_, 
 					   const MatchTablePtr mt_,
 					   const CountVecPtr sba_count_,
@@ -63,9 +64,9 @@ DynamicConfiguration::DynamicConfiguration(std::size_t ctx_id_, BridgeRulesPtr b
     limit_answers(limit_answers_),
     limit_bind_rules(limit_bind_rules_),
     heuristics(heuristics_),
-    prefix(prefix_),
     no_answers(0),
     stop(false),
+    prefix(prefix_),
     signal(3)
 { }
 
@@ -771,7 +772,7 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 
 
 GraphListPtr
-DynamicConfiguration::compute_topology(ContextSubstitutionListPtr ctx_subs, std::size_t dfs_level)
+DynamicConfiguration::compute_topology(ContextSubstitutionListPtr ctx_subs, std::size_t /* dfs_level */)
 {
   // Heuristic index
   std::stringstream out;

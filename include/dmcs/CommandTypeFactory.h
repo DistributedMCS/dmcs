@@ -40,9 +40,9 @@
 #include "dmcs/PrimitiveCommandType.h"
 #include "dmcs/StreamingCommandType.h"
 
-#include "Message.h"
-#include "ProgramOptions.h"
-#include "Neighbor.h"
+#include "dmcs/Message.h"
+#include "dmcs/ProgramOptions.h"
+#include "dmcs/Neighbor.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -96,10 +96,6 @@ public:
 private:
   std::size_t ctx_id;
   std::size_t system_size;
-  std::size_t buf_count;                    // the number of BeliefState(s) that we
-					    // are willing to store in a buffer. This is a
-					    // middle solution between having exponential space 
-                                            // and total recomputation.
   BridgeRulesPtr schematic_bridge_rules;
   BridgeRulesPtr bridge_rules;
   NeighborListPtr context_info;
@@ -114,6 +110,10 @@ private:
   QueryPlanPtr query_plan;
   TheoryPtr loopFormula;
   ContextPtr ctx;
+  std::size_t buf_count;                    // the number of BeliefState(s) that we
+					    // are willing to store in a buffer. This is a
+					    // middle solution between having exponential space 
+                                            // and total recomputation.
 };
 
 

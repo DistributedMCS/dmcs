@@ -54,11 +54,10 @@ public:
       {
 	// this quality directly takes the quality of the match into
 	// account.
-
-	ContextID cid = (**it)->tarCtx;
 	float q_it =  -(**it)->quality;
 
 #ifdef DEBUG
+	ContextID cid = (**it)->tarCtx;
 	std::cerr << TABS(dfs_level) << cid << ", " << q_it << std::endl;
 #endif
 

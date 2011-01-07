@@ -40,23 +40,24 @@ namespace dmcs {
 class InstantiateBackwardMessage : public InstantiateMessage
 {
 public:
+  /// default ctor
   InstantiateBackwardMessage()
   { }
 
-  virtual ~InstantiateBackwardMessage() 
+  virtual
+  ~InstantiateBackwardMessage() 
   { }
 
   InstantiateBackwardMessage(bool status_, HistoryPtr history_, BeliefStatePtr interface_vars_)
     : InstantiateMessage(history_, interface_vars_), status(status_)
   { }
 
-  const bool
+  bool
   getStatus() const
   {
     return status;
   }
 
-public:
   template <typename Archive>
   void
   serialize(Archive& ar, const unsigned int /* version */)

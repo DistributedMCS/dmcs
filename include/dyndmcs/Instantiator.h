@@ -51,8 +51,10 @@ public:
   Instantiator(std::size_t ctx_id_, BridgeRulesPtr schematic_bridge_rules_, 
 	       BridgeRulesPtr bridge_rules_, SignatureVecPtr global_sigs_,
 	       NeighborListPtr context_info_)
-    : ctx_id(ctx_id_), schematic_bridge_rules(schematic_bridge_rules_), 
-      bridge_rules(bridge_rules_), global_sigs(global_sigs_),
+    : ctx_id(ctx_id_),
+      schematic_bridge_rules(schematic_bridge_rules_), 
+      bridge_rules(bridge_rules_),
+      global_sigs(global_sigs_),
       context_info(context_info_)
   { }
 
@@ -60,11 +62,11 @@ public:
   instantiate(InstantiateForwardMessage& mess);
 
 private:
+  std::size_t ctx_id;
   BridgeRulesPtr schematic_bridge_rules;
   BridgeRulesPtr bridge_rules;
   SignatureVecPtr global_sigs;
   NeighborListPtr context_info;
-  std::size_t ctx_id;
 };
 
 typedef boost::shared_ptr<Instantiator> InstantiatorPtr;
