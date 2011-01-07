@@ -111,6 +111,45 @@ BaseDMCS::updateGuessingSignature(SignaturePtr& guessing_sig,
 
 
 
+SignaturePtr
+BaseDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig)
+{
+  SignaturePtr guessing_sig(new Signature);
+
+  // local id in guessing_sig will start from my signature's size + 1
+  std::size_t guessing_sig_local_id = my_sig->size() + 1;
+
+  const SignatureBySym& my_sig_sym = boost::get<Tag::Sym>(*my_sig);
+
+  const NeighborListPtr& neighbors = ctx->getNeighbors();
+
+  for (NeighborList::const_iterator n_it = neighbors->begin(); n_it != neighbors->end(); ++n_it)
+    {
+      NeighborPtr nb = *n_it;
+      const std::size_t neighbor_id = nb->neighbor_id;
+      const BeliefSet neighbor_V = (*V)[neighbor_id - 1];
+      const Signature& neighbor_sig = *((*global_sigs)[neighbor_id - 1]);
+
+#ifdef DEBUG
+      std::cerr << "Interface variable of neighbor[" << nb->neighbor_id <<"]: " << neighbor_V << std::endl;
+#endif
+
+      guessing_sig_local_id = updateGuessingSignature(guessing_sig,
+						      my_sig_sym,
+						      neighbor_sig,
+						      neighbor_V,
+						      guessing_sig_local_id);
+    }
+      
+#ifdef DEBUG
+    std::cerr << "Guessing signature: " << *guessing_sig << std::endl;
+#endif
+
+    return guessing_sig;
+}
+
+
+
 BeliefStateListPtr
 BaseDMCS::localSolve(const ProxySignatureByLocal& sig, std::size_t system_size)
 {

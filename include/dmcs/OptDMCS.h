@@ -61,10 +61,11 @@ public:
   dmcs_return_type
   getBeliefStates(const OptMessage& mess);
 
-protected:
+  /*protected:
 
   SignaturePtr
   createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& my_sig);
+  */
 
 private:
   QueryPlanPtr query_plan;

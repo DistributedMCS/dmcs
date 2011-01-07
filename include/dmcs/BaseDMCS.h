@@ -73,6 +73,10 @@ protected:
 			  const BeliefSet& neighbor_V,
 			  std::size_t guessing_sig_local_id);
 
+  SignaturePtr
+  createGuessingSignature(const BeliefStatePtr& V, 
+			  const SignaturePtr& my_sig);
+
   /**
    * @par sig signature mapping
    *
