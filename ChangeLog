@@ -1,5 +1,8 @@
 2011-01-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* include/parser/ClaspResultBuilder.tcc: Fix BeliefSet instantiation.
+	* testsuite/testBeliefComparison.cpp: Likewise.
+
 	* include/network/Handler.tcc: Check for errors in the ASIO
 	call-back methods.
 	* src/network/Server.cpp: Likwise.

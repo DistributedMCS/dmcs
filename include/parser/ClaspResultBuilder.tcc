@@ -58,7 +58,8 @@ ClaspResultBuilder<Grammar>::buildNode (typename BaseBuilder<Grammar>::node_t& n
   // create a new belief state and dispatch content of the model represented in node
   //
 
-  BeliefStatePtr bs(new BeliefState(system_size, 0)); // initially, all is zero
+  // initially, all is zero
+  BeliefStatePtr bs(new BeliefState(system_size, BeliefSet()));
   
   // set all literals in the belief state based on the model in node
   for (typename BaseBuilder<Grammar>::node_t::tree_iterator jt = node.children.begin(); 
@@ -98,11 +99,14 @@ ClaspResultBuilder<Grammar>::add_literal(typename BaseBuilder<Grammar>::node_t& 
   std::size_t cid = loc_it->ctxId - 1;
 
   //  std::cerr << "Have atom: " << std::abs(local_lit) << "in context " << cid+1 << std::endl;
-  
-  BeliefSet& b = (*bs)[cid];
 
   // just to be safe
   assert(cid < system_size);
+
+  BeliefSet& b = (*bs)[cid];
+
+  // again, better be safe than sorry
+  assert(b.size() > 0);
   
   // un/set bit in the right context at the right position
   if (local_lit > 0) // positive literal

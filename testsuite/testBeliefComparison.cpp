@@ -16,10 +16,10 @@ BOOST_AUTO_TEST_CASE( testBeliefStates )
   BeliefStateListPtr cs(new BeliefStateList);
   BeliefStateListPtr ct(new BeliefStateList);
 
-  BeliefStatePtr s1(new BeliefState(system_size, 0));
-  BeliefStatePtr s2(new BeliefState(system_size, 0));
-  BeliefStatePtr t1(new BeliefState(system_size, 0));
-  BeliefStatePtr t2(new BeliefState(system_size, 0));
+  BeliefStatePtr s1(new BeliefState(system_size, BeliefSet()));
+  BeliefStatePtr s2(new BeliefState(system_size, BeliefSet()));
+  BeliefStatePtr t1(new BeliefState(system_size, BeliefSet()));
+  BeliefStatePtr t2(new BeliefState(system_size, BeliefSet()));
 
 
   //
@@ -134,9 +134,9 @@ BOOST_AUTO_TEST_CASE( testBeliefStateSorting )
 
   BeliefStateListPtr cs(new BeliefStateList);
 
-  BeliefStatePtr s1(new BeliefState(system_size, 0));
-  BeliefStatePtr s2(new BeliefState(system_size, 0));
-  BeliefStatePtr s3(new BeliefState(system_size, 0));
+  BeliefStatePtr s1(new BeliefState(system_size, BeliefSet()));
+  BeliefStatePtr s2(new BeliefState(system_size, BeliefSet()));
+  BeliefStatePtr s3(new BeliefState(system_size, BeliefSet()));
 
 
   //
