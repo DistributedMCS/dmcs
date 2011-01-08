@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   Server.tcc
+ * @file   Server.cpp
  * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
  * @date   Tue Mar  2 07:17:31 2010
  * 

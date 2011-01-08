@@ -75,17 +75,6 @@ public:
   void
   dispatch_header(const boost::system::error_code& e, connection_ptr conn);
 
-  /*
-  void 
-  handle_next_message(const boost::system::error_code& e, SessionMsgPtr sesh);
-
-  void 
-
-  handle_read_message(const boost::system::error_code& e, SessionMsgPtr sesh);
-
-  void 
-  handle_session(const boost::system::error_code& e, SessionMsgPtr sesh);*/
-
   void 
   handle_finalize(const boost::system::error_code& e, connection_ptr conn);
 
