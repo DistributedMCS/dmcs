@@ -1,3 +1,18 @@
+2011-01-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/MessageQueueFactory.h: Move the constants to
+	header file.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+
+	* include/network/Handler.h: Let the Handler take care of creating
+	output_thread.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Support executing with a
+	unique id for creating message queues.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
 2011-01-08  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/MessagingGateway.h: Add documentation.
