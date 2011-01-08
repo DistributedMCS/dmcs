@@ -40,8 +40,10 @@ dmcsd_SOURCES = \
 		dmcsd.cpp
 
 dmcsd_LDADD = \
+	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/dmcs/libcache.a \
 	$(top_builddir)/src/loopformula/libtranslation.a \
@@ -54,4 +56,6 @@ dmcsd_LDADD = \
 dmcsc_SOURCES = \
 		dmcsc.cpp 
 
-dmcsc_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+dmcsc_LDADD = \
+	$(top_builddir)/src/dmcs/liblog.a \
+	$(top_builddir)/src/dmcs/libdmcs.a

@@ -51,6 +51,7 @@
 #include "dmcs/ProgramOptions.h"
 #include "dmcs/Neighbor.h"
 #include "dmcs/CommandTypeFactory.h"
+#include "dmcs/Log.h"
 
 #include "mcs/Signature.h"
 
@@ -64,9 +65,6 @@
 #include <boost/tokenizer.hpp>
 #include <boost/program_options.hpp>
 
-#include <log4cxx/logger.h>
-#include <log4cxx/basicconfigurator.h>
-
 #include <string>
 #include <fstream>
 
@@ -76,7 +74,6 @@ using namespace dmcs;
 const char* TOP_EXT = ".top";
 const char* OPT_EXT = ".opt";
 
-log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("dmcsd"));
 
 
 void
@@ -280,8 +277,7 @@ main(int argc, char* argv[])
 
 
       // setup log4cxx
-      logger->setLevel(log4cxx::Level::getDebug());
-      log4cxx::BasicConfigurator::configure();
+      init_loggers("dmcsd");
 
 
       LOG4CXX_DEBUG(logger, "myid:          " << myid);

@@ -1,3 +1,18 @@
+2011-01-08  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/network/Makefile.am [linux]: Create libthreads.a to fix
+	FTBFS.
+
+	* src/dyndmcs/DynamicConfiguration.cpp: Fix undefined dfs_level.
+
+	* include/dmcs/Log.h: Add global logging facility.
+	* include/dmcs/Makefile.am: Likewise.
+	* src/dmcs/Log.cpp: Likewise.
+	* src/Makefile.am: Likewise.
+	* src/dmcs/Makefile.am: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
 2011-01-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* testsuite/Makefile.am (TESTS_ENVIRONMENT): Make detailed Boost.Test reports.

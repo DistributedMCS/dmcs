@@ -32,6 +32,7 @@
 #include "config.h"
 #endif
 
+#include "dmcs/Log.h"
 #include "dmcs/OptCommandType.h"
 #include "dmcs/PrimitiveCommandType.h"
 #include "dmcs/StreamingCommandType.h"
@@ -57,17 +58,11 @@
 #include <boost/functional/hash.hpp>
 #include <boost/program_options.hpp>
 
-#include <log4cxx/logger.h>
-#include <log4cxx/basicconfigurator.h>
-
 #include <fstream>
 #include <iostream>
 #include <string> 
 
 using namespace dmcs;
-
-log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("dmcsc"));
-
 
 
 //@todo: can we reuse endpoint, io_service from main()?
@@ -142,10 +137,9 @@ main(int argc, char* argv[])
         }
 
       // setup log4cxx
-      logger->setLevel(log4cxx::Level::getDebug());
-      log4cxx::BasicConfigurator::configure();
-
+      init_loggers("dmcsc");
       
+
       bool primitiveDMCS = false;
       if (qvs.compare("") != 0) // reading V for basic DMCS
 	{

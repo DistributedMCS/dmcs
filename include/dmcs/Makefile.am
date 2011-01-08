@@ -9,6 +9,7 @@ noinst_HEADERS =  \
 		CommandTypeFactory.h \
 		Context.h \
 		Debug.h \
+		Log.h \
 		Message.h \
 		Neighbor.h \
 		OptCommandType.h \
