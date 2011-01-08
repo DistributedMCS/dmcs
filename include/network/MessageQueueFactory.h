@@ -40,23 +40,6 @@
 
 namespace dmcs {
 
-/// prefix string for the input MQ for conflicts from parents
-#define DMCS_IN_MQ       "dmcs-in-mq-"
-/// name of the conflict MQ, announces new conflicts from the local solver
-#define DMCS_CONFLICT_MQ "dmcs-conflict-mq-"
-/// name of the join MQ, announces that neighbor C_i sent k partial belief states
-#define DMCS_JOIN_IN_MQ  "dmcs-join-in-mq-"
-/// name of the join MQ, announces joined belief states from the neighbors
-#define DMCS_JOIN_OUT_MQ "dmcs-join-out-mq-"
-/// name of the output MQ, announces partial equilibria
-#define DMCS_OUT_MQ      "dmcs-out-mq-"
-
-#define INDEX_IN_MQ    0
-#define INDEX_OUT_MQ   1
-#define INDEX_CONFLICT 2
-#define INDEX_JOIN_OUT 3
-#define INDEX_JOIN_IN  4
-
   class MessageQueueFactory
   {
   private:
@@ -64,13 +47,15 @@ namespace dmcs {
     createMessageQueue(const char* name, std::size_t max_k, std::size_t max_size);
 
   public:
+
+    /// MQ offsets
     enum MQIDs
       {
-	IN_MQ = 0,
-	OUT_MQ,
-	CONFLICT_MQ,
-	JOIN_OUT_MQ,
-	JOIN_IN_MQ
+	IN_MQ = 0, // parent context sent conflict
+	OUT_MQ, // solver created belief state
+	CONFLICT_MQ, // solver created conflict
+	JOIN_MQ, // joiner created belief state
+	JOIN_IN_MQ // first neighbor input (no_nbs + JOIN_IN_MQ == first neighbor conflict)
       };
 
 

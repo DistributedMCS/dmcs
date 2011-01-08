@@ -1,24 +1,13 @@
-2011-01-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-	* include/network/MessageQueueFactory.h: Move the constants to
-	header file.
-	* src/network/MessageQueueFactory.cpp: Likewise.
-
-	* include/network/Handler.h: Let the Handler take care of creating
-	output_thread.
-	* include/network/Handler.tcc: Likewise.
-
-	* include/dmcs/StreamingCommandType.h: Support executing with a
-	unique id for creating message queues.
-	* include/dmcs/StreamingDMCS.h: Likewise.
-	* src/dmcs/StreamingDMCS.cpp: Likewise.
-
 2011-01-08  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/network/Server.cpp: Remove X-Mas leftover casserole.
+	* include/network/Server.h: Likewise.
 
 	* include/network/MessagingGateway.h: Add documentation.
 
 	* include/network/MessageQueueFactory.h: New factory method just
 	for incoming and outgoing queue.
+	Create conflict input for neighbors.
 	* src/network/MessageQueueFactory.cpp: Likewise.
 
 	* src/dmcs/Log.cpp: Initialize logger.
@@ -36,6 +25,21 @@
 	* src/dmcs/Makefile.am: Likewise.
 	* src/dmcsd.cpp: Likewise.
 	* src/dmcsc.cpp: Likewise.
+
+2011-01-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/MessageQueueFactory.h: Move the constants to
+	header file.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+
+	* include/network/Handler.h: Let the Handler take care of creating
+	output_thread.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Support executing with a
+	unique id for creating message queues.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
 
 2011-01-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
