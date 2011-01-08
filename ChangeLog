@@ -1,5 +1,14 @@
 2011-01-08  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* include/network/MessageQueueFactory.h: Fix MQIDs.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+
+	* include/network/MessageDispatcher.h: Add sendJoinIn and
+	recvJoinIn.
+	* include/network/MessagingGateway.h: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+
 	* src/network/Server.cpp: Remove X-Mas leftover casserole.
 	* include/network/Server.h: Likewise.
 

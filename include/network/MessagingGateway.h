@@ -46,6 +46,17 @@ namespace dmcs {
   public:
 
     /** 
+     * Used to announce that context @a ctx_id has sent @a peq_cnt
+     * partial equilibria.
+     */
+    struct JoinIn
+    {
+      std::size_t ctx_id;
+      std::size_t peq_cnt;
+    };
+
+
+    /** 
      * Send @a m originating from @a from to @a to with priority @a prio. May block.
      * 
      * @param m a pointer to a MODEL
@@ -68,6 +79,17 @@ namespace dmcs {
     sendConflict(CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio) = 0;
 
     /** 
+     * Send a JoinIn message from @a from to @a to with priority @a prio. Must not block.
+     * 
+     * @param k we have k partial equilibria ready to retrieve
+     * @param from sender
+     * @param to receiver
+     * @param prio priority
+     */
+    virtual void
+    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio) = 0;
+
+    /** 
      * Receive a pointer to a MODEL from @a from. May block.
      * 
      * @param from sender
@@ -88,6 +110,17 @@ namespace dmcs {
      */
     virtual CONFLICT*
     recvConflict(std::size_t from, std::size_t& prio) = 0;
+
+    /** 
+     * Receive a JoinIn message from @a from to @a to with priority @a prio. May block.
+     * 
+     * @param from sender
+     * @param prio priority
+     *
+     * @return the next JoinIn message
+     */
+    virtual struct JoinIn
+    recvJoinIn(std::size_t from, std::size_t& prio) = 0;
     
   };
 

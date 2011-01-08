@@ -64,7 +64,7 @@ MessageDispatcher::sendModel(BeliefState* b, std::size_t /* from */, std::size_t
 {
   ///@todo TK: from is not used
   assert(mqs.size() > to);
-  mqs[to]->send(b, sizeof(b), prio);
+  mqs[to]->send(&b, sizeof(b), prio);
 }
 
 
@@ -73,7 +73,18 @@ MessageDispatcher::sendConflict(Conflict* c, std::size_t /* from */, std::size_t
 {
   ///@todo TK: from is not used
   assert(mqs.size() > to);
-  mqs[to]->send(c, sizeof(c), prio);
+  mqs[to]->send(&c, sizeof(c), prio);
+}
+
+
+void
+MessageDispatcher::sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio)
+{
+  assert(mqs.size() > to);
+  assert(mqs.size() > from);
+
+  struct JoinIn ji = { from, k };
+  mqs[to]->send(&ji, sizeof(ji), prio);
 }
 
 
@@ -111,6 +122,26 @@ MessageDispatcher::recvConflict(std::size_t from, std::size_t& prio)
   prio = p;
   return c;
 }
+
+
+struct MessagingGateway<BeliefState,Conflict>::JoinIn
+MessageDispatcher::recvJoinIn(std::size_t from, std::size_t& prio)
+{
+  assert(mqs.size() > from);
+
+  struct JoinIn ji = {0,0};
+  std::size_t recvd = 0;
+  unsigned int p = 0;
+
+  mqs[from]->receive(static_cast<void*>(&ji), sizeof(ji), recvd, p);
+
+  assert(sizeof(ji) == recvd);
+  assert(ji.ctx_id > 0); // better be safe than sorry
+
+  prio = p;
+  return ji;
+}
+
 
 // Local Variables:
 // mode: C++
