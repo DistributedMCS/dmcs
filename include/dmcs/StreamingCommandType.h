@@ -62,6 +62,12 @@ public:
     return sdmcs->start_up(mess);
   }
 
+  bool 
+  execute(const StreamingForwardMessage& mess, std::size_t port)
+  {
+    return sdmcs->start_up(mess, port);
+  }
+
   bool
   continues(StreamingForwardMessage& /* mess */)
   {

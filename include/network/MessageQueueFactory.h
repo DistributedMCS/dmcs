@@ -40,6 +40,22 @@
 
 namespace dmcs {
 
+/// prefix string for the input MQ for conflicts from parents
+#define DMCS_IN_MQ       "dmcs-in-mq-"
+/// name of the conflict MQ, announces new conflicts from the local solver
+#define DMCS_CONFLICT_MQ "dmcs-conflict-mq-"
+/// name of the join MQ, announces that neighbor C_i sent k partial belief states
+#define DMCS_JOIN_IN_MQ  "dmcs-join-in-mq-"
+/// name of the join MQ, announces joined belief states from the neighbors
+#define DMCS_JOIN_OUT_MQ "dmcs-join-out-mq-"
+/// name of the output MQ, announces partial equilibria
+#define DMCS_OUT_MQ      "dmcs-out-mq-"
+
+#define INDEX_IN_MQ    0
+#define INDEX_OUT_MQ   1
+#define INDEX_CONFLICT 2
+#define INDEX_JOIN_OUT 3
+#define INDEX_JOIN_IN  4
 
   class MessageQueueFactory
   {

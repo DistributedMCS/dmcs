@@ -37,9 +37,10 @@
 #include "dmcs/ReturnMessage.h"
 #include "dmcs/Cache.h"
 #include "dmcs/QueryPlan.h"
-#include "network/MessageQueue.h"
+#include "network/MessageQueueFactory.h"
 #include "network/ThreadFactory.h"
 #include "mcs/Theory.h"
+#include "solver/Conflict.h"
 
 namespace dmcs {
 
@@ -64,6 +65,9 @@ public:
   bool
   start_up(const StreamingForwardMessage& mess);
 
+  bool
+  start_up(const StreamingForwardMessage& mess, std::size_t port);
+
   ContextPtr
   getContext();
 
@@ -81,12 +85,6 @@ private:
   start_threads(std::size_t invoker);
 
   void
-  init_mqs();
-
-  void
-  remove_mqs();
-
-  void
   sendFirstRequest(const NeighborListPtr&);
 
   void
@@ -98,13 +96,15 @@ private:
   CachePtr cache;
 
   bool thread_started;
+  bool mqs_created;
 
   ThreadVecPtr neighbor_input_threads;
   boost::thread* dmcs_thread;
   boost::thread* sat_thread;
-  boost::thread* output_thread;
 
   ProxySignatureByLocalPtr mixed_sig;
+
+  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 
   std::size_t system_size;
   std::size_t my_id;

@@ -27,6 +27,7 @@
  * 
  */
 
+#include "network/ThreadFactory.h"
 
 namespace dmcs {
 
@@ -206,6 +207,19 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 #ifdef DEBUG
   std::cerr << "Handler<StreamingCommandType>::Handler, going to read message" << std::endl;
 #endif
+  OutputThreadStarter ots;
+  output_thread = new boost::thread(ots);
+
+  // get the unique ID from connection for creating a message gateway just for this connection
+  boost::asio::ip::tcp::socket& sock = conn->socket();
+  boost::asio::ip::tcp::endpoint ep = sock.remote_endpoint(); 
+  port = ep.port();
+
+#ifdef DEBUG
+  std::cerr << "Handler<StreamingCommandType>::Handler. port of the connection: " << port << std::endl;
+#endif
+
+  mg = MessageQueueFactory().createMessagingGateway(port);
 
   SessionMsgPtr sesh(new SessionMsg(conn));
 
@@ -223,7 +237,12 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
   if (!e)
     {
       // write sesh->mess to QueryMessageQueue
-      
+
+#ifdef DEBUG
+      std::cerr << "Handler<StreamingCommandType>::do_local_job" << std::endl;
+#endif
+      cmd->execute(sesh->mess, port);
+  
       sesh->conn->async_read(header,
 			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
 					 boost::asio::placeholders::error, sesh, cmd)
@@ -232,11 +251,6 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
   else
     {
       // An error occurred.
-#ifdef DEBUG
-  std::cerr << "Handler<StreamingCommandType>::do_local_job" << std::endl;
-#endif
-  cmd->execute(sesh->mess);
-
 #ifdef DEBUG
       std::cerr << "Handler::do_local_job: " << e.message() << std::endl;
 #endif

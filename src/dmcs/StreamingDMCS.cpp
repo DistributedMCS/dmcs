@@ -45,7 +45,6 @@
 #include "parser/ParserDirector.h"
 
 #include "network/Client.h"
-#include "network/MessageQueue.h"
 
 #include <vector>
 #include <sstream>
@@ -68,6 +67,7 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     my_id(c->getContextID()),
     buf_count(buf_count_),
     thread_started(false),
+    mqs_created(false),
     neighbor_input_threads(new ThreadVec)
 { }
 
@@ -107,84 +107,6 @@ StreamingDMCS::getGlobalSigs()
   return global_sigs;
 }
 
-
-
-// initialize message queues 
-void
-StreamingDMCS::init_mqs()
-{
-  std::stringstream str_my_id;
-  str_my_id << my_id;
-
-  std::stringstream str_neighbor_id;
-  std::string mq_label;
-
-  // message queues for holding answers from neighbors
-  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
-
-#if 0
-  for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
-    {
-      NeighborPtr nb = *it;
-
-      str_neighbor_id.str();
-      str_neighbor_id << nb->neighbor_id;
-
-      mq_label = DMCS_IN_MQ "-" + str_my_id.str() + "-" + str_neighbor_id.str();
-      
-      MQ mq_in(boost::interprocess::create_only, 
-	       mq_label.c_str(), buf_count, buf_count * DMCS_MQ_MSG_SIZE);
-    }
-
-  // message queue for joining input from neighbors
-  mq_label = DMCS_JOIN_IN_MQ "-" + str_my_id.str();
-  MQ mq_join(boost::interprocess::create_only,
-	     mq_label.c_str(), buf_count, buf_count * DMCS_JOIN_IN_MSG_SIZE);
-	     
-  // message queue for holding local answers from SAT solver
-  mq_label = DMCS_OUT_MQ "-" + str_my_id.str();
-  MQ mq_out(boost::interprocess::create_only,
-	    mq_label.c_str(), buf_count, buf_count * DMCS_MQ_MSG_SIZE);
-#endif // 0
-}
-
-
-
-// remove all message queues
-void
-StreamingDMCS::remove_mqs()
-{
-  std::stringstream str_my_id;
-  str_my_id << my_id;
-
-  std::stringstream str_neighbor_id;
-  std::string mq_label;
-
-  // message queues for holding answers from neighbors
-  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
-
-#if 0
-  for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
-    {
-      NeighborPtr nb = *it;
-
-      str_neighbor_id.str();
-      str_neighbor_id << nb->neighbor_id;
-
-      mq_label = DMCS_IN_MQ "-" + str_my_id.str() + "-" + str_neighbor_id.str();
-      
-      MQ::remove(mq_label.c_str());
-    }
-
-  // message queue for joining input from neighbors
-  mq_label = DMCS_JOIN_IN_MQ "-" + str_my_id.str();
-  MQ::remove(mq_label.c_str());
-	     
-  // message queue for holding local answers from SAT solver
-  mq_label = DMCS_OUT_MQ "-" + str_my_id.str();
-  MQ::remove(mq_label.c_str());
-#endif //0
-}
 
 
 /*
@@ -239,7 +161,6 @@ StreamingDMCS::start_threads(std::size_t invoker)
   tf.createNeighborInputThreads(neighbor_input_threads);
   dmcs_thread   = tf.createJoinThread();
   sat_thread    = tf.createLocalSolveThread();
-  output_thread = tf.createOutputThread();
 
   thread_started = true;
 }
@@ -255,15 +176,18 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
       start_threads(invoker);
     }
 
-  /*
-  const NeighborListPtr& nb = query_plan->getNeighbors(my_id);
-  if (nb->size() == 0) // this is a leaf context
+  const NeighborListPtr& nb = ctx->getNeighbors();
+  std::size_t no_nbs = nb->size();
+
+  if (no_nbs == 0) // this is a leaf context
     {
 #ifdef DEBUG
       std::cerr << "StreamingDMCS::start_up. Leaf context. Put an epsilon model into SatInputMQ to start the SAT solver without input" << std::endl;
 #endif
       // put an epsilon model into SatInputMQ to start the SAT solver without input
-
+      std::size_t system_size = ctx->getSystemSize();
+      Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
+      mg->sendConflict(empty_conflict, 0, INDEX_JOIN_OUT, 0);
     }
   else // this is an intermediate context
     {
@@ -272,11 +196,30 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
 #endif
 
       // send requests to neighbors by placing a message in each of the NeighborQueryMQ
+      for (std::size_t i = INDEX_JOIN_IN + no_nbs; i < INDEX_JOIN_IN + 2*no_nbs; ++i)
+	{
+	  Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
+	  mg->sendConflict(empty_conflict, 0, i, 0);
+	}
 
-      }  */
+      }
 }
 
 
+
+bool
+StreamingDMCS::start_up(const StreamingForwardMessage& mess, std::size_t port)
+{
+  if (!mqs_created)
+    {
+      std::cerr << "Here create mqs" << std::endl;
+      const NeighborListPtr& nb = ctx->getNeighbors();
+      mg = MessageQueueFactory().createMessagingGateway(port, nb->size());
+      mqs_created = true;
+    }
+
+  return start_up(mess);
+}
 
 void
 StreamingDMCS::localCompute(BeliefState* input, BeliefState* conflict)

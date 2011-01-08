@@ -31,12 +31,13 @@
 #define HANDLER_H
 
 #include "network/connection.hpp"
-#include "network/MessageQueue.h"
+#include "network/MessageQueueFactory.h"
 #include "network/Session.h"
 #include "network/ThreadFactory.h"
+#include "dmcs/CommandType.h"
 #include "dmcs/StreamingCommandType.h"
 #include "dyndmcs/InstantiatorCommandType.h"
-#include "dmcs/CommandType.h"
+#include "solver/Conflict.h"
 
 #include "relsat-20070104/SATInstance.h"
 #include "relsat-20070104/SATSolver.h"
@@ -47,6 +48,7 @@
 #include <set>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 
 
 namespace dmcs {
@@ -105,8 +107,10 @@ public:
 
 private:
   connection_ptr conn;
-
+  boost::thread* output_thread;
   std::string header;
+  std::size_t port;
+  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 
 } // namespace dmcs
