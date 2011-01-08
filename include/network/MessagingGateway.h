@@ -45,15 +45,47 @@ namespace dmcs {
   {
   public:
 
+    /** 
+     * Send @a m originating from @a from to @a to with priority @a prio. May block.
+     * 
+     * @param m a pointer to a MODEL
+     * @param from sender
+     * @param to receiver
+     * @param prio priority
+     */
     virtual void
-    sendModel(MODEL*, std::size_t from, std::size_t to, std::size_t prio) = 0;
+    sendModel(MODEL* m, std::size_t from, std::size_t to, std::size_t prio) = 0;
 
+    /** 
+     * Send @a c originating from @a from to @a to with priority @a prio. May block.
+     * 
+     * @param c a pointer to a CONFLICT
+     * @param from sender
+     * @param to receiver
+     * @param prio priority
+     */
     virtual void
-    sendConflict(CONFLICT*, std::size_t from, std::size_t to, std::size_t prio) = 0;
+    sendConflict(CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio) = 0;
 
+    /** 
+     * Receive a pointer to a MODEL from @a from. May block.
+     * 
+     * @param from sender
+     * @param prio priority
+     * 
+     * @return the next pointer to the MODEL sent from @a from
+     */
     virtual MODEL*
     recvModel(std::size_t from, std::size_t& prio) = 0;
 
+    /** 
+     * Receive a pointer to a CONFLICT from @a from. May block.
+     * 
+     * @param from sender
+     * @param prio priority
+     * 
+     * @return the next pointer to the CONFLICT sent from @a from
+     */
     virtual CONFLICT*
     recvConflict(std::size_t from, std::size_t& prio) = 0;
     
