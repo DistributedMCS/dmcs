@@ -65,8 +65,27 @@ namespace dmcs {
     ~MessageQueueFactory();
 
 
+    /** 
+     * Creates a messaging gateway with the whole set of queues.
+     * 
+     * @param uid a number that is unique to the whole computer
+     * @param no_nbs no_nbs is the number of neighbors
+     * 
+     * @return a MessagingGateway
+     */
     boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >
     createMessagingGateway(std::size_t uid, std::size_t no_nbs);
+
+
+    /** 
+     * Creates a messaging gateway only with incoming and outgoing queues IN_MQ and OUT_MQ, resp.
+     * 
+     * @param uid a number that is unique to the whole computer
+     * 
+     * @return a MessagingGateway
+     */
+    boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >
+    createMessagingGateway(std::size_t uid);
 
   };
 

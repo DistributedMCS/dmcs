@@ -91,7 +91,7 @@ MessageQueueFactory::createMessagingGateway(std::size_t uid, std::size_t no_nbs)
   MQPtr mq;
   std::ostringstream oss;
 
-  ///@todo fixme
+  ///@todo fixme, code duplication as well...
   std::size_t k = 5;
 
   // create message queue 0
@@ -138,6 +138,48 @@ MessageQueueFactory::createMessagingGateway(std::size_t uid, std::size_t no_nbs)
 
   return md;
 }
+
+
+
+boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >
+MessageQueueFactory::createMessagingGateway(std::size_t uid)
+{
+  ///@todo TK: all MQs need to have a unique name on the system, thus
+  ///we need to add the process ID of the creating process to the name
+  ///and announce this PID to child processes/threads. on dmcs
+  ///shutdown, we need to cleanup using MQ::remove(). note: all MQs
+  ///will be created under /tmp/boost_interprocess and stay alive
+  ///after program execution.
+
+  boost::shared_ptr<MessageDispatcher> md(new MessageDispatcher);
+  MQPtr mq;
+  std::ostringstream oss;
+
+  ///@todo fixme
+  std::size_t k = 5;
+
+  // create message queue 0
+
+  oss << DMCS_IN_MQ << uid;
+  const std::string& name0 = oss.str();
+  mq = createMessageQueue(name0.c_str(), k, sizeof(Conflict*));
+  md->registerMQ(mq, name0);
+  oss.str("");
+
+  // create message queue 1
+  
+  oss << DMCS_OUT_MQ << uid;
+  const std::string& name1 = oss.str();
+  mq = createMessageQueue(name1.c_str(), k, sizeof(BeliefState*));
+  md->registerMQ(mq, name1);
+  oss.str("");
+
+  return md;
+}
+
+
+
+
 
 // Local Variables:
 // mode: C++
