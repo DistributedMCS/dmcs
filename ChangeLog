@@ -1,7 +1,10 @@
 2011-01-08  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/dmcs/Log.cpp: Initialize logger.
+
 	* src/network/Makefile.am [linux]: Create libthreads.a to fix
 	FTBFS.
+	* testsuite/Makefile.am: Likewise.
 
 	* src/dyndmcs/DynamicConfiguration.cpp: Fix undefined dfs_level.
 

@@ -40,7 +40,9 @@
 
 namespace dmcs {
 
-  log4cxx::LoggerPtr logger;
+  // initially, all static loggers must be initialized, otw. we
+  // segfault at exit because log4cxx does not shut down properly
+  log4cxx::LoggerPtr logger(log4cxx::Logger::getRootLogger());
 
 
   void
