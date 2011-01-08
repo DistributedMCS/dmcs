@@ -54,8 +54,8 @@ namespace dmcs {
 	IN_MQ = 0, // parent context sent conflict
 	OUT_MQ, // solver created belief state
 	CONFLICT_MQ, // solver created conflict
-	JOIN_MQ, // joiner created belief state
-	JOIN_IN_MQ // first neighbor input (no_nbs + JOIN_IN_MQ == first neighbor conflict)
+	JOIN_OUT_MQ, // joiner created belief state
+	JOIN_IN_MQ // neighbor i created k partial equilibria
       };
 
 

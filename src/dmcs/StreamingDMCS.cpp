@@ -187,7 +187,7 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
       // put an epsilon model into SatInputMQ to start the SAT solver without input
       std::size_t system_size = ctx->getSystemSize();
       Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
-      mg->sendConflict(empty_conflict, 0, INDEX_JOIN_OUT, 0);
+      mg->sendConflict(empty_conflict, 0, MessageQueueFactory::JOIN_OUT_MQ, 0);
     }
   else // this is an intermediate context
     {
@@ -195,8 +195,10 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
       std::cerr << "StreamingDMCS::start_up. Intermediate context. Send requests to neighbors by placing a message in each of the NeighborQueryMQ" << std::endl;
 #endif
 
+      const std::size_t off = MessageQueueFactory::JOIN_IN_MQ + 1 + no_nbs;
+
       // send requests to neighbors by placing a message in each of the NeighborQueryMQ
-      for (std::size_t i = INDEX_JOIN_IN + no_nbs; i < INDEX_JOIN_IN + 2*no_nbs; ++i)
+      for (std::size_t i = off; i < off + no_nbs; ++i)
 	{
 	  Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
 	  mg->sendConflict(empty_conflict, 0, i, 0);

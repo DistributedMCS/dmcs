@@ -37,29 +37,23 @@
 
 using namespace dmcs;
 
-/// prefix string for the input MQ for conflicts from parents
-#define DMCS_IN_MQ       "dmcs-in-mq-"
-/// name of the conflict MQ, announces new conflicts from the local solver
-#define DMCS_CONFLICT_MQ "dmcs-conflict-mq-"
-/// name of the join MQ, announces joined belief states from the neighbors
-#define DMCS_JOIN_MQ "dmcs-join-mq-"
-/// name of the join MQ, announces that neighbor C_i sent k partial belief states
-#define DMCS_JOIN_IN_MQ  "dmcs-join-in-mq-"
-/// name of the conflict MQ, announces a new conflict to a neighbor
-#define DMCS_CONFLICT_IN_MQ "dmcs-conflict-in-mq-"
+/// name of the conflict input MQ, announces conflicts from the parent
+#define DMCS_IN_MQ           "dmcs-in-mq-"
 /// name of the output MQ, announces partial equilibria
-#define DMCS_OUT_MQ      "dmcs-out-mq-"
+#define DMCS_OUT_MQ          "dmcs-out-mq-"
+/// name of the conflict output MQ, announces new conflicts from the local solver
+#define DMCS_CONFLICT_OUT_MQ "dmcs-conflict-out-mq-"
 
+/// name of the join output MQ, announces joined belief states from the neighbors
+#define DMCS_JOIN_OUT_MQ     "dmcs-join-out-mq-"
+/// name of the join input MQ, announces that neighbor C_i sent k partial belief states
+#define DMCS_JOIN_IN_MQ      "dmcs-join-in-mq-"
 
-/// message type for JoinIn messages
-struct JoinInMsg
-{
-  std::size_t context_no;
-  std::size_t peq_count;
-};
+/// name of the partial equilibrium input MQ for neighbor C_i
+#define DMCS_NEIGHBOR_IN_MQ  "dmcs-neighbor-in-mq-"
+/// name of the conflict input MQ, announces a new conflict to a neighbor C_i
+#define DMCS_CONFLICT_IN_MQ  "dmcs-conflict-in-mq-"
 
-  /// message size for the DMCS_JOIN_IN_MQ message queue
-#define DMCS_JOIN_IN_MSG_SIZE ( sizeof(JoinInMsg) )
 
 
 
@@ -115,7 +109,7 @@ MessageQueueFactory::createMessagingGateway(std::size_t uid, std::size_t no_nbs)
 
   // create message queue 2
 
-  oss << DMCS_CONFLICT_MQ << uid;
+  oss << DMCS_CONFLICT_OUT_MQ << uid;
   const std::string& name2 = oss.str();
   mq = createMessageQueue(name2.c_str(), k, sizeof(Conflict*));
   md->registerMQ(mq, name2);
@@ -123,17 +117,25 @@ MessageQueueFactory::createMessagingGateway(std::size_t uid, std::size_t no_nbs)
 
   // create message queue 3
 
-  oss << DMCS_JOIN_MQ << uid;
+  oss << DMCS_JOIN_OUT_MQ << uid;
   const std::string& name3 = oss.str();
   mq = createMessageQueue(name3.c_str(), k, sizeof(BeliefState*));
   md->registerMQ(mq, name3);
   oss.str("");
 
-  // create message queues 4 to 4+2*no_nbs
+  // create message queue 4
+
+  oss << DMCS_JOIN_IN_MQ << uid;
+  const std::string& name4 = oss.str();
+  mq = createMessageQueue(name4.c_str(), k, sizeof(MessagingGateway<BeliefState,Conflict>::JoinIn));
+  md->registerMQ(mq, name4);
+  oss.str("");
+
+  // create message queues 5 to 5+2*no_nbs
 
   for (std::size_t i = 0; i < no_nbs; ++i)
     {
-      oss << DMCS_JOIN_IN_MQ << i << '-' << uid;
+      oss << DMCS_NEIGHBOR_IN_MQ << i << '-' << uid;
       mq = createMessageQueue(oss.str().c_str(), k, sizeof(BeliefState*));
       md->registerMQ(mq, oss.str());
       oss.str("");
