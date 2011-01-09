@@ -56,6 +56,7 @@ namespace dmcs {
 #define LIMIT_BIND_RULES "b"
 #define HEURISTICS       "h"
 #define STREAMING        "s"
+#define PACK_SIZE        "k"
 
 
 } // namespace dmcs

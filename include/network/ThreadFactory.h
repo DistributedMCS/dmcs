@@ -33,6 +33,7 @@
 #include "dmcs/Context.h"
 #include "mcs/ProxySignatureByLocal.h"
 #include "mcs/Theory.h"
+#include "network/connection.hpp"
 #include "solver/RelSatSolver.h"
 
 #include <boost/asio.hpp>
@@ -48,7 +49,9 @@ class NeighborInputThreadStarter
 {
 public:
   NeighborInputThreadStarter(const NeighborPtr& nb_, 
-			     std::size_t ctx_id_, std::size_t system_size_,
+			     std::size_t ctx_id_, 
+			     std::size_t pack_size_,
+			     std::size_t system_size_,
 			     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
   void
@@ -57,6 +60,7 @@ public:
 private:
   const NeighborPtr nb;
   std::size_t ctx_id;
+  std::size_t pack_size;
   std::size_t system_size;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
@@ -94,13 +98,23 @@ private:
 class OutputThreadStarter
 {
 public:
-  OutputThreadStarter(boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
+  OutputThreadStarter(const connection_ptr& conn_,
+		      std::size_t pack_size_,
+		      boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
   void
   operator()();
 
+  void
+  collect_output(const boost::system::error_code& e);
+
+  void
+  write_result(const boost::system::error_code& e, BeliefStateVecPtr res);
+
 private:
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+  const connection_ptr& conn;
+  std::size_t pack_size;
+  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;  
 };
 
 
@@ -109,7 +123,10 @@ class ThreadFactory
 {
 public:
   ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory_,
-		const ProxySignatureByLocalPtr& mixed_sig_,
+		//		const ProxySignatureByLocalPtr& mixed_sig_,
+		const SignaturePtr& local_sig_,
+		const BeliefStatePtr& localV_,
+		std::size_t pack_size_,
 		boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
   void
@@ -122,12 +139,15 @@ public:
   createLocalSolveThread();
 
   boost::thread*
-  createOutputThread();
+  createOutputThread(const connection_ptr& conn_);
 
 private:
   const ContextPtr               context;
   const TheoryPtr                theory;
-  const ProxySignatureByLocalPtr mixed_sig;
+  //  const ProxySignatureByLocalPtr mixed_sig;
+  const SignaturePtr             local_sig;
+  const BeliefStatePtr           localV;
+  std::size_t                    pack_size;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 

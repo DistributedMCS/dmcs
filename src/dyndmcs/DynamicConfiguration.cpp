@@ -772,12 +772,7 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 
 
 GraphListPtr
-DynamicConfiguration::compute_topology(ContextSubstitutionListPtr ctx_subs,
-				       std::size_t
-#ifdef DEBUG
-				       dfs_level
-#endif
-				       )
+DynamicConfiguration::compute_topology(ContextSubstitutionListPtr ctx_subs, std::size_t dfs_level)
 {
   // Heuristic index
   std::stringstream out;

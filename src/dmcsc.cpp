@@ -104,6 +104,7 @@ main(int argc, char* argv[])
       std::string qvs = "";
       std::size_t system_size = 0;
       std::size_t root_ctx;
+      std::size_t pack_size;
       bool dynamic;
       bool streaming;
       BeliefStatePtr V(new BeliefState);
@@ -124,6 +125,7 @@ main(int argc, char* argv[])
 	(DYNAMIC, boost::program_options::value<bool>(&dynamic)->default_value(false), "set to dynamic mode")
 	(ROOT_CTX, boost::program_options::value<std::size_t>(&root_ctx)->default_value(1), "set root context id")
 	(STREAMING, boost::program_options::value<bool>(&streaming)->default_value(true), "set streaming mode")
+	(PACK_SIZE, boost::program_options::value<std::size_t>(&pack_size)->default_value(1), "set number of belief states returned in one pack")
 	;
 	
       boost::program_options::variables_map vm;        
@@ -236,7 +238,7 @@ main(int argc, char* argv[])
 
 		  std::string header = HEADER_REQ_STM_DMCS;
 		  // USER <--> invoker == 0
-		  StreamingCommandType::input_type mess(0, system_size);
+		  StreamingCommandType::input_type mess(0, pack_size, system_size);
 
 		  BeliefStatePtr conflict = mess.getConflict();
 

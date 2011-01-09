@@ -81,7 +81,7 @@ StreamingDMCS::~StreamingDMCS()
 
 
 void
-StreamingDMCS::start_threads(std::size_t invoker)
+StreamingDMCS::start_threads(std::size_t invoker, std::size_t pack_size)
 {
   BeliefStatePtr localV;
   if (invoker == 0)
@@ -94,14 +94,14 @@ StreamingDMCS::start_threads(std::size_t invoker)
       localV = query_plan->getInterface(invoker, my_id);
     }
 
-  const SignaturePtr& sig = ctx->getSignature();
-  const SignaturePtr& gsig = createGuessingSignature(localV, sig);
+  const SignaturePtr& local_sig = ctx->getSignature();
+  //  const SignaturePtr& gsig = createGuessingSignature(localV, sig);
 
-  mixed_sig = ProxySignatureByLocalPtr(new ProxySignatureByLocal(sig, gsig));
+  //mixed_sig = ProxySignatureByLocalPtr(new ProxySignatureByLocal(sig, gsig));
 
-  std::cerr << "StreamingDMCS::start_threads. mixed_sig.size() = " << mixed_sig->size() << std::endl;
+  //  std::cerr << "StreamingDMCS::start_threads. mixed_sig.size() = " << mixed_sig->size() << std::endl;
 
-  ThreadFactory tf(ctx, theory, mixed_sig, mg);
+  ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size, mg);
 
   tf.createNeighborInputThreads(neighbor_input_threads);
   dmcs_thread   = tf.createJoinThread();
@@ -118,7 +118,8 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
   if (!thread_started)
     {
       std::size_t invoker = mess.getInvoker();
-      start_threads(invoker);
+      std::size_t pack_size = mess.getPackSize();
+      start_threads(invoker, pack_size);
     }
 
   const NeighborListPtr& nb = ctx->getNeighbors();
@@ -127,12 +128,15 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
   if (no_nbs == 0) // this is a leaf context
     {
 #ifdef DEBUG
-      std::cerr << "StreamingDMCS::start_up. Leaf context. Put an epsilon model into SatInputMQ to start the SAT solver without input" << std::endl;
+      std::cerr << "StreamingDMCS::start_up. Leaf context. Put an empty model into SatInputMQ to start the SAT solver without input" << std::endl;
 #endif
-      // put an epsilon model into SatInputMQ to start the SAT solver without input
+      // put an empty model into SatInputMQ to start the SAT solver without input
       std::size_t system_size = ctx->getSystemSize();
-      Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
-      mg->sendConflict(empty_conflict, 0, MessageQueueFactory::JOIN_OUT_MQ, 0);
+      BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
+      mg->sendModel(empty_model, 0, MessageQueueFactory::JOIN_OUT_MQ, 0);
+#ifdef DEBUG
+      std::cerr << "StreamingDMCS::start_up. Finished writing" << std::endl;
+#endif      
     }
   else // this is an intermediate context
     {

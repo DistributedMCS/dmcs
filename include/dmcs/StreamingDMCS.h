@@ -70,7 +70,7 @@ public:
 
 private:
   void
-  start_threads(std::size_t invoker);
+  start_threads(std::size_t invoker, std::size_t pack_size);
 
 private:
   QueryPlanPtr query_plan;

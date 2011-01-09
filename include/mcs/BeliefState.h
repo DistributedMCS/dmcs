@@ -61,6 +61,8 @@ typedef boost::shared_ptr<BeliefState> BeliefStatePtr;
 typedef std::list<BeliefStatePtr> BeliefStateList;
 typedef boost::shared_ptr<BeliefStateList> BeliefStateListPtr;
 
+typedef std::vector<BeliefState*> BeliefStateVec;
+typedef boost::shared_ptr<BeliefStateVec> BeliefStateVecPtr;
 
 /** 
  * @param b 

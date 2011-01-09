@@ -28,6 +28,7 @@
  */
 
 #include "dmcs/StreamingForwardMessage.h"
+#include "dmcs/StreamingBackwardMessage.h"
 #include "dmcs/StreamingCommandType.h"
 #include "network/Client.h"
 #include "network/ThreadFactory.h"
@@ -38,10 +39,12 @@ namespace dmcs {
 
 NeighborInputThreadStarter::NeighborInputThreadStarter(const NeighborPtr& nb_, 
 						       std::size_t ctx_id_,
+						       std::size_t pack_size_,
 						       std::size_t system_size_,
 						       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
   : nb(nb_),
     ctx_id(ctx_id_),
+    pack_size(pack_size_),
     system_size(system_size_),
     mg(mg_)
 { }
@@ -63,7 +66,7 @@ NeighborInputThreadStarter::operator()()
     boost::asio::ip::tcp::endpoint endpoint = *res_it;
     
     std::string header = HEADER_REQ_STM_DMCS;
-    StreamingForwardMessage neighbourMess(ctx_id, system_size);
+    StreamingForwardMessage neighbourMess(ctx_id, pack_size, system_size);
     
     Client<StreamingCommandType> client(io_service, res_it, header, neighbourMess);
     
@@ -99,23 +102,89 @@ LocalSolverThreadStarter::LocalSolverThreadStarter(const RelSatSolverPtr& relsat
 void
 LocalSolverThreadStarter::operator()()
 {
-  // (1) look into the message queue of the joined input, 
-  // (2) pick the first BeliefState
-  // (3) feed input into SATSolver
-  // (4) solve and output to the output message queue
-
 #ifdef DEBUG
   std::cerr << "LocalSolverThreadStarter::operator()()" << std::endl;
 #endif
 
-  // (3)
   relsatsolver->solve();
 }
 
 
-OutputThreadStarter::OutputThreadStarter(boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
-  : mg(mg_)
+OutputThreadStarter::OutputThreadStarter(const connection_ptr& conn_,
+					 std::size_t pack_size_,
+					 boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+  : conn(conn_), pack_size(pack_size_), mg(mg_)
 { }
+
+
+
+///@todo: remove code duplication
+void
+OutputThreadStarter::collect_output(const boost::system::error_code& e)
+{
+  if (!e)
+    {
+#ifdef DEBUG
+      std::cerr << "OutputThreadStarter::collect_output()" << std::endl;
+#endif
+      BeliefStateVecPtr res(new BeliefStateVec);
+      
+      for (std::size_t i = 0; i < pack_size; ++i)
+	{
+	  std::size_t prio = 0;
+	  BeliefState* bs;
+	  
+	  bs = mg->recvModel(MessageQueueFactory::OUT_MQ, prio);
+	  
+	  if (bs == 0)
+	    // either UNSAT of EOF
+	    {
+	      break;
+	    }
+	  
+	  res->push_back(bs);
+	}
+      
+      std::string header = HEADER_ANS;
+
+      conn->async_write(header,
+			boost::bind(&OutputThreadStarter::write_result, this,
+				    boost::asio::placeholders::error, res)
+			);
+    }
+  else
+    {
+      // An error occurred.
+#ifdef DEBUG
+      std::cerr << "OutputThreadStarter::collect_output: " << e.message() << std::endl;
+#endif
+    }
+}
+
+
+void
+OutputThreadStarter::write_result(const boost::system::error_code& e, const BeliefStateVecPtr res)
+{
+  if (!e)
+    {
+#ifdef DEBUG
+      std::cerr << "OutputThreadStarter::write_result()" << std::endl;
+#endif
+      StreamingBackwardMessage return_mess(res);
+      
+      conn->async_write(return_mess,
+			boost::bind(&OutputThreadStarter::collect_output, this,
+				    boost::asio::placeholders::error)
+			);
+    }
+  else
+    {
+      // An error occurred.
+#ifdef DEBUG
+      std::cerr << "OutputThreadStarter::write_result: " << e.message() << std::endl;
+#endif
+    }
+}
 
 
 
@@ -125,15 +194,50 @@ OutputThreadStarter::operator()()
 #ifdef DEBUG
   std::cerr << "OutputThreadStarter::operator()()" << std::endl;
 #endif
+
+  collect_output(boost::system::error_code());
+
+  /*
+  BeliefStateVecPtr res(new BeliefStateVec);
+  
+  for (std::size_t i = 0; i < pack_size; ++i)
+    {
+      std::size_t prio = 0;
+      BeliefState* bs;
+
+      bs = mg->recvModel(MessageQueueFactory::OUT_MQ, prio);
+
+      if (bs == 0)
+	// either UNSAT of EOF
+	{
+	  break;
+	}
+
+      res->push_back(bs);
+    }
+
+  StreamingBackwardMessage return_mess(res);
+
+  conn->async_write(return_mess,
+		    boost::bind(&OutputThreadStarter::collect_output, this,
+				boost::asio::placeholders::error)
+				);*/
 }
 
 
 
 ThreadFactory::ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory_,
-			     const ProxySignatureByLocalPtr& mixed_sig_,
+			     //   const ProxySignatureByLocalPtr& mixed_sig_,
+			     const SignaturePtr& local_sig_,
+			     const BeliefStatePtr& localV_,
+			     std::size_t pack_size_,
 			     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
   : context(context_), theory(theory_), 
-    mixed_sig(mixed_sig_), mg(mg_)
+    //mixed_sig(mixed_sig_), 
+    local_sig(local_sig_),
+    localV(localV_),
+    pack_size(pack_size_),
+    mg(mg_)
 { }
 
 
@@ -147,7 +251,7 @@ ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
   for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
     {
       const NeighborPtr nb = *it;
-      NeighborInputThreadStarter nits(nb, ctx_id, system_size, mg);
+      NeighborInputThreadStarter nits(nb, ctx_id, pack_size, system_size, mg);
       
       boost::thread* nit = new boost::thread(nits);
       neighbor_input_threads->push_back(nit);
@@ -166,8 +270,9 @@ ThreadFactory::createJoinThread()
 boost::thread*
 ThreadFactory::createLocalSolveThread()
 {
+  std::size_t my_id = context->getContextID();
   std::size_t system_size = context->getSystemSize();
-  SatSolverFactory ssf(theory, mixed_sig, system_size, mg);
+  SatSolverFactory ssf(my_id, theory, local_sig, localV, system_size, mg);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
@@ -179,9 +284,9 @@ ThreadFactory::createLocalSolveThread()
 
 
 boost::thread*
-ThreadFactory::createOutputThread()
+ThreadFactory::createOutputThread(const connection_ptr& conn)
 {
-  OutputThreadStarter ots(mg);
+  OutputThreadStarter ots(conn, pack_size, mg);
   boost::thread* t = new boost::thread(ots);
 
   return t;

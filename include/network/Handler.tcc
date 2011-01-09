@@ -202,27 +202,15 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 
 // specialized methods for streaming dmcs
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
-  : conn(conn_)
+  : conn(conn_),
+    initialized(false)
 { 
 #ifdef DEBUG
   std::cerr << "Handler<StreamingCommandType>::Handler, going to read message" << std::endl;
 #endif
-  // get the unique ID from connection for creating a message gateway just for this connection
-  boost::asio::ip::tcp::socket& sock = conn->socket();
-  boost::asio::ip::tcp::endpoint ep = sock.remote_endpoint(); 
-  port = ep.port();
-
-#ifdef DEBUG
-  std::cerr << "Handler<StreamingCommandType>::Handler. port of the connection: " << port << std::endl;
-#endif
-
-  mg = MessageQueueFactory().createMessagingGateway(port);
-  OutputThreadStarter ots(mg);
-  output_thread = new boost::thread(ots);
 
   SessionMsgPtr sesh(new SessionMsg(conn));
 
-  // read and put this message into QueryQueue
   conn->async_read(sesh->mess,
 		   boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
 			       boost::asio::placeholders::error, sesh, cmd)
@@ -235,8 +223,26 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 {
   if (!e)
     {
-      // write sesh->mess to QueryMessageQueue
+      if (!initialized)
+	{
+#ifdef DEBUG
+	  std::cerr << "First and only initialization." << std::endl;
+#endif	
+	  // get the unique ID from connection for creating a message gateway just for this connection
+	  boost::asio::ip::tcp::socket& sock = sesh->conn->socket();
+	  boost::asio::ip::tcp::endpoint ep = sock.remote_endpoint(); 
+	  port = ep.port();
 
+	  mg = MessageQueueFactory().createMessagingGateway(port);
+
+	  std::size_t pack_size = sesh->mess.getPackSize();
+	  OutputThreadStarter ots(conn, pack_size, mg);
+	  output_thread = new boost::thread(ots);
+
+	  initialized = true;
+	}
+
+      // write sesh->mess to QueryMessageQueue
 #ifdef DEBUG
       std::cerr << "Handler<StreamingCommandType>::do_local_job" << std::endl;
 #endif
@@ -272,8 +278,6 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
   else
     {
       // An error occurred.
-  std::cerr << "header = " << header << std::endl;
-
 #ifdef DEBUG
       std::cerr << "Handler::handle_read_header: " << e.message() << std::endl;
 #endif

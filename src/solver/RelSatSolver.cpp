@@ -32,18 +32,24 @@
 
 namespace dmcs {
 
-RelSatSolver::RelSatSolver(const TheoryPtr& theory_, 
-			   const ProxySignatureByLocalPtr& mixed_sig_,
+RelSatSolver::RelSatSolver(std::size_t my_id_,
+			   const TheoryPtr& theory_, 
+			   const SignaturePtr& sig_,
+			   const BeliefStatePtr& localV_,
+			   //			   const ProxySignatureByLocalPtr& mixed_sig_,
 			   std::size_t system_size_,
 			   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
-  : theory(theory_), 
-    mixed_sig(mixed_sig_),
+  : my_id(my_id_),
+    theory(theory_), 
+    sig(sig_),
+    localV(localV_),
+    //    mixed_sig(mixed_sig_),
     system_size(system_size_),
     mg(mg_),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this))
 {
-  xInstance->readTheory(theory, mixed_sig->size());
+  xInstance->readTheory(theory, sig->size());
 }
 
 
@@ -60,34 +66,142 @@ RelSatSolver::solve(const TheoryPtr& theory, std::size_t sig_size)
 
 
 void
-RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
+RelSatSolver::update_bridge_input(SignatureByCtx::const_iterator it)
 {
+  BeliefSet& b = (*input)[it->ctxId - 1];
+  int lid = it->localId;
+
+  std::cerr << "input =   " << *input << std::endl;
+  std::cerr << "context:  " << it->ctxId - 1 << std::endl;
+  std::cerr << "b =       " << b << std::endl;
+  std::cerr << "localid = " << lid << std::endl;
+
+  if (testBeliefSet(b, it->origId))
+    // this atom is passed as true
+    {
+      xInstance->add_unit_clause(lid);
 #ifdef DEBUG
-  std::cerr << "RelSatSolver::receiveSolution" << std::endl;
+      std::cerr << "Add " << lid << " to local theory." << std::endl;
+#endif
+    }
+  else
+    // this atom is passed as false
+    {
+      xInstance->add_unit_clause(-lid);
+#ifdef DEBUG
+      std::cerr << "Add " << -lid << " to local theory." << std::endl;
 #endif
 
-  BeliefState* bs = new dmcs::BeliefState(system_size, dmcs::BeliefSet());
+    }
+}
 
+
+
+void
+RelSatSolver::prepare_input()
+{
+#ifdef DEBUG
+  std::cerr << "RelSatSolver::prepare_input()" << std::endl;
+#endif
+  // read joined input from Joiner. We need to keep the input to build
+  // complete model wrt the interface
+  std::size_t prio = 0;
+  input = mg->recvModel(MessageQueueFactory::JOIN_OUT_MQ, prio);
+  std::cerr << "RelSatSolver::input received!" << std::endl;
+
+  // then add input to the SATSolver's theory. We only add the atoms
+  // that come from our neighbors' interface
+  const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
+
+  // those are not in this range are my bridge atoms, which I need to
+  // get truth value from the input
+  SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
+  SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
+
+  for (SignatureByCtx::const_iterator it = local_sig.begin(); it != low; ++it)
+    {
+      update_bridge_input(it);
+    }
+
+  for (SignatureByCtx::const_iterator it = up; it != local_sig.end(); ++it)
+    {
+      update_bridge_input(it);
+    }
+}
+
+
+
+void
+RelSatSolver::solve()
+{
+  std::cerr << "RelSatSolver::solve()" << std::endl;
+  // remove input part of the theory (from last solve)
+  xInstance->removeLastInput();
+
+  // add new input
+  prepare_input();
+
+  // now we can do SAT solving
+  relsat_enum eResult = xSATSolver->eSolve();
+}
+
+
+
+void
+RelSatSolver::receiveUNSAT()
+{
+  // send a NULL pointer to the SatOutputMessageQueue
+  BeliefState* bs = 0;
+  mg->sendModel(bs, 0, MessageQueueFactory::OUT_MQ ,0);
+
+#ifdef DEBUG
+  std::cerr << "NO MORE SOLUTION! " << std::endl;
+#endif
+}
+
+
+
+void
+RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
+{
+  BeliefState* bs = new BeliefState(*input);
+
+#ifdef DEBUG
+  std::cerr << "RelSatSolver::receiveSolution" << std::endl;
+  std::cerr << "input = " << *input << std::endl;
+  std::cerr << "bs    = " << *bs << std::endl;
+#endif
+
+  // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
+  BeliefSet& belief = (*bs)[my_id];
+  setEpsilon(belief);                
+
+  ///@todo: MD: just need to look at real local atoms
   for (int i=0; i<_iVariableCount; i++) 
     {
       assert(_aAssignment[i] != NON_VALUE);
       if (_aAssignment[i]) 
 	{
-	  dmcs::SignatureByLocal::const_iterator loc_it = mixed_sig->find(i+1);
+	  const SignatureByLocal& local_sig = boost::get<Tag::Local>(*sig);
+	  dmcs::SignatureByLocal::const_iterator loc_it = local_sig.find(i+1);
 	  
 	  // it must show up in the signature
-	  assert (loc_it != mixed_sig->end());
+	  assert (loc_it != local_sig.end());
 	  
 	  std::size_t cid = loc_it->ctxId - 1;
 	  
 	  // just to be safe
 	  assert (cid < system_size);
 	  
-	  dmcs::BeliefSet& belief = (*bs)[cid];
+	  BeliefSet& belief = (*bs)[cid];
 
 	  belief.set(loc_it->origId);
 	}
     }
+
+#ifdef DEBUG
+  std::cerr << "After adding result: bs = " << *bs << std::endl;
+#endif
 
   // now put this BeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, 0, MessageQueueFactory::OUT_MQ ,0);
@@ -95,28 +209,6 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 #ifdef DEBUG
   std::cerr << "Solution: " << *bs << std::endl;
 #endif
-}
-
-
-
-int
-RelSatSolver::solve()
-{
-  // read joined input from Joiner
-  std::size_t prio;
-  BeliefState* input;
-  input = mg->recvModel(MessageQueueFactory::JOIN_OUT_MQ, prio);
-
-  // now remove input part of the theory (from last solve)
-  xInstance->removeLastInput();
-
-  // then add input to the SATSolver's theory
-
-  // then we can do SAT solving
-
-  relsat_enum eResult = xSATSolver->eSolve();
-
-  return 10;
 }
 
 } // namespace dmcs

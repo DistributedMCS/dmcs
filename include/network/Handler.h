@@ -108,8 +108,9 @@ public:
 private:
   connection_ptr conn;
   boost::thread* output_thread;
-  std::string header;
-  std::size_t port;
+  std::string    header;
+  std::size_t    port;
+  bool           initialized;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 

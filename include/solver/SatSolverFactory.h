@@ -40,12 +40,18 @@ namespace dmcs {
 class SatSolverFactory
 {
 public:
-  SatSolverFactory(const TheoryPtr& theory_,
-		   const ProxySignatureByLocalPtr mixed_sig_,
+  SatSolverFactory(std::size_t my_id_,
+		   const TheoryPtr& theory_,
+		   //const ProxySignatureByLocalPtr mixed_sig_,
+		   const SignaturePtr& local_sig_,
+		   const BeliefStatePtr& localV_,
 		   std::size_t system_size_,
 		   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
-    : theory(theory_),
-      mixed_sig(mixed_sig_),
+    : my_id(my_id_),
+      theory(theory_),
+      //      mixed_sig(mixed_sig_),
+      local_sig(local_sig_),
+      localV(localV_),
       system_size(system_size_),
       mg(mg_)
   { }
@@ -55,8 +61,11 @@ public:
   create();
 
 private:
+  std::size_t                    my_id;
   const TheoryPtr                theory;
-  const ProxySignatureByLocalPtr mixed_sig;
+  const SignaturePtr             local_sig;
+  const BeliefStatePtr           localV;
+  //const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
@@ -66,7 +75,7 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(theory, mixed_sig, system_size, mg));
+  RelSatSolverPtr relsatsolver(new RelSatSolver(my_id, theory, local_sig, localV, system_size, mg));
 
   return relsatsolver;
 }

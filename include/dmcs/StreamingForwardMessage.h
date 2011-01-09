@@ -44,18 +44,27 @@ public:
   virtual ~StreamingForwardMessage() 
   {}
 
-  StreamingForwardMessage(std::size_t invoker_, std::size_t system_size)
-    : invoker(invoker_), conflict(new BeliefState(system_size, BeliefSet()))
+  StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_,
+			  std::size_t system_size)
+    : invoker(invoker_), pack_size(pack_size_),
+      conflict(new BeliefState(system_size, BeliefSet()))
   { }
 
-  StreamingForwardMessage(std::size_t invoker_, BeliefStatePtr conflict_)
-    : invoker(invoker_), conflict(conflict_)
+  StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_, 
+			  BeliefStatePtr conflict_)
+    : invoker(invoker_), pack_size(pack_size_), conflict(conflict_)
   { }
 
   std::size_t
   getInvoker() const
   {
     return invoker;
+  }
+
+  std::size_t
+  getPackSize() const
+  {
+    return pack_size;
   }
 
   BeliefStatePtr
@@ -70,11 +79,13 @@ public:
   serialize(Archive& ar, const unsigned int /* version */)
   {
     ar & invoker;
+    ar & pack_size;
     ar & conflict;
   }
 
 private:
   std::size_t invoker;     // ID of the invoking context
+  std::size_t pack_size;   // The number of models in a package that the invoker expects
   BeliefStatePtr conflict; // a conflict that the receiver should obey
 };
 
@@ -82,7 +93,8 @@ inline std::ostream&
 operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
 {
 
-  os << sfMess.getInvoker() << " ["
+  os << sfMess.getInvoker() << ", " 
+     << sfMess.getPackSize() << " ["
      << sfMess.getConflict() << "] ";
   
   return os;

@@ -48,8 +48,11 @@ namespace dmcs {
 class RelSatSolver : public BaseSolver
 {
 public:
-  RelSatSolver(const TheoryPtr& theory_,
-	       const ProxySignatureByLocalPtr& mixed_sig_,
+  RelSatSolver(std::size_t my_id_,
+	       const TheoryPtr& theory_,
+	       //	       const ProxySignatureByLocalPtr& mixed_sig_,
+	       const SignaturePtr& local_sig_,
+	       const BeliefStatePtr& localV_,
 	       std::size_t system_size_,
 	       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
@@ -58,17 +61,31 @@ public:
   int
   solve(const TheoryPtr& theory, std::size_t sig_size);
 
-  int
+  void
   solve();
+
+  void
+  receiveUNSAT();
 
   void
   receiveSolution(DomainValue* _aAssignment, int _iVariableCount);
 
 private:
+  void
+  prepare_input();
+
+  void
+  update_bridge_input(SignatureByCtx::const_iterator);
+
+private:
+  std::size_t                    my_id;
   const TheoryPtr                theory;
-  const ProxySignatureByLocalPtr mixed_sig;
-  std::size_t                    system_size;
+  const SignaturePtr             sig;
+  const BeliefStatePtr           localV;
+  //  const ProxySignatureByLocalPtr mixed_sig;
+  std::size_t                    system_size; // this can be taken from localV
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+  BeliefState*                   input;
 
   SATInstance*                   xInstance;
   SATSolver*                     xSATSolver;
