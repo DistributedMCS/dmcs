@@ -48,7 +48,8 @@ class NeighborInputThreadStarter
 {
 public:
   NeighborInputThreadStarter(const NeighborPtr& nb_, 
-			     std::size_t ctx_id_, std::size_t system_size);
+			     std::size_t ctx_id_, std::size_t system_size_,
+			     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
   void
   operator()();
@@ -57,6 +58,7 @@ private:
   const NeighborPtr nb;
   std::size_t ctx_id;
   std::size_t system_size;
+  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 
 
@@ -64,10 +66,13 @@ private:
 class JoinThreadStarter
 {
 public:
-  JoinThreadStarter();
+  JoinThreadStarter(boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
   void 
   operator()();
+
+private:
+  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 
 
@@ -89,10 +94,13 @@ private:
 class OutputThreadStarter
 {
 public:
-  OutputThreadStarter();
+  OutputThreadStarter(boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
   void
   operator()();
+
+private:
+  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 
 
@@ -101,7 +109,8 @@ class ThreadFactory
 {
 public:
   ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory_,
-		const ProxySignatureByLocalPtr& mixed_sig_);
+		const ProxySignatureByLocalPtr& mixed_sig_,
+		boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
   void
   createNeighborInputThreads(ThreadVecPtr);
@@ -119,6 +128,7 @@ private:
   const ContextPtr               context;
   const TheoryPtr                theory;
   const ProxySignatureByLocalPtr mixed_sig;
+  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 
 

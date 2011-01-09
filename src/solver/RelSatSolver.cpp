@@ -34,14 +34,16 @@ namespace dmcs {
 
 RelSatSolver::RelSatSolver(const TheoryPtr& theory_, 
 			   const ProxySignatureByLocalPtr& mixed_sig_,
-			   std::size_t system_size_)
+			   std::size_t system_size_,
+			   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
   : theory(theory_), 
     mixed_sig(mixed_sig_),
     system_size(system_size_),
+    mg(mg_),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this))
 {
-  std::cerr << "relsatsolver ctor: mixed_sig->size() " << mixed_sig->size() << std::endl;
+  xInstance->readTheory(theory, mixed_sig->size());
 }
 
 
@@ -53,8 +55,7 @@ RelSatSolver::~RelSatSolver()
 
 int
 RelSatSolver::solve(const TheoryPtr& theory, std::size_t sig_size)
-{
-}
+{ }
 
 
 
@@ -88,6 +89,9 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 	}
     }
 
+  // now put this BeliefState to the SatOutputMessageQueue
+  mg->sendModel(bs, 0, MessageQueueFactory::OUT_MQ ,0);
+
 #ifdef DEBUG
   std::cerr << "Solution: " << *bs << std::endl;
 #endif
@@ -98,21 +102,17 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 int
 RelSatSolver::solve()
 {
-  // read (conflict) from QueryMessageQueue
+  // read joined input from Joiner
+  std::size_t prio;
+  BeliefState* input;
+  input = mg->recvModel(MessageQueueFactory::JOIN_OUT_MQ, prio);
 
-  BeliefStatePtr conflict(new BeliefState(system_size, BeliefSet()));
+  // now remove input part of the theory (from last solve)
+  xInstance->removeLastInput();
 
-  if (!xInstance->hasTheory())
-    {
-      std::cerr << "RelSatSolver::solve()" << std::endl;
-      show();
+  // then add input to the SATSolver's theory
 
-      //      xInstance->readTheory(theory, mixed_sig->size());
-      xInstance->readTheory(theory, mixed_sig->size());
-    }
-
-  //return solve(theory, sig_size);
-
+  // then we can do SAT solving
 
   relsat_enum eResult = xSATSolver->eSolve();
 

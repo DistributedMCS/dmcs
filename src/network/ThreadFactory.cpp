@@ -38,10 +38,12 @@ namespace dmcs {
 
 NeighborInputThreadStarter::NeighborInputThreadStarter(const NeighborPtr& nb_, 
 						       std::size_t ctx_id_,
-						       std::size_t system_size_)
+						       std::size_t system_size_,
+						       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
   : nb(nb_),
     ctx_id(ctx_id_),
-    system_size(system_size_)
+    system_size(system_size_),
+    mg(mg_)
 { }
 
 
@@ -70,7 +72,8 @@ NeighborInputThreadStarter::operator()()
 
 
 
-JoinThreadStarter::JoinThreadStarter()
+JoinThreadStarter::JoinThreadStarter(boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+  : mg(mg_)
 { }
 
 
@@ -89,7 +92,6 @@ LocalSolverThreadStarter::LocalSolverThreadStarter(const RelSatSolverPtr& relsat
   : relsatsolver(relsatsolver_)
 {
   std::cerr << "LocalSolverThreadStarter::ctor" << std::endl;
-  relsatsolver->show();
 }
 
 
@@ -107,13 +109,12 @@ LocalSolverThreadStarter::operator()()
 #endif
 
   // (3)
-  relsatsolver->show();
   relsatsolver->solve();
 }
 
 
-// wait for MQGateway
-OutputThreadStarter::OutputThreadStarter()
+OutputThreadStarter::OutputThreadStarter(boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+  : mg(mg_)
 { }
 
 
@@ -129,8 +130,10 @@ OutputThreadStarter::operator()()
 
 
 ThreadFactory::ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory_,
-			     const ProxySignatureByLocalPtr& mixed_sig_)
-  : context(context_), theory(theory_), mixed_sig(mixed_sig_)
+			     const ProxySignatureByLocalPtr& mixed_sig_,
+			     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+  : context(context_), theory(theory_), 
+    mixed_sig(mixed_sig_), mg(mg_)
 { }
 
 
@@ -144,7 +147,7 @@ ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
   for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
     {
       const NeighborPtr nb = *it;
-      NeighborInputThreadStarter nits(nb, ctx_id, system_size);
+      NeighborInputThreadStarter nits(nb, ctx_id, system_size, mg);
       
       boost::thread* nit = new boost::thread(nits);
       neighbor_input_threads->push_back(nit);
@@ -154,7 +157,7 @@ ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
 boost::thread*
 ThreadFactory::createJoinThread()
 {
-  JoinThreadStarter dts;
+  JoinThreadStarter dts(mg);
   boost::thread* t = new boost::thread(dts);
 
   return t;
@@ -164,7 +167,7 @@ boost::thread*
 ThreadFactory::createLocalSolveThread()
 {
   std::size_t system_size = context->getSystemSize();
-  SatSolverFactory ssf(theory, mixed_sig, system_size);
+  SatSolverFactory ssf(theory, mixed_sig, system_size, mg);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
@@ -178,7 +181,7 @@ ThreadFactory::createLocalSolveThread()
 boost::thread*
 ThreadFactory::createOutputThread()
 {
-  OutputThreadStarter ots;
+  OutputThreadStarter ots(mg);
   boost::thread* t = new boost::thread(ots);
 
   return t;

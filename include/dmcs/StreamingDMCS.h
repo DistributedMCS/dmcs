@@ -68,27 +68,9 @@ public:
   bool
   start_up(const StreamingForwardMessage& mess, std::size_t port);
 
-  ContextPtr
-  getContext();
-
-  TheoryPtr
-  getTheory();
-
-  QueryPlanPtr
-  getQueryPlan();
-
-  SignatureVecPtr
-  getGlobalSigs();
-
 private:
   void
   start_threads(std::size_t invoker);
-
-  void
-  sendFirstRequest(const NeighborListPtr&);
-
-  void
-  localCompute(BeliefState*, BeliefState*);
 
 private:
   QueryPlanPtr query_plan;

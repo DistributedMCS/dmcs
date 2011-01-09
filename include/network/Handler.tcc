@@ -207,9 +207,6 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 #ifdef DEBUG
   std::cerr << "Handler<StreamingCommandType>::Handler, going to read message" << std::endl;
 #endif
-  OutputThreadStarter ots;
-  output_thread = new boost::thread(ots);
-
   // get the unique ID from connection for creating a message gateway just for this connection
   boost::asio::ip::tcp::socket& sock = conn->socket();
   boost::asio::ip::tcp::endpoint ep = sock.remote_endpoint(); 
@@ -220,6 +217,8 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 #endif
 
   mg = MessageQueueFactory().createMessagingGateway(port);
+  OutputThreadStarter ots(mg);
+  output_thread = new boost::thread(ots);
 
   SessionMsgPtr sesh(new SessionMsg(conn));
 

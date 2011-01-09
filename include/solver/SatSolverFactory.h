@@ -42,11 +42,12 @@ class SatSolverFactory
 public:
   SatSolverFactory(const TheoryPtr& theory_,
 		   const ProxySignatureByLocalPtr mixed_sig_,
-		   std::size_t system_size_)
+		   std::size_t system_size_,
+		   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
     : theory(theory_),
       mixed_sig(mixed_sig_),
-      system_size(system_size_)
-
+      system_size(system_size_),
+      mg(mg_)
   { }
 
   template<typename aSatSolverTypePtr>
@@ -57,6 +58,7 @@ private:
   const TheoryPtr                theory;
   const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;
+  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 
 
@@ -64,7 +66,7 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(theory, mixed_sig, system_size));
+  RelSatSolverPtr relsatsolver(new RelSatSolver(theory, mixed_sig, system_size, mg));
 
   return relsatsolver;
 }

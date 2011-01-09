@@ -29,7 +29,9 @@
 
 #include "BaseSolver.h"
 #include "dmcs/Context.h"
-#include "dmcs/QueryPlan.h"
+#include "solver/Conflict.h"
+#include "mcs/ProxySignatureByLocal.h"
+#include "network/MessageQueueFactory.h"
 
 #include "relsat-20070104/SATInstance.h"
 #include "relsat-20070104/SATSolver.h"
@@ -48,7 +50,8 @@ class RelSatSolver : public BaseSolver
 public:
   RelSatSolver(const TheoryPtr& theory_,
 	       const ProxySignatureByLocalPtr& mixed_sig_,
-	       std::size_t system_size_);
+	       std::size_t system_size_,
+	       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
   ~RelSatSolver();
 
@@ -61,17 +64,11 @@ public:
   void
   receiveSolution(DomainValue* _aAssignment, int _iVariableCount);
 
-  void
-  show()
-  {
-    std::cerr << "mixed_sig        = " << mixed_sig << std::endl;
-    std::cerr << "mixed_sig.size() = " << mixed_sig->size() << std::endl;
-  }
-
 private:
   const TheoryPtr                theory;
   const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;
+  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 
   SATInstance*                   xInstance;
   SATSolver*                     xSATSolver;
