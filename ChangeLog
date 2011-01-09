@@ -1,3 +1,18 @@
+2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/ThreadFactory.h: Add MessageGateway everywhere.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+
+	* include/network/MessageQueueFactory.h: Add starting point for
+	neighbors' message queues.
+
+	* include/dmcs/StreamingDMCS.h: Remove X-Mas leftover casserole.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
 2011-01-08  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/MessageQueueFactory.h: Fix MQIDs.
