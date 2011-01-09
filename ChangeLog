@@ -1,3 +1,16 @@
+2011-01-09  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueue.h: Add inter-thread
+	message queue based on boost::condition, avoids persistent
+	boost::message_queue.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* src/network/Makefile.am: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/Makefile.am: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+
 2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/ThreadFactory.h: Add MessageGateway everywhere.

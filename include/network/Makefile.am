@@ -4,11 +4,14 @@ AUTOMAKE_OPTIONS = gnu
 noinst_HEADERS =  \
 		Client.h \
 		Client.tcc \
+		ConcurrentMessageDispatcher.h \
+		ConcurrentMessageQueue.h \
+		ConcurrentMessageQueueFactory.h \
 		Handler.h \
 		Handler.tcc \
+		MessageDispatcher.h \
 		MessageQueue.h \
 		MessageQueueFactory.h \
-		MessageDispatcher.h \
 		MessagingGateway.h \
 		Server.h \
 		Session.h \

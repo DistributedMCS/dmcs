@@ -34,6 +34,8 @@ libnetwork_a_SOURCES = \
 
 # the THREADS library
 libthreads_a_SOURCES = \
+		ConcurrentMessageDispatcher.cpp \
+		ConcurrentMessageQueueFactory.cpp \
 		MessageDispatcher.cpp \
 		MessageQueueFactory.cpp \
 		ThreadFactory.cpp
