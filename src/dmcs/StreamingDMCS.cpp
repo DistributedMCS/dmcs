@@ -78,61 +78,6 @@ StreamingDMCS::~StreamingDMCS()
 
 
 
-ContextPtr
-StreamingDMCS::getContext()
-{
-  return ctx;
-}
-
-
-
-TheoryPtr
-StreamingDMCS::getTheory()
-{
-  return theory;
-}
-
-
-QueryPlanPtr
-StreamingDMCS::getQueryPlan()
-{
-  return query_plan;
-}
-
-
-
-SignatureVecPtr
-StreamingDMCS::getGlobalSigs()
-{
-  return global_sigs;
-}
-
-
-
-/*
-bool
-StreamingDMCS::handleFirstRequest(const StreamingForwardMessage& mess)
-{
-  const std::size_t c = mess.getInvoker();
-
-#if defined(DEBUG)
-  std::cerr << "context " << c << " is calling context " << my_id << std::endl;
-#endif // DEBUG
-
-  const NeighborListPtr& nb = query_plan->getNeighbors(my_id);
-  
-  if (nb->size() == 0) // this is a leaf context
-    {
-      // local compute without input
-    }
-  else // this is an intermediate context
-    {
-      // send request to neighbors
-      //sendFirstRequest(nb);
-    }
-}
-*/
-
 
 
 void
@@ -156,7 +101,7 @@ StreamingDMCS::start_threads(std::size_t invoker)
 
   std::cerr << "StreamingDMCS::start_threads. mixed_sig.size() = " << mixed_sig->size() << std::endl;
 
-  ThreadFactory tf(ctx, theory, mixed_sig);
+  ThreadFactory tf(ctx, theory, mixed_sig, mg);
 
   tf.createNeighborInputThreads(neighbor_input_threads);
   dmcs_thread   = tf.createJoinThread();
@@ -195,7 +140,7 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
       std::cerr << "StreamingDMCS::start_up. Intermediate context. Send requests to neighbors by placing a message in each of the NeighborQueryMQ" << std::endl;
 #endif
 
-      const std::size_t off = MessageQueueFactory::JOIN_IN_MQ + 1 + no_nbs;
+      const std::size_t off = MessageQueueFactory::NEIGHBOR_MQ + no_nbs;
 
       // send requests to neighbors by placing a message in each of the NeighborQueryMQ
       for (std::size_t i = off; i < off + no_nbs; ++i)
@@ -223,16 +168,6 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess, std::size_t port)
   return start_up(mess);
 }
 
-void
-StreamingDMCS::localCompute(BeliefState* input, BeliefState* conflict)
-{
-  // remove input clauses from previous localCompute
-
-  // add input and conflict (in the same shape of BeliefState, but have different meanings)
-  // input: facts 
-
-  // conflict: clause
-}
 
 } // namespace dmcs
 
