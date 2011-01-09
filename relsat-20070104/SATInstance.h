@@ -50,6 +50,9 @@ public:
   void
   removeLastInput();
 
+  void
+  add_unit_clause(int literal);
+
 private:
   std::size_t orig_theory_size;
   std::size_t theory_w_conflict_size;

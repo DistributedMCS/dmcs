@@ -83,11 +83,13 @@ relsat_enum SATSolver::eSolve()
   _iBranchSelections = _iVariablesLabeled = _iContradictions = 0;
   if (!_bInitialize()) {
     eReturn = UNSAT;
+    wrapper->receiveUNSAT();
   }
   else {
     // Here we do an initial unit propagation to handle base unit clauses.
     if (_bUnitPropagate()) {
       eReturn = UNSAT;
+      wrapper->receiveUNSAT();
     }
     else {
       boolean bFailed_;
@@ -107,6 +109,7 @@ relsat_enum SATSolver::eSolve()
       }
       else {
 	eReturn = UNSAT;
+	wrapper->receiveUNSAT();
       }
     }
   }
@@ -220,11 +223,13 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
       if (_iCurrentVariable == _iVariableCount) {
         if (_bOutputSolution()) {
 	  xOutputStream << "c   Solution limit reached. " << endl;
+	  wrapper->receiveUNSAT();
 	  return bReturnValue;
 	}
       }
       if (_bSpecialBackup()) {
 	xOutputStream << "c   All solutions found." << endl;
+	wrapper->receiveUNSAT();
 	return bReturnValue;
       }
     }

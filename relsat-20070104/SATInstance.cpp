@@ -181,6 +181,32 @@ SATInstance::removeLastInput()
 
 
 
+void
+SATInstance::add_unit_clause(int literal)
+{
+  VariableSet xPositiveVariables(iVariableCount);
+  VariableSet xNegativeVariables(iVariableCount);
+  
+  assert (literal != 0);
+  
+  if (literal > 0)
+    {
+      assert (literal <= iVariableCount);
+      xPositiveVariables.vAddVariable(literal-1);
+    }
+  else
+    {
+      assert (-literal <= iVariableCount);
+      xNegativeVariables.vAddVariable(0-(literal+1));
+    }
+
+  Clause* pNewConstraint = new Clause((VariableList&)xPositiveVariables, 
+				      (VariableList&)xNegativeVariables,
+				      1);
+  vAddClause(pNewConstraint); // _iClauseCount is updated inside vAddClause
+}
+
+
 boolean SATInstance::bReadDimacs(istream& xInputFile)
 {
   xOutputStream << "c Reading instance..." << flush;

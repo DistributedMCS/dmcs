@@ -1,5 +1,12 @@
 2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* SATSolver.cpp: Add notification to the wrapper in case of UNSAT
+	or EOF (considered the same from outside).
+
+	* SATInstance.cpp: Support adding facts (from
+	neighbors' input) into relsat.
+	* SATInstance.h: Likewise.
+
 	* SATSolver.cpp: Remove X-Mas leftover casserole.
 
 	* SATInstance.h: Add support for removing input for the next computation.
