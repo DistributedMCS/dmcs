@@ -31,7 +31,7 @@
 #include "dmcs/Context.h"
 #include "solver/Conflict.h"
 #include "mcs/ProxySignatureByLocal.h"
-#include "network/MessageQueueFactory.h"
+#include "network/ConcurrentMessageQueueFactory.h"
 
 #include "relsat-20070104/SATInstance.h"
 #include "relsat-20070104/SATSolver.h"

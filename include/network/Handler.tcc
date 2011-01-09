@@ -233,7 +233,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 	  boost::asio::ip::tcp::endpoint ep = sock.remote_endpoint(); 
 	  port = ep.port();
 
-	  mg = MessageQueueFactory().createMessagingGateway(port);
+	  mg = ConcurrentMessageQueueFactory::instance().createMessagingGateway(port);
 
 	  std::size_t pack_size = sesh->mess.getPackSize();
 	  OutputThreadStarter ots(conn, pack_size, mg);

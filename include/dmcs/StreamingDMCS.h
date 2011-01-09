@@ -37,7 +37,7 @@
 #include "dmcs/ReturnMessage.h"
 #include "dmcs/Cache.h"
 #include "dmcs/QueryPlan.h"
-#include "network/MessageQueueFactory.h"
+#include "network/ConcurrentMessageQueueFactory.h"
 #include "network/ThreadFactory.h"
 #include "mcs/Theory.h"
 #include "solver/Conflict.h"

@@ -134,7 +134,7 @@ OutputThreadStarter::collect_output(const boost::system::error_code& e)
 	  std::size_t prio = 0;
 	  BeliefState* bs;
 	  
-	  bs = mg->recvModel(MessageQueueFactory::OUT_MQ, prio);
+	  bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio);
 	  
 	  if (bs == 0)
 	    // either UNSAT of EOF
@@ -205,7 +205,7 @@ OutputThreadStarter::operator()()
       std::size_t prio = 0;
       BeliefState* bs;
 
-      bs = mg->recvModel(MessageQueueFactory::OUT_MQ, prio);
+      bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio);
 
       if (bs == 0)
 	// either UNSAT of EOF

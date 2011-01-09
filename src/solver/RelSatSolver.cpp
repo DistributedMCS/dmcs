@@ -106,7 +106,7 @@ RelSatSolver::prepare_input()
   // read joined input from Joiner. We need to keep the input to build
   // complete model wrt the interface
   std::size_t prio = 0;
-  input = mg->recvModel(MessageQueueFactory::JOIN_OUT_MQ, prio);
+  input = mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio);
   std::cerr << "RelSatSolver::input received!" << std::endl;
 
   // then add input to the SATSolver's theory. We only add the atoms
@@ -152,7 +152,7 @@ RelSatSolver::receiveUNSAT()
 {
   // send a NULL pointer to the SatOutputMessageQueue
   BeliefState* bs = 0;
-  mg->sendModel(bs, 0, MessageQueueFactory::OUT_MQ ,0);
+  mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 
 #ifdef DEBUG
   std::cerr << "NO MORE SOLUTION! " << std::endl;
@@ -204,7 +204,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 #endif
 
   // now put this BeliefState to the SatOutputMessageQueue
-  mg->sendModel(bs, 0, MessageQueueFactory::OUT_MQ ,0);
+  mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 
 #ifdef DEBUG
   std::cerr << "Solution: " << *bs << std::endl;

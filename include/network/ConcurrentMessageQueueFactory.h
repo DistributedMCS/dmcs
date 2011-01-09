@@ -72,11 +72,12 @@ namespace dmcs {
     /// MQ offsets
     enum MQIDs
       {
-	IN_MQ = 0, // parent context sent conflict
-	OUT_MQ, // solver created belief state
+	IN_MQ = 0,   // parent context sent conflict
+	OUT_MQ,      // solver created belief state
 	CONFLICT_MQ, // solver created conflict
 	JOIN_OUT_MQ, // joiner created belief state
-	JOIN_IN_MQ // neighbor i created k partial equilibria
+	JOIN_IN_MQ,  // neighbor i created k partial equilibria
+	NEIGHBOR_MQ
       };
 
 

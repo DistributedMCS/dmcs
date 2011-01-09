@@ -133,7 +133,7 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
       // put an empty model into SatInputMQ to start the SAT solver without input
       std::size_t system_size = ctx->getSystemSize();
       BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
-      mg->sendModel(empty_model, 0, MessageQueueFactory::JOIN_OUT_MQ, 0);
+      mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
 #ifdef DEBUG
       std::cerr << "StreamingDMCS::start_up. Finished writing" << std::endl;
 #endif      
@@ -144,7 +144,7 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
       std::cerr << "StreamingDMCS::start_up. Intermediate context. Send requests to neighbors by placing a message in each of the NeighborQueryMQ" << std::endl;
 #endif
 
-      const std::size_t off = MessageQueueFactory::NEIGHBOR_MQ + no_nbs;
+      const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + no_nbs;
 
       // send requests to neighbors by placing a message in each of the NeighborQueryMQ
       for (std::size_t i = off; i < off + no_nbs; ++i)
@@ -165,7 +165,7 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess, std::size_t port)
     {
       std::cerr << "Here create mqs" << std::endl;
       const NeighborListPtr& nb = ctx->getNeighbors();
-      mg = MessageQueueFactory().createMessagingGateway(port, nb->size());
+      mg = ConcurrentMessageQueueFactory::instance().createMessagingGateway(port, nb->size());
       mqs_created = true;
     }
 

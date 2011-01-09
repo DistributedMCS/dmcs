@@ -31,7 +31,7 @@
 #define HANDLER_H
 
 #include "network/connection.hpp"
-#include "network/MessageQueueFactory.h"
+#include "network/ConcurrentMessageQueueFactory.h"
 #include "network/Session.h"
 #include "network/ThreadFactory.h"
 #include "dmcs/CommandType.h"
