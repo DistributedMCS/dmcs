@@ -1,3 +1,26 @@
+2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/solver/SatSolverFactory.h: Use local_sig instead of mixed_sig.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/solver/RelSatSolver.h: Push input into relsat.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/Handler.h: Initialize threads and message
+	gateways once.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/mcs/BeliefState.h: Add vector of pointers of BeliefState.
+
+	* include/dmcs/StreamingDMCS.h: Make use of pack_size.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/dmcs/ProgramOptions.h: Add PACK_SIZE option.
+
+
 2011-01-09  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/ConcurrentMessageQueue.h: Add inter-thread
@@ -12,6 +35,9 @@
 	* testsuite/testMessagingGateway.cpp: Likewise.
 
 2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingBackwardDMCS.h: New file.
+	* include/dmcs/Makefile.am: Add StreamingBackwardDMCS.h
 
 	* include/network/ThreadFactory.h: Add MessageGateway everywhere.
 	* src/network/ThreadFactory.cpp: Likewise.
