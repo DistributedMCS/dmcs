@@ -1,5 +1,10 @@
 2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/solver/RelSatSolver.cpp: Fix Segfault. 
+
+	* include/network/Handler.h: Bring first_call flag along.
+	* include/network/Handler.tcc: Likewise.
+
 	* include/dmcs/StreamingDMCS.h: Use ConcurrentMessageQueue thingy.
 	* src/solver/RelSatSolver.cpp: Likewise.
 	* src/network/ThreadFactory.cpp: Likewise.
@@ -7,6 +12,8 @@
 	* include/solver/RelSatSolver.h: Likewise.
 	* include/network/Handler.tcc: Likewise.
 	* include/network/Handler.h: Likewise.
+
+
 	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
 
 	* include/solver/SatSolverFactory.h: Use local_sig instead of mixed_sig.

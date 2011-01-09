@@ -100,17 +100,15 @@ public:
   Handler(StreamingCommandTypePtr cmd, connection_ptr conn_);
 
   void 
-  do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd);
+  do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call);
 
   void
-  handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd);
+  handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call);
 
 private:
   connection_ptr conn;
   boost::thread* output_thread;
   std::string    header;
-  std::size_t    port;
-  bool           initialized;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 

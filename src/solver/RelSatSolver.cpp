@@ -173,7 +173,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 #endif
 
   // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
-  BeliefSet& belief = (*bs)[my_id];
+  BeliefSet& belief = (*bs)[my_id-1];
   setEpsilon(belief);                
 
   ///@todo: MD: just need to look at real local atoms

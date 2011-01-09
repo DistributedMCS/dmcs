@@ -202,8 +202,7 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 
 // specialized methods for streaming dmcs
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
-  : conn(conn_),
-    initialized(false)
+  : conn(conn_)
 { 
 #ifdef DEBUG
   std::cerr << "Handler<StreamingCommandType>::Handler, going to read message" << std::endl;
@@ -213,33 +212,33 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 
   conn->async_read(sesh->mess,
 		   boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
-			       boost::asio::placeholders::error, sesh, cmd)
+			       boost::asio::placeholders::error, sesh, cmd, true)
 		   );
 }
 
 
 void
-Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd)
+Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call)
 {
   if (!e)
     {
-      if (!initialized)
+      // get the unique ID from connection for creating a message gateway just for this connection
+      boost::asio::ip::tcp::socket& sock = sesh->conn->socket();
+      boost::asio::ip::tcp::endpoint ep = sock.remote_endpoint(); 
+      std::size_t port = ep.port();
+
+      if (first_call)
 	{
 #ifdef DEBUG
 	  std::cerr << "First and only initialization." << std::endl;
 #endif	
-	  // get the unique ID from connection for creating a message gateway just for this connection
-	  boost::asio::ip::tcp::socket& sock = sesh->conn->socket();
-	  boost::asio::ip::tcp::endpoint ep = sock.remote_endpoint(); 
-	  port = ep.port();
-
+	  std::cerr << "create mg" << std::endl;
 	  mg = ConcurrentMessageQueueFactory::instance().createMessagingGateway(port);
 
+	  std::cerr << "create output thread" << std::endl;
 	  std::size_t pack_size = sesh->mess.getPackSize();
 	  OutputThreadStarter ots(conn, pack_size, mg);
 	  output_thread = new boost::thread(ots);
-
-	  initialized = true;
 	}
 
       // write sesh->mess to QueryMessageQueue
@@ -250,7 +249,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
   
       sesh->conn->async_read(header,
 			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
-					 boost::asio::placeholders::error, sesh, cmd)
+					 boost::asio::placeholders::error, sesh, cmd, false)
 			     );
     }
   else
@@ -264,7 +263,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 
 
 void
-Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd)
+Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool /* first_call */)
 {
   if (!e)
     {
@@ -272,7 +271,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
       
       sesh->conn->async_read(sesh->mess,
 			     boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
-					 boost::asio::placeholders::error, sesh, cmd)
+					 boost::asio::placeholders::error, sesh, cmd, false)
 			     );
     }
   else
