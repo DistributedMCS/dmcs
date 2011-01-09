@@ -1,3 +1,10 @@
+2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.cpp: Remove X-Mas leftover casserole.
+
+	* SATInstance.h: Add support for removing input for the next computation.
+	* SATInstance.cpp: Likewise.
+
 2011-01-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* Makefile.am: Add path so that RelSatSolver.h can be included.
@@ -14,14 +21,14 @@
 	clauses of relsat.
 	* SATInstance.cpp: Likewise.
 
-	* ClauseList.cpp (vRemoveDeletedClauses): New method. Will be used
+	* ClauseList.cpp (vRemoveBack): New method. Will be used
 	later to refresh the SAT solver by removing
 	constraints/facts/conflicts from the last call.
 	* ClauseList.h: Likewise.
 
 2011-01-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
-	* SATSolver.h:Remove MQ, wait for MQGateway.
+	* SATSolver.h: Remove MQ, wait for MQGateway.
 	* SATSolver.cpp: Likewise.
 
 	* SATSolver.cpp: Fix . to -> of local_sig.

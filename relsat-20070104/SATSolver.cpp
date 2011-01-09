@@ -281,64 +281,6 @@ boolean SATSolver::_bOutputSolution()
   return 0;
 }
 
-
-// feed relsat's model into a BeliefState
-/*boolean
-SATSolver::_bOutputBeliefState()
-{
-  std::cerr << "SATSolver::_bOutputBeliefState(), _iVariableCount = " << _iVariableCount << std::endl;
-
-  _iSolutionCount++;
-
-  std::cerr << "Make bs, system_size = " << system_size << std::endl;
-
-  dmcs::BeliefState* bs = new dmcs::BeliefState(system_size, dmcs::BeliefSet());
-
-  std::cerr << "done" << std::endl;
-
-  for (int i = 0; i < _iVariableCount; ++i)
-    {
-      std::cerr << "i = " << i << std::endl;
-      assert(_aAssignment[i] != NON_VALUE);
-
-      if (_aAssignment[i])
-	{
-	  std::cerr << "Check local_sig" << std::endl;
-	  dmcs::SignatureByLocal::const_iterator loc_it = mixed_sig->find(i);
-	  std::cerr << "done" << std::endl;
-	  
-	  // it must show up in the signature
-	  assert (loc_it != mixed_sig->end());
-	  
-	  std::size_t cid = loc_it->ctxId - 1;
-	  
-	  // just to be safe
-	  assert (cid < system_size);
-	  
-	  dmcs::BeliefSet& belief = (*bs)[cid];
-
-	  belief.set(loc_it->origId);
-	}
-    }
-
-  using namespace dmcs;
-  std::cerr << "Solution " << _iSolutionCount << ": " << *bs << std::endl;
-
-  // put the computed BeliefState in to message queue.
-
-  // The queue will be blocked when it's full. We exploy this property
-  // to have automatic streaming of models.
-
-  dmcs::BeliefState** address_bs = &bs;
-  //  mq->send(address_bs, sizeof(bs), 0);
-
-  if (_bFindAll && _iSolutionCount >= _iMaxSolutions && _iMaxSolutions) {
-    return 1;
-  }
-  return 0;
-}*/
-
-
 boolean SATSolver::_bVerifySolution()
 {
   // returns 1 if solution checks out OK

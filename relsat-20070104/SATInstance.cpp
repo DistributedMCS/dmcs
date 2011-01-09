@@ -159,20 +159,24 @@ SATInstance::readTheory(const dmcs::TheoryPtr& theory, std::size_t sig_size)
 					      (VariableList&)xNegativeVariables,
 					      1);
 	  pNewConstraint->vSortVariableList();
-	  vAddClause(pNewConstraint);
+	  vAddClause(pNewConstraint); // _iClauseCount is updated inside vAddClause
 	}
 
 
     } // for (dmcs::Theory::const_iterator it = ...
 
+  orig_theory_size = _iClauseCount;
+  theory_w_conflict_size = orig_theory_size; // for the moment, when
+					     // we haven't considered
+					     // pushing conflicts
 }
 
 
 
-bool 
-SATInstance::hasTheory()
+void
+SATInstance::removeLastInput()
 {
-  return ( _iClauseCount > 0 );
+  vRemoveBack(theory_w_conflict_size);
 }
 
 

@@ -47,8 +47,12 @@ public:
   void
   readTheory(const dmcs::TheoryPtr& theory, std::size_t sig_size);
 
-  bool
-  hasTheory();
+  void
+  removeLastInput();
+
+private:
+  std::size_t orig_theory_size;
+  std::size_t theory_w_conflict_size;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
