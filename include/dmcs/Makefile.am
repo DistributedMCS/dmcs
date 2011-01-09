@@ -25,4 +25,5 @@ noinst_HEADERS =  \
 		StatsInfo.h \
 		StreamingCommandType.h \
 		StreamingDMCS.h \
-		StreamingForwardMessage.h
+		StreamingForwardMessage.h \
+		StreamingBackwardMessage.h
