@@ -44,6 +44,10 @@ public:
   virtual ~StreamingForwardMessage() 
   {}
 
+  StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_)
+    : invoker(invoker_), pack_size(pack_size_)
+  { }
+
   StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_,
 			  std::size_t system_size)
     : invoker(invoker_), pack_size(pack_size_),
@@ -73,6 +77,12 @@ public:
     return conflict;
   }
 
+  void
+  setConflict(Conflict* conflict_)
+  {
+    conflict = conflict_;
+  }
+
 public:
   template <typename Archive>
   void
@@ -99,6 +109,8 @@ operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
   
   return os;
 }
+
+typedef boost::shared_ptr<StreamingForwardMessage> StreamingForwardMessagePtr;
 
 } // namespace dmcs
 

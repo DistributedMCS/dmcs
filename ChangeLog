@@ -1,5 +1,31 @@
 2011-01-10  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/solver/RelSatSolver.cpp: Send 0 instead of *bs = 0.
+
+	* src/network/ThreadFactory.cpp: Check the outcome of result from
+	MQ.
+
+	* include/network/ThreadFactory.h: Let client be a member, again,
+	for keeping information.
+
+	* include/network/Server.h: Remove &. Fix losing information.
+
+	* include/network/Handler.h: Let OutputThread be a member, for
+	the sake of keeping value of other passed around information.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/AsynClient.h: Add handle_answer.
+	* include/network/AsynClient.tcc: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Construct without
+	conflict and set conflict later.
+
+	* include/dmcs/StreamingBackwardMessage.h: Remove const result so
+	that the serialization works.
+
+	* include/dmcs/CommandTypeFactory.h: Reference for the
+	constructor.
+
 	* src/network/ThreadFactory.cpp: Use AsynClient for neighbors' thread.
 
 	* include/network/Client.h: Inherit from BaseClient.

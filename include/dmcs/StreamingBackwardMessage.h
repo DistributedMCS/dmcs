@@ -33,6 +33,9 @@
 #include "Message.h"
 #include "mcs/BeliefState.h"
 
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+
 namespace dmcs {
 
 class StreamingBackwardMessage : public Message
@@ -45,7 +48,7 @@ public:
   virtual ~StreamingBackwardMessage() 
   { }
 
-  StreamingBackwardMessage(const BeliefStateVecPtr& result_)
+  StreamingBackwardMessage(BeliefStateVecPtr& result_)
     : result(result_)
   { }
 
@@ -64,7 +67,7 @@ public:
   }
 
 private:
-  const BeliefStateVecPtr result;
+  BeliefStateVecPtr result;
 };
 
 inline std::ostream&
@@ -79,6 +82,8 @@ operator<< (std::ostream& os, const StreamingBackwardMessage& sbMess)
 
   return os;
 }
+
+typedef boost::shared_ptr<StreamingBackwardMessage> StreamingBackwardMessagePtr;
 
 } // namespace dmcs
 

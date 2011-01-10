@@ -81,7 +81,7 @@ public:
 
 
 private:
-  CommandTypeFactoryPtr& ctf;
+  CommandTypeFactoryPtr ctf;
   boost::asio::io_service& io_service_;
   boost::asio::ip::tcp::acceptor acceptor_;
   std::string header;

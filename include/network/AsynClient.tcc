@@ -35,6 +35,8 @@
 #endif
 
 #include "mcs/Theory.h"
+#include "dmcs/StreamingBackwardMessage.h"
+#include "dmcs/StreamingForwardMessage.h"
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -43,20 +45,26 @@
 
 namespace dmcs {
 
-template<typename InputType>
-AsynClient<InputType>::AsynClient(boost::asio::io_service& io_service,
-			  boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-			  const std::string& my_header_,
-			  InputType& mess_)
+template<typename ForwardMessType, typename BackwardMessType>
+AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_service& io_service,
+							  boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+							  const std::string& my_header_,
+							  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_,
+							  const NeighborPtr& nb_,
+							  std::size_t ctx_id_,
+							  std::size_t index_,
+							  std::size_t pack_size_)
   : BaseClient(io_service, endpoint_iterator, my_header_),
-    mess(mess_)
+    mg(mg_), nb(nb_), 
+    ctx_id(ctx_id_), index(index_), pack_size(pack_size_),
+    mess(ctx_id_, pack_size_)
+    
 {
+  std::cerr << "AsynClient::AsynClient. pack_size = " << pack_size << std::endl;
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 
 #if defined(DEBUG)
-  std::cerr << "AsynClient::AsynClient()  " << endpoint << std::endl
-	    << "Header to send  = " << my_header << std::endl
-	    << "Message to send = " << mess << std::endl;
+  std::cerr << "AsynClient::AsynClient()  " << endpoint << std::endl;
 #endif //DEBUG
 
   conn->socket().async_connect(endpoint,
@@ -67,32 +75,32 @@ AsynClient<InputType>::AsynClient(boost::asio::io_service& io_service,
 
 
 
-template<typename InputType>
+template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<InputType>::send_header(const boost::system::error_code& error,
-			     boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
+AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::error_code& error,
+							       boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
 {
-#ifdef DEBUG
-  std::cerr << "AsynClient::send_header" << std::endl;
-#endif
-
   if (!error)
     {
-      // first send the header so that the neighbor can recognize what
-      // kind of message will be sent. Notice that the neighbor
-      // receives just characters; hence, without the header, he won't
-      // be able to choose the proper type for the message.
+      // The connection is now established successfully
+      std::size_t prio = 0;
+      std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index + 1;
+      
+#ifdef DEBUG
+      std::cerr << "AsynClient::collect_message. offset = " << off << std::endl;
+#endif
 
+      Conflict* conflict;
+      conflict = mg->recvConflict(off, prio);
+      mess.setConflict(conflict);
+	
+#if defined(DEBUG)
+      std::cerr << "Send request to neighbor " << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port << std::endl;
+#endif // DEBUG
+	
       conn->async_write(my_header, boost::bind(&AsynClient::send_message, this,
 					       boost::asio::placeholders::error, conn));
-
-      /*
-      std::vector<char> write_buf(my_header.begin(), my_header.end());
-      std::cerr << "write_buf.size() = " << write_buf.size() << std::endl;
       
-      boost::asio::async_write(conn->socket(), boost::asio::buffer(write_buf),
-			       boost::bind(&AsynClient::send_message, this,
-			       boost::asio::placeholders::error, conn));*/
     }
   else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator())
     {
@@ -107,15 +115,15 @@ AsynClient<InputType>::send_header(const boost::system::error_code& error,
     }
   else
     {
-      std::cerr << "AsynClient::send_header: " << error.message() << std::endl;
+      std::cerr << "AsynClient::collect_message: " << error.message() << std::endl;
     }
 }
 
 
 
-template<typename InputType>
+template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<InputType>::send_message(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::send_message(const boost::system::error_code& error, connection_ptr conn)
 {
 #ifdef DEBUG
   std::cerr << "AsynClient::send_message" << std::endl;
@@ -123,7 +131,7 @@ AsynClient<InputType>::send_message(const boost::system::error_code& error, conn
 
   if (!error)
     {
-      std::cerr << mess << std::endl;
+      std::cerr << "neighborMess = " << mess << std::endl;
       conn->async_write(mess,
 			boost::bind(&AsynClient::read_header, this,
 				    boost::asio::placeholders::error, conn));
@@ -136,9 +144,9 @@ AsynClient<InputType>::send_message(const boost::system::error_code& error, conn
 
 
 
-template<typename InputType>
+template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<InputType>::read_header(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::read_header(const boost::system::error_code& error, connection_ptr conn)
 {
   if (!error)
     {
@@ -158,9 +166,9 @@ AsynClient<InputType>::read_header(const boost::system::error_code& error, conne
 }
 
 
-template<typename InputType>
+template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<InputType>::handle_read_header(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::system::error_code& error, connection_ptr conn)
 {
   if (!error)
     {
@@ -185,9 +193,9 @@ AsynClient<InputType>::handle_read_header(const boost::system::error_code& error
     }
 }
 
-template<typename InputType>
+template<typename ForwardMessType, typename BackwardMessType>
 void 
-AsynClient<InputType>::read_answer(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::read_answer(const boost::system::error_code& error, connection_ptr conn)
 {
   if (!error)
     {
@@ -195,9 +203,9 @@ AsynClient<InputType>::read_answer(const boost::system::error_code& error, conne
       std::cerr << "AsynClient::read_answer" << std::endl;
 #endif //DEBUG
 
-      /*      conn->async_read(result,
-		       boost::bind(&AsynClient::read_header, this,
-		       boost::asio::placeholders::error, conn));*/
+      conn->async_read(result,
+		       boost::bind(&AsynClient::handle_answer, this,
+		       boost::asio::placeholders::error, conn));
     }
   else
     {
@@ -206,9 +214,34 @@ AsynClient<InputType>::read_answer(const boost::system::error_code& error, conne
     }
 }
 
-template<typename InputType>
+
+
+template<typename ForwardMessType, typename BackwardMessType>
+void 
+AsynClient<ForwardMessType, BackwardMessType>::handle_answer(const boost::system::error_code& error, connection_ptr conn)
+{
+  if (!error)
+    {
+#if defined(DEBUG)
+      std::cerr << "AsynClient::handle_answer" << std::endl;
+#endif //DEBUG
+
+      std::cerr << result << std::endl;
+
+      read_header(boost::system::error_code(), conn);
+    }
+  else
+    {
+      std::cerr << "AsynClient::handle_answer: " << error.message() << std::endl;
+      throw std::runtime_error(error.message());
+    }
+}
+
+
+
+template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<InputType>::finalize(const boost::system::error_code& error, connection_ptr /* conn */)
+AsynClient<ForwardMessType, BackwardMessType>::finalize(const boost::system::error_code& error, connection_ptr /* conn */)
 {
   if (!error)
     {

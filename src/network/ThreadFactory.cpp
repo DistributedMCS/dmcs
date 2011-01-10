@@ -49,40 +49,25 @@ NeighborInputThreadStarter::NeighborInputThreadStarter(const NeighborPtr& nb_,
     index(index_),
     system_size(system_size_),
     mg(mg_)
-{ }
+{
+
+}
 
 
 void
 NeighborInputThreadStarter::operator()()
 {
-  std::size_t prio = 0;
-  std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index + 1;
+  boost::asio::io_service io_service;
+  boost::asio::ip::tcp::resolver resolver(io_service);
+  boost::asio::ip::tcp::resolver::query query(nb->hostname, nb->port);
+  boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
+  boost::asio::ip::tcp::endpoint endpoint = *res_it;
 
-#ifdef DEBUG
-  std::cerr << "NeighborInputThreadStarter::operator()(). offset = " << off << std::endl;
-#endif
+  const std::string header = HEADER_REQ_STM_DMCS;
+  
+  client = new AsynClient<StreamingForwardMessage, StreamingBackwardMessage>(io_service, res_it, header, mg, nb, ctx_id, index, pack_size);
 
-  Conflict* conflict;
-  conflict = mg->recvConflict(off, prio);
-
-#if defined(DEBUG)
-    std::cerr << "Send first request to neighbor " << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port << std::endl;
-#endif // DEBUG
-    boost::asio::io_service io_service;
-    boost::asio::ip::tcp::resolver resolver(io_service);
-    
-    
-    boost::asio::ip::tcp::resolver::query query(nb->hostname, nb->port);
-    
-    boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
-    boost::asio::ip::tcp::endpoint endpoint = *res_it;
-    
-    std::string header = HEADER_REQ_STM_DMCS;
-    StreamingForwardMessage neighbourMess(ctx_id, pack_size, conflict);
-    
-    AsynClient<StreamingForwardMessage> client(io_service, res_it, header, neighbourMess);
-    
-    io_service.run();
+  io_service.run();
 }
 
 
@@ -126,7 +111,9 @@ OutputThreadStarter::OutputThreadStarter(const connection_ptr& conn_,
 					 std::size_t pack_size_,
 					 boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
   : conn(conn_), pack_size(pack_size_), mg(mg_)
-{ }
+{
+  std::cerr << "OutputThreadStarter::OutputThreadStarter(). pack_size = " << pack_size << std::endl; 
+}
 
 
 
@@ -137,32 +124,48 @@ OutputThreadStarter::collect_output(const boost::system::error_code& e)
   if (!e)
     {
 #ifdef DEBUG
-      std::cerr << "OutputThreadStarter::collect_output()" << std::endl;
+      std::cerr << "OutputThreadStarter::collect_output(). pack_size = " << pack_size << std::endl;
 #endif
       BeliefStateVecPtr res(new BeliefStateVec);
       
+      // be careful with weird value of pack_size. Bug just disappreared
       for (std::size_t i = 0; i < pack_size; ++i)
 	{
 	  std::size_t prio = 0;
 	  BeliefState* bs;
 	  
+	  std::cerr << "Read from MQ" << std::endl;
 	  bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio);
 	  
 	  if (bs == 0)
 	    // either UNSAT of EOF
 	    {
+	      std::cerr << "OutputThreadStarter::collect_output(): NO MORE OUTPUT" << std::endl;
 	      break;
 	    }
 	  
+	  std::cerr << "got bs = " << *bs << std::endl;
 	  res->push_back(bs);
 	}
       
-      std::string header = HEADER_ANS;
+      std::string header;
 
-      conn->async_write(header,
-			boost::bind(&OutputThreadStarter::write_result, this,
-				    boost::asio::placeholders::error, res)
-			);
+      if (res->size() > 0)
+	{
+	  header = HEADER_ANS;
+	  conn->async_write(header,
+			    boost::bind(&OutputThreadStarter::write_result, this,
+					boost::asio::placeholders::error, res)
+			    );
+	}
+      else
+	{
+	  header = HEADER_EOF;
+	  conn->async_write(header,
+			    boost::bind(&OutputThreadStarter::collect_output, this,
+					boost::asio::placeholders::error)
+			    );
+	}
     }
   else
     {
@@ -175,13 +178,14 @@ OutputThreadStarter::collect_output(const boost::system::error_code& e)
 
 
 void
-OutputThreadStarter::write_result(const boost::system::error_code& e, const BeliefStateVecPtr res)
+OutputThreadStarter::write_result(const boost::system::error_code& e, BeliefStateVecPtr res)
 {
   if (!e)
     {
 #ifdef DEBUG
       std::cerr << "OutputThreadStarter::write_result()" << std::endl;
 #endif
+
       StreamingBackwardMessage return_mess(res);
       
       conn->async_write(return_mess,
@@ -208,32 +212,6 @@ OutputThreadStarter::operator()()
 #endif
 
   collect_output(boost::system::error_code());
-
-  /*
-  BeliefStateVecPtr res(new BeliefStateVec);
-  
-  for (std::size_t i = 0; i < pack_size; ++i)
-    {
-      std::size_t prio = 0;
-      BeliefState* bs;
-
-      bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio);
-
-      if (bs == 0)
-	// either UNSAT of EOF
-	{
-	  break;
-	}
-
-      res->push_back(bs);
-    }
-
-  StreamingBackwardMessage return_mess(res);
-
-  conn->async_write(return_mess,
-		    boost::bind(&OutputThreadStarter::collect_output, this,
-				boost::asio::placeholders::error)
-				);*/
 }
 
 

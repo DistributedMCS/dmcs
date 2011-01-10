@@ -97,7 +97,6 @@ public:
   typedef boost::shared_ptr<SessionMsg> SessionMsgPtr;
   typedef boost::shared_ptr<StreamingCommandType> StreamingCommandTypePtr;
 
-  //Handler(const CmdTypePtr cmd_, connection_ptr conn_);
   Handler(StreamingCommandTypePtr cmd, connection_ptr conn_);
 
   void 
@@ -107,9 +106,10 @@ public:
   handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call);
 
 private:
-  connection_ptr conn;
-  boost::thread* output_thread;
-  std::string    header;
+  connection_ptr       conn;
+  OutputThreadStarter* ots;
+  boost::thread*       output_thread;
+  std::string          header;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 

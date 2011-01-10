@@ -166,9 +166,7 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess, std::size_t port)
     {
       std::cerr << "Here create mqs" << std::endl;
       const NeighborListPtr& nb = ctx->getNeighbors();
-      std::cerr << "mqf" << std::endl;
       ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
-      std::cerr << "mg" << std::endl;
       mg = mqf.createMessagingGateway(port, nb->size()); // we use the port as unique id
       mqs_created = true;
     }

@@ -242,8 +242,9 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 #endif
 
 	  std::size_t pack_size = sesh->mess.getPackSize();
-	  OutputThreadStarter ots(conn, pack_size, mg);
-	  output_thread = new boost::thread(ots);
+	  std::cerr << "Handler::do_local_job(). pack_size = " << pack_size << std::endl;
+	  ots = new OutputThreadStarter(conn, pack_size, mg); ///@todo: delete ots somewhere
+	  output_thread = new boost::thread(*ots);
 	}
 
       // write sesh->mess to QueryMessageQueue

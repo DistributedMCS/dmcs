@@ -33,6 +33,7 @@
 #include "dmcs/Context.h"
 #include "mcs/ProxySignatureByLocal.h"
 #include "mcs/Theory.h"
+#include "network/BaseClient.h"
 #include "network/connection.hpp"
 #include "solver/RelSatSolver.h"
 
@@ -64,6 +65,7 @@ private:
   std::size_t pack_size;
   std::size_t index;
   std::size_t system_size;
+  BaseClient* client;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 

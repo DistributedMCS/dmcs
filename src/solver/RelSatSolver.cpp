@@ -151,8 +151,7 @@ void
 RelSatSolver::receiveUNSAT()
 {
   // send a NULL pointer to the SatOutputMessageQueue
-  BeliefState* bs = 0;
-  mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
+  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
 
 #ifdef DEBUG
   std::cerr << "NO MORE SOLUTION! " << std::endl;
