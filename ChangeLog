@@ -1,6 +1,10 @@
+2011-01-10  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc (do_local_job): Create ConcurrentMessageQueueFactory reference.
+
 2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
-	* src/solver/RelSatSolver.cpp: Fix Segfault. 
+	* src/solver/RelSatSolver.cpp: Fix Segfault.
 
 	* include/network/Handler.h: Bring first_call flag along.
 	* include/network/Handler.tcc: Likewise.

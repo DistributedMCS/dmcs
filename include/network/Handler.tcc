@@ -231,11 +231,16 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 	{
 #ifdef DEBUG
 	  std::cerr << "First and only initialization." << std::endl;
-#endif	
 	  std::cerr << "create mg" << std::endl;
-	  mg = ConcurrentMessageQueueFactory::instance().createMessagingGateway(port);
+#endif	
 
+	  ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
+	  mg = mqf.createMessagingGateway(port); // we use the port as unique id
+
+#ifdef DEBUG
 	  std::cerr << "create output thread" << std::endl;
+#endif
+
 	  std::size_t pack_size = sesh->mess.getPackSize();
 	  OutputThreadStarter ots(conn, pack_size, mg);
 	  output_thread = new boost::thread(ots);

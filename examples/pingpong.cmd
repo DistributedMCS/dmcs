@@ -1,3 +1,3 @@
-./dmcsd --context=1 --port=5001 --kb=tests/pingpong1.lp --br=tests/pingpong1.br --topology=tests/pingpong.opt
-./dmcsd --context=2 --port=5002 --kb=tests/pingpong2.lp --br=tests/pingpong2.br --topology=tests/pingpong.opt
-time ./dmcsc --hostname=localhost --port=5001 --system-size=2
+./src/dmcsd --context=1 --port=5001 --kb=examples/pingpong1.lp --br=examples/pingpong1.br --topology=examples/pingpong.opt
+./src/dmcsd --context=2 --port=5002 --kb=examples/pingpong2.lp --br=examples/pingpong2.br --topology=examples/pingpong.opt
+time ./src/dmcsc --hostname=localhost --port=5001 --system-size=2
