@@ -69,7 +69,10 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     thread_started(false),
     mqs_created(false),
     neighbor_input_threads(new ThreadVec)
-{ }
+{ 
+  const NeighborListPtr& nb = ctx->getNeighbors();
+  std::cerr << "StreamingDMCS::StreamingDMCS(). nb->size = " << nb->size() << std::endl;
+}
 
 
 
@@ -144,16 +147,14 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
       std::cerr << "StreamingDMCS::start_up. Intermediate context. Send requests to neighbors by placing a message in each of the NeighborQueryMQ" << std::endl;
 #endif
 
-      const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + no_nbs;
-
-      // send requests to neighbors by placing a message in each of the NeighborQueryMQ
-      for (std::size_t i = off; i < off + no_nbs; ++i)
+      for (std::size_t i = 0; i < no_nbs; ++i)
 	{
-	  Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
-	  mg->sendConflict(empty_conflict, 0, i, 0);
-	}
+	  const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*i + 1;	  
 
-      }
+	  Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
+	  mg->sendConflict(empty_conflict, 0, off, 0);
+	}
+    }
 }
 
 
@@ -165,7 +166,10 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess, std::size_t port)
     {
       std::cerr << "Here create mqs" << std::endl;
       const NeighborListPtr& nb = ctx->getNeighbors();
-      mg = ConcurrentMessageQueueFactory::instance().createMessagingGateway(port, nb->size());
+      std::cerr << "mqf" << std::endl;
+      ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
+      std::cerr << "mg" << std::endl;
+      mg = mqf.createMessagingGateway(port, nb->size()); // we use the port as unique id
       mqs_created = true;
     }
 

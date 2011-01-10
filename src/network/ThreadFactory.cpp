@@ -40,11 +40,13 @@ namespace dmcs {
 NeighborInputThreadStarter::NeighborInputThreadStarter(const NeighborPtr& nb_, 
 						       std::size_t ctx_id_,
 						       std::size_t pack_size_,
+						       std::size_t index_,
 						       std::size_t system_size_,
 						       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
   : nb(nb_),
     ctx_id(ctx_id_),
     pack_size(pack_size_),
+    index(index_),
     system_size(system_size_),
     mg(mg_)
 { }
@@ -53,6 +55,16 @@ NeighborInputThreadStarter::NeighborInputThreadStarter(const NeighborPtr& nb_,
 void
 NeighborInputThreadStarter::operator()()
 {
+  std::size_t prio = 0;
+  std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index + 1;
+
+#ifdef DEBUG
+  std::cerr << "NeighborInputThreadStarter::operator()(). offset = " << off << std::endl;
+#endif
+
+  Conflict* conflict;
+  conflict = mg->recvConflict(off, prio);
+
 #if defined(DEBUG)
     std::cerr << "Send first request to neighbor " << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port << std::endl;
 #endif // DEBUG
@@ -66,7 +78,7 @@ NeighborInputThreadStarter::operator()()
     boost::asio::ip::tcp::endpoint endpoint = *res_it;
     
     std::string header = HEADER_REQ_STM_DMCS;
-    StreamingForwardMessage neighbourMess(ctx_id, pack_size, system_size);
+    StreamingForwardMessage neighbourMess(ctx_id, pack_size, conflict);
     
     Client<StreamingCommandType> client(io_service, res_it, header, neighbourMess);
     
@@ -248,10 +260,11 @@ ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
   std::size_t ctx_id = context->getContextID();
   std::size_t system_size = context->getSystemSize();
 
-  for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
+  std::size_t i = 0;
+  for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it, ++i)
     {
       const NeighborPtr nb = *it;
-      NeighborInputThreadStarter nits(nb, ctx_id, pack_size, system_size, mg);
+      NeighborInputThreadStarter nits(nb, ctx_id, pack_size, i, system_size, mg);
       
       boost::thread* nit = new boost::thread(nits);
       neighbor_input_threads->push_back(nit);

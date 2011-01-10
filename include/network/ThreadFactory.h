@@ -51,6 +51,7 @@ public:
   NeighborInputThreadStarter(const NeighborPtr& nb_, 
 			     std::size_t ctx_id_, 
 			     std::size_t pack_size_,
+			     std::size_t index_,
 			     std::size_t system_size_,
 			     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
@@ -61,6 +62,7 @@ private:
   const NeighborPtr nb;
   std::size_t ctx_id;
   std::size_t pack_size;
+  std::size_t index;
   std::size_t system_size;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
