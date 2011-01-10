@@ -240,10 +240,10 @@ main(int argc, char* argv[])
 		  // USER <--> invoker == 0
 		  StreamingCommandType::input_type mess(0, pack_size, system_size);
 
-		  BeliefStatePtr conflict = mess.getConflict();
+		  Conflict* conflict = mess.getConflict();
 
 		  LOG4CXX_DEBUG(logger, "Empty starting conflict:");
-		  LOG4CXX_DEBUG(logger, conflict);
+		  //		  LOG4CXX_DEBUG(logger, *conflict);
 
 		  Client<StreamingCommandType> c(io_service, it, header, mess);
 
