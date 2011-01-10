@@ -153,6 +153,14 @@ AC_ARG_ENABLE(debug,
               )
 
 
+# stats
+AC_ARG_ENABLE(stats,
+              [  --enable-stats          switch on statistic information],
+              [AC_DEFINE(DMCS_STATS_INFO, [], [Turns on statistic information])
+               stats_support=yes]
+              )
+
+
 # Call relsat's ./configure script recursively.
 AC_CONFIG_SUBDIRS([relsat-20070104])
 
