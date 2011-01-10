@@ -18,17 +18,17 @@
  */
 
 /**
- * @file   Client.tcc
- * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
- * @date   Sun Nov  8 10:33:26 2009
+ * @file   AsynClient.tcc
+ * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
+ * @date   Mon Jan  10 14:22:21 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef CLIENT_TCC
-#define CLIENT_TCC
+#ifndef ASYN_CLIENT_TCC
+#define ASYN_CLIENT_TCC
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -43,38 +43,37 @@
 
 namespace dmcs {
 
-template<typename CmdType>
-Client<CmdType>::Client(boost::asio::io_service& io_service,
-			boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-			const std::string& my_header_,
-			typename CmdType::input_type& mess_)
+template<typename InputType>
+AsynClient<InputType>::AsynClient(boost::asio::io_service& io_service,
+			  boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+			  const std::string& my_header_,
+			  InputType& mess_)
   : BaseClient(io_service, endpoint_iterator, my_header_),
-    mess(mess_), 
-    result(new (typename CmdType::value_type))
+    mess(mess_)
 {
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 
 #if defined(DEBUG)
-  std::cerr << "Client::Client()  " << endpoint << std::endl
+  std::cerr << "AsynClient::AsynClient()  " << endpoint << std::endl
 	    << "Header to send  = " << my_header << std::endl
 	    << "Message to send = " << mess << std::endl;
 #endif //DEBUG
 
   conn->socket().async_connect(endpoint,
-			       boost::bind(&Client::send_header, this,
+			       boost::bind(&AsynClient::send_header, this,
 					   boost::asio::placeholders::error,
 					   ++endpoint_iterator));
 }
 
 
 
-template<typename CmdType>
+template<typename InputType>
 void
-Client<CmdType>::send_header(const boost::system::error_code& error,
+AsynClient<InputType>::send_header(const boost::system::error_code& error,
 			     boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
 {
 #ifdef DEBUG
-  std::cerr << "Client::send_header" << std::endl;
+  std::cerr << "AsynClient::send_header" << std::endl;
 #endif
 
   if (!error)
@@ -84,7 +83,7 @@ Client<CmdType>::send_header(const boost::system::error_code& error,
       // receives just characters; hence, without the header, he won't
       // be able to choose the proper type for the message.
 
-      conn->async_write(my_header, boost::bind(&Client::send_message, this,
+      conn->async_write(my_header, boost::bind(&AsynClient::send_message, this,
 					       boost::asio::placeholders::error, conn));
 
       /*
@@ -92,7 +91,7 @@ Client<CmdType>::send_header(const boost::system::error_code& error,
       std::cerr << "write_buf.size() = " << write_buf.size() << std::endl;
       
       boost::asio::async_write(conn->socket(), boost::asio::buffer(write_buf),
-			       boost::bind(&Client::send_message, this,
+			       boost::bind(&AsynClient::send_message, this,
 			       boost::asio::placeholders::error, conn));*/
     }
   else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator())
@@ -102,71 +101,71 @@ Client<CmdType>::send_header(const boost::system::error_code& error,
       
       boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
       conn->socket().async_connect(endpoint,
-				   boost::bind(&Client::send_header, this,
+				   boost::bind(&AsynClient::send_header, this,
 					       boost::asio::placeholders::error,
 					       ++endpoint_iterator));
     }
   else
     {
-      std::cerr << "Client::send_header: " << error.message() << std::endl;
+      std::cerr << "AsynClient::send_header: " << error.message() << std::endl;
     }
 }
 
 
 
-template<typename CmdType>
+template<typename InputType>
 void
-Client<CmdType>::send_message(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<InputType>::send_message(const boost::system::error_code& error, connection_ptr conn)
 {
 #ifdef DEBUG
-  std::cerr << "Client::send_message" << std::endl;
+  std::cerr << "AsynClient::send_message" << std::endl;
 #endif // DEBUG
 
   if (!error)
     {
       std::cerr << mess << std::endl;
       conn->async_write(mess,
-			boost::bind(&Client::read_header, this,
+			boost::bind(&AsynClient::read_header, this,
 				    boost::asio::placeholders::error, conn));
     }
   else
     {
-      std::cerr << "Client::send_message: " << error.message() << std::endl;
+      std::cerr << "AsynClient::send_message: " << error.message() << std::endl;
     }
 }
 
 
 
-template<typename CmdType>
+template<typename InputType>
 void
-Client<CmdType>::read_header(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<InputType>::read_header(const boost::system::error_code& error, connection_ptr conn)
 {
   if (!error)
     {
 #if defined(DEBUG)
-      std::cerr << "Client::read_header" << std::endl;
+      std::cerr << "AsynClient::read_header" << std::endl;
 #endif // DEBUG
       
       conn->async_read(received_header,
-		       boost::bind(&Client::handle_read_header, this,
+		       boost::bind(&AsynClient::handle_read_header, this,
 				   boost::asio::placeholders::error, conn));
     }
   else
     {
-      std::cerr << "Client::read_header: " << error.message() << std::endl;
+      std::cerr << "AsynClient::read_header: " << error.message() << std::endl;
       throw std::runtime_error(error.message());
     }
 }
 
 
-template<typename CmdType>
+template<typename InputType>
 void
-Client<CmdType>::handle_read_header(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<InputType>::handle_read_header(const boost::system::error_code& error, connection_ptr conn)
 {
   if (!error)
     {
 #ifdef DEBUG
-      std::cerr << "Client::handle_read_header" << std::endl
+      std::cerr << "AsynClient::handle_read_header" << std::endl
 		<< "Received header = " << received_header << std::endl;
 #endif
 
@@ -181,40 +180,40 @@ Client<CmdType>::handle_read_header(const boost::system::error_code& error, conn
     }
   else
     {
-      std::cerr << "Client::handle_read_header: " << error.message() << std::endl;
+      std::cerr << "AsynClient::handle_read_header: " << error.message() << std::endl;
       throw std::runtime_error(error.message());
     }
 }
 
-template<typename CmdType>
+template<typename InputType>
 void 
-Client<CmdType>::read_answer(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<InputType>::read_answer(const boost::system::error_code& error, connection_ptr conn)
 {
   if (!error)
     {
 #if defined(DEBUG)
-      std::cerr << "Client::read_answer" << std::endl;
+      std::cerr << "AsynClient::read_answer" << std::endl;
 #endif //DEBUG
 
-      conn->async_read(result,
-		       boost::bind(&Client::read_header, this,
-				   boost::asio::placeholders::error, conn));
+      /*      conn->async_read(result,
+		       boost::bind(&AsynClient::read_header, this,
+		       boost::asio::placeholders::error, conn));*/
     }
   else
     {
-      std::cerr << "Client::read_answer: " << error.message() << std::endl;
+      std::cerr << "AsynClient::read_answer: " << error.message() << std::endl;
       throw std::runtime_error(error.message());
     }
 }
 
-template<typename CmdType>
+template<typename InputType>
 void
-Client<CmdType>::finalize(const boost::system::error_code& error, connection_ptr /* conn */)
+AsynClient<InputType>::finalize(const boost::system::error_code& error, connection_ptr /* conn */)
 {
   if (!error)
     {
 #if defined(DEBUG)
-      std::cerr << "Client::finalize" << std::endl;
+      std::cerr << "AsynClient::finalize" << std::endl;
 #endif //DEBUG
       // Do nothing. Since we are not starting a new operation the
       // io_service will run out of work to do and the client will
@@ -222,7 +221,7 @@ Client<CmdType>::finalize(const boost::system::error_code& error, connection_ptr
     }
   else
     {
-      std::cerr << "Client::finalize: " << error.message() << std::endl;
+      std::cerr << "AsynClient::finalize: " << error.message() << std::endl;
       throw std::runtime_error(error.message());
     }
 }
@@ -230,7 +229,7 @@ Client<CmdType>::finalize(const boost::system::error_code& error, connection_ptr
 
 } // namespace dmcs
 
-#endif // CLIENT_TCC
+#endif // ASYN_CLIENT_TCC
 
 // Local Variables:
 // mode: C++

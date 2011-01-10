@@ -30,7 +30,7 @@
 #include "dmcs/StreamingForwardMessage.h"
 #include "dmcs/StreamingBackwardMessage.h"
 #include "dmcs/StreamingCommandType.h"
-#include "network/Client.h"
+#include "network/AsynClient.h"
 #include "network/ThreadFactory.h"
 #include "solver/SatSolverFactory.h"
 
@@ -80,7 +80,7 @@ NeighborInputThreadStarter::operator()()
     std::string header = HEADER_REQ_STM_DMCS;
     StreamingForwardMessage neighbourMess(ctx_id, pack_size, conflict);
     
-    Client<StreamingCommandType> client(io_service, res_it, header, neighbourMess);
+    AsynClient<StreamingForwardMessage> client(io_service, res_it, header, neighbourMess);
     
     io_service.run();
 }

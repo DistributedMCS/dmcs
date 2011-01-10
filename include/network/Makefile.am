@@ -2,7 +2,9 @@ AUTOMAKE_OPTIONS = gnu
 
 # including headers for make dist
 noinst_HEADERS =  \
+		AsynClient.h \
 		BaseHandler.h \
+		BaseClient.h \
 		Client.h \
 		Client.tcc \
 		ConcurrentMessageDispatcher.h \

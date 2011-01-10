@@ -1,5 +1,16 @@
 2011-01-10  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/ThreadFactory.cpp: Use AsynClient for neighbors' thread.
+
+	* include/network/Client.h: Inherit from BaseClient.
+	* include/network/Client.tcc: Likewise.
+
+	* include/network/Makefile.am: Add new header files.
+
+	* include/network/AsynClient.h: New file.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/network/BaseClient.h: Likewise.
+
 	* include/network/Server.h: Add handler data member to Server.
 	* src/network/Server.cpp: Likewise.
 

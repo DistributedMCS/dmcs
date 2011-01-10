@@ -18,9 +18,9 @@
  */
 
 /**
- * @file   Client.h
- * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
- * @date   Sun Nov  8 10:44:51 2009
+ * @file   AsynClient.h
+ * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
+ * @date   Mon Jan  10 14:15:24 2011
  * 
  * @brief  
  * 
@@ -29,36 +29,23 @@
 
 
 
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef ASYN_CLIENT_H
+#define ASYN_CLIENT_H
 
 #include "network/BaseClient.h"
-#include "network/connection.hpp"
-#include "mcs/BeliefState.h"
-#include "mcs/Theory.h"
-#include "dmcs/CommandType.h"
-#include "dmcs/Message.h"
-
-#include <boost/asio.hpp>
 
 namespace dmcs {
 
 /**
  * @brief
  */
-template <typename CmdType>
-class Client : public BaseClient
+template <typename InputType>
+class AsynClient : public BaseClient
 {
  public:
-  Client(boost::asio::io_service& io_service,
+  AsynClient(boost::asio::io_service& io_service,
 	 boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-	 const std::string& header_, typename CmdType::input_type& mess);
-
-  typename CmdType::return_type
-  getResult()
-  {
-    return result;
-  }
+	 const std::string& header_, InputType& mess_);
 
  private:
   void 
@@ -81,15 +68,14 @@ class Client : public BaseClient
   finalize(const boost::system::error_code& error, connection_ptr /* conn */);
 
   std::string received_header;
-  typename CmdType::input_type mess;
-  typename CmdType::return_type result;
+  InputType mess;
 };
 
 } // namespace dmcs
 
-#include "network/Client.tcc"
+#include "network/AsynClient.tcc"
 
-#endif
+#endif // ASYN_CLIENT_H
 
 // Local Variables:
 // mode: C++
