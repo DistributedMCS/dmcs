@@ -28,17 +28,21 @@
  */
 
 
+#include "generator/DynGridTopoGenerator.h"
+#include "generator/DynRandomTopoGenerator.h"
+#include "generator/DynRakeTopoGenerator.h"
+#include "generator/DynSocialTopoGenerator.h"
+
+#include "dmcs/Log.h"
+
+#include <boost/program_options.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 
-#include <boost/program_options.hpp>
-
-#include "generator/DynGridTopoGenerator.h"
-#include "generator/DynRandomTopoGenerator.h"
-#include "generator/DynRakeTopoGenerator.h"
-#include "generator/DynSocialTopoGenerator.h"
+#include <sys/time.h>
 
 using namespace dmcs::generator;
 
@@ -163,17 +167,23 @@ read_input(int argc, char* argv[])
 
   if (vm.count(HELP))
     {
-      std::cerr << desc;
-      return 0;
+      std::cerr << desc << std::endl;
+      return 1;
     }
-  return 1;
+  return 0;
 }
 
 
 void
 init()
 {
-  srand( time(NULL) );
+  // this is a very bad idea, it will only change the seed every second!
+  // srand( time(NULL) );
+  {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    srand(tv.tv_sec + tv.tv_usec);
+  }
 
   // pos and neg from other contexts can be pointed to one of these
   local_atoms.push_back("s");
@@ -398,9 +408,9 @@ generate_local_kb(std::size_t i)
 
 int main(int argc, char* argv[])
 {
-  if (!read_input(argc, argv))
+  if (read_input(argc, argv))
     {
-      return 0;
+      return 1;
     }
 
   init(); 
@@ -432,7 +442,9 @@ int main(int argc, char* argv[])
       generate_local_kb(i);
     }
 
-  std::cerr << "poolsize = " << poolsize << std::endl;
+  dmcs::init_loggers("dynGen");
+
+  DMCS_LOG_INFO("poolsize: " << poolsize);
   
   // Topology choosing
   switch (topology)
