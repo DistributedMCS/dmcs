@@ -28,8 +28,13 @@
  * 
  */
 
+
 #ifndef _DMCS_LOG_H
 #define _DMCS_LOG_H
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif // HAVE_CONFIG_H
 
 #include <log4cxx/logger.h>
 
@@ -44,12 +49,29 @@ namespace dmcs {
    * program.
    * 
    * @param name logger name
+   * @param config config filename
    */
   void
-  init_loggers(const char* name);
+  init_loggers(const char* name, const char* config = 0);
 
 
 } // namespace dmcs
+
+
+
+#if defined(DEBUG)
+#define DMCS_LOG_TRACE(expr) LOG4CXX_TRACE(dmcs::logger, expr)
+#define DMCS_LOG_DEBUG(expr) LOG4CXX_DEBUG(dmcs::logger, expr)
+#else
+#define DMCS_LOG_TRACE(expr) do {} while(0)
+#define DMCS_LOG_DEBUG(expr) do {} while(0)
+#endif // DEBUG
+
+#define DMCS_LOG_INFO(expr)  LOG4CXX_INFO(dmcs::logger, expr)
+#define DMCS_LOG_WARN(expr)  LOG4CXX_WARN(dmcs::logger, expr)
+#define DMCS_LOG_ERROR(expr) LOG4CXX_ERROR(dmcs::logger, expr)
+#define DMCS_LOG_FATAL(expr) LOG4CXX_FATAL(dmcs::logger, expr)
+
 
 #endif // _DMCS_LOG_H
 

@@ -36,23 +36,38 @@
 
 #include <log4cxx/logger.h>
 #include <log4cxx/basicconfigurator.h>
+#include <log4cxx/propertyconfigurator.h>
 
+#include <cassert>
 
 namespace dmcs {
 
   // initially, all static loggers must be initialized, otw. we
   // segfault at exit because log4cxx does not shut down properly
-  log4cxx::LoggerPtr logger(log4cxx::Logger::getRootLogger());
-
+  log4cxx::LoggerPtr logger = log4cxx::Logger::getRootLogger();
 
   void
-  init_loggers(const char* name)
+  init_loggers(const char* name, const char *config)
   {
+    assert(name != 0);
+
     logger = log4cxx::Logger::getLogger(name);
 
     // setup log4cxx
+
+#ifdef DEBUG
     logger->setLevel(log4cxx::Level::getDebug());
-    log4cxx::BasicConfigurator::configure();
+#endif // DEBUG
+
+    if (config == 0)
+      {
+	log4cxx::BasicConfigurator::configure();
+      }
+    else
+      {
+	// BasicConfigurator replaced with PropertyConfigurator.
+	log4cxx::PropertyConfigurator::configure(config);
+      }
   }
 
 }
