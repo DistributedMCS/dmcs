@@ -31,7 +31,7 @@
 #define STREAMING_FORWARD_MESSAGE_H
 
 #include "Message.h"
-#include "mcs/BeliefState.h"
+#include "solver/Conflict.h"
 
 namespace dmcs {
 
@@ -47,11 +47,11 @@ public:
   StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_,
 			  std::size_t system_size)
     : invoker(invoker_), pack_size(pack_size_),
-      conflict(new BeliefState(system_size, BeliefSet()))
+      conflict(new Conflict(system_size, BeliefSet()))
   { }
 
   StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_, 
-			  BeliefStatePtr conflict_)
+			  Conflict* conflict_)
     : invoker(invoker_), pack_size(pack_size_), conflict(conflict_)
   { }
 
@@ -67,7 +67,7 @@ public:
     return pack_size;
   }
 
-  BeliefStatePtr
+  Conflict*
   getConflict() const
   {
     return conflict;
@@ -86,7 +86,7 @@ public:
 private:
   std::size_t invoker;     // ID of the invoking context
   std::size_t pack_size;   // The number of models in a package that the invoker expects
-  BeliefStatePtr conflict; // a conflict that the receiver should obey
+  Conflict* conflict;    // a conflict that the receiver should obey
 };
 
 inline std::ostream&
@@ -95,7 +95,7 @@ operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
 
   os << sfMess.getInvoker() << ", " 
      << sfMess.getPackSize() << " ["
-     << sfMess.getConflict() << "] ";
+     << *sfMess.getConflict() << "] ";
   
   return os;
 }
