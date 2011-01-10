@@ -32,6 +32,7 @@
 
 //#include "dmcs/BaseDMCS.h"
 
+#include "network/BaseHandler.h"
 #include "network/connection.hpp"
 #include "network/Session.h"
 
@@ -84,6 +85,7 @@ private:
   boost::asio::io_service& io_service_;
   boost::asio::ip::tcp::acceptor acceptor_;
   std::string header;
+  BaseHandler* handler;
 };
 
 typedef boost::shared_ptr<BaseServer> ServerPtr;

@@ -30,6 +30,7 @@
 #ifndef HANDLER_H
 #define HANDLER_H
 
+#include "network/BaseHandler.h"
 #include "network/connection.hpp"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/Session.h"
@@ -55,7 +56,7 @@ namespace dmcs {
 
 
 template<typename CmdType>
-class Handler
+class Handler : public BaseHandler
 {
 public:
   typedef Session<typename CmdType::input_type> SessionMsg;
@@ -89,7 +90,7 @@ private:
 
 // Specialized handler for streaming dmcs
 template<>
-class Handler<StreamingCommandType>
+class Handler<StreamingCommandType> : public BaseHandler
 {
 public:
   typedef Session<StreamingCommandType::input_type> SessionMsg;

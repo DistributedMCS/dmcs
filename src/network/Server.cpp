@@ -110,27 +110,27 @@ Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
       if (header.find(HEADER_REQ_PRI_DMCS) != std::string::npos)
 	{
 	  PrimitiveCommandTypePtr cmt_pri_dmcs = ctf->create<PrimitiveCommandTypePtr>();
-	  Handler<PrimitiveCommandType> handler(cmt_pri_dmcs, conn);
+	  handler = new Handler<PrimitiveCommandType>(cmt_pri_dmcs, conn);
 	}
       else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
 	  StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
-	  Handler<StreamingCommandType> handler(cmt_stm_dmcs, conn);
+	  handler = new Handler<StreamingCommandType>(cmt_stm_dmcs, conn);
 	}
       else if (header.find(HEADER_REQ_OPT_DMCS) != std::string::npos)
 	{
 	  OptCommandTypePtr cmt_opt_dmcs = ctf->create<OptCommandTypePtr>();
-	  Handler<OptCommandType> handler(cmt_opt_dmcs, conn);
+	  handler = new Handler<OptCommandType>(cmt_opt_dmcs, conn);
 	}
       else if (header.find(HEADER_REQ_DYN_DMCS) != std::string::npos)
 	{
 	  DynamicCommandTypePtr cmt_dyn_conf = ctf->create<DynamicCommandTypePtr>();
-	  Handler<DynamicCommandType> handler(cmt_dyn_conf, conn);
+	  handler = new Handler<DynamicCommandType>(cmt_dyn_conf, conn);
 	}
       else if (header.find(HEADER_REQ_INSTANTIATE) != std::string::npos)
 	{
 	  InstantiatorCommandTypePtr cmt_inst = ctf->create<InstantiatorCommandTypePtr>();
-	  Handler<InstantiatorCommandType> handler(cmt_inst, conn);
+	  handler = new Handler<InstantiatorCommandType>(cmt_inst, conn);
 	}
     }
   else
@@ -147,12 +147,14 @@ Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
 void
 Server::handle_finalize(const boost::system::error_code& e, connection_ptr /* conn */)
 {
-  // Nothing to do. The socket will be closed automatically when the last
-  // reference to the connection object goes away.
+  if (!e)
+    {
 #ifdef DEBUG
-  std::cerr << "in handle_finalize: " << std::endl;
+      std::cerr << "in handle_finalize: " << std::endl;
 #endif
-  if (e)
+      delete handler;
+    }
+  else
     {
       // An error occurred.
 

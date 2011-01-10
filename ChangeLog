@@ -1,3 +1,24 @@
+2011-01-10  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Server.h: Add handler data member to Server.
+	* src/network/Server.cpp: Likewise.
+
+	* include/network/Handler.h: Inherit from BaseHandler.
+
+	* include/network/Makefile.am: Add BaseHandler.h.
+
+	* include/network/BaseHandler.h: New file.
+
+	* src/dmcs/StreamingDMCS.cpp: Point to the right message queue.
+
+	* include/network/ThreadFactory.h: Give each neighbor thread an
+	index to find the right message queue.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Use Conflict instead of
+	BeliefState for conflict.
+	* src/dmcsc.cpp: Likewise.
+
 2011-01-10  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/Handler.tcc (do_local_job): Create ConcurrentMessageQueueFactory reference.
