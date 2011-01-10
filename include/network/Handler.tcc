@@ -29,15 +29,15 @@
 
 #include "network/ThreadFactory.h"
 
+#include "dmcs/Log.h"
+
 namespace dmcs {
 
 template<typename CmdType>
 Handler<CmdType>::Handler(CmdTypePtr cmd, connection_ptr conn_)
   : conn(conn_)
 {
-#ifdef DEBUG
-  std::cerr << "Handler::Handler, going to read message" << std::endl;
-#endif
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   SessionMsgPtr sesh(new SessionMsg(conn));
 
@@ -54,22 +54,19 @@ template<typename CmdType>
 void
 Handler<CmdType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
-#if defined(DEBUG)
-      std::cerr << "Handler::do_local_job " << std::endl
-		<< "Message = " << sesh->mess << std::endl;
-#endif //DEBUG
+      DMCS_LOG_DEBUG("Message = " << sesh->mess);
 
       // do the local job
       typename CmdType::return_type result = cmd->execute(sesh->mess);
-      std::string header = HEADER_ANS;
+      const std::string& header = HEADER_ANS;
       
-#if defined(DEBUG)
-      std::cerr << "Got local result, now send back to the invoker the header and then the real result!" << std::endl
-		<< "Header = " << header << std::endl
-		<< "Result = " << *result <<std::endl;
-#endif //DEBUG
+      DMCS_LOG_DEBUG("Got local result, now send back to the invoker the header and then the real result!");
+      DMCS_LOG_DEBUG("Header = " << header);
+      DMCS_LOG_DEBUG("Result = " << result);
 	  
       // Send the result to the client. The connection::async_write()
       // function will automatically serialize the data structure for
@@ -83,10 +80,8 @@ Handler<CmdType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr
   else
     {
       // An error occurred.
-
-#ifdef DEBUG
-      std::cerr << "Handler::do_local_job: " << e.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -96,20 +91,19 @@ void
 Handler<CmdType>::send_result(typename CmdType::return_type result, 
 			      const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
- #ifdef DEBUG
-      std::cerr << "Handler::send_result" << std::endl;
-#endif
       sesh->conn->async_write(result,
 			boost::bind(&Handler<CmdType>::handle_session, this,
 				    boost::asio::placeholders::error, sesh, cmd));      
     }
   else
     {
-#ifdef DEBUG
-      std::cerr << "Handler::send_result: " << e.message() << std::endl;
-#endif
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -118,21 +112,20 @@ template<typename CmdType>
 void
 Handler<CmdType>::send_eof(const boost::system::error_code& e, SessionMsgPtr sesh)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
- #ifdef DEBUG
-      std::cerr << "Handler::send_eof" << std::endl;
-#endif
-      std::string str_eof = HEADER_EOF;
+      const std::string& str_eof = HEADER_EOF;
       sesh->conn->async_write(str_eof,
 			boost::bind(&Handler<CmdType>::handle_finalize, this,
 				    boost::asio::placeholders::error, sesh));      
     }
   else
     {
-#ifdef DEBUG
-      std::cerr << "Handler::send_result: " << e.message() << std::endl;
-#endif
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -142,12 +135,11 @@ template<typename CmdType>
 void
 Handler<CmdType>::handle_session(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
-
-#if defined(DEBUG)
-      //std::cerr << "in handle session with mess = " << sesh->mess << std::endl;
-#endif //DEBUG
+      DMCS_LOG_DEBUG("mess = " << sesh->mess);
 
       // after processing the message, check whether it's the last
       // one. PrimitiveCommandType and OptCommandType should always
@@ -156,7 +148,8 @@ Handler<CmdType>::handle_session(const boost::system::error_code& e, SessionMsgP
       // in the message.
       if (cmd->continues(sesh->mess))
 	{
-	  std::cerr << "Continue, going to read messages"  << std::endl;
+	  DMCS_LOG_DEBUG("Continue, going to read messages");
+
 	  sesh->conn->async_read(sesh->mess,
 				 boost::bind(&Handler<CmdType>::do_local_job, this,
 					     boost::asio::placeholders::error, sesh, cmd)
@@ -164,17 +157,16 @@ Handler<CmdType>::handle_session(const boost::system::error_code& e, SessionMsgP
 	}
       else
 	{
-	  std::cerr << "Go to send_eof"  << std::endl;
+	  DMCS_LOG_DEBUG("Done, sending EOF");
+
 	  send_eof(e, sesh);
 	}
     }
   else
     {
       // An error occurred.
-
-#ifdef DEBUG
-      std::cerr << "Handler::handle_session: " << e.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -184,18 +176,16 @@ template<typename CmdType>
 void
 Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsgPtr /* sesh */)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   // Nothing to do. The socket will be closed automatically when the last
   // reference to the connection object goes away.
-#ifdef DEBUG
-  std::cerr << "Handler::handle_finalize: " << std::endl;
-#endif
+
   if (e)
     {
       // An error occurred.
-
-#ifdef DEBUG
-      std::cerr << "Handler::handle_finalize: " << e.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -204,9 +194,7 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
   : conn(conn_)
 { 
-#ifdef DEBUG
-  std::cerr << "Handler<StreamingCommandType>::Handler, going to read message" << std::endl;
-#endif
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   SessionMsgPtr sesh(new SessionMsg(conn));
 
@@ -220,6 +208,8 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
       // get the unique ID from connection for creating a message gateway just for this connection
@@ -229,28 +219,23 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 
       if (first_call)
 	{
-#ifdef DEBUG
-	  std::cerr << "First and only initialization." << std::endl;
-	  std::cerr << "create mg" << std::endl;
-#endif	
+	  DMCS_LOG_DEBUG("First and only initialization, creating MessagingGateway");
 
 	  ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
 	  mg = mqf.createMessagingGateway(port); // we use the port as unique id
 
-#ifdef DEBUG
-	  std::cerr << "create output thread" << std::endl;
-#endif
-
 	  std::size_t pack_size = sesh->mess.getPackSize();
-	  std::cerr << "Handler::do_local_job(). pack_size = " << pack_size << std::endl;
+
+	  DMCS_LOG_DEBUG("creating output thread, pack_size = " << pack_size);
+
 	  ots = new OutputThreadStarter(conn, pack_size, mg); ///@todo: delete ots somewhere
 	  output_thread = new boost::thread(*ots);
 	}
 
       // write sesh->mess to QueryMessageQueue
-#ifdef DEBUG
-      std::cerr << "Handler<StreamingCommandType>::do_local_job" << std::endl;
-#endif
+
+      DMCS_LOG_DEBUG("executing command");
+
       cmd->execute(sesh->mess, port);
   
       sesh->conn->async_read(header,
@@ -261,9 +246,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
   else
     {
       // An error occurred.
-#ifdef DEBUG
-      std::cerr << "Handler::do_local_job: " << e.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -271,6 +255,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 void
 Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool /* first_call */)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
       // check header
@@ -283,9 +269,8 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
   else
     {
       // An error occurred.
-#ifdef DEBUG
-      std::cerr << "Handler::handle_read_header: " << e.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 

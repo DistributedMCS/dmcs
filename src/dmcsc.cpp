@@ -87,26 +87,29 @@ instantiate(ContextSubstitutionPtr ctx_sub, const std::string& hostName, const s
 
   if (answer->getStatus() == true)
     {
-      LOG4CXX_DEBUG(logger, "Instantiation finished successfully!");
+      DMCS_LOG_DEBUG("Instantiation finished successfully!");
 
       // Now call the evaluation
     }
 }
+
+
 
 int
 main(int argc, char* argv[])
 {
   try 
     {
-      std::string hostName = "";
-      std::string port = "";
-      std::string manager = "";
-      std::string qvs = "";
+      std::string hostName;
+      std::string port;
+      std::string manager;
+      std::string qvs;
       std::size_t system_size = 0;
-      std::size_t root_ctx;
-      std::size_t pack_size;
-      bool dynamic;
-      bool streaming;
+      std::size_t root_ctx = 0;
+      std::size_t pack_size = 0;
+      bool dynamic = false;
+      bool primitiveDMCS = false;
+      bool streaming = false;
       BeliefStatePtr V(new BeliefState);
 
       std::size_t no_beliefstates = 0;
@@ -135,41 +138,43 @@ main(int argc, char* argv[])
       if (vm.count(HELP))
 	{
 	  std::cerr << desc << std::endl;
-	  return 1;
+	  exit(1);
         }
 
       // setup log4cxx
       init_loggers("dmcsc");
       
-
-      bool primitiveDMCS = false;
-      if (qvs.compare("") != 0) // reading V for basic DMCS
+      if (!qvs.empty()) // reading V for basic DMCS
 	{
 	  primitiveDMCS = true;
 	  std::istringstream iss(qvs);
 	  iss >> V;
 	}
 
-      if (port.compare("") == 0)
+      if (port.empty() || hostName.empty())
 	{
+	  std::cerr << "Need hostname and port." << std::endl;
 	  std::cerr << desc << std::endl;
-	  return 1;
+	  exit(1);
 	}
 
+      // setup connection
       boost::asio::io_service io_service;
       boost::asio::ip::tcp::resolver resolver(io_service);
       boost::asio::ip::tcp::resolver::query query(hostName, port);
       boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
       boost::asio::ip::tcp::endpoint endpoint = *it;
 
+
+
       if (dynamic) // dynamic mode
 	{
-	  LOG4CXX_DEBUG(logger, "In dynamic mode.");
+	  DMCS_LOG_DEBUG("In dynamic mode.");
 
 	  ContextSubstitutionPtr ctx_sub(new ContextSubstitution);
 	  ConfigMessage mess(root_ctx, ctx_sub, false);
 	  
-	  LOG4CXX_DEBUG(logger, "Message = " << mess);
+	  DMCS_LOG_DEBUG("Message = " << mess);
 	  
 	  std::string header = HEADER_REQ_DYN_DMCS;
 	  Client<DynamicCommandType> c(io_service, it, header, mess);
@@ -177,8 +182,8 @@ main(int argc, char* argv[])
 
 	  DynamicConfiguration::dynmcs_return_type result = c.getResult();
 
-	  LOG4CXX_DEBUG(logger, "FINAL RESULT: ");
-	  LOG4CXX_DEBUG(logger, *result);
+	  DMCS_LOG_DEBUG("FINAL RESULT: ");
+	  DMCS_LOG_DEBUG(*result);
 
 
 	  // instantiate the system, then write .br and .sh files
@@ -191,7 +196,8 @@ main(int argc, char* argv[])
 	     (primitiveDMCS && V->size() == 0) ||
 	     (primitiveDMCS && V->size() != system_size))
 	    {
-	      std::cerr << desc << "\n";
+	      std::cerr << "empty system size" << std::endl;
+	      std::cerr << desc << std::endl;
 	      return 1;
 	    }
 
@@ -202,22 +208,22 @@ main(int argc, char* argv[])
 	  BeliefStateListPtr result(new BeliefStateList);
 #endif // DMCS_STATS_INFO
 	  
-	  LOG4CXX_DEBUG(logger, "Starting DMCS with " << system_size << " contexts.");
+	  DMCS_LOG_DEBUG("Starting DMCS with " << system_size << " contexts.");
 	  
 	  if (primitiveDMCS) // primitive DMCS
 	    {
-	      LOG4CXX_DEBUG(logger, "Primitive mode.");
-	      LOG4CXX_DEBUG(logger, "Sending: " << V);
+	      DMCS_LOG_DEBUG("Primitive mode.");
+	      DMCS_LOG_DEBUG("Sending: " << V);
 
 	      std::string header = HEADER_REQ_PRI_DMCS;
 	      PrimitiveMessage mess(V);
 	      Client<PrimitiveCommandType> c(io_service, it, header, mess);
 	      
-	      LOG4CXX_DEBUG(logger, "Running ioservice.");
+	      DMCS_LOG_DEBUG("Running ioservice.");
 	  
 	      io_service.run();
 
-	      LOG4CXX_DEBUG(logger, "Getting results.");
+	      DMCS_LOG_DEBUG("Getting results.");
 	  
 	      result = c.getResult();
 
@@ -234,7 +240,7 @@ main(int argc, char* argv[])
 	      // for now, we work on streaming DMCS for the opt topology. 
 	      if (streaming)
 		{
-		  LOG4CXX_DEBUG(logger, "Streaming mode.");
+		  DMCS_LOG_DEBUG("Streaming mode.");
 
 		  std::string header = HEADER_REQ_STM_DMCS;
 		  // USER <--> invoker == 0
@@ -242,28 +248,28 @@ main(int argc, char* argv[])
 
 		  Conflict* conflict = mess.getConflict();
 
-		  LOG4CXX_DEBUG(logger, "Empty starting conflict:");
-		  //		  LOG4CXX_DEBUG(logger, *conflict);
+		  DMCS_LOG_DEBUG("Empty starting conflict:");
+		  //		  DMCS_LOG_DEBUG(*conflict);
 
 		  Client<StreamingCommandType> c(io_service, it, header, mess);
 
-		  LOG4CXX_DEBUG(logger, "Running ioservice.");
+		  DMCS_LOG_DEBUG("Running ioservice.");
 
 		  io_service.run();
 		}
 	      else
 		{
-		  LOG4CXX_DEBUG(logger, "Opt mode.");
+		  DMCS_LOG_DEBUG("Opt mode.");
 
 		  std::string header = HEADER_REQ_OPT_DMCS;
 		  OptCommandType::input_type mess(0); // invoker ID ?
 		  Client<OptCommandType> c(io_service, it, header, mess);
 
-		  LOG4CXX_DEBUG(logger, "Running ioservice.");
+		  DMCS_LOG_DEBUG("Running ioservice.");
 
 		  io_service.run();
 	      
-		  LOG4CXX_DEBUG(logger, "Getting results.");
+		  DMCS_LOG_DEBUG("Getting results.");
 
 		  result = c.getResult();
 
@@ -347,18 +353,17 @@ main(int argc, char* argv[])
       std::cout << *result->getStatsInfo() << std::endl;
 #else
       std::cout << "Total Number of Equilibria: " << no_beliefstates << std::endl;
-#endif
+#endif // DMCS_STATS_INFO
 	}
     }
   catch (std::exception& e)
     {
-      LOG4CXX_ERROR(logger, "Exception:");
-      LOG4CXX_ERROR(logger, e.what());
+      DMCS_LOG_FATAL("Bailing out: " << e.what());
       return 1;
     }
   catch (...)
     {
-      LOG4CXX_ERROR(logger, "Exception of unknown type.");
+      DMCS_LOG_FATAL("Exception of unknown type.");
       return 1;
     }
   

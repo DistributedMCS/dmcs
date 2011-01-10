@@ -34,6 +34,8 @@
 #include "config.h"
 #endif
 
+#include "dmcs/Log.h"
+
 #include "mcs/Theory.h"
 
 #include <boost/bind.hpp>
@@ -54,11 +56,9 @@ Client<CmdType>::Client(boost::asio::io_service& io_service,
 {
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 
-#if defined(DEBUG)
-  std::cerr << "Client::Client()  " << endpoint << std::endl
-	    << "Header to send  = " << my_header << std::endl
-	    << "Message to send = " << mess << std::endl;
-#endif //DEBUG
+  DMCS_LOG_DEBUG("Client::Client(): " << endpoint);
+  DMCS_LOG_DEBUG("Header to send: " << my_header);
+  DMCS_LOG_DEBUG("Message to send: " << mess);
 
   conn->socket().async_connect(endpoint,
 			       boost::bind(&Client::send_header, this,
@@ -73,9 +73,7 @@ void
 Client<CmdType>::send_header(const boost::system::error_code& error,
 			     boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
 {
-#ifdef DEBUG
-  std::cerr << "Client::send_header" << std::endl;
-#endif
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!error)
     {
@@ -86,14 +84,6 @@ Client<CmdType>::send_header(const boost::system::error_code& error,
 
       conn->async_write(my_header, boost::bind(&Client::send_message, this,
 					       boost::asio::placeholders::error, conn));
-
-      /*
-      std::vector<char> write_buf(my_header.begin(), my_header.end());
-      std::cerr << "write_buf.size() = " << write_buf.size() << std::endl;
-      
-      boost::asio::async_write(conn->socket(), boost::asio::buffer(write_buf),
-			       boost::bind(&Client::send_message, this,
-			       boost::asio::placeholders::error, conn));*/
     }
   else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator())
     {
@@ -108,7 +98,8 @@ Client<CmdType>::send_header(const boost::system::error_code& error,
     }
   else
     {
-      std::cerr << "Client::send_header: " << error.message() << std::endl;
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << error.message());
+      throw std::runtime_error(error.message());
     }
 }
 
@@ -118,20 +109,20 @@ template<typename CmdType>
 void
 Client<CmdType>::send_message(const boost::system::error_code& error, connection_ptr conn)
 {
-#ifdef DEBUG
-  std::cerr << "Client::send_message" << std::endl;
-#endif // DEBUG
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!error)
     {
-      std::cerr << mess << std::endl;
+      DMCS_LOG_DEBUG("Sending message: " << mess);
+
       conn->async_write(mess,
 			boost::bind(&Client::read_header, this,
 				    boost::asio::placeholders::error, conn));
     }
   else
     {
-      std::cerr << "Client::send_message: " << error.message() << std::endl;
+      DMCS_LOG_FATAL(__PRETTY_FUNCTION__ << ": " << error.message());
+      throw std::runtime_error(error.message());
     }
 }
 
@@ -141,19 +132,17 @@ template<typename CmdType>
 void
 Client<CmdType>::read_header(const boost::system::error_code& error, connection_ptr conn)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!error)
     {
-#if defined(DEBUG)
-      std::cerr << "Client::read_header" << std::endl;
-#endif // DEBUG
-      
       conn->async_read(received_header,
 		       boost::bind(&Client::handle_read_header, this,
 				   boost::asio::placeholders::error, conn));
     }
   else
     {
-      std::cerr << "Client::read_header: " << error.message() << std::endl;
+      DMCS_LOG_FATAL(__PRETTY_FUNCTION__ << ": " << error.message());
       throw std::runtime_error(error.message());
     }
 }
@@ -163,12 +152,11 @@ template<typename CmdType>
 void
 Client<CmdType>::handle_read_header(const boost::system::error_code& error, connection_ptr conn)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!error)
     {
-#ifdef DEBUG
-      std::cerr << "Client::handle_read_header" << std::endl
-		<< "Received header = " << received_header << std::endl;
-#endif
+      DMCS_LOG_DEBUG("Received header = " << received_header);
 
       if (received_header.compare("DMCS EOF") == 0)
 	{
@@ -181,48 +169,47 @@ Client<CmdType>::handle_read_header(const boost::system::error_code& error, conn
     }
   else
     {
-      std::cerr << "Client::handle_read_header: " << error.message() << std::endl;
+      DMCS_LOG_FATAL(__PRETTY_FUNCTION__ << ": " << error.message());
       throw std::runtime_error(error.message());
     }
 }
+
 
 template<typename CmdType>
 void 
 Client<CmdType>::read_answer(const boost::system::error_code& error, connection_ptr conn)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!error)
     {
-#if defined(DEBUG)
-      std::cerr << "Client::read_answer" << std::endl;
-#endif //DEBUG
-
       conn->async_read(result,
 		       boost::bind(&Client::read_header, this,
 				   boost::asio::placeholders::error, conn));
     }
   else
     {
-      std::cerr << "Client::read_answer: " << error.message() << std::endl;
+      DMCS_LOG_FATAL(__PRETTY_FUNCTION__ << ": " << error.message());
       throw std::runtime_error(error.message());
     }
 }
+
 
 template<typename CmdType>
 void
 Client<CmdType>::finalize(const boost::system::error_code& error, connection_ptr /* conn */)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!error)
     {
-#if defined(DEBUG)
-      std::cerr << "Client::finalize" << std::endl;
-#endif //DEBUG
       // Do nothing. Since we are not starting a new operation the
       // io_service will run out of work to do and the client will
       // exit.
     }
   else
     {
-      std::cerr << "Client::finalize: " << error.message() << std::endl;
+      DMCS_LOG_FATAL(__PRETTY_FUNCTION__ << ": " << error.message());
       throw std::runtime_error(error.message());
     }
 }

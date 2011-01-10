@@ -27,15 +27,6 @@
  * 
  */
 
-#include <sys/time.h>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-
-#include <boost/program_options.hpp>
-
 #include "generator/dmcsGen.h"
 #include "generator/BinaryTreeTopoGenerator.h"
 #include "generator/DiamondTopoGenerator.h"
@@ -55,9 +46,19 @@
 
 #include "dmcs/ProgramOptions.h"
 #include "dmcs/QueryPlan.h"
+#include "dmcs/Log.h"
 
 #include "mcs/Rule.h"
 #include "mcs/Signature.h"
+
+#include <boost/program_options.hpp>
+
+#include <sys/time.h>
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 
 using namespace dmcs;
 using namespace dmcs::generator;
@@ -92,6 +93,7 @@ using namespace dmcs::generator;
    7: House Topology\n\
    8: Multiple Ring Topology"
 
+
 SignatureVecPtr sigmas(new SignatureVec);
 InterfaceVecPtr context_interfaces(new InterfaceVec);
 BeliefStatePtr  minV;
@@ -115,6 +117,7 @@ std::size_t topology_type;
 
 std::string prefix;
 std::string filename;
+std::string logging;
 
 std::ofstream file_rules;
 std::ofstream file_topo;
@@ -137,7 +140,8 @@ read_input(int argc, char* argv[])
     (INTERFACE, boost::program_options::value<std::size_t>(&no_interface_atoms)->default_value(4), "Number of interface atoms")
     (BRIDGE_RULES, boost::program_options::value<std::size_t>(&no_bridge_rules)->default_value(4), "Number of interface atoms")
     (TOPOLOGY, boost::program_options::value<std::size_t>(&topology_type)->default_value(1), HELP_MESSAGE_TOPO)
-    (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Prefix for all files ")
+    (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Prefix for all files")
+    (LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
     ;
 
   boost::program_options::variables_map vm;
@@ -149,6 +153,16 @@ read_input(int argc, char* argv[])
     {
       std::cerr << desc;
       return 1;
+    }
+
+  // setup log4cxx
+  if (logging.empty())
+    {
+      init_loggers("dmcsGen");
+    }
+  else
+    {
+      init_loggers("dmcsGen", logging.c_str());
     }
 
   switch (topology_type)
@@ -232,12 +246,12 @@ read_input(int argc, char* argv[])
       }
     } // switch
 
-  std::cerr << "Number of context:                             " << no_contexts << std::endl;
-  std::cerr << "Number of atoms per context:                   " << no_atoms << std::endl;
-  std::cerr << "Number of maximum interface atoms per context: " << no_interface_atoms << std::endl;
-  std::cerr << "Number of maximum bridge rules per context:    " << no_bridge_rules << std::endl;
-  std::cerr << "Topology type:                                 " << topology_type << std::endl;
-  std::cerr << "Prefix for filename:                           " << prefix << std::endl << std::endl;
+  DMCS_LOG_INFO("Number of contexts:                            " << no_contexts);
+  DMCS_LOG_INFO("Number of atoms per context:                   " << no_atoms);
+  DMCS_LOG_INFO("Number of maximum interface atoms per context: " << no_interface_atoms);
+  DMCS_LOG_INFO("Number of maximum bridge rules per context:    " << no_bridge_rules);
+  DMCS_LOG_INFO("Topology type:                                 " << topology_type);
+  DMCS_LOG_INFO("Prefix for filename:                           " << prefix);
 
   return 0;
 }
@@ -269,7 +283,7 @@ init()
   setup_topos();
 
   // initialize minV as we now know the system size
-  BeliefStatePtr someV(new BeliefState(no_contexts, 0));
+  BeliefStatePtr someV(new BeliefState(no_contexts, BeliefSet()));
   minV = someV;
 
   // now set all epsilon bits to 1
@@ -330,18 +344,19 @@ generate_orig_topology()
 
   orig_topo_gen->generate();
 
-  #ifdef DEBUG
-  std::cerr << "Original topology:" << std::endl;
+
+#if defined(DEBUG)
+  DMCS_LOG_DEBUG("Original topology:");
   for (std::size_t i = 1; i <= no_contexts; ++ i)
     {
-      std::cerr << i << " --> ";
-
       NeighborVecPtr neighbors = (*orig_topo)[i-1];
-      std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
 
-      std::cerr << std::endl;
+      std::ostringstream oss;
+      std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(oss, " "));
+
+      DMCS_LOG_DEBUG(i << " --> " << oss.str());
     }
-    #endif
+#endif
 }
 
 
@@ -361,13 +376,14 @@ generate_contexts()
   // interface in the optimal topology.
 
 #ifdef DEBUG
-  std::cerr << "minV = " << minV << std::endl;
-  std::cerr << "Original local interface:" << std::endl;
+  DMCS_LOG_DEBUG("minV: " << minV);
+  DMCS_LOG_DEBUG("Original local interface:");
+
   for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
     {
       ContextPair cp = it->first;
-      std::cerr << "(" << cp.first << ", " << cp.second << ") --> " 
-		<< it->second << std::endl;
+
+      DMCS_LOG_DEBUG("(" << cp.first << ", " << cp.second << ") --> " << it->second);
     }
 #endif
 }
@@ -424,12 +440,13 @@ generate_opt_topology()
   opt_topo_gen->create_opt_interface();
 
 #ifdef DEBUG
-  std::cerr << "Optimal local interface:" << std::endl;
-  for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
+  DMCS_LOG_DEBUG("Optimal local interface:");
+
+  for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
     {
       ContextPair cp = it->first;
-      std::cerr << "(" << cp.first << ", " << cp.second << ") --> " 
-		<< it->second << std::endl;
+
+      DMCS_LOG_DEBUG("(" << cp.first << ", " << cp.second << ") --> " << it->second);
     }
 #endif
 }
@@ -438,10 +455,14 @@ generate_opt_topology()
 void
 generate_query_plan(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
 {
+  DMCS_LOG_TRACE("add_vertex");
+
   for (std::size_t i = 1; i <= no_contexts; ++i)
     {
       boost::add_vertex(query_plan->graph);
     }
+
+  DMCS_LOG_TRACE("setup properties");
 
   std::string localhost = "localhost";
   std::stringstream out;
@@ -455,6 +476,8 @@ generate_query_plan(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
       putProp<VertexPortProperty, std::string>(i, query_plan->port, port);
       putProp<VertexSigmaProperty, Signature>(i, query_plan->sigma, *(*sigmas)[i-1]);
     }
+
+  DMCS_LOG_TRACE("setup properties");
 
   for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
     {
@@ -470,6 +493,8 @@ generate_query_plan(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
       boost::add_edge(u, v, query_plan->graph);
       putProp<EdgeInterfaceProperty, BeliefStatePtr>(query_plan, from, to, query_plan->interface, interface);
     }
+
+  DMCS_LOG_TRACE("write graphviz");
 
   out.str("");
   out << minV;
@@ -744,7 +769,7 @@ getOptimumDLVFilter()
     }
   
   return result;
-  }
+}
 
 
 std::string
@@ -837,9 +862,8 @@ main(int argc, char* argv[])
 {
   if (read_input(argc, argv) == 1) // reading input not completed
     {
-      return 0;
+      return 1;
     }
-
 
   // this is a very bad idea, it will only change the seed every second!
   // srand( time(NULL) );
@@ -848,13 +872,25 @@ main(int argc, char* argv[])
     gettimeofday(&tv, NULL);
     srand(tv.tv_sec + tv.tv_usec);
   }
+
   init();
 
+  DMCS_LOG_TRACE("generate_orig_topology");
   generate_orig_topology();
+
+  DMCS_LOG_TRACE("generate_contexts");
   generate_contexts();
+
+  DMCS_LOG_TRACE("generate_query_plan");
   generate_query_plan(orig_qp, lcim);
+
+  DMCS_LOG_TRACE("print_query_plan");
   print_query_plan(orig_qp, prefix + TOP_EXT);
+
+  DMCS_LOG_TRACE("print_command_lines");
   print_command_lines();
+
+  DMCS_LOG_TRACE("print_dlv_command_lines");
   print_dlv_command_lines();
 
   // binary tree topology is a special case, orig_qp can be reused to
@@ -877,4 +913,6 @@ main(int argc, char* argv[])
       print_opt_command_lines();
       print_opt_dlv_command_lines();
     }
+
+  return 0;
 }

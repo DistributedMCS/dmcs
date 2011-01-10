@@ -38,6 +38,8 @@
 #include "dmcs/StreamingBackwardMessage.h"
 #include "dmcs/StreamingForwardMessage.h"
 
+#include "dmcs/Log.h"
+
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/serialization/vector.hpp>
@@ -60,12 +62,12 @@ AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_servic
     mess(ctx_id_, pack_size_)
     
 {
-  std::cerr << "AsynClient::AsynClient. pack_size = " << pack_size << std::endl;
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 
-#if defined(DEBUG)
-  std::cerr << "AsynClient::AsynClient()  " << endpoint << std::endl;
-#endif //DEBUG
+  DMCS_LOG_DEBUG("pack_size = " << pack_size);
+  DMCS_LOG_DEBUG("endpoint  = " << endpoint);
 
   conn->socket().async_connect(endpoint,
 			       boost::bind(&AsynClient::send_header, this,
@@ -77,26 +79,24 @@ AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_servic
 
 template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::error_code& error,
+AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::error_code& e,
 							       boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
 {
-  if (!error)
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  if (!e)
     {
       // The connection is now established successfully
       std::size_t prio = 0;
       std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index + 1;
       
-#ifdef DEBUG
-      std::cerr << "AsynClient::collect_message. offset = " << off << std::endl;
-#endif
+      DMCS_LOG_DEBUG("offset = " << off);
 
       Conflict* conflict;
       conflict = mg->recvConflict(off, prio);
       mess.setConflict(conflict);
 	
-#if defined(DEBUG)
-      std::cerr << "Send request to neighbor " << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port << std::endl;
-#endif // DEBUG
+      DMCS_LOG_DEBUG("Send request to neighbor " << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port);
 	
       conn->async_write(my_header, boost::bind(&AsynClient::send_message, this,
 					       boost::asio::placeholders::error, conn));
@@ -115,7 +115,9 @@ AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::
     }
   else
     {
-      std::cerr << "AsynClient::collect_message: " << error.message() << std::endl;
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -123,22 +125,23 @@ AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::
 
 template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<ForwardMessType, BackwardMessType>::send_message(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::send_message(const boost::system::error_code& e, connection_ptr conn)
 {
-#ifdef DEBUG
-  std::cerr << "AsynClient::send_message" << std::endl;
-#endif // DEBUG
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  if (!error)
+  if (!e)
     {
-      std::cerr << "neighborMess = " << mess << std::endl;
+      DMCS_LOG_DEBUG("neighborMess = " << mess);
+
       conn->async_write(mess,
 			boost::bind(&AsynClient::read_header, this,
 				    boost::asio::placeholders::error, conn));
     }
   else
     {
-      std::cerr << "AsynClient::send_message: " << error.message() << std::endl;
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -146,71 +149,69 @@ AsynClient<ForwardMessType, BackwardMessType>::send_message(const boost::system:
 
 template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<ForwardMessType, BackwardMessType>::read_header(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::read_header(const boost::system::error_code& e, connection_ptr conn)
 {
-  if (!error)
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  if (!e)
     {
-#if defined(DEBUG)
-      std::cerr << "AsynClient::read_header" << std::endl;
-#endif // DEBUG
-      
       conn->async_read(received_header,
 		       boost::bind(&AsynClient::handle_read_header, this,
 				   boost::asio::placeholders::error, conn));
     }
   else
     {
-      std::cerr << "AsynClient::read_header: " << error.message() << std::endl;
-      throw std::runtime_error(error.message());
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
 
 template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::system::error_code& e, connection_ptr conn)
 {
-  if (!error)
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  if (!e)
     {
-#ifdef DEBUG
-      std::cerr << "AsynClient::handle_read_header" << std::endl
-		<< "Received header = " << received_header << std::endl;
-#endif
+      DMCS_LOG_DEBUG("Received header = " << received_header);
 
       if (received_header.compare("DMCS EOF") == 0)
 	{
-	  finalize(error, conn);
+	  finalize(e, conn);
 	}
       else
 	{
-	  read_answer(error, conn);
+	  read_answer(e, conn);
 	}
     }
   else
     {
-      std::cerr << "AsynClient::handle_read_header: " << error.message() << std::endl;
-      throw std::runtime_error(error.message());
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
 template<typename ForwardMessType, typename BackwardMessType>
 void 
-AsynClient<ForwardMessType, BackwardMessType>::read_answer(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::read_answer(const boost::system::error_code& e, connection_ptr conn)
 {
-  if (!error)
-    {
-#if defined(DEBUG)
-      std::cerr << "AsynClient::read_answer" << std::endl;
-#endif //DEBUG
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
+  if (!e)
+    {
       conn->async_read(result,
 		       boost::bind(&AsynClient::handle_answer, this,
 		       boost::asio::placeholders::error, conn));
     }
   else
     {
-      std::cerr << "AsynClient::read_answer: " << error.message() << std::endl;
-      throw std::runtime_error(error.message());
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -218,22 +219,21 @@ AsynClient<ForwardMessType, BackwardMessType>::read_answer(const boost::system::
 
 template<typename ForwardMessType, typename BackwardMessType>
 void 
-AsynClient<ForwardMessType, BackwardMessType>::handle_answer(const boost::system::error_code& error, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::handle_answer(const boost::system::error_code& e, connection_ptr conn)
 {
-  if (!error)
-    {
-#if defined(DEBUG)
-      std::cerr << "AsynClient::handle_answer" << std::endl;
-#endif //DEBUG
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-      std::cerr << result << std::endl;
+  if (!e)
+    {
+      DMCS_LOG_DEBUG("result = " << result);
 
       read_header(boost::system::error_code(), conn);
     }
   else
     {
-      std::cerr << "AsynClient::handle_answer: " << error.message() << std::endl;
-      throw std::runtime_error(error.message());
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -241,21 +241,21 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_answer(const boost::system
 
 template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<ForwardMessType, BackwardMessType>::finalize(const boost::system::error_code& error, connection_ptr /* conn */)
+AsynClient<ForwardMessType, BackwardMessType>::finalize(const boost::system::error_code& e, connection_ptr /* conn */)
 {
-  if (!error)
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  if (!e)
     {
-#if defined(DEBUG)
-      std::cerr << "AsynClient::finalize" << std::endl;
-#endif //DEBUG
       // Do nothing. Since we are not starting a new operation the
       // io_service will run out of work to do and the client will
       // exit.
     }
   else
     {
-      std::cerr << "AsynClient::finalize: " << error.message() << std::endl;
-      throw std::runtime_error(error.message());
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 

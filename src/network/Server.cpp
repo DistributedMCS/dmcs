@@ -36,6 +36,7 @@
 #include "network/Handler.h"
 #include "network/Server.h"
 
+#include "dmcs/Log.h"
 
 namespace dmcs {
 
@@ -56,14 +57,13 @@ Server::Server(CommandTypeFactoryPtr& ctf_,
 
 
 void
-Server::handle_accept(const boost::system::error_code& error, connection_ptr conn)
+Server::handle_accept(const boost::system::error_code& e, connection_ptr conn)
 {
-  if (!error)
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  if (!e)
     {
-#if defined(DEBUG)
-      std::cerr << "Server::handle_accept" << std::endl 
-		<< "Creating new connection..." << std::endl;
-#endif // DEBUG
+      DMCS_LOG_DEBUG("Creating new connection...");
 
       // Start an accept operation for a new connection.
       connection_ptr new_conn(new connection(acceptor_.io_service()));
@@ -71,9 +71,7 @@ Server::handle_accept(const boost::system::error_code& error, connection_ptr con
 			     boost::bind(&Server::handle_accept, this,
 					 boost::asio::placeholders::error, new_conn));
 
-#if defined(DEBUG)
-      std::cerr << "Expect some header" << std::endl;
-#endif // DEBUG
+      DMCS_LOG_DEBUG("Wait for header...");
 
       // read header to decide what kind of command type to create
       conn->async_read(header, boost::bind(&Server::dispatch_header, this,
@@ -86,9 +84,8 @@ Server::handle_accept(const boost::system::error_code& error, connection_ptr con
       // accept operation the io_service will run out of work to do and the
       // server will exit.
 
-#ifdef DEBUG
-      std::cerr << "handle_accept: " << error.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -96,15 +93,11 @@ Server::handle_accept(const boost::system::error_code& error, connection_ptr con
 void
 Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
-#ifdef DEBUG
-      std::cerr << "Server::dispatch_header" << std::endl;
-#endif // DEBUG
-      
-#ifdef DEBUG
-      std::cerr << "Header = \"" << header << "\"" << std::endl;
-#endif
+      DMCS_LOG_DEBUG("Header = " << header);
       
       // Create the respective handler and give him the connection
       if (header.find(HEADER_REQ_PRI_DMCS) != std::string::npos)
@@ -136,10 +129,8 @@ Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
   else
     {
       // An error occurred.
-      
-#ifdef DEBUG
-      std::cerr << "Server::dispatch_header: " << e.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
   
@@ -147,20 +138,18 @@ Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
 void
 Server::handle_finalize(const boost::system::error_code& e, connection_ptr /* conn */)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
-#ifdef DEBUG
-      std::cerr << "in handle_finalize: " << std::endl;
-#endif
+      ///@todo only one handler here..
       delete handler;
     }
   else
     {
       // An error occurred.
-
-#ifdef DEBUG
-      std::cerr << "handle_finalize: " << e.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 

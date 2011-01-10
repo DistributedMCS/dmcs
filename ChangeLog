@@ -1,3 +1,25 @@
+2011-01-10  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/generator/dynGen.cpp: Setup srand() with gettimeofday().
+
+	* src/dmcs/OptDMCS.cpp: Remove X-Mas leftover casserole.
+
+	* include/network/Client.tcc: Add support for DMCS_LOG_*.
+	* include/network/Handler.tcc: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/generator/staticGen.cpp: Likewise.
+	* include/dmcs/ProgramOptions.h: Likewise.
+	* src/generator/Makefile.am: Likewise.
+
+	* include/dmcs/Log.h: Add support for configuring the logger from
+	a config file.
+	* src/dmcs/Log.cpp: Likewise.
+
+	* configure.ac: Add --enable-stats for defining DMCS_STATS_INFO.
+
 2011-01-10  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: Send 0 instead of *bs = 0.
