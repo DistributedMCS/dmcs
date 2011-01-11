@@ -29,6 +29,8 @@
 
 #include "network/JoinThread.h"
 
+#include "dmcs/Log.h"
+
 namespace dmcs {
 
 
@@ -44,9 +46,7 @@ JoinThread::JoinThread(std::size_t expecting_,
 void
 JoinThread::operator()()
 {
-#ifdef DEBUG
-  std::cerr << "JoinThread::operator()()" << std::endl;
-#endif
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
   bool stop = false;
   BeliefStatePackagePtr partial_eqs(new BeliefStatePackage(expecting));
