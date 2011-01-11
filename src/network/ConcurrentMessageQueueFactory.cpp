@@ -146,12 +146,14 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
     {
       // partial equilibrium input MQ for neighbor C_i
 
+      // NEIGHBOR_MQ + 2*index
       id++;
       mq = createMessageQueue(id, k, sizeof(BeliefState*));
       md->registerMQ(mq, id);
 
       // conflict input MQ, announces a new conflict to a neighbor C_i
 
+      // NEIGHBOR_MQ + 2*index + 1
       id++;
       mq = createMessageQueue(id, k, sizeof(Conflict*));
       md->registerMQ(mq, id);

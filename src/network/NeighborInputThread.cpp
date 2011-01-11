@@ -48,9 +48,7 @@ NeighborInputThread::NeighborInputThread(const NeighborPtr& nb_,
     pack_size(pack_size_),
     system_size(system_size_),
     mg(mg_)
-{
-
-}
+{ }
 
 
 void

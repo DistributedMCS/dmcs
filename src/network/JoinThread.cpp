@@ -33,14 +33,78 @@
 
 namespace dmcs {
 
-
-JoinThread::JoinThread(std::size_t expecting_,
+JoinThread::JoinThread(std::size_t no_nbs_,
 		       const HashedBiMapPtr& c2o_,
 		       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
-  : expecting(expecting_),
+  : no_nbs(no_nbs_),
     c2o(c2o_),
     mg(mg_)
 { }
+
+
+void
+JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt, 
+				 BeliefStatePackagePtr partial_eqs, 
+				 bm::bvector<>& mask,
+				 BeliefStateIteratorVecPtr beg_it, 
+				 BeliefStateIteratorVecPtr mid_it)
+{
+  const HashedBiMapByFirst& from_context = boost::get<Tag::First>(*c2o);
+  HashedBiMapByFirst::const_iterator pair = from_context.find(ctx_id);
+  std::size_t index = pair->second;
+  const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index;
+
+  // read BeliefState* from NEIGHBOR_MQ
+  BeliefStateVecPtr bsv = (*partial_eqs)[index];
+  bool first_import = false;
+
+  if (bsv->size() == 0)
+    {
+      first_import = true;
+    }
+
+  if (!first_import)
+    {
+      (*mid_it)[index] = --bsv->end();
+    }
+
+  for (std::size_t i = 0; i < peq_cnt; ++i)
+    {
+      std::size_t pri = 0;
+      BeliefState* bs = mg->recvModel(off, pri);
+      bsv->push_back(bs); 
+    }
+  
+  if (first_import)
+    {
+      (*beg_it)[index] = bsv->begin();
+      (*mid_it)[index] = bsv->begin();
+    }
+  else
+    {
+      (*mid_it)[index]++;
+    }
+
+  // turn on the bit that is respective to this context
+  mask.set(index);
+}
+
+
+
+void
+JoinThread::join(BeliefStatePackagePtr partial_eqs, 
+		 BeliefStateIteratorVecPtr beg_it, 
+		 BeliefStateIteratorVecPtr mid_it)
+{
+
+  // mark the completion of this join
+  for (std::size_t i = 0; i < no_nbs; ++i)
+    {
+      BeliefStateVecPtr bsv = (*partial_eqs)[i];
+
+      (*mid_it)[i] = --(bsv->end());
+    }
+}
 
 
 void
@@ -49,25 +113,34 @@ JoinThread::operator()()
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
   bool stop = false;
-  BeliefStatePackagePtr partial_eqs(new BeliefStatePackage(expecting));
+  bm::bvector<> mask;
+
+  // set up package of empty BeliefStates
+  BeliefStatePackagePtr partial_eqs(new BeliefStatePackage);
+  for (std::size_t i = 0; i < no_nbs; ++i)
+    {
+      BeliefStateVecPtr bsv(new BeliefStateVec);
+      partial_eqs->push_back(bsv);
+    }
+
+  BeliefStateIteratorVecPtr beg_it(new BeliefStateIteratorVec(no_nbs));
+  BeliefStateIteratorVecPtr mid_it(new BeliefStateIteratorVec(no_nbs));
 
   while (!stop)
     {
 #ifdef DEBUG
-      std::cerr << "JoinThread::operator()(). expecting = " << expecting << std::endl;
+      std::cerr << "JoinThread::operator()(). no_nbs = " << no_nbs << std::endl;
 #endif
 
       // look at JOIN_IN_MQ for notification of new models arrival
       std::size_t prio = 0;
-      MessagingGateway<BeliefState, Conflict>::JoinIn neighbor_notification = mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio);
-      std::size_t ctx_id = neighbor_notification.ctx_id;
-      std::size_t peq_cnt = neighbor_notification.peq_cnt;
+      MessagingGateway<BeliefState, Conflict>::JoinIn nn;
+      nn = mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio); // notification from neighbor thread
 
-      // read BeliefState* from NEIGHBOR_MQ
-      
-      
-      expecting--;
-      if (expecting == 0)
+      import_belief_states(nn.ctx_id, nn.peq_cnt, partial_eqs, mask, beg_it, mid_it);
+
+      // all neighbors have returned some models (not necessarily pack_size)
+      if (mask.count_range(0, no_nbs) == no_nbs)
 	{
 	  // time to join
 	}

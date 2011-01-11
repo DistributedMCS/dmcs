@@ -1,3 +1,16 @@
+2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/AsynClient.tcc: Send answers to neighbor's queue
+	for the joiner.
+
+	* src/network/NeighborInputThread.cpp: Clean up.
+
+	* src/network/ConcurrentMessageQueueFactory.cpp: Add a comment to
+	mark the offset.
+
+	* include/network/JoinThread.h: On implemeting the join.
+	* src/network/JoinThread.cpp: Likewise.
+
 2011-01-11  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/generator/ContextGenerator.cpp: Add support for DMCS_LOG_*.

@@ -30,6 +30,8 @@
 #ifndef JOIN_THREAD_H
 #define JOIN_THREAD_H
 
+#include "bm/bm.h"
+
 #include "mcs/BeliefState.h"
 #include "mcs/HashedBiMap.h"
 #include "network/ConcurrentMessageQueueFactory.h"
@@ -37,10 +39,13 @@
 
 namespace dmcs {
 
+typedef std::vector<BeliefStateVec::const_iterator> BeliefStateIteratorVec;
+typedef boost::shared_ptr<BeliefStateIteratorVec> BeliefStateIteratorVecPtr;
+
 class JoinThread
 {
 public:
-  JoinThread(std::size_t expecting_,
+  JoinThread(std::size_t no_nbs_,
 	     const HashedBiMapPtr& c2o_,
 	     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
@@ -49,10 +54,19 @@ public:
 
 private:
   void
-  read_neighbor();
+  import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
+		       BeliefStatePackagePtr partial_eqs, 
+		       bm::bvector<>& mask,
+		       BeliefStateIteratorVecPtr beg_it, 
+		       BeliefStateIteratorVecPtr mid_it);
+
+void
+join(BeliefStatePackagePtr partial_eqs, 
+     BeliefStateIteratorVecPtr beg_it, 
+     BeliefStateIteratorVecPtr mid_it);
 
 private:
-  std::size_t           expecting;      // number of neighbors left from which I need the information
+  std::size_t           no_nbs;      // number of neighbors left from which I need the models
   HashedBiMapPtr        c2o;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
