@@ -79,6 +79,9 @@ namespace dmcs {
     sendConflict(Conflict* c, std::size_t from, std::size_t to, std::size_t prio);
 
     virtual void
+    sendModelConflict(BeliefState* b, Conflict* c, std::size_t from, std::size_t to, std::size_t prio);
+
+    virtual void
     sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio);
 
     virtual BeliefState*
@@ -86,6 +89,9 @@ namespace dmcs {
 
     virtual Conflict*
     recvConflict(std::size_t from, std::size_t& prio);
+
+    virtual struct ModelConflict
+    recvModelConflict(std::size_t from, std::size_t& prio);
 
     virtual struct JoinIn
     recvJoinIn(std::size_t from, std::size_t& prio);

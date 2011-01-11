@@ -103,7 +103,7 @@ MessageQueueFactory::createMessagingGateway(std::size_t uid, std::size_t no_nbs)
   
   oss << DMCS_OUT_MQ << uid;
   const std::string& name1 = oss.str();
-  mq = createMessageQueue(name1.c_str(), k, sizeof(BeliefState*));
+  mq = createMessageQueue(name1.c_str(), k, sizeof(MessagingGateway<BeliefState,Conflict>::ModelConflict));
   md->registerMQ(mq, name1);
   oss.str("");
 
@@ -180,7 +180,7 @@ MessageQueueFactory::createMessagingGateway(std::size_t uid)
   
   oss << DMCS_OUT_MQ << uid;
   const std::string& name1 = oss.str();
-  mq = createMessageQueue(name1.c_str(), k, sizeof(BeliefState*));
+  mq = createMessageQueue(name1.c_str(), k, sizeof(MessagingGateway<BeliefState,Conflict>::ModelConflict));
   md->registerMQ(mq, name1);
   oss.str("");
 

@@ -78,6 +78,16 @@ MessageDispatcher::sendConflict(Conflict* c, std::size_t /* from */, std::size_t
 
 
 void
+MessageDispatcher::sendModelConflict(BeliefState* b, Conflict* c, std::size_t /* from */, std::size_t to, std::size_t prio)
+{
+  assert(mqs.size() > to);
+
+  struct ModelConflict mc = { b, c };
+  mqs[to]->send(&mc, sizeof(mc), prio);
+}
+
+
+void
 MessageDispatcher::sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio)
 {
   assert(mqs.size() > to);
@@ -121,6 +131,24 @@ MessageDispatcher::recvConflict(std::size_t from, std::size_t& prio)
 
   prio = p;
   return c;
+}
+
+
+struct MessagingGateway<BeliefState,Conflict>::ModelConflict
+MessageDispatcher::recvModelConflict(std::size_t from, std::size_t& prio)
+{
+  assert(mqs.size() > from);
+
+  struct ModelConflict mc = {0,0};
+  std::size_t recvd = 0;
+  unsigned int p = 0;
+
+  mqs[from]->receive(static_cast<void*>(&mc), sizeof(mc), recvd, p);
+
+  assert(sizeof(mc) == recvd);
+
+  prio = p;
+  return mc;
 }
 
 

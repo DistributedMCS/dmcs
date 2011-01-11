@@ -113,10 +113,10 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   md->registerMQ(mq, id);
 
   // create message queue 1
-  // output MQ, announces partial equilibria
+  // output MQ, announces partial equilibria w.r.t. conflicts
   
   id++;
-  mq = createMessageQueue(id, k, sizeof(BeliefState*));
+  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState,Conflict>::ModelConflict));
   md->registerMQ(mq, id);
 
   // create message queue 2
@@ -185,7 +185,7 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid)
   // output MQ, announces partial equilibria
   
   id++;
-  mq = createMessageQueue(id, k, sizeof(BeliefState*));
+  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState,Conflict>::ModelConflict));
   md->registerMQ(mq, id);
 
   return md;

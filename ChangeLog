@@ -1,6 +1,21 @@
+2011-01-11  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/generator/ContextGenerator.cpp: Add support for DMCS_LOG_*.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/mcs/BeliefState.h: Fix argument-dependent name lookup.
+
+	* include/network/MessagingGateway.h: Allow to send/receive pairs
+	of BeliefState/Conflict.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* include/network/MessageDispatcher.h: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+
 2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-
 
 	* include/network/JoinThread.h: Need c2o (bimap between
 	context id and the "offset" in neighbors' message queue).
@@ -32,13 +47,6 @@
 	* src/network/NeighborInputThread.cpp: Likewise.
 	* src/network/OutputThread.cpp: Likewise.
 	* src/network/RelSatSolverThread.cpp: Likewise.
-
-2011-01-11  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* src/generator/ContextGenerator.cpp: Add support for DMCS_LOG_*.
-	* src/solver/RelSatSolver.cpp: Likewise.
-
-	* include/mcs/BeliefState.h: Fix argument-dependent name lookup.
 
 2011-01-10  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 

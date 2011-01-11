@@ -46,6 +46,17 @@ namespace dmcs {
   public:
 
     /** 
+     * Used to announce that model @a m has been computed
+     * w.r.t. conflict @a c.
+     */
+    struct ModelConflict
+    {
+      MODEL* m;
+      CONFLICT* c;
+    };
+
+
+    /** 
      * Used to announce that context @a ctx_id has sent @a peq_cnt
      * partial equilibria.
      */
@@ -67,6 +78,7 @@ namespace dmcs {
     virtual void
     sendModel(MODEL* m, std::size_t from, std::size_t to, std::size_t prio) = 0;
 
+
     /** 
      * Send @a c originating from @a from to @a to with priority @a prio. May block.
      * 
@@ -77,6 +89,19 @@ namespace dmcs {
      */
     virtual void
     sendConflict(CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio) = 0;
+
+
+    /** 
+     * Send model @a m w.r.t. conflict @a c originating from @a from to @a to with priority @a prio. May block.
+     * 
+     * @param m a pointer to a MODEL
+     * @param from sender
+     * @param to receiver
+     * @param prio priority
+     */
+    virtual void
+    sendModelConflict(MODEL* m, CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio) = 0;
+
 
     /** 
      * Send a JoinIn message from @a from to @a to with priority @a prio. Must not block.
@@ -111,8 +136,19 @@ namespace dmcs {
     virtual CONFLICT*
     recvConflict(std::size_t from, std::size_t& prio) = 0;
 
+
     /** 
-     * Receive a JoinIn message from @a from to @a to with priority @a prio. May block.
+     * Receive a ModelConflict message from @a from with priority @a prio. May block.
+     * 
+     * @param from sender
+     * @param prio priority
+     */
+    virtual struct ModelConflict
+    recvModelConflict(std::size_t from, std::size_t& prio) = 0;
+
+
+    /** 
+     * Receive a JoinIn message from @a from with priority @a prio. May block.
      * 
      * @param from sender
      * @param prio priority
