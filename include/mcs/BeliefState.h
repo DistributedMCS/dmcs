@@ -210,12 +210,19 @@ operator>> (std::istream& is, BeliefSet& belief)
 }
 
 
-}//dmcs
+} //namespace dmcs
 
 
 namespace std {
 
-/// @brief write BeliefSet to stream
+/** 
+ * Output true bits in belief set @a bv on @a os.
+ * 
+ * @param os 
+ * @param bv 
+ * 
+ * @return os
+ */
 inline std::ostream&
 operator<< (std::ostream& os, const dmcs::BeliefSet& bv)
 {
@@ -237,13 +244,9 @@ operator<< (std::ostream& os, const dmcs::BeliefSet& bv)
   return os << "]";
 }
 
-}
-
-namespace dmcs {
-
 
 /**
- * Read a belief state from is and store it in bs.
+ * Read a belief state from @a is and store it in @a bs.
  *
  * @param is
  * @param bs
@@ -251,8 +254,10 @@ namespace dmcs {
  * @return is
  */
 inline std::istream& 
-operator>> (std::istream& is, BeliefStatePtr& bs)
+operator>> (std::istream& is, dmcs::BeliefStatePtr& bs)
 {
+  using namespace dmcs;
+
   // bs may be NULL, set it up
   if (!bs)
     {
@@ -315,7 +320,7 @@ operator>> (std::istream& is, BeliefStatePtr& bs)
 
 
 /**
- * Output a space-separated belief state bs.
+ * Output space-separated belief state @a bs on @a os.
  *
  * @param os
  * @param bs
@@ -323,8 +328,10 @@ operator>> (std::istream& is, BeliefStatePtr& bs)
  * @return os
  */
 inline std::ostream&
-operator<< (std::ostream& os, const BeliefState& bs)
+operator<< (std::ostream& os, const dmcs::BeliefState& bs)
 {
+  using namespace dmcs;
+
   /*std::copy(bs.begin(), bs.end(),
 	    std::ostream_iterator<BeliefSet>(os, " ")
 	    );*/
@@ -335,9 +342,20 @@ operator<< (std::ostream& os, const BeliefState& bs)
   return os;
 }
 
+
+/** 
+ * Output space-separated @a bs on @a os.
+ * 
+ * @param os 
+ * @param l 
+ * 
+ * @return os
+ */
 inline std::ostream&
-operator<< (std::ostream& os, const BeliefStatePtr& bs)
+operator<< (std::ostream& os, const dmcs::BeliefStatePtr& bs)
 {
+  using namespace dmcs;
+
   /*std::copy(bs->begin(), bs->end(),
 	    std::ostream_iterator<BeliefSet>(os, " ")
 	    );*/
@@ -358,8 +376,10 @@ operator<< (std::ostream& os, const BeliefStatePtr& bs)
  * @return os
  */
 inline std::ostream&
-operator<< (std::ostream& os, const BeliefStateList& l)
+operator<< (std::ostream& os, const dmcs::BeliefStateList& l)
 {
+  using namespace dmcs;
+
   //typedef boost::iterator_adaptor<BeliefState,BeliefStateList::const_iterator> my_iterator; 
   //my_iterator first(l.begin());
   //my_iterator last(l.end());
@@ -371,17 +391,26 @@ operator<< (std::ostream& os, const BeliefStateList& l)
   return os;
 }
 
+
+/** 
+ * Output newline-separated @a l on @a os.
+ * 
+ * @param os 
+ * @param l 
+ * 
+ * @return os
+ */
 inline std::ostream&
-operator<< (std::ostream& os, const BeliefStateListPtr& l)
+operator<< (std::ostream& os, const dmcs::BeliefStateListPtr& l)
 {
+  using namespace dmcs;
 
   std::copy(l->begin(), l->end(), std::ostream_iterator<BeliefStatePtr>(os, "\n"));
 
   return os;
 }
 
-
-} // namespace dmcs
+} // namespace std
 
 
 namespace boost {
