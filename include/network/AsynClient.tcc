@@ -228,6 +228,27 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_answer(const boost::system
       DMCS_LOG_DEBUG("result = " << result);
 
       // now put k models from result into a message queue. 
+      const BeliefStateVecPtr bsv = result.getBeliefStates();
+      const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index;
+
+      for (BeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
+	{
+	  BeliefState* bs = *it;
+	  mg->sendModel(bs, ctx_id, off, 0);
+	}
+
+      // notify the joiner by putting a JoinMess into JoinMessageQueue
+      mg->sendJoinIn(bsv->size(), ctx_id, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+
+
+      // wait until the Joiner requests next models, then inform the
+      // neighbor that I want next models
+      std::string header_next = HEADER_NEXT;
+
+      DMCS_LOG_DEBUG("send " << header_next);
+
+      conn->async_write(header_next, boost::bind(&AsynClient::read_header, this,
+						 boost::asio::placeholders::error, conn));
 
       read_header(boost::system::error_code(), conn);
     }
