@@ -34,6 +34,7 @@
 #include "network/connection.hpp"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/Session.h"
+#include "network/OutputThread.h"
 #include "network/ThreadFactory.h"
 #include "dmcs/CommandType.h"
 #include "dmcs/StreamingCommandType.h"
@@ -106,10 +107,10 @@ public:
   handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call);
 
 private:
-  connection_ptr       conn;
-  OutputThreadStarter* ots;
-  boost::thread*       output_thread;
-  std::string          header;
+  connection_ptr  conn;
+  OutputThread*   ots;
+  boost::thread*  output_thread;
+  std::string     header;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 

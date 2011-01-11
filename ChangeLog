@@ -1,5 +1,8 @@
 2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/Handler.tcc: Adapt to new threads.
+	* include/network/Handler.h: Likewsie.
+
 	* include/network/ThreadFactory.h: Remove thread starters.
 	* src/network/ThreadFactory.cpp: Likewise.
 

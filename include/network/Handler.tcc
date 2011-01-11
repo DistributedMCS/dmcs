@@ -228,7 +228,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 
 	  DMCS_LOG_DEBUG("creating output thread, pack_size = " << pack_size);
 
-	  ots = new OutputThreadStarter(conn, pack_size, mg); ///@todo: delete ots somewhere
+	  ots = new OutputThread(conn, pack_size, mg); ///@todo: delete ots somewhere
 	  output_thread = new boost::thread(*ots);
 	}
 
