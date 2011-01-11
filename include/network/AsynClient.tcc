@@ -227,6 +227,8 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_answer(const boost::system
     {
       DMCS_LOG_DEBUG("result = " << result);
 
+      // now put k models from result into a message queue. 
+
       read_header(boost::system::error_code(), conn);
     }
   else
