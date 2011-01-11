@@ -49,6 +49,7 @@ namespace dmcs {
 #define HEADER_REQ_INSTANTIATE "DMCS REQ INSTANTIATE"
 #define HEADER_ANS "DMCS ANS"
 #define HEADER_EOF "DMCS EOF"
+#define HEADER_NEXT "DMCS NEXT"
 
 typedef std::list<std::size_t> History;
 typedef boost::shared_ptr<History> HistoryPtr;
