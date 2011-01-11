@@ -36,7 +36,6 @@
 #include "network/BaseClient.h"
 #include "network/connection.hpp"
 #include "solver/RelSatSolver.h"
-
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -46,88 +45,10 @@ namespace dmcs {
 typedef std::vector<boost::thread*> ThreadVec;
 typedef boost::shared_ptr<ThreadVec> ThreadVecPtr;
 
-class NeighborInputThreadStarter
-{
-public:
-  NeighborInputThreadStarter(const NeighborPtr& nb_, 
-			     std::size_t ctx_id_, 
-			     std::size_t pack_size_,
-			     std::size_t index_,
-			     std::size_t system_size_,
-			     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
-
-  void
-  operator()();
-
-private:
-  const NeighborPtr nb;
-  std::size_t ctx_id;
-  std::size_t pack_size;
-  std::size_t index;
-  std::size_t system_size;
-  BaseClient* client;
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
-};
-
-
-
-class JoinThreadStarter
-{
-public:
-  JoinThreadStarter(boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
-
-  void 
-  operator()();
-
-private:
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
-};
-
-
-
-class LocalSolverThreadStarter
-{
-public:
-  LocalSolverThreadStarter(const RelSatSolverPtr& relsatsolver_);
-
-  void
-  operator()();
-
-private:
-  RelSatSolverPtr relsatsolver;
-};
-
-
-
-class OutputThreadStarter
-{
-public:
-  OutputThreadStarter(const connection_ptr& conn_,
-		      std::size_t pack_size_,
-		      boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
-
-  void
-  operator()();
-
-  void
-  collect_output(const boost::system::error_code& e);
-
-  void
-  write_result(const boost::system::error_code& e, BeliefStateVecPtr res);
-
-private:
-  const connection_ptr& conn;
-  std::size_t pack_size;
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;  
-};
-
-
-
 class ThreadFactory
 {
 public:
   ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory_,
-		//		const ProxySignatureByLocalPtr& mixed_sig_,
 		const SignaturePtr& local_sig_,
 		const BeliefStatePtr& localV_,
 		std::size_t pack_size_,
@@ -148,7 +69,6 @@ public:
 private:
   const ContextPtr               context;
   const TheoryPtr                theory;
-  //  const ProxySignatureByLocalPtr mixed_sig;
   const SignaturePtr             local_sig;
   const BeliefStatePtr           localV;
   std::size_t                    pack_size;

@@ -1,5 +1,8 @@
 2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/ThreadFactory.h: Remove thread starters.
+	* src/network/ThreadFactory.cpp: Likewise.
+
 	* src/network/Makefile.am: Update libthreads with new cpp files.
 
 	* include/network/Makefile.am (noinst_HEADERS): Add new header files.
