@@ -36,6 +36,10 @@ libnetwork_a_SOURCES = \
 libthreads_a_SOURCES = \
 		ConcurrentMessageDispatcher.cpp \
 		ConcurrentMessageQueueFactory.cpp \
+		JoinThread.cpp \
 		MessageDispatcher.cpp \
 		MessageQueueFactory.cpp \
-		ThreadFactory.cpp
+		NeighborInputThread.cpp \
+		OutputThread.cpp \
+		ThreadFactory.cpp \
+		RelSatSolverThread.cpp

@@ -1,3 +1,18 @@
+2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/Makefile.am: Update libthreads with new cpp files.
+
+	* include/network/Makefile.am (noinst_HEADERS): Add new header files.
+
+	* include/network/JoinThread.h: New file.
+	* include/network/NeighborInputThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/RelSatSolverThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/NeighborInputThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
 2011-01-11  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/generator/ContextGenerator.cpp: Add support for DMCS_LOG_*.

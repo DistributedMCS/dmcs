@@ -12,13 +12,17 @@ noinst_HEADERS =  \
 		ConcurrentMessageQueueFactory.h \
 		Handler.h \
 		Handler.tcc \
+		JoinThread.h \
 		MessageDispatcher.h \
 		MessageQueue.h \
 		MessageQueueFactory.h \
 		MessagingGateway.h \
+		NeighborInputThread.h \
+		OutputThread.h \
 		Server.h \
 		Session.h \
 		ThreadFactory.h \
+		RelSatSolverThread.h \
 		connection.hpp
 
 
