@@ -31,6 +31,7 @@
 #define NEIGHBOR_INPUT_THREAD_H
 
 #include "dmcs/Context.h"
+#include "mcs/HashedBiMap.h"
 #include "network/BaseClient.h"
 #include "network/connection.hpp"
 #include "network/ConcurrentMessageQueueFactory.h"
@@ -45,9 +46,9 @@ class NeighborInputThread
 {
 public:
   NeighborInputThread(const NeighborPtr& nb_, 
+		      const HashedBiMapPtr& c2o_,
 		      std::size_t ctx_id_, 
 		      std::size_t pack_size_,
-		      std::size_t index_,
 		      std::size_t system_size_,
 		      boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
@@ -56,10 +57,10 @@ public:
 
 private:
   const NeighborPtr nb;
+  const HashedBiMapPtr c2o;
   std::size_t ctx_id;
   std::size_t pack_size;
-  std::size_t index;
-  std::size_t system_size;
+  std::size_t system_size; // might not be needed
   BaseClient* client;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };

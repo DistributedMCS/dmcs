@@ -1,5 +1,19 @@
 2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+
+
+	* include/network/JoinThread.h: Need c2o (bimap between
+	context id and the "offset" in neighbors' message queue).
+	* include/network/NeighborInputThread.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/NeighborInputThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/mcs/Makefile.am: Add HashedBiMap.h.
+
+	* include/mcs/HashedBiMap.h: New file.
+
 	* include/network/Handler.tcc: Adapt to new threads.
 	* include/network/Handler.h: Likewsie.
 

@@ -31,6 +31,7 @@
 #define JOIN_THREAD_H
 
 #include "mcs/BeliefState.h"
+#include "mcs/HashedBiMap.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "solver/Conflict.h"
 
@@ -39,15 +40,20 @@ namespace dmcs {
 class JoinThread
 {
 public:
-  JoinThread(std::size_t no_nbs_,
+  JoinThread(std::size_t expecting_,
+	     const HashedBiMapPtr& c2o_,
 	     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
 
   void 
   operator()();
 
 private:
-  std::size_t           no_nbs;      // number of neighbors
-  BeliefStatePackagePtr partial_eqs; // partial equilibria from my neighbors
+  void
+  read_neighbor();
+
+private:
+  std::size_t           expecting;      // number of neighbors left from which I need the information
+  HashedBiMapPtr        c2o;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };
 

@@ -32,13 +32,13 @@
 namespace dmcs {
 
 
-JoinThread::JoinThread(std::size_t no_nbs_,
+JoinThread::JoinThread(std::size_t expecting_,
+		       const HashedBiMapPtr& c2o_,
 		       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
-  : no_nbs(no_nbs_),
-    partial_eqs(new BeliefStatePackage(no_nbs_)),
+  : expecting(expecting_),
+    c2o(c2o_),
     mg(mg_)
 { }
-
 
 
 void
@@ -47,7 +47,35 @@ JoinThread::operator()()
 #ifdef DEBUG
   std::cerr << "JoinThread::operator()()" << std::endl;
 #endif
+  
+  bool stop = false;
+  BeliefStatePackagePtr partial_eqs(new BeliefStatePackage(expecting));
+
+  while (!stop)
+    {
+#ifdef DEBUG
+      std::cerr << "JoinThread::operator()(). expecting = " << expecting << std::endl;
+#endif
+
+      // look at JOIN_IN_MQ for notification of new models arrival
+      std::size_t prio = 0;
+      MessagingGateway<BeliefState, Conflict>::JoinIn neighbor_notification = mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio);
+      std::size_t ctx_id = neighbor_notification.ctx_id;
+      std::size_t peq_cnt = neighbor_notification.peq_cnt;
+
+      // read BeliefState* from NEIGHBOR_MQ
+      
+      
+      expecting--;
+      if (expecting == 0)
+	{
+	  // time to join
+	}
+
+      ///@todo: determine the condition for stop = true;
+    }
 }
+
 
 } // namespace dmcs
 

@@ -37,15 +37,15 @@ namespace dmcs {
 
 
 NeighborInputThread::NeighborInputThread(const NeighborPtr& nb_, 
+					 const HashedBiMapPtr& c2o_,
 					 std::size_t ctx_id_,
 					 std::size_t pack_size_,
-					 std::size_t index_,
 					 std::size_t system_size_,
 					 boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
   : nb(nb_),
+    c2o(c2o_),
     ctx_id(ctx_id_),
     pack_size(pack_size_),
-    index(index_),
     system_size(system_size_),
     mg(mg_)
 {
@@ -61,6 +61,11 @@ NeighborInputThread::operator()()
   boost::asio::ip::tcp::resolver::query query(nb->hostname, nb->port);
   boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
   boost::asio::ip::tcp::endpoint endpoint = *res_it;
+
+  // get the offset of the neighbor
+  const HashedBiMapByFirst& from_context = boost::get<Tag::First>(*c2o);
+  HashedBiMapByFirst::const_iterator pair = from_context.find(ctx_id);
+  std::size_t index = pair->second;
 
   const std::string header = HEADER_REQ_STM_DMCS;
   

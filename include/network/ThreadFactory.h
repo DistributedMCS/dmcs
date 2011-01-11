@@ -31,11 +31,13 @@
 #define THREAD_FACTORY_H
 
 #include "dmcs/Context.h"
+#include "mcs/HashedBiMap.h"
 #include "mcs/ProxySignatureByLocal.h"
 #include "mcs/Theory.h"
 #include "network/BaseClient.h"
 #include "network/connection.hpp"
 #include "solver/RelSatSolver.h"
+
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -67,12 +69,15 @@ public:
   createOutputThread(const connection_ptr& conn_);
 
 private:
-  const ContextPtr               context;
-  const TheoryPtr                theory;
-  const SignaturePtr             local_sig;
-  const BeliefStatePtr           localV;
-  std::size_t                    pack_size;
+  const ContextPtr       context;
+  const TheoryPtr        theory;
+  const SignaturePtr     local_sig;
+  const BeliefStatePtr   localV;
+  std::size_t            pack_size;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+  HashedBiMapPtr         c2o;        // hashed bimap from context id and
+				   // the offset in the vector of
+				   // neighbor message queue
 };
 
 

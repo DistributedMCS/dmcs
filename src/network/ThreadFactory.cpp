@@ -45,8 +45,17 @@ ThreadFactory::ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory
     local_sig(local_sig_),
     localV(localV_),
     pack_size(pack_size_),
-    mg(mg_)
-{ }
+    mg(mg_),
+    c2o(new HashedBiMap)
+{
+  const NeighborListPtr neighbors = context->getNeighbors();
+  std::size_t off = 0;
+  for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it, ++off)
+    {
+      std::size_t neighbor_id = (*it)->neighbor_id;
+      c2o->insert(Int2Int(neighbor_id, off));
+    }
+}
 
 
 void
@@ -56,11 +65,10 @@ ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
   std::size_t ctx_id = context->getContextID();
   std::size_t system_size = context->getSystemSize();
 
-  std::size_t i = 0;
-  for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it, ++i)
+  for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
     {
       const NeighborPtr nb = *it;
-      NeighborInputThread nits(nb, ctx_id, pack_size, i, system_size, mg);
+      NeighborInputThread nits(nb, c2o, ctx_id, pack_size, system_size, mg);
       
       boost::thread* nit = new boost::thread(nits);
       neighbor_input_threads->push_back(nit);
@@ -73,7 +81,7 @@ ThreadFactory::createJoinThread()
   const NeighborListPtr neighbors = context->getNeighbors();
   std::size_t no_nbs = neighbors->size();
 
-  JoinThread dts(no_nbs, mg);
+  JoinThread dts(no_nbs, c2o, mg);
   boost::thread* t = new boost::thread(dts);
 
   return t;
