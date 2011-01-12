@@ -51,6 +51,10 @@ public:
   void
   operator()();
 
+private:
+  void
+  wait_for_trigger(const boost::system::error_code& e);
+
   void
   collect_output(const boost::system::error_code& e);
 
@@ -59,10 +63,12 @@ public:
 
 private:
   const connection_ptr& conn;
-  std::size_t pack_size;
+  std::size_t pack_size;       // number of models the invoker expects to get
+  std::size_t left_2_send;     // number of models left to send
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;  
 };
 
+typedef boost::shared_ptr<OutputThread> OutputThreadPtr;
 
 } // namespace dmcs
 
