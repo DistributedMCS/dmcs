@@ -21,6 +21,7 @@ noinst_HEADERS =  \
 		OutputThread.h \
 		Server.h \
 		Session.h \
+		StreamingDMCSThread.h \
 		ThreadFactory.h \
 		RelSatSolverThread.h \
 		connection.hpp

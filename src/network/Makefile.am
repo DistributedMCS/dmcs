@@ -41,5 +41,6 @@ libthreads_a_SOURCES = \
 		MessageQueueFactory.cpp \
 		NeighborInputThread.cpp \
 		OutputThread.cpp \
+		StreamingDMCSThread.cpp \
 		ThreadFactory.cpp \
 		RelSatSolverThread.cpp
