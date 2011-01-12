@@ -52,20 +52,20 @@ public:
 private:
   void
   import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
-		       BeliefStatePackagePtr partial_eqs, 
+		       BeliefStatePackagePtr& partial_eqs, 
 		       bm::bvector<>& in_mask,
 		       bm::bvector<>& end_mask,
-		       BeliefStateIteratorVecPtr beg_it, 
-		       BeliefStateIteratorVecPtr mid_it,
+		       BeliefStateIteratorVecPtr& beg_it, 
+		       BeliefStateIteratorVecPtr& mid_it,
 		       bool first_import);
 
   std::size_t
-  join(const BeliefStateIteratorVecPtr run_it);
+  join(const BeliefStateIteratorVecPtr& run_it);
 
   void
-  join(BeliefStatePackagePtr partial_eqs, 
-       BeliefStateIteratorVecPtr beg_it, 
-       BeliefStateIteratorVecPtr mid_it);
+  join(const BeliefStatePackagePtr& partial_eqs, 
+       const BeliefStateIteratorVecPtr& beg_it, 
+       const BeliefStateIteratorVecPtr& end_it);
 
 private:
   std::size_t           no_nbs;      // number of neighbors left from which I need the models

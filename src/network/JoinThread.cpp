@@ -45,11 +45,11 @@ JoinThread::JoinThread(std::size_t no_nbs_,
 
 void
 JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt, 
-				 BeliefStatePackagePtr partial_eqs, 
+				 BeliefStatePackagePtr& partial_eqs, 
 				 bm::bvector<>& in_mask,
 				 bm::bvector<>& end_mask,
-				 BeliefStateIteratorVecPtr beg_it, 
-				 BeliefStateIteratorVecPtr mid_it,
+				 BeliefStateIteratorVecPtr& beg_it, 
+				 BeliefStateIteratorVecPtr& mid_it,
 				 bool first_import)
 {
   const HashedBiMapByFirst& from_context = boost::get<Tag::First>(*c2o);
@@ -58,11 +58,13 @@ JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
   const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index;
 
   // read BeliefState* from NEIGHBOR_MQ
-  BeliefStateVecPtr bsv = (*partial_eqs)[index];
+  BeliefStateVecPtr& bsv = (*partial_eqs)[index];
+
+  BeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[index];
 
   if (!first_import)
     {
-      (*mid_it)[index] = --bsv->end();
+      mid_it_ref = --bsv->end();
     }
 
   for (std::size_t i = 0; i < peq_cnt; ++i)
@@ -91,7 +93,7 @@ JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
     }
   else
     {
-      ++(*mid_it)[index];
+      ++mid_it_ref;
     }
 
   // turn on the bit that is respective to this context
@@ -102,7 +104,7 @@ JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
 
 // one-shot joining
 std::size_t 
-JoinThread::join(const BeliefStateIteratorVecPtr run_it)
+JoinThread::join(const BeliefStateIteratorVecPtr& run_it)
 {
   // We don't need the interface V here
   BeliefStateIteratorVec::const_iterator it = run_it->begin();
@@ -131,9 +133,9 @@ JoinThread::join(const BeliefStateIteratorVecPtr run_it)
 
 // join in which the range is determined by beg_it to end_it
 void
-JoinThread::join(BeliefStatePackagePtr partial_eqs, 
-		 BeliefStateIteratorVecPtr beg_it, 
-		 BeliefStateIteratorVecPtr end_it)
+JoinThread::join(const BeliefStatePackagePtr& partial_eqs, 
+		 const BeliefStateIteratorVecPtr& beg_it, 
+		 const BeliefStateIteratorVecPtr& end_it)
 {
   // initialization
   assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
@@ -155,8 +157,9 @@ JoinThread::join(BeliefStatePackagePtr partial_eqs,
       // find the greates index whose running iterator incrementable to a non-end()
       while (inc > 0)
 	{
-	  (*run_it)[inc]++;
-	  if ((*run_it)[inc] != (*end_it)[inc])
+	  BeliefStateVec::const_iterator& run_it_ref = (*run_it)[inc];
+	  run_it_ref++;
+	  if (run_it_ref != (*end_it)[inc])
 	    {
 	      break;
 	    }
@@ -221,7 +224,7 @@ JoinThread::operator()()
 	      first_import = false;
 	      for (std::size_t i = 0; i < no_nbs; ++i)
 		{
-		  BeliefStateVecPtr bsv = (*partial_eqs)[i];
+		  BeliefStateVecPtr& bsv = (*partial_eqs)[i];
 		  (*mid_it)[i] = bsv->end();
 		}
 	      join(partial_eqs, beg_it, mid_it);
@@ -231,13 +234,21 @@ JoinThread::operator()()
 	      // not the first time, so we just join selectively
 	      for (std::size_t i = 0; i < no_nbs; ++i)
 		{
-		  BeliefStateVecPtr bsv = (*partial_eqs)[i];
-		  if ((*mid_it)[i] != bsv->end())
+		  BeliefStateVecPtr& bsv = (*partial_eqs)[i];
+		  BeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[i];
+		  if (mid_it_ref != bsv->end())
 		    {
 		      // This neighbor has some new models.
-		      (*beg_it)[i] = (*mid_it)[i];
-		      (*mid_it)[i] = bsv->end();
+		      BeliefStateVec::const_iterator& beg_it_ref = (*beg_it)[i];
+
+		      // This is the range of new models that we want to join.
+		      beg_it_ref = mid_it_ref;
+		      mid_it_ref = bsv->end();
+
 		      join(partial_eqs, beg_it, mid_it);
+
+		      // Restart begin position, because the new models are now all in.
+		      beg_it_ref = bsv->begin();
 		    }
 		}
 	    }
