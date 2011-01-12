@@ -60,6 +60,47 @@ update(BeliefStatePtr& s, const BeliefStatePtr& t)
 }
 
 
+
+/** 
+ * Try to consistently join s and t into s.
+ * 
+ * @param s 
+ * @param t 
+ * 
+ * @return true if join is consistent, false otw.
+ */
+bool
+combine(BeliefState& s, const BeliefState& t)
+{
+  // all belief states must have identical size
+  // .. and we do not support system sizes <= 0
+  assert((s.size() == t.size()) && (s.size() > 0));
+
+  BeliefState::iterator       s_it = s.begin();
+  BeliefState::const_iterator t_it = t.begin();
+
+  // walk through the belief sets
+  for (; s_it != s.end(); ++s_it, ++t_it)
+    {
+      assert (s_it->size() > 0 && t_it->size() > 0);  // just to be sure
+
+      if (isEpsilon(*s_it))
+	{
+	  *s_it = *t_it;
+	}
+      else if (!isEpsilon(*t_it))
+	{
+	  if ((*s_it) != (*t_it))
+	    {
+	      return false;
+	    }
+	}
+    }
+
+  return true; // consistent
+}
+
+
 /** 
  * Try to consistently join s and t wrt. V to u.
  * 

@@ -66,6 +66,9 @@ typedef boost::shared_ptr<BeliefStateVec> BeliefStateVecPtr;
 typedef std::vector<BeliefStateVecPtr> BeliefStatePackage;
 typedef boost::shared_ptr<BeliefStatePackage> BeliefStatePackagePtr;
 
+typedef std::vector<BeliefStateVec::const_iterator> BeliefStateIteratorVec;
+typedef boost::shared_ptr<BeliefStateIteratorVec> BeliefStateIteratorVecPtr;
+
 /** 
  * @param b 
  * @param pos

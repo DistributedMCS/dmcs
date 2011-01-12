@@ -42,6 +42,9 @@ void
 update(BeliefStatePtr& s, const BeliefStatePtr& t);
 
 bool
+combine(BeliefState& s, const BeliefState& t);
+
+bool
 combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u, const BeliefStatePtr& V);
 
 BeliefStateListPtr
