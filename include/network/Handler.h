@@ -35,6 +35,7 @@
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/Session.h"
 #include "network/OutputThread.h"
+#include "network/StreamingDMCSThread.h"
 #include "network/ThreadFactory.h"
 #include "dmcs/CommandType.h"
 #include "dmcs/StreamingCommandType.h"
@@ -108,8 +109,10 @@ public:
 
 private:
   connection_ptr  conn;
-  OutputThread*   ots;
+  OutputThreadPtr ots;
+  StreamingDMCSThreadPtr stmt;
   boost::thread*  output_thread;
+  boost::thread*  dmcs_thread;
   std::string     header;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 };

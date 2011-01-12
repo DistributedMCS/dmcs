@@ -39,11 +39,6 @@
 
 namespace dmcs {
 
-class SendingRequest;
-  //class StreamingDMCS;
-
-  //  typedef boost::shared_ptr<StreamingDMCS> StreamingDMCSPtr;
-
 class StreamingCommandType : public CommandType<StreamingForwardMessage, bool>
 {
 public:
@@ -59,13 +54,13 @@ public:
   bool
   execute(const StreamingForwardMessage& mess)
   {
-    return sdmcs->start_up(mess);
+    return false;
   }
 
-  bool 
-  execute(const StreamingForwardMessage& mess, std::size_t port)
+  void
+  execute()
   {
-    return sdmcs->start_up(mess, port);
+    sdmcs->start_up();
   }
 
   bool
@@ -74,21 +69,11 @@ public:
     return false;
   }
 
-  StreamingDMCSPtr
-  getSDMCS()
-  {
-    return sdmcs;
-  }
-
 private:
   StreamingDMCSPtr sdmcs;
 };
 
 typedef boost::shared_ptr<StreamingCommandType> StreamingCommandTypePtr;
-
-
-// Functors for threads
-
 
 } // namespace dmcs
 

@@ -228,15 +228,19 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 
 	  DMCS_LOG_DEBUG("creating output thread, pack_size = " << pack_size);
 
-	  ots = new OutputThread(conn, pack_size, mg); ///@todo: delete ots somewhere
+	  ots = OutputThreadPtr(new OutputThread(conn, pack_size, mg)); 
 	  output_thread = new boost::thread(*ots);
+
+	  stmt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd));
+	  dmcs_thread = new boost::thread(*stmt);
 	}
 
       // write sesh->mess to QueryMessageQueue
 
-      DMCS_LOG_DEBUG("executing command");
+      //DMCS_LOG_DEBUG("executing command");
 
-      cmd->execute(sesh->mess, port);
+      // need another thread for dmcs here
+      //cmd->execute(sesh->mess, port);
   
       sesh->conn->async_read(header,
 			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
@@ -260,6 +264,14 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
   if (!e)
     {
       // check header
+      if (header.find(HEADER_NEXT) != std::string::npos)
+	{
+	  // trigger output thread
+	}
+      else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
+	{
+	  // restart
+	}
       
       sesh->conn->async_read(sesh->mess,
 			     boost::bind(&Handler<StreamingCommandType>::do_local_job, this,

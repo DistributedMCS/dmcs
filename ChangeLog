@@ -1,3 +1,25 @@
+2011-01-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.h: Use dmcs thread.
+	* include/network/Handler.tcc: Likewise.
+
+	* src/dmcs/StreamingDMCS.cpp: Reshape the workflow.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+
+	* include/network/StreamingDMCSThread.h: New file.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+
+	* include/network/Makefile.am: Add StreamingDMCSThread.h
+	* src/network/Makefile.am: Add StreamingDMCSThread.cpp
+
+	* include/network/OutputThread.h: Wait for a signal from Handler
+	to start.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/JoinThread.h: Add some references here and there.
+	* src/network/JoinThread.cpp: Likewise.
+
 2011-01-12  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* testsuite/testMessagingGateway.cpp: Add a future value for

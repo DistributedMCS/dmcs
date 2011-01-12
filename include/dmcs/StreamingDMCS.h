@@ -62,29 +62,31 @@ public:
   virtual
   ~StreamingDMCS();
 
-  bool
-  start_up(const StreamingForwardMessage& mess);
-
-  bool
-  start_up(const StreamingForwardMessage& mess, std::size_t port);
+  void
+  start_up();
 
 private:
   void
-  start_threads(std::size_t invoker, std::size_t pack_size);
+  listen();
+
+  void
+  initialize(std::size_t invoker, 
+	     std::size_t pack_size,
+	     std::size_t port);
+
+  void
+  work();
 
 private:
   QueryPlanPtr query_plan;
   CacheStatsPtr cacheStats;
   CachePtr cache;
 
-  bool thread_started;
-  bool mqs_created;
+  bool initialized;
 
   ThreadVecPtr neighbor_input_threads;
-  boost::thread* dmcs_thread;
+  boost::thread* join_thread;
   boost::thread* sat_thread;
-
-  ProxySignatureByLocalPtr mixed_sig;
 
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
 

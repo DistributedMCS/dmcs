@@ -35,7 +35,7 @@
 #include "dmcs/BeliefCombination.h"
 #include "dmcs/CommandType.h"
 #include "dmcs/Cache.h"
-#include "loopformula/DimacsVisitor.h"
+#include "dmcs/Log.h"
 
 #include "dmcs/StreamingDMCS.h"
 
@@ -66,8 +66,7 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     system_size(c->getSystemSize()),
     my_id(c->getContextID()),
     buf_count(buf_count_),
-    thread_started(false),
-    mqs_created(false),
+    initialized(false),
     neighbor_input_threads(new ThreadVec)
 { 
   const NeighborListPtr& nb = ctx->getNeighbors();
@@ -80,12 +79,16 @@ StreamingDMCS::~StreamingDMCS()
 { }
 
 
-
-
-
 void
-StreamingDMCS::start_threads(std::size_t invoker, std::size_t pack_size)
+StreamingDMCS::initialize(std::size_t invoker, std::size_t pack_size, std::size_t port)
 {
+  const NeighborListPtr& nb = ctx->getNeighbors();
+  std::size_t no_nbs = nb->size();
+
+  DMCS_LOG_DEBUG("Here create mqs");
+  ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
+  mg = mqf.createMessagingGateway(port, no_nbs); // we use the port as unique id
+
   BeliefStatePtr localV;
   if (invoker == 0)
     {
@@ -98,53 +101,60 @@ StreamingDMCS::start_threads(std::size_t invoker, std::size_t pack_size)
     }
 
   const SignaturePtr& local_sig = ctx->getSignature();
-  //  const SignaturePtr& gsig = createGuessingSignature(localV, sig);
-
-  //mixed_sig = ProxySignatureByLocalPtr(new ProxySignatureByLocal(sig, gsig));
-
-  //  std::cerr << "StreamingDMCS::start_threads. mixed_sig.size() = " << mixed_sig->size() << std::endl;
 
   ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size, mg);
 
-  tf.createNeighborInputThreads(neighbor_input_threads);
-  dmcs_thread   = tf.createJoinThread();
   sat_thread    = tf.createLocalSolveThread();
 
-  thread_started = true;
+  if (no_nbs > 0)
+    {
+      tf.createNeighborInputThreads(neighbor_input_threads);
+      join_thread   = tf.createJoinThread();
+    }
 }
 
 
 
-bool
-StreamingDMCS::start_up(const StreamingForwardMessage& mess)
+void
+StreamingDMCS::listen()
 {
-  if (!thread_started)
+  // wait for a signal from Handler
+
+  std::size_t invoker;
+  std::size_t pack_size;
+  std::size_t port;
+
+  if (!initialized)
     {
-      std::size_t invoker = mess.getInvoker();
-      std::size_t pack_size = mess.getPackSize();
-      start_threads(invoker, pack_size);
+      initialize(invoker, pack_size, port);
+      initialized = true;
     }
 
+  // decide to do what ever he wants
+  work();
+}
+
+
+void
+StreamingDMCS::work()
+{
   const NeighborListPtr& nb = ctx->getNeighbors();
   std::size_t no_nbs = nb->size();
 
   if (no_nbs == 0) // this is a leaf context
     {
 #ifdef DEBUG
-      std::cerr << "StreamingDMCS::start_up. Leaf context. Put an empty model into SatInputMQ to start the SAT solver without input" << std::endl;
+      DMCS_LOG_DEBUG("StreamingDMCS::start_up. Leaf context. Put an empty model into SatInputMQ to start the SAT solver without input");
 #endif
       // put an empty model into SatInputMQ to start the SAT solver without input
       std::size_t system_size = ctx->getSystemSize();
       BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
       mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
-#ifdef DEBUG
-      std::cerr << "StreamingDMCS::start_up. Finished writing" << std::endl;
-#endif      
     }
   else // this is an intermediate context
     {
 #ifdef DEBUG
-      std::cerr << "StreamingDMCS::start_up. Intermediate context. Send requests to neighbors by placing a message in each of the NeighborQueryMQ" << std::endl;
+      DMCS_LOG_DEBUG("StreamingDMCS::start_up. Intermediate context. Send requests to neighbors by placing a message in each of the NeighborQueryMQ");
 #endif
 
       for (std::size_t i = 0; i < no_nbs; ++i)
@@ -155,23 +165,16 @@ StreamingDMCS::start_up(const StreamingForwardMessage& mess)
 	  mg->sendConflict(empty_conflict, 0, off, 0);
 	}
     }
+
+  // go back to listen???
 }
 
 
 
-bool
-StreamingDMCS::start_up(const StreamingForwardMessage& mess, std::size_t port)
+void
+StreamingDMCS::start_up()
 {
-  if (!mqs_created)
-    {
-      std::cerr << "Here create mqs" << std::endl;
-      const NeighborListPtr& nb = ctx->getNeighbors();
-      ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
-      mg = mqf.createMessagingGateway(port, nb->size()); // we use the port as unique id
-      mqs_created = true;
-    }
-
-  return start_up(mess);
+  listen();
 }
 
 
