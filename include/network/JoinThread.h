@@ -39,9 +39,6 @@
 
 namespace dmcs {
 
-typedef std::vector<BeliefStateVec::const_iterator> BeliefStateIteratorVec;
-typedef boost::shared_ptr<BeliefStateIteratorVec> BeliefStateIteratorVecPtr;
-
 class JoinThread
 {
 public:
@@ -56,14 +53,19 @@ private:
   void
   import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
 		       BeliefStatePackagePtr partial_eqs, 
-		       bm::bvector<>& mask,
+		       bm::bvector<>& in_mask,
+		       bm::bvector<>& end_mask,
 		       BeliefStateIteratorVecPtr beg_it, 
-		       BeliefStateIteratorVecPtr mid_it);
+		       BeliefStateIteratorVecPtr mid_it,
+		       bool first_import);
 
-void
-join(BeliefStatePackagePtr partial_eqs, 
-     BeliefStateIteratorVecPtr beg_it, 
-     BeliefStateIteratorVecPtr mid_it);
+  std::size_t
+  join(const BeliefStateIteratorVecPtr run_it);
+
+  void
+  join(BeliefStatePackagePtr partial_eqs, 
+       BeliefStateIteratorVecPtr beg_it, 
+       BeliefStateIteratorVecPtr mid_it);
 
 private:
   std::size_t           no_nbs;      // number of neighbors left from which I need the models
