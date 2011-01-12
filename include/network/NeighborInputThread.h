@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   NeighborThreadFactory.h
+ * @file   NeighborInputThread.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
  * @date   Tue Jan  11 8:38:24 2011
  * 
