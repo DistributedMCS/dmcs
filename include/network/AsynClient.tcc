@@ -89,11 +89,11 @@ AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::
       // The connection is now established successfully
       std::size_t prio = 0;
       std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index + 1;
-      
-      DMCS_LOG_DEBUG("offset = " << off);
+      std::size_t timeout = 0;
 
-      Conflict* conflict;
-      conflict = mg->recvConflict(off, prio);
+      DMCS_LOG_DEBUG("offset = " << off);
+      
+      Conflict* conflict = mg->recvConflict(off, prio, timeout);
       mess.setConflict(conflict);
 	
       DMCS_LOG_DEBUG("Send request to neighbor " << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port);

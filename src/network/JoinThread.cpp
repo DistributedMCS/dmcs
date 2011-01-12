@@ -70,8 +70,9 @@ JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
 
   for (std::size_t i = 0; i < peq_cnt; ++i)
     {
-      std::size_t pri = 0;
-      BeliefState* bs = mg->recvModel(off, pri);
+      std::size_t prio = 0;
+      std::size_t timeout = 0;
+      BeliefState* bs = mg->recvModel(off, prio, timeout);
       bsv->push_back(bs); 
     }
   
@@ -128,14 +129,14 @@ JoinThread::operator()()
 
   while (!stop)
     {
-#ifdef DEBUG
-      std::cerr << "JoinThread::operator()(). no_nbs = " << no_nbs << std::endl;
-#endif
+      DMCS_LOG_DEBUG("no_nbs = " << no_nbs);
 
       // look at JOIN_IN_MQ for notification of new models arrival
       std::size_t prio = 0;
-      MessagingGateway<BeliefState, Conflict>::JoinIn nn;
-      nn = mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio); // notification from neighbor thread
+      std::size_t timeout = 0;
+      // notification from neighbor thread
+      MessagingGateway<BeliefState, Conflict>::JoinIn nn = 
+	mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
 
       import_belief_states(nn.ctx_id, nn.peq_cnt, partial_eqs, mask, beg_it, mid_it);
 

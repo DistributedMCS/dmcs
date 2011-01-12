@@ -31,14 +31,19 @@
 #include "dmcs/StreamingBackwardMessage.h"
 #include "network/OutputThread.h"
 
+#include "dmcs/Log.h"
+
 namespace dmcs {
 
 OutputThread::OutputThread(const connection_ptr& conn_,
-					 std::size_t pack_size_,
-					 boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
-  : conn(conn_), pack_size(pack_size_), mg(mg_)
+			   std::size_t pack_size_,
+			   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+  : conn(conn_),
+    pack_size(pack_size_),
+    mg(mg_)
 {
-  std::cerr << "OutputThread::OutputThread(). pack_size = " << pack_size << std::endl; 
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  DMCS_LOG_DEBUG("pack_size = " << pack_size);
 }
 
 
@@ -46,30 +51,34 @@ OutputThread::OutputThread(const connection_ptr& conn_,
 void
 OutputThread::collect_output(const boost::system::error_code& e)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
-#ifdef DEBUG
-      std::cerr << "OutputThread::collect_output(). pack_size = " << pack_size << std::endl;
-#endif
+      DMCS_LOG_DEBUG("pack_size = " << pack_size);
+
       BeliefStateVecPtr res(new BeliefStateVec);
       
       // be careful with weird value of pack_size. Bug just disappreared
       for (std::size_t i = 0; i < pack_size; ++i)
 	{
+	  DMCS_LOG_DEBUG("Read from MQ");
+
 	  std::size_t prio = 0;
-	  BeliefState* bs;
+	  std::size_t timeout = 0;
+	  BeliefState* bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
 	  
-	  std::cerr << "Read from MQ" << std::endl;
-	  bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio);
-	  
-	  if (bs == 0)
-	    // either UNSAT of EOF
+	  if (bs == 0) // either UNSAT of EOF
 	    {
-	      std::cerr << "OutputThread::collect_output(): NO MORE OUTPUT" << std::endl;
+	      DMCS_LOG_DEBUG("NOTHING TO OUTPUT, going to send EOF");
+
+	      ///@todo TK: shouldn't we send the nullptr here?
+
 	      break;
 	    }
 	  
-	  std::cerr << "got bs = " << *bs << std::endl;
+	  DMCS_LOG_DEBUG("got #" << i << ": bs = " << *bs);
+
 	  res->push_back(bs);
 	}
       
@@ -95,9 +104,8 @@ OutputThread::collect_output(const boost::system::error_code& e)
   else
     {
       // An error occurred.
-#ifdef DEBUG
-      std::cerr << "OutputThread::collect_output: " << e.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -105,12 +113,10 @@ OutputThread::collect_output(const boost::system::error_code& e)
 void
 OutputThread::write_result(const boost::system::error_code& e, BeliefStateVecPtr res)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
-#ifdef DEBUG
-      std::cerr << "OutputThread::write_result()" << std::endl;
-#endif
-
       StreamingBackwardMessage return_mess(res);
       
       conn->async_write(return_mess,
@@ -121,9 +127,8 @@ OutputThread::write_result(const boost::system::error_code& e, BeliefStateVecPtr
   else
     {
       // An error occurred.
-#ifdef DEBUG
-      std::cerr << "OutputThread::write_result: " << e.message() << std::endl;
-#endif
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
@@ -132,9 +137,7 @@ OutputThread::write_result(const boost::system::error_code& e, BeliefStateVecPtr
 void
 OutputThread::operator()()
 {
-#ifdef DEBUG
-  std::cerr << "OutputThread::operator()()" << std::endl;
-#endif
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   collect_output(boost::system::error_code());
 }

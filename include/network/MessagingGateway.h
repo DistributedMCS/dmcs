@@ -74,9 +74,12 @@ namespace dmcs {
      * @param from sender
      * @param to receiver
      * @param prio priority
+     * @param msecs timed receive
+     *
+     * @return true if sending failed
      */
-    virtual void
-    sendModel(MODEL* m, std::size_t from, std::size_t to, std::size_t prio) = 0;
+    virtual bool
+    sendModel(MODEL* m, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0) = 0;
 
 
     /** 
@@ -86,9 +89,12 @@ namespace dmcs {
      * @param from sender
      * @param to receiver
      * @param prio priority
+     * @param msecs timed receive
+     *
+     * @return true if sending failed
      */
-    virtual void
-    sendConflict(CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio) = 0;
+    virtual bool
+    sendConflict(CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0) = 0;
 
 
     /** 
@@ -98,9 +104,12 @@ namespace dmcs {
      * @param from sender
      * @param to receiver
      * @param prio priority
+     * @param msecs timed receive
+     *
+     * @return true if sending failed
      */
-    virtual void
-    sendModelConflict(MODEL* m, CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio) = 0;
+    virtual bool
+    sendModelConflict(MODEL* m, CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0) = 0;
 
 
     /** 
@@ -110,31 +119,36 @@ namespace dmcs {
      * @param from sender
      * @param to receiver
      * @param prio priority
+     * @param msecs timed receive
+     *
+     * @return true if sending failed
      */
-    virtual void
-    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio) = 0;
+    virtual bool
+    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0) = 0;
 
     /** 
      * Receive a pointer to a MODEL from @a from. May block.
      * 
      * @param from sender
      * @param prio priority
+     * @param msecs timed receive
      * 
      * @return the next pointer to the MODEL sent from @a from
      */
     virtual MODEL*
-    recvModel(std::size_t from, std::size_t& prio) = 0;
+    recvModel(std::size_t from, std::size_t& prio, std::size_t& msecs) = 0;
 
     /** 
      * Receive a pointer to a CONFLICT from @a from. May block.
      * 
      * @param from sender
      * @param prio priority
+     * @param msecs timed receive
      * 
      * @return the next pointer to the CONFLICT sent from @a from
      */
     virtual CONFLICT*
-    recvConflict(std::size_t from, std::size_t& prio) = 0;
+    recvConflict(std::size_t from, std::size_t& prio, std::size_t& msecs) = 0;
 
 
     /** 
@@ -142,9 +156,10 @@ namespace dmcs {
      * 
      * @param from sender
      * @param prio priority
+     * @param msecs timed receive
      */
     virtual struct ModelConflict
-    recvModelConflict(std::size_t from, std::size_t& prio) = 0;
+    recvModelConflict(std::size_t from, std::size_t& prio, std::size_t& msecs) = 0;
 
 
     /** 
@@ -152,11 +167,12 @@ namespace dmcs {
      * 
      * @param from sender
      * @param prio priority
+     * @param msecs timed receive
      *
      * @return the next JoinIn message
      */
     virtual struct JoinIn
-    recvJoinIn(std::size_t from, std::size_t& prio) = 0;
+    recvJoinIn(std::size_t from, std::size_t& prio, std::size_t& msecs) = 0;
     
   };
 

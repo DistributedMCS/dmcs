@@ -1,3 +1,18 @@
+2011-01-12  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueue.h: Add support for timed
+	message queues.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewie.
+	* include/network/MessageDispatcher.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+
 2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/AsynClient.tcc: Send answers to neighbor's queue

@@ -34,6 +34,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
+#include <boost/thread/thread_time.hpp>
+#include <boost/date_time/time_duration.hpp>
 
 #include <queue>
 #include <cstdio>
@@ -66,7 +68,8 @@ namespace dmcs {
     mutable boost::mutex mtx;
     boost::condition_variable cnd;
 
-
+    
+    
     inline void
     waitOnCapacity(boost::mutex::scoped_lock& lock)
     {
@@ -82,8 +85,7 @@ namespace dmcs {
 	  cnd.notify_one(); // notify one consuming thread
 	}
     }
-
-
+    
     inline void
     waitOnEmpty(boost::mutex::scoped_lock& lock)
     {
@@ -99,6 +101,88 @@ namespace dmcs {
 	  cnd.notify_one(); // notify one producing thread
 	}
     }
+
+
+    
+    inline bool
+    waitOnTimedCapacity(boost::mutex::scoped_lock& lock, const boost::posix_time::time_duration& t)
+    {
+      bool no_timeout = true;
+      
+      while (n == q.size() && no_timeout) // maximum capacity reached
+	{
+	  ++enq;
+	  no_timeout = cnd.timed_wait(lock, t);
+	  --enq;
+	}
+      
+      if (deq > 0) // is some consumer waiting?
+	{
+	  cnd.notify_one(); // notify one consuming thread
+	}
+      
+      return no_timeout;
+    }
+
+
+    inline bool
+    waitOnTimedEmpty(boost::mutex::scoped_lock& lock, const boost::posix_time::time_duration& t)
+    {
+      bool no_timeout = true;
+
+      while (q.empty() && no_timeout) // minimum capacity reached
+	{
+	  ++deq;
+	  no_timeout = cnd.timed_wait(lock, t);
+	  --deq;
+	}
+
+      if (enq > 0) // is some producer waiting?
+	{
+	  cnd.notify_one(); // notify one producing thread
+	}
+
+      return no_timeout;
+    }
+
+
+    inline void
+    pushBlock (const void *buf, std::size_t size)
+    {
+      void *m = malloc(size);
+
+      if (m == NULL)
+	{
+	  ::perror("malloc");
+	}
+      
+      std::memcpy(m, buf, size);
+
+      Block b = { m, size };
+
+      q.push(b);
+    }
+
+
+    inline std::size_t
+    popBlock (void *buf, std::size_t size)
+    {
+      Block& b = q.front();
+
+      assert (b.s <= size);
+
+      std::memcpy(buf, b.m, b.s);
+      std::size_t recvd = b.s;
+
+      free(b.m);
+      b.m = NULL;
+      b.s = 0;
+
+      q.pop();
+
+      return recvd;
+    }
+
 
 
   public:
@@ -122,6 +206,7 @@ namespace dmcs {
     virtual
     ~ConcurrentMessageQueue()
     {
+      boost::mutex::scoped_lock lock(mtx);
       while (!q.empty())
 	{
 	  Block& b = q.front();
@@ -153,40 +238,46 @@ namespace dmcs {
     {
       boost::mutex::scoped_lock lock(mtx);
       waitOnCapacity(lock);
-
-      void *m = malloc(size);
-
-      if (m == NULL)
-	{
-	  ::perror("malloc");
-	}
-      
-      std::memcpy(m, buf, size);
-
-      Block b = { m, size };
-
-      q.push(b);
+      pushBlock(buf, size);
     }
 
+
+    bool
+    timed_send (const void* buf, std::size_t size, unsigned int /* prio */, const boost::posix_time::time_duration& t)
+    {
+      boost::mutex::scoped_lock lock(mtx);
+
+      if (waitOnTimedCapacity(lock, t))
+	{
+	  pushBlock(buf, size);
+	  return true;
+	}
+
+      return false;
+    }
+      
 
     void
     receive (void *buf, std::size_t size, std::size_t& recvd, unsigned int& /* prio */)
     {
       boost::mutex::scoped_lock lock(mtx);
       waitOnEmpty(lock);
+      recvd = popBlock(buf, size);
+    }
 
-      Block& b = q.front();
 
-      assert (b.s <= size);
+    bool
+    timed_receive (void *buf, std::size_t size, std::size_t& recvd, unsigned int& /* prio */, const boost::posix_time::time_duration& t)
+    {
+      boost::mutex::scoped_lock lock(mtx);
 
-      std::memcpy(buf, b.m, b.s);
-      recvd = b.s;
+      if (waitOnTimedEmpty(lock, t))
+	{
+	  recvd = popBlock(buf, size);
+	  return true;
+	}
 
-      free(b.m);
-      b.m = NULL;
-      b.s = 0;
-
-      q.pop();
+      return false;
     }
 
   };
