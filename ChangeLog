@@ -1,15 +1,7 @@
-2011-01-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-	* include/network/JoinThread.h: Add streaming join.
-	* src/network/JoinThread.cpp: Likewise.
-
-	* include/mcs/BeliefState.h: Move some typedef here.
-
-	* include/dmcs/BeliefCombination.h: Combination done with
-	BeliefState& and doesn't need V.
-	* src/dmcs/BeliefCombination.cpp: Likewise.
-
 2011-01-12  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/testMessagingGateway.cpp: Add a future value for
+	thread joining.
 
 	* include/network/ConcurrentMessageQueue.h: Add support for timed
 	message queues.
@@ -23,6 +15,17 @@
 	* src/network/ConcurrentMessageDispatcher.cpp: Likewie.
 	* include/network/MessageDispatcher.h: Likewise.
 	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+
+2011-01-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: Add streaming join.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/mcs/BeliefState.h: Move some typedef here.
+
+	* include/dmcs/BeliefCombination.h: Combination done with
+	BeliefState& and doesn't need V.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
 
 2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 

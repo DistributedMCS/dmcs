@@ -6,13 +6,14 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/thread.hpp>  
+#include <boost/thread/future.hpp>  
 #include <boost/date_time.hpp>
 #include <iostream>
 
 using namespace dmcs;
 
 void
-worker(boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >& mg)
+worker(boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >& mg, boost::promise<int>& p)
 {  
   boost::posix_time::seconds s(1);
   boost::this_thread::sleep(s);
@@ -37,6 +38,8 @@ worker(boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >& mg)
   timeout = 1000;
   mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
   BOOST_CHECK_EQUAL(timeout, 0);
+
+  p.set_value(42);
 }
    
 
@@ -75,11 +78,22 @@ BOOST_AUTO_TEST_CASE( testMessagingGateway )
 
   BOOST_CHECK_EQUAL(ret, false);
 
-  boost::thread workerThread(worker, mg2);
+
+  boost::promise<int> promise_a_val;
+  boost::unique_future<int> get_future_val = promise_a_val.get_future();
+  
+
+  boost::thread workerThread(worker, mg2, boost::ref(promise_a_val));
        
   BOOST_TEST_MESSAGE("waiting for worker thread to read queue...");
 
   mg2->sendModel(b1, 0, ConcurrentMessageQueueFactory::OUT_MQ, prio);
+
+  BOOST_TEST_MESSAGE("waiting for worker thread to send me a future value...");
+
+  get_future_val.wait();
+
+  BOOST_CHECK_EQUAL(get_future_val.get(), 42);
 
   BOOST_TEST_MESSAGE("killing worker thread...");
   workerThread.join();  
