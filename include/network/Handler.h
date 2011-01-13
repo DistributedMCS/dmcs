@@ -115,6 +115,8 @@ private:
   boost::thread*  dmcs_thread;
   std::string     header;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+
+  ParentsNotificationPromise pnp;
 };
 
 } // namespace dmcs

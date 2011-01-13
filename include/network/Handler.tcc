@@ -217,6 +217,9 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
       boost::asio::ip::tcp::endpoint ep = sock.remote_endpoint(); 
       std::size_t port = ep.port();
 
+      std::size_t invoker = sesh->mess.getInvoker();
+      std::size_t pack_size = sesh->mess.getPackSize();
+
       if (first_call)
 	{
 	  DMCS_LOG_DEBUG("First and only initialization, creating MessagingGateway");
@@ -224,23 +227,23 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 	  ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
 	  mg = mqf.createMessagingGateway(port); // we use the port as unique id
 
-	  std::size_t pack_size = sesh->mess.getPackSize();
-
 	  DMCS_LOG_DEBUG("creating output thread, pack_size = " << pack_size);
 
 	  ots = OutputThreadPtr(new OutputThread(conn, pack_size, mg)); 
 	  output_thread = new boost::thread(*ots);
 
-	  stmt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd));
+	  ParentsNotificationFuture pnf = pnp.get_future();
+	  stmt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, pnf));
 	  dmcs_thread = new boost::thread(*stmt);
 	}
 
-      // write sesh->mess to QueryMessageQueue
+      DMCS_LOG_DEBUG("Notify my slaves of the new message");
 
-      //DMCS_LOG_DEBUG("executing command");
+      // to StreamingDMCS
+      ParentsNotificationPtr pn(new ParentsNotification(invoker, pack_size, port));
+      pnp.set_value(pn);
 
-      // need another thread for dmcs here
-      //cmd->execute(sesh->mess, port);
+      // to OutputThread
   
       sesh->conn->async_read(header,
 			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,

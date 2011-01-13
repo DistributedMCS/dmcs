@@ -35,8 +35,6 @@
 #include "StreamingDMCS.h"
 #include "network/Client.h"
 
-//#include <boost/thread.hpp>
-
 namespace dmcs {
 
 class StreamingCommandType : public CommandType<StreamingForwardMessage, bool>
@@ -58,9 +56,9 @@ public:
   }
 
   void
-  execute()
+  execute(ParentsNotificationFuture& pnf)
   {
-    sdmcs->start_up();
+    sdmcs->start_up(pnf);
   }
 
   bool

@@ -116,22 +116,17 @@ StreamingDMCS::initialize(std::size_t invoker, std::size_t pack_size, std::size_
 
 
 void
-StreamingDMCS::listen()
+StreamingDMCS::listen(ParentsNotificationFuture& pnf,
+		      std::size_t& invoker, std::size_t& pack_size, std::size_t& port)
 {
   // wait for a signal from Handler
+  pnf.wait();
 
-  std::size_t invoker;
-  std::size_t pack_size;
-  std::size_t port;
+  ParentsNotificationPtr pn = pnf.get();
 
-  if (!initialized)
-    {
-      initialize(invoker, pack_size, port);
-      initialized = true;
-    }
-
-  // decide to do what ever he wants
-  work();
+  invoker   = pn->invoker;
+  pack_size = pn->pack_size;
+  port      = pn->port;
 }
 
 
@@ -172,9 +167,24 @@ StreamingDMCS::work()
 
 
 void
-StreamingDMCS::start_up()
+StreamingDMCS::start_up(ParentsNotificationFuture& pnf)
 {
-  listen();
+  std::size_t invoker;
+  std::size_t pack_size;
+  std::size_t port;
+
+  while (1)
+    {
+      listen(pnf, invoker, pack_size, port);
+
+      if (!initialized)
+	{
+	  initialize(invoker, pack_size, port);
+	  initialized = true;
+	}
+
+      work();
+    }
 }
 
 

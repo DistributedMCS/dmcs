@@ -41,13 +41,15 @@ namespace dmcs {
 class StreamingDMCSThread
 {
 public:
-  StreamingDMCSThread(const StreamingCommandTypePtr& scmt_);
+  StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
+		      ParentsNotificationFuture& pnf);
 
   void
   operator()();
 
 private:
   const StreamingCommandTypePtr scmt;
+  ParentsNotificationFuture&    pnf;
 };
 
 typedef boost::shared_ptr<StreamingDMCSThread> StreamingDMCSThreadPtr;

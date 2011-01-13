@@ -15,6 +15,7 @@ noinst_HEADERS =  \
 		OptCommandType.h \
 		OptDMCS.h \
 		OptMessage.h \
+		ParentsNotification.h \
 	  	ProgramOptions.h \
 		PrimitiveCommandType.h \
 		PrimitiveDMCS.h \

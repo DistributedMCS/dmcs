@@ -18,31 +18,43 @@
  */
 
 /**
- * @file   StreamingDMCSThread.cpp
+ * @file   ParentsNotification.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Wed Jan  12 16:48:59 2011
+ * @date   Wed Jan  13 7:10:24 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#include "network/StreamingDMCSThread.h"
+#ifndef PARENTS_NOTIFICATION_H
+#define PARENTS_NOTIFICATION_H
+
+#include <boost/thread/future.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace dmcs {
 
-StreamingDMCSThread::StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
-					 ParentsNotificationFuture& pnf_)
-  : scmt(scmt_), pnf(pnf_)
-{ }
-
-void
-StreamingDMCSThread::operator()()
+struct ParentsNotification
 {
-  scmt->execute(pnf);
-}
+  ParentsNotification(std::size_t invoker_,
+		      std::size_t pack_size_,
+		      std::size_t port_)
+    : invoker(invoker_), pack_size(pack_size_), port(port_)
+  { }
+  
+  std::size_t invoker;
+  std::size_t pack_size;
+  std::size_t port;
+};
+
+typedef boost::shared_ptr<ParentsNotification> ParentsNotificationPtr;
+typedef boost::promise<ParentsNotificationPtr> ParentsNotificationPromise;
+typedef boost::unique_future<ParentsNotificationPtr> ParentsNotificationFuture;
 
 } // namespace dmcs
+
+#endif // PARENTS_NOTIFICATION_H
 
 // Local Variables:
 // mode: C++

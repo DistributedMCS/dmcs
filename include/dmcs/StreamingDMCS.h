@@ -36,6 +36,7 @@
 #include "dmcs/StreamingForwardMessage.h"
 #include "dmcs/ReturnMessage.h"
 #include "dmcs/Cache.h"
+#include "dmcs/ParentsNotification.h"
 #include "dmcs/QueryPlan.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/ThreadFactory.h"
@@ -63,11 +64,14 @@ public:
   ~StreamingDMCS();
 
   void
-  start_up();
+  start_up(ParentsNotificationFuture& pnf);
 
 private:
   void
-  listen();
+  listen(ParentsNotificationFuture& pnf,
+	 std::size_t& invoker,
+	 std::size_t& pack_size,
+	 std::size_t& port);
 
   void
   initialize(std::size_t invoker, 
