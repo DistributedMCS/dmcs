@@ -1,3 +1,21 @@
+2011-01-13  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.h: Notifiy StreamingDMCS using
+	boost::future.
+	* include/network/Handler.tcc: Likewise.
+
+	* src/network/StreamingDMCSThread.cpp: Pass the notification from
+	parents along.
+	* include/network/StreamingDMCSThread.h: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Now listen to Handler for
+	notification from parents.
+	* src/dmcs/StreamingCommandType.cpp: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+
+	* include/dmcs/ParentsNotification.h: New file.
+	* include/dmcs/Makefile.am: Add ParentsNotification.h.
+
 2011-01-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Handler.h: Use dmcs thread.
