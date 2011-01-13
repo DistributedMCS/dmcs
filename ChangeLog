@@ -1,5 +1,19 @@
 2011-01-13  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/dmcs/ParentsNotification.h: Removed.
+	* include/dmcs/StreamingDMCSNotification.h: Added.
+
+	* include/dmcs/Makefile.am: ParentsNotification -->
+	StreamingDMCSNotification
+	* include/dmcs/StreamingCommandType.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/Handler.h: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+
 	* include/network/Handler.h: Notifiy StreamingDMCS using
 	boost::future.
 	* include/network/Handler.tcc: Likewise.

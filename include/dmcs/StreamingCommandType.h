@@ -56,9 +56,9 @@ public:
   }
 
   void
-  execute(ParentsNotificationFuture& pnf)
+  execute(StreamingDMCSNotificationFuture& snf)
   {
-    sdmcs->start_up(pnf);
+    sdmcs->start_up(snf);
   }
 
   bool

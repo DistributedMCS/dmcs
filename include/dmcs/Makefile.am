@@ -15,7 +15,6 @@ noinst_HEADERS =  \
 		OptCommandType.h \
 		OptDMCS.h \
 		OptMessage.h \
-		ParentsNotification.h \
 	  	ProgramOptions.h \
 		PrimitiveCommandType.h \
 		PrimitiveDMCS.h \
@@ -26,5 +25,6 @@ noinst_HEADERS =  \
 		StatsInfo.h \
 		StreamingCommandType.h \
 		StreamingDMCS.h \
+		StreamingDMCSNotification.h \
 		StreamingForwardMessage.h \
 		StreamingBackwardMessage.h

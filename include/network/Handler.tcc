@@ -232,16 +232,16 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 	  ots = OutputThreadPtr(new OutputThread(conn, pack_size, mg)); 
 	  output_thread = new boost::thread(*ots);
 
-	  ParentsNotificationFuture pnf = pnp.get_future();
-	  stmt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, pnf));
+	  StreamingDMCSNotificationFuture snf = snp.get_future();
+	  stmt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, snf));
 	  dmcs_thread = new boost::thread(*stmt);
 	}
 
       DMCS_LOG_DEBUG("Notify my slaves of the new message");
 
       // to StreamingDMCS
-      ParentsNotificationPtr pn(new ParentsNotification(invoker, pack_size, port));
-      pnp.set_value(pn);
+      StreamingDMCSNotificationPtr sn(new StreamingDMCSNotification(invoker, pack_size, port));
+      snp.set_value(sn);
 
       // to OutputThread
   

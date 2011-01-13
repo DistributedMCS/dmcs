@@ -42,14 +42,14 @@ class StreamingDMCSThread
 {
 public:
   StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
-		      ParentsNotificationFuture& pnf);
+		      StreamingDMCSNotificationFuture& snf_);
 
   void
   operator()();
 
 private:
-  const StreamingCommandTypePtr scmt;
-  ParentsNotificationFuture&    pnf;
+  const StreamingCommandTypePtr    scmt;
+  StreamingDMCSNotificationFuture& snf;
 };
 
 typedef boost::shared_ptr<StreamingDMCSThread> StreamingDMCSThreadPtr;
