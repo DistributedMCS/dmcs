@@ -37,14 +37,22 @@
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "solver/Conflict.h"
 
+#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
+
 namespace dmcs {
+
+typedef boost::promise<bool> BoolNotificationPromise;
+typedef boost::unique_future<bool> BoolNotificationFuture;
+typedef boost::shared_ptr<BoolNotificationFuture> BoolNotificationFuturePtr;
 
 class JoinThread
 {
 public:
   JoinThread(std::size_t no_nbs_,
 	     const HashedBiMapPtr& c2o_,
-	     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
+	     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_,
+	     BoolNotificationFuture& bnf_);
 
   void 
   operator()();
@@ -71,10 +79,10 @@ private:
   std::size_t           no_nbs;      // number of neighbors left from which I need the models
   HashedBiMapPtr        c2o;
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+  BoolNotificationFuturePtr bnf;
 };
 
 } // namespace dmcs
-
 
 #endif // JOIN_THREAD_H
 

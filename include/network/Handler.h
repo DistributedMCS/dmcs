@@ -89,7 +89,7 @@ private:
   connection_ptr conn;
 };
 
-
+// **********************************************************************************************************************
 // Specialized handler for streaming dmcs
 template<>
 class Handler<StreamingCommandType> : public BaseHandler
@@ -108,15 +108,18 @@ public:
   handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call);
 
 private:
-  connection_ptr  conn;
-  OutputThreadPtr ots;
-  StreamingDMCSThreadPtr stmt;
-  boost::thread*  output_thread;
-  boost::thread*  dmcs_thread;
-  std::string     header;
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+  connection_ptr                   conn;
+
+  OutputThreadPtr                  ot;
+  StreamingDMCSThreadPtr           stdt;
+
+  boost::thread*                   output_thread;
+  boost::thread*                   streaming_dmcs_thread;
 
   StreamingDMCSNotificationPromise snp;
+  OutputNotificationPromise        onp;
+
+  MessagingGatewayBCPtr            mg;
 };
 
 } // namespace dmcs

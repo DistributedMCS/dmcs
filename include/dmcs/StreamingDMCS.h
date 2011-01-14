@@ -58,20 +58,24 @@ public:
   typedef bool dmcs_return_type;
 #endif
 
-  StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, const SignatureVecPtr& s, const QueryPlanPtr& query_plan_, std::size_t buf_count_);
+  StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, 
+		const SignatureVecPtr& s, 
+		const QueryPlanPtr& query_plan_, 
+		std::size_t buf_count_);
 
   virtual
   ~StreamingDMCS();
 
   void
-  start_up(StreamingDMCSNotificationFuture& snf);
+  start_up(StreamingDMCSNotificationFuturePtr& snf);
 
 private:
   void
-  listen(StreamingDMCSNotificationFuture& snf,
+  listen(StreamingDMCSNotificationFuturePtr& snf,
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
-	 std::size_t& port);
+	 std::size_t& port,
+	 Conflict* conflict);
 
   void
   initialize(std::size_t invoker, 
@@ -93,6 +97,8 @@ private:
   boost::thread* sat_thread;
 
   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+
+  BoolNotificationPromise bnp;
 
   std::size_t system_size;
   std::size_t my_id;

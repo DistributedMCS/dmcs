@@ -30,9 +30,10 @@
 #ifndef OUTPUT_THREAD_H
 #define OUTPUT_THREAD_H
 
+#include "dmcs/OutputNotification.h"
+#include "mcs/BeliefState.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/connection.hpp"
-#include "mcs/BeliefState.h"
 #include "solver/Conflict.h"
 
 #include <boost/asio.hpp>
@@ -46,26 +47,37 @@ class OutputThread
 public:
   OutputThread(const connection_ptr& conn_,
 	       std::size_t pack_size_,
-	       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
+	       MessagingGatewayBCPtr& mg_,
+	       OutputNotificationFuturePtr& onf_);
 
   void
   operator()();
 
 private:
   void
-  wait_for_trigger(const boost::system::error_code& e);
+  loop(const boost::system::error_code& e);
 
   void
-  collect_output(const boost::system::error_code& e);
+  wait_for_trigger();
 
   void
-  write_result(const boost::system::error_code& e, BeliefStateVecPtr res);
+  collect_output(BeliefStateVecPtr& res, std::string& header);
+
+  void
+  write_result(BeliefStateVecPtr& res, const std::string& header);
+
+  void
+  write_models(const boost::system::error_code& e,
+	       BeliefStateVecPtr& res);
 
 private:
-  const connection_ptr& conn;
-  std::size_t pack_size;       // number of models the invoker expects to get
-  std::size_t left_2_send;     // number of models left to send
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;  
+  const connection_ptr&       conn;
+  std::size_t                 pack_size;       // Number of models the invoker expects to get
+  std::size_t                 left_2_send;     // Number of models left to send
+  MessagingGatewayBCPtr       mg;
+  OutputNotificationFuturePtr onf;
+  bool                        collecting;      // A flag to determine whether we are in collecting mode or not 
+                                               // (if yes then we don't want to wait for any trigger)
 };
 
 typedef boost::shared_ptr<OutputThread> OutputThreadPtr;

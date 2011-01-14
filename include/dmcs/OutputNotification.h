@@ -18,46 +18,42 @@
  */
 
 /**
- * @file   StreamingDMCSThread.h
+ * @file   OutputNotification.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Wed Jan  12 16:48:24 2011
+ * @date   Wed Jan  13 8:43:24 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef STREAMING_DMCS_THREAD_H
-#define STREAMING_DMCS_THREAD_H
+#ifndef OUTPUT_NOTIFICATION_H
+#define OUTPUT_NOTIFICATION_H
 
-#include "dmcs/StreamingCommandType.h"
-
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace dmcs {
 
-class StreamingDMCSThread
+// Keep it as a class for now. If nothing changes then we can reduce
+// this to just an integer
+struct OutputNotification
 {
-public:
-  StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
-		      StreamingDMCSNotificationFuturePtr& snf_);
-
-  void
-  operator()();
-
-private:
-  const StreamingCommandTypePtr      scmt;
-  StreamingDMCSNotificationFuturePtr snf;
+  OutputNotification(std::size_t pack_size_)
+    : pack_size(pack_size_)
+  { }
+  
+  std::size_t pack_size;
 };
 
-typedef boost::shared_ptr<StreamingDMCSThread> StreamingDMCSThreadPtr;
+typedef boost::shared_ptr<OutputNotification> OutputNotificationPtr;
+typedef boost::promise<OutputNotificationPtr> OutputNotificationPromise;
+typedef boost::unique_future<OutputNotificationPtr> OutputNotificationFuture;
+typedef boost::shared_ptr<OutputNotificationFuture> OutputNotificationFuturePtr;
 
 } // namespace dmcs
 
-
-#endif // STREAMING_DMCS_THREAD_H
+#endif // OUTPUT_NOTIFICATION_H
 
 // Local Variables:
 // mode: C++

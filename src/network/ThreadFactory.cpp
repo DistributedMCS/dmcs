@@ -27,7 +27,6 @@
  * 
  */
 
-#include "network/JoinThread.h"
 #include "network/NeighborInputThread.h"
 #include "network/OutputThread.h"
 #include "network/RelSatSolverThread.h"
@@ -76,12 +75,12 @@ ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
 }
   
 boost::thread*
-ThreadFactory::createJoinThread()
+ThreadFactory::createJoinThread(BoolNotificationFuturePtr& bnf)
 {
   const NeighborListPtr neighbors = context->getNeighbors();
   std::size_t no_nbs = neighbors->size();
 
-  JoinThread dts(no_nbs, c2o, mg);
+  JoinThread dts(no_nbs, c2o, mg, bnf);
   boost::thread* t = new boost::thread(dts);
 
   return t;
@@ -102,15 +101,15 @@ ThreadFactory::createLocalSolveThread()
   return t;
 }
 
-
+  /*
 boost::thread*
 ThreadFactory::createOutputThread(const connection_ptr& conn)
 {
-  OutputThread ots(conn, pack_size, mg);
+  OutputThread ots(conn, pack_size, mg, onf);
   boost::thread* t = new boost::thread(ots);
 
   return t;
-}
+  }*/
 
 } // namespace dmcs
 

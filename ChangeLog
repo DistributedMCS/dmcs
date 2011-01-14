@@ -1,3 +1,35 @@
+2011-01-14  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/BaseStreamer.h: New file.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+
+	* include/network/Handler.tcc: Change to the simplified algorithm.
+	* include/network/Handler.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Use Ptr here and there.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/network/JoinThread.h: Likewise.
+
+	* include/dmcs/OutputNotification.h: New file.
+	* include/dmcs/Makefile.am: Add OutputNotification.h
+
+	* src/network/ConcurrentMessageQueueFactory.cpp: Change the
+	MessageQueue system to the simplified algorithm.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+
+	* include/network/MessagingGateway.h: Unify message from neighbor
+	to joiner into 1 queue.
+
 2011-01-13  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/dmcs/ParentsNotification.h: Removed.

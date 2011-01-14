@@ -19,7 +19,7 @@
 
 /**
  * @file   Handler.tcc
- * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
  * @date   Wed Sep  29 07:23:24 2010
  * 
  * @brief  
@@ -189,8 +189,8 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
     }
 }
 
-
-// specialized methods for streaming dmcs
+// *********************************************************************************************************************
+// Specialized methods for streaming dmcs
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
   : conn(conn_)
 { 
@@ -200,8 +200,7 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 
   conn->async_read(sesh->mess,
 		   boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
-			       boost::asio::placeholders::error, sesh, cmd, true)
-		   );
+			       boost::asio::placeholders::error, sesh, cmd, true));
 }
 
 
@@ -212,13 +211,13 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 
   if (!e)
     {
-      // get the unique ID from connection for creating a message gateway just for this connection
+      // get the unique ID from the port of the connection for creating a unique message gateway just for this session
       boost::asio::ip::tcp::socket& sock = sesh->conn->socket();
-      boost::asio::ip::tcp::endpoint ep = sock.remote_endpoint(); 
-      std::size_t port = ep.port();
+      boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
+      std::size_t port                   = ep.port();
 
-      std::size_t invoker = sesh->mess.getInvoker();
-      std::size_t pack_size = sesh->mess.getPackSize();
+      std::size_t invoker                = sesh->mess.getInvoker();
+      std::size_t pack_size              = sesh->mess.getPackSize();
 
       if (first_call)
 	{
@@ -227,28 +226,42 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 	  ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
 	  mg = mqf.createMessagingGateway(port); // we use the port as unique id
 
+
+	  DMCS_LOG_DEBUG("creating dmcs thread");
+
+	  StreamingDMCSNotificationFuturePtr snf(new StreamingDMCSNotificationFuture(snp.get_future()));
+	  stdt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, snf));
+	  streaming_dmcs_thread = new boost::thread(*stdt);
+
 	  DMCS_LOG_DEBUG("creating output thread, pack_size = " << pack_size);
 
-	  ots = OutputThreadPtr(new OutputThread(conn, pack_size, mg)); 
-	  output_thread = new boost::thread(*ots);
+	  OutputNotificationFuturePtr onf(new OutputNotificationFuture(onp.get_future()));
+	  ot = OutputThreadPtr(new OutputThread(conn, pack_size, mg, onf)); 
+	  output_thread = new boost::thread(*ot);
 
-	  StreamingDMCSNotificationFuture snf = snp.get_future();
-	  stmt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, snf));
-	  dmcs_thread = new boost::thread(*stmt);
+	  first_call = false;
 	}
 
       DMCS_LOG_DEBUG("Notify my slaves of the new message");
 
-      // to StreamingDMCS
+      // It's possible to swap (1) and (2)
+
+      // (1) notify StreamingDMCS
       StreamingDMCSNotificationPtr sn(new StreamingDMCSNotification(invoker, pack_size, port));
       snp.set_value(sn);
 
-      // to OutputThread
+      // (2) send the conflict to IN_MQ, so that the local solver can pick it up
+      Conflict* c = sesh->mess.getConflict();
+      mg->sendConflict(c, 0, ConcurrentMessageQueueFactory::IN_MQ, 0);
+
+      // (3) notify OutputThread
+      OutputNotificationPtr on(new OutputNotification(pack_size));
+      onp.set_value(on);
   
+      // back to waiting for incoming message
       sesh->conn->async_read(header,
 			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
-					 boost::asio::placeholders::error, sesh, cmd, false)
-			     );
+					 boost::asio::placeholders::error, sesh, cmd, false));
     }
   else
     {
@@ -266,20 +279,25 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 
   if (!e)
     {
-      // check header
+      // Check header
       if (header.find(HEADER_NEXT) != std::string::npos)
 	{
-	  // trigger output thread
+	  // Read the message to get pack_size and conflict, so that we can inform our slaves
+	  sesh->conn->async_read(sesh->mess,
+				 boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
+					     boost::asio::placeholders::error, sesh, cmd, false));
 	}
       else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
-	  // restart
+	  ///@todo: restart
 	}
-      
-      sesh->conn->async_read(sesh->mess,
-			     boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
-					 boost::asio::placeholders::error, sesh, cmd, false)
-			     );
+      else
+	{
+	  DMCS_LOG_ERROR("Got a crappy header: " << header << ". Back to waiting for the next header.");
+	  sesh->conn->async_read(header,
+				 boost::bind(&Handler<StreamingCommandType>::handler_read_header, this,
+					     boost::asio::placeholders::error, sesh, cmd, false));
+	}
     }
   else
     {

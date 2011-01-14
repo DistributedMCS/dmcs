@@ -92,7 +92,7 @@ ConcurrentMessageQueueFactory::createMessageQueue(std::size_t id, std::size_t ma
 }
 
 
-boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >
+MessagingGatewayBCPtr
 ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size_t no_nbs)
 {
   ///@todo TK: all MQs need to have a unique name in the _process_, thus
@@ -105,55 +105,50 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   std::size_t k = 5;
 
 
-  // create message queue 0
+  // create message queue 0 (IN_MQ)
   // conflict input MQ, announces conflicts from the parent
 
   std::size_t id = uid;
   mq = createMessageQueue(id, k, sizeof(Conflict*));
   md->registerMQ(mq, id);
 
-  // create message queue 1
-  // output MQ, announces partial equilibria w.r.t. conflicts
+  // create message queue 1 (OUT_MQ)
+  // output MQ, announces partial equilibria from the local solver
   
   id++;
-  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState,Conflict>::ModelConflict));
+  mq = createMessageQueue(id, k, sizeof(BeliefState*);
   md->registerMQ(mq, id);
 
-  // create message queue 2
+  // create message queue 2 (CONFLICT_MQ)
   // conflict output MQ, announces new conflicts from the local solver
 
   id++;
   mq = createMessageQueue(id, k, sizeof(Conflict*));
   md->registerMQ(mq, id);
 
-  // create message queue 3
+  // create message queue 3 (JOINT_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
 
   id++;
   mq = createMessageQueue(id, k, sizeof(BeliefState*));
   md->registerMQ(mq, id);
 
-  // create message queue 4
-  // join input MQ, announces that neighbor C_i sent k partial belief states
+  // create message queue 4 (JOIN_IN_MQ)
+  // join input MQ, announces pairs of (neighbor_id, partial belief states)
 
   id++;
-  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState,Conflict>::JoinIn));
+  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Conflict>::JoinIn));
   md->registerMQ(mq, id);
 
-  // create message queues 5 to 5+2*no_nbs
+  // create message queues 5 to 5 + (no_nbs - 1)
+  // NEIGHBOR_OUT_MQ --> NEIGHBOR_OUT_MQ + (no_nbs - 1)
 
   for (std::size_t i = 0; i < no_nbs; ++i)
     {
-      // partial equilibrium input MQ for neighbor C_i
+      // conflict output MQ, announces a new conflict to a neighbor C_i
 
-      // NEIGHBOR_MQ + 2*index
-      id++;
-      mq = createMessageQueue(id, k, sizeof(BeliefState*));
-      md->registerMQ(mq, id);
-
-      // conflict input MQ, announces a new conflict to a neighbor C_i
-
-      // NEIGHBOR_MQ + 2*index + 1
+      // NEIGHBOR_OUT_MQ + index 
+      // index starts from 0
       id++;
       mq = createMessageQueue(id, k, sizeof(Conflict*));
       md->registerMQ(mq, id);
@@ -164,7 +159,7 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
 
 
 
-boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >
+MessagingGatewayBCPtr
 ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid)
 {
   ///@todo TK: all MQs need to have a unique name in the _process_, thus
@@ -176,18 +171,18 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid)
   ///@todo fixme, code duplication as well...
   std::size_t k = 5;
 
-  // create message queue 0
+  // create message queue 0 (IN_MQ)
   // conflict input MQ, announces conflicts from the parent
 
   std::size_t id = uid;
   mq = createMessageQueue(id, k, sizeof(Conflict*));
   md->registerMQ(mq, id);
 
-  // create message queue 1
+  // create message queue 1 (OUT_MQ)
   // output MQ, announces partial equilibria
   
   id++;
-  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState,Conflict>::ModelConflict));
+  mq = createMessageQueue(id, k, sizeof(BeliefState*));
   md->registerMQ(mq, id);
 
   return md;

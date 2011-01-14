@@ -35,6 +35,7 @@
 #include "mcs/ProxySignatureByLocal.h"
 #include "mcs/Theory.h"
 #include "network/BaseClient.h"
+#include "network/JoinThread.h"
 #include "network/connection.hpp"
 #include "solver/RelSatSolver.h"
 
@@ -60,13 +61,13 @@ public:
   createNeighborInputThreads(ThreadVecPtr);
 
   boost::thread*
-  createJoinThread();
+  createJoinThread(BoolNotificationFuturePtr& bnf);
 
   boost::thread*
   createLocalSolveThread();
 
-  boost::thread*
-  createOutputThread(const connection_ptr& conn_);
+  //boost::thread*
+  //createOutputThread(const connection_ptr& conn_);
 
 private:
   const ContextPtr       context;

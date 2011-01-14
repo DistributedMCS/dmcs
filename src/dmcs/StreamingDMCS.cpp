@@ -104,29 +104,34 @@ StreamingDMCS::initialize(std::size_t invoker, std::size_t pack_size, std::size_
 
   ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size, mg);
 
-  sat_thread    = tf.createLocalSolveThread();
+  sat_thread = tf.createLocalSolveThread();
 
   if (no_nbs > 0)
     {
       tf.createNeighborInputThreads(neighbor_input_threads);
-      join_thread   = tf.createJoinThread();
+      BoolNotificationFuturePtr bnf(new BoolNotificationFuture(bnp.get_future()));
+      join_thread = tf.createJoinThread(bnf);
     }
 }
 
 
 
 void
-StreamingDMCS::listen(StreamingDMCSNotificationFuture& snf,
-		      std::size_t& invoker, std::size_t& pack_size, std::size_t& port)
+StreamingDMCS::listen(StreamingDMCSNotificationFuturePtr& snf,
+		      std::size_t& invoker, 
+		      std::size_t& pack_size, 
+		      std::size_t& port,
+		      Conflict* conflict)
 {
   // wait for a signal from Handler
-  snf.wait();
+  snf->wait();
 
-  StreamingDMCSNotificationPtr sn = snf.get();
+  StreamingDMCSNotificationPtr sn = snf->get();
 
   invoker   = sn->invoker;
   pack_size = sn->pack_size;
   port      = sn->port;
+  conflict  = sn->conflict;
 }
 
 
@@ -146,7 +151,7 @@ StreamingDMCS::work()
       BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
       mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
     }
-  else // this is an intermediate context
+  else // this is an intermediate context, now trigger the Joiner
     {
 #ifdef DEBUG
       DMCS_LOG_DEBUG("StreamingDMCS::start_up. Intermediate context. Send requests to neighbors by placing a message in each of the NeighborQueryMQ");
@@ -160,22 +165,21 @@ StreamingDMCS::work()
 	  mg->sendConflict(empty_conflict, 0, off, 0);
 	}
     }
-
-  // go back to listen???
 }
 
 
 
 void
-StreamingDMCS::start_up(StreamingDMCSNotificationFuture& snf)
+StreamingDMCS::start_up(StreamingDMCSNotificationFuturePtr& snf)
 {
   std::size_t invoker;
   std::size_t pack_size;
   std::size_t port;
+  Conflict*   conflict;
 
   while (1)
     {
-      listen(snf, invoker, pack_size, port);
+      listen(snf, invoker, pack_size, port, conflict);
 
       if (!initialized)
 	{

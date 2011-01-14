@@ -44,79 +44,80 @@
 #include <boost/scoped_ptr.hpp>
 
 namespace dmcs {
+  
+typedef boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > MessagingGatewayBCPtr;
 
-  class ConcurrentMessageQueueFactory : private boost::noncopyable
-  {
-  private:
-    /// singleton instance
-    static boost::scoped_ptr<ConcurrentMessageQueueFactory> ins;
-    static boost::once_flag flag;
+class ConcurrentMessageQueueFactory : private boost::noncopyable
+{
+private:
+  /// singleton instance
+  static boost::scoped_ptr<ConcurrentMessageQueueFactory> ins;
+  static boost::once_flag flag;
+  
+  /// global set of message queues
+  std::map<std::size_t,ConcurrentMessageQueuePtr> mqs;
+  
+  /// create or get a ConcurrentMessageQueue
+  ConcurrentMessageQueuePtr
+  createMessageQueue(std::size_t id, std::size_t max_k, std::size_t max_size);
+  
+  
+  /// private ctor
+  ConcurrentMessageQueueFactory();
 
-    /// global set of message queues
-    std::map<std::size_t,ConcurrentMessageQueuePtr> mqs;
+  /// private copy ctor
+  ConcurrentMessageQueueFactory(const ConcurrentMessageQueueFactory&);
+  
+public:
+  
+  /// MQ offsets
+  enum MQIDs
+    {
+      IN_MQ = 0,   // parent context sent conflict
+      OUT_MQ,      // solver created belief state
+      CONFLICT_MQ, // solver created conflict
+      JOIN_OUT_MQ, // joiner created belief state
+      JOIN_IN_MQ,  // pairs of (neighbor_id, partial equilibria)
+      NEIGHBOR_OUT_MQ
+    };
+  
+  
+  static ConcurrentMessageQueueFactory&
+  instance();
+  
+  
+  static void
+  init(); // never throws
+  
+  
+  virtual
+  ~ConcurrentMessageQueueFactory();
 
-    /// create or get a ConcurrentMessageQueue
-    ConcurrentMessageQueuePtr
-    createMessageQueue(std::size_t id, std::size_t max_k, std::size_t max_size);
-
-
-    /// private ctor
-    ConcurrentMessageQueueFactory();
-
-    /// private copy ctor
-    ConcurrentMessageQueueFactory(const ConcurrentMessageQueueFactory&);
-
-
-  public:
-
-    /// MQ offsets
-    enum MQIDs
-      {
-	IN_MQ = 0,   // parent context sent conflict
-	OUT_MQ,      // solver created belief state
-	CONFLICT_MQ, // solver created conflict
-	JOIN_OUT_MQ, // joiner created belief state
-	JOIN_IN_MQ,  // neighbor i created k partial equilibria
-	NEIGHBOR_MQ
-      };
-
-
-    static ConcurrentMessageQueueFactory&
-    instance();
-
-
-    static void
-    init(); // never throws
-
-
-    virtual
-    ~ConcurrentMessageQueueFactory();
-
-
-    /** 
-     * Creates a messaging gateway with the whole set of queues.
-     * 
-     * @param uid a number that is unique to the whole computer
-     * @param no_nbs no_nbs is the number of neighbors
-     * 
-     * @return a MessagingGateway
-     */
-    boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >
-    createMessagingGateway(std::size_t uid, std::size_t no_nbs);
-
-
-    /** 
-     * Creates a messaging gateway only with incoming and outgoing queues IN_MQ and OUT_MQ, resp.
-     * 
-     * @param uid a number that is unique to the whole computer
-     * 
-     * @return a MessagingGateway
-     */
-    boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >
-    createMessagingGateway(std::size_t uid);
-
-  };
-
+  
+  /** 
+   * Creates a messaging gateway with the whole set of queues.
+   * 
+   * @param uid a number that is unique to the whole computer
+   * @param no_nbs no_nbs is the number of neighbors
+   * 
+   * @return a MessagingGateway
+   */
+  MessingGatewayBCPtr
+  createMessagingGateway(std::size_t uid, std::size_t no_nbs);
+  
+  
+  /** 
+   * Creates a messaging gateway only with incoming and outgoing queues IN_MQ and OUT_MQ, resp.
+   * 
+   * @param uid a number that is unique to the whole computer
+   * 
+   * @return a MessagingGateway
+   */
+  MessagingGatewayBCPtr
+  createMessagingGateway(std::size_t uid);
+  
+};
+  
 
 } // namespace dmcs
 

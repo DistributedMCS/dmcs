@@ -37,142 +37,162 @@ namespace dmcs {
 
 OutputThread::OutputThread(const connection_ptr& conn_,
 			   std::size_t pack_size_,
-			   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+			   MessagingGatewayBCPtr& mg_,
+			   OutputNotificationFuturePtr& onf_)
   : conn(conn_),
     pack_size(pack_size_),
-    mg(mg_)
+    mg(mg_),
+    onf(onf_),
+    collecting(false)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  DMCS_LOG_DEBUG("pack_size = " << pack_size);
+  DMCS_LOG_DEBUG("OutputThread::ctor. pack_size = " << pack_size);
 }
 
 
 
 void
-OutputThread::wait_for_trigger(const boost::system::error_code& e)
+OutputThread::loop(const boost::system::error_code& e)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  
   if (!e)
     {
-      // wait for boost::condition stuff
-      left_2_send = pack_size;
-      collect_output(e);
+      BeliefStateVecPtr res(new BeliefStateVec);
+      std::string       header = "";
+
+      if (!collecting)
+	{
+	  wait_for_trigger();
+	}
+
+      collect_out_put(res, header);
+      write_result(res, header);
     }
   else
     {
-      // An error occurred.
-      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
-      throw std::runtime_error(e.message());
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << ": " << e.message());
     }
 }
 
 
+
 void
-OutputThread::collect_output(const boost::system::error_code& e)
+OutputThread::wait_for_trigger()
+{
+  // wait for Handler to tell me to return some models
+  onf->wait();
+
+  OutputNotificationPtr on = onf->get();
+  pack_size                = on->pack_size;
+  Conflict* new_conflict   = on->conflict;
+  
+  left_2_send = pack_size;
+}
+
+
+
+void
+OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  DMCS_LOG_DEBUG("pack_size = " << pack_size << ", left to send = " << left_2_send);
 
-  if (!e)
+  // Turn this mode on. It's off only when either we collect and send
+  // enough pack_size models, or there's no more model to send.
+  collecting = true; 
+  
+  // be careful with weird value of pack_size. Bug just disappreared
+  for (std::size_t i = 0; i < left_2_send; ++i)
     {
-      DMCS_LOG_DEBUG("pack_size = " << pack_size << ", left to send = " << left_2_send);
-
-      BeliefStateVecPtr res(new BeliefStateVec);
-      bool need_send = true;
+      DMCS_LOG_DEBUG("Read from MQ");
       
-      // be careful with weird value of pack_size. Bug just disappreared
-      for (std::size_t i = 0; i < left_2_send; ++i)
+      std::size_t prio    = 0;
+      std::size_t timeout = 100; // milisecs
+      BeliefState* bs     = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+      
+      if (bs == 0) // Ups, a NULL pointer
 	{
-	  DMCS_LOG_DEBUG("Read from MQ");
-
-	  std::size_t prio = 0;
-	  std::size_t timeout = 100; // milisecs
-	  BeliefState* bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
-	  
-	  if (bs == 0) // Ups, a NULL pointer
+	  if (timeout == 0)
 	    {
-	      if (timeout == 0)
+	      // TIME OUT! Going to send whatever I got so far to the parent
+	      if (res->size() > 0)
 		{
-		  // TIME OUT! Going to send whatever I got so far to the parent
-		  if (res->size() > 0)
-		    {
-		      std::string header = HEADER_ANS;
-		      conn->async_write(header,
-					boost::bind(&OutputThread::write_result, this,
-						    boost::asio::placeholders::error, res)
-					);
-		      need_send = false;
-		      break;
-		    }
-		  else
-		    {
-		      // decrease counter because we gained nothing so far.
-		      --i;
-		    }
-		}
-	      else 
-		{
-		  // either UNSAT of EOF
-		  DMCS_LOG_DEBUG("NOTHING TO OUTPUT, going to send EOF");
+		  header = HEADER_ANS;
 		  break;
 		}
+	      else
+		{
+		  // decrease counter because we gained nothing so far.
+		  --i;
+		}
 	    }
-	  
-	  DMCS_LOG_DEBUG("got #" << i << ": bs = " << *bs);
-
-	  // Got something is a reasonable time. Continue collecting.
-	  res->push_back(bs);
-	} // for
-      
-      std::string header;
-
-      if (need_send)
-	{
-	  if (res->size() > 0)
+	  else 
 	    {
-	      header = HEADER_ANS;
-	      conn->async_write(header,
-				boost::bind(&OutputThread::write_result, this,
-					    boost::asio::placeholders::error, res)
-				);
-	    }
-	  else
-	    {
+	      // either UNSAT of EOF
+	      DMCS_LOG_DEBUG("NOTHING TO OUTPUT, going to send EOF");
+
+	      // Turn off collecting mode
+	      collecting = false; 
+
 	      header = HEADER_EOF;
-	      conn->async_write(header,
-				boost::bind(&OutputThread::collect_output, this,
-					    boost::asio::placeholders::error)
-				);
+	      break;
 	    }
 	}
-    }
-  else
-    {
-      // An error occurred.
-      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
-      throw std::runtime_error(e.message());
-    }
+      
+      DMCS_LOG_DEBUG("got #" << i << ": bs = " << *bs);
+      
+      // Got something is a reasonable time. Continue collecting.
+      res->push_back(bs);
+    } // for
 }
 
 
+
 void
-OutputThread::write_result(const boost::system::error_code& e, BeliefStateVecPtr res)
+OutputThread::write_result(BeliefStateVecPtr res, const std::string& header)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  if (!e)
-    {
-      StreamingBackwardMessage return_mess(res);
-      
-      left_2_send -= res->size();
-
-      conn->async_write(return_mess,
-			boost::bind(&OutputThread::collect_output, this,
-				    boost::asio::placeholders::error)
-			);
+  if (header.find(HEADER_ANS) != std::string::npos)
+    { // send some models
+      conn->async_write(header,
+			boost::bind(&OutputThread::write_models, this,
+				    boost::asio::placeholders::error, res));
     }
   else
+    { // send EOF
+      assert (header.find(HEADER_EOF) != std::string::npos);
+      conn->async_write(header,
+			boost::bind(&OutputThread::loop, this,
+				    boost::asio::placeholders::error));
+    }
+
+}
+
+
+
+void
+OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr res)
+{
+  if (!e)
     {
+      left_2_send -= res->size();
+      
+      assert (left_2_send >= 0);
+      
+      StreamingBackwardMessage return_mess(res);
+      
+      if (left_2_send == 0)
+	{
+	  collecting = false;
+	}
+
+      conn->async_write(return_mess,
+			boost::bind(&OutputThread::loop, this,
+				    boost::asio::placeholders::error));
+    }
+ else
+   {
       // An error occurred.
       DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
       throw std::runtime_error(e.message());
@@ -186,13 +206,8 @@ OutputThread::operator()()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  // check flag from Handler. If he tells me to output then start
-  // collecting output from OUT_MQ
-  wait_for_trigger(boost::system::error_code());
+  loop(boost::system::error_code());
 }
-
-
-
 
 } // namespace dmcs
 

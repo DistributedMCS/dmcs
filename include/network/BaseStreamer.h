@@ -18,46 +18,49 @@
  */
 
 /**
- * @file   StreamingDMCSThread.h
+ * @file   BaseStreamer.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Wed Jan  12 16:48:24 2011
+ * @date   Thu Jan  13 21:42:21 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef STREAMING_DMCS_THREAD_H
-#define STREAMING_DMCS_THREAD_H
 
-#include "dmcs/StreamingCommandType.h"
 
+#ifndef BASE_STREAMER_H
+#define BASE_STREAMER_H
+
+#include "network/ConcurrentMessageQueueFactory.h"
+#include "network/connection.hpp"
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <boost/thread.hpp>
 
 namespace dmcs {
 
-class StreamingDMCSThread
+/**
+ * @brief
+ */
+class BaseStreamer
 {
 public:
-  StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
-		      StreamingDMCSNotificationFuturePtr& snf_);
+  BaseStreamer(connection_ptr conn_, MessagingGatewayBC mg_, std::size_t noff_)
+    : conn(conn_), mg(mg_), noff(noff_)
+  { }
 
-  void
-  operator()();
+protected:
+  virtual void 
+  stream(const boost::system::error_code& error) = 0;
 
-private:
-  const StreamingCommandTypePtr      scmt;
-  StreamingDMCSNotificationFuturePtr snf;
+protected:
+  connection_ptr     conn;
+  MessagingGatewayBC mg;    // reference possible?
+  std::size_t        noff;  // offset of the neighbor streamer in the vector of MQs
 };
-
-typedef boost::shared_ptr<StreamingDMCSThread> StreamingDMCSThreadPtr;
 
 } // namespace dmcs
 
-
-#endif // STREAMING_DMCS_THREAD_H
+#endif // BASE_STREAMER_H
 
 // Local Variables:
 // mode: C++

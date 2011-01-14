@@ -57,13 +57,13 @@ namespace dmcs {
 
 
     /** 
-     * Used to announce that context @a ctx_id has sent @a peq_cnt
-     * partial equilibria.
+     * Used to announce that context @a ctx_id has sent @a 
+     * partial equilibria peq.
      */
     struct JoinIn
     {
       std::size_t ctx_id;
-      std::size_t peq_cnt;
+      MODEL*      peq;
     };
 
 
@@ -124,7 +124,7 @@ namespace dmcs {
      * @return true if sending failed
      */
     virtual bool
-    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0) = 0;
+    sendJoinIn(MODEL* models, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0) = 0;
 
     /** 
      * Receive a pointer to a MODEL from @a from. May block.

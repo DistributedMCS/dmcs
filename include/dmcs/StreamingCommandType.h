@@ -56,7 +56,7 @@ public:
   }
 
   void
-  execute(StreamingDMCSNotificationFuture& snf)
+  execute(StreamingDMCSNotificationFuturePtr& snf)
   {
     sdmcs->start_up(snf);
   }

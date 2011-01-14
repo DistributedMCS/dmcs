@@ -36,10 +36,12 @@ namespace dmcs {
 
 JoinThread::JoinThread(std::size_t no_nbs_,
 		       const HashedBiMapPtr& c2o_,
-		       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+		       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_,
+		       BoolNotificationFuturePtr& bnf_)
   : no_nbs(no_nbs_),
     c2o(c2o_),
-    mg(mg_)
+    mg(mg_),
+    bnf(bnf_)
 { }
 
 

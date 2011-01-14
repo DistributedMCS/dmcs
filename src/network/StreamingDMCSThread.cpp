@@ -32,7 +32,7 @@
 namespace dmcs {
 
 StreamingDMCSThread::StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
-					 StreamingDMCSNotificationFuture& snf_)
+					 StreamingDMCSNotificationFuturePtr& snf_)
   : scmt(scmt_), snf(snf_)
 { }
 
