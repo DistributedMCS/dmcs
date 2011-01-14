@@ -2,9 +2,9 @@ AUTOMAKE_OPTIONS = gnu
 
 # including headers for make dist
 noinst_HEADERS =  \
-		AsynClient.h \
-		BaseHandler.h \
 		BaseClient.h \
+		BaseHandler.h \
+		BaseStreamer.h \
 		Client.h \
 		Client.tcc \
 		ConcurrentMessageDispatcher.h \
@@ -13,12 +13,10 @@ noinst_HEADERS =  \
 		Handler.h \
 		Handler.tcc \
 		JoinThread.h \
-		MessageDispatcher.h \
-		MessageQueue.h \
-		MessageQueueFactory.h \
 		MessagingGateway.h \
-		NeighborInputThread.h \
+		NeighborThread.h \
 		OutputThread.h \
+		RouterThread.h \
 		Server.h \
 		Session.h \
 		StreamingDMCSThread.h \

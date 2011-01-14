@@ -63,8 +63,6 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     query_plan(query_plan_),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats)),
-    system_size(c->getSystemSize()),
-    my_id(c->getContextID()),
     buf_count(buf_count_),
     initialized(false),
     neighbor_input_threads(new ThreadVec)
@@ -82,9 +80,6 @@ StreamingDMCS::~StreamingDMCS()
 void
 StreamingDMCS::initialize(std::size_t invoker, std::size_t pack_size, std::size_t port)
 {
-  const NeighborListPtr& nb = ctx->getNeighbors();
-  std::size_t no_nbs = nb->size();
-
   DMCS_LOG_DEBUG("Here create mqs");
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
   mg = mqf.createMessagingGateway(port, no_nbs); // we use the port as unique id
@@ -96,7 +91,7 @@ StreamingDMCS::initialize(std::size_t invoker, std::size_t pack_size, std::size_
     }
   else
     {
-      std::size_t my_id = ctx->getContextID();
+      const std::size_t my_id = ctx->getContextID();
       localV = query_plan->getInterface(invoker, my_id);
     }
 
@@ -106,11 +101,13 @@ StreamingDMCS::initialize(std::size_t invoker, std::size_t pack_size, std::size_
 
   sat_thread = tf.createLocalSolveThread();
 
+  const NeighborListPtr& nbs = ctx->getNeighbors();
+  const std::size_t no_nbs   = nbs->size();
   if (no_nbs > 0)
     {
       tf.createNeighborInputThreads(neighbor_input_threads);
-      BoolNotificationFuturePtr bnf(new BoolNotificationFuture(bnp.get_future()));
-      join_thread = tf.createJoinThread(bnf);
+      join_thread     = tf.createJoinThread();
+      router_thread   = tf.createRouterThread();
     }
 }
 
@@ -136,30 +133,29 @@ StreamingDMCS::listen(StreamingDMCSNotificationFuturePtr& snf,
 
 
 void
-StreamingDMCS::work()
+StreamingDMCS::start_up()
 {
-  const NeighborListPtr& nb = ctx->getNeighbors();
-  std::size_t no_nbs = nb->size();
+  const std::size_t system_size = ctx->getSystemSize();
+  const NeighborListPtr& nbs    = ctx->getNeighbors();
+  const std::size_t no_nbs      = nbs->size();
 
   if (no_nbs == 0) // this is a leaf context
     {
-#ifdef DEBUG
-      DMCS_LOG_DEBUG("StreamingDMCS::start_up. Leaf context. Put an empty model into SatInputMQ to start the SAT solver without input");
-#endif
-      // put an empty model into SatInputMQ to start the SAT solver without input
-      std::size_t system_size = ctx->getSystemSize();
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Leaf context. Put an empty model into JOIN_OUT_MQ to start the SAT solver without input");
+
+
       BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
       mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
     }
-  else // this is an intermediate context, now trigger the Joiner
+  else
     {
-#ifdef DEBUG
-      DMCS_LOG_DEBUG("StreamingDMCS::start_up. Intermediate context. Send requests to neighbors by placing a message in each of the NeighborQueryMQ");
-#endif
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Intermediate context. Send requests to neighbors by placing a message in each of the NEIGHBOR_OUT_MQ");
 
       for (std::size_t i = 0; i < no_nbs; ++i)
 	{
-	  const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*i + 1;	  
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Send empty conflict to offset 5 + " << i);
+
+	  const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + i;
 
 	  Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
 	  mg->sendConflict(empty_conflict, 0, off, 0);
@@ -170,20 +166,28 @@ StreamingDMCS::work()
 
 
 void
-StreamingDMCS::start_up(StreamingDMCSNotificationFuturePtr& snf)
+StreamingDMCS::work()
+{
+  // interrupt SAT thread
+}
+
+
+
+void
+StreamingDMCS::loop(StreamingDMCSNotificationFuturePtr& snf)
 {
   std::size_t invoker;
   std::size_t pack_size;
   std::size_t port;
-  Conflict*   conflict;
 
   while (1)
     {
-      listen(snf, invoker, pack_size, port, conflict);
+      listen(snf, invoker, pack_size, port);
 
       if (!initialized)
 	{
 	  initialize(invoker, pack_size, port);
+	  start_up();
 	  initialized = true;
 	}
 

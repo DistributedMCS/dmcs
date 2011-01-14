@@ -44,9 +44,11 @@ namespace dmcs {
 class NeighborIn : BaseStreamer
 {
 public:
-  NeighborIn(connection_ptr conn_, MessagingGatewayBC mg_, 
+  NeighborIn(boost::asio::io_service& io_service_, 
+	     const MessagingGatewayBCPtr& mg_, 
 	     std::size_t noff_)
-    : BaseStreamer(conn_, mg_, noff_),
+    : BaseStreamer(io_service_),
+      mg(mg_), noff(noff_),
       first_round(true)
   { }
 
@@ -85,8 +87,12 @@ public:
 
 private:
   bool                     first_round;
+  std::size_t              noff;        // offset of the neighbor streamer in the vector of MQs
+  MessagingGatewayBCPtr    mg;
   StreamingBackwardMessage mess;
 };
+
+typedef boost::shared_ptr<NeighborIn> NeighborInPtr;
 
 } // namespace dmcs
 

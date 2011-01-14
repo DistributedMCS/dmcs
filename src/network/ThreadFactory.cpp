@@ -27,7 +27,9 @@
  * 
  */
 
-#include "network/NeighborInputThread.h"
+#include "network/ConflictsAnalysisThread.h"
+#include "network/JoinThread.h"
+#include "network/NeighborThread.h"
 #include "network/OutputThread.h"
 #include "network/RelSatSolverThread.h"
 #include "network/ThreadFactory.h"
@@ -35,71 +37,89 @@
 
 namespace dmcs {
 
-ThreadFactory::ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory_,
+ThreadFactory::ThreadFactory(const ContextPtr& context_, 
+			     const TheoryPtr& theory_,
 			     const SignaturePtr& local_sig_,
 			     const BeliefStatePtr& localV_,
 			     std::size_t pack_size_,
-			     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+			     MessagingGatewayBCPtr& mg_)
   : context(context_), theory(theory_), 
-    local_sig(local_sig_),
-    localV(localV_),
-    pack_size(pack_size_),
-    mg(mg_),
+    local_sig(local_sig_), localV(localV_),
+    pack_size(pack_size_), mg(mg_),
     c2o(new HashedBiMap)
 {
-  const NeighborListPtr neighbors = context->getNeighbors();
+  // fill up the map: ctx_id <--> offset
+  const NeighborListPtr& nbs = context->getNeighbors();
   std::size_t off = 0;
-  for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it, ++off)
+  for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it, ++off)
     {
-      std::size_t neighbor_id = (*it)->neighbor_id;
-      c2o->insert(Int2Int(neighbor_id, off));
+      std::size_t nid = (*it)->neighbor_id;
+      c2o->insert(Int2Int(nid, off));
     }
 }
+
 
 
 void
 ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
 {
-  NeighborListPtr neighbors = context->getNeighbors();
-  std::size_t ctx_id = context->getContextID();
-  std::size_t system_size = context->getSystemSize();
+  NeighborListPtr& nbs          = context->getNeighbors();
+  const std::size_t ctx_id      = context->getContextID();
+  const std::size_t system_size = context->getSystemSize();
 
-  for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
+  for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
     {
       const NeighborPtr nb = *it;
-      NeighborInputThread nits(nb, c2o, ctx_id, pack_size, system_size, mg);
+      NeighborThread nt(nb, c2o, ctx_id, pack_size, system_size, mg);
       
-      boost::thread* nit = new boost::thread(nits);
+      boost::thread* nit = new boost::thread(nt);
       neighbor_input_threads->push_back(nit);
     }
 }
-  
-boost::thread*
-ThreadFactory::createJoinThread(BoolNotificationFuturePtr& bnf)
-{
-  const NeighborListPtr neighbors = context->getNeighbors();
-  std::size_t no_nbs = neighbors->size();
 
-  JoinThread dts(no_nbs, c2o, mg, bnf);
-  boost::thread* t = new boost::thread(dts);
+
+
+boost::thread*
+ThreadFactory::createJoinThread()
+{
+  const NeighborListPtr& nbs = context->getNeighbors();
+  const std::size_t no_nbs   = nbs->size();
+
+  JoinThread jt(no_nbs, c2o, mg, bnf);
+  boost::thread* t = new boost::thread(jt);
 
   return t;
 }
-  
+
+
+
 boost::thread*
 ThreadFactory::createLocalSolveThread()
 {
-  std::size_t my_id = context->getContextID();
-  std::size_t system_size = context->getSystemSize();
+  const std::size_t my_id       = context->getContextID();
+  const std::size_t system_size = context->getSystemSize();
+
   SatSolverFactory ssf(my_id, theory, local_sig, localV, system_size, mg);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
-  RelSatSolverThread lts(relsatsolver);
-  boost::thread* t = new boost::thread(lts);
+  RelSatSolverThread rsst(relsatsolver);
+  boost::thread* t = new boost::thread(rsst);
 
   return t;
 }
+
+
+
+boost::thread*
+ThreadFactory::createRouterThread()
+{
+  RouterThread rt();
+  boost::thread* t = new boost::thread(rt);
+
+  return t;
+}
+
 
   /*
 boost::thread*

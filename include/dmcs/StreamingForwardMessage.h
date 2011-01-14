@@ -31,6 +31,7 @@
 #define STREAMING_FORWARD_MESSAGE_H
 
 #include "Message.h"
+#include "mcs/BeliefState.h"
 #include "solver/Conflict.h"
 
 namespace dmcs {
@@ -51,12 +52,14 @@ public:
   StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_,
 			  std::size_t system_size)
     : invoker(invoker_), pack_size(pack_size_),
-      conflict(new Conflict(system_size, BeliefSet()))
+      conflict(new Conflict(system_size, BeliefSet())),
+      partial_ass(new BeliefState(system_size, BeliefSet()))
   { }
 
   StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_, 
-			  Conflict* conflict_)
-    : invoker(invoker_), pack_size(pack_size_), conflict(conflict_)
+			  Conflict* conflict_, BeliefState* paritial_ass)
+    : invoker(invoker_), pack_size(pack_size_), 
+      conflict(conflict_), partial_ass(paritial_ass_)
   { }
 
   std::size_t
@@ -77,6 +80,12 @@ public:
     return conflict;
   }
 
+  BeliefState*
+  getPartialAss() const
+  {
+    return partial_ass;
+  }
+
   void
   setConflict(Conflict* conflict_)
   {
@@ -94,18 +103,20 @@ public:
   }
 
 private:
-  std::size_t invoker;     // ID of the invoking context
-  std::size_t pack_size;   // The number of models in a package that the invoker expects
-  Conflict* conflict;    // a conflict that the receiver should obey
+  std::size_t  invoker;      // ID of the invoking context
+  std::size_t  pack_size;    // The number of models in a package that the invoker expects
+  Conflict*    conflict;     // A global conflict that the receiver should obey
+  BeliefState* partial_ass;  // The partial assignment of the whole system
 };
 
 inline std::ostream&
 operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
 {
 
-  os << sfMess.getInvoker() << ", " 
-     << sfMess.getPackSize() << " ["
-     << *sfMess.getConflict() << "] ";
+  os << sfMess.getInvoker()     << ", " 
+     << sfMess.getPackSize()    << " ["
+     << *sfMess.getConflict()   << "] " 
+     << *sfMess.getPartialAss() << "] ";
   
   return os;
 }

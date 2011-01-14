@@ -35,7 +35,6 @@
 #include "mcs/ProxySignatureByLocal.h"
 #include "mcs/Theory.h"
 #include "network/BaseClient.h"
-#include "network/JoinThread.h"
 #include "network/connection.hpp"
 #include "solver/RelSatSolver.h"
 
@@ -51,32 +50,36 @@ typedef boost::shared_ptr<ThreadVec> ThreadVecPtr;
 class ThreadFactory
 {
 public:
-  ThreadFactory(const ContextPtr& context_, const TheoryPtr& theory_,
+  ThreadFactory(const ContextPtr& context_, 
+		const TheoryPtr& theory_,
 		const SignaturePtr& local_sig_,
 		const BeliefStatePtr& localV_,
 		std::size_t pack_size_,
-		boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
+		MessagingGatewayBCPtr& mg_);
 
   void
   createNeighborInputThreads(ThreadVecPtr);
 
   boost::thread*
-  createJoinThread(BoolNotificationFuturePtr& bnf);
+  createJoinThread();
 
   boost::thread*
   createLocalSolveThread();
+
+  boost::thread*
+  createRouterThread();
 
   //boost::thread*
   //createOutputThread(const connection_ptr& conn_);
 
 private:
-  const ContextPtr       context;
-  const TheoryPtr        theory;
-  const SignaturePtr     local_sig;
-  const BeliefStatePtr   localV;
-  std::size_t            pack_size;
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
-  HashedBiMapPtr         c2o;        // hashed bimap from context id and
+  const ContextPtr      context;
+  const TheoryPtr       theory;
+  const SignaturePtr    local_sig;
+  const BeliefStatePtr  localV;
+  std::size_t           pack_size;
+  MessagingGatewayBCPtr mg;
+  HashedBiMapPtr        c2o;       // hashed bimap from context id to
 				   // the offset in the vector of
 				   // neighbor message queue
 };

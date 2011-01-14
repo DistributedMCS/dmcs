@@ -1,5 +1,27 @@
 2011-01-14  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/dmcs/ConflictNotification.h: New file.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+
+	* include/dmcs/Makefile.am: Add new header files.
+	* include/network/Makefile.am: Likewise.
+
+	* include/network/ThreadFactory.h: Create thread for router.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/network/NeighborOut.h: Add cnf and partial_ass.
+
+	* include/network/JoinThread.h: Add mg.
+
+	* include/network/BaseStreamer.h: Remove mg, noff.
+	* include/network/NeighborIn.h: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Add partial_ass.
+
+	* include/dmcs/StreamingDMCS.h: Add thread for router.
+
 	* include/network/BaseStreamer.h: New file.
 	* include/network/NeighborIn.h: Likewise.
 	* include/network/NeighborOut.h: Likewise.

@@ -67,15 +67,14 @@ public:
   ~StreamingDMCS();
 
   void
-  start_up(StreamingDMCSNotificationFuturePtr& snf);
+  loop(StreamingDMCSNotificationFuturePtr& snf);
 
 private:
   void
   listen(StreamingDMCSNotificationFuturePtr& snf,
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
-	 std::size_t& port,
-	 Conflict* conflict);
+	 std::size_t& port);
 
   void
   initialize(std::size_t invoker, 
@@ -83,30 +82,26 @@ private:
 	     std::size_t port);
 
   void
+  start_up();
+
+  void
   work();
 
 private:
-  QueryPlanPtr query_plan;
-  CacheStatsPtr cacheStats;
-  CachePtr cache;
+  QueryPlanPtr          query_plan;
+  CacheStatsPtr         cacheStats;
+  CachePtr              cache;
+  bool                  initialized;
+  boost::thread*        sat_thread;
+  boost::thread*        join_thread;
+  boost::thread*        router_thread;
+  ThreadVecPtr          neighbor_input_threads;
+  MessagingGatewayBCPtr mg;
 
-  bool initialized;
-
-  ThreadVecPtr neighbor_input_threads;
-  boost::thread* join_thread;
-  boost::thread* sat_thread;
-
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
-
-  BoolNotificationPromise bnp;
-
-  std::size_t system_size;
-  std::size_t my_id;
   std::size_t buf_count;
 };
 
 typedef boost::shared_ptr<StreamingDMCS> StreamingDMCSPtr;
-
 
 } // namespace dmcs
 

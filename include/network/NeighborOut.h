@@ -33,8 +33,11 @@
 #define NEIGHBOR_OUT_H
 
 #include "dmcs/Log.h"
+#include "dmcs/ConflictNotification.h"
 #include "mcs/Conflict.h"
 #include "network/BaseStreamer.h"
+
+#include <boost/shared_ptr.hpp>
 
 namespace dmcs {
 
@@ -44,11 +47,13 @@ namespace dmcs {
 class NeighborOut : BaseStreamer
 {
 public:
-  NeighborOut(connection_ptr conn_, MessagingGatewayBC mg_,
+  NeighborOut(boost::asio::io_service& io_service_, 
+	      ConflictNotificationFuturePtr& cnf_,
 	      std::size_t noff_,std::size_t invoker_, 
 	      std::size_t pack_size)
-    : BaseStreamer(conn_, mg_, noff_),
-      invoker(invoker_), pack_size(pack_size_)
+    : BaseStreamer(io_service_),
+      cnf(cnf_), invoker(invoker_), 
+      pack_size(pack_size_)
   { }
 
   void 
@@ -56,13 +61,14 @@ public:
   {
     if (!e)
       {
-	// read from NEIGHBOR_OUT_MQ + noff
-	std::size_t prio = 0;
-	std::size_t timeout = 0;
-	Conflict* conflict = mg->recvConflict(ConcurrentMessageQueueFactory::NEIGHBOR_OUT_MQ + noff,
-					      prio, timeout);
+	// wait for a future from the Router
+	cnf->wait();
+	ConflictNotificationPtr cn = cnf->get();
 
-	StreamingForwardMessage mess(invoker, pack_size, conflict);
+	Conflict* conflict       = cn->conflict;
+	BeliefState* partial_ass = cn->partial_ass;
+
+	StreamingForwardMessage mess(invoker, pack_size, conflict, partial_ass);
 
 	// write to network
 	conn->async_write(mess, boost::bind(&NeighborOut::stream, this,  
@@ -79,6 +85,8 @@ private:
   std::size_t invoker;
   std::size_t pack_size;
 };
+
+typedef boost::shared_ptr<NeighborOut> NeighborOutPtr;
 
 } // namespace dmcs
 

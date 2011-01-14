@@ -44,8 +44,8 @@ namespace dmcs {
 class BaseStreamer
 {
 public:
-  BaseStreamer(connection_ptr conn_, MessagingGatewayBC mg_, std::size_t noff_)
-    : conn(conn_), mg(mg_), noff(noff_)
+  BaseStreamer(boost::asio::io_service& io_service_, std::size_t noff_)
+    : conn(new connection(io_service_))
   { }
 
 protected:
@@ -54,8 +54,6 @@ protected:
 
 protected:
   connection_ptr     conn;
-  MessagingGatewayBC mg;    // reference possible?
-  std::size_t        noff;  // offset of the neighbor streamer in the vector of MQs
 };
 
 } // namespace dmcs

@@ -7,11 +7,14 @@ noinst_HEADERS =  \
 		Cache.h \
 		CommandType.h \
 		CommandTypeFactory.h \
+		ConflictNotification.h \
 		Context.h \
 		Debug.h \
 		Log.h \
 		Message.h \
 		Neighbor.h \
+		NeighborIn.h \
+		NeighborOut.h \
 		OptCommandType.h \
 		OptDMCS.h \
 		OptMessage.h \

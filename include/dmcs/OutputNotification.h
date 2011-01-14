@@ -20,7 +20,7 @@
 /**
  * @file   OutputNotification.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Wed Jan  13 8:43:24 2011
+ * @date   Wed Jan  12 8:43:24 2011
  * 
  * @brief  
  * 
