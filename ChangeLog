@@ -1,5 +1,20 @@
 2011-01-14  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/Handler.tcc: Communicate with SAT thread
+	via a promise.
+	* include/network/Handler.h: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Push cnf to relsat.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+
 	* include/dmcs/ConflictNotification.h: New file.
 	* include/network/NeighborThread.h: Likewise.
 	* include/network/RouterThread.h: Likewise.

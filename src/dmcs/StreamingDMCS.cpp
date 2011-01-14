@@ -78,7 +78,10 @@ StreamingDMCS::~StreamingDMCS()
 
 
 void
-StreamingDMCS::initialize(std::size_t invoker, std::size_t pack_size, std::size_t port)
+StreamingDMCS::initialize(std::size_t invoker, 
+			  std::size_t pack_size, 
+			  std::size_t port,
+			  ConflictNotificationFuturePtr& cnf)
 {
   DMCS_LOG_DEBUG("Here create mqs");
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
@@ -97,7 +100,7 @@ StreamingDMCS::initialize(std::size_t invoker, std::size_t pack_size, std::size_
 
   const SignaturePtr& local_sig = ctx->getSignature();
 
-  ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size, mg);
+  ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size, mg, cnf);
 
   sat_thread = tf.createLocalSolveThread();
 
@@ -174,7 +177,7 @@ StreamingDMCS::work()
 
 
 void
-StreamingDMCS::loop(StreamingDMCSNotificationFuturePtr& snf)
+StreamingDMCS::loop(StreamingDMCSNotificationFuturePtr& snf, ConflictNotificationFuturePtr& cnf)
 {
   std::size_t invoker;
   std::size_t pack_size;
@@ -186,7 +189,7 @@ StreamingDMCS::loop(StreamingDMCSNotificationFuturePtr& snf)
 
       if (!initialized)
 	{
-	  initialize(invoker, pack_size, port);
+	  initialize(invoker, pack_size, port, cnf);
 	  start_up();
 	  initialized = true;
 	}

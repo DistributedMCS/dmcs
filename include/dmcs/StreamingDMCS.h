@@ -33,6 +33,7 @@
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include "dmcs/BaseDMCS.h"
+#include "dmcs/ConflictNotification.h"
 #include "dmcs/StreamingForwardMessage.h"
 #include "dmcs/ReturnMessage.h"
 #include "dmcs/Cache.h"
@@ -67,7 +68,7 @@ public:
   ~StreamingDMCS();
 
   void
-  loop(StreamingDMCSNotificationFuturePtr& snf);
+  loop(StreamingDMCSNotificationFuturePtr& snf, ConflictNotificationFuturePtr& cnf);
 
 private:
   void
@@ -79,7 +80,8 @@ private:
   void
   initialize(std::size_t invoker, 
 	     std::size_t pack_size,
-	     std::size_t port);
+	     std::size_t port,
+	     ConflictNotificationFuturePtr& cnf);
 
   void
   start_up();

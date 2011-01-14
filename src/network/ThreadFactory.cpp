@@ -42,11 +42,12 @@ ThreadFactory::ThreadFactory(const ContextPtr& context_,
 			     const SignaturePtr& local_sig_,
 			     const BeliefStatePtr& localV_,
 			     std::size_t pack_size_,
-			     MessagingGatewayBCPtr& mg_)
+			     MessagingGatewayBCPtr& mg_,
+			     const ConflictNotificationFuturePtr& cnf_)
   : context(context_), theory(theory_), 
     local_sig(local_sig_), localV(localV_),
     pack_size(pack_size_), mg(mg_),
-    c2o(new HashedBiMap)
+    cnf(cnf_), c2o(new HashedBiMap)
 {
   // fill up the map: ctx_id <--> offset
   const NeighborListPtr& nbs = context->getNeighbors();
@@ -99,7 +100,7 @@ ThreadFactory::createLocalSolveThread()
   const std::size_t my_id       = context->getContextID();
   const std::size_t system_size = context->getSystemSize();
 
-  SatSolverFactory ssf(my_id, theory, local_sig, localV, system_size, mg);
+  SatSolverFactory ssf(my_id, theory, local_sig, localV, system_size, mg, cnf);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

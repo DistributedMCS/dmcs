@@ -54,7 +54,8 @@ public:
 	       const SignaturePtr& local_sig_,
 	       const BeliefStatePtr& localV_,
 	       std::size_t system_size_,
-	       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
+	       MessagingGatewayBCPtr& mg_,
+	       ConflictNotificationFuturePtr& cnf_);
 
   ~RelSatSolver();
 
@@ -83,8 +84,10 @@ private:
   const SignaturePtr             sig;
   const BeliefStatePtr           localV;
   //  const ProxySignatureByLocalPtr mixed_sig;
-  std::size_t                    system_size; // this can be taken from localV
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+  std::size_t                    system_size;    // this can be taken from localV
+  MessagingGatewayBCPtr          mg;
+  ConflictNotificationFuturePtr  cnf;
+  BeliefState*                   partial_ass;
   BeliefState*                   input;
 
   SATInstance*                   xInstance;

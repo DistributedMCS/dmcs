@@ -118,6 +118,7 @@ private:
 
   StreamingDMCSNotificationPromise snp;
   OutputNotificationPromise        onp;
+  ConflictNotificationPromise      cnp;
 
   MessagingGatewayBCPtr            mg;
 };

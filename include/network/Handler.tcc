@@ -230,7 +230,9 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 	  DMCS_LOG_DEBUG("creating dmcs thread");
 
 	  StreamingDMCSNotificationFuturePtr snf(new StreamingDMCSNotificationFuture(snp.get_future()));
-	  stdt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, snf));
+	  ConflictNotificationFuturePtr      cnf(new ConflictNotificationFuture(cnp.get_future()));
+
+	  stdt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, snf, cnf));
 	  streaming_dmcs_thread = new boost::thread(*stdt);
 
 	  DMCS_LOG_DEBUG("creating output thread, pack_size = " << pack_size);
@@ -250,9 +252,11 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
       StreamingDMCSNotificationPtr sn(new StreamingDMCSNotification(invoker, pack_size, port));
       snp.set_value(sn);
 
-      // (2) send the conflict to IN_MQ, so that the local solver can pick it up
-      Conflict* c = sesh->mess.getConflict();
-      mg->sendConflict(c, 0, ConcurrentMessageQueueFactory::IN_MQ, 0);
+      // (2) notify the local solver
+      Conflict* conflict       = sesh->mess.getConflict();
+      BeliefState* partial_ass = sesh->mess.getPartialAss();
+      ConflictNotificationPtr cn(new ConflictNotification(pack_size, conflict, partial_ass));
+      cnp.set_value(cn);
 
       // (3) notify OutputThread
       OutputNotificationPtr on(new OutputNotification(pack_size));

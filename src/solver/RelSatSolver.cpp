@@ -40,7 +40,8 @@ RelSatSolver::RelSatSolver(std::size_t my_id_,
 			   const BeliefStatePtr& localV_,
 			   //			   const ProxySignatureByLocalPtr& mixed_sig_,
 			   std::size_t system_size_,
-			   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+			   MessagingGatewayBCPtr& mg_,
+			   ConflictNotificationFuturePtr& cnf_)
   : my_id(my_id_),
     theory(theory_), 
     sig(sig_),
@@ -48,6 +49,7 @@ RelSatSolver::RelSatSolver(std::size_t my_id_,
     //    mixed_sig(mixed_sig_),
     system_size(system_size_),
     mg(mg_),
+    cnf(cnf_),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this))
 {
@@ -134,6 +136,19 @@ void
 RelSatSolver::solve()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  // wait for conflict and partial_ass from Handler
+  cnf->wait();
+  ConflictNotificationFuturePtr cn = cnf->get();
+  Conflict* conflict               = cn->conflict;
+  BeliefState* new_partial_ass     = cn->partial_ass;
+
+  if ((*partial_ass) != (*new_partial_ass))
+    { // now restart
+    }
+  else
+    { // continue
+    }
+  
 
   // remove input part of the theory (from last solve)
   xInstance->removeLastInput();

@@ -30,9 +30,9 @@
 #ifndef STREAMING_COMMAND_TYPE
 #define STREAMING_COMMAND_TYPE
 
-#include "CommandType.h"
-#include "StreamingForwardMessage.h"
-#include "StreamingDMCS.h"
+#include "dmcs/CommandType.h"
+#include "dmcs/StreamingDMCS.h"
+#include "dmcs/StreamingForwardMessage.h"
 #include "network/Client.h"
 
 namespace dmcs {
@@ -56,9 +56,9 @@ public:
   }
 
   void
-  execute(StreamingDMCSNotificationFuturePtr& snf)
+  execute(StreamingDMCSNotificationFuturePtr& snf, ConflictNotificationFuturePtr& cnf)
   {
-    sdmcs->start_up(snf);
+    sdmcs->loop(snf, cnf);
   }
 
   bool

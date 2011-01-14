@@ -46,14 +46,15 @@ public:
 		   const SignaturePtr& local_sig_,
 		   const BeliefStatePtr& localV_,
 		   std::size_t system_size_,
-		   boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+		   MessagingGatewayBCPtr& mg_,
+		   const ConflictNotificationFuturePtr& cnf_)
     : my_id(my_id_),
       theory(theory_),
       //      mixed_sig(mixed_sig_),
       local_sig(local_sig_),
       localV(localV_),
       system_size(system_size_),
-      mg(mg_)
+      mg(mg_), cnf(cnf_)
   { }
 
   template<typename aSatSolverTypePtr>
@@ -67,7 +68,8 @@ private:
   const BeliefStatePtr           localV;
   //const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+  MessagingGatewayBCPtr          mg;
+  ConflictNotificationFuturePtr  cnf;
 };
 
 
@@ -75,7 +77,7 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(my_id, theory, local_sig, localV, system_size, mg));
+  RelSatSolverPtr relsatsolver(new RelSatSolver(my_id, theory, local_sig, localV, system_size, mg, cnf));
 
   return relsatsolver;
 }

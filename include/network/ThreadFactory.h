@@ -55,7 +55,8 @@ public:
 		const SignaturePtr& local_sig_,
 		const BeliefStatePtr& localV_,
 		std::size_t pack_size_,
-		MessagingGatewayBCPtr& mg_);
+		MessagingGatewayBCPtr& mg_,
+		const ConflictNotificationFuturePtr& cnf_);
 
   void
   createNeighborInputThreads(ThreadVecPtr);
@@ -73,15 +74,16 @@ public:
   //createOutputThread(const connection_ptr& conn_);
 
 private:
-  const ContextPtr      context;
-  const TheoryPtr       theory;
-  const SignaturePtr    local_sig;
-  const BeliefStatePtr  localV;
-  std::size_t           pack_size;
-  MessagingGatewayBCPtr mg;
-  HashedBiMapPtr        c2o;       // hashed bimap from context id to
-				   // the offset in the vector of
-				   // neighbor message queue
+  const ContextPtr              context;
+  const TheoryPtr               theory;
+  const SignaturePtr            local_sig;
+  const BeliefStatePtr          localV;
+  std::size_t                   pack_size;
+  MessagingGatewayBCPtr         mg;
+  ConflictNotificationFuturePtr cnf;
+  HashedBiMapPtr                c2o;       // hashed bimap from context id to
+			         	   // the offset in the vector of
+				           // neighbor message queue
 };
 
 
