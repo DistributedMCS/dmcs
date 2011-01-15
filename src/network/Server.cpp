@@ -59,11 +59,9 @@ Server::Server(CommandTypeFactoryPtr& ctf_,
 void
 Server::handle_accept(const boost::system::error_code& e, connection_ptr conn)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
   if (!e)
     {
-      DMCS_LOG_DEBUG("Creating new connection...");
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__  << "Creating new connection...");
 
       // Start an accept operation for a new connection.
       connection_ptr new_conn(new connection(acceptor_.io_service()));
@@ -71,7 +69,7 @@ Server::handle_accept(const boost::system::error_code& e, connection_ptr conn)
 			     boost::bind(&Server::handle_accept, this,
 					 boost::asio::placeholders::error, new_conn));
 
-      DMCS_LOG_DEBUG("Wait for header...");
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Wait for header...");
 
       // read header to decide what kind of command type to create
       conn->async_read(header, boost::bind(&Server::dispatch_header, this,
@@ -93,11 +91,9 @@ Server::handle_accept(const boost::system::error_code& e, connection_ptr conn)
 void
 Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
   if (!e)
     {
-      DMCS_LOG_DEBUG("Header = " << header);
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Header = " << header);
       
       // Create the respective handler and give him the connection
       if (header.find(HEADER_REQ_PRI_DMCS) != std::string::npos)

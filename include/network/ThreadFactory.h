@@ -59,8 +59,7 @@ public:
 		const ConflictNotificationFuturePtr& cnf_);
 
   void
-  createNeighborThreads(ThreadVecPtr& neighbor_threads, 
-			ConflictNotificationPromiseVecPtr& cnpv);
+  createNeighborThreads(ThreadVecPtr& neighbor_threads);
 
   boost::thread*
   createJoinThread();
@@ -69,22 +68,24 @@ public:
   createLocalSolveThread();
 
   boost::thread*
-  createRouterThread(ConflictNotificationPromiseVecPtr& cnpv);
+  createRouterThread();
 
   //boost::thread*
   //createOutputThread(const connection_ptr& conn_);
 
 private:
-  const ContextPtr              context;
-  const TheoryPtr               theory;
-  const SignaturePtr            local_sig;
-  const BeliefStatePtr          localV;
-  std::size_t                   pack_size;
-  MessagingGatewayBCPtr         mg;
-  ConflictNotificationFuturePtr cnf;
-  HashedBiMapPtr                c2o;       // hashed bimap from context id to
-			         	   // the offset in the vector of
-				           // neighbor message queue
+  const ContextPtr                  context;
+  const TheoryPtr                   theory;
+  const SignaturePtr                local_sig;
+  const BeliefStatePtr              localV;
+  std::size_t                       pack_size;
+  MessagingGatewayBCPtr             mg;
+  ConflictNotificationFuturePtr     handler_sat_cnf;
+  ConflictNotificationPromisePtr    sat_router_cnp;
+  ConflictNotificationPromiseVecPtr cnpv;
+  HashedBiMapPtr                    c2o;             // hashed bimap from context id to
+			                             // the offset in the vector of
+				                     // neighbor message queue
 };
 
 

@@ -1,10 +1,32 @@
 2011-01-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/dmcs/Makefile.am: Remove StreamingCommandType.cpp
 
+	* include/network/ThreadFactory.h: Add promise and future.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/network/NeighborThread.h: Start the connection.
+
+	* include/network/BaseStreamer.h: Get conn instead of io_service.
+
+	* include/dmcs/StreamingCommandType.h: Make use of DMCS_LOG
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/dmcsc.cpp: Likwise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
 
 	* include/network/ThreadFactory.h: create Router.
 	* src/dmcs/StreamingDMCS.cpp: Likewise.
 	* src/network/ThreadFactory.cpp: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
 
 	* include/network/NeighborOut.h: Add cnf so that NeighborOut gets
 	promise from Router.

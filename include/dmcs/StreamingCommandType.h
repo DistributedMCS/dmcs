@@ -31,6 +31,7 @@
 #define STREAMING_COMMAND_TYPE
 
 #include "dmcs/CommandType.h"
+#include "dmcs/Log.h"
 #include "dmcs/StreamingDMCS.h"
 #include "dmcs/StreamingForwardMessage.h"
 #include "network/Client.h"
@@ -58,6 +59,7 @@ public:
   void
   execute(StreamingDMCSNotificationFuturePtr& snf, ConflictNotificationFuturePtr& cnf)
   {
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
     sdmcs->loop(snf, cnf);
   }
 

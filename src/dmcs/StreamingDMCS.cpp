@@ -66,15 +66,13 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     buf_count(buf_count_),
     initialized(false),
     neighbor_threads(new ThreadVec)
-{ 
-  const NeighborListPtr& nb = ctx->getNeighbors();
-  std::cerr << "StreamingDMCS::StreamingDMCS(). nb->size = " << nb->size() << std::endl;
-}
+{ }
 
 
 
 StreamingDMCS::~StreamingDMCS()
 { }
+
 
 
 void
@@ -83,9 +81,10 @@ StreamingDMCS::initialize(std::size_t invoker,
 			  std::size_t port,
 			  ConflictNotificationFuturePtr& cnf)
 {
-  DMCS_LOG_DEBUG("Here create mqs");
   const NeighborListPtr& nbs = ctx->getNeighbors();
   std::size_t no_nbs         = nbs->size(); 
+
+  DMCS_LOG_DEBUG("Here create mqs and threads. no_nbs = " << no_nbs);
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
   mg = mqf.createMessagingGateway(port, no_nbs); // we use the port as unique id
@@ -109,11 +108,9 @@ StreamingDMCS::initialize(std::size_t invoker,
 
   if (no_nbs > 0)
     {
-      
-      ConflictNotificationPromiseVecPtr cnpv(new ConflictNotificationPromiseVec);
-      tf.createNeighborThreads(neighbor_threads, cnpv);
+      tf.createNeighborThreads(neighbor_threads);
       join_thread     = tf.createJoinThread();
-      router_thread   = tf.createRouterThread(cnpv);
+      router_thread   = tf.createRouterThread();
     }
 }
 
@@ -147,13 +144,11 @@ StreamingDMCS::start_up()
     {
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Leaf context. Put an empty model into JOIN_OUT_MQ to start the SAT solver without input");
 
-
       BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
       mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
     }
   else
     {
-
       /*
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Intermediate context. Send requests to neighbors by placing a message in each of the NEIGHBOR_OUT_MQ");
 
@@ -165,8 +160,7 @@ StreamingDMCS::start_up()
 
 	  Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
 	  mg->sendConflict(empty_conflict, 0, off, 0);
-	}
-      */
+	  }*/
     }
 }
 
@@ -186,6 +180,8 @@ StreamingDMCS::loop(StreamingDMCSNotificationFuturePtr& snf, ConflictNotificatio
   std::size_t invoker;
   std::size_t pack_size;
   std::size_t port;
+
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   while (1)
     {

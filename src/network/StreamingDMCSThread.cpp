@@ -27,6 +27,7 @@
  * 
  */
 
+#include "dmcs/Log.h"
 #include "network/StreamingDMCSThread.h"
 
 namespace dmcs {
@@ -40,6 +41,7 @@ StreamingDMCSThread::StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
 void
 StreamingDMCSThread::operator()()
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   scmt->execute(snf, cnf);
 }
 

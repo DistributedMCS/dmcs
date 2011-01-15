@@ -247,9 +247,11 @@ main(int argc, char* argv[])
 		  StreamingCommandType::input_type mess(0, pack_size, system_size);
 
 		  Conflict* conflict = mess.getConflict();
+		  BeliefState* partial_ass = mess.getPartialAss();
 
-		  DMCS_LOG_DEBUG("Empty starting conflict:");
-		  //		  DMCS_LOG_DEBUG(*conflict);
+		  DMCS_LOG_DEBUG("Empty starting conflict:" << *conflict);
+		  DMCS_LOG_DEBUG("Empty starting assignment:" << *partial_ass);
+
 
 		  Client<StreamingCommandType> c(io_service, it, header, mess);
 

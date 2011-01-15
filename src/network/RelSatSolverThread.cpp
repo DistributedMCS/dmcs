@@ -27,22 +27,19 @@
  * 
  */
 
+#include "dmcs/Log.h"
 #include "network/RelSatSolverThread.h"
 
 namespace dmcs {
 
 RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& relsatsolver_)
   : relsatsolver(relsatsolver_)
-{
-  std::cerr << "RelSatSolverThread::ctor" << std::endl;
-}
+{ }
 
 void
 RelSatSolverThread::operator()()
 {
-#ifdef DEBUG
-  std::cerr << "RelSatSolverThread::operator()()" << std::endl;
-#endif
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   relsatsolver->solve();
 }

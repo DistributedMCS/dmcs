@@ -44,5 +44,4 @@ libdmcs_a_SOURCES = \
                 BeliefCombination.cpp \
 		PrimitiveDMCS.cpp \
 		OptDMCS.cpp \
-		StreamingCommandType.cpp \
 		StreamingDMCS.cpp

@@ -45,17 +45,20 @@ namespace dmcs {
 class NeighborIn : BaseStreamer
 {
 public:
-  NeighborIn(boost::asio::io_service& io_service_, 
+  NeighborIn(connection_ptr& conn_, 
 	     const MessagingGatewayBCPtr& mg_, 
 	     std::size_t noff_)
-    : BaseStreamer(io_service_),
+    : BaseStreamer(conn_),
       mg(mg_), noff(noff_),
       first_round(true)
-  { }
+  {
+    stream(boost::system::error_code());
+  }
 
   void 
   stream(const boost::system::error_code& e) 
   {
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "noff = " << noff);
     if (!e)
       {
 	// write to NEIGHBOR_IN_MQ, only from the second round
@@ -66,6 +69,7 @@ public:
 	else
 	  {
 	    // extract a bunch of models from the message and then put each into NEIGHBOR_MQ
+	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Write to MQs");
 	    const BeliefStateVecPtr bsv = mess.getBeliefStates();
 	    const std::size_t offset    = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
@@ -79,6 +83,7 @@ public:
 	  }
 	
 	// read from network
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Reading from network");
 	conn->async_read(mess, boost::bind(&NeighborIn::stream, this,  
 					   boost::asio::placeholders::error));
       }

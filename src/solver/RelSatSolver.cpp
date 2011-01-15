@@ -41,7 +41,8 @@ RelSatSolver::RelSatSolver(std::size_t my_id_,
 			   //			   const ProxySignatureByLocalPtr& mixed_sig_,
 			   std::size_t system_size_,
 			   MessagingGatewayBCPtr& mg_,
-			   ConflictNotificationFuturePtr& cnf_)
+			   ConflictNotificationFuturePtr& handler_cnf_,
+			   ConflictNotificationPromisePtr& router_cnp_)
   : my_id(my_id_),
     theory(theory_), 
     sig(sig_),
@@ -49,7 +50,8 @@ RelSatSolver::RelSatSolver(std::size_t my_id_,
     //    mixed_sig(mixed_sig_),
     system_size(system_size_),
     mg(mg_),
-    cnf(cnf_),
+    handler_cnf(handler_cnf_),
+    router_cnp(router_cnp_),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this))
 {
@@ -74,19 +76,17 @@ RelSatSolver::solve(const TheoryPtr& theory, std::size_t sig_size)
 void
 RelSatSolver::update_bridge_input(SignatureByCtx::const_iterator it)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
   BeliefSet& b = (*input)[it->ctxId - 1];
   int lid = it->localId;
 
   int ucl = testBeliefSet(b, it->origId) ? lid : -lid;
 
-  DMCS_LOG_DEBUG("input:    " << *input);
-  DMCS_LOG_DEBUG("context:  " << it->ctxId - 1);
-  DMCS_LOG_DEBUG("bset:     " << b);
-  DMCS_LOG_DEBUG("localid:  " << lid);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input:    " << *input);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "context:  " << it->ctxId - 1);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "bset:     " << b);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "localid:  " << lid);
 
-  DMCS_LOG_DEBUG("Adding unit clause " << ucl << " to local theory.");
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Adding unit clause " << ucl << " to local theory.");
 
   xInstance->add_unit_clause(ucl);
 }
@@ -96,15 +96,13 @@ RelSatSolver::update_bridge_input(SignatureByCtx::const_iterator it)
 void
 RelSatSolver::prepare_input()
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
   // read joined input from Joiner. We need to keep the input to build
   // complete model wrt the interface
-  std::size_t prio = 0;
+  std::size_t prio    = 0;
   std::size_t timeout = 0;
   input = mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
 
-  DMCS_LOG_DEBUG("input received!");
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input received!");
 
   // then add input to the SATSolver's theory. We only add the atoms
   // that come from our neighbors' interface
@@ -115,14 +113,14 @@ RelSatSolver::prepare_input()
   SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
   SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
 
-  DMCS_LOG_DEBUG("Updating input from local signature...");
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Updating input from local signature...");
 
   for (SignatureByCtx::const_iterator it = local_sig.begin(); it != low; ++it)
     {
       update_bridge_input(it);
     }
 
-  DMCS_LOG_DEBUG("Updating input from bridge signature...");
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Updating input from bridge signature...");
 
   for (SignatureByCtx::const_iterator it = up; it != local_sig.end(); ++it)
     {
@@ -135,19 +133,28 @@ RelSatSolver::prepare_input()
 void
 RelSatSolver::solve()
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   // wait for conflict and partial_ass from Handler
-  cnf->wait();
-  ConflictNotificationPtr cn   = cnf->get();
+  handler_cnf->wait();
+  ConflictNotificationPtr cn   = handler_cnf->get();
   Conflict* conflict           = cn->conflict;
   BeliefState* new_partial_ass = cn->partial_ass;
 
-  if ((*partial_ass) != (*new_partial_ass))
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got a message from Handler. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
+
+  /*
+  if (partial_ass == 0)
+    {
+      partial_ass = new_partial_ass;
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "First time. Going to start");
+    }
+  else if ((*partial_ass) != (*new_partial_ass))
     { // now restart
+      partial_ass = new_partial_ass;
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "New partial_ass. Going to restart");
     }
   else
     { // continue
-    }
+    }*/
   
 
   // remove input part of the theory (from last solve)
@@ -181,8 +188,8 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   // copy input
   BeliefState* bs = new BeliefState(*input);
 
-  DMCS_LOG_DEBUG("input: " << *input);
-  DMCS_LOG_DEBUG("bs:    " << *bs);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input: " << *input);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "bs:    " << *bs);
 
   // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
   BeliefSet& belief = (*bs)[my_id-1];
@@ -212,12 +219,12 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 	}
     }
 
-  DMCS_LOG_DEBUG("After adding result: bs = " << *bs);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "After adding result: bs = " << *bs);
 
   // now put this BeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 
-  DMCS_LOG_DEBUG("Solution sent: " << *bs);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Solution sent: " << *bs);
 }
 
 } // namespace dmcs

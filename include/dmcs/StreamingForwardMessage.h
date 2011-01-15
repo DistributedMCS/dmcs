@@ -30,7 +30,8 @@
 #ifndef STREAMING_FORWARD_MESSAGE_H
 #define STREAMING_FORWARD_MESSAGE_H
 
-#include "Message.h"
+#include "dmcs/Log.h"
+#include "dmcs/Message.h"
 #include "mcs/BeliefState.h"
 #include "solver/Conflict.h"
 
@@ -47,7 +48,9 @@ public:
 
   StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_)
     : invoker(invoker_), pack_size(pack_size_)
-  { }
+  {
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << ". Watch out! NULL conflict, NULL paritial_ass");
+  }
 
   StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_,
 			  std::size_t system_size)
@@ -100,6 +103,7 @@ public:
     ar & invoker;
     ar & pack_size;
     ar & conflict;
+    ar & partial_ass;
   }
 
 private:

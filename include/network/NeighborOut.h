@@ -48,26 +48,34 @@ namespace dmcs {
 class NeighborOut : BaseStreamer
 {
 public:
-  NeighborOut(boost::asio::io_service& io_service_, 
+  NeighborOut(connection_ptr& conn_, 
 	      ConflictNotificationFuturePtr& cnf_,
 	      std::size_t invoker_, 
 	      std::size_t pack_size_)
-    : BaseStreamer(io_service_),
+    : BaseStreamer(conn_),
       cnf(cnf_), invoker(invoker_), 
       pack_size(pack_size_)
-  { }
+  {
+    stream(boost::system::error_code());
+  }
 
   void 
   stream(const boost::system::error_code& e)
   {
     if (!e)
       {
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 	// wait for a future from the Router
 	cnf->wait();
 	ConflictNotificationPtr cn = cnf->get();
 
 	Conflict* conflict       = cn->conflict;
 	BeliefState* partial_ass = cn->partial_ass;
+
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ <<
+		       "Got from Router: "
+		       "conflict = " << *conflict <<
+		       "partial_ass = " << *partial_ass);
 
 	StreamingForwardMessage mess(invoker, pack_size, conflict, partial_ass);
 

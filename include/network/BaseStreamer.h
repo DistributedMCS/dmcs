@@ -44,8 +44,8 @@ namespace dmcs {
 class BaseStreamer
 {
 public:
-  BaseStreamer(boost::asio::io_service& io_service_)
-    : conn(new connection(io_service_))
+  BaseStreamer(connection_ptr& conn_)
+    : conn(conn)
   { }
 
 protected:

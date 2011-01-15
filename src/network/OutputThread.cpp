@@ -45,8 +45,7 @@ OutputThread::OutputThread(const connection_ptr& conn_,
     onf(onf_),
     collecting(false)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  DMCS_LOG_DEBUG("OutputThread::ctor. pack_size = " << pack_size);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " pack_size = " << pack_size);
 }
 
 
@@ -55,6 +54,7 @@ void
 OutputThread::loop(const boost::system::error_code& e)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
       BeliefStateVecPtr res(new BeliefStateVec);
@@ -84,6 +84,8 @@ OutputThread::wait_for_trigger()
 
   OutputNotificationPtr on = onf->get();
   pack_size                = on->pack_size;
+
+  DMCS_LOG_DEBUG(" OutputThread::wait_for_trigger(): Got a message from Handler. pack_size = " << pack_size);
   
   left_2_send = pack_size;
 }
@@ -93,29 +95,31 @@ OutputThread::wait_for_trigger()
 void
 OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  DMCS_LOG_DEBUG("pack_size = " << pack_size << ", left to send = " << left_2_send);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " pack_size = " << pack_size << ", left to send = " << left_2_send);
 
   // Turn this mode on. It's off only when either we collect and send
   // enough pack_size models, or there's no more model to send.
   collecting = true; 
   
   // be careful with weird value of pack_size. Bug just disappreared
-  for (std::size_t i = 0; i < left_2_send; ++i)
+  for (std::size_t i = 1; i <= left_2_send; ++i)
     {
-      DMCS_LOG_DEBUG("Read from MQ");
+      //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Read from MQ");
       
       std::size_t prio    = 0;
-      std::size_t timeout = 100; // milisecs
+      std::size_t timeout = 200; // milisecs
       BeliefState* bs     = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
       
+      //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Check result from MQ");
       if (bs == 0) // Ups, a NULL pointer
 	{
 	  if (timeout == 0)
 	    {
+	      //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " TIME OUT");
 	      // TIME OUT! Going to send whatever I got so far to the parent
 	      if (res->size() > 0)
 		{
+		  //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to send");
 		  header = HEADER_ANS;
 		  break;
 		}
@@ -123,12 +127,14 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
 		{
 		  // decrease counter because we gained nothing so far.
 		  --i;
+		  //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Restart, i = " << i);
+		  continue;
 		}
 	    }
 	  else 
 	    {
 	      // either UNSAT of EOF
-	      DMCS_LOG_DEBUG("NOTHING TO OUTPUT, going to send EOF");
+	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " NOTHING TO OUTPUT, going to send EOF");
 
 	      // Turn off collecting mode
 	      collecting = false; 
@@ -138,7 +144,7 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
 	    }
 	}
       
-      DMCS_LOG_DEBUG("got #" << i << ": bs = " << *bs);
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " got #" << i << ": bs = " << *bs);
       
       // Got something is a reasonable time. Continue collecting.
       res->push_back(bs);
@@ -203,7 +209,7 @@ OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr
 void
 OutputThread::operator()()
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to call loop()");
 
   loop(boost::system::error_code());
 }

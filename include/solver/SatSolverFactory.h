@@ -47,14 +47,15 @@ public:
 		   const BeliefStatePtr& localV_,
 		   std::size_t system_size_,
 		   MessagingGatewayBCPtr& mg_,
-		   const ConflictNotificationFuturePtr& cnf_)
+		   const ConflictNotificationFuturePtr& cnf_,
+		   const ConflictNotificationPromisePtr& cnp_)
     : my_id(my_id_),
       theory(theory_),
       //      mixed_sig(mixed_sig_),
       local_sig(local_sig_),
       localV(localV_),
       system_size(system_size_),
-      mg(mg_), cnf(cnf_)
+      mg(mg_), cnf(cnf_), cnp(cnp_)
   { }
 
   template<typename aSatSolverTypePtr>
@@ -70,6 +71,7 @@ private:
   std::size_t                    system_size;
   MessagingGatewayBCPtr          mg;
   ConflictNotificationFuturePtr  cnf;
+  ConflictNotificationPromisePtr cnp;
 };
 
 
@@ -77,7 +79,7 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(my_id, theory, local_sig, localV, system_size, mg, cnf));
+  RelSatSolverPtr relsatsolver(new RelSatSolver(my_id, theory, local_sig, localV, system_size, mg, cnf, cnp));
 
   return relsatsolver;
 }

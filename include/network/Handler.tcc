@@ -194,7 +194,7 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
   : conn(conn_)
 { 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  DMCS_LOG_DEBUG("Handler<StreamingCommandType>::Handler()");
 
   SessionMsgPtr sesh(new SessionMsg(conn));
 
@@ -207,7 +207,7 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  DMCS_LOG_DEBUG("Handler<StreamingCommandType>::do_local_job()");
 
   if (!e)
     {
@@ -244,7 +244,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 	  first_call = false;
 	}
 
-      DMCS_LOG_DEBUG("Notify my slaves of the new message");
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Notify my slaves of the new message");
 
       // It's possible to swap (1) and (2)
 
@@ -255,6 +255,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
       // (2) notify the local solver
       Conflict* conflict       = sesh->mess.getConflict();
       BeliefState* partial_ass = sesh->mess.getPartialAss();
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to send: conflict = " << *conflict << ", partial_ass = " << *partial_ass);
       ConflictNotificationPtr cn(new ConflictNotification(pack_size, conflict, partial_ass));
       cnp.set_value(cn);
 
@@ -263,6 +264,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
       onp.set_value(on);
   
       // back to waiting for incoming message
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Back to waiting for incoming message");
       sesh->conn->async_read(header,
 			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
 					 boost::asio::placeholders::error, sesh, cmd, false));
@@ -279,7 +281,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 void
 Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool /* first_call */)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  DMCS_LOG_DEBUG("Handler<StreamingCommandType>::handle_reade_header()");
 
   if (!e)
     {
