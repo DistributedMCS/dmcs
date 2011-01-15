@@ -57,7 +57,7 @@ public:
   { }
 
   StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_, 
-			  Conflict* conflict_, BeliefState* paritial_ass)
+			  Conflict* conflict_, BeliefState* paritial_ass_)
     : invoker(invoker_), pack_size(pack_size_), 
       conflict(conflict_), partial_ass(paritial_ass_)
   { }

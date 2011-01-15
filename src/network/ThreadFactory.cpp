@@ -32,6 +32,7 @@
 #include "network/NeighborThread.h"
 #include "network/OutputThread.h"
 #include "network/RelSatSolverThread.h"
+#include "network/RouterThread.h"
 #include "network/ThreadFactory.h"
 #include "solver/SatSolverFactory.h"
 
@@ -62,16 +63,20 @@ ThreadFactory::ThreadFactory(const ContextPtr& context_,
 
 
 void
-ThreadFactory::createNeighborInputThreads(ThreadVecPtr neighbor_input_threads)
+ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
+				     ConflictNotificationPromiseVecPtr& cnpv)
 {
-  NeighborListPtr& nbs          = context->getNeighbors();
+  const NeighborListPtr& nbs    = context->getNeighbors();
   const std::size_t ctx_id      = context->getContextID();
   const std::size_t system_size = context->getSystemSize();
 
   for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
     {
       const NeighborPtr nb = *it;
-      NeighborThread nt(nb, c2o, ctx_id, pack_size, system_size, mg);
+      ConflictNotificationPromisePtr cnp(new ConflictNotificationPromise);
+      ConflictNotificationFuturePtr  cnf(new ConflictNotificationFuture(cnp->get_future()));
+
+      NeighborThread nt(cnf, mg, nb, c2o, ctx_id, pack_size);
       
       boost::thread* nit = new boost::thread(nt);
       neighbor_input_threads->push_back(nit);
@@ -86,7 +91,7 @@ ThreadFactory::createJoinThread()
   const NeighborListPtr& nbs = context->getNeighbors();
   const std::size_t no_nbs   = nbs->size();
 
-  JoinThread jt(no_nbs, c2o, mg, bnf);
+  JoinThread jt(no_nbs, c2o, mg);
   boost::thread* t = new boost::thread(jt);
 
   return t;
@@ -113,9 +118,11 @@ ThreadFactory::createLocalSolveThread()
 
 
 boost::thread*
-ThreadFactory::createRouterThread()
+ThreadFactory::createRouterThread(ConflictNotificationPromiseVecPtr& cnpv)
 {
-  RouterThread rt();
+  ConflictNotificationFuturePtr cnf;
+
+  RouterThread rt(cnf, cnpv, c2o);
   boost::thread* t = new boost::thread(rt);
 
   return t;

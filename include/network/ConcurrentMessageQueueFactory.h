@@ -78,7 +78,7 @@ public:
       CONFLICT_MQ, // solver created conflict
       JOIN_OUT_MQ, // joiner created belief state
       JOIN_IN_MQ,  // pairs of (neighbor_id, partial equilibria)
-      NEIGHBOR_OUT_MQ
+      NEIGHBOR_MQ
     };
   
   
@@ -102,7 +102,7 @@ public:
    * 
    * @return a MessagingGateway
    */
-  MessingGatewayBCPtr
+  MessagingGatewayBCPtr
   createMessagingGateway(std::size_t uid, std::size_t no_nbs);
   
   

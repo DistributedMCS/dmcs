@@ -40,10 +40,10 @@ namespace dmcs {
 class RouterThread
 {
 public:
-  RouterThread(const ConflictNotificationFuturePtr& cnf_,
-	       const ConflictNotificationPromiseVecPtr& cnps_,
-	       const HashedBiMap& c2o_)
-    : cnf(cnf_), cnps(cnps_), c2o(c2o_)
+  RouterThread(ConflictNotificationFuturePtr& cnf_,
+	       ConflictNotificationPromiseVecPtr& cnpv_,
+	       HashedBiMapPtr& c2o_)
+    : cnf(cnf_), cnpv(cnpv_), c2o(c2o_)
   { }
 
   void
@@ -58,9 +58,9 @@ public:
 	
 	// inform neighbor nid about the conflict
 	const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
-	HashedBiMapByFirst::const_iterator pair = from_context.find(ctx_id);
+	HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
 	const std::size_t noff                  = pair->second;
-	ConflictNotificationPromisePtr      cnp = cnps[noff];
+	ConflictNotificationPromisePtr cnp      = (*cnpv)[noff];
 
 	cnp->set_value(cn);
       }
@@ -68,8 +68,8 @@ public:
 
 private:
   ConflictNotificationFuturePtr     cnf;
-  ConflictNotificationPromiseVecPtr cnps;
-  const HashedBiMapPtr              c2o;
+  ConflictNotificationPromiseVecPtr cnpv;
+  HashedBiMapPtr              c2o;
 };
 
 typedef boost::shared_ptr<RouterThread> RouterThreadPtr;

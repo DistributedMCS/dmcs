@@ -33,6 +33,7 @@
 #define NEIGHBOR_IN_H
 
 #include "dmcs/Log.h"
+#include "dmcs/StreamingBackwardMessage.h"
 #include "mcs/BeliefState.h"
 #include "network/BaseStreamer.h"
 
@@ -64,16 +65,19 @@ public:
 	  }
 	else
 	  {
-	    // extract a bunch of models from the message and then put each into NEIGHBOR_IN_MQ
+	    // extract a bunch of models from the message and then put each into NEIGHBOR_MQ
 	    const BeliefStateVecPtr bsv = mess.getBeliefStates();
+	    const std::size_t offset    = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
+
 	    for (BeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
 	      {
 		BeliefState* bs = *it;
-		sendJoinIn(bs, noff, ConcurrentMessageQueueFactory::NEIGHBOR_IN_MQ);
+		mg->sendModel(bs, noff, offset, 0);
 	      }
+	    // notify the joiner by putting a JoinMess into JoinMessageQueue
+	    mg->sendJoinIn(bsv->size(), noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
 	  }
-
-
+	
 	// read from network
 	conn->async_read(mess, boost::bind(&NeighborIn::stream, this,  
 					   boost::asio::placeholders::error));

@@ -138,9 +138,9 @@ RelSatSolver::solve()
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   // wait for conflict and partial_ass from Handler
   cnf->wait();
-  ConflictNotificationFuturePtr cn = cnf->get();
-  Conflict* conflict               = cn->conflict;
-  BeliefState* new_partial_ass     = cn->partial_ass;
+  ConflictNotificationPtr cn   = cnf->get();
+  Conflict* conflict           = cn->conflict;
+  BeliefState* new_partial_ass = cn->partial_ass;
 
   if ((*partial_ass) != (*new_partial_ass))
     { // now restart

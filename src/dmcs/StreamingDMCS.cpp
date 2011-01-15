@@ -65,7 +65,7 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     cache(new Cache(cacheStats)),
     buf_count(buf_count_),
     initialized(false),
-    neighbor_input_threads(new ThreadVec)
+    neighbor_threads(new ThreadVec)
 { 
   const NeighborListPtr& nb = ctx->getNeighbors();
   std::cerr << "StreamingDMCS::StreamingDMCS(). nb->size = " << nb->size() << std::endl;
@@ -84,6 +84,9 @@ StreamingDMCS::initialize(std::size_t invoker,
 			  ConflictNotificationFuturePtr& cnf)
 {
   DMCS_LOG_DEBUG("Here create mqs");
+  const NeighborListPtr& nbs = ctx->getNeighbors();
+  std::size_t no_nbs         = nbs->size(); 
+
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
   mg = mqf.createMessagingGateway(port, no_nbs); // we use the port as unique id
 
@@ -104,13 +107,13 @@ StreamingDMCS::initialize(std::size_t invoker,
 
   sat_thread = tf.createLocalSolveThread();
 
-  const NeighborListPtr& nbs = ctx->getNeighbors();
-  const std::size_t no_nbs   = nbs->size();
   if (no_nbs > 0)
     {
-      tf.createNeighborInputThreads(neighbor_input_threads);
+      
+      ConflictNotificationPromiseVecPtr cnpv(new ConflictNotificationPromiseVec);
+      tf.createNeighborThreads(neighbor_threads, cnpv);
       join_thread     = tf.createJoinThread();
-      router_thread   = tf.createRouterThread();
+      router_thread   = tf.createRouterThread(cnpv);
     }
 }
 
@@ -120,8 +123,7 @@ void
 StreamingDMCS::listen(StreamingDMCSNotificationFuturePtr& snf,
 		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
-		      std::size_t& port,
-		      Conflict* conflict)
+		      std::size_t& port)
 {
   // wait for a signal from Handler
   snf->wait();
@@ -131,7 +133,6 @@ StreamingDMCS::listen(StreamingDMCSNotificationFuturePtr& snf,
   invoker   = sn->invoker;
   pack_size = sn->pack_size;
   port      = sn->port;
-  conflict  = sn->conflict;
 }
 
 
@@ -152,6 +153,8 @@ StreamingDMCS::start_up()
     }
   else
     {
+
+      /*
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Intermediate context. Send requests to neighbors by placing a message in each of the NEIGHBOR_OUT_MQ");
 
       for (std::size_t i = 0; i < no_nbs; ++i)
@@ -163,6 +166,7 @@ StreamingDMCS::start_up()
 	  Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
 	  mg->sendConflict(empty_conflict, 0, off, 0);
 	}
+      */
     }
 }
 

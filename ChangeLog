@@ -1,3 +1,33 @@
+2011-01-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+
+
+	* include/network/ThreadFactory.h: create Router.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/NeighborOut.h: Add cnf so that NeighborOut gets
+	promise from Router.
+
+	* include/network/MessagingGateway.h: Use old JoinIn for now, as
+	it doesn't change the Joiner dramatically.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+
+	* include/network/ConcurrentMessageQueueFactory.h: Typo.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/BaseStreamer.h: Remove noff.
+
+	* include/dmcs/StreamingDMCS.h: Small change in name.
+
+	* include/dmcs/Makefile.am: Move include of NeighboIn.h and
+	NeighborOut.h to corrent dir.
+	* include/network/Makefile.am: Likewise.
+
+	* include/dmcs/ConflictNotification.h: More typedef.
+
 2011-01-14  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Handler.tcc: Communicate with SAT thread

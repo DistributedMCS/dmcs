@@ -40,7 +40,14 @@ namespace dmcs {
 
 struct ConflictNotification
 {
-  ConflictNotification(std::size_t val_ = 0,
+  ConflictNotification(Conflict* conflict_,
+		       BeliefState* partial_ass_)
+    : val(0),
+      conflict(conflict_),
+      partial_ass(partial_ass_)
+  { }
+
+  ConflictNotification(std::size_t val_,
 		       Conflict* conflict_,
 		       BeliefState* partial_ass_)
     : val(val_),
@@ -56,13 +63,14 @@ struct ConflictNotification
 
 typedef boost::shared_ptr<ConflictNotification>           ConflictNotificationPtr;
 typedef boost::promise<ConflictNotificationPtr>           ConflictNotificationPromise;
-typedef std::vector<ConflictNotificationPromise>          ConflictNotificationPromiseVec;
+typedef boost::shared_ptr<ConflictNotificationPromise>    ConflictNotificationPromisePtr;
+typedef std::vector<ConflictNotificationPromisePtr>       ConflictNotificationPromiseVec;
 typedef boost::shared_ptr<ConflictNotificationPromiseVec> ConflictNotificationPromiseVecPtr;
 
 typedef boost::unique_future<ConflictNotificationPtr>     ConflictNotificationFuture;
 typedef boost::shared_ptr<ConflictNotificationFuture>     ConflictNotificationFuturePtr;
 typedef std::vector<ConflictNotificationFuturePtr>        ConflictNotificationFutureVec;
-typedef boost::shared_ptr<ConflictNotificationFutureVec>  ConflictNotificationFutureVecPtr
+typedef boost::shared_ptr<ConflictNotificationFutureVec>  ConflictNotificationFutureVecPtr;
 
 } // namespace dmcs
 

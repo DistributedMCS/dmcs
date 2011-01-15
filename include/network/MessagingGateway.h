@@ -63,7 +63,7 @@ namespace dmcs {
     struct JoinIn
     {
       std::size_t ctx_id;
-      MODEL*      peq;
+      std::size_t peq_cnt;
     };
 
 
@@ -124,7 +124,7 @@ namespace dmcs {
      * @return true if sending failed
      */
     virtual bool
-    sendJoinIn(MODEL* models, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0) = 0;
+    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0) = 0;
 
     /** 
      * Receive a pointer to a MODEL from @a from. May block.

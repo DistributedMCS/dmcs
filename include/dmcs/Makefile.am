@@ -13,8 +13,6 @@ noinst_HEADERS =  \
 		Log.h \
 		Message.h \
 		Neighbor.h \
-		NeighborIn.h \
-		NeighborOut.h \
 		OptCommandType.h \
 		OptDMCS.h \
 		OptMessage.h \

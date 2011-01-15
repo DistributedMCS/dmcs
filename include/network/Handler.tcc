@@ -299,7 +299,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	{
 	  DMCS_LOG_ERROR("Got a crappy header: " << header << ". Back to waiting for the next header.");
 	  sesh->conn->async_read(header,
-				 boost::bind(&Handler<StreamingCommandType>::handler_read_header, this,
+				 boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
 					     boost::asio::placeholders::error, sesh, cmd, false));
 	}
     }

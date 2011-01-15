@@ -116,7 +116,7 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // output MQ, announces partial equilibria from the local solver
   
   id++;
-  mq = createMessageQueue(id, k, sizeof(BeliefState*);
+  mq = createMessageQueue(id, k, sizeof(BeliefState*));
   md->registerMQ(mq, id);
 
   // create message queue 2 (CONFLICT_MQ)
@@ -141,16 +141,16 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   md->registerMQ(mq, id);
 
   // create message queues 5 to 5 + (no_nbs - 1)
-  // NEIGHBOR_OUT_MQ --> NEIGHBOR_OUT_MQ + (no_nbs - 1)
+  // NEIGHBOR_MQ --> NEIGHBOR_MQ + (no_nbs - 1)
 
   for (std::size_t i = 0; i < no_nbs; ++i)
     {
-      // conflict output MQ, announces a new conflict to a neighbor C_i
+      // partial equilibria MQ, announces a new partial equilibria from a neighbor C_i
 
-      // NEIGHBOR_OUT_MQ + index 
-      // index starts from 0
+      // NEIGHBOR_MQ + noff
+      // noff starts from 0
       id++;
-      mq = createMessageQueue(id, k, sizeof(Conflict*));
+      mq = createMessageQueue(id, k, sizeof(BeliefState*));
       md->registerMQ(mq, id);
     }
 

@@ -54,7 +54,7 @@ public:
 
 private:
   void
-  import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
+  import_belief_states(std::size_t noff, std::size_t peq_cnt,
 		       BeliefStatePackagePtr& partial_eqs, 
 		       bm::bvector<>& in_mask,
 		       bm::bvector<>& end_mask,

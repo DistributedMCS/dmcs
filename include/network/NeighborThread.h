@@ -31,9 +31,12 @@
 #define NEIGHBOR_IN_THREAD_H
 
 #include "dmcs/ConflictNotification.h"
+#include "dmcs/Neighbor.h"
 #include "mcs/HashedBiMap.h"
-#include "network/connection.hpp"
+#include "network/NeighborIn.h"
+#include "network/NeighborOut.h"
 #include "network/ConcurrentMessageQueueFactory.h"
+#include "network/connection.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -52,6 +55,7 @@ public:
 		 const std::size_t pack_size_)
     : cnf(cnf_), mg(mg_), nb(nb_), c2o(c2o_),
       invoker(invoker_), pack_size(pack_size_)
+  { }
 
   void
   operator()()
@@ -63,13 +67,14 @@ public:
     boost::asio::ip::tcp::endpoint endpoint = *res_it;
     
     // get the offset of the neighbor
+    const std::size_t nid                   = nb->neighbor_id;
     const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
-    HashedBiMapByFirst::const_iterator pair = from_context.find(ctx_id);
+    HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
     const std::size_t offset                = pair->second;
 
     nip = NeighborInPtr(new NeighborIn(io_service, mg, offset));
 
-    nop = NeighborOutPtr(new NeighborOut(io_service, cnf, offset, invoker, pack_size));
+    nop = NeighborOutPtr(new NeighborOut(io_service, cnf, invoker, pack_size));
 
     io_service.run();
   }

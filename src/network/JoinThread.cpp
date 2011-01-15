@@ -36,17 +36,15 @@ namespace dmcs {
 
 JoinThread::JoinThread(std::size_t no_nbs_,
 		       const HashedBiMapPtr& c2o_,
-		       boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_,
-		       BoolNotificationFuturePtr& bnf_)
+		       MessagingGatewayBCPtr& mg_)
   : no_nbs(no_nbs_),
     c2o(c2o_),
-    mg(mg_),
-    bnf(bnf_)
+    mg(mg_)
 { }
 
 
 void
-JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt, 
+JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt, 
 				 BeliefStatePackagePtr& partial_eqs, 
 				 bm::bvector<>& in_mask,
 				 bm::bvector<>& end_mask,
@@ -54,15 +52,12 @@ JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
 				 BeliefStateIteratorVecPtr& mid_it,
 				 bool first_import)
 {
-  const HashedBiMapByFirst& from_context = boost::get<Tag::First>(*c2o);
-  HashedBiMapByFirst::const_iterator pair = from_context.find(ctx_id);
-  std::size_t index = pair->second;
-  const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index;
+  const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
   // read BeliefState* from NEIGHBOR_MQ
-  BeliefStateVecPtr& bsv = (*partial_eqs)[index];
+  BeliefStateVecPtr& bsv = (*partial_eqs)[noff];
 
-  BeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[index];
+  BeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[noff];
 
   if (!first_import)
     {
@@ -73,7 +68,7 @@ JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
     {
       std::size_t prio = 0;
       std::size_t timeout = 0;
-      BeliefState* bs = mg->recvModel(off, prio, timeout);
+      BeliefState* bs = mg->recvModel(offset, prio, timeout);
       if (bs == 0)
 	{
 	  // It must be the last model to be NULL;
@@ -81,7 +76,7 @@ JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
 	  assert (i == peq_cnt - 1);
 	 
 	  // mark that this neighbor reached its pack_size. 
-	  end_mask.set(index);
+	  end_mask.set(noff);
 
 	  // NULL models are not used for joining
 	  break;
@@ -91,7 +86,7 @@ JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
   
   if (first_import)
     {
-      (*beg_it)[index] = bsv->begin();
+      (*beg_it)[noff] = bsv->begin();
     }
   else
     {
@@ -99,7 +94,7 @@ JoinThread::import_belief_states(std::size_t ctx_id, std::size_t peq_cnt,
     }
 
   // turn on the bit that is respective to this context
-  in_mask.set(index);
+  in_mask.set(noff);
 }
 
 

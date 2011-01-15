@@ -65,7 +65,7 @@ OutputThread::loop(const boost::system::error_code& e)
 	  wait_for_trigger();
 	}
 
-      collect_out_put(res, header);
+      collect_output(res, header);
       write_result(res, header);
     }
   else
@@ -84,7 +84,6 @@ OutputThread::wait_for_trigger()
 
   OutputNotificationPtr on = onf->get();
   pack_size                = on->pack_size;
-  Conflict* new_conflict   = on->conflict;
   
   left_2_send = pack_size;
 }
@@ -149,7 +148,7 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
 
 
 void
-OutputThread::write_result(BeliefStateVecPtr res, const std::string& header)
+OutputThread::write_result(BeliefStateVecPtr& res, const std::string& header)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -172,7 +171,7 @@ OutputThread::write_result(BeliefStateVecPtr res, const std::string& header)
 
 
 void
-OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr res)
+OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr& res)
 {
   if (!e)
     {

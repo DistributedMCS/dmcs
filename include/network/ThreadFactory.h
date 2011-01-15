@@ -59,7 +59,8 @@ public:
 		const ConflictNotificationFuturePtr& cnf_);
 
   void
-  createNeighborInputThreads(ThreadVecPtr);
+  createNeighborThreads(ThreadVecPtr& neighbor_threads, 
+			ConflictNotificationPromiseVecPtr& cnpv);
 
   boost::thread*
   createJoinThread();
@@ -68,7 +69,7 @@ public:
   createLocalSolveThread();
 
   boost::thread*
-  createRouterThread();
+  createRouterThread(ConflictNotificationPromiseVecPtr& cnpv);
 
   //boost::thread*
   //createOutputThread(const connection_ptr& conn_);

@@ -97,7 +97,7 @@ private:
   boost::thread*        sat_thread;
   boost::thread*        join_thread;
   boost::thread*        router_thread;
-  ThreadVecPtr          neighbor_input_threads;
+  ThreadVecPtr          neighbor_threads;
   MessagingGatewayBCPtr mg;
 
   std::size_t buf_count;

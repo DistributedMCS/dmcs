@@ -27,11 +27,13 @@
  * 
  */
 
-#include "BaseSolver.h"
+
+#include "dmcs/ConflictNotification.h"
 #include "dmcs/Context.h"
-#include "solver/Conflict.h"
 #include "mcs/ProxySignatureByLocal.h"
 #include "network/ConcurrentMessageQueueFactory.h"
+#include "solver/BaseSolver.h"
+#include "solver/Conflict.h"
 
 #include "relsat-20070104/SATInstance.h"
 #include "relsat-20070104/SATSolver.h"

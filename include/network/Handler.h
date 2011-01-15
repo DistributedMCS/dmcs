@@ -109,6 +109,7 @@ public:
 
 private:
   connection_ptr                   conn;
+  std::string                      header;
 
   OutputThreadPtr                  ot;
   StreamingDMCSThreadPtr           stdt;

@@ -32,10 +32,11 @@
 #ifndef NEIGHBOR_OUT_H
 #define NEIGHBOR_OUT_H
 
-#include "dmcs/Log.h"
 #include "dmcs/ConflictNotification.h"
-#include "mcs/Conflict.h"
+#include "dmcs/Log.h"
+#include "dmcs/StreamingForwardMessage.h"
 #include "network/BaseStreamer.h"
+#include "solver/Conflict.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -49,8 +50,8 @@ class NeighborOut : BaseStreamer
 public:
   NeighborOut(boost::asio::io_service& io_service_, 
 	      ConflictNotificationFuturePtr& cnf_,
-	      std::size_t noff_,std::size_t invoker_, 
-	      std::size_t pack_size)
+	      std::size_t invoker_, 
+	      std::size_t pack_size_)
     : BaseStreamer(io_service_),
       cnf(cnf_), invoker(invoker_), 
       pack_size(pack_size_)
@@ -82,8 +83,9 @@ public:
   }
 
 private:
-  std::size_t invoker;
-  std::size_t pack_size;
+  ConflictNotificationFuturePtr cnf;
+  std::size_t                   invoker;
+  std::size_t                   pack_size;
 };
 
 typedef boost::shared_ptr<NeighborOut> NeighborOutPtr;
