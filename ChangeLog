@@ -1,3 +1,14 @@
+2011-01-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/NeighborOut.h: Send header and then message.
+
+	* include/network/Handler.tcc: Make use of DMCS_LOG.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/BaseStreamer.h: Fix stupid bug.
+
 2011-01-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcs/Makefile.am: Remove StreamingCommandType.cpp

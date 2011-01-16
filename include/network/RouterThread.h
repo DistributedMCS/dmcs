@@ -53,9 +53,12 @@ public:
       {
 	// wait for any conflict from the local solver
 	cnf->wait();
+
 	ConflictNotificationPtr cn = cnf->get();
 	const std::size_t nid      = cn->val;
 	
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got a notification from local solver. nid = " << nid);
+
 	// inform neighbor nid about the conflict
 	const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
 	HashedBiMapByFirst::const_iterator pair = from_context.find(nid);

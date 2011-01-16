@@ -58,7 +58,7 @@ public:
   void 
   stream(const boost::system::error_code& e) 
   {
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "noff = " << noff);
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "noff = " << noff);
     if (!e)
       {
 	// write to NEIGHBOR_IN_MQ, only from the second round

@@ -194,7 +194,7 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
   : conn(conn_)
 { 
-  DMCS_LOG_DEBUG("Handler<StreamingCommandType>::Handler()");
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   SessionMsgPtr sesh(new SessionMsg(conn));
 
@@ -207,7 +207,7 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call)
 {
-  DMCS_LOG_DEBUG("Handler<StreamingCommandType>::do_local_job()");
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!e)
     {

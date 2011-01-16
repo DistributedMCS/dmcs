@@ -77,17 +77,28 @@ public:
 		       "conflict = " << *conflict <<
 		       "partial_ass = " << *partial_ass);
 
-	StreamingForwardMessage mess(invoker, pack_size, conflict, partial_ass);
-
 	// write to network
-	conn->async_write(mess, boost::bind(&NeighborOut::stream, this,  
-					   boost::asio::placeholders::error));
+	std::string header = HEADER_REQ_STM_DMCS;
+	conn->async_write(header, boost::bind(&NeighborOut::write_message, this,
+					      boost::asio::placeholders::error,
+					      conflict, partial_ass));
       }
     else
       {
 	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
 	throw std::runtime_error(e.message());
       }
+  }
+
+  
+
+  void
+  write_message(const boost::system::error_code& e,
+		Conflict* conflict, BeliefState* partial_ass)
+  {
+    StreamingForwardMessage mess(invoker, pack_size, conflict, partial_ass);
+    conn->async_write(mess, boost::bind(&NeighborOut::stream, this,  
+					boost::asio::placeholders::error));
   }
 
 private:

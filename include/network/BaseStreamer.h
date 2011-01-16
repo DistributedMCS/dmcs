@@ -45,7 +45,7 @@ class BaseStreamer
 {
 public:
   BaseStreamer(connection_ptr& conn_)
-    : conn(conn)
+    : conn(conn_)
   { }
 
 protected:

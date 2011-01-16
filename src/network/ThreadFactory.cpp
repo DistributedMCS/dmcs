@@ -69,12 +69,15 @@ ThreadFactory::ThreadFactory(const ContextPtr& context_,
 void
 ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   const NeighborListPtr& nbs    = context->getNeighbors();
   const std::size_t ctx_id      = context->getContextID();
   const std::size_t system_size = context->getSystemSize();
 
-  for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
+  const std::size_t no_nbs      = nbs->size();
+  std::size_t i = 0;
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to create " << no_nbs << " neighbor threads.");
+
+  for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it, ++i)
     {
       const NeighborPtr nb = *it;
       ConflictNotificationPromisePtr cnp(new ConflictNotificationPromise);
@@ -89,6 +92,8 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads)
       Conflict* c    = new Conflict(system_size, BeliefSet());
       BeliefState* p = new BeliefState(system_size, BeliefSet());
       ConflictNotificationPtr first_push(new ConflictNotification(c, p));
+
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " First push to offset " << i);
       cnp->set_value(first_push);
     }
 }

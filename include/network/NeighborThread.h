@@ -72,9 +72,9 @@ public:
     conn = connection_ptr(new connection(io_service));
 
     conn->socket().async_connect(endpoint,
-				 boost::bind(&NeighborThread::connect, this,
-					   boost::asio::placeholders::error,
-					   ++res_it));
+				 boost::bind(&NeighborThread::send_header, this,
+					     boost::asio::placeholders::error,
+					     ++res_it, conn));
 
     DMCS_LOG_DEBUG("io_service.run()");
     io_service.run();
@@ -83,22 +83,28 @@ public:
 
 private:
   void
-  connect(const boost::system::error_code& e,
-	  boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
+  send_header(const boost::system::error_code& e,
+	      boost::asio::ip::tcp::resolver::iterator endpoint_iterator, connection_ptr conn)
   {
     if (!e)
       {
-	// get the offset of the neighbor
-	const std::size_t nid                   = nb->neighbor_id;
-	const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
-	HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
-	const std::size_t offset                = pair->second;
+	//std::string header = HEADER_REQ_STM_DMCS;
+	//conn->async_write(header, boost::bind(&NeighborThread::establish_connection, this,
+	//	      boost::asio::placeholders::error, conn));
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "neighbor: ");
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
+    // get the offset of the neighbor
+    const std::size_t nid                   = nb->neighbor_id;
+    const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
+    HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
+    const std::size_t offset                = pair->second;
+    
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " create NeighborIn");
+    nip = NeighborInPtr(new NeighborIn(conn, mg, offset));
+    
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "create NeighborOut");
+    nop = NeighborOutPtr(new NeighborOut(conn, cnf, invoker, pack_size));
 
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " create NeighborIn");
-	nip = NeighborInPtr(new NeighborIn(conn, mg, offset));
-	
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "create NeighborOut");
-	nop = NeighborOutPtr(new NeighborOut(conn, cnf, invoker, pack_size));
       }
     else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator())
     {
@@ -107,9 +113,9 @@ private:
       
       boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
       conn->socket().async_connect(endpoint,
-				   boost::bind(&NeighborThread::connect, this,
+				   boost::bind(&NeighborThread::send_header, this,
 					       boost::asio::placeholders::error,
-					       ++endpoint_iterator));
+					       ++endpoint_iterator, conn));
     }
   else
     {
@@ -117,9 +123,28 @@ private:
       DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
       throw std::runtime_error(e.message());
     }
-     
-      
   }
+
+
+  
+  /*  void
+  establish_connection(const boost::system::error_code& e, connection_ptr conn)
+  {
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "neighbor: ");
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
+    // get the offset of the neighbor
+    const std::size_t nid                   = nb->neighbor_id;
+    const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
+    HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
+    const std::size_t offset                = pair->second;
+    
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " create NeighborIn");
+    nip = NeighborInPtr(new NeighborIn(conn, mg, offset));
+    
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "create NeighborOut");
+    nop = NeighborOutPtr(new NeighborOut(conn, cnf, invoker, pack_size));
+    }*/
+  
 
 private:
   ConflictNotificationFuturePtr cnf;
