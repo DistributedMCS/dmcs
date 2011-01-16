@@ -30,6 +30,7 @@
 #ifndef CONFLICT_NOTIFICATION_H
 #define CONFLICT_NOTIFICATION_H
 
+#include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
 #include <boost/shared_ptr.hpp>
 
