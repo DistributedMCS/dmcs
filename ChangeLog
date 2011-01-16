@@ -1,29 +1,7 @@
-2011-01-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-	* include/network/ConcurrentMessageQueueHelper.h: New file.
-
-	* include/dmcs/StreamingCommandType.h: Use ConcurrentMessageQueue
-	for one-shot notification rather than boost::future.
-	* src/solver/RelSatSolver.cpp: Likewise.
-	* src/network/ThreadFactory.cpp: Likewise.
-	* src/network/StreamingDMCSThread.cpp: Likewise.
-	* src/network/OutputThread.cpp: Likewise.
-	* src/dmcs/StreamingDMCS.cpp: Likewise.k
-	* include/solver/SatSolverFactory.h: Likewise.
-	* include/solver/RelSatSolver.h: Likewise.
-	* include/network/ThreadFactory.h: Likewise.
-	* include/network/StreamingDMCSThread.h: Likewise.
-	* include/network/RouterThread.h: Likewise.
-	* include/network/OutputThread.h: Likewise.
-	* include/network/NeighborThread.h: Likewise.
-	* include/network/NeighborOut.h: Likewise.
-	* include/network/Makefile.am: Likewise.
-	* include/network/Handler.tcc: Likewise.
-	* include/network/Handler.h: Likewise.
-	* include/network/ConcurrentMessageQueue.h: Likewise.
-	* include/dmcs/StreamingDMCS.h: Likewise.
-
 2011-01-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueueHelper.h: Overwritten
+	message leaks.
 
 	* include/network/Makefile.am: Don't include
 	boost::message_queue-related stuff for now.
@@ -50,6 +28,31 @@
 	* include/network/MessagingGateway.h: Likewise.
 	* include/network/MessageDispatcher.h: Likewise.
 	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+
+2011-01-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueueHelper.h: New file.
+
+	* include/dmcs/StreamingCommandType.h: Use ConcurrentMessageQueue
+	for one-shot notification rather than boost::future.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.k
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/Makefile.am: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/network/ConcurrentMessageQueue.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
 
 2011-01-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
