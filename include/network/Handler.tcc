@@ -191,8 +191,8 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 
 // *********************************************************************************************************************
 // Specialized methods for streaming dmcs
-Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_)
-  : conn(conn_)
+  Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_, Server* s)
+    : conn(conn_), server(s)
 { 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -207,8 +207,6 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_p
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
   if (!e)
     {
       // get the unique ID from the port of the connection for creating a unique message gateway just for this session
@@ -221,13 +219,16 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 
       if (first_call)
 	{
-	  DMCS_LOG_DEBUG("First and only initialization, creating MessagingGateway");
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "First and only initialization, creating MessagingGateway");
 
 	  ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
 	  mg = mqf.createMessagingGateway(port); // we use the port as unique id
 
 
-	  DMCS_LOG_DEBUG("creating dmcs thread");
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "creating dmcs thread");
+
+	  // create MessageQueue between Handler and StreamingDMCS to
+	  // inform StreamingDMCS about new incoming message
 
 	  StreamingDMCSNotificationFuturePtr snf(new StreamingDMCSNotificationFuture(snp.get_future()));
 	  ConflictNotificationFuturePtr      cnf(new ConflictNotificationFuture(cnp.get_future()));
@@ -236,6 +237,10 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 	  streaming_dmcs_thread = new boost::thread(*stdt);
 
 	  DMCS_LOG_DEBUG("creating output thread, pack_size = " << pack_size);
+
+	  // create MessageQueue between Handler and OutputThread to
+	  // inform OutputThread about new incoming message (request
+	  // the next pack_size models)
 
 	  OutputNotificationFuturePtr onf(new OutputNotificationFuture(onp.get_future()));
 	  ot = OutputThreadPtr(new OutputThread(conn, pack_size, mg, onf)); 
@@ -249,17 +254,19 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
       // It's possible to swap (1) and (2)
 
       // (1) notify StreamingDMCS
+      // use overwrite_send() 
       StreamingDMCSNotificationPtr sn(new StreamingDMCSNotification(invoker, pack_size, port));
       snp.set_value(sn);
 
       // (2) notify the local solver
-      Conflict* conflict       = sesh->mess.getConflict();
+      /*      Conflict* conflict       = sesh->mess.getConflict();
       BeliefState* partial_ass = sesh->mess.getPartialAss();
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to send: conflict = " << *conflict << ", partial_ass = " << *partial_ass);
       ConflictNotificationPtr cn(new ConflictNotification(pack_size, conflict, partial_ass));
-      cnp.set_value(cn);
+      cnp.set_value(cn);*/
 
       // (3) notify OutputThread
+      // use overwrite_send()
       OutputNotificationPtr on(new OutputNotification(pack_size));
       onp.set_value(on);
   
@@ -281,7 +288,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 void
 Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool /* first_call */)
 {
-  DMCS_LOG_DEBUG("Handler<StreamingCommandType>::handle_reade_header()");
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!e)
     {
@@ -296,8 +303,12 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
       else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
 	  ///@todo: restart
+	} 
+      else if (header.find(HEADER_TERMINATE) != std::string::npos)
+	{
+	  server->remove_handler(this);
 	}
-      else
+      else 
 	{
 	  DMCS_LOG_ERROR("Got a crappy header: " << header << ". Back to waiting for the next header.");
 	  sesh->conn->async_read(header,

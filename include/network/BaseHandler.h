@@ -30,34 +30,18 @@
 #ifndef BASE_HANDLER_H
 #define BASE_HANDLER_H
 
-#include "network/connection.hpp"
-#include "network/ConcurrentMessageQueueFactory.h"
-#include "network/Session.h"
-#include "network/ThreadFactory.h"
-#include "dmcs/CommandType.h"
-#include "dmcs/StreamingCommandType.h"
-#include "dyndmcs/InstantiatorCommandType.h"
-#include "solver/Conflict.h"
-
-#include "relsat-20070104/SATInstance.h"
-#include "relsat-20070104/SATSolver.h"
-
-#include <algorithm>
-#include <cstdlib>
 #include <list>
-#include <set>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/thread.hpp>
-
 
 namespace dmcs {
 
 
 class BaseHandler
-{
+{ };
 
-};
+typedef std::list<BaseHandler*> HandlerList;
+typedef boost::shared_ptr<HandlerList> HandlerListPtr;
 
 } // namespace dmcs
 

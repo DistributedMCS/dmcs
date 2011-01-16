@@ -31,12 +31,12 @@
 #include "config.h"
 #endif
 
+#include <algorithm>
 #include <iostream>
 
+#include "dmcs/Log.h"
 #include "network/Handler.h"
 #include "network/Server.h"
-
-#include "dmcs/Log.h"
 
 namespace dmcs {
 
@@ -45,7 +45,8 @@ Server::Server(CommandTypeFactoryPtr& ctf_,
 	       boost::asio::io_service& io_service,
 	       const boost::asio::ip::tcp::endpoint& endpoint)
   : ctf(ctf_), io_service_(io_service),
-    acceptor_(io_service, endpoint)
+    acceptor_(io_service, endpoint),
+    handler_list(new HandlerList)
 {
   connection_ptr my_connection(new connection(io_service_));
 
@@ -88,12 +89,14 @@ Server::handle_accept(const boost::system::error_code& e, connection_ptr conn)
 }
 
 
+
 void
 Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
 {
   if (!e)
     {
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Header = " << header);
+      BaseHandler* handler;
       
       // Create the respective handler and give him the connection
       if (header.find(HEADER_REQ_PRI_DMCS) != std::string::npos)
@@ -104,7 +107,7 @@ Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
       else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
 	  StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
-	  handler = new Handler<StreamingCommandType>(cmt_stm_dmcs, conn);
+	  handler = new Handler<StreamingCommandType>(cmt_stm_dmcs, conn, this);
 	}
       else if (header.find(HEADER_REQ_OPT_DMCS) != std::string::npos)
 	{
@@ -121,6 +124,8 @@ Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
 	  InstantiatorCommandTypePtr cmt_inst = ctf->create<InstantiatorCommandTypePtr>();
 	  handler = new Handler<InstantiatorCommandType>(cmt_inst, conn);
 	}
+
+      handler_list->push_back(handler);
     }
   else
     {
@@ -128,6 +133,14 @@ Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
       DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
       throw std::runtime_error(e.message());
     }
+}
+
+
+
+void
+Server::remove_handler(BaseHandler* handler)
+{
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 }
   
 
@@ -139,7 +152,7 @@ Server::handle_finalize(const boost::system::error_code& e, connection_ptr /* co
   if (!e)
     {
       ///@todo only one handler here..
-      delete handler;
+      //delete handler;
     }
   else
     {

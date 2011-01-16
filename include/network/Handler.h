@@ -35,8 +35,9 @@
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/Session.h"
 #include "network/OutputThread.h"
-#include "network/StreamingDMCSThread.h"
 #include "network/ThreadFactory.h"
+#include "network/Server.h"
+#include "network/StreamingDMCSThread.h"
 #include "dmcs/CommandType.h"
 #include "dmcs/StreamingCommandType.h"
 #include "dyndmcs/InstantiatorCommandType.h"
@@ -56,6 +57,7 @@
 
 namespace dmcs {
 
+class Server;
 
 template<typename CmdType>
 class Handler : public BaseHandler
@@ -99,7 +101,7 @@ public:
   typedef boost::shared_ptr<SessionMsg> SessionMsgPtr;
   typedef boost::shared_ptr<StreamingCommandType> StreamingCommandTypePtr;
 
-  Handler(StreamingCommandTypePtr cmd, connection_ptr conn_);
+  Handler(StreamingCommandTypePtr cmd, connection_ptr conn_, Server* s);
 
   void 
   do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call);
@@ -117,11 +119,13 @@ private:
   boost::thread*                   output_thread;
   boost::thread*                   streaming_dmcs_thread;
 
+  // replace by ConcurrentMessageQueue for StreamingDMCS and OutputThread
   StreamingDMCSNotificationPromise snp;
   OutputNotificationPromise        onp;
   ConflictNotificationPromise      cnp;
 
   MessagingGatewayBCPtr            mg;
+  Server*        server;
 };
 
 } // namespace dmcs

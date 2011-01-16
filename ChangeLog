@@ -1,3 +1,20 @@
+2011-01-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+
+
+	* include/network/NeighborThread.h: Move send header to
+	NeighborOut.
+
+	* include/network/Handler.h: Ask Server to remove myself when
+	receiving HEADER_TERMINATE.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/BaseHandler.h: Allow list of handlers.
+	* include/network/Server.h: Likewise.
+	* src/network/Server.cpp: Likewise.
+
+	* include/dmcs/Message.h: Add HEADER_TERMINATE.
+
 2011-01-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/network/ThreadFactory.cpp: Fix regression.

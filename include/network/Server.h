@@ -79,13 +79,15 @@ public:
   void 
   handle_finalize(const boost::system::error_code& e, connection_ptr conn);
 
+  void
+  remove_handler(BaseHandler* handler);
 
 private:
   CommandTypeFactoryPtr ctf;
   boost::asio::io_service& io_service_;
   boost::asio::ip::tcp::acceptor acceptor_;
   std::string header;
-  BaseHandler* handler;
+  HandlerListPtr handler_list;
 };
 
 typedef boost::shared_ptr<BaseServer> ServerPtr;
