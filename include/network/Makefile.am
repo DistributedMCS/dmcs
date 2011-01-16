@@ -27,3 +27,8 @@ noinst_HEADERS =  \
 		connection.hpp
 
 
+
+# don't include boost::message_queue-related stuff for now
+#           MessageDispatcher.h 
+#           MessageQueue.h 
+#           MessageQueueFactory.h 

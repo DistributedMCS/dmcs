@@ -37,10 +37,13 @@ libthreads_a_SOURCES = \
 		ConcurrentMessageDispatcher.cpp \
 		ConcurrentMessageQueueFactory.cpp \
 		JoinThread.cpp \
-		MessageDispatcher.cpp \
-		MessageQueueFactory.cpp \
 		NeighborInputThread.cpp \
 		OutputThread.cpp \
 		StreamingDMCSThread.cpp \
 		ThreadFactory.cpp \
 		RelSatSolverThread.cpp
+
+
+# don't compile boost::message_queue for now
+#		MessageDispatcher.cpp
+#		MessageQueueFactory.cpp

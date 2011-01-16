@@ -50,8 +50,10 @@ worker(boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >& mg, boost::pr
 
 BOOST_AUTO_TEST_CASE( testMessagingGateway )
 {
+#if 0
   boost::shared_ptr<MessagingGateway<BeliefState,Conflict> > mg1 =
     MessageQueueFactory().createMessagingGateway(0, 5);
+#endif //0
 
   ConcurrentMessageQueueFactory& f = ConcurrentMessageQueueFactory::instance();
   boost::shared_ptr<MessagingGateway<BeliefState,Conflict> > mg2 = f.createMessagingGateway(0, 5);
