@@ -28,7 +28,6 @@
  */
 
 #include "dmcs/Log.h"
-#include "network/ConflictsAnalysisThread.h"
 #include "network/JoinThread.h"
 #include "network/NeighborThread.h"
 #include "network/OutputThread.h"
