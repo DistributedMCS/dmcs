@@ -67,7 +67,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
   for (std::size_t i = 0; i < peq_cnt; ++i)
     {
       std::size_t prio = 0;
-      std::size_t timeout = 0;
+      int timeout = 0;
       BeliefState* bs = mg->recvModel(offset, prio, timeout);
       if (bs == 0)
 	{
@@ -202,7 +202,7 @@ JoinThread::operator()()
 
       // look at JOIN_IN_MQ for notification of new models arrival
       std::size_t prio = 0;
-      std::size_t timeout = 0;
+      int timeout = 0;
       // notification from neighbor thread
       MessagingGateway<BeliefState, Conflict>::JoinIn nn = 
 	mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);

@@ -89,7 +89,7 @@ AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::
       // The connection is now established successfully
       std::size_t prio = 0;
       std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index + 1;
-      std::size_t timeout = 0;
+      int timeout = 0;
 
       DMCS_LOG_DEBUG("offset = " << off);
       

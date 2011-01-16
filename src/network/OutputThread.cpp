@@ -107,7 +107,7 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
       //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Read from MQ");
       
       std::size_t prio    = 0;
-      std::size_t timeout = 200; // milisecs
+      int timeout = 200; // milisecs
       BeliefState* bs     = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
       
       //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Check result from MQ");

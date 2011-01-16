@@ -99,7 +99,7 @@ RelSatSolver::prepare_input()
   // read joined input from Joiner. We need to keep the input to build
   // complete model wrt the interface
   std::size_t prio    = 0;
-  std::size_t timeout = 0;
+  int timeout = 0;
   input = mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input received!");
