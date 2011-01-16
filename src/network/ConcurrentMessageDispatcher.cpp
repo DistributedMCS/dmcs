@@ -68,14 +68,18 @@ ConcurrentMessageDispatcher::sendModel(BeliefState* b,
 				       std::size_t /* from */,
 				       std::size_t to,
 				       std::size_t /* prio */,
-				       std::size_t msecs)
+				       int msecs)
 {
   ///@todo TK: from and prio are not used
   assert(mqs.size() > to);
 
-  if (msecs)
+  if (msecs > 0)
     {
       return mqs[to]->timed_send(&b, sizeof(b), 0, boost::posix_time::milliseconds(msecs));
+    }
+  else if (msecs < 0)
+    {
+      return mqs[to]->try_send(&b, sizeof(b), 0);
     }
   else
     {
@@ -90,14 +94,18 @@ ConcurrentMessageDispatcher::sendConflict(Conflict* c,
 					  std::size_t /* from */,
 					  std::size_t to,
 					  std::size_t /* prio */,
-					  std::size_t msecs)
+					  int msecs)
 {
   ///@todo TK: from and prio are not used
   assert(mqs.size() > to);
 
-  if (msecs)
+  if (msecs > 0)
     {
       return mqs[to]->timed_send(&c, sizeof(c), 0, boost::posix_time::milliseconds(msecs));
+    }
+  else if (msecs < 0)
+    {
+      return mqs[to]->try_send(&c, sizeof(c), 0);
     }
   else
     {
@@ -113,16 +121,20 @@ ConcurrentMessageDispatcher::sendModelConflict(BeliefState* b,
 					       std::size_t /* from */,
 					       std::size_t to,
 					       std::size_t /* prio */,
-					       std::size_t msecs)
+					       int msecs)
 {
   ///@todo TK: from and prio are not used
   assert(mqs.size() > to);
 
   struct ModelConflict mc = { b, c };
 
-  if (msecs)
+  if (msecs > 0)
     {
       return mqs[to]->timed_send(&mc, sizeof(mc), 0, boost::posix_time::milliseconds(msecs));
+    }
+  else if (msecs < 0)
+    {
+      return mqs[to]->try_send(&mc, sizeof(b), 0);
     }
   else
     {
@@ -137,7 +149,7 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
 					std::size_t from,
 					std::size_t to,
 					std::size_t /* prio */,
-					std::size_t msecs)
+					int msecs)
 {
   ///@todo TK: prio is not used
   assert(mqs.size() > to);
@@ -145,9 +157,13 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
 
   struct JoinIn ji = { from, k };
 
-  if (msecs)
+  if (msecs > 0)
     {
       return mqs[to]->timed_send(&ji, sizeof(ji), 0, boost::posix_time::milliseconds(msecs));
+    }
+  else if (msecs < 0)
+    {
+      return mqs[to]->try_send(&ji, sizeof(ji), 0);
     }
   else
     {
@@ -160,7 +176,7 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
 BeliefState*
 ConcurrentMessageDispatcher::recvModel(std::size_t from,
 				       std::size_t& /* prio */,
-				       std::size_t& msecs)
+				       int& msecs)
 {
   ///@todo TK: prio is not used
   assert(mqs.size() > from);
@@ -170,9 +186,17 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
   unsigned int p = 0;
   void *ptr = static_cast<void*>(&b);
 
-  if (msecs)
+  if (msecs > 0)
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(b), recvd, p, boost::posix_time::milliseconds(msecs)))
+	{
+	  msecs = 0;
+	  return 0;
+	}
+    }
+  else if (msecs < 0)
+    {
+      if (!mqs[from]->try_receive(ptr, sizeof(b), recvd, p))
 	{
 	  msecs = 0;
 	  return 0;
@@ -193,7 +217,7 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
 Conflict*
 ConcurrentMessageDispatcher::recvConflict(std::size_t from,
 					  std::size_t& /* prio */,
-					  std::size_t& msecs)
+					  int& msecs)
 {
   ///@todo TK: prio is not used
   assert(mqs.size() > from);
@@ -203,9 +227,17 @@ ConcurrentMessageDispatcher::recvConflict(std::size_t from,
   unsigned int p = 0;
   void *ptr = static_cast<void*>(&c);
 
-  if (msecs)
+  if (msecs > 0)
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(c), recvd, p, boost::posix_time::milliseconds(msecs)))
+	{
+	  msecs = 0;
+	  return 0;
+	}
+    }
+  else if (msecs < 0)
+    {
+      if (!mqs[from]->try_receive(ptr, sizeof(c), recvd, p))
 	{
 	  msecs = 0;
 	  return 0;
@@ -226,7 +258,7 @@ ConcurrentMessageDispatcher::recvConflict(std::size_t from,
 struct MessagingGateway<BeliefState,Conflict>::ModelConflict
 ConcurrentMessageDispatcher::recvModelConflict(std::size_t from,
 					       std::size_t& /* prio */,
-					       std::size_t& msecs)
+					       int& msecs)
 {
   assert(mqs.size() > from);
 
@@ -236,9 +268,17 @@ ConcurrentMessageDispatcher::recvModelConflict(std::size_t from,
   void *ptr = static_cast<void*>(&mc);
 
 
-  if (msecs)
+  if (msecs > 0)
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(mc), recvd, p, boost::posix_time::milliseconds(msecs)))
+	{
+	  msecs = 0;
+	  return mc;
+	}
+    }
+  else if (msecs < 0)
+    {
+      if (!mqs[from]->try_receive(ptr, sizeof(mc), recvd, p))
 	{
 	  msecs = 0;
 	  return mc;
@@ -259,7 +299,7 @@ ConcurrentMessageDispatcher::recvModelConflict(std::size_t from,
 struct MessagingGateway<BeliefState,Conflict>::JoinIn
 ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 					std::size_t& /* prio */,
-					std::size_t& msecs)
+					int& msecs)
 {
   assert(mqs.size() > from);
 
@@ -268,9 +308,17 @@ ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
   unsigned int p = 0;
   void *ptr = static_cast<void*>(&ji);
 
-  if (msecs)
+  if (msecs > 0)
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(ji), recvd, p, boost::posix_time::milliseconds(msecs)))
+	{
+	  msecs = 0;
+	  return ji;
+	}
+    }
+  else if (msecs < 0)
+    {
+      if (!mqs[from]->try_receive(ptr, sizeof(ji), recvd, p))
 	{
 	  msecs = 0;
 	  return ji;

@@ -39,6 +39,11 @@ worker(boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >& mg, boost::pr
   mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
   BOOST_CHECK_EQUAL(timeout, 0);
 
+  BOOST_TEST_MESSAGE("worker thread: try reading queue...");
+  timeout = -1;
+  mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+  BOOST_CHECK_EQUAL(timeout, 0);
+
   p.set_value(42);
 }
    

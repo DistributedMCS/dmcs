@@ -68,7 +68,26 @@ namespace dmcs {
     mutable boost::mutex mtx;
     boost::condition_variable cnd;
 
-    
+
+    inline void
+    notifyConsumer()
+    {
+      if (deq > 0) // is some consumer waiting?
+	{
+	  cnd.notify_one(); // notify one consuming thread
+	}
+    }
+
+
+    inline void
+    notifyProducer()
+    {
+      if (enq > 0) // is some producer waiting?
+	{
+	  cnd.notify_one(); // notify one producing thread
+	}
+    }
+
     
     inline void
     waitOnCapacity(boost::mutex::scoped_lock& lock)
@@ -79,12 +98,10 @@ namespace dmcs {
 	  cnd.wait(lock);
 	  --enq;
 	}
-      
-      if (deq > 0) // is some consumer waiting?
-	{
-	  cnd.notify_one(); // notify one consuming thread
-	}
+
+      notifyConsumer();
     }
+
     
     inline void
     waitOnEmpty(boost::mutex::scoped_lock& lock)
@@ -96,12 +113,8 @@ namespace dmcs {
 	  --deq;
 	}
 
-      if (enq > 0) // is some producer waiting?
-	{
-	  cnd.notify_one(); // notify one producing thread
-	}
+      notifyProducer();
     }
-
 
     
     inline bool
@@ -116,10 +129,7 @@ namespace dmcs {
 	  --enq;
 	}
       
-      if (deq > 0) // is some consumer waiting?
-	{
-	  cnd.notify_one(); // notify one consuming thread
-	}
+      notifyConsumer();
       
       return no_timeout;
     }
@@ -137,10 +147,7 @@ namespace dmcs {
 	  --deq;
 	}
 
-      if (enq > 0) // is some producer waiting?
-	{
-	  cnd.notify_one(); // notify one producing thread
-	}
+      notifyProducer();
 
       return no_timeout;
     }
@@ -149,6 +156,7 @@ namespace dmcs {
     inline void
     pushBlock (const void *buf, std::size_t size)
     {
+      ///@todo we can do better and preallocate the maximum memory requirements here
       void *m = malloc(size);
 
       if (m == NULL)
@@ -218,6 +226,7 @@ namespace dmcs {
 	}
     }
 
+
     bool
     empty () const
     {
@@ -243,6 +252,22 @@ namespace dmcs {
 
 
     bool
+    try_send (const void* buf, std::size_t size, unsigned int /* prio */)
+    {
+      boost::mutex::scoped_lock lock(mtx);
+
+      if (q.size() < n)
+	{
+	  pushBlock(buf, size);
+	  notifyConsumer();
+	  return true;
+	}
+
+      return false;      
+    }
+
+
+    bool
     timed_send (const void* buf, std::size_t size, unsigned int /* prio */, const boost::posix_time::time_duration& t)
     {
       boost::mutex::scoped_lock lock(mtx);
@@ -263,6 +288,22 @@ namespace dmcs {
       boost::mutex::scoped_lock lock(mtx);
       waitOnEmpty(lock);
       recvd = popBlock(buf, size);
+    }
+
+
+    bool
+    try_receive (void *buf, std::size_t size, std::size_t& recvd, unsigned int /* prio */)
+    {
+      boost::mutex::scoped_lock lock(mtx);
+
+      if (!q.empty())
+	{
+	  recvd = popBlock(buf, size);
+	  notifyProducer();
+	  return true;
+	}
+
+      return false;      
     }
 
 

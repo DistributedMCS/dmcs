@@ -73,28 +73,28 @@ namespace dmcs {
     registerMQ(MQPtr& mq, const std::string& nm);
 
     virtual bool
-    sendModel(BeliefState* b, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0);
+    sendModel(BeliefState* b, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
-    sendConflict(Conflict* c, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0);
+    sendConflict(Conflict* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
-    sendModelConflict(BeliefState* b, Conflict* c, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0);
+    sendModelConflict(BeliefState* b, Conflict* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
-    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, std::size_t msecs = 0);
+    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual BeliefState*
-    recvModel(std::size_t from, std::size_t& prio, std::size_t& msecs);
+    recvModel(std::size_t from, std::size_t& prio, int& msecs);
 
     virtual Conflict*
-    recvConflict(std::size_t from, std::size_t& prio, std::size_t& msecs);
+    recvConflict(std::size_t from, std::size_t& prio, int& msecs);
 
     virtual struct ModelConflict
-    recvModelConflict(std::size_t from, std::size_t& prio, std::size_t& msecs);
+    recvModelConflict(std::size_t from, std::size_t& prio, int& msecs);
 
     virtual struct JoinIn
-    recvJoinIn(std::size_t from, std::size_t& prio, std::size_t& msecs);
+    recvJoinIn(std::size_t from, std::size_t& prio, int& msecs);
 
   };
 
