@@ -49,11 +49,12 @@ class NeighborOut : BaseStreamer
 {
 public:
   NeighborOut(connection_ptr& conn_, 
-	      ConflictNotificationFuturePtr& cnf_,
+	      ConcurrentMessageQueuePtr& rnn,
 	      std::size_t invoker_, 
 	      std::size_t pack_size_)
     : BaseStreamer(conn_),
-      cnf(cnf_), invoker(invoker_), 
+      router_neighbor_notif(rnn), 
+      invoker(invoker_), 
       pack_size(pack_size_)
   {
     stream(boost::system::error_code());
@@ -66,11 +67,17 @@ public:
       {
 	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 	// wait for a future from the Router
-	cnf->wait();
-	ConflictNotificationPtr cn = cnf->get();
+	ConflictNotificationPtr cn;
+	void *ptr         = static_cast<void*>(&cn);
+	unsigned int p    = 0;
+	std::size_t recvd = 0;
+
+	router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
 
 	Conflict* conflict       = cn->conflict;
 	BeliefState* partial_ass = cn->partial_ass;
+
+	// compare
 
 	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ <<
 		       "Got from Router: "
@@ -102,9 +109,9 @@ public:
   }
 
 private:
-  ConflictNotificationFuturePtr cnf;
-  std::size_t                   invoker;
-  std::size_t                   pack_size;
+  ConcurrentMessageQueuePtr router_neighbor_notif;
+  std::size_t               invoker;
+  std::size_t               pack_size;
 };
 
 typedef boost::shared_ptr<NeighborOut> NeighborOutPtr;

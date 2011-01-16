@@ -192,7 +192,9 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e, SessionMsg
 // *********************************************************************************************************************
 // Specialized methods for streaming dmcs
   Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd, connection_ptr conn_, Server* s)
-    : conn(conn_), server(s)
+    : conn(conn_), server(s),
+      handler_dmcs_notif(new ConcurrentMessageQueue),
+      handler_output_notif(new ConcurrentMessageQueue)
 { 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -227,13 +229,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 
 	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "creating dmcs thread");
 
-	  // create MessageQueue between Handler and StreamingDMCS to
-	  // inform StreamingDMCS about new incoming message
-
-	  StreamingDMCSNotificationFuturePtr snf(new StreamingDMCSNotificationFuture(snp.get_future()));
-	  ConflictNotificationFuturePtr      cnf(new ConflictNotificationFuture(cnp.get_future()));
-
-	  stdt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, snf, cnf));
+	  stdt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, handler_dmcs_notif));
 	  streaming_dmcs_thread = new boost::thread(*stdt);
 
 	  DMCS_LOG_DEBUG("creating output thread, pack_size = " << pack_size);
@@ -242,8 +238,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 	  // inform OutputThread about new incoming message (request
 	  // the next pack_size models)
 
-	  OutputNotificationFuturePtr onf(new OutputNotificationFuture(onp.get_future()));
-	  ot = OutputThreadPtr(new OutputThread(conn, pack_size, mg, onf)); 
+	  ot = OutputThreadPtr(new OutputThread(conn, pack_size, mg, handler_output_notif));
 	  output_thread = new boost::thread(*ot);
 
 	  first_call = false;
@@ -256,7 +251,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
       // (1) notify StreamingDMCS
       // use overwrite_send() 
       StreamingDMCSNotificationPtr sn(new StreamingDMCSNotification(invoker, pack_size, port));
-      snp.set_value(sn);
+      overwrite_send(handler_dmcs_notif, &sn, sizeof(sn), 0);
 
       // (2) notify the local solver
       /*      Conflict* conflict       = sesh->mess.getConflict();
@@ -268,7 +263,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
       // (3) notify OutputThread
       // use overwrite_send()
       OutputNotificationPtr on(new OutputNotification(pack_size));
-      onp.set_value(on);
+      overwrite_send(handler_output_notif, &on, sizeof(on), 0);
   
       // back to waiting for incoming message
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Back to waiting for incoming message");

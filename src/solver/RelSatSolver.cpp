@@ -41,8 +41,8 @@ RelSatSolver::RelSatSolver(std::size_t my_id_,
 			   //			   const ProxySignatureByLocalPtr& mixed_sig_,
 			   std::size_t system_size_,
 			   MessagingGatewayBCPtr& mg_,
-			   ConflictNotificationFuturePtr& handler_cnf_,
-			   ConflictNotificationPromisePtr& router_cnp_)
+			   ConcurrentMessageQueuePtr& dsn,
+			   ConcurrentMessageQueuePtr& srn)
   : my_id(my_id_),
     theory(theory_), 
     sig(sig_),
@@ -50,8 +50,8 @@ RelSatSolver::RelSatSolver(std::size_t my_id_,
     //    mixed_sig(mixed_sig_),
     system_size(system_size_),
     mg(mg_),
-    handler_cnf(handler_cnf_),
-    router_cnp(router_cnp_),
+    dmcs_sat_notif(dsn),
+    sat_router_notif(srn),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this))
 {
@@ -134,8 +134,13 @@ void
 RelSatSolver::solve()
 {
   // wait for conflict and partial_ass from Handler
-  handler_cnf->wait();
-  ConflictNotificationPtr cn   = handler_cnf->get();
+  ConflictNotificationPtr cn;
+  void *ptr         = static_cast<void*>(&cn);
+  unsigned int p    = 0;
+  std::size_t recvd = 0;
+
+  dmcs_sat_notif->receive(ptr, sizeof(cn), recvd, p);
+
   Conflict* conflict           = cn->conflict;
   BeliefState* new_partial_ass = cn->partial_ass;
 

@@ -33,16 +33,15 @@
 namespace dmcs {
 
 StreamingDMCSThread::StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
-					 const StreamingDMCSNotificationFuturePtr& snf_,
-					 const ConflictNotificationFuturePtr& cnf_)
-  : scmt(scmt_), snf(snf_), cnf(cnf_)
+					 const ConcurrentMessageQueuePtr& nfh)
+  : scmt(scmt_), notif_from_handler(nfh)
 { }
 
 void
 StreamingDMCSThread::operator()()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  scmt->execute(snf, cnf);
+  scmt->execute(notif_from_handler);
 }
 
 } // namespace dmcs

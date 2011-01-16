@@ -47,15 +47,17 @@ public:
 		   const BeliefStatePtr& localV_,
 		   std::size_t system_size_,
 		   MessagingGatewayBCPtr& mg_,
-		   const ConflictNotificationFuturePtr& cnf_,
-		   const ConflictNotificationPromisePtr& cnp_)
+		   const ConcurrentMessageQueuePtr& dsn,
+		   const ConcurrentMessageQueuePtr& srn)
     : my_id(my_id_),
       theory(theory_),
       //      mixed_sig(mixed_sig_),
       local_sig(local_sig_),
       localV(localV_),
       system_size(system_size_),
-      mg(mg_), cnf(cnf_), cnp(cnp_)
+      mg(mg_), 
+      dmcs_sat_notif(dsn), 
+      sat_router_notif(srn)
   { }
 
   template<typename aSatSolverTypePtr>
@@ -70,8 +72,8 @@ private:
   //const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;
   MessagingGatewayBCPtr          mg;
-  ConflictNotificationFuturePtr  cnf;
-  ConflictNotificationPromisePtr cnp;
+  ConcurrentMessageQueuePtr      dmcs_sat_notif;
+  ConcurrentMessageQueuePtr      sat_router_notif;
 };
 
 
@@ -79,7 +81,7 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(my_id, theory, local_sig, localV, system_size, mg, cnf, cnp));
+  RelSatSolverPtr relsatsolver(new RelSatSolver(my_id, theory, local_sig, localV, system_size, mg, dmcs_sat_notif, sat_router_notif));
 
   return relsatsolver;
 }

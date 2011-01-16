@@ -57,8 +57,8 @@ public:
 	       const BeliefStatePtr& localV_,
 	       std::size_t system_size_,
 	       MessagingGatewayBCPtr& mg_,
-	       ConflictNotificationFuturePtr& handler_cnf_,
-	       ConflictNotificationPromisePtr& router_cnp_);
+	       ConcurrentMessageQueuePtr& dsn,
+	       ConcurrentMessageQueuePtr& srn);
 
   ~RelSatSolver();
 
@@ -87,10 +87,10 @@ private:
   const SignaturePtr             sig;
   const BeliefStatePtr           localV;
   //  const ProxySignatureByLocalPtr mixed_sig;
-  std::size_t                    system_size;    // this can be taken from localV
+  std::size_t                    system_size;      // this can be taken from localV
   MessagingGatewayBCPtr          mg;
-  ConflictNotificationFuturePtr  handler_cnf;    // to get notification from Handler
-  ConflictNotificationPromisePtr router_cnp;     // to inform Router
+  ConcurrentMessageQueuePtr      dmcs_sat_notif;   // to get notification from Handler
+  ConcurrentMessageQueuePtr      sat_router_notif; // to inform Router
   BeliefState*                   partial_ass;
   BeliefState*                   input;
 

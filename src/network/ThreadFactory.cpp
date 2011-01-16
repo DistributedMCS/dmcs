@@ -28,6 +28,7 @@
  */
 
 #include "dmcs/Log.h"
+#include "network/ConcurrentMessageQueueHelper.h"
 #include "network/JoinThread.h"
 #include "network/NeighborThread.h"
 #include "network/OutputThread.h"
@@ -44,13 +45,13 @@ ThreadFactory::ThreadFactory(const ContextPtr& context_,
 			     const BeliefStatePtr& localV_,
 			     std::size_t pack_size_,
 			     MessagingGatewayBCPtr& mg_,
-			     const ConflictNotificationFuturePtr& handler_sat_cnf_)
+			     const ConcurrentMessageQueuePtr& dsn)
   : context(context_), theory(theory_), 
     local_sig(local_sig_), localV(localV_),
     pack_size(pack_size_), mg(mg_),
-    handler_sat_cnf(handler_sat_cnf_), 
+    dmcs_sat_notif(dsn), 
     c2o(new HashedBiMap),
-    cnpv(new ConflictNotificationPromiseVec)
+    sat_router_notif(new ConcurrentMessageQueue)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   // fill up the map: ctx_id <--> offset
@@ -66,7 +67,8 @@ ThreadFactory::ThreadFactory(const ContextPtr& context_,
 
 
 void
-ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads)
+ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
+				     ConcurrentMessageQueueVecPtr& router_neighbors_notif)
 {
   const NeighborListPtr& nbs    = context->getNeighbors();
   const std::size_t ctx_id      = context->getContextID();
@@ -79,21 +81,13 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads)
   for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it, ++i)
     {
       const NeighborPtr nb = *it;
-      ConflictNotificationPromisePtr cnp(new ConflictNotificationPromise);
-      ConflictNotificationFuturePtr  cnf(new ConflictNotificationFuture(cnp->get_future()));
+      ConcurrentMessageQueuePtr cmq(new ConcurrentMessageQueue);
+      router_neighbors_notif->push_back(cmq);
 
-      NeighborThread nt(cnf, mg, nb, c2o, ctx_id, pack_size);
+      NeighborThread nt(cmq, mg, nb, c2o, ctx_id, pack_size);
       
       boost::thread* nit = new boost::thread(nt);
       neighbor_input_threads->push_back(nit);
-
-      // notify the neighbor with an empty ConflictNotification, just for starting up
-      Conflict* c    = new Conflict(system_size, BeliefSet());
-      BeliefState* p = new BeliefState(system_size, BeliefSet());
-      ConflictNotificationPtr first_push(new ConflictNotification(c, p));
-
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " First push to offset " << i);
-      cnp->set_value(first_push);
     }
 }
 
@@ -120,9 +114,8 @@ ThreadFactory::createLocalSolveThread()
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   const std::size_t my_id       = context->getContextID();
   const std::size_t system_size = context->getSystemSize();
-  sat_router_cnp = ConflictNotificationPromisePtr(new ConflictNotificationPromise);
 
-  SatSolverFactory ssf(my_id, theory, local_sig, localV, system_size, mg, handler_sat_cnf, sat_router_cnp);
+  SatSolverFactory ssf(my_id, theory, local_sig, localV, system_size, mg, dmcs_sat_notif, sat_router_notif);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
@@ -135,12 +128,11 @@ ThreadFactory::createLocalSolveThread()
 
 
 boost::thread*
-ThreadFactory::createRouterThread()
+ThreadFactory::createRouterThread(ConcurrentMessageQueueVecPtr& router_neighbors_notif)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  ConflictNotificationFuturePtr cnf = ConflictNotificationFuturePtr(new ConflictNotificationFuture(sat_router_cnp->get_future()));
 
-  RouterThread rt(cnf, cnpv, c2o);
+  RouterThread rt(sat_router_notif, router_neighbors_notif, c2o);
   boost::thread* t = new boost::thread(rt);
 
   return t;

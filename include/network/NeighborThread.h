@@ -48,14 +48,14 @@ namespace dmcs {
 class NeighborThread
 {
 public:
-  NeighborThread(ConflictNotificationFuturePtr& cnf_,
+  NeighborThread(ConcurrentMessageQueuePtr& rnn,
 		 MessagingGatewayBCPtr& mg_,
 		 const NeighborPtr& nb_,
 		 const HashedBiMapPtr& c2o_,
 		 const std::size_t invoker_,
 		 const std::size_t pack_size_)
-    : cnf(cnf_), mg(mg_), nb(nb_), c2o(c2o_),
-      invoker(invoker_), pack_size(pack_size_)
+    : router_neighbor_notif(rnn), mg(mg_), nb(nb_), 
+      c2o(c2o_), invoker(invoker_), pack_size(pack_size_)
   { }
 
   void
@@ -100,7 +100,7 @@ private:
 	nip = NeighborInPtr(new NeighborIn(conn, mg, offset));
 	
 	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "create NeighborOut");
-	nop = NeighborOutPtr(new NeighborOut(conn, cnf, invoker, pack_size));
+	nop = NeighborOutPtr(new NeighborOut(conn, router_neighbor_notif, invoker, pack_size));
 	
       }
     else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator())
@@ -123,7 +123,7 @@ private:
   }  
 
 private:
-  ConflictNotificationFuturePtr cnf;
+  ConcurrentMessageQueuePtr     router_neighbor_notif;
   MessagingGatewayBCPtr         mg;
   const NeighborPtr             nb;
   const HashedBiMapPtr          c2o;

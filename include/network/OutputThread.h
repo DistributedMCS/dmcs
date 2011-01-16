@@ -48,7 +48,7 @@ public:
   OutputThread(const connection_ptr& conn_,
 	       std::size_t pack_size_,
 	       MessagingGatewayBCPtr& mg_,
-	       OutputNotificationFuturePtr& onf_);
+	       ConcurrentMessageQueuePtr& hon);
 
   void
   operator()();
@@ -72,12 +72,12 @@ private:
 
 private:
   const connection_ptr&       conn;
-  std::size_t                 pack_size;       // Number of models the invoker expects to get
-  std::size_t                 left_2_send;     // Number of models left to send
+  std::size_t                 pack_size;             // Number of models the invoker expects to get
+  std::size_t                 left_2_send;           // Number of models left to send
   MessagingGatewayBCPtr       mg;
-  OutputNotificationFuturePtr onf;
-  bool                        collecting;      // A flag to determine whether we are in collecting mode or not 
-                                               // (if yes then we don't want to wait for any trigger)
+  ConcurrentMessageQueuePtr   handler_output_notif;
+  bool                        collecting;           // A flag to determine whether we are in collecting mode or not 
+                                                    // (if yes then we don't want to wait for any trigger)
 };
 
 typedef boost::shared_ptr<OutputThread> OutputThreadPtr;

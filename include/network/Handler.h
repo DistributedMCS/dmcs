@@ -33,6 +33,7 @@
 #include "network/BaseHandler.h"
 #include "network/connection.hpp"
 #include "network/ConcurrentMessageQueueFactory.h"
+#include "network/ConcurrentMessageQueueHelper.h"
 #include "network/Session.h"
 #include "network/OutputThread.h"
 #include "network/ThreadFactory.h"
@@ -120,6 +121,8 @@ private:
   boost::thread*                   streaming_dmcs_thread;
 
   // replace by ConcurrentMessageQueue for StreamingDMCS and OutputThread
+  ConcurrentMessageQueuePtr        handler_dmcs_notif;
+  ConcurrentMessageQueuePtr        handler_output_notif;
   StreamingDMCSNotificationPromise snp;
   OutputNotificationPromise        onp;
   ConflictNotificationPromise      cnp;

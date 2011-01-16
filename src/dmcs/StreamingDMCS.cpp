@@ -36,15 +36,12 @@
 #include "dmcs/CommandType.h"
 #include "dmcs/Cache.h"
 #include "dmcs/Log.h"
-
 #include "dmcs/StreamingDMCS.h"
-
-
+#include "network/Client.h"
+#include "network/ConcurrentMessageQueueHelper.h"
 #include "parser/ClaspResultGrammar.h"
 #include "parser/ClaspResultBuilder.h"
 #include "parser/ParserDirector.h"
-
-#include "network/Client.h"
 
 #include <vector>
 #include <sstream>
@@ -65,7 +62,9 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     cache(new Cache(cacheStats)),
     buf_count(buf_count_),
     initialized(false),
-    neighbor_threads(new ThreadVec)
+    neighbor_threads(new ThreadVec),
+    dmcs_sat_notif(new ConcurrentMessageQueue),
+    router_neighbors_notif(new ConcurrentMessageQueueVec)
 { }
 
 
@@ -78,13 +77,12 @@ StreamingDMCS::~StreamingDMCS()
 void
 StreamingDMCS::initialize(std::size_t invoker, 
 			  std::size_t pack_size, 
-			  std::size_t port,
-			  ConflictNotificationFuturePtr& cnf)
+			  std::size_t port)
 {
   const NeighborListPtr& nbs = ctx->getNeighbors();
   std::size_t no_nbs         = nbs->size(); 
 
-  DMCS_LOG_DEBUG("Here create mqs and threads. no_nbs = " << no_nbs);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Here create mqs and threads. no_nbs = " << no_nbs);
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
   mg = mqf.createMessagingGateway(port, no_nbs); // we use the port as unique id
@@ -102,30 +100,33 @@ StreamingDMCS::initialize(std::size_t invoker,
 
   const SignaturePtr& local_sig = ctx->getSignature();
 
-  ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size, mg, cnf);
+  ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size, mg, dmcs_sat_notif);
 
   sat_thread = tf.createLocalSolveThread();
 
   if (no_nbs > 0)
     {
-      tf.createNeighborThreads(neighbor_threads);
+      tf.createNeighborThreads(neighbor_threads, router_neighbors_notif);
       join_thread     = tf.createJoinThread();
-      router_thread   = tf.createRouterThread();
+      router_thread   = tf.createRouterThread(router_neighbors_notif);
     }
 }
 
 
 
 void
-StreamingDMCS::listen(StreamingDMCSNotificationFuturePtr& snf,
+StreamingDMCS::listen(ConcurrentMessageQueuePtr& handler_dmcs_notif,
 		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
 		      std::size_t& port)
 {
   // wait for a signal from Handler
-  snf->wait();
+  StreamingDMCSNotificationPtr sn;
+  void *ptr         = static_cast<void*>(&sn);
+  unsigned int p    = 0;
+  std::size_t recvd = 0;
 
-  StreamingDMCSNotificationPtr sn = snf->get();
+  handler_dmcs_notif->receive(ptr, sizeof(sn), recvd, p);
 
   invoker   = sn->invoker;
   pack_size = sn->pack_size;
@@ -149,18 +150,21 @@ StreamingDMCS::start_up()
     }
   else
     {
-      /*
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Intermediate context. Send requests to neighbors by placing a message in each of the NEIGHBOR_OUT_MQ");
+
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
+
+      assert (router_neighbors_notif->size() == no_nbs);
 
       for (std::size_t i = 0; i < no_nbs; ++i)
 	{
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Send empty conflict to offset 5 + " << i);
-
-	  const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + i;
-
-	  Conflict* empty_conflict = new Conflict(system_size, BeliefSet());
-	  mg->sendConflict(empty_conflict, 0, off, 0);
-	  }*/
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " First push to offset " << i);
+	  ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
+	  Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
+	  BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
+	  ConflictNotificationPtr cn(new ConflictNotification(empty_conflict, empty_ass));
+	  std::size_t p = 0;
+	  overwrite_send(cmq, &cn, sizeof(cn), p);
+	}
     }
 }
 
@@ -175,7 +179,7 @@ StreamingDMCS::work()
 
 
 void
-StreamingDMCS::loop(StreamingDMCSNotificationFuturePtr& snf, ConflictNotificationFuturePtr& cnf)
+StreamingDMCS::loop(ConcurrentMessageQueuePtr& handler_dmcs_notif)
 {
   std::size_t invoker;
   std::size_t pack_size;
@@ -185,11 +189,11 @@ StreamingDMCS::loop(StreamingDMCSNotificationFuturePtr& snf, ConflictNotificatio
 
   while (1)
     {
-      listen(snf, invoker, pack_size, port);
+      listen(handler_dmcs_notif, invoker, pack_size, port);
 
       if (!initialized)
 	{
-	  initialize(invoker, pack_size, port, cnf);
+	  initialize(invoker, pack_size, port);
 	  start_up();
 	  initialized = true;
 	}

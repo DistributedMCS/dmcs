@@ -31,6 +31,7 @@
 #define STREAMING_DMCS_THREAD_H
 
 #include "dmcs/StreamingCommandType.h"
+#include "network/ConcurrentMessageQueue.h"
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -42,16 +43,14 @@ class StreamingDMCSThread
 {
 public:
   StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
-		      const StreamingDMCSNotificationFuturePtr& snf_,
-		      const ConflictNotificationFuturePtr& cnf_);
+		      const ConcurrentMessageQueuePtr& nfh);
 
   void
   operator()();
 
 private:
   const StreamingCommandTypePtr      scmt;
-  StreamingDMCSNotificationFuturePtr snf;
-  ConflictNotificationFuturePtr      cnf;
+  ConcurrentMessageQueuePtr          notif_from_handler;
 };
 
 typedef boost::shared_ptr<StreamingDMCSThread> StreamingDMCSThreadPtr;

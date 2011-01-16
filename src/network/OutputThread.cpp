@@ -38,11 +38,11 @@ namespace dmcs {
 OutputThread::OutputThread(const connection_ptr& conn_,
 			   std::size_t pack_size_,
 			   MessagingGatewayBCPtr& mg_,
-			   OutputNotificationFuturePtr& onf_)
+			   ConcurrentMessageQueuePtr& hon)
   : conn(conn_),
     pack_size(pack_size_),
     mg(mg_),
-    onf(onf_),
+    handler_output_notif(hon),
     collecting(false)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " pack_size = " << pack_size);
@@ -80,10 +80,14 @@ void
 OutputThread::wait_for_trigger()
 {
   // wait for Handler to tell me to return some models
-  onf->wait();
+  OutputNotificationPtr on;
+  void *ptr         = static_cast<void*>(&on);
+  unsigned int    p = 0;
+  std::size_t recvd = 0;
 
-  OutputNotificationPtr on = onf->get();
-  pack_size                = on->pack_size;
+  handler_output_notif->receive(ptr, sizeof(on), recvd, p);
+
+  pack_size = on->pack_size;
 
   DMCS_LOG_DEBUG(" OutputThread::wait_for_trigger(): Got a message from Handler. pack_size = " << pack_size);
   
@@ -181,9 +185,9 @@ OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr
 {
   if (!e)
     {
+      assert (left_2_send >= res->size());
+
       left_2_send -= res->size();
-      
-      assert (left_2_send >= 0);
       
       StreamingBackwardMessage return_mess(res);
       

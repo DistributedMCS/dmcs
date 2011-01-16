@@ -68,11 +68,11 @@ public:
   ~StreamingDMCS();
 
   void
-  loop(StreamingDMCSNotificationFuturePtr& snf, ConflictNotificationFuturePtr& cnf);
+  loop(ConcurrentMessageQueuePtr& notif_from_handler);
 
 private:
   void
-  listen(StreamingDMCSNotificationFuturePtr& snf,
+  listen(ConcurrentMessageQueuePtr& notif_from_handler,
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
 	 std::size_t& port);
@@ -80,8 +80,7 @@ private:
   void
   initialize(std::size_t invoker, 
 	     std::size_t pack_size,
-	     std::size_t port,
-	     ConflictNotificationFuturePtr& cnf);
+	     std::size_t port);
 
   void
   start_up();
@@ -99,6 +98,8 @@ private:
   boost::thread*        router_thread;
   ThreadVecPtr          neighbor_threads;
   MessagingGatewayBCPtr mg;
+  ConcurrentMessageQueuePtr dmcs_sat_notif;
+  ConcurrentMessageQueueVecPtr router_neighbors_notif;
 
   std::size_t buf_count;
 };

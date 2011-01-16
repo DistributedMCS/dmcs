@@ -31,6 +31,7 @@
 #define ROUTER_THREAD_H
 
 #include "dmcs/ConflictNotification.h"
+#include "network/ConcurrentMessageQueueHelper.h"
 #include "mcs/HashedBiMap.h"
 
 #include <boost/thread.hpp>
@@ -40,10 +41,12 @@ namespace dmcs {
 class RouterThread
 {
 public:
-  RouterThread(ConflictNotificationFuturePtr& cnf_,
-	       ConflictNotificationPromiseVecPtr& cnpv_,
+  RouterThread(ConcurrentMessageQueuePtr& srn,
+	       ConcurrentMessageQueueVecPtr& rnn,
 	       HashedBiMapPtr& c2o_)
-    : cnf(cnf_), cnpv(cnpv_), c2o(c2o_)
+    : sat_router_notif(srn), 
+      router_neighbors_notif(rnn), 
+      c2o(c2o_)
   { }
 
   void
@@ -52,9 +55,9 @@ public:
     while (1)
       {
 	// wait for any conflict from the local solver
-	cnf->wait();
+	ConflictNotificationPtr cn;
+	void *ptr = static_cast<void*>(&cn);
 
-	ConflictNotificationPtr cn = cnf->get();
 	const std::size_t nid      = cn->val;
 	
 	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got a notification from local solver. nid = " << nid);
@@ -63,15 +66,16 @@ public:
 	const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
 	HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
 	const std::size_t noff                  = pair->second;
-	ConflictNotificationPromisePtr cnp      = (*cnpv)[noff];
+	ConcurrentMessageQueuePtr& cmq          = (*router_neighbors_notif)[noff];
 
-	cnp->set_value(cn);
+	std::size_t p = 0;
+	overwrite_send(cmq, &cn, sizeof(cn), p);
       }
   }
 
 private:
-  ConflictNotificationFuturePtr     cnf;
-  ConflictNotificationPromiseVecPtr cnpv;
+  ConcurrentMessageQueuePtr     sat_router_notif;
+  ConcurrentMessageQueueVecPtr  router_neighbors_notif;
   HashedBiMapPtr              c2o;
 };
 
