@@ -6,6 +6,7 @@
 	* src/solver/RelSatSolver.cpp: Likewise.
 	* src/network/OutputThread.cpp: Likewise.
 	* src/network/JoinThread.cpp: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
 
 	* include/dmcs/ConflictNotification.h: Include boost/thread.hpp.
 	* include/dmcs/OutputNotification.h: Likewise.
@@ -13,6 +14,7 @@
 	* include/network/ConcurrentMessageQueue.h: Add try_send and
 	try_receive.
 	* testsuite/testMessagingGateway.cpp: Likewise.
+
 	* src/network/MessageDispatcher.cpp: Likewise.
 	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
 	* include/network/MessagingGateway.h: Likewise.

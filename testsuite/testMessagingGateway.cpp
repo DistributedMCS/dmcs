@@ -19,7 +19,7 @@ worker(boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >& mg, boost::pr
   boost::this_thread::sleep(s);
 
   std::size_t prio = 0;
-  std::size_t timeout = 0;
+  int timeout = 0;
 
   BOOST_TEST_MESSAGE("worker thread: reading queue...");
   mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( testMessagingGateway )
   BeliefState* b1 = (BeliefState*) 0xdeadbeef;
   BeliefState* b2 = 0;
   std::size_t prio = 0;
-  std::size_t timeout = 0;
+  int timeout = 0;
 
   BOOST_TEST_MESSAGE("send model...");
   mg2->sendModel(b1, 0, ConcurrentMessageQueueFactory::OUT_MQ, prio);
