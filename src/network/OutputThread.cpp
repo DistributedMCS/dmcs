@@ -203,12 +203,14 @@ OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr
 
       left_2_send -= res->size();
       
-      StreamingBackwardMessage return_mess(res);
-      
       if (left_2_send == 0)
 	{
+	  BeliefState* bs = 0;
+	  res->push_back(bs);
 	  collecting = false;
 	}
+      
+      StreamingBackwardMessage return_mess(res);
 
       conn->async_write(return_mess,
 			boost::bind(&OutputThread::loop, this,

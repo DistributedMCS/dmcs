@@ -1,5 +1,20 @@
 2011-01-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* log4cxx.cfg: Remove date output.
+
+	* src/solver/RelSatSolver.cpp: Add some debugging information.
+
+	* src/network/OutputThread.cpp: Send a NULL pointer after each
+	full package.
+
+	* src/network/JoinThread.cpp: Use int counters.
+
+	* src/network/ConcurrentMessageDispatcher.cpp: Relax the
+	assertion.
+
+	* src/dmcs/StreamingDMCS.cpp: Sending start_up assignment in all
+	cases (leaf and non-leaf).
+
 	* include/network/NeighborThread.h: Allow NeighborIn and
 	NeighborOut to run together.
 

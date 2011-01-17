@@ -77,6 +77,8 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 	  // It must be the last model to be NULL;
 	  // otw, the neighbor sent me some crap
 	  assert (i == peq_cnt - 1);
+
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Reached a NULL model. set bit noff = " << noff);
 	 
 	  // mark that this neighbor reached its pack_size. 
 	  end_mask.set(noff);
@@ -124,6 +126,8 @@ JoinThread::join(const BeliefStateIteratorVecPtr& run_it)
 	}
     }
 
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " result = " << *result);
+
   // Joining succeeded. Now send this input to SAT solver via JOIN_OUT_MQ
   // be careful that we are blocked here. Use timeout sending instead?
   mg->sendModel(result, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
@@ -142,8 +146,9 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   // initialization
-  assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
-  std::size_t n = partial_eqs->size();
+  //assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
+  int n = partial_eqs->size();
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "n = " << n);
   BeliefStateIteratorVecPtr run_it(new BeliefStateIteratorVec);
   
   for (std::size_t i = 0; i < n; ++i)
@@ -152,14 +157,15 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
     }
 
   // recursion disposal
-  std::size_t inc = n-1;
-  while (inc > 0)
+  int inc = n-1;
+  while (inc >= 0)
     {
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "inc = " << inc);
       join(run_it);
       inc = n-1;
 
       // find the greates index whose running iterator incrementable to a non-end()
-      while (inc > 0)
+      while (inc >= 0)
 	{
 	  BeliefStateVec::const_iterator& run_it_ref = (*run_it)[inc];
 	  run_it_ref++;
@@ -173,12 +179,16 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
 	    }
 	}
       
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "inc = " << inc);
       // reset all running iterator after inc to beg_it
-      for (std::size_t i = inc+1; i < n; ++i)
+      for (int i = inc+1; i < n; ++i)
 	{
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "reset run_it. i = " << i);
 	  (*run_it)[i] = (*beg_it)[i];
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "reset run_it. i = " << i << ". DONE");
 	}
     }
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " DONE");
 }
 
 
@@ -228,10 +238,12 @@ JoinThread::operator()()
 	  // time to join
 	  if (first_import)
 	    {
+	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "First time joining");
 	      // assign first time join
 	      first_import = false;
 	      for (std::size_t i = 0; i < no_nbs; ++i)
 		{
+		  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "i = " << i);
 		  BeliefStateVecPtr& bsv = (*partial_eqs)[i];
 		  (*mid_it)[i] = bsv->end();
 		}
@@ -239,6 +251,7 @@ JoinThread::operator()()
 	    }
 	  else
 	    {
+	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "NOT a first time joining ==> do it selectively");
 	      // not the first time, so we just join selectively
 	      for (std::size_t i = 0; i < no_nbs; ++i)
 		{
@@ -261,6 +274,8 @@ JoinThread::operator()()
 		}
 	    }
 	  
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Check for stop. count = " << end_mask.count_range(0, no_nbs+1) << ", no_nbs = " << no_nbs);
+
 	  if (end_mask.count_range(0, no_nbs+1) == no_nbs)
 	    {
 	      // all neighbors reached their pack_size. Need a
@@ -272,6 +287,7 @@ JoinThread::operator()()
 
       ///@todo: determine the condition for stop = true;
     }
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " DONE");
 }
 
 

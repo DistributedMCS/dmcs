@@ -136,6 +136,7 @@ void
 RelSatSolver::solve()
 {
   // wait for conflict and partial_ass from Handler
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Wait for a message from DMCS");
   ConflictNotification* cn;
   void *ptr         = static_cast<void*>(&cn);
   unsigned int p    = 0;
@@ -165,7 +166,6 @@ RelSatSolver::solve()
 	{ // continue
 	}*/
   
-
       // remove input part of the theory (from last solve)
       xInstance->removeLastInput();
       

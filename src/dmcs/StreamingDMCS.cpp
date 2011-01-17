@@ -154,27 +154,26 @@ StreamingDMCS::start_up()
   const NeighborListPtr& nbs    = ctx->getNeighbors();
   const std::size_t no_nbs      = nbs->size();
 
-  if (no_nbs == 0) // this is a leaf context
+
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Trigger SAT solver with empty conflict and empty ass.");
+
+  //BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
+  //mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+  
+  Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
+  BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
+  
+  ConflictNotification* mess_sat = new ConflictNotification(0, empty_conflict, empty_ass);
+  ConflictNotification* ow_sat = 
+    (ConflictNotification*) overwrite_send(dmcs_sat_notif, &mess_sat, sizeof(mess_sat), 0);
+  
+  if (ow_sat)
     {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Leaf context. SAT solver with empty conflict and empty ass.");
-
-      //BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
-      //mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
-
-      Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
-      BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
-      
-      ConflictNotification* mess_sat = new ConflictNotification(0, empty_conflict, empty_ass);
-      ConflictNotification* ow_sat = 
-	(ConflictNotification*) overwrite_send(dmcs_sat_notif, &mess_sat, sizeof(mess_sat), 0);
-
-      if (ow_sat)
-	{
-	  delete ow_sat;
-	  ow_sat = 0;
-	}
+      delete ow_sat;
+      ow_sat = 0;
     }
-  else
+
+  if (no_nbs > 0) // not a leaf context
     {
 
       DMCS_LOG_TRACE("Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
