@@ -100,8 +100,6 @@ private:
   MessagingGatewayBCPtr mg;
   ConcurrentMessageQueuePtr    dmcs_sat_notif;
   ConcurrentMessageQueueVecPtr router_neighbors_notif;
-  ConflictNotificationVecPtr   mess_neighbors;
-  ConflictNotificationPtr      mess_sat;
 
   std::size_t buf_count;
 };

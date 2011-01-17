@@ -77,7 +77,9 @@ public:
 					     ++res_it));
 
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "io_service.run()");
+    boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
     io_service.run();
+    t.join();
   }
 
 private:

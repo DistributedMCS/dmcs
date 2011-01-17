@@ -1,5 +1,32 @@
 2011-01-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/NeighborThread.h: Allow NeighborIn and
+	NeighborOut to run together.
+
+	* include/network/NeighborIn.h: Add some debug information.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Remove some Ptr.
+
+	* log4cxx.cfg: New file.
+
+	* src/dmcsd.cpp: Add logging commandline argument.
+
+	* include/dmcs/Log.h: Add __PRETTY_FUNCTION__ to DMCS_LOG_TRACE.
+
+	* include/network/Handler.tcc: overwrite_send and receive pure
+	pointers.
+	* include/network/Handler.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+
+	* include/dmcs/OutputNotification.h: Comment out Ptr typedef.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+
 	* src/network/OutputThread.cpp: Setup header after receive k models.
 
 	* src/dmcs/StreamingDMCS.cpp: Notify SAT via overwrite_send.

@@ -70,8 +70,9 @@ public:
 	else
 	  {
 	    // extract a bunch of models from the message and then put each into NEIGHBOR_MQ
-	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Write to MQs");
+	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Write to MQs. noff = " << noff);
 	    const BeliefStateVecPtr bsv = mess.getBeliefStates();
+	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Number of bs received = " << bsv->size());
 	    const std::size_t offset    = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
 	    for (BeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
@@ -84,9 +85,37 @@ public:
 	  }
 	
 	// read from network
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Reading from network");
-	conn->async_read(mess, boost::bind(&NeighborIn::stream, this,  
-					   boost::asio::placeholders::error));
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Reading header from network");
+	conn->async_read(header, boost::bind(&NeighborIn::read_message, this,  
+					     boost::asio::placeholders::error));
+      }
+    else
+      {
+	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+	throw std::runtime_error(e.message());
+      }
+  }
+
+
+ 
+  void
+  read_message(const boost::system::error_code& e)
+  {
+    if (!e)
+      {
+	if (header.find(HEADER_ANS) != std::string::npos)
+	  { // read some models
+	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Reading message from network");
+	    conn->async_read(mess,
+			      boost::bind(&NeighborIn::stream, this,
+					  boost::asio::placeholders::error));
+	  }
+	else
+	  { // no message to read, wait for the next header 
+	    assert (header.find(HEADER_EOF) != std::string::npos);
+	    first_round = true;
+	    stream(boost::system::error_code());
+	  }	
       }
     else
       {
@@ -100,6 +129,7 @@ private:
   std::size_t              noff;        // offset of the neighbor streamer in the vector of MQs
   MessagingGatewayBCPtr    mg;
   StreamingBackwardMessage mess;
+  std::string              header;
 };
 
 typedef boost::shared_ptr<NeighborIn> NeighborInPtr;

@@ -52,6 +52,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 				 BeliefStateIteratorVecPtr& mid_it,
 				 bool first_import)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " noff = " << noff);
   const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
   // read BeliefState* from NEIGHBOR_MQ
@@ -68,6 +69,8 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
     {
       std::size_t prio = 0;
       int timeout = 0;
+
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Read up to " << peq_cnt << " belief states");
       BeliefState* bs = mg->recvModel(offset, prio, timeout);
       if (bs == 0)
 	{
@@ -81,6 +84,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 	  // NULL models are not used for joining
 	  break;
 	}
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Push 1 belief state into bsv");
       bsv->push_back(bs); 
     }
   
@@ -95,6 +99,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 
   // turn on the bit that is respective to this context
   in_mask.set(noff);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " DONE");  
 }
 
 
@@ -134,6 +139,8 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
 		 const BeliefStateIteratorVecPtr& beg_it, 
 		 const BeliefStateIteratorVecPtr& end_it)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   // initialization
   assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
   std::size_t n = partial_eqs->size();
@@ -195,11 +202,10 @@ JoinThread::operator()()
 
   BeliefStateIteratorVecPtr beg_it(new BeliefStateIteratorVec(no_nbs));
   BeliefStateIteratorVecPtr mid_it(new BeliefStateIteratorVec(no_nbs));
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "no_nbs = " << no_nbs);
 
   while (!stop)
     {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "no_nbs = " << no_nbs);
-
       // look at JOIN_IN_MQ for notification of new models arrival
       std::size_t prio = 0;
       int timeout = 0;
@@ -217,6 +223,8 @@ JoinThread::operator()()
       // all neighbors have returned some models (not necessarily up to pack_size)
       if (in_mask.count_range(0, no_nbs+1) == no_nbs)
 	{
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Time to join");
+
 	  // time to join
 	  if (first_import)
 	    {
