@@ -60,7 +60,7 @@ namespace dmcs {
 
 
 #if defined(DEBUG)
-#define DMCS_LOG_TRACE(expr) LOG4CXX_TRACE(dmcs::logger, expr)
+#define DMCS_LOG_TRACE(expr) LOG4CXX_TRACE(dmcs::logger, __PRETTY_FUNCTION__ << expr)
 #define DMCS_LOG_DEBUG(expr) LOG4CXX_DEBUG(dmcs::logger, expr)
 #else
 #define DMCS_LOG_TRACE(expr) do {} while(0)

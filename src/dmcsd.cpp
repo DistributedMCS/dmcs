@@ -233,6 +233,7 @@ main(int argc, char* argv[])
       std::size_t limit_bind_rules = 0;
       std::size_t heuristics = 0;
       bool dynamic = false;
+      std::string logging;
 
       boost::program_options::options_description desc("Allowed options");
       desc.add_options()
@@ -248,6 +249,7 @@ main(int argc, char* argv[])
 	(LIMIT_ANSWERS, boost::program_options::value<std::size_t>(&limit_answers)->default_value(10), "set the limitation of answers to be computed")
 	(LIMIT_BIND_RULES, boost::program_options::value<std::size_t>(&limit_bind_rules)->default_value(100), "set the limitation of binding computed for each rule")
 	(HEURISTICS, boost::program_options::value<std::size_t>(&heuristics)->default_value(1), "choose heuristics")
+	(LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
 	;
       
       boost::program_options::variables_map vm;        
@@ -278,7 +280,15 @@ main(int argc, char* argv[])
 
 
       // setup log4cxx
-      init_loggers("dmcsd");
+      if (logging.empty())
+	{
+	  init_loggers("dmcsd");
+	}
+      else
+	{
+	  init_loggers("dmcsd", logging.c_str());
+	}
+
 
       if (filename_topo.empty())
 	{
