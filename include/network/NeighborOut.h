@@ -66,36 +66,34 @@ public:
   {
     if (!e)
       {
-	// wait for a future from the Router
-	ConflictNotificationPtr cn;
+	// wait for a notification from the Router
+	ConflictNotification* cn;
 	void *ptr         = static_cast<void*>(&cn);
 	unsigned int p    = 0;
 	std::size_t recvd = 0;
 
 	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Listen to router...");
 	router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got something from router");
 
-	Conflict* conflict       = cn->conflict;
-	BeliefState* partial_ass = cn->partial_ass;
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Value extracted");
+	if (ptr && cn)
+	  {
+	    Conflict* conflict       = cn->conflict;
+	    BeliefState* partial_ass = cn->partial_ass;
 
-	///assert ((conflict != 0) && (partial_ass != 0));
+	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got from Router: conflict = " << *conflict 
+			   << "*partial_ass = " << *partial_ass);
 
-	// compare
-
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got from Router: ");
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "val          = " << cn->val);
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "conflict     = " << conflict);
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "partial_ass  = " << partial_ass);
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "*conflict    = " << *conflict);
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "*partial_ass = " << *partial_ass);
-
-	// write to network
-	std::string header = HEADER_REQ_STM_DMCS;
-	conn->async_write(header, boost::bind(&NeighborOut::write_message, this,
-					      boost::asio::placeholders::error,
-					      conflict, partial_ass));
+	    // write to network
+	    std::string header = HEADER_REQ_STM_DMCS;
+	    conn->async_write(header, boost::bind(&NeighborOut::write_message, this,
+						  boost::asio::placeholders::error,
+						  conflict, partial_ass));
+	  }
+	else
+	  {
+	    DMCS_LOG_FATAL("Got null message: " << ptr << " " << cn);
+	    assert(ptr != 0 && cn != 0);
+	  }
       }
     else
       {

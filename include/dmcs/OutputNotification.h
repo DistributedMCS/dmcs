@@ -47,10 +47,12 @@ struct OutputNotification
   std::size_t pack_size;
 };
 
+  /*
 typedef boost::shared_ptr<OutputNotification> OutputNotificationPtr;
 typedef boost::promise<OutputNotificationPtr> OutputNotificationPromise;
 typedef boost::unique_future<OutputNotificationPtr> OutputNotificationFuture;
 typedef boost::shared_ptr<OutputNotificationFuture> OutputNotificationFuturePtr;
+  */
 
 } // namespace dmcs
 

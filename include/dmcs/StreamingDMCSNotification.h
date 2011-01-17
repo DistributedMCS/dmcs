@@ -50,11 +50,12 @@ struct StreamingDMCSNotification
   std::size_t port;
 };
 
+  /*
 typedef boost::shared_ptr<StreamingDMCSNotification> StreamingDMCSNotificationPtr;
 typedef boost::promise<StreamingDMCSNotificationPtr> StreamingDMCSNotificationPromise;
 typedef boost::unique_future<StreamingDMCSNotificationPtr> StreamingDMCSNotificationFuture;
 typedef boost::shared_ptr<StreamingDMCSNotificationFuture> StreamingDMCSNotificationFuturePtr;
-
+  */
 
 } // namespace dmcs
 

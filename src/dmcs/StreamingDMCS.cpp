@@ -64,8 +64,7 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     initialized(false),
     neighbor_threads(new ThreadVec),
     dmcs_sat_notif(new ConcurrentMessageQueue),
-    router_neighbors_notif(new ConcurrentMessageQueueVec),
-    mess_neighbors(new ConflictNotificationVec)
+    router_neighbors_notif(new ConcurrentMessageQueueVec)
 { }
 
 
@@ -123,20 +122,28 @@ StreamingDMCS::listen(ConcurrentMessageQueuePtr handler_dmcs_notif,
 		      std::size_t& port)
 {
   // wait for a signal from Handler
-  StreamingDMCSNotificationPtr sn;
+  StreamingDMCSNotification* sn;
   void *ptr         = static_cast<void*>(&sn);
   unsigned int p    = 0;
   std::size_t recvd = 0;
 
   handler_dmcs_notif->receive(ptr, sizeof(sn), recvd, p);
 
-  invoker   = sn->invoker;
-  pack_size = sn->pack_size;
-  port      = sn->port;
+  if (ptr && sn)
+    {
+      invoker   = sn->invoker;
+      pack_size = sn->pack_size;
+      port      = sn->port;
+    }
+  else
+    {
+      DMCS_LOG_FATAL("Got null message: " << ptr << " " << sn);
+      assert(ptr != 0 && sn != 0);
+    }
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "invoker   = " << invoker);
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "pack_size = " << pack_size);
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "port      = " << port);
+  DMCS_LOG_TRACE("invoker   = " << invoker);
+  DMCS_LOG_TRACE("pack_size = " << pack_size);
+  DMCS_LOG_TRACE("port      = " << port);
 }
 
 
@@ -157,33 +164,44 @@ StreamingDMCS::start_up()
       Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
       BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
       
-      mess_sat = ConflictNotificationPtr(new ConflictNotification(0, empty_conflict, empty_ass));
-      overwrite_send(dmcs_sat_notif, &mess_sat, sizeof(mess_sat), 0);
+      ConflictNotification* mess_sat = new ConflictNotification(0, empty_conflict, empty_ass);
+      ConflictNotification* ow_sat = 
+	(ConflictNotification*) overwrite_send(dmcs_sat_notif, &mess_sat, sizeof(mess_sat), 0);
+
+      if (ow_sat)
+	{
+	  delete ow_sat;
+	  ow_sat = 0;
+	}
     }
   else
     {
 
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "router_neighbors_notif.size() = ");
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << router_neighbors_notif->size());
+      DMCS_LOG_TRACE("Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
+      DMCS_LOG_TRACE("router_neighbors_notif.size() = ");
+      DMCS_LOG_TRACE(router_neighbors_notif->size());
 
       assert (router_neighbors_notif->size() == no_nbs);
 
+      Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
+      BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
+      ConflictNotification* cn = new ConflictNotification(0, empty_conflict, empty_ass);
+
       for (std::size_t i = 0; i < no_nbs; ++i)
 	{
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " First push to offset " << i);
+	  DMCS_LOG_TRACE(" First push to offset " << i);
 	  ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
-	  Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
-	  BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
 
-	  ConflictNotificationPtr cn(new ConflictNotification(0, empty_conflict, empty_ass));
-	  mess_neighbors->push_back(cn);
-	  //	  std::size_t p = 0;
-
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
+	  DMCS_LOG_TRACE(__PRETTY_FUNCTION__ << " Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
 			 <<", partial_ass = (" << cn->partial_ass << ") " << *(cn->partial_ass));
 
-	  overwrite_send(cmq, &cn, sizeof(cn), 0);
+	  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
+
+	  if (ow_neighbor)
+	    {
+	      delete ow_neighbor;
+	      ow_neighbor = 0;
+	    }
 	}
     }
 }

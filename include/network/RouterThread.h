@@ -55,25 +55,41 @@ public:
     while (1)
       {
 	// wait for any conflict from the local solver
-	ConflictNotificationPtr cn;
+	ConflictNotification* cn;
 	void *ptr         = static_cast<void*>(&cn);
 	unsigned int p    = 0;
 	std::size_t recvd = 0;
 
 	sat_router_notif->receive(ptr, sizeof(cn), recvd, p);
 
-	const std::size_t nid      = cn->val;
-	
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got a notification from local solver. nid = " << nid);
+	if (ptr && cn)
+	  {
+	    const std::size_t nid      = cn->val;
+	    
+	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got a notification from local solver. nid = " << nid);
+	    
+	    // inform neighbor nid about the conflict
+	    const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
+	    HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
+	    const std::size_t noff                  = pair->second;
+	    ConcurrentMessageQueuePtr& cmq          = (*router_neighbors_notif)[noff];
+	    
+	    std::size_t p1 = 0;
 
-	// inform neighbor nid about the conflict
-	const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
-	HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
-	const std::size_t noff                  = pair->second;
-	ConcurrentMessageQueuePtr& cmq          = (*router_neighbors_notif)[noff];
+	    ConflictNotification* ow_neighbor =
+	      (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), p1);
 
-	std::size_t p1 = 0;
-	overwrite_send(cmq, &cn, sizeof(cn), p1);
+	    if (ow_neighbor)
+	      {
+		delete ow_neighbor;
+		ow_neighbor = 0;
+	      }
+	  }
+	else
+	  {
+	    DMCS_LOG_FATAL("Got null message: " << ptr << " " << cn);
+	    assert (ptr != 0 && cn != 0);
+	  }
       }
   }
 

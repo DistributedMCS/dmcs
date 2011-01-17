@@ -62,6 +62,7 @@ struct ConflictNotification
   BeliefState* partial_ass; // partial assignment
 };
 
+  /*
 typedef boost::shared_ptr<ConflictNotification>           ConflictNotificationPtr;
 typedef std::vector<ConflictNotificationPtr>              ConflictNotificationVec;
 typedef boost::shared_ptr<ConflictNotificationVec>        ConflictNotificationVecPtr;
@@ -74,7 +75,7 @@ typedef boost::shared_ptr<ConflictNotificationPromiseVec> ConflictNotificationPr
 typedef boost::unique_future<ConflictNotificationPtr>     ConflictNotificationFuture;
 typedef boost::shared_ptr<ConflictNotificationFuture>     ConflictNotificationFuturePtr;
 typedef std::vector<ConflictNotificationFuturePtr>        ConflictNotificationFutureVec;
-typedef boost::shared_ptr<ConflictNotificationFutureVec>  ConflictNotificationFutureVecPtr;
+typedef boost::shared_ptr<ConflictNotificationFutureVec>  ConflictNotificationFutureVecPtr;*/
 
 } // namespace dmcs
 

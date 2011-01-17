@@ -123,9 +123,6 @@ private:
   ConcurrentMessageQueuePtr        handler_dmcs_notif;
   ConcurrentMessageQueuePtr        handler_output_notif;
 
-  StreamingDMCSNotificationPtr     mess_dmcs;
-  OutputNotificationPtr            mess_output;
-
   MessagingGatewayBCPtr            mg;
   Server*        server;
 };

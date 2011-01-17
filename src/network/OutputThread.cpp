@@ -79,20 +79,30 @@ OutputThread::loop(const boost::system::error_code& e)
 void
 OutputThread::wait_for_trigger()
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   // wait for Handler to tell me to return some models
-  OutputNotificationPtr on;
+  OutputNotification* on = 0;
   void *ptr         = static_cast<void*>(&on);
   unsigned int    p = 0;
   std::size_t recvd = 0;
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Wait for message from Handler");
+  DMCS_LOG_TRACE("Wait for message from Handler");
+
   handler_output_notif->receive(ptr, sizeof(on), recvd, p);
 
-  pack_size = on->pack_size;
+  if (ptr && on)
+    {
+      pack_size = on->pack_size;
+      left_2_send = on->pack_size;
+    }
+  else
+    {
+      DMCS_LOG_FATAL("Got null message: " << ptr << " " << on);
+      assert(ptr != 0 && on != 0);
+    }
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Got a message from Handler. pack_size = " << pack_size);
-  
-  left_2_send = pack_size;
+  DMCS_LOG_TRACE("Got a message from Handler. pack_size = " << pack_size);
 }
 
 

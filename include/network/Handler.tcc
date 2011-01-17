@@ -250,13 +250,26 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "invoker   = " << invoker);
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "pack_size = " << pack_size);
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "port      = " << port);
-      mess_dmcs = StreamingDMCSNotificationPtr(new StreamingDMCSNotification(invoker, pack_size, port));
-      overwrite_send(handler_dmcs_notif, &mess_dmcs, sizeof(mess_dmcs), 0);
+
+      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(invoker, pack_size, port);
+      StreamingDMCSNotification* ow_dmcs = 
+	(StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif, &mess_dmcs, sizeof(mess_dmcs), 0);
+      if (ow_dmcs)
+	{
+	  delete ow_dmcs;
+	  ow_dmcs = 0;
+	}
 
       // notify OutputThread
-      mess_output = OutputNotificationPtr(new OutputNotification(pack_size));
-      overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
-  
+      OutputNotification* mess_output = new OutputNotification(pack_size);
+      OutputNotification* ow_output = 
+	(OutputNotification*) overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
+      if (ow_output)
+	{
+	  delete ow_output;
+	  ow_output = 0;
+	}
+
       // back to waiting for incoming message
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Back to waiting for incoming message");
       sesh->conn->async_read(header,
