@@ -50,7 +50,8 @@ namespace dmcs {
 class RelSatSolver : public BaseSolver
 {
 public:
-  RelSatSolver(std::size_t my_id_,
+  RelSatSolver(bool il,
+	       std::size_t my_id_,
 	       const TheoryPtr& theory_,
 	       //	       const ProxySignatureByLocalPtr& mixed_sig_,
 	       const SignaturePtr& local_sig_,
@@ -82,6 +83,7 @@ private:
   update_bridge_input(SignatureByCtx::const_iterator);
 
 private:
+  bool                           is_leaf;
   std::size_t                    my_id;
   const TheoryPtr                theory;
   const SignaturePtr             sig;

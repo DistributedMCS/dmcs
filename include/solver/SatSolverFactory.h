@@ -40,7 +40,8 @@ namespace dmcs {
 class SatSolverFactory
 {
 public:
-  SatSolverFactory(std::size_t my_id_,
+  SatSolverFactory(bool il,
+		   std::size_t my_id_,
 		   const TheoryPtr& theory_,
 		   //const ProxySignatureByLocalPtr mixed_sig_,
 		   const SignaturePtr& local_sig_,
@@ -49,7 +50,8 @@ public:
 		   MessagingGatewayBCPtr& mg_,
 		   const ConcurrentMessageQueuePtr& dsn,
 		   const ConcurrentMessageQueuePtr& srn)
-    : my_id(my_id_),
+    : is_leaf(il),
+      my_id(my_id_),
       theory(theory_),
       //      mixed_sig(mixed_sig_),
       local_sig(local_sig_),
@@ -65,6 +67,7 @@ public:
   create();
 
 private:
+  bool                           is_leaf;
   std::size_t                    my_id;
   const TheoryPtr                theory;
   const SignaturePtr             local_sig;
@@ -81,7 +84,11 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(my_id, theory, local_sig, localV, system_size, mg, dmcs_sat_notif, sat_router_notif));
+  RelSatSolverPtr relsatsolver(new RelSatSolver(is_leaf, my_id, 
+						theory, local_sig, 
+						localV, system_size, 
+						mg, dmcs_sat_notif, 
+						sat_router_notif));
 
   return relsatsolver;
 }

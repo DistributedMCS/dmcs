@@ -149,10 +149,16 @@ StreamingDMCS::start_up()
 
   if (no_nbs == 0) // this is a leaf context
     {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Leaf context. Put an empty model into JOIN_OUT_MQ to start the SAT solver without input");
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Leaf context. SAT solver with empty conflict and empty ass.");
 
-      BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
-      mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+      //BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
+      //mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+
+      Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
+      BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
+      
+      mess_sat = ConflictNotificationPtr(new ConflictNotification(0, empty_conflict, empty_ass));
+      overwrite_send(dmcs_sat_notif, &mess_sat, sizeof(mess_sat), 0);
     }
   else
     {
@@ -170,7 +176,7 @@ StreamingDMCS::start_up()
 	  Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
 	  BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
 
-	  ConflictNotificationPtr cn(new ConflictNotification(2109, empty_conflict, empty_ass));
+	  ConflictNotificationPtr cn(new ConflictNotification(0, empty_conflict, empty_ass));
 	  mess_neighbors->push_back(cn);
 	  //	  std::size_t p = 0;
 

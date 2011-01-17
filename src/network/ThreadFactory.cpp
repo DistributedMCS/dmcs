@@ -115,10 +115,12 @@ boost::thread*
 ThreadFactory::createLocalSolveThread()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  const NeighborListPtr& nbs    = context->getNeighbors();
+  bool is_leaf                  = (nbs->size() == 0);
   const std::size_t my_id       = context->getContextID();
   const std::size_t system_size = context->getSystemSize();
 
-  SatSolverFactory ssf(my_id, theory, local_sig, localV, system_size, mg, dmcs_sat_notif, sat_router_notif);
+  SatSolverFactory ssf(is_leaf, my_id, theory, local_sig, localV, system_size, mg, dmcs_sat_notif, sat_router_notif);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

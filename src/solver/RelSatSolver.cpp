@@ -34,7 +34,8 @@
 
 namespace dmcs {
 
-RelSatSolver::RelSatSolver(std::size_t my_id_,
+RelSatSolver::RelSatSolver(bool il,
+			   std::size_t my_id_,
 			   const TheoryPtr& theory_, 
 			   const SignaturePtr& sig_,
 			   const BeliefStatePtr& localV_,
@@ -43,7 +44,8 @@ RelSatSolver::RelSatSolver(std::size_t my_id_,
 			   MessagingGatewayBCPtr& mg_,
 			   ConcurrentMessageQueuePtr& dsn,
 			   ConcurrentMessageQueuePtr& srn)
-  : my_id(my_id_),
+  : is_leaf(il),
+    my_id(my_id_),
     theory(theory_), 
     sig(sig_),
     localV(localV_),
@@ -144,7 +146,7 @@ RelSatSolver::solve()
   Conflict* conflict           = cn->conflict;
   BeliefState* new_partial_ass = cn->partial_ass;
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got a message from Handler. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Got a message from DMCS. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
 
   /*
   if (partial_ass == 0)
@@ -165,9 +167,14 @@ RelSatSolver::solve()
   // remove input part of the theory (from last solve)
   xInstance->removeLastInput();
 
-  // add new input
-  prepare_input();
+  if (!is_leaf)
+    {
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to prepare input");
+      // add new input
+      prepare_input();
+    }
 
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to solve");
   // now we can do SAT solving
   relsat_enum eResult = xSATSolver->eSolve();
 }
@@ -190,10 +197,18 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
+  BeliefState* bs;
   // copy input
-  BeliefState* bs = new BeliefState(*input);
+  if (is_leaf)
+    {
+      bs = new BeliefState(system_size, BeliefSet());
+    }
+  else
+    {
+      bs = new BeliefState(*input);
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input: " << *input);
+    }
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input: " << *input);
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "bs:    " << *bs);
 
   // set epsilon bit of my position so that the invoker knows this is SATISFIABLE

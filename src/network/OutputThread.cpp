@@ -124,7 +124,7 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
 	      // TIME OUT! Going to send whatever I got so far to the parent
 	      if (res->size() > 0)
 		{
-		  //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to send");
+		  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to send");
 		  header = HEADER_ANS;
 		  break;
 		}
@@ -154,6 +154,8 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
       // Got something is a reasonable time. Continue collecting.
       res->push_back(bs);
     } // for
+
+  header = HEADER_ANS;
 }
 
 
@@ -161,7 +163,7 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
 void
 OutputThread::write_result(BeliefStateVecPtr& res, const std::string& header)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "header = " << header);
 
   if (header.find(HEADER_ANS) != std::string::npos)
     { // send some models
@@ -184,6 +186,7 @@ OutputThread::write_result(BeliefStateVecPtr& res, const std::string& header)
 void
 OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr& res)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   if (!e)
     {
       assert (left_2_send >= res->size());
