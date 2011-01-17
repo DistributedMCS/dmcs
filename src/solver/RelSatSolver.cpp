@@ -136,47 +136,56 @@ void
 RelSatSolver::solve()
 {
   // wait for conflict and partial_ass from Handler
-  ConflictNotificationPtr cn;
+  ConflictNotification* cn;
   void *ptr         = static_cast<void*>(&cn);
   unsigned int p    = 0;
   std::size_t recvd = 0;
 
   dmcs_sat_notif->receive(ptr, sizeof(cn), recvd, p);
 
-  Conflict* conflict           = cn->conflict;
-  BeliefState* new_partial_ass = cn->partial_ass;
-
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Got a message from DMCS. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
-
-  /*
-  if (partial_ass == 0)
+  if (ptr && cn)
     {
-      partial_ass = new_partial_ass;
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "First time. Going to start");
-    }
-  else if ((*partial_ass) != (*new_partial_ass))
-    { // now restart
-      partial_ass = new_partial_ass;
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "New partial_ass. Going to restart");
-    }
-  else
-    { // continue
-    }*/
+      Conflict* conflict           = cn->conflict;
+      BeliefState* new_partial_ass = cn->partial_ass;
+
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Got a message from DMCS. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
+
+      /*
+	if (partial_ass == 0)
+	{
+	partial_ass = new_partial_ass;
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "First time. Going to start");
+	}
+	else if ((*partial_ass) != (*new_partial_ass))
+	{ // now restart
+	partial_ass = new_partial_ass;
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "New partial_ass. Going to restart");
+	}
+	else
+	{ // continue
+	}*/
   
 
-  // remove input part of the theory (from last solve)
-  xInstance->removeLastInput();
-
-  if (!is_leaf)
-    {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to prepare input");
-      // add new input
-      prepare_input();
+      // remove input part of the theory (from last solve)
+      xInstance->removeLastInput();
+      
+      if (!is_leaf)
+	{
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to prepare input");
+	  // add new input
+	  prepare_input();
+	}
+      
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to solve");
+      // now we can do SAT solving
+      relsat_enum eResult = xSATSolver->eSolve();
+      
     }
-
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to solve");
-  // now we can do SAT solving
-  relsat_enum eResult = xSATSolver->eSolve();
+  else
+    {
+      DMCS_LOG_FATAL("Got null message: " << ptr << " " << cn);
+      assert(ptr != 0 && cn != 0);
+    }
 }
 
 
