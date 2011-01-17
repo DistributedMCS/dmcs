@@ -85,11 +85,12 @@ OutputThread::wait_for_trigger()
   unsigned int    p = 0;
   std::size_t recvd = 0;
 
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Wait for message from Handler");
   handler_output_notif->receive(ptr, sizeof(on), recvd, p);
 
   pack_size = on->pack_size;
 
-  DMCS_LOG_DEBUG(" OutputThread::wait_for_trigger(): Got a message from Handler. pack_size = " << pack_size);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Got a message from Handler. pack_size = " << pack_size);
   
   left_2_send = pack_size;
 }

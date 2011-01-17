@@ -52,6 +52,7 @@ public:
       mg(mg_), noff(noff_),
       first_round(true)
   {
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
     stream(boost::system::error_code());
   }
 

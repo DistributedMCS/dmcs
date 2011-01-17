@@ -76,9 +76,8 @@ public:
 					     boost::asio::placeholders::error,
 					     ++res_it));
 
-    DMCS_LOG_DEBUG("io_service.run()");
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "io_service.run()");
     io_service.run();
-    DMCS_LOG_DEBUG("after io_service.run()");
   }
 
 private:

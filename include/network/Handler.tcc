@@ -246,24 +246,16 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e, 
 
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Notify my slaves of the new message");
 
-      // It's possible to swap (1) and (2)
+      // notify StreamingDMCS
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "invoker   = " << invoker);
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "pack_size = " << pack_size);
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "port      = " << port);
+      mess_dmcs = StreamingDMCSNotificationPtr(new StreamingDMCSNotification(invoker, pack_size, port));
+      overwrite_send(handler_dmcs_notif, &mess_dmcs, sizeof(mess_dmcs), 0);
 
-      // (1) notify StreamingDMCS
-      // use overwrite_send() 
-      StreamingDMCSNotificationPtr sn(new StreamingDMCSNotification(invoker, pack_size, port));
-      overwrite_send(handler_dmcs_notif, &sn, sizeof(sn), 0);
-
-      // (2) notify the local solver
-      /*      Conflict* conflict       = sesh->mess.getConflict();
-      BeliefState* partial_ass = sesh->mess.getPartialAss();
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to send: conflict = " << *conflict << ", partial_ass = " << *partial_ass);
-      ConflictNotificationPtr cn(new ConflictNotification(pack_size, conflict, partial_ass));
-      cnp.set_value(cn);*/
-
-      // (3) notify OutputThread
-      // use overwrite_send()
-      OutputNotificationPtr on(new OutputNotification(pack_size));
-      overwrite_send(handler_output_notif, &on, sizeof(on), 0);
+      // notify OutputThread
+      mess_output = OutputNotificationPtr(new OutputNotification(pack_size));
+      overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
   
       // back to waiting for incoming message
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Back to waiting for incoming message");

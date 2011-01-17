@@ -198,14 +198,17 @@ JoinThread::operator()()
 
   while (!stop)
     {
-      DMCS_LOG_DEBUG("no_nbs = " << no_nbs);
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "no_nbs = " << no_nbs);
 
       // look at JOIN_IN_MQ for notification of new models arrival
       std::size_t prio = 0;
       int timeout = 0;
       // notification from neighbor thread
+
       MessagingGateway<BeliefState, Conflict>::JoinIn nn = 
 	mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
+
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Received: " << nn.ctx_id << ", " << nn.peq_cnt);
 
       import_belief_states(nn.ctx_id, nn.peq_cnt, partial_eqs, 
 			   in_mask, end_mask,

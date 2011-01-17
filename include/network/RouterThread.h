@@ -56,7 +56,11 @@ public:
       {
 	// wait for any conflict from the local solver
 	ConflictNotificationPtr cn;
-	void *ptr = static_cast<void*>(&cn);
+	void *ptr         = static_cast<void*>(&cn);
+	unsigned int p    = 0;
+	std::size_t recvd = 0;
+
+	sat_router_notif->receive(ptr, sizeof(cn), recvd, p);
 
 	const std::size_t nid      = cn->val;
 	
@@ -68,8 +72,8 @@ public:
 	const std::size_t noff                  = pair->second;
 	ConcurrentMessageQueuePtr& cmq          = (*router_neighbors_notif)[noff];
 
-	std::size_t p = 0;
-	overwrite_send(cmq, &cn, sizeof(cn), p);
+	std::size_t p1 = 0;
+	overwrite_send(cmq, &cn, sizeof(cn), p1);
       }
   }
 

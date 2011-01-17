@@ -120,12 +120,11 @@ private:
   boost::thread*                   output_thread;
   boost::thread*                   streaming_dmcs_thread;
 
-  // replace by ConcurrentMessageQueue for StreamingDMCS and OutputThread
   ConcurrentMessageQueuePtr        handler_dmcs_notif;
   ConcurrentMessageQueuePtr        handler_output_notif;
-  StreamingDMCSNotificationPromise snp;
-  OutputNotificationPromise        onp;
-  ConflictNotificationPromise      cnp;
+
+  StreamingDMCSNotificationPtr     mess_dmcs;
+  OutputNotificationPtr            mess_output;
 
   MessagingGatewayBCPtr            mg;
   Server*        server;

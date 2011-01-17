@@ -80,14 +80,17 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 
   for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it, ++i)
     {
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Create neighbor thread " << i);
+
       const NeighborPtr nb = *it;
       ConcurrentMessageQueuePtr cmq(new ConcurrentMessageQueue);
-      router_neighbors_notif->push_back(cmq);
 
       NeighborThread nt(cmq, mg, nb, c2o, ctx_id, pack_size);
+      router_neighbors_notif->push_back(cmq);
       
       boost::thread* nit = new boost::thread(nt);
       neighbor_input_threads->push_back(nit);
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Create neighbor thread " << i << ". DONE");
     }
 }
 

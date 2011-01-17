@@ -41,6 +41,9 @@ overwrite_send(ConcurrentMessageQueuePtr& cmq,
 	       std::size_t size,
 	       unsigned int prio)
 {
+
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Begin");
+
   void* tmp_buf = 0;
 
   if (!cmq->try_send(buf, size, prio))
@@ -55,6 +58,8 @@ overwrite_send(ConcurrentMessageQueuePtr& cmq,
 
       cmq->send(buf, size, prio);
     }
+
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Now call return");
 
   return tmp_buf;
 }

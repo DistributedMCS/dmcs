@@ -72,7 +72,7 @@ public:
 
 private:
   void
-  listen(ConcurrentMessageQueuePtr& notif_from_handler,
+  listen(ConcurrentMessageQueuePtr notif_from_handler,
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
 	 std::size_t& port);
@@ -98,8 +98,9 @@ private:
   boost::thread*        router_thread;
   ThreadVecPtr          neighbor_threads;
   MessagingGatewayBCPtr mg;
-  ConcurrentMessageQueuePtr dmcs_sat_notif;
+  ConcurrentMessageQueuePtr    dmcs_sat_notif;
   ConcurrentMessageQueueVecPtr router_neighbors_notif;
+  ConflictNotificationVecPtr   mess_neighbors;
 
   std::size_t buf_count;
 };

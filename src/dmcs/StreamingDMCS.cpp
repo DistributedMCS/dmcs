@@ -64,7 +64,8 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     initialized(false),
     neighbor_threads(new ThreadVec),
     dmcs_sat_notif(new ConcurrentMessageQueue),
-    router_neighbors_notif(new ConcurrentMessageQueueVec)
+    router_neighbors_notif(new ConcurrentMessageQueueVec),
+    mess_neighbors(new ConflictNotificationVec)
 { }
 
 
@@ -110,12 +111,13 @@ StreamingDMCS::initialize(std::size_t invoker,
       join_thread     = tf.createJoinThread();
       router_thread   = tf.createRouterThread(router_neighbors_notif);
     }
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " All threads created!");
 }
 
 
 
 void
-StreamingDMCS::listen(ConcurrentMessageQueuePtr& handler_dmcs_notif,
+StreamingDMCS::listen(ConcurrentMessageQueuePtr handler_dmcs_notif,
 		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
 		      std::size_t& port)
@@ -131,6 +133,10 @@ StreamingDMCS::listen(ConcurrentMessageQueuePtr& handler_dmcs_notif,
   invoker   = sn->invoker;
   pack_size = sn->pack_size;
   port      = sn->port;
+
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "invoker   = " << invoker);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "pack_size = " << pack_size);
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "port      = " << port);
 }
 
 
@@ -152,6 +158,8 @@ StreamingDMCS::start_up()
     {
 
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "router_neighbors_notif.size() = ");
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << router_neighbors_notif->size());
 
       assert (router_neighbors_notif->size() == no_nbs);
 
@@ -161,9 +169,15 @@ StreamingDMCS::start_up()
 	  ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
 	  Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
 	  BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
-	  ConflictNotificationPtr cn(new ConflictNotification(empty_conflict, empty_ass));
-	  std::size_t p = 0;
-	  overwrite_send(cmq, &cn, sizeof(cn), p);
+
+	  ConflictNotificationPtr cn(new ConflictNotification(2109, empty_conflict, empty_ass));
+	  mess_neighbors->push_back(cn);
+	  //	  std::size_t p = 0;
+
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
+			 <<", partial_ass = (" << cn->partial_ass << ") " << *(cn->partial_ass));
+
+	  overwrite_send(cmq, &cn, sizeof(cn), 0);
 	}
     }
 }

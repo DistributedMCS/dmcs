@@ -57,6 +57,7 @@ public:
       invoker(invoker_), 
       pack_size(pack_size_)
   {
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
     stream(boost::system::error_code());
   }
 
@@ -65,24 +66,30 @@ public:
   {
     if (!e)
       {
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 	// wait for a future from the Router
 	ConflictNotificationPtr cn;
 	void *ptr         = static_cast<void*>(&cn);
 	unsigned int p    = 0;
 	std::size_t recvd = 0;
 
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Listen to router...");
 	router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got something from router");
 
 	Conflict* conflict       = cn->conflict;
 	BeliefState* partial_ass = cn->partial_ass;
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Value extracted");
+
+	///assert ((conflict != 0) && (partial_ass != 0));
 
 	// compare
 
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ <<
-		       "Got from Router: "
-		       "conflict = " << *conflict <<
-		       "partial_ass = " << *partial_ass);
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got from Router: ");
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "val          = " << cn->val);
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "conflict     = " << conflict);
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "partial_ass  = " << partial_ass);
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "*conflict    = " << *conflict);
+	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "*partial_ass = " << *partial_ass);
 
 	// write to network
 	std::string header = HEADER_REQ_STM_DMCS;
@@ -103,6 +110,7 @@ public:
   write_message(const boost::system::error_code& e,
 		Conflict* conflict, BeliefState* partial_ass)
   {
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
     StreamingForwardMessage mess(invoker, pack_size, conflict, partial_ass);
     conn->async_write(mess, boost::bind(&NeighborOut::stream, this,  
 					boost::asio::placeholders::error));
