@@ -30,6 +30,8 @@
 #if !defined(_SAT_SOLVER_TCC)
 #define _SAT_SOLVER_TCC
 
+#include "dmcs/Log.h"
+
 #include "parser/BaseBuilder.h"
 #include "parser/ClaspResultGrammar.h"
 #include "parser/ClaspResultBuilder.h"
@@ -80,9 +82,7 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const TheoryPtr& theory, std::s
       // parse result and set belief states
       //
 
-#if defined(DEBUG)
-      std::cerr << "Parsing the models..." << std::endl;
-#endif // DEBUG
+      DMCS_LOG_TRACE("Parsing the models...");
       
       //Parser model_builder(context_signature, belief_states);
       
@@ -98,12 +98,12 @@ SatSolver<Builder, Parser, ParserGrammar>::solve(const TheoryPtr& theory, std::s
     }
   catch (std::ios_base::failure& e)
     {
-      std::cerr << "Error: " << e.what() << std::endl;
+      DMCS_LOG_ERROR("Parsing error in SatSolver: " << e.what());
       throw e;
     }
   catch(std::exception& e)
     {
-      std::cerr << "Error: " << e.what() << std::endl;
+      DMCS_LOG_ERROR("Parsing error in SatSolver: " << e.what());
       throw e;
     }
   

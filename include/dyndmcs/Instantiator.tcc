@@ -30,6 +30,8 @@
 #ifndef INSTANTIATOR_TCC
 #define INSTANTIATOR_TCC
 
+#include "dmcs/Log.h"
+
 namespace dmcs {
 
 template<typename BridgeBodyType>
@@ -61,12 +63,10 @@ instantiate_body(const BridgeBodyType& body,
 	  const ContextSubstitutionBySrcSym& ctt_ss = boost::get<Tag::SrcSym>(*ctx_sub);
 	  ContextSubstitutionBySrcSym::const_iterator sub_it = ctt_ss.find(boost::make_tuple(ctt, sBelief(sb)));
 	  
-#ifdef DEBUG
-	  std::cerr << "BridgeAtom = " << *it << std::endl
-		    << "ctt = " << ctt << std::endl
-		    << "sb  = " << sb << std::endl;
-#endif
-	  
+	  DMCS_LOG_DEBUG("BridgeAtom = " << *it);
+	  DMCS_LOG_DEBUG("ctt = " << ctt);
+	  DMCS_LOG_DEBUG("sb  = " << sb);
+
 	  assert ( sub_it != ctt_ss.end() );
 	  
 	  // now instantiate with the target context and the image atom in that context
@@ -107,9 +107,7 @@ instantiate_body(const BridgeBodyType& body,
 	      // and port) must be available in context_info
 	      assert ( nb_info != context_info->end() );
 
-#ifdef DEBUG	      
-	      std::cerr << "Add neighbor " << neighbor_id << std::endl;
-#endif
+	      DMCS_LOG_DEBUG("Adding neighbor " << neighbor_id);
 
 	      neighbors->push_back(*nb_info);
 	    }

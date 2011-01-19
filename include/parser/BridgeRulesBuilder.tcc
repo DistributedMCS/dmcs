@@ -32,6 +32,8 @@
 
 #include "parser/SpiritDebugging.h"
 
+#include "dmcs/Log.h"
+
 #include <boost/functional/hash.hpp>
 #include <iostream>
 #include <algorithm>
@@ -74,9 +76,7 @@ BridgeRulesBuilder<Grammar>::buildNode(typename BaseBuilder<Grammar>::node_t& no
 
   bridge_rules->push_back(r);
 
-#ifdef DEBUG
-  std::cerr << "Got new rule r = " << r << std::endl;
-#endif
+  DMCS_LOG_TRACE("Got new rule r = " << r);
 
   vm.clear();
   neighbor_list->sort();
@@ -94,7 +94,6 @@ BridgeRulesBuilder<Grammar>::build_disjunctive_head(typename BaseBuilder<Grammar
   for (typename BaseBuilder<Grammar>::node_t::tree_iterator it = node.children.begin();
       it != node.children.end(); ++it)
     {
-
       std::string atom_name = BaseBuilder<Grammar>::createStringFromNode(it->children[0]);
 
       SignaturePtr& local_sig = (*global_sigs)[ctx_id - 1];
@@ -120,9 +119,7 @@ BridgeRulesBuilder<Grammar>::build_body(typename BaseBuilder<Grammar>::node_t& n
 	{
 	  BridgeAtom bap = build_bridge_atom(it->children[0]);
 
-#ifdef DEBUG  
-	  std::cerr << "Got positive bridge atom:" << bap << std::endl;
-#endif
+	  DMCS_LOG_TRACE("Got positive bridge atom:" << bap);
 
 	  // getPositiveBody(r)->push_back(bap);
 	  r->second.first->push_back(bap);
@@ -132,9 +129,7 @@ BridgeRulesBuilder<Grammar>::build_body(typename BaseBuilder<Grammar>::node_t& n
 	{
 	  BridgeAtom bap = build_bridge_atom(it->children[1]);
 
-#ifdef DEBUG  
-	  std::cerr << "Got negative bridge atom:" << bap << std::endl;
-#endif
+	  DMCS_LOG_TRACE("Got negative bridge atom:" << bap);
 
 	  // getNegativeBody(r)->push_back(bap);
 	  r->second.second->push_back(bap);
@@ -178,10 +173,8 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
 
   std::string str_schematic_const = BaseBuilder<Grammar>::createStringFromNode(node_sb);
 
-#ifdef DEBUG
-  std::cerr << "Facing: " << str_context_term << ", " << str_schematic_const << std::endl;
-  std::cerr << "Context Variables counter = " << ctx_var_counter << std::endl;
-#endif
+  DMCS_LOG_DEBUG("Got: " << str_context_term << ", " << str_schematic_const);
+  DMCS_LOG_DEBUG("Context Variables counter = " << ctx_var_counter);
 
   ContextTerm context_term;
   SchematicBelief schematic_belief;
@@ -219,16 +212,18 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
       std::bitset<sizeof(ContextTerm)*8> context_term_sb = context_term;
       std::bitset<sizeof(SchematicBelief)*8> schematic_belief_sb = schematic_belief;
 
-      std::cerr << "str_context_term    = " << str_context_term << std::endl 
-		<< "encoded             = " << context_term << std::endl
-		<< "                    = " << context_term_sb << std::endl;
-      std::cerr << "isVar = " << isCtxVar(context_term) << ", ctx_id = " << ctxID(context_term);
-      std::cerr << ", var = " << varID(context_term) << std::endl;
+      DMCS_LOG_DEBUG("str_context_term    = " << str_context_term);
+      DMCS_LOG_DEBUG("encoded             = " << context_term);
+      DMCS_LOG_DEBUG("                    = " << context_term_sb);
+      DMCS_LOG_DEBUG("isVar               = " << isCtxVar(context_term));
+      DMCS_LOG_DEBUG("ctx_id              = " << ctxID(context_term));
+      DMCS_LOG_DEBUG("var                 = " << varID(context_term));
       
-      std::cerr << "str_schematic_const = " << str_schematic_const << std::endl
-		<< "encoded             = " << schematic_belief << std::endl
-		<< "                    = " << schematic_belief_sb << std::endl;
-      std::cerr << "type =" << sBeliefType(schematic_belief) << ", schematic_const = " << sBelief(schematic_belief) << std::endl;
+      DMCS_LOG_DEBUG("str_schematic_const = " << str_schematic_const);
+      DMCS_LOG_DEBUG("encoded             = " << schematic_belief);
+      DMCS_LOG_DEBUG("                    = " << schematic_belief_sb);
+      DMCS_LOG_DEBUG("type                = " << sBeliefType(schematic_belief));
+      DMCS_LOG_DEBUG("schematic_const     = " << sBelief(schematic_belief));
 #endif
     }
   else // context id
@@ -237,7 +232,9 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
       std::size_t context_id = std::atoi(str_context_term.c_str());
       context_term = ctxConstTerm(context_id);
 
-      NeighborList::const_iterator it = std::find_if(neighbor_list->begin(), neighbor_list->end(), compareNeighbors(context_id));
+      NeighborList::const_iterator it = std::find_if(neighbor_list->begin(),
+						     neighbor_list->end(),
+						     compareNeighbors(context_id));
 
       if (it == neighbor_list->end()) // add new neighbor to NeighborList
 	{
@@ -287,21 +284,22 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
       std::bitset<sizeof(ContextTerm)*8> context_term_sb = context_term;
       std::bitset<sizeof(SchematicBelief)*8> schematic_belief_sb = schematic_belief;
 
-      std::cerr << "str_context_term    = " << str_context_term << std::endl 
-		<< "encoded             = " << context_term << std::endl
-		<< "                    = " << context_term_sb << std::endl;
-      std::cerr << "isVar = " << isCtxVar(context_term) << std::endl;
-
-      std::cerr << "str_schematic_const = " << str_schematic_const << std::endl
-		<< "encoded             = " << schematic_belief << std::endl
-		<< "                    = " << schematic_belief_sb << std::endl;
-      std::cerr << "type =" << sBeliefType(schematic_belief) << ", schematic_const = " << sBelief(schematic_belief) << std::endl;
+      DMCS_LOG_DEBUG("str_context_term    = " << str_context_term);
+      DMCS_LOG_DEBUG("encoded             = " << context_term);
+      DMCS_LOG_DEBUG("                    = " << context_term_sb);
+      DMCS_LOG_DEBUG("isVar               = " << isCtxVar(context_term));
+      DMCS_LOG_DEBUG("ctx_id              = " << ctxID(context_term));
+      DMCS_LOG_DEBUG("var                 = " << varID(context_term));
+      
+      DMCS_LOG_DEBUG("str_schematic_const = " << str_schematic_const);
+      DMCS_LOG_DEBUG("encoded             = " << schematic_belief);
+      DMCS_LOG_DEBUG("                    = " << schematic_belief_sb);
+      DMCS_LOG_DEBUG("type                = " << sBeliefType(schematic_belief));
+      DMCS_LOG_DEBUG("schematic_const     = " << sBelief(schematic_belief));
 #endif
     }
 
-#ifdef DEBUG
-  std::cerr << "Create atom (" << context_term << ":" << schematic_belief << ")" << std::endl;
-#endif  
+  DMCS_LOG_DEBUG("Creating atom (" << context_term << ":" << schematic_belief << ")");
 
   BridgeAtom ba(context_term, schematic_belief);
 

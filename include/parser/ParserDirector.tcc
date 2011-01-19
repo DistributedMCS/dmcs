@@ -33,6 +33,8 @@
 
 #include "parser/BaseBuilder.h"
 
+#include "dmcs/Log.h"
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -102,11 +104,8 @@ ParserDirector<Grammar>::parse(std::istream& is)
   //  buf << is.rdbuf();
   std::string input = buf.str();
 
-#ifdef DEBUG
-  std::cerr << std::endl;
-  std::cerr << "parsing input (size=" << input.size() << "):" << std::endl;
-  std::cerr << input << std::endl;
-#endif //DEBUG
+  DMCS_LOG_DEBUG("Parsing input (size=" << input.size() << "):");
+  DMCS_LOG_DEBUG(input);
 
   typename BaseBuilder<Grammar>::iterator_t it_begin(input.c_str(), input.c_str()+input.size());
   typename BaseBuilder<Grammar>::iterator_t it_end;

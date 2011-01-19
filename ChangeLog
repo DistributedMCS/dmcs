@@ -1,3 +1,16 @@
+2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/solver/SatSolver.tcc: Add support for DMCS_LOG_*.
+	* include/parser/ParserDirector.tcc: Likewise.
+	* include/parser/BridgeRulesBuilder.tcc: Likewise.
+	* include/dyndmcs/Instantiator.tcc: Likewise.
+
+	* include/network/BaseClient.h: Fix warning.
+
+	* include/mcs/Rule.h: Fix argument-dependent name lookup.
+
+	* include/dmcs/Log.h (DMCS_LOG_TRACE): Beautification.
+
 2011-01-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* log4cxx.cfg: Remove date output.
