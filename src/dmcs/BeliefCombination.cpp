@@ -159,9 +159,6 @@ combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u,
 	}
       else 
 	{
-#if 0
-	  std::cerr << " Upps. MISMATCH at position" << std::endl;
-#endif
 	  return false;
 	}
 
