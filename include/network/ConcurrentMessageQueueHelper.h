@@ -31,6 +31,7 @@
 #ifndef CONCURRENT_MESSAGE_QUEUE_HELPER_H
 #define CONCURRENT_MESSAGE_QUEUE_HELPER_H
 
+#include "dmcs/Log.h"
 #include "network/ConcurrentMessageQueue.h"
 
 namespace dmcs {

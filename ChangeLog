@@ -1,3 +1,18 @@
+2011-01-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/ThreadFactory.h: Joiner also needs to know the
+	MQs to inform the neighbors.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/network/JoinThread.h: Implement a DFS strategy to ask
+	for next models.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Include Log.h.
+
+	* include/dmcs/CommandTypeFactory.h: Remove some MQs.
+
 2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/solver/SatSolver.tcc: Add support for DMCS_LOG_*.

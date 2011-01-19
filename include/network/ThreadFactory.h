@@ -63,7 +63,7 @@ public:
 			ConcurrentMessageQueueVecPtr& router_neighbors_notif);
 
   boost::thread*
-  createJoinThread();
+  createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_notif);
 
   boost::thread*
   createLocalSolveThread();

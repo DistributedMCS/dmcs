@@ -107,7 +107,7 @@ StreamingDMCS::initialize(std::size_t invoker,
   if (no_nbs > 0)
     {
       tf.createNeighborThreads(neighbor_threads, router_neighbors_notif);
-      join_thread     = tf.createJoinThread();
+      join_thread     = tf.createJoinThread(router_neighbors_notif);
       router_thread   = tf.createRouterThread(router_neighbors_notif);
     }
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " All threads created!");

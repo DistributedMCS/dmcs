@@ -46,14 +46,16 @@ class JoinThread
 {
 public:
   JoinThread(std::size_t no_nbs_,
+	     std::size_t ss,
 	     const HashedBiMapPtr& c2o_,
-	     MessagingGatewayBCPtr& mg_);
+	     MessagingGatewayBCPtr& mg_,
+	     ConcurrentMessageQueueVecPtr& jnn);
 
   void 
   operator()();
 
 private:
-  void
+  bool
   import_belief_states(std::size_t noff, std::size_t peq_cnt,
 		       BeliefStatePackagePtr& partial_eqs, 
 		       bm::bvector<>& in_mask,
@@ -61,6 +63,12 @@ private:
 		       BeliefStateIteratorVecPtr& beg_it, 
 		       BeliefStateIteratorVecPtr& mid_it,
 		       bool first_import);
+
+  std::size_t
+  next_to_ask(std::vector<bool>& eom);
+
+  void
+  ask_for_next(std::size_t next);
 
   std::size_t
   join(const BeliefStateIteratorVecPtr& run_it);
@@ -71,9 +79,11 @@ private:
        const BeliefStateIteratorVecPtr& end_it);
 
 private:
-  std::size_t           no_nbs;      // number of neighbors left from which I need the models
-  HashedBiMapPtr        c2o;
-  MessagingGatewayBCPtr mg;
+  std::size_t                  no_nbs;      // number of neighbors 
+  std::size_t                  system_size;
+  HashedBiMapPtr               c2o;
+  MessagingGatewayBCPtr        mg;
+  ConcurrentMessageQueueVecPtr joiner_neighbors_notif;
 };
 
 } // namespace dmcs

@@ -28,6 +28,8 @@
  */
 
 #include "dmcs/BeliefCombination.h"
+#include "dmcs/ConflictNotification.h"
+#include "network/ConcurrentMessageQueueHelper.h"
 #include "network/JoinThread.h"
 
 #include "dmcs/Log.h"
@@ -35,24 +37,31 @@
 namespace dmcs {
 
 JoinThread::JoinThread(std::size_t no_nbs_,
+		       std::size_t ss,
 		       const HashedBiMapPtr& c2o_,
-		       MessagingGatewayBCPtr& mg_)
+		       MessagingGatewayBCPtr& mg_,
+		       ConcurrentMessageQueueVecPtr& jnn)
   : no_nbs(no_nbs_),
+    system_size(ss),
     c2o(c2o_),
-    mg(mg_)
+    mg(mg_),
+    joiner_neighbors_notif(jnn)
 { }
 
 
-void
+bool
 JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt, 
 				 BeliefStatePackagePtr& partial_eqs, 
 				 bm::bvector<>& in_mask,
-				 bm::bvector<>& end_mask,
+				 bm::bvector<>& pack_full,
 				 BeliefStateIteratorVecPtr& beg_it, 
 				 BeliefStateIteratorVecPtr& mid_it,
 				 bool first_import)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " noff = " << noff);
+
+  // end of models 
+  bool eom = false; 
   const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
   // read BeliefState* from NEIGHBOR_MQ
@@ -74,18 +83,31 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
       BeliefState* bs = mg->recvModel(offset, prio, timeout);
       if (bs == 0)
 	{
-	  // It must be the last model to be NULL;
-	  // otw, the neighbor sent me some crap
-	  assert (i == peq_cnt - 1);
+	  assert (i >= peq_cnt - 2);
+
+	  if (i == peq_cnt - 2)
+	    {
+	      // This is the sign of eom
+	      BeliefState* bs1 = mg->recvModel(offset, prio, timeout);
+
+	      // two NULL models mean end of models
+	      assert (bs1 == 0);
+	      eom = true;
+	    }
+
+	  // Otw, i == peq_cnt-1
+	  // This is the sign of end of a package of models
 
 	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Reached a NULL model. set bit noff = " << noff);
 	 
 	  // mark that this neighbor reached its pack_size. 
-	  end_mask.set(noff);
+	  pack_full.set(noff);
 
 	  // NULL models are not used for joining
 	  break;
 	}
+
+      // normal case, just got a belief state
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Push 1 belief state into bsv");
       bsv->push_back(bs); 
     }
@@ -102,6 +124,8 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
   // turn on the bit that is respective to this context
   in_mask.set(noff);
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " DONE");  
+
+  return eom; 
 }
 
 
@@ -192,15 +216,68 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
 }
 
 
+// This can be a helper function
+// return -1 when all neighbors are asked and run out of models
+std::size_t
+JoinThread::next_to_ask(std::vector<bool>& eom)
+{
+  // find the first index such that eom[index] = false
+  std::size_t index = 0;
+  for ( ; index < eom.size(); ++index)
+    {
+      if (!eom[index])
+	{
+	  break;
+	}
+    }
+
+  return index;
+}
+
+
+
+void
+JoinThread::ask_for_next(std::size_t next)
+{
+  // for now, let's put empty conflict and empty ass to notify the neighbors
+  Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
+  BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
+  ConflictNotification* cn = new ConflictNotification(0, empty_conflict, empty_ass);
+
+  for (std::size_t i = 0; i < next; ++i)
+    {
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " First push to offset " << i);
+      ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[i];
+      
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
+		     <<", partial_ass = (" << cn->partial_ass << ") " << *(cn->partial_ass));
+      
+      ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
+      
+      if (ow_neighbor)
+	{
+	  delete ow_neighbor;
+	  ow_neighbor = 0;
+	}
+    }
+}
+
 void
 JoinThread::operator()()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
+  // offset of the neighbor that we want the next package of models
+  std::vector<bool> eom(no_nbs, false);
+
   bool stop = false;
   bool first_import = true;
   bm::bvector<> in_mask;
-  bm::bvector<> end_mask;
+  bm::bvector<> pack_full;
+  bm::bvector<> next_mask;
+
+  next_mask.resize(no_nbs+1);
+  next_mask.set();           // set all bits to 1
 
   // set up package of empty BeliefStates
   BeliefStatePackagePtr partial_eqs(new BeliefStatePackage);
@@ -226,9 +303,9 @@ JoinThread::operator()()
 
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Received: " << nn.ctx_id << ", " << nn.peq_cnt);
 
-      import_belief_states(nn.ctx_id, nn.peq_cnt, partial_eqs, 
-			   in_mask, end_mask,
-			   beg_it, mid_it, first_import);
+      eom[nn.ctx_id] = import_belief_states(nn.ctx_id, nn.peq_cnt, partial_eqs, 
+					 in_mask, pack_full,
+					 beg_it, mid_it, first_import);
 
       // all neighbors have returned some models (not necessarily up to pack_size)
       if (in_mask.count_range(0, no_nbs+1) == no_nbs)
@@ -274,14 +351,25 @@ JoinThread::operator()()
 		}
 	    }
 	  
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Check for stop. count = " << end_mask.count_range(0, no_nbs+1) << ", no_nbs = " << no_nbs);
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Check for stop. count = " << pack_full.count_range(0, no_nbs+1) << ", no_nbs = " << no_nbs);
 
-	  if (end_mask.count_range(0, no_nbs+1) == no_nbs)
+	  if (pack_full.count_range(0, no_nbs+1) == no_nbs)
 	    {
-	      // all neighbors reached their pack_size. Need a
-	      // strategy to find a neighbor to ask for next models.
-	      // for now let stop
-	      stop = true;
+	      // Now we need to pick a neighbor to ask for next models
+	      std::size_t next = next_to_ask(eom);
+	      if (next == eom.size())
+		{
+		  // Really, we have nothing else to expect!
+		  stop = true;
+		}
+	      else
+		{
+		  for (std::size_t i = 0; i <= next; ++i)
+		    {
+		      ask_for_next(i);
+		      eom[i] = false;
+		    }
+		}
 	    }
 	}
 
