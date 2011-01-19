@@ -1,3 +1,31 @@
+2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcs/BeliefCombination.cpp: Cleanup.
+
+	* include/parser/BridgeRulesBuilder.tcc: Fix regression.
+
+	* include/solver/SatSolver.tcc: Add support for DMCS_LOG_*.
+	* include/parser/ParserDirector.tcc: Likewise.
+	* include/parser/BridgeRulesBuilder.tcc: Likewise.
+	* include/dyndmcs/Instantiator.tcc: Likewise.
+	* testsuite/Makefile.am: Likewise.
+	* testsuite/testBlockingClasp.cpp: Likewise.
+	* testsuite/testTranslation.cpp: Likewise.
+	* testsuite/testClaspResultOnlineParser.cpp: Likewise.
+	* src/dmcs/BaseDMCS.cpp: Likewise.
+	* src/dmcs/Cache.cpp: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+	* src/dyndmcs/DynamicConfiguration.cpp: Likewise.
+	* src/dyndmcs/Instantiator.cpp: Likewise.
+	* src/parser/ClaspResultOnlineParser.cpp: Likewise.
+
+	* include/network/BaseClient.h: Fix warning.
+
+	* include/mcs/Rule.h: Fix argument-dependent name lookup.
+
+	* include/dmcs/Log.h (DMCS_LOG_TRACE): Beautification.
+
 2011-01-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/OutputThread.cpp: Add some more debugging
@@ -14,35 +42,6 @@
 
 	* include/dmcs/StreamingBackwardMessage.h: Do not output NULL
 	pointers at the end.
-
-2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* src/dmcs/BeliefCombination.cpp: Cleanup.
-
-	* include/parser/BridgeRulesBuilder.tcc: Fix regression.
-
-	* include/solver/SatSolver.tcc: Add support for DMCS_LOG_*.
-	* include/parser/ParserDirector.tcc: Likewise.
-	* include/parser/BridgeRulesBuilder.tcc: Likewise.
-	* include/dyndmcs/Instantiator.tcc: Likewise.
-	* testsuite/Makefile.am: Likewise.
-	* testsuite/testBlockingClasp.cpp: Likewise.
-	* testsuite/testTranslation.cpp: Likewise.
-	* src/dmcs/BaseDMCS.cpp: Likewise.
-	* src/dmcs/Cache.cpp: Likewise.
-	* src/dmcs/OptDMCS.cpp: Likewise.
-	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
-	* src/dyndmcs/DynamicConfiguration.cpp: Likewise.
-	* src/dyndmcs/Instantiator.cpp: Likewise.
-	* src/parser/ClaspResultOnlineParser.cpp: Likewise.
-
-	* include/network/BaseClient.h: Fix warning.
-
-	* include/mcs/Rule.h: Fix argument-dependent name lookup.
-
-	* include/dmcs/Log.h (DMCS_LOG_TRACE): Beautification.
-
-2011-01-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/OutputThread.cpp: Typo.
 

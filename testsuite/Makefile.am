@@ -59,10 +59,10 @@ check_PROGRAMS = \
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
-	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/solver/libsolver.a \
+	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/loopformula/libtranslation.a
 
 testBeliefComparison_SOURCES = testBeliefComparison.cpp
