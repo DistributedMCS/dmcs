@@ -44,8 +44,8 @@ class BaseClient
 {
 public:
   BaseClient(boost::asio::io_service& io_service,
-	 boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-	 const std::string& my_header_)
+	     boost::asio::ip::tcp::resolver::iterator /* endpoint_iterator */,
+	     const std::string& my_header_)
     : io_service_(io_service),
       conn(new connection(io_service)),
       my_header(my_header_)
