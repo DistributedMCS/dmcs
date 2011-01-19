@@ -288,8 +288,6 @@ BridgeRulesBuilder<Grammar>::build_bridge_atom(typename BaseBuilder<Grammar>::no
       DMCS_LOG_DEBUG("encoded             = " << context_term);
       DMCS_LOG_DEBUG("                    = " << context_term_sb);
       DMCS_LOG_DEBUG("isVar               = " << isCtxVar(context_term));
-      DMCS_LOG_DEBUG("ctx_id              = " << ctxID(context_term));
-      DMCS_LOG_DEBUG("var                 = " << varID(context_term));
       
       DMCS_LOG_DEBUG("str_schematic_const = " << str_schematic_const);
       DMCS_LOG_DEBUG("encoded             = " << schematic_belief);

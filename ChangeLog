@@ -1,3 +1,20 @@
+2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/parser/BridgeRulesBuilder.tcc: Fix regression.
+
+	* include/solver/SatSolver.tcc: Add support for DMCS_LOG_*.
+	* include/parser/ParserDirector.tcc: Likewise.
+	* include/parser/BridgeRulesBuilder.tcc: Likewise.
+	* include/dyndmcs/Instantiator.tcc: Likewise.
+	* testsuite/Makefile.am: Likewise.
+	* testsuite/testTranslation.cpp: Likewise.
+
+	* include/network/BaseClient.h: Fix warning.
+
+	* include/mcs/Rule.h: Fix argument-dependent name lookup.
+
+	* include/dmcs/Log.h (DMCS_LOG_TRACE): Beautification.
+
 2011-01-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/OutputThread.cpp: Typo.
@@ -24,21 +41,6 @@
 	* include/network/ConcurrentMessageQueueHelper.h: Include Log.h.
 
 	* include/dmcs/CommandTypeFactory.h: Remove some MQs.
-
-2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* include/solver/SatSolver.tcc: Add support for DMCS_LOG_*.
-	* include/parser/ParserDirector.tcc: Likewise.
-	* include/parser/BridgeRulesBuilder.tcc: Likewise.
-	* include/dyndmcs/Instantiator.tcc: Likewise.
-	* testsuite/Makefile.am: Likewise.
-	* testsuite/testTranslation.cpp: Likewise.
-
-	* include/network/BaseClient.h: Fix warning.
-
-	* include/mcs/Rule.h: Fix argument-dependent name lookup.
-
-	* include/dmcs/Log.h (DMCS_LOG_TRACE): Beautification.
 
 2011-01-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
