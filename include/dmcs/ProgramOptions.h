@@ -50,6 +50,7 @@ namespace dmcs {
 #define TEMPLATE         "template"
 #define PREFIX           "prefix"
 #define LOGGING          "logging"
+#define DAEMONIZE        "daemon"
 #define DYNAMIC          "dynamic"
 #define MATCH_MAKER      "mm"
 #define ROOT_CTX         "root"

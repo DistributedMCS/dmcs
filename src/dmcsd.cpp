@@ -67,6 +67,7 @@
 
 #include <string>
 #include <fstream>
+#include <cstdlib> // daemon()
 
 
 using namespace dmcs;
@@ -250,6 +251,7 @@ main(int argc, char* argv[])
 	(LIMIT_BIND_RULES, boost::program_options::value<std::size_t>(&limit_bind_rules)->default_value(100), "set the limitation of binding computed for each rule")
 	(HEURISTICS, boost::program_options::value<std::size_t>(&heuristics)->default_value(1), "choose heuristics")
 	(LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
+	(DAEMONIZE, "start dmcsd in the background")
 	;
       
       boost::program_options::variables_map vm;        
@@ -290,10 +292,22 @@ main(int argc, char* argv[])
 	}
 
 
+      // go into background
+      if (vm.count(DAEMONIZE))
+	{
+	  // redirect stdin/stdout/stderr to /dev/null, but keep cwd()
+	  if (daemon(1, 0))
+	    {
+	      perror("daemon()");
+	      exit(1);
+	    }
+	}
+
       if (filename_topo.empty())
 	{
 	  DMCS_LOG_WARN("No topology given.");
 	}
+
 
       DMCS_LOG_DEBUG("Context ID: " << myid);
       DMCS_LOG_DEBUG("KB:         " << filename_local_kb);

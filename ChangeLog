@@ -1,5 +1,10 @@
 2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/dmcsd.cpp: Add --daemon option.
+	* include/dmcs/ProgramOptions.h: Likewise.
+
+	* examples/pingpong.sh: Add shell script.
+
 	* src/dmcs/BeliefCombination.cpp: Cleanup.
 
 	* include/parser/BridgeRulesBuilder.tcc: Fix regression.
