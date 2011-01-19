@@ -62,7 +62,7 @@ namespace dmcs {
      */
     struct JoinIn
     {
-      std::size_t ctx_id;
+      std::size_t ctx_offset;
       std::size_t peq_cnt;
     };
 

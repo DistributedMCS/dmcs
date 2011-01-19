@@ -54,6 +54,13 @@ public:
   void 
   operator()();
 
+  enum ImportStates
+    {
+      START_UP = 0,   // the very fist start. We need this in order to distinguish between UNSAT and EOF
+      FILLING_UP,     // the state where not all models have returned the full package of models
+      GETTING_NEXT    // next round, meaning that we reached PACK_FULL before and now want to ask a neighbor for its next models
+    };
+
 private:
   bool
   import_belief_states(std::size_t noff, std::size_t peq_cnt,
@@ -62,10 +69,7 @@ private:
 		       bm::bvector<>& end_mask,
 		       BeliefStateIteratorVecPtr& beg_it, 
 		       BeliefStateIteratorVecPtr& mid_it,
-		       bool first_import);
-
-  std::size_t
-  next_to_ask(std::vector<bool>& eom);
+		       ImportStates import_state);
 
   void
   ask_for_next(std::size_t next);
@@ -79,7 +83,7 @@ private:
        const BeliefStateIteratorVecPtr& end_it);
 
 private:
-  std::size_t                  no_nbs;      // number of neighbors 
+  std::size_t                  no_nbs;                  // number of neighbors 
   std::size_t                  system_size;
   HashedBiMapPtr               c2o;
   MessagingGatewayBCPtr        mg;

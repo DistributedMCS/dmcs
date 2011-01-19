@@ -330,7 +330,7 @@ ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
     }
 
   assert(sizeof(ji) == recvd);
-  assert(ji.ctx_id >= 0); // better be safe than sorry. Now ctx_id is noff, hence >= 0
+  assert(ji.ctx_offset >= 0); // better be safe than sorry. 
 
   //prio = p;
   return ji;

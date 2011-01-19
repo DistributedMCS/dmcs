@@ -111,8 +111,11 @@ public:
 					  boost::asio::placeholders::error));
 	  }
 	else
-	  { // no message to read, wait for the next header 
+	  { // no message to read, inform the Joiner with (ctx_offset, 0)
 	    assert (header.find(HEADER_EOF) != std::string::npos);
+	    mg->sendJoinIn(0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+
+	    // wait for the next header 
 	    first_round = true;
 	    stream(boost::system::error_code());
 	  }	

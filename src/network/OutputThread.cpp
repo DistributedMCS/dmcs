@@ -148,7 +148,7 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
 	    }
 	  else 
 	    {
-	      // either UNSAT of EOF
+	      // either UNSAT or EOF
 	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " NOTHING TO OUTPUT, going to send EOF");
 
 	      // Turn off collecting mode

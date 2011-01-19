@@ -56,7 +56,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 				 bm::bvector<>& pack_full,
 				 BeliefStateIteratorVecPtr& beg_it, 
 				 BeliefStateIteratorVecPtr& mid_it,
-				 bool first_import)
+				 ImportStates import_state)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " noff = " << noff);
 
@@ -69,7 +69,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 
   BeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[noff];
 
-  if (!first_import)
+  if (import_state != FILLING_UP)
     {
       mid_it_ref = --bsv->end();
     }
@@ -98,7 +98,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 	  // Otw, i == peq_cnt-1
 	  // This is the sign of end of a package of models
 
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Reached a NULL model. set bit noff = " << noff);
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Reached a NULL model. set bit noff = " << noff);
 	 
 	  // mark that this neighbor reached its pack_size. 
 	  pack_full.set(noff);
@@ -112,7 +112,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
       bsv->push_back(bs); 
     }
   
-  if (first_import)
+  if (import_state == FILLING_UP)
     {
       (*beg_it)[noff] = bsv->begin();
     }
@@ -216,25 +216,6 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
 }
 
 
-// This can be a helper function
-// return -1 when all neighbors are asked and run out of models
-std::size_t
-JoinThread::next_to_ask(std::vector<bool>& eom)
-{
-  // find the first index such that eom[index] = false
-  std::size_t index = 0;
-  for ( ; index < eom.size(); ++index)
-    {
-      if (!eom[index])
-	{
-	  break;
-	}
-    }
-
-  return index;
-}
-
-
 
 void
 JoinThread::ask_for_next(std::size_t next)
@@ -267,19 +248,17 @@ JoinThread::operator()()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
-  // offset of the neighbor that we want the next package of models
-  std::vector<bool> eom(no_nbs, false);
+  ImportStates import_state = START_UP;
 
-  bool stop = false;
-  bool first_import = true;
+  bool stop         = false;
+  bool asking_next  = false;
+
+  std::size_t next_neighbor_offset = 0;
+
   bm::bvector<> in_mask;
   bm::bvector<> pack_full;
-  bm::bvector<> next_mask;
 
-  next_mask.resize(no_nbs+1);
-  next_mask.set();           // set all bits to 1
-
-  // set up package of empty BeliefStates
+  // set up a package of empty BeliefStates
   BeliefStatePackagePtr partial_eqs(new BeliefStatePackage);
   for (std::size_t i = 0; i < no_nbs; ++i)
     {
@@ -301,35 +280,94 @@ JoinThread::operator()()
       MessagingGateway<BeliefState, Conflict>::JoinIn nn = 
 	mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
 
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Received: " << nn.ctx_id << ", " << nn.peq_cnt);
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Received: " << nn.ctx_offset << ", " << nn.peq_cnt);
 
-      eom[nn.ctx_id] = import_belief_states(nn.ctx_id, nn.peq_cnt, partial_eqs, 
-					 in_mask, pack_full,
-					 beg_it, mid_it, first_import);
+      if (nn.peq_cnt == 0)
+	{ // This neighbor is either out of models of UNSAT
 
-      // all neighbors have returned some models (not necessarily up to pack_size)
-      if (in_mask.count_range(0, no_nbs+1) == no_nbs)
-	{
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Time to join");
+	  assert (import_state != FILLING_UP);
 
-	  // time to join
-	  if (first_import)
-	    {
-	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "First time joining");
-	      // assign first time join
-	      first_import = false;
-	      for (std::size_t i = 0; i < no_nbs; ++i)
-		{
-		  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "i = " << i);
-		  BeliefStateVecPtr& bsv = (*partial_eqs)[i];
-		  (*mid_it)[i] = bsv->end();
-		}
-	      join(partial_eqs, beg_it, mid_it);
+	  if (import_state == START_UP)
+	    { // UNSAT
+	      
+	      // The current C, S to the neighbors is bad. I need to
+	      // inform the SAT solver about this by sending him a
+	      // NULL model.
+
+	      // Also tell the neighbors (via NeighborOut) to stop
+	      // returning models.
 	    }
 	  else
+	    { // out of models, import == GETTING_NEXT
+
+	      // We need to ask the next neighbor (now ordered by the
+	      // offset) to give the next package of models.
+
+	      next_neighbor_offset = nn.ctx_offset + 1;
+	      if (next_neighbor_offset == no_nbs)
+		{
+		  stop = true;
+		}
+	      else
+		{
+		  asking_next = true;
+		  ask_for_next(next_neighbor_offset);
+		}
+	    }
+	} // (nn.peq_cnt == 0)
+      else
+	{ // (nn.peq_cnt != 0)
+	  // first we import the belief states received
+	  import_belief_states(nn.ctx_offset, nn.peq_cnt, partial_eqs, 
+			       in_mask, pack_full,
+			       beg_it, mid_it, import_state);
+
+	  // then if this was a "NEXT" request to this neighbor, we
+	  // have to restart the neighbors before him
+	  if (asking_next)
 	    {
-	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "NOT a first time joining ==> do it selectively");
-	      // not the first time, so we just join selectively
+	      assert (import_state != START_UP);
+	      assert (nn.ctx_offset == next_neighbor_offset);
+
+	      asking_next  = false;
+	      import_state = START_UP;
+
+	      for (std::size_t i = 0; i < next_neighbor_offset; ++i)
+		{
+		  // actually it's asking for a new round of models 
+		  ask_for_next(i);
+
+		  // and reset the in bit mask wrt this neighbor
+		  in_mask.set(i, false);
+
+		  // further possible improvement: if neighbor at
+		  // offset i has in total less than pack_size models,
+		  // then we just keep his models as asking for a new
+		  // round will return the same thing.
+		}
+	    }
+
+	  // At this point, we can check whether joining is possible
+	  if (in_mask.count_range(0, no_nbs+1) == no_nbs)
+	    {
+	      if (import_state == START_UP)
+		{
+		  import_state = FILLING_UP;
+
+		  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "First time joining");
+
+		  for (std::size_t i = 0; i < no_nbs; ++i)
+		    {
+		      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "i = " << i);
+		      BeliefStateVecPtr& bsv = (*partial_eqs)[i];
+		      (*mid_it)[i] = bsv->end();
+		    }
+		  join(partial_eqs, beg_it, mid_it);
+		}
+	    } // (in_mask.count_range(0, no_nbs+1) == no_nbs)
+	  else
+	    { // (in_mask.count_range(0, no_nbs+1) != no_nbs)
+	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " NOT a first time joining ==> do it selectively");
 	      for (std::size_t i = 0; i < no_nbs; ++i)
 		{
 		  BeliefStateVecPtr& bsv = (*partial_eqs)[i];
@@ -349,32 +387,21 @@ JoinThread::operator()()
 		      beg_it_ref = bsv->begin();
 		    }
 		}
-	    }
-	  
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Check for stop. count = " << pack_full.count_range(0, no_nbs+1) << ", no_nbs = " << no_nbs);
+	    } // (in_mask.count_range(0, no_nbs+1) != no_nbs)
+
 
 	  if (pack_full.count_range(0, no_nbs+1) == no_nbs)
 	    {
-	      // Now we need to pick a neighbor to ask for next models
-	      std::size_t next = next_to_ask(eom);
-	      if (next == eom.size())
-		{
-		  // Really, we have nothing else to expect!
-		  stop = true;
-		}
-	      else
-		{
-		  for (std::size_t i = 0; i <= next; ++i)
-		    {
-		      ask_for_next(i);
-		      eom[i] = false;
-		    }
-		}
+	      import_state == GETTING_NEXT;
+	      
+	      // always ask for next models from neighbor with offset 0
+	      ask_for_next(0);
 	    }
-	}
 
-      ///@todo: determine the condition for stop = true;
-    }
+	} // (nn.peq_cnt != 0)
+
+    } // while (!stop)
+
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " DONE");
 }
 

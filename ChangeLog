@@ -1,5 +1,17 @@
 2011-01-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/OutputThread.cpp: Typo.
+
+	* include/network/NeighborIn.h: Send (offset, 0) to JOIN_IN_MQ
+	when receiving HEADER_EOF.
+
+	* include/network/MessagingGateway.h: ctx_id --> ctx_offset.
+	* src/network/ConcurrentMessageDispactcher.cpp: Likewise.
+
+	* src/network/JoinThread.cpp: Realize EOF/UNSAT via JoinIn.
+
+	* include/network/JoinThread.h: Add 3 states for import.
+
 	* include/network/ThreadFactory.h: Joiner also needs to know the
 	MQs to inform the neighbors.
 	* src/dmcs/StreamingDMCS.cpp: Likewise.
