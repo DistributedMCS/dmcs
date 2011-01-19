@@ -2,7 +2,8 @@
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	$(BM_CPPFLAGS) \
-	$(BOOST_CPPFLAGS)
+	$(BOOST_CPPFLAGS) \
+	$(LOG4CXX_CFLAGS)
 
 # global linker flags
 AM_LDFLAGS = \
@@ -17,7 +18,8 @@ LIBS = \
 	$(BOOST_GRAPH_LIBS) \
 	$(BOOST_SERIALIZATION_LIBS) \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIBS) \
-	$(BOOST_SYSTEM_LIBS)
+	$(BOOST_SYSTEM_LIBS) \
+	$(LOG4CXX_LIBS)
 
 
 TESTS = \
@@ -57,6 +59,7 @@ check_PROGRAMS = \
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
+	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/solver/libsolver.a \
@@ -66,13 +69,16 @@ testBeliefComparison_SOURCES = testBeliefComparison.cpp
 testBeliefComparison_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testParsers_SOURCES = testParsers.cpp
-testParsers_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+testParsers_LDADD = \
+	$(top_builddir)/src/dmcs/liblog.a \
+	$(top_builddir)/src/dmcs/libdmcs.a
 
 testCombination_SOURCES = testCombination.cpp
 testCombination_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testTranslation_SOURCES = testTranslation.cpp
 testTranslation_LDADD = \
+	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/loopformula/libtranslation.a
 
@@ -83,6 +89,7 @@ testQueryPlan_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testClaspResultOnlineParser_SOURCES = testClaspResultOnlineParser.cpp
 testClaspResultOnlineParser_LDADD = \
+	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/solver/libsolver.a \
@@ -93,6 +100,7 @@ testBlockingClasp_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/solver/libsolver.a \
+	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/loopformula/libtranslation.a
 
 testMatch_SOURCES = testMatch.cpp

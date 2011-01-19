@@ -4,6 +4,8 @@
 	* include/parser/ParserDirector.tcc: Likewise.
 	* include/parser/BridgeRulesBuilder.tcc: Likewise.
 	* include/dyndmcs/Instantiator.tcc: Likewise.
+	* testsuite/Makefile.am: Likewise.
+	* testsuite/testTranslation.cpp: Likewise.
 
 	* include/network/BaseClient.h: Fix warning.
 

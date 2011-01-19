@@ -3,6 +3,8 @@
 
 #include "dmcs/QueryPlan.h"
 
+#include "dmcs/Log.h"
+
 #include "loopformula/DimacsVisitor.h"
 #include "loopformula/LocalLoopFormulaBuilder.h"
 #include "loopformula/CNFLocalLoopFormulaBuilder.h"
@@ -33,6 +35,8 @@ using namespace dmcs;
 
 BOOST_AUTO_TEST_CASE( testCNFTranslation )
 {
+  init_loggers("testTranslation");
+
   const std::size_t system_size = 4;
 
   // create signature
