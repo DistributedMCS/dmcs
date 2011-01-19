@@ -74,10 +74,8 @@ DynamicConfiguration::DynamicConfiguration(std::size_t ctx_id_,
 ContextSubstitutionListPtr
 DynamicConfiguration::lconfig(ConfigMessage& mess, std::size_t dfs_level)
 {
-#ifdef DEBUG
-  std::cerr << "DynamicConfiguration::lconfig" << std::endl;
-  std::cerr << "Mess = " << mess << std::endl;
-#endif
+  DMCS_LOG_TRACE("Mess = " << mess);
+
   std::size_t root_ctx = mess.getRootContext();
   const ContextSubstitutionPtr ctx_sub = mess.getCtxSubstitution();
 
@@ -85,11 +83,8 @@ DynamicConfiguration::lconfig(ConfigMessage& mess, std::size_t dfs_level)
 
   if (ctx_id == root_ctx)
     {
-
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "Number of results from lconfig = " << result->size() << std::endl;
-      std::cerr << TABS(dfs_level) << "Going to compute result's topological graphs" << std::endl;
-#endif
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "Number of results from lconfig = " << result->size());
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "Going to compute result's topological graphs");
       
       // whenever get an answer at root context, write out the
       // topology in graphviz format
@@ -110,12 +105,9 @@ DynamicConfiguration::lconfig(const std::size_t root,
   // DFS controlled by rules iterator r_beg and r_end
   if (r_beg == r_end)
     {
-
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "REACHED EMPTY SET OF RULES." << std::endl;
-      std::cerr << TABS(dfs_level) << "ctx_substitution_sofar = " << *ctx_substitution_sofar << std::endl;
-      std::cerr << TABS(dfs_level) << "Calculating new contexts" << std::endl;
-#endif
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "REACHED EMPTY SET OF RULES.");
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "ctx_substitution_sofar = " << *ctx_substitution_sofar);
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "Calculating new contexts");
 
       ContextVec new_contexts;
 
@@ -148,9 +140,14 @@ DynamicConfiguration::lconfig(const std::size_t root,
       if (new_contexts.size() > 0)
 	{
 #ifdef DEBUG
-	  std::cerr << TABS(dfs_level) << "Going to call " << new_contexts.size() << " neighbors: ";
-	  std::copy(new_contexts.begin(), new_contexts.end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
-	  std::cerr << std::endl;
+	  DMCS_LOG_DEBUG(TABS(dfs_level) << "Going to call " << new_contexts.size() << " neighbors:");
+
+	  for (ContextVec::iterator it = new_contexts.begin();
+	       it != new_contexts.end();
+	       ++it)
+	    {
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << *it);
+	    }
 #endif
 
 	  // HEURISTIC: sort contexts according to some quality to invoke.
@@ -173,21 +170,19 @@ DynamicConfiguration::lconfig(const std::size_t root,
 	  
 
 #ifdef DEBUG
-	  std::cerr << TABS(dfs_level) << "Order of invoking neighbors:" << std::endl;
-	  std::cerr << TABS(dfs_level);
-	  for (ContextVecIteratorList::const_iterator it = new_contexts_iter->begin(); it != new_contexts_iter->end(); ++it)
+	  DMCS_LOG_DEBUG(TABS(dfs_level) << "Order of invoking neighbors:");
+
+	  for (ContextVecIteratorList::const_iterator it = new_contexts_iter->begin();
+	       it != new_contexts_iter->end(); ++it)
 	    {
-	      std::cerr << **it << " ";
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << **it);
 	    }
-	  std::cerr << std::endl;
 #endif
 
 	  return invoke_neighbors(root, new_contexts_iter->begin(), new_contexts_iter->end(), ctx_substitution_sofar, dfs_level+1);
 	}
 
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "No new contexts to call, return {context_substitution_sofar}" << std::endl;
-#endif
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "No new contexts to call, return {context_substitution_sofar}");
 
       ContextSubstitutionListPtr ctx_subs(new ContextSubstitutionList);
       ctx_subs->push_back(ctx_substitution_sofar);
@@ -206,9 +201,8 @@ DynamicConfiguration::lconfig(const std::size_t root,
   // call a DFS procedure to find all substitution for this rule. 
   // the recursion is controled by 2 pairs of body iterators, for the positive and
   // negative bridge bodies, respectively
-#ifdef DEBUG
-  std::cerr << TABS(dfs_level) << "Start binding rule r = " << *r_beg  << std::endl;
-#endif
+
+  DMCS_LOG_DEBUG(TABS(dfs_level) << "Start binding rule r = " << *r_beg);
 
   stop_bind_rules = false;
   no_bind_rules = 0;
@@ -217,9 +211,7 @@ DynamicConfiguration::lconfig(const std::size_t root,
   // Don't need to sort in output_queue_r because we already applied
   // some quality in ordering the contexts to be bound
 
-#ifdef DEBUG
-  std::cerr << TABS(dfs_level) << "Finished binding rule r = " << *r_beg  << std::endl;
-#endif
+  DMCS_LOG_DEBUG(TABS(dfs_level) << "Finished binding rule r = " << *r_beg);
 
   // now we got all substitutions for r_beg, go to the next rule.
   BridgeRules::const_iterator r_next = r_beg;
@@ -233,7 +225,6 @@ DynamicConfiguration::lconfig(const std::size_t root,
     {
       ContextSubstitutionList::iterator cs_it = output_queue_r->begin();
       
-      //std::cerr << "call lconfig for the next rule with substitution = " << **cs_it << std::endl;
       ContextSubstitutionListPtr intermediate_ctx_subs = lconfig(root, r_next, r_end, *cs_it, dfs_level+1);
 
       ctx_subs->insert(ctx_subs->end(), intermediate_ctx_subs->begin(), intermediate_ctx_subs->end());
@@ -249,9 +240,7 @@ DynamicConfiguration::lconfig(const std::size_t root,
       output_queue_r->pop_front();
     }
 
-#ifdef DEBUG
-  std::cerr << TABS(dfs_level) << "Finished lconfig for local rules, number of substitutions = " << ctx_subs->size() << std::endl;
-#endif
+  DMCS_LOG_DEBUG(TABS(dfs_level) << "Finished lconfig for local rules, number of substitutions = " << ctx_subs->size());
 
   return ctx_subs;
 }
@@ -264,33 +253,23 @@ DynamicConfiguration::invoke_neighbors(const std::size_t root,
 				       ContextSubstitutionPtr ctx_substitution_sofar,
 				       std::size_t dfs_level)
 {
-
-#ifdef DEBUG
-  std::cerr << TABS(dfs_level) << "DynamicConfiguration::invoke_neighbors." << std::endl;
-  std::cerr << TABS(dfs_level) << "ctx_substitution_sofar = " << *ctx_substitution_sofar << std::endl;
-#endif
+  DMCS_LOG_TRACE(TABS(dfs_level) << "ctx_substitution_sofar = " << *ctx_substitution_sofar);
 
   if (c_beg == c_end)
     {
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "No more neighbor to invoke, return {ctx_substitution_sofar}");
 
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "No more neighbor to invoke, return {ctx_substitution_sofar}" << std::endl;
-#endif
       ContextSubstitutionListPtr ctx_subs(new ContextSubstitutionList);
       ctx_subs->push_back(ctx_substitution_sofar);
 
       no_answers++;
 
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "Number of answers = " << no_answers << std::endl;
-#endif
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "Number of answers = " << no_answers);
 
       if ((limit_answers > 0) && (no_answers >= limit_answers))
 	{
 	  // we want to stop here
-#ifdef DEBUG
-	  std::cerr << "Number of answers reached limitation. We want to STOP" << std::endl;
-#endif
+	  DMCS_LOG_DEBUG("Number of answers reached limitation. We want to STOP");
 	  stop = true;
 	}
 
@@ -299,9 +278,7 @@ DynamicConfiguration::invoke_neighbors(const std::size_t root,
 
   // call context neighbor identified by **c_beg
   ContextID cid = **c_beg;
-#ifdef DEBUG
-  std::cerr << TABS(dfs_level) << "Invoking neighbor " << cid << std::endl;
-#endif
+  DMCS_LOG_DEBUG(TABS(dfs_level) << "Invoking neighbor " << cid);
 
   ContextVecIteratorList::const_iterator c_next = c_beg;
   c_next++;
@@ -321,20 +298,16 @@ DynamicConfiguration::invoke_neighbors(const std::size_t root,
   std::string header = HEADER_REQ_DYN_DMCS;
   ConfigMessage mess(root, ctx_substitution_sofar, false);
 
-#ifdef DEBUG
-  std::cerr << TABS(dfs_level) << "Message = " << mess << std::endl;
-#endif
+  DMCS_LOG_DEBUG(TABS(dfs_level) << "Message = " << mess);
 
   Client<DynamicCommandType> client(io_service, it, header, mess);
   io_service.run();
 
   dynmcs_return_type output_queue_cj = client.getResult();
 
-#ifdef DEBUG
-  std::cerr << TABS(dfs_level) << "Got " << output_queue_cj->size() << " substitutions from neighbor " << cid << std::endl;
-  std::cerr << TABS(dfs_level) << *output_queue_cj << std::endl;
-  std::cerr << TABS(dfs_level) << "Now going to call next neighbors." << std::endl;
-#endif
+  DMCS_LOG_DEBUG(TABS(dfs_level) << "Got " << output_queue_cj->size() << " substitutions from neighbor " << cid);
+  DMCS_LOG_DEBUG(TABS(dfs_level) << *output_queue_cj);
+  DMCS_LOG_DEBUG(TABS(dfs_level) << "Now going to call next neighbors.");
 
   ContextSubstitutionListPtr ctx_subs(new ContextSubstitutionList);
 
@@ -347,34 +320,28 @@ DynamicConfiguration::invoke_neighbors(const std::size_t root,
 #ifdef DEBUG
       if (c_next != c_end)
 	{
-	  std::cerr << TABS(dfs_level) << "Invoke neighbor " << **c_next << std::endl;
+	  DMCS_LOG_DEBUG(TABS(dfs_level) << "Invoke neighbor " << **c_next);
 	}
       else
 	{
-	  std::cerr << TABS(dfs_level) << "Reached ending." << std::endl;
+	  DMCS_LOG_DEBUG(TABS(dfs_level) << "Reached ending.");
 	}
 #endif
 
       ContextSubstitutionListPtr intermediate_ctx_subs = invoke_neighbors(root, c_next, c_end, *cs_it, dfs_level+1);
 
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "intermediate_ctx_subs.size() = " << intermediate_ctx_subs->size() << std::endl;
-      std::cerr << TABS(dfs_level) << "ctx_subs.size() = " << ctx_subs->size() << std::endl;
-#endif
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "intermediate_ctx_subs.size() = " << intermediate_ctx_subs->size());
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "ctx_subs.size() = " << ctx_subs->size());
 
       ctx_subs->insert(ctx_subs->end(), intermediate_ctx_subs->begin(), intermediate_ctx_subs->end());
 
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "ctx_subs.size() = " << ctx_subs->size() << std::endl;
-#endif
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "ctx_subs.size() = " << ctx_subs->size());
 
       output_queue_cj->pop_front();
     }
 
-#ifdef DEBUG
-  std::cerr << TABS(dfs_level) << "Exit invoking neighbor " << cid << std::endl;
-  std::cerr << TABS(dfs_level) << "ctx_subs.size() = " << ctx_subs->size() << std::endl;
-#endif
+  DMCS_LOG_DEBUG(TABS(dfs_level) << "Exit invoking neighbor " << cid);
+  DMCS_LOG_DEBUG(TABS(dfs_level) << "ctx_subs.size() = " << ctx_subs->size());
 
   return ctx_subs;
 }
@@ -391,18 +358,12 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
   // DFS controlled by 2 pairs of body iterators, for the positive
   // and negative bridge bodies, respectively
 
-#ifdef DEBUG
-  std::cerr << TABS(dfs_level) << "DynamicConfiguration::bind_rule" << std::endl 
-	    << "ctx_substitution_sofar = " << *ctx_substitution_sofar << std::endl;
-#endif
+  DMCS_LOG_TRACE(TABS(dfs_level) << "ctx_substitution_sofar = " << *ctx_substitution_sofar);
 
   // all bridge atoms matched, return the substitution at this leaf situation.
   if ((pb_beg == pb_end) && (nb_beg == nb_end))
     {
-
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "No more atom to bind. return {ctx_substitution_sofar}" << std::endl;
-#endif
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "No more atom to bind. return {ctx_substitution_sofar}");
 
       ContextSubstitutionListPtr ctx_subs(new ContextSubstitutionList);
       ctx_subs->push_back(ctx_substitution_sofar);
@@ -412,9 +373,7 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
       // We only want a limit of binding to our set of rules
       if (no_bind_rules >= limit_bind_rules)
 	{
-#ifdef DEBUG
-	  std::cerr << "We want to stop binding rules here..." << std::endl;
-#endif
+	  DMCS_LOG_DEBUG("We want to stop binding rules here...");
 	  stop_bind_rules = true;
 	}
 
@@ -441,9 +400,7 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 	  ++nb_next;
 	}
 
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "Chose " << sba << std::endl;
-#endif
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "Chose " << sba);
 
       // check for s-bridge atom
       ContextTerm ctt = sba.first;
@@ -453,9 +410,7 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 
       if ((!isCtxVar(ctt) && (sb_type == IS_ORDINARY_BELIEF))) // ordinary s-bridge atom, then just go ahead
 	{
-#ifdef DEBUG
-	  std::cerr << TABS(dfs_level) << "An ordinary s-bridge atom. Continues..." << std::endl;
-#endif
+	  DMCS_LOG_DEBUG(TABS(dfs_level) << "An ordinary s-bridge atom. Continues...");
 	  return bind_rule(pb_next, pb_end, nb_next, nb_end, ctx_substitution_sofar, dfs_level+1);
 	}
       else if (!isCtxVar(ctt)) // context term is a context id
@@ -467,9 +422,8 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 	  // + read the term substitution \eta from mm
 	  // + compute \theta = \sigma \otimes \eta
 
-#ifdef DEBUG
-	  std::cerr << TABS(dfs_level) << "Context term is a context id. Find a target atom..." << std::endl;
-#endif
+	  DMCS_LOG_DEBUG(TABS(dfs_level) << "Context term is a context id. Find a target atom...");
+
 	  ///@todo: find a target atom with srcCtx, srcSym, and tarCtx available.
 	  // ctt now holds the constant value for the target context,
 	  // and source context we can only 
@@ -484,11 +438,8 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 		      
 	  if (std::distance(low, up) == 0)
 	    {
-			  
-#ifdef DEBUG
-	      std::cerr << TABS(dfs_level) << "Ups, no match from the match maker. " << std::endl;
-	      std::cerr << TABS(dfs_level) << "Simply backtrack by returning empty set of substitutions now." << std::endl;
-#endif	    
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << "Ups, no match from the match maker.");
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << "Simply backtrack by returning empty set of substitutions now.");
 			  
 	      ContextSubstitutionListPtr ctx_subs(new ContextSubstitutionList);
 	      
@@ -535,11 +486,8 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 	  // let's just backtrack
 	  if (std::distance(low, up) == 0)
 	    {
-
-#ifdef DEBUG
-	      std::cerr << TABS(dfs_level) << "Ups, no match from the match maker. " << std::endl;
-	      std::cerr << TABS(dfs_level) << "Simply backtrack by returning empty set of substitutions now." << std::endl;
-#endif	    
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << "Ups, no match from the match maker. ");
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << "Simply backtrack by returning empty set of substitutions now.");
 
 	      ContextSubstitutionListPtr ctx_subs(new ContextSubstitutionList);
 	      
@@ -555,9 +503,7 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 	    {
 	      ContextID potential_neighbor = low->tarCtx;
 
-#ifdef DEBUG
-	      std::cerr << "potential_neighbor = " << potential_neighbor << std::endl;
-#endif
+	      DMCS_LOG_DEBUG("potential_neighbor = " << potential_neighbor);
 
 	      MatchTableIteratorVec::iterator it = std::find_if(mti.begin(), mti.end(), CompareMatch(potential_neighbor));
 
@@ -618,13 +564,13 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 		}
 	      
 #ifdef DEBUG
-	  std::cerr << TABS(dfs_level) << "Sorted possible substitutions according to some quality:" << std::endl;
-	  std::cerr << TABS(dfs_level);
-	  for (MatchTableIteratorVecIteratorList::const_iterator it = mti_iter->begin(); it != mti_iter->end(); ++it)
-	    {
-	      std::cerr << (**it)->tarCtx << " ";
-	    }
-	  std::cerr << std::endl;
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << "Sorted possible substitutions according to some quality:");
+
+	      for (MatchTableIteratorVecIteratorList::const_iterator it = mti_iter->begin();
+		   it != mti_iter->end(); ++it)
+		{
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << (**it)->tarCtx);
+		}
 #endif
 
 	      ContextSubstitutionListPtr ctx_subs(new ContextSubstitutionList);
@@ -634,11 +580,8 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 
 	      while ((mti_it != mti_iter->end()) && (!stop_bind_rules))
 		{
-
-#ifdef DEBUG
-		  std::cerr << TABS(dfs_level) << "Now bind " << ctx2string(ctt) << " to " << (**mti_it)->tarCtx << std::endl;
-		  std::cerr << TABS(dfs_level) << "Going to bind next atom." << std::endl;
-#endif
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << "Now bind " << ctx2string(ctt) << " to " << (**mti_it)->tarCtx);
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << "Going to bind next atom.");
 		  
 		  std::size_t src_sym = (**mti_it)->sym;
 		  ContextID   tar_ctx = (**mti_it)->tarCtx;
@@ -653,30 +596,21 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 		  
 		  ctx_subs->insert(ctx_subs->end(), intermediate_ctx_subs->begin(), intermediate_ctx_subs->end());
 
-#ifdef DEBUG
-		  std::cerr << TABS(dfs_level) << "There are " << intermediate_ctx_subs->size() << " substitutions from binding next atom: " << std::endl;
-		  std::cerr << TABS(dfs_level) << *intermediate_ctx_subs << std::endl;
-		  std::cerr << TABS(dfs_level) << "ctx_subs.size() = " << ctx_subs->size() << std::endl;
-#endif		  
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << "There are " << intermediate_ctx_subs->size() << " substitutions from binding next atom:");
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << *intermediate_ctx_subs);
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << "ctx_subs.size() = " << ctx_subs->size());
 
 		  ++mti_it;
 		}
 	      
-#ifdef DEBUG
-	      std::cerr << TABS(dfs_level) << "There are " << ctx_subs->size() << " substitutions after trying all possibilities to bind : " << std::endl;
-	      std::cerr << TABS(dfs_level) << *ctx_subs << std::endl;
-
-#endif
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << "There are " << ctx_subs->size() << " substitutions after trying all possibilities to bind: ");
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << *ctx_subs);
  	      
 	      return ctx_subs;
 	    }
-	  
 	  else // context term was already instantiated
 	    {
-	      
-#ifdef DEBUG
-	      std::cerr << TABS(dfs_level) << "This context term was already instantiated." << std::endl;
-#endif
+	      DMCS_LOG_DEBUG(TABS(dfs_level) << "This context term was already instantiated.");
 	      
 	      // if the instantiated value does not appear in the
 	      // possible neighbor, then that substitution is
@@ -688,11 +622,8 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 
 	      if (mti_jt == mti.end())
 		{
-		  
-#ifdef DEBUG
-		  std::cerr << TABS(dfs_level) << "Previous instantiation doesn't match the current potential neighbors." << std::endl;
-		  std::cerr << TABS(dfs_level) << "Will return empty set of substitutions." << std::endl;
-#endif		  
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << "Previous instantiation doesn't match the current potential neighbors.");
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << "Will return empty set of substitutions.");
 
 		  ContextSubstitutionListPtr ctx_subs(new ContextSubstitutionList);
 
@@ -724,11 +655,8 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 		      
 		      if (std::distance(low, up) == 0)
 			{
-			  
-#ifdef DEBUG
-			  std::cerr << TABS(dfs_level) << "Ups, no match from the match maker. " << std::endl;
-			  std::cerr << TABS(dfs_level) << "Simply backtrack by returning empty set of substitutions now." << std::endl;
-#endif	    
+			  DMCS_LOG_DEBUG(TABS(dfs_level) << "Ups, no match from the match maker.");
+			  DMCS_LOG_DEBUG(TABS(dfs_level) << "Simply backtrack by returning empty set of substitutions now.");
 			  
 			  ContextSubstitutionListPtr ctx_subs(new ContextSubstitutionList);
 			  
@@ -759,9 +687,7 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 
 		    }
 
-#ifdef DEBUG
-		  std::cerr << TABS(dfs_level) << "Go to the next atom." << std::endl;
-#endif
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << "Go to the next atom.");
 
 		  return bind_rule(pb_next, pb_end, nb_next, nb_end, ctx_substitution_sofar, dfs_level+1);
 		}
@@ -795,10 +721,7 @@ DynamicConfiguration::compute_topology(ContextSubstitutionListPtr ctx_subs, std:
   for (ContextSubstitutionList::const_iterator it = ctx_subs->begin();
        it != ctx_subs->end(); ++it, ++i)
     {
-
-#ifdef DEBUG
-      std::cerr << TABS(dfs_level) << "Computing topological graph number " << i << std::endl;
-#endif
+      DMCS_LOG_DEBUG(TABS(dfs_level) << "Computing topological graph number " << i);
 
       GraphPtr g = compute_topology(*it);
       topo->push_back(g);
@@ -817,7 +740,7 @@ DynamicConfiguration::compute_topology(ContextSubstitutionListPtr ctx_subs, std:
       out << i;
       filename = filename + out.str() + ".dot";
 
-      std::cerr << "filename = " << filename << std::endl;
+      DMCS_LOG_DEBUG("filename = " << filename);
 
       file_topo.open(filename.c_str());
       boost::write_graphviz(file_topo, *g);

@@ -1,5 +1,6 @@
 #include "process/ClaspProcess.h"
 #include "parser/ClaspResultOnlineParser.h"
+#include "dmcs/Log.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testBlockingClasp"
@@ -12,6 +13,8 @@ using namespace dmcs;
 
 BOOST_AUTO_TEST_CASE ( testBlockingClasp )
 {
+  init_loggers("testBlockingClasp");
+
   // Prepare some signatures
   const SignaturePtr sig(new Signature);
   const SignaturePtr gsig(new Signature);

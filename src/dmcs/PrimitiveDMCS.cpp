@@ -78,10 +78,8 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   const std::size_t n = ctx->getSystemSize();
   const std::size_t k = ctx->getContextID(); // my local id
 
-#if defined(DEBUG)
-  std::cerr << "In PrimitiveDMCS, at context " << k << std::endl 
-	    << "n = " << n << std::endl;
-#endif // DEBUG
+  DMCS_LOG_DEBUG("In PrimitiveDMCS, at context " << k);
+  DMCS_LOG_DEBUG("n = " << n);
 
   assert(n > 0 && k <= n);
 
@@ -99,9 +97,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   
   if (bs.belief_states_ptr) 
     {
-#if defined(DEBUG)
-      std::cerr << "cache hit" << std::endl;
-#endif //DEBUG
+      DMCS_LOG_DEBUG("cache hit");
       belief_states = bs;
       return belief_states;
     }
@@ -111,19 +107,15 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
   
   const SignaturePtr& sig = ctx->getSignature();
   
-#ifdef DEBUG
-  std::cerr << "Original signature: " << *sig << std::endl;
-#endif
+  DMCS_LOG_DEBUG("Original signature: " << *sig);
       
     // create the guessing signature using global V and my signature
     const SignaturePtr& gsig = createGuessingSignature(V, sig);
 
     ProxySignatureByLocal mixed_sig(boost::get<Tag::Local>(*sig), boost::get<Tag::Local>(*gsig));
 
-#ifdef DEBUG
-      std::cerr << "Local:    " << *sig << std::endl;
-      std::cerr << "Guessing: " << *gsig << std::endl;
-#endif
+    DMCS_LOG_DEBUG("Local:    " << *sig);
+    DMCS_LOG_DEBUG("Guessing: " << *gsig);
 
     BeliefStateListPtr local_belief_states;
 
@@ -133,16 +125,12 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #ifdef DMCS_STATS_INFO
       my_stats_info.lsolve.second = local_belief_states->size();
 
-#ifdef DEBUG
-      std::cerr << "local belief states size: " << my_stats_info.lsolve.second << " == " << local_belief_states->size() << std::endl;
-      std::cerr << local_belief_states->size() << std::endl;
-#endif // DEBUG
+      DMCS_LOG_DEBUG("local belief states size: " << my_stats_info.lsolve.second << " == " << local_belief_states->size() << " " << local_belief_states->size());
 
 #endif // DMCS_STATS_INFO
 
 #ifdef DEBUG
     BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
-    //printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif // DEBUG
 
     BeliefStateListPtr belief_states(new BeliefStateList);
@@ -153,22 +141,17 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #ifdef DMCS_STATS_INFO
     my_stats_info.projection.second = belief_states->size();
 
-#ifdef DEBUG
-    std::cerr << "projected belief states size: " << belief_states->size() << std::endl;
-    std::cerr << my_stats_info << std::endl;
-#endif // DEBUG
-
+    DMCS_LOG_DEBUG("projected belief states size: " << belief_states->size());
+    DMCS_LOG_DEBUG(my_stats_info);
 #endif // DMCS_STATS_INFO
 
 
-#if defined(DEBUG)
-    std::cerr << "Projected belief states..." << std::endl;
-    std::cerr << *belief_states << std::endl;
-    std::cerr << "The V used in projection..." << std::endl;
-    std::cerr << *V << std::endl;
-    //printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
-    std::cerr << "Now check for neighbors..." << std::endl;
-#endif // DEBUG
+    DMCS_LOG_DEBUG("Projected belief states:");
+    DMCS_LOG_DEBUG(*belief_states);
+    DMCS_LOG_DEBUG("The V used in projection:");
+    DMCS_LOG_DEBUG(*V);
+
+    DMCS_LOG_DEBUG("Now check for neighbors...");
 
 
     //
@@ -182,12 +165,11 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #if defined(DEBUG)
 	if (nbs->empty())
 	  {
-	    std::cerr << "Reached a leaf context " << k << std::endl;
-
+	    DMCS_LOG_DEBUG("Reached a leaf context " << k);
 	  }
 	else
 	  {
-	    std::cerr << "Cycle detected at context " << k << std::endl;
+	    DMCS_LOG_DEBUG("Cycle detected at context " << k);
 	  }
 #endif // DEBUG
 
@@ -200,9 +182,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	// We are now at an intermediate context.
 	// Need to consult all neighbors before combining with our local belief states
 
-#ifdef DEBUG
-	std::cerr << "At an intermediate context! " << std::endl;
-#endif
+	DMCS_LOG_DEBUG("At an intermediate context!");
 
 	for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it)
 	  {
@@ -220,9 +200,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	  
 	    mess.insertHistory(k);
 
-#if defined(DEBUG)
-	    std::cerr << "Invoking neighbor " << neighbor_id << std::endl;
-#endif // DEBUG
+	    DMCS_LOG_DEBUG("Invoking neighbor " << neighbor_id);
 
 	    std::string header = HEADER_REQ_PRI_DMCS;
 	    Client<PrimitiveCommandType> client(io_service, res_it, header, mess);
@@ -252,11 +230,9 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	    mess.removeHistory();
 
 
-#if defined(DEBUG)
-	    std::cerr << "Belief states received from neighbor " << neighbor_id << std::endl;	  
-	    std::cerr << *neighbor_belief_states << std::endl;
-	    std::cerr << "Going to combine " << "k = " << k << " neighbor = " << neighbor_id << std::endl;
-#endif // DEBUG
+	    DMCS_LOG_DEBUG("Belief states received from neighbor " << neighbor_id);
+	    DMCS_LOG_DEBUG(*neighbor_belief_states);
+	    DMCS_LOG_DEBUG("Going to combine " << "k = " << k << " neighbor = " << neighbor_id);
 
 
 	    STATS_DIFF_REUSE (belief_states = combine(belief_states,
@@ -264,19 +240,9 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 						      V),
 			      time_combine
 			      );
-
-#if defined(DEBUG)
-	    std::cerr << "Accumulated combination... " << std::endl;	  	  
-	    //std::cerr << *belief_states << std::endl;
-#endif // DEBUG
 	  }
 
 #ifdef DMCS_STATS_INFO
-
-#ifdef DEBUG
-	//std::cerr << "combination size: " << belief_states->size() << std::endl;
-#endif // DEBUG
-
 	my_stats_info.combine.second = belief_states->size();
 #endif // DMCS_STATS_INFO
       
@@ -291,16 +257,13 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 	History::const_iterator ed = hist.end();
 	--ed;
 	std::size_t invoker = *ed;
-	std::cerr << "Going to send " << belief_states->size()
-		  << " belief states above back to invoker: C_" << invoker << std::endl;
+
+	DMCS_LOG_DEBUG("Going to send " << belief_states->size() << " belief states above back to invoker: C_" << invoker);
       }
     else
       {
-	std::cerr << "Going to send " << belief_states->size()
-		  << " belief states above back to user." << std::endl;
+	DMCS_LOG_DEBUG("Going to send " << belief_states->size() << " belief states above back to user.");
       }
- 
-    //printBeliefStatesNicely(std::cerr, belief_states, V, query_plan);
 #endif // DEBUG
   
 #ifdef DMCS_STATS_INFO
@@ -314,13 +277,11 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
     PTime sending_moment = boost::posix_time::microsec_clock::local_time();
     ReturnMessagePtr returning_message(new ReturnMessage(belief_states, sending_moment, sis));
 
-#ifdef DEBUG
-    std::cerr << "Size of my transfer = " << my_transfer->size() << std::endl;
-    std::cerr << "Returning message is: " << std::endl << *returning_message << std::endl;
-#endif // DEBUG
+    DMCS_LOG_DEBUG("Size of my transfer = " << my_transfer->size());
+    DMCS_LOG_DEBUG("Returning message is: ");
+    DMCS_LOG_DEBUG(*returning_message);
 
     return returning_message;
-
 #else
     return belief_states;
 #endif // DMCS_STATS_INFO

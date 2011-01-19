@@ -32,7 +32,7 @@
 
 #include "dmcs/Cache.h"
 #include "dmcs/BeliefCombination.h"
-
+#include "dmcs/Log.h"
 #include "mcs/BeliefState.h"
 
 #include <iterator>
@@ -97,19 +97,21 @@ BeliefStateListPtr
 Cache::cacheHit(const BeliefStatePtr& v) const
 {
   // find if there exists any cache (v*, s*) such that v < v*
-  //std::cerr << "Looking into cache..." << std::endl;
+  DMCS_LOG_DEBUG("Looking into cache..");
   for (QueryAnswerMap::const_reverse_iterator i = cacheMap.rbegin(); i != cacheMap.rend(); ++i)
     {
       if (v <= i->first)
 	{
 	  stats->hits(1);
-	  //std::cerr << "In cacheHit: Found cached information..." << std::endl << *stats << std::endl;
+	  DMCS_LOG_TRACE("Found cached information...");
+	  DMCS_LOG_TRACE(*stats);
 	  return i->second;
 	}
     }      
 
   stats->miss(1);
-  //std::cerr << "In cacheHit: Found nothing..." << std::endl << *stats << std::endl;
+  DMCS_LOG_TRACE("Found nothing...");
+  DMCS_LOG_TRACE(*stats);
   return BeliefStateListPtr();
 }
 

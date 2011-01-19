@@ -35,6 +35,7 @@
 #include "dmcs/BaseDMCS.h"
 #include "process/ClaspProcess.h"
 #include "dmcs/StatsInfo.h"
+#include "dmcs/Log.h"
 
 namespace dmcs {
 
@@ -73,19 +74,14 @@ BaseDMCS::updateGuessingSignature(SignaturePtr& guessing_sig,
     {
       if (testBeliefSet(neighbor_V, i))
 	{
-#ifdef DEBUG
-	  std::cerr << "Bit " << i << "is on" << std::endl;
-#endif // DEBUG
+	  DMCS_LOG_TRACE("Bit " << i << "is on");
+
 	  SignatureByLocal::const_iterator neighbor_it = neighbor_loc.find(i);
-
-
 	  
 	  // the neighbor's V must be set up properly
 	  assert(neighbor_it != neighbor_loc.end());
 
-#ifdef DEBUG
-	  std::cerr << "want to insert " << neighbor_it->sym << std::endl;
-#endif // DEBUG
+	  DMCS_LOG_DEBUG("want to insert " << neighbor_it->sym);
 	  
 	  SignatureBySym::const_iterator my_it = my_sig_sym.find(neighbor_it->sym);
 	  
@@ -99,9 +95,7 @@ BaseDMCS::updateGuessingSignature(SignaturePtr& guessing_sig,
 	      guessing_sig->insert(sym);
 	      guessing_sig_local_id++;
 
-#ifdef DEBUG
-	      std::cerr << neighbor_it->sym << "inserted" << std::endl;
-#endif // DEBUG
+	      DMCS_LOG_DEBUG(neighbor_it->sym << "inserted");
 	    }
 	}
     }
@@ -130,9 +124,7 @@ BaseDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& m
       const BeliefSet neighbor_V = (*V)[neighbor_id - 1];
       const Signature& neighbor_sig = *((*global_sigs)[neighbor_id - 1]);
 
-#ifdef DEBUG
-      std::cerr << "Interface variable of neighbor[" << nb->neighbor_id <<"]: " << neighbor_V << std::endl;
-#endif
+      DMCS_LOG_DEBUG("Interface variable of neighbor[" << nb->neighbor_id <<"]: " << neighbor_V);
 
       guessing_sig_local_id = updateGuessingSignature(guessing_sig,
 						      my_sig_sym,
@@ -141,11 +133,9 @@ BaseDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& m
 						      guessing_sig_local_id);
     }
       
-#ifdef DEBUG
-    std::cerr << "Guessing signature: " << *guessing_sig << std::endl;
-#endif
+  DMCS_LOG_DEBUG("Guessing signature: " << *guessing_sig);
 
-    return guessing_sig;
+  return guessing_sig;
 }
 
 
@@ -153,9 +143,7 @@ BaseDMCS::createGuessingSignature(const BeliefStatePtr& V, const SignaturePtr& m
 BeliefStateListPtr
 BaseDMCS::localSolve(const ProxySignatureByLocal& sig, std::size_t system_size)
 {
-#ifdef DEBUG
-  std::cerr << "Starting local solve..." << std::endl;
-#endif
+  DMCS_LOG_DEBUG("Starting local solve...");
 
   BeliefStateListPtr local_belief_states(new BeliefStateList);
 
@@ -169,12 +157,9 @@ BaseDMCS::localSolve(const ProxySignatureByLocal& sig, std::size_t system_size)
   ///@todo 
   solver->solve(theory, sig.size());
 
-#ifdef DEBUG
-  std::cerr << "Got " << local_belief_states->size();
-  std::cerr << " answers from CLASP" << std::endl;
-  std::cerr << "Local belief states from localsolve(): " << std::endl;
-  std::cerr << *local_belief_states << std::endl;
-#endif
+  DMCS_LOG_DEBUG("Got " << local_belief_states->size() << " answers from solver");
+  DMCS_LOG_DEBUG("Local belief states from localsolve():");
+  DMCS_LOG_DEBUG(*local_belief_states);
 
   return local_belief_states;
 }
@@ -207,9 +192,7 @@ BaseDMCS::initStatsInfos(std::size_t system_size)
       sis->push_back(si);
     }
 
-#ifdef DEBUG
-  std::cerr << "Initialization of the statistic information: " << *sis << std::endl;
-#endif // DEBUG
+  DMCS_LOG_DEBUG("Initialization of the statistic information: " << *sis);
 }
 
 #endif // DMCS_STATS_INFO

@@ -89,8 +89,8 @@ testQueryPlan_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testClaspResultOnlineParser_SOURCES = testClaspResultOnlineParser.cpp
 testClaspResultOnlineParser_LDADD = \
-	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/parser/libparser.a \
+	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/solver/libsolver.a \
 	$(top_builddir)/src/loopformula/libtranslation.a

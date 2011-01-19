@@ -29,6 +29,8 @@
 
 #include "parser/ClaspResultOnlineParser.h"
 
+#include "dmcs/Log.h"
+
 namespace dmcs {
 
 BeliefStatePtr
@@ -47,9 +49,7 @@ ClaspResultOnlineParser::getNextAnswer()
 	  
 	  if (!line.empty())
 	    {
-#ifdef DEBUG
-	      std::cerr << "Processing line: \"" << line << "\""<< std::endl; 
-#endif
+	      DMCS_LOG_DEBUG("Processing line: \"" << line << "\"");
 	      
 	      std::string::const_iterator beg = line.begin();
 	      std::string::const_iterator end = line.end();

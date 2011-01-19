@@ -52,10 +52,7 @@ Instantiator::instantiate(InstantiateForwardMessage& mess)
   ContextSubstitutionPtr ctx_sub = mess.getCtxSubstitution();
   NeighborListPtr neighbors(new NeighborList);
 
-#ifdef DEBUG
-  std::cerr << "Instantiator::instantiate" << std::endl 
-	    << "Context substitution = " << ctx_sub << std::endl;
-#endif
+  DMCS_LOG_TRACE("Context substitution = " << ctx_sub);
 
   for (BridgeRules::const_iterator r = schematic_bridge_rules->begin(); 
        r != schematic_bridge_rules->end(); ++r)
@@ -65,9 +62,7 @@ Instantiator::instantiate(InstantiateForwardMessage& mess)
       const PositiveBridgeBody& pbody = getPositiveBody(*r);
       const NegativeBridgeBody& nbody = getNegativeBody(*r);
 
-#ifdef DEBUG
-      std::cerr << "Instantiating schematic bridge rule: " << *r << std::endl;
-#endif
+      DMCS_LOG_DEBUG("Instantiating schematic bridge rule: " << *r);
 
       // new parts for the instantiated bridge rule
       PositiveBridgeBodyPtr pi_body(new PositiveBridgeBody);
@@ -80,16 +75,13 @@ Instantiator::instantiate(InstantiateForwardMessage& mess)
       bridge_rules->push_back(ri);
     }
       
-#ifdef DEBUG
-  std::cerr << "RESULT: Instantiated bridge rules: " << std::endl
-	    << bridge_rules << std::endl;
-#endif  
+  DMCS_LOG_DEBUG("RESULT: Instantiated bridge rules:");
+  DMCS_LOG_DEBUG(bridge_rules);
 
   // forward the instantiation request to all confirmed neighbors
-#ifdef DEBUG
-  std::cerr << "Going to instantiate the following neighbors: " << std::endl;
-  std::cerr << *neighbors << std::endl;
-#endif
+  DMCS_LOG_DEBUG("Going to instantiate the following neighbors:");
+  DMCS_LOG_DEBUG(*neighbors);
+
   hist->push_back(ctx_id);
 
   for (NeighborList::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
@@ -109,9 +101,7 @@ Instantiator::instantiate(InstantiateForwardMessage& mess)
 	  boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
 	  boost::asio::ip::tcp::endpoint endpoint = *res_it;
 	  
-#if defined(DEBUG)
-	  std::cerr << "Invoking neighbor " << neighbor_id << std::endl;
-#endif // DEBUG
+	  DMCS_LOG_DEBUG("Invoking neighbor " << neighbor_id);
 	  
 	  std::string header = HEADER_REQ_INSTANTIATE;
 	  Client<InstantiatorCommandType> client(io_service, res_it, header, mess);
@@ -120,9 +110,7 @@ Instantiator::instantiate(InstantiateForwardMessage& mess)
 	  
 	  InstantiateBackwardMessagePtr result = client.getResult();
 
-#ifdef DEBUG	  
-	  std::cerr << "Answer from neighbor: " << *result << std::endl;
-#endif
+	  DMCS_LOG_DEBUG("Answer from neighbor: " << *result);
 	  
 	  if (result->getStatus() == false)
 	    {
@@ -134,9 +122,7 @@ Instantiator::instantiate(InstantiateForwardMessage& mess)
 	}
       else
 	{
-#ifdef DEBUG
-	  std::cerr << "Neighbor: " << neighbor_id << " was already instantiated." << std::endl;
-#endif
+	  DMCS_LOG_DEBUG("Neighbor: " << neighbor_id << " was already instantiated.");
 	}
     }
       
