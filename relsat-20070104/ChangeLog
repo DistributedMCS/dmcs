@@ -1,3 +1,7 @@
+2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* SATInstance.cpp: Add support for DMCS_LOG_*.
+
 2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.cpp: Add notification to the wrapper in case of UNSAT
