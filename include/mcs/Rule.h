@@ -186,16 +186,25 @@ getNegativeBody(BridgeRulePtr& r)
 }
 
 
+} // namespace dmcs
+
+
+
+namespace std {
+
 inline std::ostream&
-operator<< (std::ostream& os, const BridgeAtom& ba)
+operator<< (std::ostream& os, const dmcs::BridgeAtom& ba)
 {
+  using namespace dmcs;
   return os << "(" << ctx2string(ba.first) << ":" << sb2string(ba.second) << ")";
 }
 
 
 inline std::ostream&
-operator<< (std::ostream& os, const BridgeBody& B)
+operator<< (std::ostream& os, const dmcs::BridgeBody& B)
 {
+  using namespace dmcs;
+
   const PositiveBridgeBody& pbody = getPositiveBody(B);
   PositiveBridgeBody::const_iterator p_end = --pbody.end();
 
@@ -236,8 +245,10 @@ operator<< (std::ostream& os, const BridgeBody& B)
 
 
 inline std::ostream&
-operator<< (std::ostream& os, const BridgeRulePtr& r)
+operator<< (std::ostream& os, const dmcs::BridgeRulePtr& r)
 {
+  using namespace dmcs;
+
   const Head& head = getHead(r);
   Head::const_iterator h_end = --head.end();
 
@@ -257,8 +268,10 @@ operator<< (std::ostream& os, const BridgeRulePtr& r)
 
 
 inline std::ostream&
-operator<< (std::ostream& os, const BridgeRulesPtr& R)
+operator<< (std::ostream& os, const dmcs::BridgeRulesPtr& R)
 {
+  using namespace dmcs;
+
   for (BridgeRules::const_iterator it = R->begin(); it != R->end(); ++it)
     {
       os << *it << "\n";
@@ -267,7 +280,7 @@ operator<< (std::ostream& os, const BridgeRulesPtr& R)
   return os;
 }
 
-} // namespace dmcs
+} // namespace std
 
 #endif /* RULE_H */
 
