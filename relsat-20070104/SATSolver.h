@@ -25,11 +25,6 @@
 #include "VariableSet.h"
 #include "Random.h"
 
-#include <mcs/BeliefState.h>
-#include <mcs/ProxySignatureByLocal.h>
-
-#include <network/MessageQueue.h>
-
 #include "solver/RelSatSolver.h"
 
 /////////////
@@ -130,6 +125,12 @@ public:
   void vSetPrimaryVariables(VariableSet* pPrimaryVariables_) {
     _pPrimaryVariables = pPrimaryVariables_;
   }
+
+  void
+  refresh();
+
+  void
+  clean_up();
 
 private:
   boolean _bVerifySolution();
@@ -270,8 +271,7 @@ private:
   // primary variable related vars
   VariableSet* _pPrimaryVariables;
 
-  // for porting models to BeliefState form
-  
+  // for communicating with dmcs
   dmcs::RelSatSolver* wrapper;
 };
 

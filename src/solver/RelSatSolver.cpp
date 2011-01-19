@@ -95,14 +95,23 @@ RelSatSolver::update_bridge_input(SignatureByCtx::const_iterator it)
 
 
 
-void
+// return false when there is no more input to read
+bool
 RelSatSolver::prepare_input()
 {
   // read joined input from Joiner. We need to keep the input to build
   // complete model wrt the interface
-  std::size_t prio    = 0;
-  int timeout = 0;
+  std::size_t prio = 0;
+  int timeout      = 0;
+
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Staring at JOIN_OUT_MQ for the next input!");
+
   input = mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
+
+  if (input == 0)
+    {
+      return false;
+    }
 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input received!");
 
@@ -115,19 +124,19 @@ RelSatSolver::prepare_input()
   SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
   SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Updating input from local signature...");
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Updating input from bridge signature...");
 
   for (SignatureByCtx::const_iterator it = local_sig.begin(); it != low; ++it)
     {
       update_bridge_input(it);
     }
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Updating input from bridge signature...");
-
   for (SignatureByCtx::const_iterator it = up; it != local_sig.end(); ++it)
     {
       update_bridge_input(it);
     }
+
+  return true;
 }
 
 
@@ -136,7 +145,7 @@ void
 RelSatSolver::solve()
 {
   // wait for conflict and partial_ass from Handler
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Wait for a message from DMCS");
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Fresh solving. Wait for a message from DMCS");
   ConflictNotification* cn;
   void *ptr         = static_cast<void*>(&cn);
   unsigned int p    = 0;
@@ -167,19 +176,28 @@ RelSatSolver::solve()
 	}*/
   
       // remove input part of the theory (from last solve)
-      xInstance->removeLastInput();
-      
-      if (!is_leaf)
+
+      if (is_leaf)
 	{
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to prepare input");
-	  // add new input
-	  prepare_input();
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Leaf case. Solve now.");
+	  relsat_enum eResult = xSATSolver->eSolve();
 	}
-      
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to solve");
-      // now we can do SAT solving
-      relsat_enum eResult = xSATSolver->eSolve();
-      
+      else
+	{
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Intermediate case.");
+	  while (1)
+	    {
+	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Prepare input before solving.");
+	      xInstance->removeLastInput();
+	      if (!prepare_input())
+		{
+		  break;
+		}
+	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " A fresh solving.");
+	      xSATSolver->refresh();
+	      relsat_enum eResult = xSATSolver->eSolve();
+	    }
+	}
     }
   else
     {
@@ -196,7 +214,9 @@ RelSatSolver::receiveUNSAT()
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   // send a NULL pointer to the SatOutputMessageQueue
-  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+  //mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+
+  // 
 }
 
 

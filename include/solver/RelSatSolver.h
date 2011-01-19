@@ -76,7 +76,7 @@ public:
   receiveSolution(DomainValue* _aAssignment, int _iVariableCount);
 
 private:
-  void
+  bool
   prepare_input();
 
   void

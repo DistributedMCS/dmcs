@@ -9,6 +9,7 @@
 #include "Random.h"
 #include "SATInstance.h"
 #include "SATSolver.h"
+#include "RelSatHelper.h"
 
 #include "dmcs/Log.h"
 
@@ -185,7 +186,7 @@ SATInstance::removeLastInput()
 
 
 void
-SATInstance::add_unit_clause(int literal)
+SATInstance::add_unit_clause(int literal) 
 {
   VariableSet xPositiveVariables(iVariableCount);
   VariableSet xNegativeVariables(iVariableCount);

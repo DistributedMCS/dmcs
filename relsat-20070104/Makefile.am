@@ -15,6 +15,7 @@ noinst_HEADERS = \
 	Maximums.h \
 	RandGen.h \
 	Random.h \
+	RelSatHelper.h \
 	SATInstance.h \
 	SATPreprocessor.h \
 	SATSolver.h \

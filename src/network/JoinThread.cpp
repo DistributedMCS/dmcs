@@ -69,7 +69,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 
   BeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[noff];
 
-  if (import_state != FILLING_UP)
+  if (import_state == FILLING_UP)
     {
       mid_it_ref = --bsv->end();
     }
@@ -112,7 +112,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
       bsv->push_back(bs); 
     }
   
-  if (import_state == FILLING_UP)
+  if (import_state != FILLING_UP)
     {
       (*beg_it)[noff] = bsv->begin();
     }
@@ -136,10 +136,13 @@ JoinThread::join(const BeliefStateIteratorVecPtr& run_it)
 {
   // We don't need the interface V here
   BeliefStateIteratorVec::const_iterator it = run_it->begin();
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Get first belief state");
   BeliefState* first_bs = **it;
 
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Initialize result");
   BeliefState* result = new BeliefState(*first_bs);
   
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Iteratively join with next belief states");
   ++it;
   for (; it != run_it->end(); ++it)
     {
@@ -167,8 +170,6 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
 		 const BeliefStateIteratorVecPtr& beg_it, 
 		 const BeliefStateIteratorVecPtr& end_it)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
   // initialization
   //assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
   int n = partial_eqs->size();
@@ -186,6 +187,7 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
     {
       DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "inc = " << inc);
       join(run_it);
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Finish small join ");
       inc = n-1;
 
       // find the greates index whose running iterator incrementable to a non-end()
@@ -225,21 +227,18 @@ JoinThread::ask_for_next(std::size_t next)
   BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
   ConflictNotification* cn = new ConflictNotification(0, empty_conflict, empty_ass);
 
-  for (std::size_t i = 0; i < next; ++i)
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Push to offset " << next);
+  ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
+  
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
+		 <<", partial_ass = (" << cn->partial_ass << ") " << *(cn->partial_ass));
+  
+  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
+  
+  if (ow_neighbor)
     {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " First push to offset " << i);
-      ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[i];
-      
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
-		     <<", partial_ass = (" << cn->partial_ass << ") " << *(cn->partial_ass));
-      
-      ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
-      
-      if (ow_neighbor)
-	{
-	  delete ow_neighbor;
-	  ow_neighbor = 0;
-	}
+      delete ow_neighbor;
+      ow_neighbor = 0;
     }
 }
 
@@ -322,10 +321,15 @@ JoinThread::operator()()
 			       in_mask, pack_full,
 			       beg_it, mid_it, import_state);
 
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " beg_it.size() = " << beg_it->size());
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " mid_it.size() = " << mid_it->size());
+
 	  // then if this was a "NEXT" request to this neighbor, we
 	  // have to restart the neighbors before him
 	  if (asking_next)
 	    {
+	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Realized that we are in GETTING_NEXT mode.");
+
 	      assert (import_state != START_UP);
 	      assert (nn.ctx_offset == next_neighbor_offset);
 
@@ -350,7 +354,7 @@ JoinThread::operator()()
 	  // At this point, we can check whether joining is possible
 	  if (in_mask.count_range(0, no_nbs+1) == no_nbs)
 	    {
-	      if (import_state == START_UP)
+	      if (import_state == START_UP || import_state == GETTING_NEXT)
 		{
 		  import_state = FILLING_UP;
 
@@ -364,39 +368,41 @@ JoinThread::operator()()
 		    }
 		  join(partial_eqs, beg_it, mid_it);
 		}
-	    } // (in_mask.count_range(0, no_nbs+1) == no_nbs)
-	  else
-	    { // (in_mask.count_range(0, no_nbs+1) != no_nbs)
-	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " NOT a first time joining ==> do it selectively");
-	      for (std::size_t i = 0; i < no_nbs; ++i)
+	      else
 		{
-		  BeliefStateVecPtr& bsv = (*partial_eqs)[i];
-		  BeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[i];
-		  if (mid_it_ref != bsv->end())
+		  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " NOT a first time joining ==> do it selectively");
+		  for (std::size_t i = 0; i < no_nbs; ++i)
 		    {
-		      // This neighbor has some new models.
-		      BeliefStateVec::const_iterator& beg_it_ref = (*beg_it)[i];
-
-		      // This is the range of new models that we want to join.
-		      beg_it_ref = mid_it_ref;
-		      mid_it_ref = bsv->end();
-
-		      join(partial_eqs, beg_it, mid_it);
-
-		      // Restart begin position, because the new models are now all in.
-		      beg_it_ref = bsv->begin();
+		      BeliefStateVecPtr& bsv = (*partial_eqs)[i];
+		      BeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[i];
+		      if (mid_it_ref != bsv->end())
+			{
+			  // This neighbor has some new models.
+			  BeliefStateVec::const_iterator& beg_it_ref = (*beg_it)[i];
+			  
+			  // This is the range of new models that we want to join.
+			  beg_it_ref = mid_it_ref;
+			  mid_it_ref = bsv->end();
+			  
+			  join(partial_eqs, beg_it, mid_it);
+			  
+			  // Restart begin position, because the new models are now all in.
+			  beg_it_ref = bsv->begin();
+			}
 		    }
 		}
-	    } // (in_mask.count_range(0, no_nbs+1) != no_nbs)
 
-
-	  if (pack_full.count_range(0, no_nbs+1) == no_nbs)
-	    {
-	      import_state == GETTING_NEXT;
-	      
-	      // always ask for next models from neighbor with offset 0
-	      ask_for_next(0);
-	    }
+	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " pack_full.count_range == " << pack_full.count_range(0, no_nbs+1));
+	      if (pack_full.count_range(0, no_nbs+1) == no_nbs)
+		{
+		  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Pack full, go to get next models");
+		  import_state = GETTING_NEXT;
+		  asking_next  = true;
+		  
+		  // always ask for next models from neighbor with offset 0
+		  ask_for_next(0);
+		}
+	    } // (in_mask.count_range(0, no_nbs+1) == no_nbs)
 
 	} // (nn.peq_cnt != 0)
 

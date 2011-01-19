@@ -1,3 +1,13 @@
+2011-01-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.cpp: Add more debugging information. Add methods
+	refresh() and clean_up().
+	* SATSolver.h: Likewise.
+
+	* SATInstance.cpp: include RelSatHelper.h.
+
+	* Makefile.am: Add RelSatHelper.h.
+
 2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* SATInstance.cpp: Add support for DMCS_LOG_*.

@@ -212,6 +212,9 @@ OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr
       
       StreamingBackwardMessage return_mess(res);
 
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " return message:");
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << return_mess);
+
       conn->async_write(return_mess,
 			boost::bind(&OutputThread::loop, this,
 				    boost::asio::placeholders::error));

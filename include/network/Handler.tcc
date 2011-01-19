@@ -293,17 +293,14 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
   if (!e)
     {
       // Check header
-      if (header.find(HEADER_NEXT) != std::string::npos)
+      if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
 	  // Read the message to get pack_size and conflict, so that we can inform our slaves
+	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Got a request. Will inform my slaves about this.");
 	  sesh->conn->async_read(sesh->mess,
 				 boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
 					     boost::asio::placeholders::error, sesh, cmd, false));
 	}
-      else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
-	{
-	  ///@todo: restart
-	} 
       else if (header.find(HEADER_TERMINATE) != std::string::npos)
 	{
 	  server->remove_handler(this);

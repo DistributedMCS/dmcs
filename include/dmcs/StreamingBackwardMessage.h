@@ -74,11 +74,16 @@ inline std::ostream&
 operator<< (std::ostream& os, const StreamingBackwardMessage& sbMess)
 {
   const BeliefStateVecPtr& result = sbMess.getBeliefStates();
+  os << "{ ";
   for (BeliefStateVec::const_iterator it = result->begin();
        it != result->end(); ++it)
     {
-      os << **it << std::endl;
+      if (*it)
+	{
+	  os << **it << std::endl;
+	}
     }
+  os << " }";
 
   return os;
 }

@@ -1,3 +1,20 @@
+2011-01-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/OutputThread.cpp: Add some more debugging
+	information
+
+	* src/network/JoinThread.cpp: Fix join.
+
+	* include/solver/RelSatSolver.h: More informative getting input
+	from JOIN_OUT_MQ.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/Handler.tcc: Spread request for next models to
+	my slaves (dmcs and output threads).
+
+	* include/dmcs/StreamingBackwardMessage.h: Do not output NULL
+	pointers at the end.
+
 2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcs/BeliefCombination.cpp: Cleanup.
