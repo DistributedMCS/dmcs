@@ -51,7 +51,7 @@ public:
   // return true/false indicating whether the execution was successful
   // while sending local models to message queue.
   bool
-  execute(const StreamingForwardMessage& mess)
+  execute(const StreamingForwardMessage& /* mess */)
   {
     return false;
   }
