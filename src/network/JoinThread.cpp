@@ -172,8 +172,11 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
 {
   // initialization
   //assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
-  int n = partial_eqs->size();
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "n = " << n);
+
+  std::size_t n = partial_eqs->size();
+
+  DMCS_LOG_TRACE("n = " << n);
+
   BeliefStateIteratorVecPtr run_it(new BeliefStateIteratorVec);
   
   for (std::size_t i = 0; i < n; ++i)
@@ -185,9 +188,9 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
   int inc = n-1;
   while (inc >= 0)
     {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "inc = " << inc);
+      DMCS_LOG_TRACE("inc = " << inc);
       join(run_it);
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Finish small join ");
+      DMCS_LOG_TRACE("Finish small join ");
       inc = n-1;
 
       // find the greates index whose running iterator incrementable to a non-end()
@@ -205,16 +208,18 @@ JoinThread::join(const BeliefStatePackagePtr& partial_eqs,
 	    }
 	}
       
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "inc = " << inc);
+      DMCS_LOG_TRACE("inc = " << inc);
+
       // reset all running iterator after inc to beg_it
-      for (int i = inc+1; i < n; ++i)
+
+      for (std::size_t i = inc+1; i < n; ++i)
 	{
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "reset run_it. i = " << i);
+	  DMCS_LOG_TRACE("reset run_it. i = " << i);
 	  (*run_it)[i] = (*beg_it)[i];
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "reset run_it. i = " << i << ". DONE");
+	  DMCS_LOG_TRACE("reset run_it. i = " << i << ". DONE");
 	}
     }
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " DONE");
+  DMCS_LOG_TRACE("DONE");
 }
 
 

@@ -49,7 +49,8 @@ public:
 	     const MessagingGatewayBCPtr& mg_, 
 	     std::size_t noff_)
     : BaseStreamer(conn_),
-      mg(mg_), noff(noff_),
+      mg(mg_),
+      noff(noff_),
       first_round(true)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
@@ -128,9 +129,9 @@ public:
   }
 
 private:
-  bool                     first_round;
-  std::size_t              noff;        // offset of the neighbor streamer in the vector of MQs
   MessagingGatewayBCPtr    mg;
+  std::size_t              noff;        // offset of the neighbor streamer in the vector of MQs
+  bool                     first_round;
   StreamingBackwardMessage mess;
   std::string              header;
 };

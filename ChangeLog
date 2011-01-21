@@ -10,6 +10,15 @@
 	* src/network/Server.cpp: Likewise.
 
 	* include/dmcs/StreamingCommandType.h: Fix warning.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/mcs/BeliefState.h: Likewise.
 
 	* testsuite/testConnection.cpp: Add connection test.
 	* testsuite/Makefile.am: Likewise.

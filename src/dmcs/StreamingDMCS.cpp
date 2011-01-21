@@ -60,11 +60,14 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     query_plan(query_plan_),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats)),
-    buf_count(buf_count_),
     initialized(false),
+    sat_thread(0),
+    join_thread(0),
+    router_thread(0),
     neighbor_threads(new ThreadVec),
     dmcs_sat_notif(new ConcurrentMessageQueue),
-    router_neighbors_notif(new ConcurrentMessageQueueVec)
+    router_neighbors_notif(new ConcurrentMessageQueueVec),
+    buf_count(buf_count_)
 { }
 
 

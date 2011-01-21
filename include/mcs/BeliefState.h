@@ -52,7 +52,6 @@ namespace dmcs {
 
 /// a belief set
 typedef bm::bvector<> BeliefSet;
-//typedef uint64_t BeliefSet;
 
 /// a belief state
 typedef std::vector<BeliefSet> BeliefState;
@@ -69,6 +68,7 @@ typedef boost::shared_ptr<BeliefStatePackage> BeliefStatePackagePtr;
 
 typedef std::vector<BeliefStateVec::const_iterator> BeliefStateIteratorVec;
 typedef boost::shared_ptr<BeliefStateIteratorVec> BeliefStateIteratorVecPtr;
+
 
 /** 
  * @param b 
@@ -479,6 +479,9 @@ operator<< (std::ostream& os, const dmcs::BeliefStateListPtr& l)
 
 } // namespace std
 
+
+
+
 // ********************************************************************************
 // PartialBeliefState, for streaming DMCS
 
@@ -486,6 +489,7 @@ namespace dmcs {
 
 typedef bm::bvector<> BitMagic;
 
+/// a partial belief set
 struct PartialBeliefSet
 {
   // for 3-value assignment
@@ -499,19 +503,19 @@ struct PartialBeliefSet
   PartialBeliefSet()
   { }
 
+  PartialBeliefSet(std::size_t n)
+    : value_bit(n),
+      state_bit(n)
+  { }
+
   PartialBeliefSet(const PartialBeliefSet& pb)
   {
+    assert (pb.value_bit.size() == pb.state_bit.size());
     value_bit = pb.value_bit;
     state_bit = pb.state_bit;
   }
 
-  PartialBeliefSet(std::size_t n)
-  {
-    value_bit.resize(n);
-    state_bit.resize(n);
-  }
-
-  const std::size_t
+  inline std::size_t
   size() const
   {
     assert (value_bit.size() == state_bit.size());
@@ -522,7 +526,6 @@ struct PartialBeliefSet
   resize(std::size_t n)
   {
     assert (n > 0);
-
     value_bit.resize(n);
     state_bit.resize(n);
   }

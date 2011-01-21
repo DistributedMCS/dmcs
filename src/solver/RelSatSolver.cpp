@@ -69,9 +69,10 @@ RelSatSolver::~RelSatSolver()
 
 
 int
-RelSatSolver::solve(const TheoryPtr& theory, std::size_t sig_size)
+RelSatSolver::solve(const TheoryPtr& /* theory */, std::size_t /* sig_size */)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  return 42; ///@todo  nothing here??
 }
 
 
@@ -177,27 +178,32 @@ RelSatSolver::solve()
   
       // remove input part of the theory (from last solve)
 
+      relsat_enum eResult;
+
       if (is_leaf)
 	{
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Leaf case. Solve now.");
-	  relsat_enum eResult = xSATSolver->eSolve();
+	  DMCS_LOG_TRACE("Leaf case. Solve now.");
+	  eResult = xSATSolver->eSolve();
 	}
       else
 	{
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Intermediate case.");
+	  DMCS_LOG_TRACE("Intermediate case.");
+
 	  while (1)
 	    {
-	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Prepare input before solving.");
+	      DMCS_LOG_TRACE("Prepare input before solving.");
 	      xInstance->removeLastInput();
 	      if (!prepare_input())
 		{
 		  break;
 		}
-	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " A fresh solving.");
+	      DMCS_LOG_TRACE("A fresh solving.");
 	      xSATSolver->refresh();
-	      relsat_enum eResult = xSATSolver->eSolve();
+	      eResult = xSATSolver->eSolve();
 	    }
 	}
+
+      ///@todo what todo with eResult?
     }
   else
     {

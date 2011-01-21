@@ -57,10 +57,12 @@ AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_servic
 							  std::size_t index_,
 							  std::size_t pack_size_)
   : BaseClient(io_service, endpoint_iterator, my_header_),
-    mg(mg_), nb(nb_), 
-    ctx_id(ctx_id_), index(index_), pack_size(pack_size_),
-    mess(ctx_id_, pack_size_)
-    
+    mess(ctx_id_, pack_size_),
+    mg(mg_),
+    nb(nb_), 
+    ctx_id(ctx_id_),
+    index(index_),
+    pack_size(pack_size_)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   

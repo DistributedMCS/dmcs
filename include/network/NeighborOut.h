@@ -72,7 +72,7 @@ public:
 	unsigned int p    = 0;
 	std::size_t recvd = 0;
 
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Listen to router...");
+	DMCS_LOG_TRACE("Listen to router...");
 	router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
 
 	if (ptr && cn)
@@ -80,8 +80,7 @@ public:
 	    Conflict* conflict       = cn->conflict;
 	    BeliefState* partial_ass = cn->partial_ass;
 
-	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got from Router: conflict = " << *conflict 
-			   << "*partial_ass = " << *partial_ass);
+	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflict << "*partial_ass = " << *partial_ass);
 
 	    // write to network
 	    std::string header = HEADER_REQ_STM_DMCS;
@@ -109,10 +108,20 @@ public:
 		Conflict* conflict, BeliefState* partial_ass)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-    StreamingForwardMessage mess(invoker, pack_size, conflict, partial_ass);
-    conn->async_write(mess, boost::bind(&NeighborOut::stream, this,  
-					boost::asio::placeholders::error));
+
+    if (!e)
+      {
+	StreamingForwardMessage mess(invoker, pack_size, conflict, partial_ass);
+	conn->async_write(mess, boost::bind(&NeighborOut::stream, this,  
+					    boost::asio::placeholders::error));
+      }
+    else
+      {
+	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+	throw std::runtime_error(e.message());
+      }
   }
+
 
 private:
   ConcurrentMessageQueuePtr router_neighbor_notif;

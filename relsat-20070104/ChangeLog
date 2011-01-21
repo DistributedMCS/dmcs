@@ -1,3 +1,7 @@
+2011-01-21  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* SATSolver.h: Fix warning.
+
 2011-01-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.cpp: Add more debugging information. Add methods

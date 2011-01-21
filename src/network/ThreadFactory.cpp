@@ -46,12 +46,15 @@ ThreadFactory::ThreadFactory(const ContextPtr& context_,
 			     std::size_t pack_size_,
 			     MessagingGatewayBCPtr& mg_,
 			     const ConcurrentMessageQueuePtr& dsn)
-  : context(context_), theory(theory_), 
-    local_sig(local_sig_), localV(localV_),
-    pack_size(pack_size_), mg(mg_),
+  : context(context_),
+    theory(theory_), 
+    local_sig(local_sig_),
+    localV(localV_),
+    pack_size(pack_size_),
+    mg(mg_),
     dmcs_sat_notif(dsn), 
-    c2o(new HashedBiMap),
-    sat_router_notif(new ConcurrentMessageQueue)
+    sat_router_notif(new ConcurrentMessageQueue),
+    c2o(new HashedBiMap)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   // fill up the map: ctx_id <--> offset
@@ -72,15 +75,16 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 {
   const NeighborListPtr& nbs    = context->getNeighbors();
   const std::size_t ctx_id      = context->getContextID();
-  const std::size_t system_size = context->getSystemSize();
+  //const std::size_t system_size = context->getSystemSize();
 
   const std::size_t no_nbs      = nbs->size();
   std::size_t i = 0;
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Going to create " << no_nbs << " neighbor threads.");
+
+  DMCS_LOG_TRACE("Going to create " << no_nbs << " neighbor threads.");
 
   for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it, ++i)
     {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Create neighbor thread " << i);
+      DMCS_LOG_TRACE("Create neighbor thread " << i);
 
       const NeighborPtr nb = *it;
       ConcurrentMessageQueuePtr cmq(new ConcurrentMessageQueue);
@@ -90,7 +94,7 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
       
       boost::thread* nit = new boost::thread(nt);
       neighbor_input_threads->push_back(nit);
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Create neighbor thread " << i << ". DONE");
+      DMCS_LOG_TRACE("Create neighbor thread " << i << ". DONE");
     }
 }
 
