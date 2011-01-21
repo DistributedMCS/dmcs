@@ -1,3 +1,10 @@
+2011-01-21  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/testConnection.cpp: Add connection test.
+	* testsuite/Makefile.am: Likewise.
+
+	* testsuite/testBlockingClasp.cpp: Use BOOST_TEST_MESSAGE.
+
 2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcsd.cpp: Add --daemon option.
