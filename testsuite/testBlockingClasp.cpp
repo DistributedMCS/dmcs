@@ -6,6 +6,8 @@
 #define BOOST_TEST_MODULE "testBlockingClasp"
 #include <boost/test/unit_test.hpp>
 
+#include <boost/thread.hpp>
+
 #include <iostream>
 #include <fstream>
 
@@ -68,18 +70,20 @@ BOOST_AUTO_TEST_CASE ( testBlockingClasp )
 
       if (belief_state != boost::shared_ptr<BeliefState>())
 	{
-#ifdef DEBUG
-	  std::cerr << belief_state << std::endl;
-#endif
+	  BOOST_TEST_MESSAGE("read " << belief_state);
+	  BOOST_TEST_MESSAGE("count: " << count);
 
 	  count++;
-	  sleep(1);
 
-#ifdef DEBUG
-	  std::cerr << "read " << count << std::endl;
-#endif
+	  boost::posix_time::milliseconds n(500);
+	  boost::this_thread::sleep(n);
+
+	  BOOST_TEST_MESSAGE("slept 500msecs");
 	}
     }
   while (belief_state != boost::shared_ptr<BeliefState>() &&
 	 count < 3);
+
+  BOOST_CHECK_EQUAL(count, 3);
+  BOOST_CHECK_NE(belief_state, boost::shared_ptr<BeliefState>());
 }
