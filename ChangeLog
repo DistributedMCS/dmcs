@@ -1,5 +1,11 @@
 2011-01-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/dmcs/BeliefCombination.cpp (dmcs): Add combine() method for
+	2 ParitialBeliefState(s).
+
+	* include/mcs/BeliefState.h: Add copy constructor, operator!=,
+	size() and resize().
+
 	* testsuite/testBeliefState.cpp: Add testBeliefState.
 	* testsuite/Makefile.am: Likewise.
 

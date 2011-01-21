@@ -499,8 +499,30 @@ struct PartialBeliefSet
   PartialBeliefSet()
   { }
 
+  PartialBeliefSet(const PartialBeliefSet& pb)
+  {
+    value_bit = pb.value_bit;
+    state_bit = pb.state_bit;
+  }
+
   PartialBeliefSet(std::size_t n)
   {
+    value_bit.resize(n);
+    state_bit.resize(n);
+  }
+
+  const std::size_t
+  size() const
+  {
+    assert (value_bit.size() == state_bit.size());
+    return value_bit.size();
+  }
+
+  void
+  resize(std::size_t n)
+  {
+    assert (n > 0);
+
     value_bit.resize(n);
     state_bit.resize(n);
   }
@@ -529,6 +551,12 @@ operator== (const PartialBeliefSet& p, const PartialBeliefSet& b)
 }
 
 
+inline bool
+operator!= (const PartialBeliefSet& p, const PartialBeliefSet& b)
+{
+  return !(p == b);
+}
+
 
 inline bool
 operator< (const PartialBeliefSet& p, const PartialBeliefSet& b)
@@ -549,7 +577,7 @@ operator< (const PartialBeliefSet& p, const PartialBeliefSet& b)
 inline PartialBeliefSet::TruthVal
 testBeliefSet(PartialBeliefSet& pb, std::size_t pos)
 {
-  assert (pos > 0 && pos < pb.value_bit.size());
+  assert (pos > 0 && pos < pb.size());
 
   if (pb.state_bit.test(pos))
     {
@@ -572,7 +600,7 @@ inline void
 setBeliefSet(PartialBeliefSet& pb, std::size_t pos, 
 	     PartialBeliefSet::TruthVal val = PartialBeliefSet::DMCS_TRUE)
 {
-  assert (pos > 0 && pos < pb.value_bit.size());
+  assert (pos > 0 && pos < pb.size());
 
   if (val == PartialBeliefSet::DMCS_UNDEF)
     {
@@ -1084,8 +1112,7 @@ inline void save(Archive & ar, const dmcs::PartialBeliefSet& pb, unsigned int ve
   const std::size_t len_value = bm_serializer.serialize(pb.value_bit, buf_value, st_value.max_serialize_mem);
   const std::size_t len_state = bm_serializer.serialize(pb.state_bit, buf_state, st_state.max_serialize_mem);
 
-  assert (pb.value_bit.size() == pb.state_bit.size());
-  const std::size_t bit_size = pb.value_bit.size();
+  const std::size_t bit_size = pb.size();
 
   ar << bit_size;
 
@@ -1125,10 +1152,10 @@ inline void load(Archive & ar, dmcs::PartialBeliefSet& pb, unsigned int version)
   ar >> bit_size;
   assert (bit_size > 0);
 
-  if (pb.value_bit.size() != bit_size)
+  if (pb.size() != bit_size)
     {
-      pb.value_bit.resize(bit_size);
-      pb.state_bit.resize(bit_size);
+      pb.resize(bit_size);
+      pb.resize(bit_size);
     }
 
   ar >> len_value;
