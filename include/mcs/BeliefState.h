@@ -35,6 +35,7 @@
 #include <list>
 #include <vector>
 
+#include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/vector.hpp>
@@ -110,8 +111,6 @@ maxBeliefSet()
 }
 
 
-
-
 /** 
  * @param b 
  * 
@@ -138,7 +137,6 @@ setEpsilon(BeliefSet& b)
   // non-epsilon BeliefSet's
   b.set(0);
 }
-
 
 
 /// @brief for sorting BeliefStateLists
@@ -231,9 +229,14 @@ namespace std {
 inline std::ostream&
 operator<< (std::ostream& os, const dmcs::BeliefSet& bv)
 {
-  os << "[";
+  std::size_t count = bv.count();
+  if (count == 0)
+    {
+      os << "[ ]";
+      return os;
+    }
 
-  ///@todo TK: looks fishy
+  os << "[";
   std::size_t bit = bv.get_first();
   do
     {
@@ -251,7 +254,7 @@ operator<< (std::ostream& os, const dmcs::BeliefSet& bv)
 
 
 /**
- * Read a belief state from @a is and store it in @a bs.
+ * Read a space-separated belief state from is and store it in bs.
  *
  * @param is
  * @param bs
@@ -263,21 +266,74 @@ operator>> (std::istream& is, dmcs::BeliefStatePtr& bs)
 {
   using namespace dmcs;
 
-  // bs may be NULL, set it up
-  if (!bs)
-    {
-      BeliefStatePtr tmp(new BeliefState);
-      bs = tmp;
-    }
-
   std::string s;
   std::getline(is, s);
+  BeliefSet empty;     // an partial belief set
 
+  // BeliefState is one of the forms:
+
+  // (1) {belief} {belief} ... {belief}
+  //     where a partial belief is a list of unsingned integers representing the true atoms/bits.
+
+  // (2) belief belief ... belief
+  //     where each belief is an integer representing a full assignment,
+  //     meaning that when a bit is on, the corresponding atom is set to true.
+  
+  // (2) is for the sake of backward compatiblity.
+
+  if (!bs)
+    {
+      bs = BeliefStatePtr(new BeliefState);
+    }
+
+
+  // case (2)
+  if (s.find("{") == std::string::npos)
+    {
+      const std::size_t ONE = 1;
+      std::size_t atom;
+      std::size_t remain;
+      std::size_t i;
+
+      boost::tokenizer<> tok(s);
+
+      for (boost::tokenizer<>::const_iterator it = tok.begin(); it != tok.end(); ++it)
+	{
+	  // if input is invalid, boost::lexical_cast will throw an
+	  // error. For now we don't catch it, just let it crash.
+	  atom = boost::lexical_cast<std::size_t>(*it);
+	  i    = 0;
+	  bs->push_back(empty);
+	  
+	  while (atom > 0)
+	    {
+	      remain = atom & ONE;  // remain = atom % 2
+	      atom >>= 1;           // atom   = atom / 2
+
+	      if (remain)
+		{
+		  if (i == 0)
+		    {
+		      setEpsilon(bs->back());
+		    }
+		  else
+		    {
+		      setBeliefSet(bs->back(), i);
+		    }
+		}
+
+	      ++i;
+	    }
+	}
+
+      return is;
+    }
+
+
+  // case (1)
   typedef boost::char_separator<char> separator;
   typedef boost::tokenizer<separator> tokenizer;
 
-  // A BeliefState is of the form {belief} {belief} ... {belief}
-  // where a belief is a list of integers representing the true bits
   separator sep(" ", "{}");
   tokenizer tok(s, sep);
 
@@ -288,7 +344,6 @@ operator>> (std::istream& is, dmcs::BeliefStatePtr& bs)
   };
 
   State state = START;
-  BeliefSet empty; // an empty belief set
   
   for (tokenizer::const_iterator it = tok.begin(); it != tok.end(); ++it)
     {
@@ -311,8 +366,15 @@ operator>> (std::istream& is, dmcs::BeliefStatePtr& bs)
 	      }
 	    else
 	      {
-		std::size_t bit = std::atoi(t); ///@todo we expect integers here
-		bs->back().set(bit);
+		std::size_t atom = boost::lexical_cast<std::size_t>(t);
+		if (atom == 0)
+		  {
+		    setEpsilon(bs->back());
+		  }
+		else 
+		  {
+		    setBeliefSet(bs->back(), atom);
+		  }
 	      }
 	    break;
 	  }
@@ -352,7 +414,7 @@ operator<< (std::ostream& os, const dmcs::BeliefState& bs)
  * Output space-separated @a bs on @a os.
  * 
  * @param os 
- * @param l 
+ * @param bs 
  * 
  * @return os
  */
@@ -417,6 +479,482 @@ operator<< (std::ostream& os, const dmcs::BeliefStateListPtr& l)
 
 } // namespace std
 
+// ********************************************************************************
+// PartialBeliefState, for streaming DMCS
+
+namespace dmcs {
+
+typedef bm::bvector<> BitMagic;
+
+struct PartialBeliefSet
+{
+  // for 3-value assignment
+  enum TruthVal
+    {
+      DMCS_FALSE = 0,
+      DMCS_TRUE,
+      DMCS_UNDEF
+    };
+
+  PartialBeliefSet()
+  { }
+
+  PartialBeliefSet(std::size_t n)
+  {
+    value_bit.resize(n);
+    state_bit.resize(n);
+  }
+
+  BitMagic value_bit;
+  BitMagic state_bit;
+};
+
+
+typedef std::vector<PartialBeliefSet> PartialBeliefState;
+typedef boost::shared_ptr<PartialBeliefState> PartialBeliefStatePtr;
+typedef std::vector<PartialBeliefStatePtr> PartialBeliefStateVec;
+typedef boost::shared_ptr<PartialBeliefStateVec> PartialBeliefStateVecPtr;
+
+typedef std::vector<PartialBeliefStateVecPtr> PartialBeliefStatePackage;
+typedef boost::shared_ptr<PartialBeliefStatePackage> PartialBeliefStatePackagePtr;
+
+typedef std::vector<PartialBeliefStateVec::const_iterator> PartialBeliefStateIteratorVec;
+typedef boost::shared_ptr<PartialBeliefStateIteratorVec> PartialBeliefStateIteratorVecPtr;
+
+
+inline bool
+operator== (const PartialBeliefSet& p, const PartialBeliefSet& b)
+{
+  return ((p.value_bit == b.value_bit) && (p.state_bit == b.state_bit));
+}
+
+
+
+inline bool
+operator< (const PartialBeliefSet& p, const PartialBeliefSet& b)
+{
+  if (p.state_bit < b.state_bit)
+    {
+      return true;
+    }
+  else if ((p.state_bit == b.state_bit ) && (p.value_bit < b.value_bit))
+    {
+      return true;
+    }
+  return false;
+}
+
+
+
+inline PartialBeliefSet::TruthVal
+testBeliefSet(PartialBeliefSet& pb, std::size_t pos)
+{
+  assert (pos > 0 && pos < pb.value_bit.size());
+
+  if (pb.state_bit.test(pos))
+    {
+      if (pb.value_bit.test(pos))
+	{
+	  return PartialBeliefSet::DMCS_TRUE;
+	}
+      else
+	{
+	  return PartialBeliefSet::DMCS_FALSE;
+	}
+    }
+  
+  return PartialBeliefSet::DMCS_UNDEF;
+}
+
+
+
+inline void
+setBeliefSet(PartialBeliefSet& pb, std::size_t pos, 
+	     PartialBeliefSet::TruthVal val = PartialBeliefSet::DMCS_TRUE)
+{
+  assert (pos > 0 && pos < pb.value_bit.size());
+
+  if (val == PartialBeliefSet::DMCS_UNDEF)
+    {
+      pb.state_bit.set_bit(pos, false);
+      pb.value_bit.set_bit(pos, false); // just want to have it clean
+    }
+  else
+    {
+      pb.state_bit.set_bit(pos);
+      if (val == PartialBeliefSet::DMCS_FALSE)
+	{
+	  pb.value_bit.set_bit(pos, false);
+	}
+      else 
+	{
+	  pb.value_bit.set_bit(pos);
+	}
+    }
+}
+
+
+
+inline bool
+isEpsilon(const PartialBeliefSet& pb)
+{
+  return !(pb.state_bit.test(0));
+}
+
+
+
+inline void
+setEpsilon(PartialBeliefSet& pb)
+{
+  pb.state_bit.set(0);
+  pb.value_bit.set(0); // just want to have it clean
+}
+
+
+} // namespace dmcs
+
+
+namespace std
+{
+
+
+/** 
+ * Output true/false bits in a partial belief set @a pb on @a os.
+ * 
+ * @param os 
+ * @param pb
+ * 
+ * @return os
+ */
+inline std::ostream&
+operator<< (std::ostream& os, const dmcs::PartialBeliefSet& pb)
+{
+  using namespace dmcs;
+
+  std::size_t count = pb.state_bit.count();
+  if (count == 0)
+    {
+      os << "[ ]";
+      return os;
+    }
+
+  os << "[";
+  std::size_t bit = pb.state_bit.get_first();
+  do
+    {
+      if (!pb.value_bit.test(bit))
+	{
+	  os << "-";
+	}
+      os << bit;
+
+      bit = pb.state_bit.get_next(bit);
+      
+      if (bit)
+	{
+	  os << ", ";
+	}
+    }
+  while (bit);
+
+  return os << "]";  
+}
+
+/**
+ * Read a partial belief state from @a is and store it in @a bs.
+ *
+ * @param is
+ * @param bs
+ *
+ * @return is
+ */
+inline std::istream& 
+operator>> (std::istream& is, dmcs::PartialBeliefState& pbs)
+{
+  using namespace dmcs;
+
+  std::string s;
+  std::getline(is, s);
+  PartialBeliefSet empty; // an empty partial belief set
+
+  // A PartialBeliefState is one of the forms:
+
+  // (1) {partial_belief} {partial_belief} ... {partial_belief}
+  //     where a partial belief is a list of integers representing a 
+  //     partial assingment, where positive (resp. negative) integers represent 
+
+  // (2) belief belief ... belief
+  //     where each belief is an integer representing a full assignment,
+  //     meaning that when a bit is on, the corresponding atom is set to true.
+  
+  // (2) is for the sake of backward compatiblity.
+
+
+  // case (2)
+  if (s.find("{") == std::string::npos)
+    {
+      const std::size_t ONE = 1;
+      std::size_t atom;
+      std::size_t remain;
+      std::size_t i;
+
+      boost::tokenizer<> tok(s);
+
+      for (boost::tokenizer<>::const_iterator it = tok.begin(); it != tok.end(); ++it)
+	{
+	  // if input is invalid, boost::lexical_cast will throw an
+	  // error. For now we don't catch it, just let it crash.
+	  atom = boost::lexical_cast<std::size_t>(*it);
+	  i    = 0;
+	  pbs.push_back(empty);
+	  
+	  while (atom > 0)
+	    {
+	      remain = atom & ONE;  // remain = atom % 2
+	      atom >>= 1;           // atom   = atom / 2
+
+	      if (remain)
+		{
+		  if (i == 0)
+		    {
+		      setEpsilon(pbs.back());
+		    }
+		  else
+		    {
+		      setBeliefSet(pbs.back(), i);
+		    }
+		}
+
+	      ++i;
+	    }
+	}
+
+      return is;
+    }
+
+
+  // case (1)
+  typedef boost::char_separator<char> separator;
+  typedef boost::tokenizer<separator> tokenizer;
+
+  separator sep(" ", "{}");
+  tokenizer tok(s, sep);
+
+  enum State
+  {
+    START,
+    BELIEFSET
+  };
+
+  State state = START;
+  
+  for (tokenizer::const_iterator it = tok.begin(); it != tok.end(); ++it)
+    {
+      const char *t = it->c_str();
+
+      switch (state)
+	{
+	case START:
+	  {
+	    assert( *t == '{' ); // we expect an open curly bracket
+	    pbs.push_back(empty);
+	    state = BELIEFSET;
+	    break;
+	  }
+	case BELIEFSET:
+	  {
+	    if (*t == '}') // are we there yet?
+	      {
+		state = START;
+	      }
+	    else
+	      {
+		int atom = boost::lexical_cast<int>(t);
+		if (atom == 0)
+		  {
+		    setEpsilon(pbs.back());
+		  }
+		else if (atom > 0)
+		  {
+		    setBeliefSet(pbs.back(), atom);
+		  }
+		else
+		  {
+		    setBeliefSet(pbs.back(), -atom, PartialBeliefSet::DMCS_FALSE);
+		  }
+	      }
+	    break;
+	  }
+	}
+    }
+  
+  return is;
+}
+
+
+/** 
+ * Output space-separated @a pbs on @a os.
+ * 
+ * @param os 
+ * @param pbs 
+ * 
+ * @return os
+ */
+inline std::ostream&
+operator<< (std::ostream& os, const dmcs::PartialBeliefState& pbs)
+{
+  using namespace dmcs;
+
+  std::copy(pbs.begin(), pbs.end(), std::ostream_iterator<PartialBeliefSet>(os, " "));
+
+  /*
+  for (PartialBeliefState::const_iterator it = pbs.begin(); it != pbs.end(); ++it)
+    {
+      os << *it << " ";
+    }
+  */
+
+  return os;
+}
+
+
+
+/** 
+ * Output space-separated @a pbs on @a os.
+ * 
+ * @param os 
+ * @param pbs 
+ * 
+ * @return os
+ */
+inline std::ostream&
+operator<< (std::ostream& os, const dmcs::PartialBeliefStatePtr& pbs)
+{
+  os << *pbs;
+
+  return os;
+}
+
+
+
+/** 
+ * Output newline-separated @a pbsv on @a os.
+ * 
+ * @param os 
+ * @param pbsv 
+ * 
+ * @return os
+ */
+inline std::ostream&
+operator<< (std::ostream& os, const dmcs::PartialBeliefStateVec& pbsv)
+{
+  using namespace dmcs;
+
+  std::copy(pbsv.begin(), pbsv.end(), std::ostream_iterator<PartialBeliefStatePtr>(os, "\n"));
+
+  return os;
+}
+
+
+
+/** 
+ * Output newline-separated @a pbsv on @a os.
+ * 
+ * @param os 
+ * @param pbsv 
+ * 
+ * @return os
+ */
+inline std::ostream&
+operator<< (std::ostream& os, const dmcs::PartialBeliefStateVecPtr& pbsv)
+{
+  os << *pbsv;
+
+  return os;
+}
+
+
+
+/** 
+ * Output double-newline-separated @a pbsp on @a os.
+ * 
+ * @param os 
+ * @param pbsp
+ * 
+ * @return os
+ */
+inline std::ostream&
+operator<< (std::ostream& os, const dmcs::PartialBeliefStatePackage& pbsp)
+{
+  using namespace dmcs;
+
+  std::copy(pbsp.begin(), pbsp.end(), std::ostream_iterator<PartialBeliefStateVecPtr>(os, "\n"));
+
+  return os;
+}
+
+
+/** 
+ * Output double-newline-separated @a pbsp on @a os.
+ * 
+ * @param os 
+ * @param pbsp
+ * 
+ * @return os
+ */
+inline std::ostream&
+operator<< (std::ostream& os, const dmcs::PartialBeliefStatePackagePtr& pbsp)
+{
+  os << *pbsp;
+
+  return os;
+}
+
+
+
+/** 
+ * Output newline-separated @a pbsi on @a os.
+ * 
+ * @param os 
+ * @param pbsi
+ * 
+ * @return os
+ */
+inline std::ostream&
+operator<< (std::ostream& os, const dmcs::PartialBeliefStateIteratorVec& pbsi)
+{
+  using namespace dmcs;
+  
+  std::vector<PartialBeliefStateVec::const_iterator>::const_iterator it = pbsi.begin();
+  for (; it != pbsi.end(); ++it)
+    {
+      os << **it << "\n";
+    }
+
+  return os;
+}
+
+
+
+/** 
+ * Output newline-separated @a pbsi on @a os.
+ * 
+ * @param os 
+ * @param pbsi
+ * 
+ * @return os
+ */
+inline std::ostream&
+operator<< (std::ostream& os, const dmcs::PartialBeliefStateIteratorVecPtr& pbsi)
+{
+  os << *pbsi;
+
+  return os;
+}
+
+
+} // namespace std
+
 
 namespace boost {
 
@@ -446,25 +984,12 @@ inline void save(Archive & ar, const dmcs::BeliefSet& belief, unsigned int versi
   dmcs::BeliefSet::statistics st;
   belief.calc_stat(&st);
 
-#ifdef DEBUG
-  //  std::cerr << "Serializing " << belief << std::endl;
-  std::cerr << "Bits count:" << belief.count() << std::endl;
-  std::cerr << "Bit blocks:" << st.bit_blocks << std::endl;  
-  std::cerr << "GAP blocks:" << st.gap_blocks << std::endl;  
-  std::cerr << "Memory used:"<< st.memory_used << std::endl;  
-  std::cerr << "Max.serialize mem.:" << st.max_serialize_mem << std::endl;
-#endif
-
   unsigned char buf[st.max_serialize_mem];
   unsigned char* b = buf;
 
   const std::size_t len = bvs.serialize(belief, buf, st.max_serialize_mem);
 
   ar << len;
-
-#ifdef DEBUG
-  std::cerr << "Serialized size:" << len << std::endl;
-#endif
 
   for (std::size_t i = 0; i < len; ++i)
     {
@@ -520,6 +1045,136 @@ template<class Archive>
 inline void serialize(Archive& ar, dmcs::BeliefSet& belief, const unsigned int file_version)
 {
   split_free(ar, belief, file_version);
+}
+
+
+// ***************************************************************************************
+// PartialBeliefState, for streaming DMCS
+
+/**
+ * Serialization Method Save.
+ * @param Archive ar
+ * @param PartialBeliefSet pb
+ * @param int version
+ *
+ */
+template<class Archive>
+inline void save(Archive & ar, const dmcs::PartialBeliefSet& pb, unsigned int version)
+{
+  ///@todo TK: hack a new archive thingie, we copy things twice in here
+
+  ///@todo MD: code duplication. Create save/load methods for BitMagic and reuse?
+
+  bm::serializer<dmcs::BitMagic> bm_serializer;
+  
+  //belief.optimize();
+
+  dmcs::BitMagic::statistics st_value;
+  dmcs::BitMagic::statistics st_state;
+
+  pb.value_bit.calc_stat(&st_value);
+  pb.state_bit.calc_stat(&st_state);
+
+  unsigned char buf_value[st_value.max_serialize_mem];
+  unsigned char buf_state[st_state.max_serialize_mem];
+
+  unsigned char* b_value = buf_value;
+  unsigned char* b_state = buf_state;
+
+  const std::size_t len_value = bm_serializer.serialize(pb.value_bit, buf_value, st_value.max_serialize_mem);
+  const std::size_t len_state = bm_serializer.serialize(pb.state_bit, buf_state, st_state.max_serialize_mem);
+
+  assert (pb.value_bit.size() == pb.state_bit.size());
+  const std::size_t bit_size = pb.value_bit.size();
+
+  ar << bit_size;
+
+  ar << len_value;
+
+  for (std::size_t i = 0; i < len_value; ++i)
+    {
+      ar << *b_value++;
+    }
+
+  ar << len_state;
+
+  for (std::size_t i = 0; i < len_state; ++i)
+    {
+      ar << *b_state++;
+    }
+  
+  ar << version;
+}
+
+
+
+/**
+ * Serialization Method Load.
+ * @param Archive ar
+ * @param PartialBeliefSet pb
+ * @param int version
+ *
+ */
+template<class Archive>
+inline void load(Archive & ar, dmcs::PartialBeliefSet& pb, unsigned int version)
+{
+  std::size_t bit_size  = 0;
+  std::size_t len_value = 0;
+  std::size_t len_state = 0;
+
+  ar >> bit_size;
+  assert (bit_size > 0);
+
+  if (pb.value_bit.size() != bit_size)
+    {
+      pb.value_bit.resize(bit_size);
+      pb.state_bit.resize(bit_size);
+    }
+
+  ar >> len_value;
+  assert(len_value > 0);
+
+  ///@todo TK: hack a new archive thingie, we copy things twice in here
+
+  unsigned char buf_value[len_value];
+  unsigned char* b_value = buf_value;
+
+  for (std::size_t i = 0; i < len_value; i++)
+    {
+      ar >> *b_value++;
+    }
+
+  bm::deserialize(pb.value_bit, buf_value);
+
+
+  ar >> len_state;
+  assert(len_state > 0);
+
+  unsigned char buf_state[len_state];
+  unsigned char* b_state = buf_state;
+
+  for (std::size_t i = 0; i < len_state; i++)
+    {
+      ar >> *b_state++;
+    }
+  bm::deserialize(pb.state_bit, buf_state);
+
+  ar >> version;
+}
+
+
+
+/**
+ * Serialization Method Serialize.
+ * @param Archive ar
+ * @param BeliefSet belief
+ * @param int file_version
+ *
+ */
+template<class Archive>
+inline void serialize(Archive& ar, dmcs::PartialBeliefSet& pb, const unsigned int file_version)
+{
+  split_free(ar, pb, file_version);
 }
 
 

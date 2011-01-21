@@ -1,3 +1,10 @@
+2011-01-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBeliefState.cpp: Add testBeliefState.
+	* testsuite/Makefile.am: Likewise.
+
+	* include/mcs/BeliefState.h: Add PartialBeliefState.
+
 2011-01-21  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/Session.h: Add docstring.

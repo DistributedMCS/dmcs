@@ -33,7 +33,8 @@ TESTS = \
 	testBlockingClasp \
 	testGraphProp \
 	testConnection \
-	testMessagingGateway
+	testMessagingGateway \
+	testBeliefState
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -57,7 +58,8 @@ check_PROGRAMS = \
 	testBlockingClasp \
 	testGraphProp \
 	testConnection \
-	testMessagingGateway
+	testMessagingGateway \
+	testBeliefState
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -121,3 +123,5 @@ testConnection_SOURCES = testConnection.cpp
 testConnection_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/dmcs/liblog.a
+
+testBeliefState_SOURCES = testBeliefState.cpp
