@@ -27,8 +27,6 @@
  * 
  */
 
-//#include "dmcs/OptMessage.h"
-//#include "PrimitiveMessage.h"
 #include "mcs/Theory.h"
 
 #include "network/connection.hpp"
@@ -40,18 +38,19 @@
 
 namespace dmcs {
 
+  /// holds the data of a session
 template <typename MessageType>
 struct Session
 {
-  MessageType mess;
-  connection_ptr conn;
+  connection_ptr conn; /// the connection of the session
 
-  Session(connection_ptr c) : conn(c) { }
+  MessageType mess;    /// data payload
+
+  Session(const connection_ptr& c)
+    : conn(c)
+  { }
 };
 
-
-  //typedef boost::shared_ptr<Session<PrimitiveMessage> > SessionPrimitivePtr;
-  //typedef boost::shared_ptr<Session<OptMessage> > SessionOptPtr;
 
 } // namespace dmcs
 
