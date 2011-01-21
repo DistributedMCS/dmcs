@@ -1,5 +1,7 @@
 2011-01-21  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/network/ConcurrentMessageDispatcher.cpp: Fix regression.
+
 	* examples/diamond.sh: Add shell script.
 
 	* include/network/Session.h: Add docstring.
@@ -14,6 +16,7 @@
 	* src/network/ThreadFactory.cpp: Likewise.
 	* src/network/JoinThread.cpp: Likewise.
 	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+
 	* src/dmcs/StreamingDMCS.cpp: Likewise.
 	* include/network/NeighborOut.h: Likewise.
 	* include/network/NeighborIn.h: Likewise.
