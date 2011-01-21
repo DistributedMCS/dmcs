@@ -30,8 +30,6 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-//#include "dmcs/BaseDMCS.h"
-
 #include "network/BaseHandler.h"
 #include "network/connection.hpp"
 #include "network/Session.h"
@@ -46,11 +44,9 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <list>
-#include <set>
+#include <string>
 
 #include <boost/shared_ptr.hpp>
-
 
 namespace dmcs {
 
@@ -67,27 +63,23 @@ struct BaseServer
 class Server : public BaseServer
 {
 public:
-  Server(CommandTypeFactoryPtr& ctf_, boost::asio::io_service& io_service,
+  Server(const CommandTypeFactoryPtr& ctf,
+	 boost::asio::io_service& io_service,
 	 const boost::asio::ip::tcp::endpoint& endpoint);
 
   void 
   handle_accept(const boost::system::error_code& e, connection_ptr conn);
 
   void
-  dispatch_header(const boost::system::error_code& e, connection_ptr conn);
+  dispatch_header(const boost::system::error_code& e, connection_ptr conn, boost::shared_ptr<std::string> header);
 
   void 
-  handle_finalize(const boost::system::error_code& e, connection_ptr conn);
-
-  void
-  remove_handler(BaseHandler* handler);
+  handle_finalize(const boost::system::error_code& e, connection_ptr /* conn */);
 
 private:
   CommandTypeFactoryPtr ctf;
-  boost::asio::io_service& io_service_;
-  boost::asio::ip::tcp::acceptor acceptor_;
-  std::string header;
-  HandlerListPtr handler_list;
+  boost::asio::io_service& io_service;
+  boost::asio::ip::tcp::acceptor acceptor;
 };
 
 typedef boost::shared_ptr<BaseServer> ServerPtr;

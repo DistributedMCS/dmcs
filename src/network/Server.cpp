@@ -31,30 +31,33 @@
 #include "config.h"
 #endif
 
-#include <algorithm>
-#include <iostream>
-
 #include "dmcs/Log.h"
 #include "network/Handler.h"
 #include "network/Server.h"
 
+#include <algorithm>
+#include <iostream>
+#include <string>
+
+
 namespace dmcs {
 
 
-Server::Server(CommandTypeFactoryPtr& ctf_,
-	       boost::asio::io_service& io_service,
+Server::Server(const CommandTypeFactoryPtr& c,
+	       boost::asio::io_service& i,
 	       const boost::asio::ip::tcp::endpoint& endpoint)
-  : ctf(ctf_), io_service_(io_service),
-    acceptor_(io_service, endpoint),
-    handler_list(new HandlerList)
+  : ctf(c),
+    io_service(i),
+    acceptor(io_service, endpoint)
 {
-  connection_ptr my_connection(new connection(io_service_));
+  connection_ptr my_connection(new connection(io_service));
 
-  acceptor_.async_accept(my_connection->socket(),
-			 boost::bind(&Server::handle_accept, this,
-				     boost::asio::placeholders::error, my_connection));
+  acceptor.async_accept(my_connection->socket(),
+			boost::bind(&Server::handle_accept, this,
+				    boost::asio::placeholders::error,
+				    my_connection)
+			);
 }
-
 
 
 void
@@ -62,20 +65,27 @@ Server::handle_accept(const boost::system::error_code& e, connection_ptr conn)
 {
   if (!e)
     {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__  << "Creating new connection...");
+      DMCS_LOG_TRACE("Creating new connection...");
 
       // Start an accept operation for a new connection.
-      connection_ptr new_conn(new connection(acceptor_.io_service()));
-      acceptor_.async_accept(new_conn->socket(),
-			     boost::bind(&Server::handle_accept, this,
-					 boost::asio::placeholders::error, new_conn));
+      connection_ptr new_conn(new connection(acceptor.io_service()));
+      acceptor.async_accept(new_conn->socket(),
+			    boost::bind(&Server::handle_accept, this,
+					boost::asio::placeholders::error,
+					new_conn)
+			    );
 
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Wait for header...");
+      DMCS_LOG_TRACE("Wait for header...");
+
+      boost::shared_ptr<std::string> header(new std::string);
 
       // read header to decide what kind of command type to create
-      conn->async_read(header, boost::bind(&Server::dispatch_header, this,
-					   boost::asio::placeholders::error, 
-					   conn));
+      conn->async_read(*header,
+		       boost::bind(&Server::dispatch_header, this,
+				   boost::asio::placeholders::error,
+				   conn,
+				   header)
+		       );
     }
   else
     {
@@ -91,41 +101,44 @@ Server::handle_accept(const boost::system::error_code& e, connection_ptr conn)
 
 
 void
-Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
+Server::dispatch_header(const boost::system::error_code& e,
+			connection_ptr conn,
+			boost::shared_ptr<std::string> header)
 {
   if (!e)
     {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Header = " << header);
+      DMCS_LOG_TRACE("Header = " << *header);
+
       BaseHandler* handler;
       
       // Create the respective handler and give him the connection
-      if (header.find(HEADER_REQ_PRI_DMCS) != std::string::npos)
+      if (header->find(HEADER_REQ_PRI_DMCS) != std::string::npos)
 	{
 	  PrimitiveCommandTypePtr cmt_pri_dmcs = ctf->create<PrimitiveCommandTypePtr>();
 	  handler = new Handler<PrimitiveCommandType>(cmt_pri_dmcs, conn);
 	}
-      else if (header.find(HEADER_REQ_STM_DMCS) != std::string::npos)
+      else if (header->find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
 	  StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
-	  handler = new Handler<StreamingCommandType>(cmt_stm_dmcs, conn, this);
+	  handler = new Handler<StreamingCommandType>(cmt_stm_dmcs, conn);
 	}
-      else if (header.find(HEADER_REQ_OPT_DMCS) != std::string::npos)
+      else if (header->find(HEADER_REQ_OPT_DMCS) != std::string::npos)
 	{
 	  OptCommandTypePtr cmt_opt_dmcs = ctf->create<OptCommandTypePtr>();
 	  handler = new Handler<OptCommandType>(cmt_opt_dmcs, conn);
 	}
-      else if (header.find(HEADER_REQ_DYN_DMCS) != std::string::npos)
+      else if (header->find(HEADER_REQ_DYN_DMCS) != std::string::npos)
 	{
 	  DynamicCommandTypePtr cmt_dyn_conf = ctf->create<DynamicCommandTypePtr>();
 	  handler = new Handler<DynamicCommandType>(cmt_dyn_conf, conn);
 	}
-      else if (header.find(HEADER_REQ_INSTANTIATE) != std::string::npos)
+      else if (header->find(HEADER_REQ_INSTANTIATE) != std::string::npos)
 	{
 	  InstantiatorCommandTypePtr cmt_inst = ctf->create<InstantiatorCommandTypePtr>();
 	  handler = new Handler<InstantiatorCommandType>(cmt_inst, conn);
 	}
 
-      handler_list->push_back(handler);
+      ///@todo handler leaks here...
     }
   else
     {
@@ -136,14 +149,6 @@ Server::dispatch_header(const boost::system::error_code& e, connection_ptr conn)
 }
 
 
-
-void
-Server::remove_handler(BaseHandler* handler)
-{
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-}
-  
-
 void
 Server::handle_finalize(const boost::system::error_code& e, connection_ptr /* conn */)
 {
@@ -151,8 +156,7 @@ Server::handle_finalize(const boost::system::error_code& e, connection_ptr /* co
 
   if (!e)
     {
-      ///@todo only one handler here..
-      //delete handler;
+      // nothing to do
     }
   else
     {

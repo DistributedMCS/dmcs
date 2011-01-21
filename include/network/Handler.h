@@ -68,15 +68,13 @@ public:
   typedef typename boost::shared_ptr<SessionMsg> SessionMsgPtr;
   typedef typename boost::shared_ptr<CmdType> CmdTypePtr;
 
-  //Handler(const CmdTypePtr cmd_, connection_ptr conn_);
-  Handler(CmdTypePtr cmd, connection_ptr conn_);
+  Handler(CmdTypePtr cmd, connection_ptr c);
 
   void 
   do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
 
   void 
-  send_result(typename CmdType::return_type result,
-	      const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
+  send_result(const boost::system::error_code& e, typename CmdType::return_type result, SessionMsgPtr sesh, CmdTypePtr cmd);
 
   void 
   handle_session(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
@@ -87,9 +85,6 @@ public:
   void 
   handle_finalize(const boost::system::error_code& e, SessionMsgPtr sesh);
 
-
-private:
-  connection_ptr conn;
 };
 
 // **********************************************************************************************************************
@@ -102,18 +97,15 @@ public:
   typedef boost::shared_ptr<SessionMsg> SessionMsgPtr;
   typedef boost::shared_ptr<StreamingCommandType> StreamingCommandTypePtr;
 
-  Handler(StreamingCommandTypePtr cmd, connection_ptr conn_, Server* s);
+  Handler(StreamingCommandTypePtr cmd, connection_ptr c);
 
   void 
   do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call);
 
   void
-  handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call);
+  handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, boost::shared_ptr<std::string> header);
 
 private:
-  connection_ptr                   conn;
-  std::string                      header;
-
   OutputThreadPtr                  ot;
   StreamingDMCSThreadPtr           stdt;
 
@@ -124,7 +116,6 @@ private:
   ConcurrentMessageQueuePtr        handler_output_notif;
 
   MessagingGatewayBCPtr            mg;
-  Server*        server;
 };
 
 } // namespace dmcs

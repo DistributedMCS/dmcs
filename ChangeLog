@@ -1,5 +1,14 @@
 2011-01-21  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* include/network/Session.h: Add docstring.
+
+	* include/network/Handler.h: Fix non-threadsafe parts.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Server.h: Likewise.
+	* src/network/Server.cpp: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Fix warning.
+
 	* testsuite/testConnection.cpp: Add connection test.
 	* testsuite/Makefile.am: Likewise.
 
