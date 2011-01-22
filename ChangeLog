@@ -1,3 +1,20 @@
+2011-01-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueueHelper.h: Use DMCS_LOG_TRACE.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Fix memory leak.
+	* include/network/AsynClient.tcc: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* testsuite/testMessagingGateway.cpp: Use MessagingGatewayBCPtr.
+
 2011-01-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/RelSatSolverThread.h: Fix potential underscore
@@ -43,21 +60,6 @@
 
 	* include/dmcs/BeliefCombination.h: Add combine method for
 	PartialBeliefState(s).
-
-2011-01-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* include/network/ConcurrentMessageQueueHelper.h: Use DMCS_LOG_TRACE.
-	* include/network/NeighborIn.h: Likewise.
-	* include/network/NeighborThread.h: Likewise.
-	* include/network/RouterThread.h: Likewise.
-	* src/dmcs/StreamingDMCS.cpp: Likewise.
-	* src/network/JoinThread.cpp: Likewise.
-	* src/network/OutputThread.cpp: Likewise.
-	* src/solver/RelSatSolver.cpp: Likewise.
-
-	* include/dmcs/StreamingForwardMessage.h: Fix memory leak.
-	* include/network/AsynClient.tcc: Likewise.
-	* src/dmcsc.cpp: Likewise.
 
 2011-01-21  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 

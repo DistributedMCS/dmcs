@@ -13,7 +13,7 @@
 using namespace dmcs;
 
 void
-worker(boost::shared_ptr<MessagingGateway<BeliefState,Conflict> >& mg, boost::promise<int>& p)
+worker(MessagingGatewayBCPtr& mg, boost::promise<int>& p)
 {  
   boost::posix_time::seconds s(1);
   boost::this_thread::sleep(s);
