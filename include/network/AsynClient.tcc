@@ -57,7 +57,7 @@ AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_servic
 							  std::size_t index_,
 							  std::size_t pack_size_)
   : BaseClient(io_service, endpoint_iterator, my_header_),
-    mess(ctx_id_, pack_size_),
+    mess(ctx_id_, pack_size_, 0, 0),
     mg(mg_),
     nb(nb_), 
     ctx_id(ctx_id_),

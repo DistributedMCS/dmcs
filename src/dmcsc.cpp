@@ -244,10 +244,12 @@ main(int argc, char* argv[])
 
 		  std::string header = HEADER_REQ_STM_DMCS;
 		  // USER <--> invoker == 0
-		  StreamingCommandType::input_type mess(0, pack_size, system_size);
+	
+		  Conflict* conflict = new Conflict(system_size, BeliefSet());
+		  BeliefState* partial_ass = new BeliefState(system_size, BeliefSet());
 
-		  Conflict* conflict = mess.getConflict();
-		  BeliefState* partial_ass = mess.getPartialAss();
+		  StreamingCommandType::input_type mess(0, pack_size, conflict, partial_ass);
+
 
 		  DMCS_LOG_DEBUG("Empty starting conflict:" << *conflict);
 		  DMCS_LOG_DEBUG("Empty starting assignment:" << *partial_ass);
@@ -258,6 +260,8 @@ main(int argc, char* argv[])
 		  DMCS_LOG_DEBUG("Running ioservice.");
 
 		  io_service.run();
+
+		  ///@todo TK: conflict and partial_ass leaks here
 		}
 	      else
 		{

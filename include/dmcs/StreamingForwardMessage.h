@@ -40,30 +40,33 @@ namespace dmcs {
 class StreamingForwardMessage : public Message
 {
 public:
+
+  // public default ctor, everything 0 for now
   StreamingForwardMessage()
+    : invoker(0),
+      pack_size(0), 
+      conflict(0),
+      partial_ass(0)
   { }
 
-  virtual ~StreamingForwardMessage() 
-  {}
+  virtual
+  ~StreamingForwardMessage() 
+  { }
 
-  StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_)
-    : invoker(invoker_), pack_size(pack_size_)
+  StreamingForwardMessage(std::size_t invoker_,
+			  std::size_t pack_size_, 
+			  Conflict* conflict_,
+			  BeliefState* partial_ass_)
+    : invoker(invoker_),
+      pack_size(pack_size_), 
+      conflict(conflict_),
+      partial_ass(partial_ass_)
   {
-    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << ". Watch out! NULL conflict, NULL paritial_ass");
+    if (partial_ass == 0 || conflict == 0)
+      {
+	DMCS_LOG_TRACE("Watch out! NULL conflict, NULL partial_ass");
+      }
   }
-
-  StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_,
-			  std::size_t system_size)
-    : invoker(invoker_), pack_size(pack_size_),
-      conflict(new Conflict(system_size, BeliefSet())),
-      partial_ass(new BeliefState(system_size, BeliefSet()))
-  { }
-
-  StreamingForwardMessage(std::size_t invoker_, std::size_t pack_size_, 
-			  Conflict* conflict_, BeliefState* paritial_ass_)
-    : invoker(invoker_), pack_size(pack_size_), 
-      conflict(conflict_), partial_ass(paritial_ass_)
-  { }
 
   std::size_t
   getInvoker() const
@@ -113,8 +116,15 @@ private:
   BeliefState* partial_ass;  // The partial assignment of the whole system
 };
 
+typedef boost::shared_ptr<StreamingForwardMessage> StreamingForwardMessagePtr;
+
+} // namespace dmcs
+
+
+namespace std {
+
 inline std::ostream&
-operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
+operator<< (std::ostream& os, const dmcs::StreamingForwardMessage& sfMess)
 {
 
   os << sfMess.getInvoker()     << ", " 
@@ -125,9 +135,8 @@ operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
   return os;
 }
 
-typedef boost::shared_ptr<StreamingForwardMessage> StreamingForwardMessagePtr;
+} // namespace std
 
-} // namespace dmcs
 
 #endif // STREAMING_FORWARD_MESSAGE_H
 
