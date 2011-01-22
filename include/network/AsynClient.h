@@ -49,6 +49,12 @@ class AsynClient : public BaseClient
 	     const std::string& h,
 	     ForwardMessType& fm);
 
+  std::size_t
+  getNoAnswers()
+  {
+    return no_answers;
+  }
+
 private:
   void 
   send_header(const boost::system::error_code& error,
@@ -72,6 +78,7 @@ private:
   void 
   finalize(const boost::system::error_code& error, connection_ptr /* conn */);
 
+  std::size_t      no_answers;
   std::string      received_header;
   ForwardMessType  mess;
   BackwardMessType result;

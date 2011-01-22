@@ -231,7 +231,7 @@ JoinThread::ask_for_next(std::size_t next)
   // for now, let's put empty conflict and empty ass to notify the neighbors
   Conflict* empty_conflict       = new Conflict(system_size, PartialBeliefSet());
   PartialBeliefState* empty_ass  = new PartialBeliefState(system_size, PartialBeliefSet());
-  ConflictNotification* cn = new ConflictNotification(0, empty_conflict, empty_ass);
+  ConflictNotification* cn       = new ConflictNotification(0, empty_conflict, empty_ass);
 
   DMCS_LOG_TRACE(" Push to offset " << next);
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
@@ -414,7 +414,8 @@ JoinThread::operator()()
 
     } // while (!stop)
 
-  DMCS_LOG_TRACE(" DONE");
+  DMCS_LOG_TRACE(" DONE. Send a NULL model to JOIN_OUT_MQ");
+  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
 }
 
 

@@ -1,3 +1,21 @@
+2011-01-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: In leaf case, send NULL model after
+	receiving UNSAT.
+
+	* src/network/OutputThread.cpp: Fix bug: always HEADER_ANS.
+
+	* src/network/JoinThread.cpp: End of join is a NULL model.
+
+	* src/dmcsc.cpp: Get the number of answers.
+
+	* include/network/AsynClient.tcc: Send a message after request
+	next model. We can later change this to just sending HEADER_NEXT.
+
+	* include/network/AsynClient.h: Announce number of answers.
+
+	* include/dmcs/StreamingBackwardMessage.h: More meaningful debug infor.
+
 2011-01-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* log4cxx.cfg: Fix duplicates.

@@ -261,6 +261,8 @@ main(int argc, char* argv[])
 
 		  io_service.run();
 
+		  no_beliefstates = c.getNoAnswers();
+
 		  ///@todo TK: conflict and partial_ass leaks here
 		}
 	      else

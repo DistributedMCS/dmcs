@@ -201,6 +201,8 @@ RelSatSolver::solve()
 	      xInstance->removeLastInput();
 	      if (!prepare_input())
 		{
+		  // send a NULL model to OUT_MQ to inform OutputThread
+		  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 		  break;
 		}
 	      DMCS_LOG_TRACE("A fresh solving.");
@@ -225,10 +227,11 @@ RelSatSolver::receiveUNSAT()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  // send a NULL pointer to the SatOutputMessageQueue
-  //mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
-
-  // 
+  if (is_leaf)
+    {
+      // send a NULL pointer to the SatOutputMessageQueue
+      mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+    }
 }
 
 

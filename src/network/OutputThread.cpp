@@ -115,6 +115,7 @@ OutputThread::collect_output(PartialBeliefStateVecPtr& res, std::string& header)
   // Turn this mode on. It's off only when either we collect and send
   // enough pack_size models, or there's no more model to send.
   collecting = true; 
+  header = HEADER_ANS;
   
   // be careful with weird value of pack_size. Bug just disappreared
   for (std::size_t i = 1; i <= left_2_send; ++i)
@@ -164,8 +165,6 @@ OutputThread::collect_output(PartialBeliefStateVecPtr& res, std::string& header)
       // Got something is a reasonable time. Continue collecting.
       res->push_back(bs);
     } // for
-
-  header = HEADER_ANS;
 }
 
 

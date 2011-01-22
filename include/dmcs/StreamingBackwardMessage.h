@@ -82,6 +82,10 @@ operator<< (std::ostream& os, const StreamingBackwardMessage& sbMess)
 	{
 	  os << **it << std::endl;
 	}
+      else
+	{
+	  os << "NULL" << std::endl;
+	}
     }
   os << " }";
 
