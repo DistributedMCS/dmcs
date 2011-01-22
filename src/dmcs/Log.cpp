@@ -56,7 +56,8 @@ namespace dmcs {
     // setup log4cxx
 
 #ifdef DEBUG
-    logger->setLevel(log4cxx::Level::getDebug());
+    //logger->setLevel(log4cxx::Level::getDebug());
+    logger->setLevel(log4cxx::Level::getTrace());
 #endif // DEBUG
 
     if (config == 0)

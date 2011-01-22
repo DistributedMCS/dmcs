@@ -1,5 +1,7 @@
 2011-01-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/dmcs/Log.cpp: Set TRACE loglevel if defined(DEBUG).
+
 	* include/network/ConcurrentMessageQueueHelper.h: Use DMCS_LOG_TRACE.
 	* include/network/NeighborIn.h: Likewise.
 	* include/network/NeighborThread.h: Likewise.
