@@ -37,7 +37,6 @@ libthreads_a_SOURCES = \
 		ConcurrentMessageDispatcher.cpp \
 		ConcurrentMessageQueueFactory.cpp \
 		JoinThread.cpp \
-		NeighborInputThread.cpp \
 		OutputThread.cpp \
 		StreamingDMCSThread.cpp \
 		ThreadFactory.cpp \
