@@ -58,7 +58,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 				 BeliefStateIteratorVecPtr& mid_it,
 				 ImportStates import_state)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " noff = " << noff);
+  DMCS_LOG_TRACE("noff = " << noff);
 
   // end of models 
   bool eom = false; 
@@ -79,7 +79,8 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
       std::size_t prio = 0;
       int timeout = 0;
 
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Read up to " << peq_cnt << " belief states");
+      DMCS_LOG_TRACE("Read up to " << peq_cnt << " belief states");
+
       BeliefState* bs = mg->recvModel(offset, prio, timeout);
       if (bs == 0)
 	{
@@ -98,7 +99,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 	  // Otw, i == peq_cnt-1
 	  // This is the sign of end of a package of models
 
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Reached a NULL model. set bit noff = " << noff);
+	  DMCS_LOG_TRACE("Reached a NULL model. set bit noff = " << noff);
 	 
 	  // mark that this neighbor reached its pack_size. 
 	  pack_full.set(noff);
@@ -108,7 +109,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 	}
 
       // normal case, just got a belief state
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Push 1 belief state into bsv");
+      DMCS_LOG_TRACE("Push 1 belief state into bsv");
       bsv->push_back(bs); 
     }
   
@@ -123,7 +124,7 @@ JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt,
 
   // turn on the bit that is respective to this context
   in_mask.set(noff);
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " DONE");  
+  DMCS_LOG_TRACE("DONE");  
 
   return eom; 
 }
@@ -136,13 +137,13 @@ JoinThread::join(const BeliefStateIteratorVecPtr& run_it)
 {
   // We don't need the interface V here
   BeliefStateIteratorVec::const_iterator it = run_it->begin();
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Get first belief state");
+  DMCS_LOG_TRACE(" Get first belief state");
   BeliefState* first_bs = **it;
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Initialize result");
+  DMCS_LOG_TRACE(" Initialize result");
   BeliefState* result = new BeliefState(*first_bs);
   
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Iteratively join with next belief states");
+  DMCS_LOG_TRACE(" Iteratively join with next belief states");
   ++it;
   for (; it != run_it->end(); ++it)
     {
@@ -153,7 +154,7 @@ JoinThread::join(const BeliefStateIteratorVecPtr& run_it)
 	}
     }
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " result = " << *result);
+  DMCS_LOG_TRACE(" result = " << *result);
 
   // Joining succeeded. Now send this input to SAT solver via JOIN_OUT_MQ
   // be careful that we are blocked here. Use timeout sending instead?
@@ -232,10 +233,10 @@ JoinThread::ask_for_next(std::size_t next)
   BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
   ConflictNotification* cn = new ConflictNotification(0, empty_conflict, empty_ass);
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Push to offset " << next);
+  DMCS_LOG_TRACE(" Push to offset " << next);
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
   
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
+  DMCS_LOG_TRACE(" Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
 		 <<", partial_ass = (" << cn->partial_ass << ") " << *(cn->partial_ass));
   
   ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
@@ -272,7 +273,7 @@ JoinThread::operator()()
 
   BeliefStateIteratorVecPtr beg_it(new BeliefStateIteratorVec(no_nbs));
   BeliefStateIteratorVecPtr mid_it(new BeliefStateIteratorVec(no_nbs));
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "no_nbs = " << no_nbs);
+  DMCS_LOG_TRACE("no_nbs = " << no_nbs);
 
   while (!stop)
     {
@@ -284,7 +285,7 @@ JoinThread::operator()()
       MessagingGateway<BeliefState, Conflict>::JoinIn nn = 
 	mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
 
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Received: " << nn.ctx_offset << ", " << nn.peq_cnt);
+      DMCS_LOG_TRACE("Received: " << nn.ctx_offset << ", " << nn.peq_cnt);
 
       if (nn.peq_cnt == 0)
 	{ // This neighbor is either out of models of UNSAT
@@ -326,14 +327,14 @@ JoinThread::operator()()
 			       in_mask, pack_full,
 			       beg_it, mid_it, import_state);
 
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " beg_it.size() = " << beg_it->size());
-	  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " mid_it.size() = " << mid_it->size());
+	  DMCS_LOG_TRACE(" beg_it.size() = " << beg_it->size());
+	  DMCS_LOG_TRACE(" mid_it.size() = " << mid_it->size());
 
 	  // then if this was a "NEXT" request to this neighbor, we
 	  // have to restart the neighbors before him
 	  if (asking_next)
 	    {
-	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Realized that we are in GETTING_NEXT mode.");
+	      DMCS_LOG_TRACE(" Realized that we are in GETTING_NEXT mode.");
 
 	      assert (import_state != START_UP);
 	      assert (nn.ctx_offset == next_neighbor_offset);
@@ -363,11 +364,11 @@ JoinThread::operator()()
 		{
 		  import_state = FILLING_UP;
 
-		  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "First time joining");
+		  DMCS_LOG_TRACE("First time joining");
 
 		  for (std::size_t i = 0; i < no_nbs; ++i)
 		    {
-		      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "i = " << i);
+		      DMCS_LOG_TRACE("i = " << i);
 		      BeliefStateVecPtr& bsv = (*partial_eqs)[i];
 		      (*mid_it)[i] = bsv->end();
 		    }
@@ -375,7 +376,7 @@ JoinThread::operator()()
 		}
 	      else
 		{
-		  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " NOT a first time joining ==> do it selectively");
+		  DMCS_LOG_TRACE(" NOT a first time joining ==> do it selectively");
 		  for (std::size_t i = 0; i < no_nbs; ++i)
 		    {
 		      BeliefStateVecPtr& bsv = (*partial_eqs)[i];
@@ -397,10 +398,10 @@ JoinThread::operator()()
 		    }
 		}
 
-	      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " pack_full.count_range == " << pack_full.count_range(0, no_nbs+1));
+	      DMCS_LOG_TRACE(" pack_full.count_range == " << pack_full.count_range(0, no_nbs+1));
 	      if (pack_full.count_range(0, no_nbs+1) == no_nbs)
 		{
-		  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Pack full, go to get next models");
+		  DMCS_LOG_TRACE(" Pack full, go to get next models");
 		  import_state = GETTING_NEXT;
 		  asking_next  = true;
 		  
@@ -413,7 +414,7 @@ JoinThread::operator()()
 
     } // while (!stop)
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " DONE");
+  DMCS_LOG_TRACE(" DONE");
 }
 
 

@@ -66,7 +66,7 @@ public:
 	  {
 	    const std::size_t nid      = cn->val;
 	    
-	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Got a notification from local solver. nid = " << nid);
+	    DMCS_LOG_TRACE("Got a notification from local solver. nid = " << nid);
 	    
 	    // inform neighbor nid about the conflict
 	    const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);

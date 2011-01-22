@@ -61,7 +61,7 @@ public:
   void
   operator()()
   {
-    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "neighbor " << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
+    DMCS_LOG_TRACE("neighbor " << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
 
     boost::asio::io_service io_service;
     boost::asio::ip::tcp::resolver resolver(io_service);
@@ -76,7 +76,7 @@ public:
 					     boost::asio::placeholders::error,
 					     ++res_it));
 
-    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "io_service.run()");
+    DMCS_LOG_TRACE("io_service.run()");
     boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
     io_service.run();
     t.join();
@@ -89,18 +89,18 @@ private:
   {
     if (!e)
       {
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "neighbor: ");
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
+	DMCS_LOG_TRACE("neighbor: ");
+	DMCS_LOG_TRACE(nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
 	// get the offset of the neighbor
 	const std::size_t nid                   = nb->neighbor_id;
 	const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
 	HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
 	const std::size_t offset                = pair->second;
 	
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " create NeighborIn");
+	DMCS_LOG_TRACE(" create NeighborIn");
 	nip = NeighborInPtr(new NeighborIn(conn, mg, offset));
 	
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "create NeighborOut");
+	DMCS_LOG_TRACE("create NeighborOut");
 	nop = NeighborOutPtr(new NeighborOut(conn, router_neighbor_notif, invoker, pack_size));
 	
       }

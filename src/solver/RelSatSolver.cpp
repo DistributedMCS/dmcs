@@ -84,12 +84,12 @@ RelSatSolver::update_bridge_input(SignatureByCtx::const_iterator it)
 
   int ucl = testBeliefSet(b, it->origId) ? lid : -lid;
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input:    " << *input);
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "context:  " << it->ctxId - 1);
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "bset:     " << b);
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "localid:  " << lid);
+  DMCS_LOG_TRACE("input:    " << *input);
+  DMCS_LOG_TRACE("context:  " << it->ctxId - 1);
+  DMCS_LOG_TRACE("bset:     " << b);
+  DMCS_LOG_TRACE("localid:  " << lid);
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Adding unit clause " << ucl << " to local theory.");
+  DMCS_LOG_TRACE("Adding unit clause " << ucl << " to local theory.");
 
   xInstance->add_unit_clause(ucl);
 }
@@ -105,7 +105,7 @@ RelSatSolver::prepare_input()
   std::size_t prio = 0;
   int timeout      = 0;
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Staring at JOIN_OUT_MQ for the next input!");
+  DMCS_LOG_TRACE("Staring at JOIN_OUT_MQ for the next input!");
 
   input = mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
 
@@ -114,7 +114,7 @@ RelSatSolver::prepare_input()
       return false;
     }
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input received!");
+  DMCS_LOG_TRACE("input received!");
 
   // then add input to the SATSolver's theory. We only add the atoms
   // that come from our neighbors' interface
@@ -125,7 +125,7 @@ RelSatSolver::prepare_input()
   SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
   SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Updating input from bridge signature...");
+  DMCS_LOG_TRACE(" Updating input from bridge signature...");
 
   for (SignatureByCtx::const_iterator it = local_sig.begin(); it != low; ++it)
     {
@@ -146,7 +146,7 @@ void
 RelSatSolver::solve()
 {
   // wait for conflict and partial_ass from Handler
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Fresh solving. Wait for a message from DMCS");
+  DMCS_LOG_TRACE(" Fresh solving. Wait for a message from DMCS");
   ConflictNotification* cn;
   void *ptr         = static_cast<void*>(&cn);
   unsigned int p    = 0;
@@ -159,18 +159,18 @@ RelSatSolver::solve()
       Conflict* conflict           = cn->conflict;
       BeliefState* new_partial_ass = cn->partial_ass;
 
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Got a message from DMCS. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
+      DMCS_LOG_TRACE(" Got a message from DMCS. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
 
       /*
 	if (partial_ass == 0)
 	{
 	partial_ass = new_partial_ass;
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "First time. Going to start");
+	DMCS_LOG_TRACE("First time. Going to start");
 	}
 	else if ((*partial_ass) != (*new_partial_ass))
 	{ // now restart
 	partial_ass = new_partial_ass;
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "New partial_ass. Going to restart");
+	DMCS_LOG_TRACE("New partial_ass. Going to restart");
 	}
 	else
 	{ // continue
@@ -241,10 +241,10 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   else
     {
       bs = new BeliefState(*input);
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "input: " << *input);
+      DMCS_LOG_TRACE("input: " << *input);
     }
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "bs:    " << *bs);
+  DMCS_LOG_TRACE("bs:    " << *bs);
 
   // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
   BeliefSet& belief = (*bs)[my_id-1];
@@ -274,12 +274,12 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 	}
     }
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "After adding result: bs = " << *bs);
+  DMCS_LOG_TRACE("After adding result: bs = " << *bs);
 
   // now put this BeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Solution sent: " << *bs);
+  DMCS_LOG_TRACE("Solution sent: " << *bs);
 }
 
 } // namespace dmcs

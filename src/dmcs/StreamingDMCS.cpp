@@ -85,7 +85,7 @@ StreamingDMCS::initialize(std::size_t invoker,
   const NeighborListPtr& nbs = ctx->getNeighbors();
   std::size_t no_nbs         = nbs->size(); 
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Here create mqs and threads. no_nbs = " << no_nbs);
+  DMCS_LOG_TRACE("Here create mqs and threads. no_nbs = " << no_nbs);
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
   mg = mqf.createMessagingGateway(port, no_nbs); // we use the port as unique id
@@ -113,7 +113,7 @@ StreamingDMCS::initialize(std::size_t invoker,
       join_thread     = tf.createJoinThread(router_neighbors_notif);
       router_thread   = tf.createRouterThread(router_neighbors_notif);
     }
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " All threads created!");
+  DMCS_LOG_TRACE(" All threads created!");
 }
 
 
@@ -158,7 +158,7 @@ StreamingDMCS::start_up()
   const std::size_t no_nbs      = nbs->size();
 
 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Trigger SAT solver with empty conflict and empty ass.");
+  DMCS_LOG_TRACE("Trigger SAT solver with empty conflict and empty ass.");
 
   //BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
   //mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);

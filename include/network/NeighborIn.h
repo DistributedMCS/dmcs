@@ -60,7 +60,7 @@ public:
   void 
   stream(const boost::system::error_code& e) 
   {
-    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "noff = " << noff);
+    DMCS_LOG_TRACE("noff = " << noff);
     if (!e)
       {
 	// write to NEIGHBOR_IN_MQ, only from the second round
@@ -71,9 +71,9 @@ public:
 	else
 	  {
 	    // extract a bunch of models from the message and then put each into NEIGHBOR_MQ
-	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Write to MQs. noff = " << noff);
+	    DMCS_LOG_TRACE("Write to MQs. noff = " << noff);
 	    const BeliefStateVecPtr bsv = mess.getBeliefStates();
-	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Number of bs received = " << bsv->size());
+	    DMCS_LOG_TRACE("Number of bs received = " << bsv->size());
 	    const std::size_t offset    = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
 	    for (BeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
@@ -86,7 +86,7 @@ public:
 	  }
 	
 	// read from network
-	DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Reading header from network");
+	DMCS_LOG_TRACE("Reading header from network");
 	conn->async_read(header, boost::bind(&NeighborIn::read_message, this,  
 					     boost::asio::placeholders::error));
       }
@@ -106,7 +106,7 @@ public:
       {
 	if (header.find(HEADER_ANS) != std::string::npos)
 	  { // read some models
-	    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << "Reading message from network");
+	    DMCS_LOG_TRACE("Reading message from network");
 	    conn->async_read(mess,
 			      boost::bind(&NeighborIn::stream, this,
 					  boost::asio::placeholders::error));
