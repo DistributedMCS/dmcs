@@ -56,7 +56,7 @@ public:
   StreamingForwardMessage(std::size_t invoker_,
 			  std::size_t pack_size_, 
 			  Conflict* conflict_,
-			  BeliefState* partial_ass_)
+			  PartialBeliefState* partial_ass_)
     : invoker(invoker_),
       pack_size(pack_size_), 
       conflict(conflict_),
@@ -86,7 +86,7 @@ public:
     return conflict;
   }
 
-  BeliefState*
+  PartialBeliefState*
   getPartialAss() const
   {
     return partial_ass;
@@ -110,10 +110,10 @@ public:
   }
 
 private:
-  std::size_t  invoker;      // ID of the invoking context
-  std::size_t  pack_size;    // The number of models in a package that the invoker expects
-  Conflict*    conflict;     // A global conflict that the receiver should obey
-  BeliefState* partial_ass;  // The partial assignment of the whole system
+  std::size_t         invoker;      // ID of the invoking context
+  std::size_t         pack_size;    // The number of models in a package that the invoker expects
+  Conflict*           conflict;     // A global conflict that the receiver should obey
+  PartialBeliefState* partial_ass;  // The partial assignment of the whole system
 };
 
 typedef boost::shared_ptr<StreamingForwardMessage> StreamingForwardMessagePtr;

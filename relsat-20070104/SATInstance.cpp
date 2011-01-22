@@ -105,18 +105,18 @@ SATInstance::readTheory(const dmcs::TheoryPtr& theory, std::size_t sig_size)
   // Transfer local theory to internal clause representation of relsat
   iVariableCount = sig_size;
 
-  DMCS_LOG_TRACE("iVariableCount = " << iVariableCount);
+  //DMCS_LOG_TRACE("iVariableCount = " << iVariableCount);
 
   VariableSet xPositiveVariables(iVariableCount);
   VariableSet xNegativeVariables(iVariableCount);
 
-  DMCS_LOG_DEBUG("Reading theory:");
+  //DMCS_LOG_DEBUG("Reading theory:");
 
   // travel through the theory
   for (dmcs::Theory::const_iterator it = theory->begin();
        it != theory->end(); ++it)
     {
-      DMCS_LOG_DEBUG("Clause:");
+      //DMCS_LOG_DEBUG("Clause:");
 
       xPositiveVariables.vClear();
       xNegativeVariables.vClear();
@@ -130,7 +130,7 @@ SATInstance::readTheory(const dmcs::TheoryPtr& theory, std::size_t sig_size)
 	  eVar = *jt;
 	  assert (eVar <= iVariableCount);
 
-	  DMCS_LOG_DEBUG(eVar);
+	  //DMCS_LOG_DEBUG(eVar);
 
 	  if (eVar < 0)
 	    {

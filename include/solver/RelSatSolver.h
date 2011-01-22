@@ -93,8 +93,8 @@ private:
   MessagingGatewayBCPtr          mg;
   ConcurrentMessageQueuePtr      dmcs_sat_notif;   // to get notification from Handler
   ConcurrentMessageQueuePtr      sat_router_notif; // to inform Router
-  BeliefState*                   partial_ass;
-  BeliefState*                   input;
+  PartialBeliefState*            partial_ass;
+  PartialBeliefState*            input;
 
   SATInstance*                   xInstance;
   SATSolver*                     xSATSolver;

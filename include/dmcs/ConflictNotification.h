@@ -42,7 +42,7 @@ namespace dmcs {
 struct ConflictNotification
 {
   ConflictNotification(Conflict* c,
-		       BeliefState* pa)
+		       PartialBeliefState* pa)
     : val(0),
       conflict(c),
       partial_ass(pa)
@@ -50,32 +50,17 @@ struct ConflictNotification
 
   ConflictNotification(std::size_t val_,
 		       Conflict* conflict_,
-		       BeliefState* partial_ass_)
+		       PartialBeliefState* partial_ass_)
     : val(val_),
       conflict(conflict_),
       partial_ass(partial_ass_)
   { }
   
-  std::size_t  val;         // from SAT    --> Router:      val == id of the neighbor to send the assignment
-                            // from Router --> NeighborOut: val is now unused
-  Conflict*    conflict;
-  BeliefState* partial_ass; // partial assignment
+  std::size_t  val;                // from SAT    --> Router:      val == id of the neighbor to send the assignment
+                                   // from Router --> NeighborOut: val is now unused
+  Conflict*           conflict;
+  PartialBeliefState* partial_ass; // partial assignment
 };
-
-  /*
-typedef boost::shared_ptr<ConflictNotification>           ConflictNotificationPtr;
-typedef std::vector<ConflictNotificationPtr>              ConflictNotificationVec;
-typedef boost::shared_ptr<ConflictNotificationVec>        ConflictNotificationVecPtr;
-
-typedef boost::promise<ConflictNotificationPtr>           ConflictNotificationPromise;
-typedef boost::shared_ptr<ConflictNotificationPromise>    ConflictNotificationPromisePtr;
-typedef std::vector<ConflictNotificationPromisePtr>       ConflictNotificationPromiseVec;
-typedef boost::shared_ptr<ConflictNotificationPromiseVec> ConflictNotificationPromiseVecPtr;
-
-typedef boost::unique_future<ConflictNotificationPtr>     ConflictNotificationFuture;
-typedef boost::shared_ptr<ConflictNotificationFuture>     ConflictNotificationFuturePtr;
-typedef std::vector<ConflictNotificationFuturePtr>        ConflictNotificationFutureVec;
-typedef boost::shared_ptr<ConflictNotificationFutureVec>  ConflictNotificationFutureVecPtr;*/
 
 } // namespace dmcs
 

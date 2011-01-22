@@ -37,7 +37,7 @@ namespace dmcs {
 class RelSatSolverThread
 {
 public:
-  RelSatSolverThread(const RelSatSolverPtr& relsatsolver_);
+  RelSatSolverThread(const RelSatSolverPtr& rss);
 
   void
   operator()();

@@ -537,7 +537,7 @@ struct PartialBeliefSet
 
 typedef std::vector<PartialBeliefSet> PartialBeliefState;
 typedef boost::shared_ptr<PartialBeliefState> PartialBeliefStatePtr;
-typedef std::vector<PartialBeliefStatePtr> PartialBeliefStateVec;
+typedef std::vector<PartialBeliefState*> PartialBeliefStateVec;
 typedef boost::shared_ptr<PartialBeliefStateVec> PartialBeliefStateVecPtr;
 
 typedef std::vector<PartialBeliefStateVecPtr> PartialBeliefStatePackage;
@@ -880,8 +880,11 @@ inline std::ostream&
 operator<< (std::ostream& os, const dmcs::PartialBeliefStateVec& pbsv)
 {
   using namespace dmcs;
-
-  std::copy(pbsv.begin(), pbsv.end(), std::ostream_iterator<PartialBeliefStatePtr>(os, "\n"));
+  
+  for (PartialBeliefStateVec::const_iterator it = pbsv.begin(); it != pbsv.end(); ++it)
+    {
+      os << *it << "\n";
+    }
 
   return os;
 }

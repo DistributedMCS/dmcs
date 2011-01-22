@@ -56,10 +56,10 @@ BOOST_AUTO_TEST_CASE( testMessagingGateway )
 #endif //0
 
   ConcurrentMessageQueueFactory& f = ConcurrentMessageQueueFactory::instance();
-  boost::shared_ptr<MessagingGateway<BeliefState,Conflict> > mg2 = f.createMessagingGateway(0, 5);
+  MessagingGatewayBCPtr mg2 = f.createMessagingGateway(0, 5);
 
-  BeliefState* b1 = (BeliefState*) 0xdeadbeef;
-  BeliefState* b2 = 0;
+  PartialBeliefState* b1 = (PartialBeliefState*) 0xdeadbeef;
+  PartialBeliefState* b2 = 0;
   std::size_t prio = 0;
   int timeout = 0;
 

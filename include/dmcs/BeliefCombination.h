@@ -45,6 +45,9 @@ bool
 combine(BeliefState& s, const BeliefState& t);
 
 bool
+combine(PartialBeliefState& s, const PartialBeliefState& t);
+
+bool
 combine(const BeliefStatePtr& s, const BeliefStatePtr& t, BeliefStatePtr& u, const BeliefStatePtr& V);
 
 BeliefStateListPtr

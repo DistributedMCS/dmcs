@@ -92,15 +92,19 @@ relsat_enum SATSolver::eSolve()
     // Here we do an initial unit propagation to handle base unit clauses.
     if (_bUnitPropagate()) {
       eReturn = UNSAT;
-      DMCS_LOG_TRACE(" UNSAT after UnitPropagation. Now call bBackup() to learn some clause.");
+      
+      //DMCS_LOG_TRACE(" UNSAT after UnitPropagation. Now call bBackup() to learn some clause.");
+
       _bBackup();
-      DMCS_LOG_TRACE(" Number of learned clauses = " << _xLearnedClauses.iClauseCount());
-      DMCS_LOG_TRACE(" Learned Clauses: " << _xLearnedClauses);
+
+      //DMCS_LOG_TRACE(" Number of learned clauses = " << _xLearnedClauses.iClauseCount());
+      //DMCS_LOG_TRACE(" Learned Clauses: " << _xLearnedClauses);
+
       wrapper->receiveUNSAT();
     }
     else {
-      DMCS_LOG_TRACE(" _bUnitPropagate and no UNSAT found");
-      DMCS_LOG_TRACE(" pInstance = " << *_pInstance);
+      //DMCS_LOG_TRACE(" _bUnitPropagate and no UNSAT found");
+      //DMCS_LOG_TRACE(" pInstance = " << *_pInstance);
 
       boolean bFailed_;
       boolean bReturn;
@@ -119,9 +123,10 @@ relsat_enum SATSolver::eSolve()
       }
       else {
 	eReturn = UNSAT;
-	DMCS_LOG_TRACE("UNSAT after Loop.");
-	DMCS_LOG_TRACE("Number of learned clauses = " << _xLearnedClauses.iClauseCount());
-	DMCS_LOG_TRACE("Learned Clauses: " << _xLearnedClauses);
+
+	//DMCS_LOG_TRACE("UNSAT after Loop.");
+	//DMCS_LOG_TRACE("Number of learned clauses = " << _xLearnedClauses.iClauseCount());
+	//DMCS_LOG_TRACE("Learned Clauses: " << _xLearnedClauses);
 	wrapper->receiveUNSAT();
       }
     }
@@ -257,7 +262,9 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
       }
 
       if (_bUnitPropagate()) {
-	DMCS_LOG_TRACE(" Now call _bBackup()");
+
+	//DMCS_LOG_TRACE(" Now call _bBackup()");
+
 	if (_bBackup()) {
 	  return bReturnValue;
 	}
@@ -270,11 +277,11 @@ boolean SATSolver::_bOutputSolution()
 {
   _iSolutionCount++;
   if (_bFindAll || _iSolutionCount == 1) { // output only first solution found if counting
-    xOutputStream << "Solution " << _iSolutionCount << ": ";
+    //xOutputStream << "Solution " << _iSolutionCount << ": ";
 
-    std::cerr << "Output solution." << std::endl;
-    std::cerr << "Number of learned clauses = " << _xLearnedClauses.iClauseCount() << std::endl;
-    std::cerr << "Learned Clauses: " << _xLearnedClauses << std::endl;
+    //    std::cerr << "Output solution." << std::endl;
+    //std::cerr << "Number of learned clauses = " << _xLearnedClauses.iClauseCount() << std::endl;
+    //std::cerr << "Learned Clauses: " << _xLearnedClauses << std::endl;
     wrapper->receiveSolution(_aAssignment, _iVariableCount);
 
     /*
@@ -871,46 +878,48 @@ boolean SATSolver::_bUnitPropagate()
     if (_pUnitVariables1->iCount()) {
       int iWhich = xRandom.iRandom(_pUnitVariables1->iCount());
 
-      DMCS_LOG_TRACE("Branch (1). iWhich = " << iWhich);
+      //DMCS_LOG_TRACE("Branch (1). iWhich = " << iWhich);
 
       _vLabelVariable(_pUnitVariables1->iVariable(iWhich), 1); // here set eCurrentID to _pUnitVariables1->iVariable(iWhich)
       _pUnitVariables1->vRemoveVariable(_eCurrentID);
       assert(_pGoodList->bHasVariable(_eCurrentID));
 
-      DMCS_LOG_TRACE("Branch (1). eCurrentID = " << _eCurrentID);
+      //DMCS_LOG_TRACE("Branch (1). eCurrentID = " << _eCurrentID);
 
       pWork = &_aVariableStruct[_eCurrentID];
 
-      DMCS_LOG_TRACE("Branch (1). pwork = " << *pWork);
+      //DMCS_LOG_TRACE("Branch (1). pwork = " << *pWork);
 
       _vSatisfyWithClauseList(pWork->xPositiveClauses.pEntry(0),
 			      pWork->xPositiveClauses.pLastEntry());
       if (_bFilterWithClauseList(pWork->xNegativeClauses.pEntry(0),
 				 pWork->xNegativeClauses.pLastEntry())) {
-	DMCS_LOG_TRACE("Found a contradiction!");
+	//DMCS_LOG_TRACE("Found a contradiction!");
+
 	return 1;
       }
     }
     else if (_pUnitVariables0->iCount()) {
       int iWhich = xRandom.iRandom(_pUnitVariables0->iCount());
 
-      DMCS_LOG_TRACE("Branch (0). iWhich = " << iWhich);
+      //DMCS_LOG_TRACE("Branch (0). iWhich = " << iWhich);
 
       _vLabelVariable(_pUnitVariables0->iVariable(iWhich), 0);
       _pUnitVariables0->vRemoveVariable(_eCurrentID);
       assert(_pGoodList->bHasVariable(_eCurrentID));
 
-      DMCS_LOG_TRACE("Branch (0). eCurrentID = " << _eCurrentID);
+      //DMCS_LOG_TRACE("Branch (0). eCurrentID = " << _eCurrentID);
 
       pWork = &_aVariableStruct[_eCurrentID];
 
-      DMCS_LOG_TRACE("Branch (0). pwork = " << *pWork);
+      //DMCS_LOG_TRACE("Branch (0). pwork = " << *pWork);
 
       _vSatisfyWithClauseList(pWork->xNegativeClauses.pEntry(0),
 			      pWork->xNegativeClauses.pLastEntry());
       if (_bFilterWithClauseList(pWork->xPositiveClauses.pEntry(0),
 				 pWork->xPositiveClauses.pLastEntry())) {
-	DMCS_LOG_TRACE("Found a contradiction!");
+	//DMCS_LOG_TRACE("Found a contradiction!");
+
 	return 1;
       }
     }
@@ -1023,23 +1032,24 @@ inline void SATSolver::_vSetContradiction(VariableID eContradictionID_, Clause* 
   }
   _pUnitVariables1->vClear();
 
-  DMCS_LOG_TRACE("_eContradictionID = " << _eContradictionID);
+  //DMCS_LOG_TRACE("_eContradictionID = " << _eContradictionID);
+
   if (_pContradictionClause1)
     {
-      DMCS_LOG_TRACE("_pContradictionClause1 = " << *_pContradictionClause1);
+      //DMCS_LOG_TRACE("_pContradictionClause1 = " << *_pContradictionClause1);
     }
   else
     {
-      DMCS_LOG_TRACE("_pContradictionClause1 = NULL" << *_pContradictionClause1);
+      //DMCS_LOG_TRACE("_pContradictionClause1 = NULL" << *_pContradictionClause1);
     }
 
   if (_pContradictionClause2)
     {
-      DMCS_LOG_TRACE("_pContradictionClause2 = " << *_pContradictionClause2);
+      //DMCS_LOG_TRACE("_pContradictionClause2 = " << *_pContradictionClause2);
     }
   else
     {
-      DMCS_LOG_TRACE("_pContradictionClause2 = NULL" << *_pContradictionClause2);
+      //DMCS_LOG_TRACE("_pContradictionClause2 = NULL" << *_pContradictionClause2);
     }
 }
 
@@ -1074,8 +1084,8 @@ boolean SATSolver::_bCreateBackupClauseFromContradiction()
   // Create a new clause representing the nogood derived from the
   // current contradiction on _eContradictionID.
 
-  DMCS_LOG_TRACE("_pContradictionClause1 = " << *_pContradictionClause1);
-  DMCS_LOG_TRACE("_pContradictionClause2 = " << *_pContradictionClause2);
+  //DMCS_LOG_TRACE("_pContradictionClause1 = " << *_pContradictionClause1);
+  //DMCS_LOG_TRACE("_pContradictionClause2 = " << *_pContradictionClause2);
 
   _iContradictions++;
   _pPositiveBackup->vClear();
@@ -1117,8 +1127,8 @@ inline boolean SATSolver::_bCreateNewBackupClause(boolean bLastReasonTransient_)
 
   Clause* pBackupClause = new Clause(*_pPositiveBackup, *_pNegativeBackup);
 
-  DMCS_LOG_TRACE(" pBackupClause = " << *pBackupClause);
-  DMCS_LOG_TRACE(" pFailClause2  = " << *pFailClause2);
+  //DMCS_LOG_TRACE(" pBackupClause = " << *pBackupClause);
+  //DMCS_LOG_TRACE(" pFailClause2  = " << *pFailClause2);
   
   int iOriginalCount =
     _pNegativeBackup->iCount() +
@@ -1136,17 +1146,19 @@ inline boolean SATSolver::_bCreateNewBackupClause(boolean bLastReasonTransient_)
   _pNegativeBackup->vRemoveVariableCheck(_eCurrentID);
 
   Clause* pLearnedHere = new Clause(*_pPositiveBackup, *_pNegativeBackup);
-  DMCS_LOG_TRACE("pLearnedHere = " << *pLearnedHere);
+  //DMCS_LOG_TRACE("pLearnedHere = " << *pLearnedHere);
 
   if (!bLastReasonTransient_ &&
       !pFailClause2->bIsTemporary() &&
       _pPositiveBackup->iCount() + _pNegativeBackup->iCount() >=
       (pFailClause2->iVariableCount() + iOriginalCount - 2)) {
-    DMCS_LOG_TRACE(" return 0");
+    //DMCS_LOG_TRACE(" return 0");
+
     return 0;
   }
   else {
-    DMCS_LOG_TRACE(" return 1");
+    //DMCS_LOG_TRACE(" return 1");
+
     return 1;
   }
 }
@@ -1279,7 +1291,7 @@ inline void SATSolver::_vLabelVariable(VariableID eID_, DomainValue lWhich_)
 
 boolean SATSolver::_bBackup()
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   // Returns 1 if the search is complete.
 start:
   //^^ We goto start instead of call bBackup() recursively since some compilers don't
@@ -1289,27 +1301,29 @@ start:
   boolean bLastReasonTransient;
 
   if (_pPositiveBackup->iCount() == 0 && _pNegativeBackup->iCount() == 0) {
-    DMCS_LOG_TRACE("HERE FOUND UNSAT");
+    //DMCS_LOG_TRACE("HERE FOUND UNSAT");
     return 1;
   }
 
   Clause* pLearnedFromBackup = new Clause(*_pPositiveBackup, *_pNegativeBackup);
-  DMCS_LOG_TRACE("pLearnedFromBackup = " << *pLearnedFromBackup);
+
+  //DMCS_LOG_TRACE("pLearnedFromBackup = " << *pLearnedFromBackup);
 
   Clause* pJustLearned;
   if (bLearn) {
     pJustLearned = _pLearn();
-    DMCS_LOG_TRACE("pJustLearned = " << *pJustLearned);    
+    //DMCS_LOG_TRACE("pJustLearned = " << *pJustLearned);    
     if (pJustLearned && !pJustLearned->bIsTemporary()) {
       bLastReasonTransient = 0;
     }
     else {
-      DMCS_LOG_TRACE("bLastReasonTransient = 1");
+      //DMCS_LOG_TRACE("bLastReasonTransient = 1");
       bLastReasonTransient = 1;
     }
   }
   else {
-    DMCS_LOG_TRACE("bLastReasonTransient = 0");
+    //DMCS_LOG_TRACE("bLastReasonTransient = 0");
+
     bLastReasonTransient = 0;
     pJustLearned = 0;
   }
@@ -1318,27 +1332,36 @@ start:
   VariableStruct* pWork;
   do { // while (1)
     pWork = &(_aVariableStruct[_eCurrentID]);
+
     //DMCS_LOG_TRACE(" _eCurrentID = " << _eCurrentID);
     //DMCS_LOG_TRACE(" pWork = " << *pWork);
+
     if (pWork->pSolutionInfo) {
       pWork->pSolutionInfo->xSolutionCount.vSet(0);
       pWork->pReason = new Clause(*_pPositiveBackup, *_pNegativeBackup);
-      DMCS_LOG_TRACE(" pWork->pReason = " << *(pWork->pReason));
+      
+      //DMCS_LOG_TRACE(" pWork->pReason = " << *(pWork->pReason));
+
       delete pWork->pDeleteReason;
       pWork->pDeleteReason = pWork->pReason;
       // NASTY UGLY HACK
       // This hack is needed so that _vCreateGoodReason properly computes the reason.
       _bReverse = 1;
       // END NASTY UGLY HACK
-      DMCS_LOG_TRACE(" Go into _bSpecialBackup");
+
+      //DMCS_LOG_TRACE(" Go into _bSpecialBackup");
+
       return _bSpecialBackup();
     }
-    DMCS_LOG_TRACE(" Going to undo clause modifications");
+    //DMCS_LOG_TRACE(" Going to undo clause modifications");
+
     _vUndoClauseModifications();
 
     if (_pPositiveBackup->bHasVariable(_eCurrentID) ||
 	_pNegativeBackup->bHasVariable(_eCurrentID)) {
-      DMCS_LOG_TRACE(" _eCurrentID = " << _eCurrentID << " in _pPositiveBackup or _pNegativeBackup");      
+      
+      //DMCS_LOG_TRACE(" _eCurrentID = " << _eCurrentID << " in _pPositiveBackup or _pNegativeBackup");      
+
       if (pWork->bBranch) {
 	pWork->bBranch = 0;
 	if (pJustLearned) {
@@ -1351,14 +1374,17 @@ start:
 	  pWork->pDeleteReason = pWork->pReason;
 	}
 
-	DMCS_LOG_TRACE(" pWork->pReason = " << *pWork->pReason);
+	//DMCS_LOG_TRACE(" pWork->pReason = " << *pWork->pReason);
 
 	if (_aAssignment[_eCurrentID] == 0) {  // try the opposite assignment
+	  
 	  DMCS_LOG_TRACE(" try opposite assignment of _eCurrentID = " << _eCurrentID << " to 1");
+
 	  _pUnitVariables1->vAddVariable(_eCurrentID);
 	}
 	else {
 	  DMCS_LOG_TRACE(" try opposite assignment of _eCurrentID = " << _eCurrentID << " to 0");
+
 	  _pUnitVariables0->vAddVariable(_eCurrentID);
 	}
 	_aAssignment[_eCurrentID] = NON_VALUE;
@@ -1378,16 +1404,16 @@ start:
 
 	if (bLearn)
 	  {
-	    DMCS_LOG_TRACE(" bLearn = 1");
+	    //DMCS_LOG_TRACE(" bLearn = 1");
 	  }
 	else
 	  {
-	    DMCS_LOG_TRACE(" bLearn = 0");
+	    //DMCS_LOG_TRACE(" bLearn = 0");
 	  }
 
 
 	if (_pPositiveBackup->iCount() == 0 && _pNegativeBackup->iCount() == 0) {
-	  DMCS_LOG_TRACE("HERE FOUND UNSAT");
+	  //DMCS_LOG_TRACE("HERE FOUND UNSAT");
 	  return 1;
 	}
 	if (bLearn) {
@@ -1793,8 +1819,8 @@ void SATSolver::_vUndoClauseModifications()
 
   VariableStruct* pWork = &(_aVariableStruct[_eCurrentID]);
 
-  DMCS_LOG_TRACE(" _eCurrentID = " << _eCurrentID);
-  DMCS_LOG_TRACE(" pWork = " << *pWork);
+  //DMCS_LOG_TRACE(" _eCurrentID = " << _eCurrentID);
+  //DMCS_LOG_TRACE(" pWork = " << *pWork);
 
   if (_aAssignment[_eCurrentID] == 1) {
     pStart1 = pWork->xNegativeClauses.pEntry(0);

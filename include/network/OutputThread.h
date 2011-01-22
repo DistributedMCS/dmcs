@@ -45,9 +45,9 @@ namespace dmcs {
 class OutputThread
 {
 public:
-  OutputThread(const connection_ptr& conn_,
-	       std::size_t pack_size_,
-	       MessagingGatewayBCPtr& mg_,
+  OutputThread(const connection_ptr& c,
+	       std::size_t ps,
+	       MessagingGatewayBCPtr& m,
 	       ConcurrentMessageQueuePtr& hon);
 
   void
@@ -61,23 +61,23 @@ private:
   wait_for_trigger();
 
   void
-  collect_output(BeliefStateVecPtr& res, std::string& header);
+  collect_output(PartialBeliefStateVecPtr& res, std::string& header);
 
   void
-  write_result(BeliefStateVecPtr& res, const std::string& header);
+  write_result(PartialBeliefStateVecPtr& res, const std::string& header);
 
   void
   write_models(const boost::system::error_code& e,
-	       BeliefStateVecPtr& res);
+	       PartialBeliefStateVecPtr& res);
 
 private:
-  const connection_ptr&       conn;
-  std::size_t                 pack_size;             // Number of models the invoker expects to get
-  std::size_t                 left_2_send;           // Number of models left to send
-  MessagingGatewayBCPtr       mg;
-  ConcurrentMessageQueuePtr   handler_output_notif;
-  bool                        collecting;           // A flag to determine whether we are in collecting mode or not 
-                                                    // (if yes then we don't want to wait for any trigger)
+  const connection_ptr&      conn;
+  std::size_t                pack_size;             // Number of models the invoker expects to get
+  std::size_t                left_2_send;           // Number of models left to send
+  MessagingGatewayBCPtr      mg;
+  ConcurrentMessageQueuePtr  handler_output_notif;
+  bool                       collecting;           // A flag to determine whether we are in collecting mode or not 
+                                                   // (if yes then we don't want to wait for any trigger)
 };
 
 typedef boost::shared_ptr<OutputThread> OutputThreadPtr;

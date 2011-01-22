@@ -184,7 +184,7 @@ Client<CmdType>::read_answer(const boost::system::error_code& error, connection_
   if (!error)
     {
       conn->async_read(result,
-		       boost::bind(&Client::read_header, this,
+		       boost::bind(&Client::handle_read_answer, this,
 				   boost::asio::placeholders::error, conn));
     }
   else
@@ -193,6 +193,26 @@ Client<CmdType>::read_answer(const boost::system::error_code& error, connection_
       throw std::runtime_error(error.message());
     }
 }
+
+
+template<typename CmdType>
+void 
+Client<CmdType>::handle_read_answer(const boost::system::error_code& error, connection_ptr conn)
+{
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  if (!error)
+    {
+      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Got an answer: " << result);
+      read_header(boost::system::error_code(), conn);
+    }
+  else
+    {
+      DMCS_LOG_FATAL(__PRETTY_FUNCTION__ << ": " << error.message());
+      throw std::runtime_error(error.message());
+    }
+}
+
 
 
 template<typename CmdType>

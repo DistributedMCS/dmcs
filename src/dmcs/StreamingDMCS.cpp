@@ -52,12 +52,13 @@
 namespace dmcs {
 
 
-StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, 
+StreamingDMCS::StreamingDMCS(const ContextPtr& c, 
+			     const TheoryPtr& t, 
 			     const SignatureVecPtr& s, 
-			     const QueryPlanPtr& query_plan_,
-			     std::size_t buf_count_)
+			     const QueryPlanPtr& qp,
+			     std::size_t bc)
   : BaseDMCS(c, t, s),
-    query_plan(query_plan_),
+    query_plan(qp),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats)),
     initialized(false),
@@ -67,7 +68,7 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c, const TheoryPtr& t,
     neighbor_threads(new ThreadVec),
     dmcs_sat_notif(new ConcurrentMessageQueue),
     router_neighbors_notif(new ConcurrentMessageQueueVec),
-    buf_count(buf_count_)
+    buf_count(bc)
 { }
 
 
@@ -110,8 +111,8 @@ StreamingDMCS::initialize(std::size_t invoker,
   if (no_nbs > 0)
     {
       tf.createNeighborThreads(neighbor_threads, router_neighbors_notif);
-      join_thread     = tf.createJoinThread(router_neighbors_notif);
-      router_thread   = tf.createRouterThread(router_neighbors_notif);
+      join_thread   = tf.createJoinThread(router_neighbors_notif);
+      router_thread = tf.createRouterThread(router_neighbors_notif);
     }
   DMCS_LOG_TRACE(" All threads created!");
 }
@@ -163,8 +164,8 @@ StreamingDMCS::start_up()
   //BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
   //mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
   
-  Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
-  BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
+  Conflict* empty_conflict       = new Conflict(system_size, PartialBeliefSet());
+  PartialBeliefState* empty_ass  = new PartialBeliefState(system_size, PartialBeliefSet());
   
   ConflictNotification* mess_sat = new ConflictNotification(0, empty_conflict, empty_ass);
   ConflictNotification* ow_sat = 
@@ -185,9 +186,9 @@ StreamingDMCS::start_up()
 
       assert (router_neighbors_notif->size() == no_nbs);
 
-      Conflict* empty_conflict       = new Conflict(system_size, BeliefSet());
-      BeliefState* empty_ass         = new BeliefState(system_size, BeliefSet());
-      ConflictNotification* cn = new ConflictNotification(0, empty_conflict, empty_ass);
+      Conflict* empty_conflict      = new Conflict(system_size, PartialBeliefSet());
+      PartialBeliefState* empty_ass = new PartialBeliefState(system_size, PartialBeliefSet());
+      ConflictNotification* cn      = new ConflictNotification(0, empty_conflict, empty_ass);
 
       for (std::size_t i = 0; i < no_nbs; ++i)
 	{

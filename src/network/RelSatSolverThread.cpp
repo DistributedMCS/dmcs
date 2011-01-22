@@ -32,8 +32,8 @@
 
 namespace dmcs {
 
-RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& relsatsolver_)
-  : relsatsolver(relsatsolver_)
+RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& rss)
+  : relsatsolver(rss)
 { }
 
 void

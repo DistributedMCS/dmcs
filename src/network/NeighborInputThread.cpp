@@ -41,7 +41,7 @@ NeighborInputThread::NeighborInputThread(const NeighborPtr& nb_,
 					 std::size_t ctx_id_,
 					 std::size_t pack_size_,
 					 std::size_t system_size_,
-					 boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_)
+					 MessagingGatewayBCPtr& mg_)
   : nb(nb_),
     c2o(c2o_),
     ctx_id(ctx_id_),

@@ -48,11 +48,11 @@ public:
   virtual ~StreamingBackwardMessage() 
   { }
 
-  StreamingBackwardMessage(BeliefStateVecPtr& result_)
+  StreamingBackwardMessage(PartialBeliefStateVecPtr& result_)
     : result(result_)
   { }
 
-  BeliefStateVecPtr
+  PartialBeliefStateVecPtr
   getBeliefStates() const
   {
     return result;
@@ -67,15 +67,15 @@ public:
   }
 
 private:
-  BeliefStateVecPtr result;
+  PartialBeliefStateVecPtr result;
 };
 
 inline std::ostream&
 operator<< (std::ostream& os, const StreamingBackwardMessage& sbMess)
 {
-  const BeliefStateVecPtr& result = sbMess.getBeliefStates();
+  const PartialBeliefStateVecPtr& result = sbMess.getBeliefStates();
   os << "{ ";
-  for (BeliefStateVec::const_iterator it = result->begin();
+  for (PartialBeliefStateVec::const_iterator it = result->begin();
        it != result->end(); ++it)
     {
       if (*it)

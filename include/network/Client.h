@@ -78,6 +78,9 @@ class Client : public BaseClient
   read_answer(const boost::system::error_code& error, connection_ptr conn);
 
   void 
+  handle_read_answer(const boost::system::error_code& error, connection_ptr conn);
+
+  void 
   finalize(const boost::system::error_code& error, connection_ptr /* conn */);
 
   std::string received_header;

@@ -39,19 +39,19 @@
 
 namespace dmcs {
 
-ThreadFactory::ThreadFactory(const ContextPtr& context_, 
-			     const TheoryPtr& theory_,
-			     const SignaturePtr& local_sig_,
-			     const BeliefStatePtr& localV_,
-			     std::size_t pack_size_,
-			     MessagingGatewayBCPtr& mg_,
+ThreadFactory::ThreadFactory(const ContextPtr& c, 
+			     const TheoryPtr& t,
+			     const SignaturePtr& ls,
+			     const BeliefStatePtr& lV,
+			     std::size_t ps,
+			     MessagingGatewayBCPtr& m,
 			     const ConcurrentMessageQueuePtr& dsn)
-  : context(context_),
-    theory(theory_), 
-    local_sig(local_sig_),
-    localV(localV_),
-    pack_size(pack_size_),
-    mg(mg_),
+  : context(c),
+    theory(t), 
+    local_sig(ls),
+    localV(lV),
+    pack_size(ps),
+    mg(m),
     dmcs_sat_notif(dsn), 
     sat_router_notif(new ConcurrentMessageQueue),
     c2o(new HashedBiMap)

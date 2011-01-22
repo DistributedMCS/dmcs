@@ -35,13 +35,13 @@
 
 namespace dmcs {
 
-OutputThread::OutputThread(const connection_ptr& conn_,
-			   std::size_t pack_size_,
-			   MessagingGatewayBCPtr& mg_,
+OutputThread::OutputThread(const connection_ptr& c,
+			   std::size_t ps,
+			   MessagingGatewayBCPtr& m,
 			   ConcurrentMessageQueuePtr& hon)
-  : conn(conn_),
-    pack_size(pack_size_),
-    mg(mg_),
+  : conn(c),
+    pack_size(ps),
+    mg(m),
     handler_output_notif(hon),
     collecting(false)
 {
@@ -57,8 +57,8 @@ OutputThread::loop(const boost::system::error_code& e)
 
   if (!e)
     {
-      BeliefStateVecPtr res(new BeliefStateVec);
-      std::string       header = "";
+      PartialBeliefStateVecPtr res(new PartialBeliefStateVec);
+      std::string header = "";
 
       if (!collecting)
 	{
@@ -108,7 +108,7 @@ OutputThread::wait_for_trigger()
 
 
 void
-OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
+OutputThread::collect_output(PartialBeliefStateVecPtr& res, std::string& header)
 {
   DMCS_LOG_TRACE(" pack_size = " << pack_size << ", left to send = " << left_2_send);
 
@@ -121,9 +121,9 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
     {
       //DMCS_LOG_TRACE(" Read from MQ");
       
-      std::size_t prio    = 0;
-      int timeout = 200; // milisecs
-      BeliefState* bs     = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+      std::size_t prio       = 0;
+      int timeout            = 200; // milisecs
+      PartialBeliefState* bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
       
       //DMCS_LOG_TRACE(" Check result from MQ");
       if (bs == 0) // Ups, a NULL pointer
@@ -171,7 +171,7 @@ OutputThread::collect_output(BeliefStateVecPtr& res, std::string& header)
 
 
 void
-OutputThread::write_result(BeliefStateVecPtr& res, const std::string& header)
+OutputThread::write_result(PartialBeliefStateVecPtr& res, const std::string& header)
 {
   DMCS_LOG_TRACE("header = " << header);
 
@@ -194,7 +194,7 @@ OutputThread::write_result(BeliefStateVecPtr& res, const std::string& header)
 
 
 void
-OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr& res)
+OutputThread::write_models(const boost::system::error_code& e, PartialBeliefStateVecPtr& res)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   if (!e)
@@ -203,17 +203,21 @@ OutputThread::write_models(const boost::system::error_code& e, BeliefStateVecPtr
 
       left_2_send -= res->size();
       
+      // mark end of package by a NULL model
       if (left_2_send == 0)
 	{
-	  BeliefState* bs = 0;
+	  PartialBeliefState* bs = 0;
 	  res->push_back(bs);
 	  collecting = false;
 	}
       
       StreamingBackwardMessage return_mess(res);
 
-      DMCS_LOG_TRACE(" return message:");
-      DMCS_LOG_TRACE(return_mess);
+      boost::asio::ip::tcp::socket& sock = conn->socket();
+      boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
+      std::size_t port                   = ep.port();
+
+      DMCS_LOG_TRACE(" return message == " << return_mess << " on port :" << port);
 
       conn->async_write(return_mess,
 			boost::bind(&OutputThread::loop, this,

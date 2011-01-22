@@ -59,7 +59,7 @@ public:
   void
   execute(ConcurrentMessageQueuePtr& notif_from_handler)
   {
-    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+    //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
     sdmcs->loop(notif_from_handler);
   }
 

@@ -79,17 +79,23 @@ RelSatSolver::solve(const TheoryPtr& /* theory */, std::size_t /* sig_size */)
 void
 RelSatSolver::update_bridge_input(SignatureByCtx::const_iterator it)
 {
-  BeliefSet& b = (*input)[it->ctxId - 1];
+  PartialBeliefSet& b = (*input)[it->ctxId - 1];
+  
+
   int lid = it->localId;
 
-  int ucl = testBeliefSet(b, it->origId) ? lid : -lid;
+  PartialBeliefSet::TruthVal val = testBeliefSet(b, it->origId);
 
-  DMCS_LOG_TRACE("input:    " << *input);
+  assert (val != PartialBeliefSet::DMCS_UNDEF);
+
+  int ucl = (val == PartialBeliefSet::DMCS_TRUE) ? lid : -lid;
+
+  /*DMCS_LOG_TRACE("input:    " << *input);
   DMCS_LOG_TRACE("context:  " << it->ctxId - 1);
   DMCS_LOG_TRACE("bset:     " << b);
   DMCS_LOG_TRACE("localid:  " << lid);
 
-  DMCS_LOG_TRACE("Adding unit clause " << ucl << " to local theory.");
+  DMCS_LOG_TRACE("Adding unit clause " << ucl << " to local theory.");*/
 
   xInstance->add_unit_clause(ucl);
 }
@@ -125,7 +131,7 @@ RelSatSolver::prepare_input()
   SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
   SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
 
-  DMCS_LOG_TRACE(" Updating input from bridge signature...");
+  //DMCS_LOG_TRACE(" Updating input from bridge signature...");
 
   for (SignatureByCtx::const_iterator it = local_sig.begin(); it != low; ++it)
     {
@@ -156,8 +162,8 @@ RelSatSolver::solve()
 
   if (ptr && cn)
     {
-      Conflict* conflict           = cn->conflict;
-      BeliefState* new_partial_ass = cn->partial_ass;
+      Conflict* conflict                  = cn->conflict;
+      PartialBeliefState* new_partial_ass = cn->partial_ass;
 
       DMCS_LOG_TRACE(" Got a message from DMCS. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
 
@@ -232,22 +238,22 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  BeliefState* bs;
+  PartialBeliefState* bs;
   // copy input
   if (is_leaf)
     {
-      bs = new BeliefState(system_size, BeliefSet());
+      bs = new PartialBeliefState(system_size, PartialBeliefSet());
     }
   else
     {
-      bs = new BeliefState(*input);
-      DMCS_LOG_TRACE("input: " << *input);
+      bs = new PartialBeliefState(*input);
+      //DMCS_LOG_DEBUG("input: " << *input);
     }
 
   DMCS_LOG_TRACE("bs:    " << *bs);
 
   // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
-  BeliefSet& belief = (*bs)[my_id-1];
+  PartialBeliefSet& belief = (*bs)[my_id-1];
   setEpsilon(belief);                
 
   ///@todo: MD: just need to look at real local atoms
@@ -255,31 +261,35 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
     {
       assert(_aAssignment[i] != NON_VALUE);
 
+      const SignatureByLocal& local_sig = boost::get<Tag::Local>(*sig);
+      dmcs::SignatureByLocal::const_iterator loc_it = local_sig.find(i+1);
+      
+      // it must show up in the signature
+      assert (loc_it != local_sig.end());
+
+      std::size_t cid = loc_it->ctxId - 1;
+
+      // just to be safe
+      assert (cid < system_size);
+      
+      PartialBeliefSet& belief = (*bs)[cid];
+
       if (_aAssignment[i]) 
 	{
-	  const SignatureByLocal& local_sig = boost::get<Tag::Local>(*sig);
-	  dmcs::SignatureByLocal::const_iterator loc_it = local_sig.find(i+1);
-	  
-	  // it must show up in the signature
-	  assert (loc_it != local_sig.end());
-	  
-	  std::size_t cid = loc_it->ctxId - 1;
-	  
-	  // just to be safe
-	  assert (cid < system_size);
-	  
-	  BeliefSet& belief = (*bs)[cid];
-
-	  belief.set(loc_it->origId);
+	  setBeliefSet(belief, loc_it->origId);
+	}
+      else
+	{
+	  setBeliefSet(belief, loc_it->origId, PartialBeliefSet::DMCS_FALSE);
 	}
     }
 
-  DMCS_LOG_TRACE("After adding result: bs = " << *bs);
+  //DMCS_LOG_TRACE("After adding result: bs = " << *bs);
 
-  // now put this BeliefState to the SatOutputMessageQueue
+  // now put this PartialBeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 
-  DMCS_LOG_TRACE("Solution sent: " << *bs);
+  //DMCS_LOG_TRACE("Solution sent: " << *bs);
 }
 
 } // namespace dmcs

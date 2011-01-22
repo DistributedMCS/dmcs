@@ -245,11 +245,10 @@ main(int argc, char* argv[])
 		  std::string header = HEADER_REQ_STM_DMCS;
 		  // USER <--> invoker == 0
 	
-		  Conflict* conflict = new Conflict(system_size, BeliefSet());
-		  BeliefState* partial_ass = new BeliefState(system_size, BeliefSet());
+		  Conflict* conflict = new Conflict(system_size, PartialBeliefSet());
+		  PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
 
 		  StreamingCommandType::input_type mess(0, pack_size, conflict, partial_ass);
-
 
 		  DMCS_LOG_DEBUG("Empty starting conflict:" << *conflict);
 		  DMCS_LOG_DEBUG("Empty starting assignment:" << *partial_ass);

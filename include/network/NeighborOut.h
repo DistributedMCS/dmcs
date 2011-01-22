@@ -77,8 +77,8 @@ public:
 
 	if (ptr && cn)
 	  {
-	    Conflict* conflict       = cn->conflict;
-	    BeliefState* partial_ass = cn->partial_ass;
+	    Conflict* conflict              = cn->conflict;
+	    PartialBeliefState* partial_ass = cn->partial_ass;
 
 	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflict << "*partial_ass = " << *partial_ass);
 
@@ -105,7 +105,8 @@ public:
 
   void
   write_message(const boost::system::error_code& e,
-		Conflict* conflict, BeliefState* partial_ass)
+		Conflict* conflict, 
+		PartialBeliefState* partial_ass)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 

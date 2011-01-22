@@ -36,9 +36,9 @@
 namespace dmcs {
 
   /**
-   * @brief a Conflict is just a BeliefState for now
+   * @brief a Conflict is just a PartialBeliefState for now
    */
-  typedef BeliefState Conflict;
+  typedef PartialBeliefState Conflict;
 
 } // namespace dmcs
 

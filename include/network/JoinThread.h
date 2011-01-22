@@ -64,23 +64,23 @@ public:
 private:
   bool
   import_belief_states(std::size_t noff, std::size_t peq_cnt,
-		       BeliefStatePackagePtr& partial_eqs, 
+		       PartialBeliefStatePackagePtr& partial_eqs, 
 		       bm::bvector<>& in_mask,
 		       bm::bvector<>& end_mask,
-		       BeliefStateIteratorVecPtr& beg_it, 
-		       BeliefStateIteratorVecPtr& mid_it,
+		       PartialBeliefStateIteratorVecPtr& beg_it, 
+		       PartialBeliefStateIteratorVecPtr& mid_it,
 		       ImportStates import_state);
 
   void
   ask_for_next(std::size_t next);
 
   std::size_t
-  join(const BeliefStateIteratorVecPtr& run_it);
+  join(const PartialBeliefStateIteratorVecPtr& run_it);
 
   void
-  join(const BeliefStatePackagePtr& partial_eqs, 
-       const BeliefStateIteratorVecPtr& beg_it, 
-       const BeliefStateIteratorVecPtr& end_it);
+  join(const PartialBeliefStatePackagePtr& partial_eqs, 
+       const PartialBeliefStateIteratorVecPtr& beg_it, 
+       const PartialBeliefStateIteratorVecPtr& end_it);
 
 private:
   std::size_t                  no_nbs;                  // number of neighbors 

@@ -46,7 +46,7 @@ namespace dmcs {
   /**
    * @brief a dispatcher for concurrent message queues
    */
-  class ConcurrentMessageDispatcher : public MessagingGateway<BeliefState,Conflict>
+  class ConcurrentMessageDispatcher : public MessagingGateway<PartialBeliefState, Conflict>
   {
   private:
     /// here we pile up all MQ's that receive messages
@@ -73,18 +73,18 @@ namespace dmcs {
     registerMQ(ConcurrentMessageQueuePtr& mq, std::size_t id);
 
     virtual bool
-    sendModel(BeliefState* b, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+    sendModel(PartialBeliefState* b, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
     sendConflict(Conflict* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
-    sendModelConflict(BeliefState* b, Conflict* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+    sendModelConflict(PartialBeliefState* b, Conflict* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
     sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
-    virtual BeliefState*
+    virtual PartialBeliefState*
     recvModel(std::size_t from, std::size_t& prio, int& msecs);
 
     virtual Conflict*

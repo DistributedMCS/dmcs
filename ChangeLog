@@ -1,3 +1,49 @@
+2011-01-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/RelSatSolverThread.h: Fix potential underscore
+	bug.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Comment out some
+	debugging information.
+	* include/network/NeighborThread.h: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+
+	* include/network/AsynClient.h: Use MessagingGatewayBCPtr.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/network/NeighborInputThread.h: Likewise.
+	* src/network/NeighborInputThread.cpp: Likewise.
+
+	* include/mcs/BeliefState.h: Use pointer instead of Ptr.
+
+	* include/dmcs/OutputNotification.h: Clean up.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+
+	* include/dmcs/ConflictNotification.h: Use PartialBeliefState
+	instead of BeliefState.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingBackwardMessage.h: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/solver/Conflict.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/dmcs/BeliefCombination.h: Add combine method for
+	PartialBeliefState(s).
+
 2011-01-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/ConcurrentMessageQueueHelper.h: Use DMCS_LOG_TRACE.

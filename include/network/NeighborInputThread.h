@@ -50,7 +50,7 @@ public:
 		      std::size_t ctx_id_, 
 		      std::size_t pack_size_,
 		      std::size_t system_size_,
-		      boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_);
+		      MessagingGatewayBCPtr& mg_);
 
   void
   operator()();
@@ -62,7 +62,7 @@ private:
   std::size_t pack_size;
   std::size_t system_size; // might not be needed
   BaseClient* client;
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+  MessagingGatewayBCPtr mg;
 };
 
 } // namespace dmcs

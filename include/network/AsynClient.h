@@ -47,7 +47,7 @@ class AsynClient : public BaseClient
   AsynClient(boost::asio::io_service& io_service,
 	     boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
 	     const std::string& header_,
-	     boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_,
+	     MessagingGatewayBCPtr& mg_,
 	     const NeighborPtr& nb_,
 	     std::size_t ctx_id_,
 	     std::size_t index_,
@@ -79,7 +79,7 @@ private:
   std::string received_header;
   ForwardMessType mess;
   BackwardMessType result;
-  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> > mg;
+  MessagingGatewayBCPtr mg;
   NeighborPtr nb;
   std::size_t ctx_id;
   std::size_t index;

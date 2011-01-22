@@ -51,7 +51,7 @@ template<typename ForwardMessType, typename BackwardMessType>
 AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_service& io_service,
 							  boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
 							  const std::string& my_header_,
-							  boost::shared_ptr<MessagingGateway<BeliefState, Conflict> >& mg_,
+							  MessagingGatewayBCPtr& mg_,
 							  const NeighborPtr& nb_,
 							  std::size_t ctx_id_,
 							  std::size_t index_,
@@ -230,12 +230,12 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_answer(const boost::system
       DMCS_LOG_DEBUG("result = " << result);
 
       // now put k models from result into a message queue. 
-      const BeliefStateVecPtr bsv = result.getBeliefStates();
+      const PartialBeliefStateVecPtr bsv = result.getBeliefStates();
       const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index;
 
-      for (BeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
+      for (PartialBeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
 	{
-	  BeliefState* bs = *it;
+	  PartialBeliefState* bs = *it;
 	  mg->sendModel(bs, ctx_id, off, 0);
 	}
 

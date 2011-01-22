@@ -72,13 +72,13 @@ public:
 	  {
 	    // extract a bunch of models from the message and then put each into NEIGHBOR_MQ
 	    DMCS_LOG_TRACE("Write to MQs. noff = " << noff);
-	    const BeliefStateVecPtr bsv = mess.getBeliefStates();
+	    const PartialBeliefStateVecPtr bsv = mess.getBeliefStates();
 	    DMCS_LOG_TRACE("Number of bs received = " << bsv->size());
 	    const std::size_t offset    = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
-	    for (BeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
+	    for (PartialBeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
 	      {
-		BeliefState* bs = *it;
+		PartialBeliefState* bs = *it;
 		mg->sendModel(bs, noff, offset, 0);
 	      }
 	    // notify the joiner by putting a JoinMess into JoinMessageQueue

@@ -50,12 +50,12 @@ typedef boost::shared_ptr<ThreadVec> ThreadVecPtr;
 class ThreadFactory
 {
 public:
-  ThreadFactory(const ContextPtr& context_, 
-		const TheoryPtr& theory_,
-		const SignaturePtr& local_sig_,
-		const BeliefStatePtr& localV_,
-		std::size_t pack_size_,
-		MessagingGatewayBCPtr& mg_,
+  ThreadFactory(const ContextPtr& c, 
+		const TheoryPtr& t,
+		const SignaturePtr& ls,
+		const BeliefStatePtr& lV,
+		std::size_t ps,
+		MessagingGatewayBCPtr& m,
 		const ConcurrentMessageQueuePtr& dsn);
 
   void

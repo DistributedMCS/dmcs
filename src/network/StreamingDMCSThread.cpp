@@ -40,7 +40,7 @@ StreamingDMCSThread::StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
 void
 StreamingDMCSThread::operator()()
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  //  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   scmt->execute(notif_from_handler);
 }
 

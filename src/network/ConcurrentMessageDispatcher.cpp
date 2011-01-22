@@ -64,7 +64,7 @@ ConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr& mq, std::size
 
 
 bool
-ConcurrentMessageDispatcher::sendModel(BeliefState* b,
+ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
 				       std::size_t /* from */,
 				       std::size_t to,
 				       std::size_t /* prio */,
@@ -116,7 +116,7 @@ ConcurrentMessageDispatcher::sendConflict(Conflict* c,
 
 
 bool
-ConcurrentMessageDispatcher::sendModelConflict(BeliefState* b,
+ConcurrentMessageDispatcher::sendModelConflict(PartialBeliefState* b,
 					       Conflict* c,
 					       std::size_t /* from */,
 					       std::size_t to,
@@ -173,7 +173,7 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
 }
 
 
-BeliefState*
+PartialBeliefState*
 ConcurrentMessageDispatcher::recvModel(std::size_t from,
 				       std::size_t& /* prio */,
 				       int& msecs)
@@ -181,7 +181,7 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
   ///@todo TK: prio is not used
   assert(mqs.size() > from);
 
-  BeliefState* b = 0;
+  PartialBeliefState* b = 0;
   std::size_t recvd = 0;
   unsigned int p = 0;
   void *ptr = static_cast<void*>(&b);
@@ -255,7 +255,7 @@ ConcurrentMessageDispatcher::recvConflict(std::size_t from,
 }
 
 
-struct MessagingGateway<BeliefState,Conflict>::ModelConflict
+struct MessagingGateway<PartialBeliefState, Conflict>::ModelConflict
 ConcurrentMessageDispatcher::recvModelConflict(std::size_t from,
 					       std::size_t& /* prio */,
 					       int& msecs)
@@ -296,7 +296,7 @@ ConcurrentMessageDispatcher::recvModelConflict(std::size_t from,
 }
 
 
-struct MessagingGateway<BeliefState,Conflict>::JoinIn
+struct MessagingGateway<PartialBeliefState, Conflict>::JoinIn
 ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 					std::size_t& /* prio */,
 					int& msecs)
