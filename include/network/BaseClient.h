@@ -74,7 +74,7 @@ protected:
 protected:
   boost::asio::io_service& io_service_;
   connection_ptr conn;
-  const std::string& my_header;
+  const std::string my_header;
 };
 
 } // namespace dmcs

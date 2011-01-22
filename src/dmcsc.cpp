@@ -41,6 +41,7 @@
 #include "dyndmcs/DynamicConfiguration.h"
 #include "dyndmcs/InstantiatorCommandType.h"
 
+#include "network/AsynClient.h"
 #include "network/Client.h"
 
 #include "dmcs/Message.h"
@@ -254,7 +255,7 @@ main(int argc, char* argv[])
 		  DMCS_LOG_DEBUG("Empty starting assignment:" << *partial_ass);
 
 
-		  Client<StreamingCommandType> c(io_service, it, header, mess);
+		  AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(io_service, it, header, mess);
 
 		  DMCS_LOG_DEBUG("Running ioservice.");
 

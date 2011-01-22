@@ -2,6 +2,7 @@ AUTOMAKE_OPTIONS = gnu
 
 # including headers for make dist
 noinst_HEADERS =  \
+		AsynClient.h \
 		BaseClient.h \
 		BaseHandler.h \
 		BaseStreamer.h \

@@ -46,12 +46,8 @@ class AsynClient : public BaseClient
  public:
   AsynClient(boost::asio::io_service& io_service,
 	     boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-	     const std::string& header_,
-	     MessagingGatewayBCPtr& mg_,
-	     const NeighborPtr& nb_,
-	     std::size_t ctx_id_,
-	     std::size_t index_,
-	     std::size_t pack_size_);
+	     const std::string& h,
+	     ForwardMessType& fm);
 
 private:
   void 
@@ -71,19 +67,14 @@ private:
   read_answer(const boost::system::error_code& error, connection_ptr conn);
 
   void 
-  handle_answer(const boost::system::error_code& error, connection_ptr conn);
+  handle_read_answer(const boost::system::error_code& error, connection_ptr conn);
 
   void 
   finalize(const boost::system::error_code& error, connection_ptr /* conn */);
 
-  std::string received_header;
-  ForwardMessType mess;
+  std::string      received_header;
+  ForwardMessType  mess;
   BackwardMessType result;
-  MessagingGatewayBCPtr mg;
-  NeighborPtr nb;
-  std::size_t ctx_id;
-  std::size_t index;
-  std::size_t pack_size;
 };
 
 } // namespace dmcs

@@ -17,6 +17,16 @@
 
 2011-01-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* log4cxx.cfg: Enable TRACE.
+
+	* include/network/Makefile.am: Now use AsynClient.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/network/BaseClient.h: Better safe than sorry.
+
+	* include/network/AsynClient.h: Turn into end-user's client.
+	* include/network/AsynClient.tcc: Likewise.
+
 	* include/network/RelSatSolverThread.h: Fix potential underscore
 	bug.
 	* include/network/ThreadFactory.h: Likewise.

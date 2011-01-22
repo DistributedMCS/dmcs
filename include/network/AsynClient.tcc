@@ -50,26 +50,14 @@ namespace dmcs {
 template<typename ForwardMessType, typename BackwardMessType>
 AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_service& io_service,
 							  boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-							  const std::string& my_header_,
-							  MessagingGatewayBCPtr& mg_,
-							  const NeighborPtr& nb_,
-							  std::size_t ctx_id_,
-							  std::size_t index_,
-							  std::size_t pack_size_)
-  : BaseClient(io_service, endpoint_iterator, my_header_),
-    mess(ctx_id_, pack_size_, 0, 0),
-    mg(mg_),
-    nb(nb_), 
-    ctx_id(ctx_id_),
-    index(index_),
-    pack_size(pack_size_)
+							  const std::string& h,
+							  ForwardMessType& fm)
+  : BaseClient(io_service, endpoint_iterator, h),
+    mess(fm)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
-
-  DMCS_LOG_DEBUG("pack_size = " << pack_size);
-  DMCS_LOG_DEBUG("endpoint  = " << endpoint);
 
   conn->socket().async_connect(endpoint,
 			       boost::bind(&AsynClient::send_header, this,
@@ -89,17 +77,6 @@ AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::
   if (!e)
     {
       // The connection is now established successfully
-      std::size_t prio = 0;
-      std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index + 1;
-      int timeout = 0;
-
-      DMCS_LOG_DEBUG("offset = " << off);
-      
-      Conflict* conflict = mg->recvConflict(off, prio, timeout);
-      mess.setConflict(conflict);
-	
-      DMCS_LOG_DEBUG("Send request to neighbor " << nb->neighbor_id << "@" << nb->hostname << ":" << nb->port);
-	
       conn->async_write(my_header, boost::bind(&AsynClient::send_message, this,
 					       boost::asio::placeholders::error, conn));
       
@@ -148,7 +125,6 @@ AsynClient<ForwardMessType, BackwardMessType>::send_message(const boost::system:
 }
 
 
-
 template<typename ForwardMessType, typename BackwardMessType>
 void
 AsynClient<ForwardMessType, BackwardMessType>::read_header(const boost::system::error_code& e, connection_ptr conn)
@@ -180,7 +156,7 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::s
     {
       DMCS_LOG_DEBUG("Received header = " << received_header);
 
-      if (received_header.compare("DMCS EOF") == 0)
+      if (received_header.compare(HEADER_EOF) == 0)
 	{
 	  finalize(e, conn);
 	}
@@ -197,6 +173,7 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::s
     }
 }
 
+
 template<typename ForwardMessType, typename BackwardMessType>
 void 
 AsynClient<ForwardMessType, BackwardMessType>::read_answer(const boost::system::error_code& e, connection_ptr conn)
@@ -206,7 +183,7 @@ AsynClient<ForwardMessType, BackwardMessType>::read_answer(const boost::system::
   if (!e)
     {
       conn->async_read(result,
-		       boost::bind(&AsynClient::handle_answer, this,
+		       boost::bind(&AsynClient::handle_read_answer, this,
 		       boost::asio::placeholders::error, conn));
     }
   else
@@ -221,38 +198,23 @@ AsynClient<ForwardMessType, BackwardMessType>::read_answer(const boost::system::
 
 template<typename ForwardMessType, typename BackwardMessType>
 void 
-AsynClient<ForwardMessType, BackwardMessType>::handle_answer(const boost::system::error_code& e, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::system::error_code& e, connection_ptr conn)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
   if (!e)
     {
-      DMCS_LOG_DEBUG("result = " << result);
 
-      // now put k models from result into a message queue. 
-      const PartialBeliefStateVecPtr bsv = result.getBeliefStates();
-      const std::size_t off = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2*index;
+      DMCS_LOG_TRACE("result = " << result);
 
-      for (PartialBeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
-	{
-	  PartialBeliefState* bs = *it;
-	  mg->sendModel(bs, ctx_id, off, 0);
-	}
+      std::string header_next = HEADER_REQ_STM_DMCS;
 
-      // notify the joiner by putting a JoinMess into JoinMessageQueue
-      mg->sendJoinIn(bsv->size(), ctx_id, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+      DMCS_LOG_TRACE("send " << header_next);
 
-
-      // wait until the Joiner requests next models, then inform the
-      // neighbor that I want next models
-      std::string header_next = HEADER_NEXT;
-
-      DMCS_LOG_DEBUG("send " << header_next);
+      //      std::cerr << "send " << header_next << std::endl;
+      //      std::cerr << "result == " << result << std::endl;
 
       conn->async_write(header_next, boost::bind(&AsynClient::read_header, this,
 						 boost::asio::placeholders::error, conn));
-
-      read_header(boost::system::error_code(), conn);
     }
   else
     {
