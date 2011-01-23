@@ -1,5 +1,7 @@
 2011-01-23  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* configure.ac: Compile with NDEBUG and -O3 by default.
+
 	* src/dmcsd.cpp: Show compile-time options.
 	* src/dmcsc.cpp: Likewise.
 

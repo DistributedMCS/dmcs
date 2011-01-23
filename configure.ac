@@ -68,6 +68,7 @@ AC_PROG_CXXCPP
 # set default warning parameters for g++ compatible compilers
 if test "$GXX" = "yes"; then
    CXXFLAGS="$CXXFLAGS -W -Wall"
+   CFLAGS="$CFLAGS -W -Wall"
 fi
 
 # Checks for header files.
@@ -149,7 +150,8 @@ PKG_CHECK_MODULES([LOG4CXX], [liblog4cxx >= 0.10.0])
 AC_ARG_ENABLE(debug,
               [  --enable-debug          switch on debug routines (timers, ...)],
               [AC_DEFINE(DEBUG, [], [Turns on timer routines for profiling])
-               debug_support=yes]
+               debug_support=yes],
+	      [CPPFLAGS="-DNDEBUG" CXXFLAGS="`echo $CXXFLAGS | sed 's/-O[[0-9]]//g'` -O3" CFLAGS="`echo $CFLAGS | sed 's/-O[[0-9]]//g'` -O3"]
               )
 
 
@@ -227,5 +229,6 @@ $PACKAGE_TARNAME $PACKAGE_VERSION configuration:
 
  - Options:
  Debug: $debug_support
+ Stats: $stats_support
 
 EOF
