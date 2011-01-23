@@ -68,11 +68,10 @@ AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_servic
 }
 
 
-
 template<typename ForwardMessType, typename BackwardMessType>
 void
 AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::error_code& e,
-							       boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
+							   boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -160,7 +159,7 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::s
 
       if (received_header.compare(HEADER_EOF) == 0)
 	{
-	  finalize(e, conn);
+	  terminate();
 	}
       else
 	{
@@ -203,6 +202,7 @@ void
 AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::system::error_code& e, connection_ptr conn)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
       no_answers++;
@@ -214,15 +214,17 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
 	  callback(result);
 	}
 
-      std::string header_next = HEADER_REQ_STM_DMCS;
+      const std::string& header_next = HEADER_REQ_STM_DMCS;
 
       DMCS_LOG_TRACE("send " << header_next);
 
       //      std::cerr << "send " << header_next << std::endl;
       //      std::cerr << "result == " << result << std::endl;
 
-      conn->async_write(header_next, boost::bind(&AsynClient::send_message, this,
-						 boost::asio::placeholders::error, conn));
+      conn->async_write(header_next,
+			boost::bind(&AsynClient::send_message, this,
+				    boost::asio::placeholders::error, conn)
+			);
     }
   else
     {
@@ -231,6 +233,23 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
       throw std::runtime_error(e.message());
     }
 }
+
+
+
+template<typename ForwardMessType, typename BackwardMessType>
+void
+AsynClient<ForwardMessType, BackwardMessType>::terminate()
+{
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  const std::string& header = HEADER_TERMINATE;
+
+  conn->async_write(header,
+		    boost::bind(&AsynClient::finalize, this,
+				boost::asio::placeholders::error, conn)
+		    );
+}
+
 
 
 
@@ -245,6 +264,8 @@ AsynClient<ForwardMessType, BackwardMessType>::finalize(const boost::system::err
       // Do nothing. Since we are not starting a new operation the
       // io_service will run out of work to do and the client will
       // exit.
+
+      conn->socket().close();
     }
   else
     {

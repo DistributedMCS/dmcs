@@ -64,6 +64,11 @@ class AsynClient : public BaseClient
     callback = f;
   }
 
+
+  void
+  terminate();
+
+
 private:
   void 
   send_header(const boost::system::error_code& error,

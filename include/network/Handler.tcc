@@ -342,11 +342,12 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 					     false) // subsequent call to local job
 				 );
 	}
-      //      else if (header.find(HEADER_TERMINATE) != std::string::npos)
-      //{
-	  ///@todo this cannot work
-	  //server->remove_handler(this);
-      //}
+      else if (header->find(HEADER_TERMINATE) != std::string::npos)
+	{
+	  // don't do anything, session will disappear
+
+	  DMCS_LOG_DEBUG("Closing session with context " << sesh->mess.getInvoker());
+	}
       else 
 	{
 	  DMCS_LOG_ERROR("Got a crappy header: " << *header << ". Back to waiting for the next header.");

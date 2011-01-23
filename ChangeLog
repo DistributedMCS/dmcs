@@ -1,5 +1,9 @@
 2011-01-23  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* include/network/Handler.tcc: Handle client terminate.
+	* include/network/AsynClient.h: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+
 	* configure.ac: Compile with NDEBUG and -O3 by default.
 
 	* src/dmcsd.cpp: Show compile-time options.
