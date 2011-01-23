@@ -55,6 +55,15 @@ class AsynClient : public BaseClient
     return no_answers;
   }
 
+
+  typedef void (*CallbackFun)(BackwardMessType&);
+
+  void
+  setCallback(CallbackFun f)
+  {
+    callback = f;
+  }
+
 private:
   void 
   send_header(const boost::system::error_code& error,
@@ -82,6 +91,7 @@ private:
   std::string      received_header;
   ForwardMessType  mess;
   BackwardMessType result;
+  CallbackFun      callback;
 };
 
 } // namespace dmcs

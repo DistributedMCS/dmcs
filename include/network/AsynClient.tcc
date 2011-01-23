@@ -53,8 +53,9 @@ AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_servic
 							  const std::string& h,
 							  ForwardMessType& fm)
   : BaseClient(io_service, endpoint_iterator, h),
+    no_answers(0),
     mess(fm),
-    no_answers(0)
+    callback(0)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
@@ -205,7 +206,13 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
   if (!e)
     {
       no_answers++;
-      DMCS_LOG_TRACE("result = " << result);
+
+      DMCS_LOG_TRACE("result = " << result << " #" << no_answers);
+
+      if (callback)
+	{
+	  callback(result);
+	}
 
       std::string header_next = HEADER_REQ_STM_DMCS;
 
