@@ -182,6 +182,9 @@ namespace dmcs {
       std::memcpy(buf, b.m, b.s);
       std::size_t recvd = b.s;
 
+      assert(b.m != 0);
+      assert(b.s > 0);
+
       free(b.m);
       b.m = NULL;
       b.s = 0;
@@ -219,6 +222,9 @@ namespace dmcs {
 	{
 	  Block& b = q.front();
 
+	  assert(b.m != 0);
+	  assert(b.s > 0);
+
 	  free(b.m);
 	  b.m = NULL;
 
@@ -245,6 +251,8 @@ namespace dmcs {
     void
     send (const void* buf, std::size_t size, unsigned int /* prio */)
     {
+      assert(buf != 0);
+      assert(size > 0);
       boost::mutex::scoped_lock lock(mtx);
       waitOnCapacity(lock);
       pushBlock(buf, size);
@@ -254,6 +262,9 @@ namespace dmcs {
     bool
     try_send (const void* buf, std::size_t size, unsigned int /* prio */)
     {
+      assert(buf != 0);
+      assert(size > 0);
+
       boost::mutex::scoped_lock lock(mtx);
 
       if (q.size() < n)
@@ -270,6 +281,9 @@ namespace dmcs {
     bool
     timed_send (const void* buf, std::size_t size, unsigned int /* prio */, const boost::posix_time::time_duration& t)
     {
+      assert(buf != 0);
+      assert(size > 0);
+
       boost::mutex::scoped_lock lock(mtx);
 
       if (waitOnTimedCapacity(lock, t))
@@ -285,6 +299,8 @@ namespace dmcs {
     void
     receive (void *buf, std::size_t size, std::size_t& recvd, unsigned int& /* prio */)
     {
+      assert(buf != 0);
+      assert(size > 0);
       boost::mutex::scoped_lock lock(mtx);
       waitOnEmpty(lock);
       recvd = popBlock(buf, size);
@@ -294,6 +310,9 @@ namespace dmcs {
     bool
     try_receive (void *buf, std::size_t size, std::size_t& recvd, unsigned int /* prio */)
     {
+      assert(buf != 0);
+      assert(size > 0);
+
       boost::mutex::scoped_lock lock(mtx);
 
       if (!q.empty())
@@ -310,6 +329,9 @@ namespace dmcs {
     bool
     timed_receive (void *buf, std::size_t size, std::size_t& recvd, unsigned int& /* prio */, const boost::posix_time::time_duration& t)
     {
+      assert(buf != 0);
+      assert(size > 0);
+
       boost::mutex::scoped_lock lock(mtx);
 
       if (waitOnTimedEmpty(lock, t))

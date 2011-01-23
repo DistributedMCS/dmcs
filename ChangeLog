@@ -1,5 +1,7 @@
 2011-01-23  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* include/network/ConcurrentMessageQueue.h: Add sanity checks.
+
 	* include/network/Handler.tcc: Handle client terminate.
 	* include/network/AsynClient.h: Likewise.
 	* include/network/AsynClient.tcc: Likewise.
