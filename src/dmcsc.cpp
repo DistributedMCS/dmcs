@@ -96,6 +96,14 @@ instantiate(ContextSubstitutionPtr ctx_sub, const std::string& hostName, const s
 
 
 
+void
+handle_belief_state(StreamingBackwardMessage& m)
+{
+  std::cerr << "recvd: " << m << std::endl;
+}
+
+
+
 int
 main(int argc, char* argv[])
 {
@@ -116,8 +124,29 @@ main(int argc, char* argv[])
       std::size_t no_beliefstates = 0;
       bool all_answers = false;
       
+      const char* help_description = "\
+dmcsc " PACKAGE_VERSION " ---"
+#ifdef DEBUG
+	" DEBUG"
+#else
+#ifdef NDEBUG
+	" RELEASE"
+#else
+	" "
+#endif // NDEBUG
+#endif // DEBUG
+#ifdef DMCS_STATS_INFO
+	"STATS"
+#else
+	""
+#endif // DMCS_STATS_INFO
+"\n\n\
+Usage: dmcsc --hostname=NAME --port=PORT --system-size=N [OPTIONS]\n\
+\n\
+Options";
 
-      boost::program_options::options_description desc("Allowed options");
+
+      boost::program_options::options_description desc(help_description);
 
       desc.add_options()
 	(HELP, "produce help and usage message")
@@ -256,6 +285,8 @@ main(int argc, char* argv[])
 
 
 		  AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(io_service, it, header, mess);
+
+		  c.setCallback(&handle_belief_state);
 
 		  DMCS_LOG_DEBUG("Running ioservice.");
 

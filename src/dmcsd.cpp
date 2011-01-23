@@ -236,7 +236,29 @@ main(int argc, char* argv[])
       bool dynamic = false;
       std::string logging;
 
-      boost::program_options::options_description desc("Allowed options");
+      const char* help_description = "\
+dmcsd " PACKAGE_VERSION " ---"
+#ifdef DEBUG
+	" DEBUG"
+#else
+#ifdef NDEBUG
+	" RELEASE"
+#else
+	" "
+#endif // NDEBUG
+#endif // DEBUG
+#ifdef DMCS_STATS_INFO
+	"STATS"
+#else
+	""
+#endif // DMCS_STATS_INFO
+"\n\n\
+Usage: dmcsd --context=N --port=PORT --kb=FILE --br=FILE [OPTIONS]\n\
+\n\
+Options";
+
+
+      boost::program_options::options_description desc(help_description);
       desc.add_options()
 	(HELP, "produce help and usage message")
 	(CONTEXT_ID, boost::program_options::value<std::size_t>(&myid), "set context ID")
