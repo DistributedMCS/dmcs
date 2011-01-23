@@ -42,24 +42,21 @@ overwrite_send(ConcurrentMessageQueuePtr& cmq,
 	       std::size_t size,
 	       unsigned int prio)
 {
-  //DMCS_LOG_TRACE("Begin");
-
   void* tmp_buf = 0;
+  assert (size == sizeof(buf));
 
   if (!cmq->try_send(buf, size, prio))
     {
       std::size_t tmp_prio = 0;
       std::size_t recvd = 0;
 
-      if (!cmq->try_receive(tmp_buf, size, recvd, tmp_prio))
+      if (!cmq->try_receive(&tmp_buf, sizeof(tmp_buf), recvd, tmp_prio))
 	{
 	  tmp_buf = 0;
 	}
 
       cmq->send(buf, size, prio);
     }
-
-  //DMCS_LOG_TRACE("Now call return");
 
   return tmp_buf;
 }

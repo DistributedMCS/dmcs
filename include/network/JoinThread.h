@@ -47,7 +47,7 @@ class JoinThread
 public:
   JoinThread(std::size_t no_nbs_,
 	     std::size_t ss,
-	     const HashedBiMapPtr& c2o_,
+	     //	     const HashedBiMapPtr& c2o_,
 	     MessagingGatewayBCPtr& mg_,
 	     ConcurrentMessageQueueVecPtr& jnn);
 
@@ -72,7 +72,8 @@ private:
 		       ImportStates import_state);
 
   void
-  ask_for_next(std::size_t next);
+  ask_for_next(PartialBeliefStatePackagePtr& partial_eqs, 
+	       std::size_t next);
 
   std::size_t
   join(const PartialBeliefStateIteratorVecPtr& run_it);
@@ -85,7 +86,7 @@ private:
 private:
   std::size_t                  no_nbs;                  // number of neighbors 
   std::size_t                  system_size;
-  HashedBiMapPtr               c2o;
+  //  HashedBiMapPtr               c2o;
   MessagingGatewayBCPtr        mg;
   ConcurrentMessageQueueVecPtr joiner_neighbors_notif;
 };

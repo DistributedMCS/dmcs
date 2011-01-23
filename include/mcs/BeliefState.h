@@ -677,6 +677,10 @@ operator<< (std::ostream& os, const dmcs::PartialBeliefSet& pb)
 	{
 	  os << "-";
 	}
+      else
+	{
+	  os << " ";
+	}
       os << bit;
 
       bit = pb.state_bit.get_next(bit);
@@ -883,7 +887,7 @@ operator<< (std::ostream& os, const dmcs::PartialBeliefStateVec& pbsv)
   
   for (PartialBeliefStateVec::const_iterator it = pbsv.begin(); it != pbsv.end(); ++it)
     {
-      os << *it << "\n";
+      os << **it << "\n";
     }
 
   return os;

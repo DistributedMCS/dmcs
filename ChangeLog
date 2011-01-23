@@ -1,3 +1,17 @@
+2011-01-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/BeliefState.h: Fix output debug.
+
+	* testsuite/testJoinThread.cpp: Add test case for JoinThread.
+	* testsuite/Makefile.am: Likewise.
+
+	* src/network/JoinThread.cpp: Fix join.
+
+	* include/network/JoinThread.h: Remove map ctxid--offset.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Add assert.
+
 2011-01-23  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/ConcurrentMessageQueue.h: Add sanity checks.

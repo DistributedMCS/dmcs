@@ -34,7 +34,8 @@ TESTS = \
 	testGraphProp \
 	testConnection \
 	testMessagingGateway \
-	testBeliefState
+	testBeliefState \
+	testJoinThread
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -59,7 +60,8 @@ check_PROGRAMS = \
 	testGraphProp \
 	testConnection \
 	testMessagingGateway \
-	testBeliefState
+	testBeliefState \
+	testJoinThread
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -125,3 +127,9 @@ testConnection_LDADD = \
 	$(top_builddir)/src/dmcs/liblog.a
 
 testBeliefState_SOURCES = testBeliefState.cpp
+
+testJoinThread_SOURCES = testJoinThread.cpp
+testJoinThread_LDADD = \
+	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/dmcs/liblog.a
