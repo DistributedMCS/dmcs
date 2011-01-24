@@ -112,41 +112,64 @@ Server::dispatch_header(const boost::system::error_code& e,
       // Create the respective handler and give him the connection
       if (header->find(HEADER_REQ_PRI_DMCS) != std::string::npos)
 	{
-	  PrimitiveCommandTypePtr cmt_pri_dmcs =
-	    ctf->create<PrimitiveCommandTypePtr>();
-	  Handler<PrimitiveCommandType>* handler =
-	    new Handler<PrimitiveCommandType>(cmt_pri_dmcs, conn);
+	  typedef Handler<PrimitiveCommandType> PrimitiveHandler;
+
+	  PrimitiveCommandTypePtr cmt_pri_dmcs = ctf->create<PrimitiveCommandTypePtr>();
+
+	  PrimitiveHandler::SessionMsgPtr sesh(new PrimitiveHandler::SessionMsg(conn));
+
+	  PrimitiveHandler::HandlerPtr handler(new PrimitiveHandler);
+
+	  handler->start(handler, sesh, cmt_pri_dmcs);
 	}
       else if (header->find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
-	  StreamingCommandTypePtr cmt_stm_dmcs =
-	    ctf->create<StreamingCommandTypePtr>();
-	  Handler<StreamingCommandType>* handler =
-	    new Handler<StreamingCommandType>(cmt_stm_dmcs, conn);
+	  typedef Handler<StreamingCommandType> StreamingHandler;
+
+	  StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
+
+	  StreamingHandler::SessionMsgPtr sesh(new StreamingHandler::SessionMsg(conn));
+
+	  StreamingHandler::HandlerPtr handler(new StreamingHandler);
+
+	  handler->start(handler,sesh, cmt_stm_dmcs);
 	}
       else if (header->find(HEADER_REQ_OPT_DMCS) != std::string::npos)
 	{
-	  OptCommandTypePtr cmt_opt_dmcs =
-	    ctf->create<OptCommandTypePtr>();
-	  Handler<OptCommandType>* handler =
-	    new Handler<OptCommandType>(cmt_opt_dmcs, conn);
+	  typedef Handler<OptCommandType> OptHandler;
+
+	  OptCommandTypePtr cmt_opt_dmcs = ctf->create<OptCommandTypePtr>();
+
+	  OptHandler::SessionMsgPtr sesh(new OptHandler::SessionMsg(conn));
+
+	  OptHandler::HandlerPtr handler(new OptHandler);
+
+	  handler->start(handler, sesh, cmt_opt_dmcs);
 	}
       else if (header->find(HEADER_REQ_DYN_DMCS) != std::string::npos)
 	{
-	  DynamicCommandTypePtr cmt_dyn_conf =
-	    ctf->create<DynamicCommandTypePtr>();
-	  Handler<DynamicCommandType>* handler =
-	    new Handler<DynamicCommandType>(cmt_dyn_conf, conn);
+	  typedef Handler<DynamicCommandType> DynHandler;
+
+	  DynamicCommandTypePtr cmt_dyn_conf = ctf->create<DynamicCommandTypePtr>();
+
+	  DynHandler::SessionMsgPtr sesh(new DynHandler::SessionMsg(conn));
+
+	  DynHandler::HandlerPtr handler(new DynHandler);
+
+	  handler->start(handler, sesh, cmt_dyn_conf);
 	}
       else if (header->find(HEADER_REQ_INSTANTIATE) != std::string::npos)
 	{
-	  InstantiatorCommandTypePtr cmt_inst =
-	    ctf->create<InstantiatorCommandTypePtr>();
-	  Handler<InstantiatorCommandType>* handler =
-	    new Handler<InstantiatorCommandType>(cmt_inst, conn);
-	}
+	  typedef Handler<InstantiatorCommandType> InstHandler;
 
-      ///@todo handler leaks here...
+	  InstantiatorCommandTypePtr cmt_inst = ctf->create<InstantiatorCommandTypePtr>();
+
+	  InstHandler::SessionMsgPtr sesh(new InstHandler::SessionMsg(conn));
+
+	  InstHandler::HandlerPtr handler(new InstHandler);
+
+	  handler->start(handler, sesh, cmt_inst);
+	}
     }
   else
     {

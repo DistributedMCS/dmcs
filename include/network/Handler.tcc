@@ -35,27 +35,16 @@
 namespace dmcs {
 
 template<typename CmdType>
-Handler<CmdType>::Handler(typename BaseHandler<CmdType>::CmdTypePtr cmd,
-			  connection_ptr c)
+Handler<CmdType>::Handler()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
-  typename BaseHandler<CmdType>::SessionMsgPtr sesh(new typename BaseHandler<CmdType>::SessionMsg(c));
-
-  // read and process this message
-  c->async_read(sesh->mess,
-		boost::bind(&Handler<CmdType>::do_local_job, this,
-			    boost::asio::placeholders::error,
-			    sesh,
-			    cmd,
-			    true)
-		);
 }
 
 
 template<typename CmdType>
 void
 Handler<CmdType>::do_local_job(const boost::system::error_code& e,
+			       typename BaseHandler<CmdType>::HandlerPtr hdl,
 			       typename BaseHandler<CmdType>::SessionMsgPtr sesh,
 			       typename BaseHandler<CmdType>::CmdTypePtr cmd,
 			       bool /* first_call */)
@@ -83,6 +72,7 @@ Handler<CmdType>::do_local_job(const boost::system::error_code& e,
 			      boost::bind(&Handler<CmdType>::send_result, this,
 					  boost::asio::placeholders::error,
 					  result,
+					  hdl,
 					  sesh,
 					  cmd)
 			      );
@@ -100,6 +90,7 @@ template<typename CmdType>
 void
 Handler<CmdType>::send_result(const boost::system::error_code& e,
 			      typename CmdType::return_type result, 
+			      typename BaseHandler<CmdType>::HandlerPtr hdl,
 			      typename BaseHandler<CmdType>::SessionMsgPtr sesh,
 			      typename BaseHandler<CmdType>::CmdTypePtr cmd)
 {
@@ -110,6 +101,7 @@ Handler<CmdType>::send_result(const boost::system::error_code& e,
       sesh->conn->async_write(result,
 			      boost::bind(&Handler<CmdType>::handle_session, this,
 					  boost::asio::placeholders::error,
+					  hdl,
 					  sesh,
 					  cmd)
 			      );      
@@ -126,6 +118,7 @@ Handler<CmdType>::send_result(const boost::system::error_code& e,
 template<typename CmdType>
 void
 Handler<CmdType>::send_eof(const boost::system::error_code& e,
+			   typename BaseHandler<CmdType>::HandlerPtr hdl,
 			   typename BaseHandler<CmdType>::SessionMsgPtr sesh)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
@@ -136,6 +129,7 @@ Handler<CmdType>::send_eof(const boost::system::error_code& e,
       sesh->conn->async_write(str_eof,
 			      boost::bind(&Handler<CmdType>::handle_finalize, this,
 					  boost::asio::placeholders::error,
+					  hdl,
 					  sesh)
 			      );      
     }
@@ -152,6 +146,7 @@ Handler<CmdType>::send_eof(const boost::system::error_code& e,
 template<typename CmdType>
 void
 Handler<CmdType>::handle_session(const boost::system::error_code& e,
+				 typename BaseHandler<CmdType>::HandlerPtr hdl,
 				 typename BaseHandler<CmdType>::SessionMsgPtr sesh,
 				 typename BaseHandler<CmdType>::CmdTypePtr cmd)
 {
@@ -173,6 +168,7 @@ Handler<CmdType>::handle_session(const boost::system::error_code& e,
 	  sesh->conn->async_read(sesh->mess,
 				 boost::bind(&Handler<CmdType>::do_local_job, this,
 					     boost::asio::placeholders::error,
+					     hdl,
 					     sesh,
 					     cmd,
 					     false) // subsequent call
@@ -182,7 +178,7 @@ Handler<CmdType>::handle_session(const boost::system::error_code& e,
 	{
 	  DMCS_LOG_DEBUG("Done, sending EOF");
 
-	  send_eof(e, sesh);
+	  send_eof(e, hdl, sesh);
 	}
     }
   else
@@ -198,6 +194,7 @@ Handler<CmdType>::handle_session(const boost::system::error_code& e,
 template<typename CmdType>
 void
 Handler<CmdType>::handle_finalize(const boost::system::error_code& e,
+				  typename BaseHandler<CmdType>::HandlerPtr /* hdl */,
 				  typename BaseHandler<CmdType>::SessionMsgPtr /* sesh */)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
@@ -217,27 +214,34 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e,
 
 // *********************************************************************************************************************
 // Specialized methods for streaming dmcs
-Handler<StreamingCommandType>::Handler(CmdTypePtr cmd,
-				       connection_ptr c)
+Handler<StreamingCommandType>::Handler()
   : handler_dmcs_notif(new ConcurrentMessageQueue),
     handler_output_notif(new ConcurrentMessageQueue)
 { 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+}
 
-  SessionMsgPtr sesh(new SessionMsg(c));
 
-  c->async_read(sesh->mess,
-		boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
-			    boost::asio::placeholders::error,
-			    sesh,
-			    cmd,
-			    true) // first call to local job
-		);
+Handler<StreamingCommandType>::~Handler()
+{ 
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  DMCS_LOG_TRACE("Join Output thread");
+  output_thread->join();
+
+  DMCS_LOG_TRACE("Join DMCS thread");
+  streaming_dmcs_thread->join();
+
+  delete output_thread;
+  delete streaming_dmcs_thread;
+
+  DMCS_LOG_TRACE("So long, and thanks for all the fish.");
 }
 
 
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
+					    HandlerPtr hdl,
 					    SessionMsgPtr sesh,
 					    CmdTypePtr cmd,
 					    bool first_call)
@@ -313,6 +317,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       sesh->conn->async_read(*header,
 			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
 					 boost::asio::placeholders::error,
+					 hdl,
 					 sesh, 
 					 cmd,
 					 header)
@@ -329,6 +334,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
 void
 Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e,
+						  HandlerPtr hdl,
 						  SessionMsgPtr sesh,
 						  CmdTypePtr cmd,
 						  boost::shared_ptr<std::string> header)
@@ -344,6 +350,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  sesh->conn->async_read(sesh->mess,
 				 boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
 					     boost::asio::placeholders::error,
+					     hdl,
 					     sesh,
 					     cmd,
 					     false) // subsequent call to local job
@@ -353,7 +360,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	{
 	  // don't do anything, session will disappear
 
-	  DMCS_LOG_DEBUG("Closing session with context " << sesh->mess.getInvoker());
+	  DMCS_LOG_TRACE("Closing session with context " << sesh->mess.getInvoker());
 	}
       else 
 	{
@@ -361,6 +368,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  sesh->conn->async_read(*header,
 				 boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
 					     boost::asio::placeholders::error,
+					     hdl,
 					     sesh,
 					     cmd,
 					     header)

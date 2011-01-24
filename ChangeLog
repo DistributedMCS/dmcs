@@ -1,5 +1,10 @@
 2011-01-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* include/network/BaseHandler.h: Let Handler clean-up properly.
+	* src/network/Server.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+
 	* src/dmcsc.cpp: Fix FTBFS.
 
 	* include/dyndmcs/DynamicConfiguration.h: Fix DMCS_STATS_INFO

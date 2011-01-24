@@ -62,11 +62,11 @@ template<typename CmdType>
 class Handler : public BaseHandler<CmdType>
 {
 public:
-  Handler(typename BaseHandler<CmdType>::CmdTypePtr cmd,
-	  connection_ptr c);
+  Handler();
 
   void
   do_local_job(const boost::system::error_code& e,
+	       typename BaseHandler<CmdType>::HandlerPtr hdl,
 	       typename BaseHandler<CmdType>::SessionMsgPtr sesh,
 	       typename BaseHandler<CmdType>::CmdTypePtr cmd,
 	       bool first_call);
@@ -74,20 +74,24 @@ public:
   void 
   send_result(const boost::system::error_code& e,
 	      typename CmdType::return_type result,
+	      typename BaseHandler<CmdType>::HandlerPtr hdl,
 	      typename BaseHandler<CmdType>::SessionMsgPtr sesh,
 	      typename BaseHandler<CmdType>::CmdTypePtr cmd);
 
   void 
   handle_session(const boost::system::error_code& e,
+		 typename BaseHandler<CmdType>::HandlerPtr hdl,
 		 typename BaseHandler<CmdType>::SessionMsgPtr sesh,
 		 typename BaseHandler<CmdType>::CmdTypePtr cmd);
 
   void 
   send_eof(const boost::system::error_code& e,
+	   typename BaseHandler<CmdType>::HandlerPtr hdl,
 	   typename BaseHandler<CmdType>::SessionMsgPtr sesh);
 
   void 
   handle_finalize(const boost::system::error_code& e,
+		  typename BaseHandler<CmdType>::HandlerPtr hdl,
 		  typename BaseHandler<CmdType>::SessionMsgPtr sesh);
 
 };
@@ -100,21 +104,26 @@ template<>
 class Handler<StreamingCommandType> : public BaseHandler<StreamingCommandType>
 {
 public:
+  Handler();
 
-  Handler(BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
-	  connection_ptr c);
+  virtual
+  ~Handler();
 
   void 
   do_local_job(const boost::system::error_code& e,
+	       BaseHandler<StreamingCommandType>::HandlerPtr hdl,
 	       BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
 	       BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
 	       bool first_call);
 
+
   void
   handle_read_header(const boost::system::error_code& e,
+		     BaseHandler<StreamingCommandType>::HandlerPtr hdl,
 		     BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
 		     BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
 		     boost::shared_ptr<std::string> header);
+
 
 private:
   OutputThreadPtr                  ot;

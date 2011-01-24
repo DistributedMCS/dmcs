@@ -46,9 +46,29 @@ public:
   typedef typename boost::shared_ptr<SessionMsg> SessionMsgPtr;
   typedef typename boost::shared_ptr<CmdType> CmdTypePtr;
 
+  typedef typename boost::shared_ptr<BaseHandler<CmdType> > HandlerPtr;
+
+
+  inline void
+  start(HandlerPtr hdl, SessionMsgPtr sesh, CmdTypePtr cmd)
+  {
+    assert(hdl.get() == this);
+
+    // read and process this message
+    sesh->conn->async_read(sesh->mess,
+			   boost::bind(&BaseHandler<CmdType>::do_local_job, this,
+				       boost::asio::placeholders::error,
+				       hdl,
+				       sesh,
+				       cmd,
+				       true) // first request
+			   );
+  }
+
 
   virtual void
   do_local_job(const boost::system::error_code& e,
+	       HandlerPtr hdl,
 	       SessionMsgPtr sesh,
 	       CmdTypePtr cmd,
 	       bool first_call) = 0;
