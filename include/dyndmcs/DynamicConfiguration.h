@@ -61,6 +61,9 @@ class DynamicConfiguration
 public:
 
 #ifdef DMCS_STATS_INFO
+#warning DMCS_STATS_INFO not implemented yet
+  typedef ContextSubstitutionList    dynmcs_value_type;
+  typedef ContextSubstitutionListPtr dynmcs_return_type;
 #else
   typedef ContextSubstitutionList    dynmcs_value_type;
   typedef ContextSubstitutionListPtr dynmcs_return_type;
