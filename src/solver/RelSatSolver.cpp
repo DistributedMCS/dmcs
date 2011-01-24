@@ -41,6 +41,7 @@ RelSatSolver::RelSatSolver(bool il,
 			   const SignaturePtr& sig_,
 			   const BeliefStatePtr& localV_,
 			   //			   const ProxySignatureByLocalPtr& mixed_sig_,
+			   const HashedBiMapPtr& co,
 			   std::size_t system_size_,
 			   MessagingGatewayBCPtr& mg_,
 			   ConcurrentMessageQueuePtr& dsn,
@@ -50,6 +51,7 @@ RelSatSolver::RelSatSolver(bool il,
     theory(theory_), 
     sig(sig_),
     localV(localV_),
+    c2o(co),
     //    mixed_sig(mixed_sig_),
     system_size(system_size_),
     mg(mg_),
@@ -244,10 +246,58 @@ RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
   for (int i = 0; i < learned_clauses.iClauseCount(); ++i)
     {
       ::Clause* c = learned_clauses.pClause(i);
+      Conflict* conflict = new Conflict(system_size, PartialBeliefSet());
+
+      DMCS_LOG_TRACE("Checking learned clause: " << *c);
+      std::size_t from_neighbor = 0;
+
       for (int j = 0; j < c->iVariableCount(); ++j)
 	{
 	  int atom = back_2_lit(c->eConstrainedLiteral(j));
+
+	  assert (atom != 0);
+	  std::size_t abs_atom = std::abs(atom);
+
+	  const SignatureByLocal& sig_by_local    = boost::get<Tag::Local>(*sig);
+	  SignatureByLocal::const_iterator loc_it = sig_by_local.find(abs_atom);
+
+	  assert (loc_it != sig_by_local.end());
+
+	  std::size_t orig_ctx = loc_it->ctxId;
+
+	  if (orig_ctx == my_id)
+	    {
+	      // We don't care about conflict in the local context
+	      from_neighbor = 0;
+	      break;
+	    }
+	  else if (from_neighbor == 0)
+	    {
+	      from_neighbor = orig_ctx;
+	    }
+	  else if (from_neighbor != orig_ctx)
+	    {
+	      // this learned clause includes atoms from different
+	      // neighbors, we don't collect it
+	      from_neighbor = 0;
+	      break;
+	    }
+
+	  if (atom > 0)
+	    {
+	    }
+	  else
+	    {
+	    }
 	}
+      
+      if (from_neighbor == 0)
+	{
+	  // we don't collect this clause
+	  delete conflict;
+	  conflict = 0;
+	}
+
     }
 }
 

@@ -30,6 +30,7 @@
 
 #include "dmcs/ConflictNotification.h"
 #include "dmcs/Context.h"
+#include "mcs/HashedBiMap.h"
 #include "mcs/ProxySignatureByLocal.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "solver/BaseSolver.h"
@@ -56,6 +57,7 @@ public:
 	       //	       const ProxySignatureByLocalPtr& mixed_sig_,
 	       const SignaturePtr& local_sig_,
 	       const BeliefStatePtr& localV_,
+	       const HashedBiMapPtr& co,
 	       std::size_t system_size_,
 	       MessagingGatewayBCPtr& mg_,
 	       ConcurrentMessageQueuePtr& dsn,
@@ -91,6 +93,7 @@ private:
   const TheoryPtr                theory;
   const SignaturePtr             sig;
   const BeliefStatePtr           localV;
+  const HashedBiMapPtr           c2o;
   //  const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;      // this can be taken from localV
   MessagingGatewayBCPtr          mg;

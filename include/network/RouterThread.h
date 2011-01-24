@@ -42,11 +42,9 @@ class RouterThread
 {
 public:
   RouterThread(ConcurrentMessageQueuePtr& srn,
-	       ConcurrentMessageQueueVecPtr& rnn,
-	       HashedBiMapPtr& c2o_)
+	       ConcurrentMessageQueueVecPtr& rnn)
     : sat_router_notif(srn), 
-      router_neighbors_notif(rnn), 
-      c2o(c2o_)
+      router_neighbors_notif(rnn)
   { }
 
   void
@@ -64,15 +62,12 @@ public:
 
 	if (ptr && cn)
 	  {
-	    const std::size_t nid      = cn->val;
+	    const std::size_t noff = cn->val;
 	    
-	    DMCS_LOG_TRACE("Got a notification from local solver. nid = " << nid);
+	    DMCS_LOG_TRACE("Got a notification from local solver. noff = " << noff);
 	    
-	    // inform neighbor nid about the conflict
-	    const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
-	    HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
-	    const std::size_t noff                  = pair->second;
-	    ConcurrentMessageQueuePtr& cmq          = (*router_neighbors_notif)[noff];
+	    // inform neighbor at noff about the conflict
+	    ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[noff];
 	    
 	    std::size_t p1 = 0;
 
@@ -96,7 +91,6 @@ public:
 private:
   ConcurrentMessageQueuePtr     sat_router_notif;
   ConcurrentMessageQueueVecPtr  router_neighbors_notif;
-  HashedBiMapPtr              c2o;
 };
 
 typedef boost::shared_ptr<RouterThread> RouterThreadPtr;

@@ -123,7 +123,8 @@ ThreadFactory::createLocalSolveThread()
   const std::size_t my_id       = context->getContextID();
   const std::size_t system_size = context->getSystemSize();
 
-  SatSolverFactory ssf(is_leaf, my_id, theory, local_sig, localV, system_size, mg, dmcs_sat_notif, sat_router_notif);
+  SatSolverFactory ssf(is_leaf, my_id, theory, local_sig, localV, c2o, 
+		       system_size, mg, dmcs_sat_notif, sat_router_notif);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
@@ -140,7 +141,7 @@ ThreadFactory::createRouterThread(ConcurrentMessageQueueVecPtr& router_neighbors
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  RouterThread rt(sat_router_notif, router_neighbors_notif, c2o);
+  RouterThread rt(sat_router_notif, router_neighbors_notif);
   boost::thread* t = new boost::thread(rt);
 
   return t;

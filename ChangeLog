@@ -1,5 +1,12 @@
 2011-01-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/RouterThread.h: Move map ctxid <--> offset from
+	Router to SAT wrapper.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
 	* include/solver/RelSatSolver.h: Add new method for
 	collecting learned clauses from relsat.
 
