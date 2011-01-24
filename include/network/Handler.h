@@ -49,8 +49,6 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <list>
-#include <set>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
@@ -58,52 +56,65 @@
 
 namespace dmcs {
 
-class Server;
+
 
 template<typename CmdType>
-class Handler : public BaseHandler
+class Handler : public BaseHandler<CmdType>
 {
 public:
-  typedef Session<typename CmdType::input_type> SessionMsg;
-  typedef typename boost::shared_ptr<SessionMsg> SessionMsgPtr;
-  typedef typename boost::shared_ptr<CmdType> CmdTypePtr;
+  Handler(typename BaseHandler<CmdType>::CmdTypePtr cmd,
+	  connection_ptr c);
 
-  Handler(CmdTypePtr cmd, connection_ptr c);
-
-  void 
-  do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
-
-  void 
-  send_result(const boost::system::error_code& e, typename CmdType::return_type result, SessionMsgPtr sesh, CmdTypePtr cmd);
+  void
+  do_local_job(const boost::system::error_code& e,
+	       typename BaseHandler<CmdType>::SessionMsgPtr sesh,
+	       typename BaseHandler<CmdType>::CmdTypePtr cmd,
+	       bool first_call);
 
   void 
-  handle_session(const boost::system::error_code& e, SessionMsgPtr sesh, CmdTypePtr cmd);
+  send_result(const boost::system::error_code& e,
+	      typename CmdType::return_type result,
+	      typename BaseHandler<CmdType>::SessionMsgPtr sesh,
+	      typename BaseHandler<CmdType>::CmdTypePtr cmd);
 
   void 
-  send_eof(const boost::system::error_code& e, SessionMsgPtr sesh);
+  handle_session(const boost::system::error_code& e,
+		 typename BaseHandler<CmdType>::SessionMsgPtr sesh,
+		 typename BaseHandler<CmdType>::CmdTypePtr cmd);
 
   void 
-  handle_finalize(const boost::system::error_code& e, SessionMsgPtr sesh);
+  send_eof(const boost::system::error_code& e,
+	   typename BaseHandler<CmdType>::SessionMsgPtr sesh);
+
+  void 
+  handle_finalize(const boost::system::error_code& e,
+		  typename BaseHandler<CmdType>::SessionMsgPtr sesh);
 
 };
+
+
 
 // **********************************************************************************************************************
 // Specialized handler for streaming dmcs
 template<>
-class Handler<StreamingCommandType> : public BaseHandler
+class Handler<StreamingCommandType> : public BaseHandler<StreamingCommandType>
 {
 public:
-  typedef Session<StreamingCommandType::input_type> SessionMsg;
-  typedef boost::shared_ptr<SessionMsg> SessionMsgPtr;
-  typedef boost::shared_ptr<StreamingCommandType> StreamingCommandTypePtr;
 
-  Handler(StreamingCommandTypePtr cmd, connection_ptr c);
+  Handler(BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
+	  connection_ptr c);
 
   void 
-  do_local_job(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, bool first_call);
+  do_local_job(const boost::system::error_code& e,
+	       BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
+	       BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
+	       bool first_call);
 
   void
-  handle_read_header(const boost::system::error_code& e, SessionMsgPtr sesh, StreamingCommandTypePtr cmd, boost::shared_ptr<std::string> header);
+  handle_read_header(const boost::system::error_code& e,
+		     BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
+		     BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
+		     boost::shared_ptr<std::string> header);
 
 private:
   OutputThreadPtr                  ot;

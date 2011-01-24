@@ -1,3 +1,10 @@
+2011-01-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/BaseHandler.h: Moved typedefs to BaseHandler.
+	* src/network/Server.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+
 2011-01-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/BeliefState.h: Fix output debug.

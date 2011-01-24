@@ -30,18 +30,32 @@
 #ifndef BASE_HANDLER_H
 #define BASE_HANDLER_H
 
-#include <list>
+#include "network/Session.h"
 
 #include <boost/shared_ptr.hpp>
 
 namespace dmcs {
 
 
+template<typename CmdType>
 class BaseHandler
-{ };
+{
+public:
 
-typedef std::list<BaseHandler*> HandlerList;
-typedef boost::shared_ptr<HandlerList> HandlerListPtr;
+  typedef Session<typename CmdType::input_type> SessionMsg;
+  typedef typename boost::shared_ptr<SessionMsg> SessionMsgPtr;
+  typedef typename boost::shared_ptr<CmdType> CmdTypePtr;
+
+
+  virtual void
+  do_local_job(const boost::system::error_code& e,
+	       SessionMsgPtr sesh,
+	       CmdTypePtr cmd,
+	       bool first_call) = 0;
+	       
+
+};
+
 
 } // namespace dmcs
 

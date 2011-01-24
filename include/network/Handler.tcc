@@ -35,16 +35,20 @@
 namespace dmcs {
 
 template<typename CmdType>
-Handler<CmdType>::Handler(CmdTypePtr cmd, connection_ptr c)
+Handler<CmdType>::Handler(typename BaseHandler<CmdType>::CmdTypePtr cmd,
+			  connection_ptr c)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  SessionMsgPtr sesh(new SessionMsg(c));
+  typename BaseHandler<CmdType>::SessionMsgPtr sesh(new typename BaseHandler<CmdType>::SessionMsg(c));
 
   // read and process this message
   c->async_read(sesh->mess,
 		boost::bind(&Handler<CmdType>::do_local_job, this,
-			    boost::asio::placeholders::error, sesh, cmd)
+			    boost::asio::placeholders::error,
+			    sesh,
+			    cmd,
+			    true)
 		);
 }
 
@@ -52,8 +56,9 @@ Handler<CmdType>::Handler(CmdTypePtr cmd, connection_ptr c)
 template<typename CmdType>
 void
 Handler<CmdType>::do_local_job(const boost::system::error_code& e,
-			       SessionMsgPtr sesh,
-			       CmdTypePtr cmd)
+			       typename BaseHandler<CmdType>::SessionMsgPtr sesh,
+			       typename BaseHandler<CmdType>::CmdTypePtr cmd,
+			       bool /* first_call */)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -95,8 +100,8 @@ template<typename CmdType>
 void
 Handler<CmdType>::send_result(const boost::system::error_code& e,
 			      typename CmdType::return_type result, 
-			      SessionMsgPtr sesh,
-			      CmdTypePtr cmd)
+			      typename BaseHandler<CmdType>::SessionMsgPtr sesh,
+			      typename BaseHandler<CmdType>::CmdTypePtr cmd)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -120,7 +125,8 @@ Handler<CmdType>::send_result(const boost::system::error_code& e,
 
 template<typename CmdType>
 void
-Handler<CmdType>::send_eof(const boost::system::error_code& e, SessionMsgPtr sesh)
+Handler<CmdType>::send_eof(const boost::system::error_code& e,
+			   typename BaseHandler<CmdType>::SessionMsgPtr sesh)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -146,8 +152,8 @@ Handler<CmdType>::send_eof(const boost::system::error_code& e, SessionMsgPtr ses
 template<typename CmdType>
 void
 Handler<CmdType>::handle_session(const boost::system::error_code& e,
-				 SessionMsgPtr sesh,
-				 CmdTypePtr cmd)
+				 typename BaseHandler<CmdType>::SessionMsgPtr sesh,
+				 typename BaseHandler<CmdType>::CmdTypePtr cmd)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -168,7 +174,8 @@ Handler<CmdType>::handle_session(const boost::system::error_code& e,
 				 boost::bind(&Handler<CmdType>::do_local_job, this,
 					     boost::asio::placeholders::error,
 					     sesh,
-					     cmd)
+					     cmd,
+					     false) // subsequent call
 				 );
 	}
       else
@@ -191,7 +198,7 @@ Handler<CmdType>::handle_session(const boost::system::error_code& e,
 template<typename CmdType>
 void
 Handler<CmdType>::handle_finalize(const boost::system::error_code& e,
-				  SessionMsgPtr /* sesh */)
+				  typename BaseHandler<CmdType>::SessionMsgPtr /* sesh */)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -210,7 +217,7 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e,
 
 // *********************************************************************************************************************
 // Specialized methods for streaming dmcs
-Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd,
+Handler<StreamingCommandType>::Handler(CmdTypePtr cmd,
 				       connection_ptr c)
   : handler_dmcs_notif(new ConcurrentMessageQueue),
     handler_output_notif(new ConcurrentMessageQueue)
@@ -232,7 +239,7 @@ Handler<StreamingCommandType>::Handler(StreamingCommandTypePtr cmd,
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					    SessionMsgPtr sesh,
-					    StreamingCommandTypePtr cmd,
+					    CmdTypePtr cmd,
 					    bool first_call)
 {
   if (!e)
@@ -323,7 +330,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 void
 Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e,
 						  SessionMsgPtr sesh,
-						  StreamingCommandTypePtr cmd,
+						  CmdTypePtr cmd,
 						  boost::shared_ptr<std::string> header)
 {
   if (!e)

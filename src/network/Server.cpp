@@ -109,33 +109,41 @@ Server::dispatch_header(const boost::system::error_code& e,
     {
       DMCS_LOG_TRACE("Header = " << *header);
 
-      BaseHandler* handler;
-      
       // Create the respective handler and give him the connection
       if (header->find(HEADER_REQ_PRI_DMCS) != std::string::npos)
 	{
-	  PrimitiveCommandTypePtr cmt_pri_dmcs = ctf->create<PrimitiveCommandTypePtr>();
-	  handler = new Handler<PrimitiveCommandType>(cmt_pri_dmcs, conn);
+	  PrimitiveCommandTypePtr cmt_pri_dmcs =
+	    ctf->create<PrimitiveCommandTypePtr>();
+	  Handler<PrimitiveCommandType>* handler =
+	    new Handler<PrimitiveCommandType>(cmt_pri_dmcs, conn);
 	}
       else if (header->find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
-	  StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
-	  handler = new Handler<StreamingCommandType>(cmt_stm_dmcs, conn);
+	  StreamingCommandTypePtr cmt_stm_dmcs =
+	    ctf->create<StreamingCommandTypePtr>();
+	  Handler<StreamingCommandType>* handler =
+	    new Handler<StreamingCommandType>(cmt_stm_dmcs, conn);
 	}
       else if (header->find(HEADER_REQ_OPT_DMCS) != std::string::npos)
 	{
-	  OptCommandTypePtr cmt_opt_dmcs = ctf->create<OptCommandTypePtr>();
-	  handler = new Handler<OptCommandType>(cmt_opt_dmcs, conn);
+	  OptCommandTypePtr cmt_opt_dmcs =
+	    ctf->create<OptCommandTypePtr>();
+	  Handler<OptCommandType>* handler =
+	    new Handler<OptCommandType>(cmt_opt_dmcs, conn);
 	}
       else if (header->find(HEADER_REQ_DYN_DMCS) != std::string::npos)
 	{
-	  DynamicCommandTypePtr cmt_dyn_conf = ctf->create<DynamicCommandTypePtr>();
-	  handler = new Handler<DynamicCommandType>(cmt_dyn_conf, conn);
+	  DynamicCommandTypePtr cmt_dyn_conf =
+	    ctf->create<DynamicCommandTypePtr>();
+	  Handler<DynamicCommandType>* handler =
+	    new Handler<DynamicCommandType>(cmt_dyn_conf, conn);
 	}
       else if (header->find(HEADER_REQ_INSTANTIATE) != std::string::npos)
 	{
-	  InstantiatorCommandTypePtr cmt_inst = ctf->create<InstantiatorCommandTypePtr>();
-	  handler = new Handler<InstantiatorCommandType>(cmt_inst, conn);
+	  InstantiatorCommandTypePtr cmt_inst =
+	    ctf->create<InstantiatorCommandTypePtr>();
+	  Handler<InstantiatorCommandType>* handler =
+	    new Handler<InstantiatorCommandType>(cmt_inst, conn);
 	}
 
       ///@todo handler leaks here...
