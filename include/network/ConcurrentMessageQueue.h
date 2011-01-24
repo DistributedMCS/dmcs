@@ -177,13 +177,20 @@ namespace dmcs {
     {
       Block& b = q.front();
 
-      assert (b.s <= size);
-
-      std::memcpy(buf, b.m, b.s);
-      std::size_t recvd = b.s;
-
-      assert(b.m != 0);
       assert(b.s > 0);
+      assert(b.m != NULL);
+
+      if (b.s <= size)
+	{
+	  std::memcpy(buf, b.m, b.s);
+	}
+      else
+	{
+	  ///@todo here we just forget about b.m[size] ... b.m[b.s-1]
+	  std::memcpy(buf, b.m, size);
+	}
+
+      std::size_t recvd = b.s;
 
       free(b.m);
       b.m = NULL;
@@ -222,11 +229,12 @@ namespace dmcs {
 	{
 	  Block& b = q.front();
 
-	  assert(b.m != 0);
+	  assert(b.m != NULL);
 	  assert(b.s > 0);
 
 	  free(b.m);
 	  b.m = NULL;
+	  b.s = 0;
 
 	  q.pop();
 	}
