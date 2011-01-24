@@ -41,24 +41,24 @@ namespace dmcs {
 
 struct ConflictNotification
 {
-  ConflictNotification(Conflict* c,
+  ConflictNotification(ConflictVecPtr cs,
 		       PartialBeliefState* pa)
     : val(0),
-      conflict(c),
+      conflicts(cs),
       partial_ass(pa)
   { }
 
-  ConflictNotification(std::size_t val_,
-		       Conflict* conflict_,
-		       PartialBeliefState* partial_ass_)
-    : val(val_),
-      conflict(conflict_),
-      partial_ass(partial_ass_)
+  ConflictNotification(std::size_t v,
+		       ConflictVecPtr cs,
+		       PartialBeliefState* pa)
+    : val(v),
+      conflicts(cs),
+      partial_ass(pa)
   { }
   
   std::size_t  val;                // from SAT    --> Router:      val == id of the neighbor to send the assignment
                                    // from Router --> NeighborOut: val is now unused
-  Conflict*           conflict;
+  ConflictVecPtr      conflicts;
   PartialBeliefState* partial_ass; // partial assignment
 };
 

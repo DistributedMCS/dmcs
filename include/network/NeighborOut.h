@@ -77,16 +77,16 @@ public:
 
 	if (ptr && cn)
 	  {
-	    Conflict* conflict              = cn->conflict;
+	    ConflictVecPtr conflicts        = cn->conflicts;
 	    PartialBeliefState* partial_ass = cn->partial_ass;
 
-	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflict << "*partial_ass = " << *partial_ass);
+	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
 
 	    // write to network
 	    std::string header = HEADER_REQ_STM_DMCS;
 	    conn->async_write(header, boost::bind(&NeighborOut::write_message, this,
 						  boost::asio::placeholders::error,
-						  conflict, partial_ass));
+						  conflicts, partial_ass));
 	  }
 	else
 	  {
@@ -105,16 +105,42 @@ public:
 
   void
   write_message(const boost::system::error_code& e,
-		Conflict* conflict, 
+		ConflictVecPtr conflicts, 
 		PartialBeliefState* partial_ass)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
     if (!e)
       {
-	StreamingForwardMessage mess(invoker, pack_size, conflict, partial_ass);
-	conn->async_write(mess, boost::bind(&NeighborOut::stream, this,  
-					    boost::asio::placeholders::error));
+	StreamingForwardMessage mess(invoker, pack_size, conflicts, partial_ass);
+	conn->async_write(mess, boost::bind(&NeighborOut::clean_up, this,  
+					    boost::asio::placeholders::error, conflicts, partial_ass));
+      }
+    else
+      {
+	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+	throw std::runtime_error(e.message());
+      }
+  }
+
+
+
+  void
+  clean_up(const boost::system::error_code& e,
+	   ConflictVecPtr conflicts, 
+	   PartialBeliefState* partial_ass)
+  {
+    if (!e)
+      {
+	// We don't delete partial_ass here. It should be used in other places.
+
+	for (ConflictVec::const_iterator it = conflicts->begin(); it != conflicts->end(); ++it)
+	  {
+	    Conflict* c = *it;
+	    delete c;
+	  }
+
+	stream(boost::system::error_code());
       }
     else
       {

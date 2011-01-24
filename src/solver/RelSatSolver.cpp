@@ -29,6 +29,7 @@
 
 
 #include "solver/RelSatSolver.h"
+#include "relsat-20070104/RelSatHelper.h"
 
 #include "dmcs/Log.h"
 
@@ -162,12 +163,12 @@ RelSatSolver::solve()
 
   if (ptr && cn)
     {
-      Conflict* conflict                  = cn->conflict;
+      ConflictVecPtr conflicts            = cn->conflicts;
       PartialBeliefState* new_partial_ass = cn->partial_ass;
 
       ///@todo what happens with conflict and new_partial_ass here?
 
-      DMCS_LOG_TRACE(" Got a message from DMCS. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
+      DMCS_LOG_TRACE(" Got a message from DMCS. conflict = " << *conflicts << ". new_partial_ass = " << *new_partial_ass);
 
       /*
 	if (partial_ass == 0)
@@ -222,6 +223,33 @@ RelSatSolver::solve()
     }
 }
 
+
+
+void
+RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
+{
+  // in order not to be specific to relsat, we convert the learned
+  // clauses to PartialBeliefState format for transferring over the
+  // network, and at the neighbor, convert it back to ClauseList
+  // format, with orig_id of the atoms.
+
+  // a faster way to do this is directly convert the learned clauses
+  // here, from our local_id to the orig_id in the atoms' original
+  // context, having the result in ClauseList format. And the neighbor
+  // can use these learned clauses directly without any
+  // conversion. But then we have to transfer relsat's ClauseList and
+  // hence it's not flexible to extend the implementation to make use
+  // of other SAT solvers.
+
+  for (int i = 0; i < learned_clauses.iClauseCount(); ++i)
+    {
+      ::Clause* c = learned_clauses.pClause(i);
+      for (int j = 0; j < c->iVariableCount(); ++j)
+	{
+	  int atom = back_2_lit(c->eConstrainedLiteral(j));
+	}
+    }
+}
 
 
 void

@@ -164,10 +164,10 @@ StreamingDMCS::start_up()
   //BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
   //mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
   
-  Conflict* empty_conflict       = new Conflict(system_size, PartialBeliefSet());
+  ConflictVecPtr empty_conflicts(new ConflictVec);
   PartialBeliefState* empty_ass  = new PartialBeliefState(system_size, PartialBeliefSet());
   
-  ConflictNotification* mess_sat = new ConflictNotification(0, empty_conflict, empty_ass);
+  ConflictNotification* mess_sat = new ConflictNotification(0, empty_conflicts, empty_ass);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(dmcs_sat_notif, &mess_sat, sizeof(mess_sat), 0);
   
@@ -186,17 +186,17 @@ StreamingDMCS::start_up()
 
       assert (router_neighbors_notif->size() == no_nbs);
 
-      Conflict* empty_conflict      = new Conflict(system_size, PartialBeliefSet());
+      ConflictVecPtr empty_conflicts(new ConflictVec);
       PartialBeliefState* empty_ass = new PartialBeliefState(system_size, PartialBeliefSet());
-      ConflictNotification* cn      = new ConflictNotification(0, empty_conflict, empty_ass);
+      ConflictNotification* cn      = new ConflictNotification(0, empty_conflicts, empty_ass);
 
       for (std::size_t i = 0; i < no_nbs; ++i)
 	{
 	  DMCS_LOG_TRACE(" First push to offset " << i);
 	  ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
 
-	  DMCS_LOG_TRACE(__PRETTY_FUNCTION__ << " Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
-			 <<", partial_ass = (" << cn->partial_ass << ") " << *(cn->partial_ass));
+	  DMCS_LOG_TRACE(__PRETTY_FUNCTION__ << " Will push: conflict = " << *(cn->conflicts)
+			 <<", partial_ass = " << *(cn->partial_ass));
 
 	  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
 

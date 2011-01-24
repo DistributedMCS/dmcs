@@ -1,3 +1,19 @@
+2011-01-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/solver/RelSatSolver.h: Add new method for
+	collecting learned clauses from relsat.
+
+	* include/dmcs/ConflictNotification.h: Have multiple conflicts in
+	one Conflict notification.
+
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/Conflict.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+
 2011-01-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/dyndmcs/DynamicConfiguration.h: Fix DMCS_STATS_INFO

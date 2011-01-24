@@ -45,7 +45,7 @@ public:
   StreamingForwardMessage()
     : invoker(0),
       pack_size(0), 
-      conflict(0),
+      // conflicts(0),
       partial_ass(0)
   { }
 
@@ -53,18 +53,18 @@ public:
   ~StreamingForwardMessage() 
   { }
 
-  StreamingForwardMessage(std::size_t invoker_,
-			  std::size_t pack_size_, 
-			  Conflict* conflict_,
-			  PartialBeliefState* partial_ass_)
-    : invoker(invoker_),
-      pack_size(pack_size_), 
-      conflict(conflict_),
-      partial_ass(partial_ass_)
+  StreamingForwardMessage(std::size_t i,
+			  std::size_t ps, 
+			  ConflictVecPtr cs,
+			  PartialBeliefState* pa)
+    : invoker(i),
+      pack_size(ps), 
+      conflicts(cs),
+      partial_ass(pa)
   {
-    if (partial_ass == 0 || conflict == 0)
+    if (partial_ass == 0)
       {
-	DMCS_LOG_TRACE("Watch out! NULL conflict, NULL partial_ass");
+	DMCS_LOG_TRACE("Watch out! NULL partial_ass");
       }
   }
 
@@ -80,10 +80,10 @@ public:
     return pack_size;
   }
 
-  Conflict*
-  getConflict() const
+  ConflictVecPtr
+  getConflicts() const
   {
-    return conflict;
+    return conflicts;
   }
 
   PartialBeliefState*
@@ -93,9 +93,9 @@ public:
   }
 
   void
-  setConflict(Conflict* conflict_)
+  setConflict(ConflictVecPtr cs)
   {
-    conflict = conflict_;
+    conflicts = cs;
   }
 
 public:
@@ -105,14 +105,14 @@ public:
   {
     ar & invoker;
     ar & pack_size;
-    ar & conflict;
+    ar & conflicts;
     ar & partial_ass;
   }
 
 private:
   std::size_t         invoker;      // ID of the invoking context
   std::size_t         pack_size;    // The number of models in a package that the invoker expects
-  Conflict*           conflict;     // A global conflict that the receiver should obey
+  ConflictVecPtr      conflicts;    // A global conflict that the receiver should obey
   PartialBeliefState* partial_ass;  // The partial assignment of the whole system
 };
 
@@ -128,8 +128,8 @@ operator<< (std::ostream& os, const dmcs::StreamingForwardMessage& sfMess)
 {
 
   os << sfMess.getInvoker()     << ", " 
-     << sfMess.getPackSize()    << " ["
-     << *sfMess.getConflict()   << "] " 
+     << sfMess.getPackSize()    << " {"
+     << *sfMess.getConflicts()   << "} ["
      << *sfMess.getPartialAss() << "] ";
   
   return os;

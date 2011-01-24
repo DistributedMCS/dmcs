@@ -70,6 +70,9 @@ public:
   solve();
 
   void
+  collect_learned_clauses(ClauseList learned_clauses);
+
+  void
   receiveUNSAT();
 
   void

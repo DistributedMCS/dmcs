@@ -244,14 +244,14 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs, std::size_t 
   bsv->clear();
 
   // for now, let's put empty conflict and empty ass to notify the neighbors
-  Conflict* empty_conflict       = new Conflict(system_size, PartialBeliefSet());
+  ConflictVecPtr empty_conflicts(new ConflictVec);
   PartialBeliefState* empty_ass  = new PartialBeliefState(system_size, PartialBeliefSet());
-  ConflictNotification* cn       = new ConflictNotification(0, empty_conflict, empty_ass);
+  ConflictNotification* cn       = new ConflictNotification(0, empty_conflicts, empty_ass);
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
   
-  DMCS_LOG_TRACE(" Will push: conflict = (" << cn->conflict << ") " << *(cn->conflict)
-		 <<", partial_ass = (" << cn->partial_ass << ") " << *(cn->partial_ass));
+  DMCS_LOG_TRACE(" Will push: conflict = " << *(cn->conflicts)
+		 <<", partial_ass = " << *(cn->partial_ass));
   
   ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
   

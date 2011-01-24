@@ -35,10 +35,17 @@
 
 namespace dmcs {
 
-  /**
-   * @brief a Conflict is just a PartialBeliefState for now
-   */
-  typedef PartialBeliefState Conflict;
+/**
+ * @brief a Conflict is just a PartialBeliefState for now
+ */
+typedef PartialBeliefState Conflict;
+
+///@todo: check whether we can use ConflictPtr here instead of Conflict*
+typedef std::vector<Conflict*> ConflictVec;
+typedef boost::shared_ptr<ConflictVec> ConflictVecPtr;
+
+// no operator<< is needed for ConflictVec, ConflictVecPtr as long
+// as Conflict == PartialBeliefState.
 
 } // namespace dmcs
 
