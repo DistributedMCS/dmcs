@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( testParsersKB )
 
   SignaturePtr sig(new Signature);
   *sig = query_plan->getSignature(myid);
-  std::size_t system_size = query_plan->getSystemSize();
+  //std::size_t system_size = query_plan->getSystemSize();
 
   RulesPtr local_kb(new Rules);
 

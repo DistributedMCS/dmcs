@@ -100,6 +100,8 @@ public:
 
     // if we find multiple children which have a value, this is an error
     assert(false && "found multiple value children in createStringFromNode");
+
+    exit(1); // to shut up the compiler
   }  
 };
 

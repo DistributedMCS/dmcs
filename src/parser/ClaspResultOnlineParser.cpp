@@ -58,9 +58,13 @@ ClaspResultOnlineParser::getNextAnswer()
 	      
 	      assert (succeeded);
 	      
-	      if (crog.got_answer)
+	      if (crog.got_answer && succeeded)
 		{
 		  return crog.belief_state;
+		}
+	      else if (!succeeded)
+		{
+		  throw std::runtime_error("Parsing error.");
 		}
 	    }
 	}

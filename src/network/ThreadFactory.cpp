@@ -75,13 +75,10 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 {
   const NeighborListPtr& nbs    = context->getNeighbors();
   const std::size_t ctx_id      = context->getContextID();
-  //const std::size_t system_size = context->getSystemSize();
 
-  const std::size_t no_nbs      = nbs->size();
+  DMCS_LOG_TRACE("Going to create " << nbs->size() << " neighbor threads.");
+
   std::size_t i = 0;
-
-  DMCS_LOG_TRACE("Going to create " << no_nbs << " neighbor threads.");
-
   for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it, ++i)
     {
       DMCS_LOG_TRACE("Create neighbor thread " << i);
@@ -94,6 +91,7 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
       
       boost::thread* nit = new boost::thread(nt);
       neighbor_input_threads->push_back(nit);
+
       DMCS_LOG_TRACE("Create neighbor thread " << i << ". DONE");
     }
 }

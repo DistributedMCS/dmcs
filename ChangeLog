@@ -1,5 +1,14 @@
 2011-01-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* include/parser/BaseBuilder.h: Fix warnings.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/parser/ClaspResultOnlineParser.cpp: Likewise.
+	* testsuite/testJoinThread.cpp: Likewise.
+	* testsuite/testParsers.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueue.h: Fix sanity checks.
+
 	* include/network/BaseHandler.h: Moved typedefs to BaseHandler.
 	* src/network/Server.cpp: Likewise.
 	* include/network/Handler.tcc: Likewise.

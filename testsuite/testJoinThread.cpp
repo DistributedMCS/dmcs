@@ -22,18 +22,18 @@ BOOST_AUTO_TEST_CASE ( testJoinThread )
   std::size_t system_size = 4;
   std::size_t port        = 212409;
 
-  // topology:
-  //                 (1)_______
-  //                /   \      \
-  //               /     \      \
-  //              (2)----(3)    /
-  //               \     /     /
-  //                \   /     /
-  //                 (4)_____/
-  //
-  //
-  // Supppose that pack_size = 3
+  /*
+    topology:
+                   (1)_______
+                  /   \      \
+                 /     \      \
+                (2)----(3)    /
+                 \     /     /
+                  \   /     /
+                   (4)_____/
 
+    Supppose that pack_size = 3
+  */
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
   MessagingGatewayBCPtr mg = mqf.createMessagingGateway(port, no_nbs);

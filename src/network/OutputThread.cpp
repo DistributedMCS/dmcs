@@ -196,6 +196,7 @@ void
 OutputThread::write_models(const boost::system::error_code& e, PartialBeliefStateVecPtr& res)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
   if (!e)
     {
       assert (left_2_send >= res->size());
@@ -214,9 +215,8 @@ OutputThread::write_models(const boost::system::error_code& e, PartialBeliefStat
 
       boost::asio::ip::tcp::socket& sock = conn->socket();
       boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
-      std::size_t port                   = ep.port();
 
-      DMCS_LOG_TRACE(" return message == " << return_mess << " on port :" << port);
+      DMCS_LOG_TRACE("return message == " << return_mess << " on port " << ep.port());
 
       conn->async_write(return_mess,
 			boost::bind(&OutputThread::loop, this,

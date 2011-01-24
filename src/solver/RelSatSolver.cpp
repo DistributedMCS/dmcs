@@ -165,6 +165,8 @@ RelSatSolver::solve()
       Conflict* conflict                  = cn->conflict;
       PartialBeliefState* new_partial_ass = cn->partial_ass;
 
+      ///@todo what happens with conflict and new_partial_ass here?
+
       DMCS_LOG_TRACE(" Got a message from DMCS. conflict = " << *conflict << ". new_partial_ass = " << *new_partial_ass);
 
       /*
