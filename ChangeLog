@@ -1,3 +1,24 @@
+2011-01-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Fix FTBFS.
+
+	* include/dyndmcs/DynamicConfiguration.h: Fix DMCS_STATS_INFO
+	compilation.
+
+	* include/parser/BaseBuilder.h: Fix warnings.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/parser/ClaspResultOnlineParser.cpp: Likewise.
+	* testsuite/testJoinThread.cpp: Likewise.
+	* testsuite/testParsers.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueue.h: Fix sanity checks.
+
+	* include/network/BaseHandler.h: Moved typedefs to BaseHandler.
+	* src/network/Server.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+
 2011-01-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/RouterThread.h: Move map ctxid <--> offset from
@@ -20,25 +41,6 @@
 	* include/solver/Conflict.h: Likewise.
 	* include/network/NeighborOut.h: Likewise.
 	* include/dmcs/StreamingForwardMessage.h: Likewise.
-
-2011-01-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* include/dyndmcs/DynamicConfiguration.h: Fix DMCS_STATS_INFO
-	compilation.
-
-	* include/parser/BaseBuilder.h: Fix warnings.
-	* src/network/ThreadFactory.cpp: Likewise.
-	* src/network/OutputThread.cpp: Likewise.
-	* src/parser/ClaspResultOnlineParser.cpp: Likewise.
-	* testsuite/testJoinThread.cpp: Likewise.
-	* testsuite/testParsers.cpp: Likewise.
-
-	* include/network/ConcurrentMessageQueue.h: Fix sanity checks.
-
-	* include/network/BaseHandler.h: Moved typedefs to BaseHandler.
-	* src/network/Server.cpp: Likewise.
-	* include/network/Handler.tcc: Likewise.
-	* include/network/Handler.h: Likewise.
 
 2011-01-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 

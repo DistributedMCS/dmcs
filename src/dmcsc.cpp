@@ -280,7 +280,7 @@ Options";
 
 		  StreamingCommandType::input_type mess(0, pack_size, conflicts, partial_ass);
 
-		  DMCS_LOG_DEBUG("Empty starting conflict:" << *conflict);
+		  DMCS_LOG_DEBUG("Empty starting conflict:" << *conflicts);
 		  DMCS_LOG_DEBUG("Empty starting assignment:" << *partial_ass);
 
 
