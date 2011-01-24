@@ -47,15 +47,60 @@ public:
   void
   readTheory(const dmcs::TheoryPtr& theory, std::size_t sig_size);
 
+
+  /* Organization of additional clauses:
+
+     original theory | conflict clauses | partial ass (unit clauses) | input (unit clauses) |
+                     ^                  ^                            ^                      ^
+		     |                  |                            |                      |
+		     |                  |                            |                      |
+             orig_theory_size     size_w_conflict           size_w_partial_ass         size_w_input = _iClauseCount
+
+   */
+
   void
-  removeLastInput();
+  removeInput()
+  {
+    vRemoveBack(size_w_partial_ass);
+  }
+
+  void
+  removePartialAss()
+  {
+    vRemoveBack(size_w_conflict);
+  }
+
+  void
+  removeConflicts()
+  {
+    vRemoveBack(orig_theory_size);
+  }
+
+  void
+  setOrigTheorySize(std::size_t s)
+  {
+    orig_theory_size = s;
+  }
+
+  void
+  setSizeWConflict(std::size_t s)
+  {
+    size_w_conflict = s;
+  }
+
+  void
+  setSizeWPartialAss(std::size_t s)
+  {
+    size_w_partial_ass = s;
+  }
 
   void
   add_unit_clause(int literal);
 
 private:
   std::size_t orig_theory_size;
-  std::size_t theory_w_conflict_size;
+  std::size_t size_w_conflict;
+  std::size_t size_w_partial_ass;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

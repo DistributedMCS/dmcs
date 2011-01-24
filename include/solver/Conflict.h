@@ -43,9 +43,12 @@ typedef PartialBeliefState Conflict;
 ///@todo: check whether we can use ConflictPtr here instead of Conflict*
 typedef std::vector<Conflict*> ConflictVec;
 typedef boost::shared_ptr<ConflictVec> ConflictVecPtr;
+typedef std::vector<ConflictVecPtr> ConflictVec2;
+typedef boost::shared_ptr<ConflictVec2> ConflictVec2Ptr;
 
-// no operator<< is needed for ConflictVec, ConflictVecPtr as long
-// as Conflict == PartialBeliefState.
+// no operator<< is needed for ConflictVec, ConflictVecPtr,
+// ConflictVec2, ConflictVec2Ptr as long as Conflict ==
+// PartialBeliefState.
 
 } // namespace dmcs
 

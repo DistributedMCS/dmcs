@@ -1,3 +1,9 @@
+2011-01-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATInstance.h: Support canceling additional clauses added by
+	conflicts, partial ass, and input.
+	* SATInstance.cpp: Likewise.
+
 2011-01-23  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* configure.ac: Compile with NDEBUG and -O3 by default.

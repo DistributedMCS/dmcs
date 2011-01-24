@@ -30,6 +30,7 @@
 
 #include "solver/RelSatSolver.h"
 #include "relsat-20070104/RelSatHelper.h"
+#include "relsat-20070104/SATInstance.h"
 
 #include "dmcs/Log.h"
 
@@ -57,10 +58,19 @@ RelSatSolver::RelSatSolver(bool il,
     mg(mg_),
     dmcs_sat_notif(dsn),
     sat_router_notif(srn),
+    learned_conflicts(new ConflictVec2),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this))
 {
   xInstance->readTheory(theory, sig->size());
+
+  // prepare storage for conflicts learned by the solver
+  std::size_t no_nbs = c2o->size();
+  for (std::size_t i = 0; i < no_nbs; ++i)
+    {
+      ConflictVecPtr cv(new ConflictVec);
+      learned_conflicts->push_back(cv);
+    }
 }
 
 
@@ -71,6 +81,7 @@ RelSatSolver::~RelSatSolver()
 }
 
 
+
 int
 RelSatSolver::solve(const TheoryPtr& /* theory */, std::size_t /* sig_size */)
 {
@@ -79,12 +90,12 @@ RelSatSolver::solve(const TheoryPtr& /* theory */, std::size_t /* sig_size */)
 }
 
 
+
 void
 RelSatSolver::update_bridge_input(SignatureByCtx::const_iterator it)
 {
   PartialBeliefSet& b = (*input)[it->ctxId - 1];
   
-
   int lid = it->localId;
 
   PartialBeliefSet::TruthVal val = testBeliefSet(b, it->origId);
@@ -125,6 +136,8 @@ RelSatSolver::prepare_input()
 
   DMCS_LOG_TRACE("input received!");
 
+  xInstance->setSizeWPartialAss(xInstance->iClauseCount());
+  
   // then add input to the SATSolver's theory. We only add the atoms
   // that come from our neighbors' interface
   const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
@@ -152,6 +165,75 @@ RelSatSolver::prepare_input()
 
 
 void
+RelSatSolver::import_conflicts(const ConflictVecPtr& conflicts)
+{
+  xInstance->setOrigTheorySize(xInstance->iClauseCount());
+
+  std::size_t sig_size = sig->size();
+  VariableSet xPositiveVariables(sig_size);
+  VariableSet xNegativeVariables(sig_size);
+
+  for (ConflictVec::const_iterator it = conflicts->begin(); it != conflicts->end(); ++it)
+    {
+      xPositiveVariables.vClear();
+      xNegativeVariables.vClear();
+
+      Conflict* conflict = *it;
+      PartialBeliefSet& local_conflict = (*conflict)[my_id - 1];
+
+      std::size_t bit = local_conflict.state_bit.get_first();
+      VariableID eVar;
+      do
+	{
+	  eVar = (VariableID)bit;
+	  // a SAT solver should be intelligent enough not to send me
+	  // a tautology, hence we don't check for tautology here
+	  if (local_conflict.value_bit.test(bit))
+	    {
+	      xPositiveVariables.vAddVariable(eVar-1);
+	    }
+	  else
+	    {
+	      xNegativeVariables.vAddVariable(0-(eVar+1));
+	    }
+	  bit = local_conflict.state_bit.get_next(bit);
+	}
+      while (bit);
+
+      assert(xNegativeVariables.iCount() + xPositiveVariables.iCount() > 0);
+      ::Clause* pNewConstraint = new ::Clause((VariableList&)xPositiveVariables, 
+					      (VariableList&)xNegativeVariables,
+					      1);
+      pNewConstraint->vSortVariableList();
+
+      xInstance->vAddClause(pNewConstraint);
+    }
+}
+
+
+
+void
+RelSatSolver::import_partial_ass(const PartialBeliefState* partial_ass)
+{
+  xInstance->setSizeWConflict(xInstance->iClauseCount());
+  for (Signature::const_iterator it = sig->begin(); it != sig->end(); ++it)
+    {
+      const PartialBeliefSet& b = (*partial_ass)[it->ctxId - 1];
+      int lid = it->localId;
+
+      PartialBeliefSet::TruthVal val = testBeliefSet(b, it->origId);
+      
+      if (val != PartialBeliefSet::DMCS_UNDEF)
+	{
+	  int ucl = (val == PartialBeliefSet::DMCS_TRUE) ? lid : -lid;
+	  xInstance->add_unit_clause(ucl);
+	}
+    }
+}
+
+
+
+void
 RelSatSolver::solve()
 {
   // wait for conflict and partial_ass from Handler
@@ -167,6 +249,8 @@ RelSatSolver::solve()
     {
       ConflictVecPtr conflicts            = cn->conflicts;
       PartialBeliefState* new_partial_ass = cn->partial_ass;
+
+      import_conflicts(conflicts);
 
       ///@todo what happens with conflict and new_partial_ass here?
 
@@ -203,7 +287,7 @@ RelSatSolver::solve()
 	  while (1)
 	    {
 	      DMCS_LOG_TRACE("Prepare input before solving.");
-	      xInstance->removeLastInput();
+	      xInstance->removeInput();
 	      if (!prepare_input())
 		{
 		  // send a NULL model to OUT_MQ to inform OutputThread
@@ -247,6 +331,7 @@ RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
     {
       ::Clause* c = learned_clauses.pClause(i);
       Conflict* conflict = new Conflict(system_size, PartialBeliefSet());
+      PartialBeliefSet& neighbor_ref = (*conflict)[0];
 
       DMCS_LOG_TRACE("Checking learned clause: " << *c);
       std::size_t from_neighbor = 0;
@@ -274,6 +359,7 @@ RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
 	  else if (from_neighbor == 0)
 	    {
 	      from_neighbor = orig_ctx;
+	      neighbor_ref  = (*conflict)[from_neighbor - 1];
 	    }
 	  else if (from_neighbor != orig_ctx)
 	    {
@@ -285,9 +371,11 @@ RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
 
 	  if (atom > 0)
 	    {
+	      setBeliefSet(neighbor_ref, abs_atom);
 	    }
 	  else
 	    {
+	      setBeliefSet(neighbor_ref, abs_atom, PartialBeliefSet::DMCS_FALSE);
 	    }
 	}
       
@@ -297,7 +385,21 @@ RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
 	  delete conflict;
 	  conflict = 0;
 	}
+      else
+	{
+	  //setEpsilon(neighbor_ref);
 
+	  // store this conflict at the right offset of the neighbor's id
+	  const HashedBiMapByFirst& neighbor_context = boost::get<Tag::First>(*c2o);
+	  HashedBiMapByFirst::const_iterator pair    = neighbor_context.find(from_neighbor);
+
+	  assert (pair != neighbor_context.end());
+
+	  const std::size_t neighbor_offset = pair->second;
+
+	  ConflictVecPtr& storage_ref = (*learned_conflicts)[neighbor_offset];
+	  storage_ref->push_back(conflict);
+	}
     }
 }
 

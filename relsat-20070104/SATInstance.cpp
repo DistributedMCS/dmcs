@@ -169,18 +169,9 @@ SATInstance::readTheory(const dmcs::TheoryPtr& theory, std::size_t sig_size)
 
     } // for (dmcs::Theory::const_iterator it = ...
 
-  orig_theory_size = _iClauseCount;
-  theory_w_conflict_size = orig_theory_size; // for the moment, when
-					     // we haven't considered
-					     // pushing conflicts
-}
-
-
-
-void
-SATInstance::removeLastInput()
-{
-  vRemoveBack(theory_w_conflict_size);
+  orig_theory_size   = _iClauseCount;
+  size_w_conflict    = orig_theory_size; 
+  size_w_partial_ass = orig_theory_size;
 }
 
 

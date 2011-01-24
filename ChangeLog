@@ -1,3 +1,13 @@
+2011-01-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Collect learned conflicts from
+	relsat. Import conficts/partial ass/input from system.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/solver/Conflict.h: Add 2-dimension vector of Conflict*.
+
+	* include/mcs/BeliefState.h (testBeliefSet): Add const for parameter.
+
 2011-01-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/BaseHandler.h: Let Handler clean-up properly.

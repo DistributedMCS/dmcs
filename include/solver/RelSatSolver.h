@@ -87,6 +87,12 @@ private:
   void
   update_bridge_input(SignatureByCtx::const_iterator);
 
+  void
+  import_conflicts(const ConflictVecPtr& conflicts);
+
+  void
+  import_partial_ass(const PartialBeliefState* partial_ass);
+
 private:
   bool                           is_leaf;
   std::size_t                    my_id;
@@ -101,6 +107,7 @@ private:
   ConcurrentMessageQueuePtr      sat_router_notif; // to inform Router
   PartialBeliefState*            partial_ass;
   PartialBeliefState*            input;
+  ConflictVec2Ptr                learned_conflicts;
 
   SATInstance*                   xInstance;
   SATSolver*                     xSATSolver;

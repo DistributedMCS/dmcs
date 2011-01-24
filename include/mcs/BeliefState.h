@@ -578,7 +578,7 @@ operator< (const PartialBeliefSet& p, const PartialBeliefSet& b)
 
 
 inline PartialBeliefSet::TruthVal
-testBeliefSet(PartialBeliefSet& pb, std::size_t pos)
+testBeliefSet(const PartialBeliefSet& pb, std::size_t pos)
 {
   assert (pos > 0 && pos < pb.size());
 
