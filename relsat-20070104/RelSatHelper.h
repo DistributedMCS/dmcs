@@ -32,9 +32,73 @@
 #include "SATInstance.h"
 #include "SATSolver.h"
 
+#include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
+
 #ifndef RELSAT_HELPER
 #define RELSAT_HELPER
 
+
+inline std::istream&
+operator>> (std::istream& is, ClauseList& cl)
+{
+  typedef boost::char_separator<char> separator;
+  typedef boost::tokenizer<separator> tokenizer;
+
+  std::string s;
+  std::getline(is, s);
+
+  while (!s.empty())
+    {
+      std::size_t eMaxVar = 0;
+      std::vector<VariableID> atoms;
+
+      separator sep(" ");
+      tokenizer tok(s, sep);
+
+      // First travel through the clause just to collect the atoms and find out eMaxVar
+      int atom;
+      for (tokenizer::const_iterator it = tok.begin(); it != tok.end(); ++it)
+	{
+	  atom = boost::lexical_cast<VariableID>(*it);
+	  atoms.push_back(atom);
+	  if (eMaxVar < std::abs(atom))
+	    {
+	      eMaxVar = std::abs(atom);
+	    }
+	}
+      
+      VariableSet xPositiveVariables(eMaxVar);
+      VariableSet xNegativeVariables(eMaxVar);
+      
+      for (std::vector<VariableID>::const_iterator it = atoms.begin(); it != atoms.end(); ++it)
+	{
+	  atom = *it;
+	  
+	  assert (atom != 0);
+	  
+	  if (atom > 0)
+	    {
+	      xPositiveVariables.vAddVariable(atom-1);
+	    }
+	  else
+	    {
+	      xNegativeVariables.vAddVariable(0-(atom+1));
+	    }
+	}
+
+      assert(xNegativeVariables.iCount() + xPositiveVariables.iCount() > 0);
+
+      Clause* c = new Clause((VariableList&)xPositiveVariables, 
+			     (VariableList&)xNegativeVariables,
+			     1);
+
+      cl.vAddClause(c);
+      std::getline(is, s);
+    }
+
+  return is;
+}
 
 
 inline int

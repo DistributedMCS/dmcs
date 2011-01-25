@@ -295,6 +295,9 @@ operator>> (std::istream& is, dmcs::BeliefStatePtr& bs)
       std::size_t remain;
       std::size_t i;
 
+      // be careful: this removes also the "-" sign of the negative
+      // numbers. But as we just have positive numbers in this case,
+      // it doesn't harm
       boost::tokenizer<> tok(s);
 
       for (boost::tokenizer<>::const_iterator it = tok.begin(); it != tok.end(); ++it)

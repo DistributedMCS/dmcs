@@ -1,6 +1,7 @@
 # global preprocessor flags
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
+	-I$(top_srcdir) \
 	$(BM_CPPFLAGS) \
 	$(BOOST_CPPFLAGS) \
 	$(LOG4CXX_CFLAGS)
@@ -35,7 +36,8 @@ TESTS = \
 	testConnection \
 	testMessagingGateway \
 	testBeliefState \
-	testJoinThread
+	testJoinThread \
+	testInterfaceRelSat
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -61,7 +63,8 @@ check_PROGRAMS = \
 	testConnection \
 	testMessagingGateway \
 	testBeliefState \
-	testJoinThread
+	testJoinThread \
+	testInterfaceRelSat
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -133,3 +136,11 @@ testJoinThread_LDADD = \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a
+
+testInterfaceRelSat_SOURCES = testInterfaceRelSat.cpp
+testInterfaceRelSat_LDADD = \
+	$(top_builddir)/src/dmcs/liblog.a \
+	$(top_builddir)/src/network/libnetwork.a \
+	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/src/solver/libsolver.a \
+	$(top_builddir)/relsat-20070104/librelsat.a

@@ -183,10 +183,12 @@ RelSatSolver::import_conflicts(const ConflictVecPtr& conflicts)
 
       std::size_t bit = local_conflict.state_bit.get_first();
       VariableID eVar;
+
       do
 	{
 	  eVar = (VariableID)bit;
-	  // a SAT solver should be intelligent enough not to send me
+
+	  // a SAT solver should be intelligent enough NOT to send me
 	  // a tautology, hence we don't check for tautology here
 	  if (local_conflict.value_bit.test(bit))
 	    {
@@ -194,7 +196,9 @@ RelSatSolver::import_conflicts(const ConflictVecPtr& conflicts)
 	    }
 	  else
 	    {
-	      xNegativeVariables.vAddVariable(0-(eVar+1));
+	      // actually it is 0 - (eVar+1), but we already had that
+	      // eVar > 0, hence we can use this shortcut
+	      xNegativeVariables.vAddVariable(eVar-1);
 	    }
 	  bit = local_conflict.state_bit.get_next(bit);
 	}
@@ -312,7 +316,7 @@ RelSatSolver::solve()
 
 
 void
-RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
+RelSatSolver::collect_learned_clauses(ClauseList& learned_clauses)
 {
   // in order not to be specific to relsat, we convert the learned
   // clauses to PartialBeliefState format for transferring over the
@@ -331,9 +335,8 @@ RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
     {
       ::Clause* c = learned_clauses.pClause(i);
       Conflict* conflict = new Conflict(system_size, PartialBeliefSet());
-      PartialBeliefSet& neighbor_ref = (*conflict)[0];
+      PartialBeliefSet* neighbor_ref;
 
-      DMCS_LOG_TRACE("Checking learned clause: " << *c);
       std::size_t from_neighbor = 0;
 
       for (int j = 0; j < c->iVariableCount(); ++j)
@@ -359,7 +362,7 @@ RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
 	  else if (from_neighbor == 0)
 	    {
 	      from_neighbor = orig_ctx;
-	      neighbor_ref  = (*conflict)[from_neighbor - 1];
+	      neighbor_ref  = &((*conflict)[from_neighbor - 1]);
 	    }
 	  else if (from_neighbor != orig_ctx)
 	    {
@@ -371,11 +374,11 @@ RelSatSolver::collect_learned_clauses(ClauseList learned_clauses)
 
 	  if (atom > 0)
 	    {
-	      setBeliefSet(neighbor_ref, abs_atom);
+	      setBeliefSet(*neighbor_ref, abs_atom);
 	    }
 	  else
 	    {
-	      setBeliefSet(neighbor_ref, abs_atom, PartialBeliefSet::DMCS_FALSE);
+	      setBeliefSet(*neighbor_ref, abs_atom, PartialBeliefSet::DMCS_FALSE);
 	    }
 	}
       
@@ -475,6 +478,17 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 
   //DMCS_LOG_TRACE("Solution sent: " << *bs);
+}
+
+
+void
+RelSatSolver::print_local_theory()
+{
+  for (int i = 0; i < xInstance->iClauseCount(); ++i)
+    {
+      ::Clause* c = xInstance->pClause(i);
+      DMCS_LOG_DEBUG(*c);
+    }
 }
 
 } // namespace dmcs

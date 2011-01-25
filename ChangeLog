@@ -1,3 +1,15 @@
+2011-01-25  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testInterfaceRelSat.cpp: Add test case for importing
+	stuff to relsat.
+	* testsuite/Makefile.am: Likewise.
+
+	* src/solver/RelSatSolver.cpp: Fix bugs in importing stuff.
+
+	* include/solver/RelSatSolver.h: Make some methods public.
+
+	* include/mcs/BeliefState.h: Add a remark.
+
 2011-01-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: Collect learned conflicts from

@@ -72,7 +72,7 @@ public:
   solve();
 
   void
-  collect_learned_clauses(ClauseList learned_clauses);
+  collect_learned_clauses(ClauseList& learned_clauses);
 
   void
   receiveUNSAT();
@@ -80,18 +80,27 @@ public:
   void
   receiveSolution(DomainValue* _aAssignment, int _iVariableCount);
 
+  void
+  import_conflicts(const ConflictVecPtr& conflicts);
+
+  void
+  import_partial_ass(const PartialBeliefState* partial_ass);
+
+  void
+  print_local_theory();
+
+  ConflictVec2Ptr
+  getLearnedConflicts()
+  {
+    return learned_conflicts;
+  }
+
 private:
   bool
   prepare_input();
 
   void
   update_bridge_input(SignatureByCtx::const_iterator);
-
-  void
-  import_conflicts(const ConflictVecPtr& conflicts);
-
-  void
-  import_partial_ass(const PartialBeliefState* partial_ass);
 
 private:
   bool                           is_leaf;
