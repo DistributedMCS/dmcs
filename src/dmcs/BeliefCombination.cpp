@@ -308,4 +308,34 @@ project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateLis
      }
 }
 
+
+
+// project bs to V, and just a position pos. The reason is that when
+// all contexts project their models to its output interface then the
+// parent won't need to take care of the children's slots in the
+// belief states.
+void
+project_to(PartialBeliefState* bs, const BeliefStatePtr& V, std::size_t pos)
+{
+  assert((bs->size() == V->size()) && (pos < V->size()));
+
+  PartialBeliefSet& b_pos = (*bs)[pos];
+  const BeliefSet   v_pos = (*V)[pos];
+
+  b_pos.value_bit &= v_pos;
+  b_pos.state_bit &= v_pos;
+}
+
+
+void
+project_to(PartialBeliefState* bs, const BeliefStatePtr& V)
+{
+  assert (bs->size() == V->size());
+
+  for (std::size_t pos = 0; pos < V->size(); ++ pos)
+    {
+      project_to(bs, V, pos);
+    }
+}
+
 } // namespace dmcs

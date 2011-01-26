@@ -28,6 +28,7 @@
  */
 
 
+#include "dmcs/BeliefCombination.h"
 #include "solver/RelSatSolver.h"
 #include "relsat-20070104/RelSatHelper.h"
 #include "relsat-20070104/SATInstance.h"
@@ -473,6 +474,9 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
     }
 
   //DMCS_LOG_TRACE("After adding result: bs = " << *bs);
+
+  // project to my output interface
+  project_to(bs, localV, my_id - 1);
 
   // now put this PartialBeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);

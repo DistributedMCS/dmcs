@@ -1,3 +1,10 @@
+2011-01-26  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Project models from local solver to
+	output interface.
+	* include/dmcs/BeliefCombination.h: Likewise.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+
 2011-01-25  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testInterfaceRelSat.cpp: Add test case for importing
