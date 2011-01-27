@@ -46,7 +46,7 @@
 namespace dmcs {
 
 typedef MessagingGateway<PartialBeliefState, Conflict> MessagingGatewayBC;
-typedef boost::shared_ptr<MessagingGatewayBC > MessagingGatewayBCPtr;
+typedef boost::shared_ptr<MessagingGatewayBC> MessagingGatewayBCPtr;
 
 class ConcurrentMessageQueueFactory : private boost::noncopyable
 {

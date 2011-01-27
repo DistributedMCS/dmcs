@@ -221,6 +221,12 @@ namespace dmcs {
     { }
 
 
+    /// copy ctor, just take capacity
+    ConcurrentMessageQueue(const ConcurrentMessageQueue& q)
+      : n(q.n), enq(0), deq(0)
+    { }
+
+
     virtual
     ~ConcurrentMessageQueue()
     {
