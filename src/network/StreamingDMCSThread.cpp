@@ -32,16 +32,21 @@
 
 namespace dmcs {
 
-StreamingDMCSThread::StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
-					 const ConcurrentMessageQueuePtr& nfh)
-  : scmt(scmt_), notif_from_handler(nfh)
+StreamingDMCSThread::StreamingDMCSThread()
 { }
 
+
+StreamingDMCSThread::~StreamingDMCSThread()
+{
+  DMCS_LOG_TRACE("Gone with the wind.");
+}
+
+
 void
-StreamingDMCSThread::operator()()
+StreamingDMCSThread::operator()(StreamingCommandType* scmt, ConcurrentMessageQueue* nfh)
 {
   //  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  scmt->execute(notif_from_handler);
+  scmt->execute(nfh);
 }
 
 } // namespace dmcs

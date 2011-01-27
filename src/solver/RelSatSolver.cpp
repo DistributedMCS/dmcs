@@ -43,11 +43,11 @@ RelSatSolver::RelSatSolver(bool il,
 			   const SignaturePtr& sig_,
 			   const BeliefStatePtr& localV_,
 			   //			   const ProxySignatureByLocalPtr& mixed_sig_,
-			   const HashedBiMapPtr& co,
+			   const HashedBiMap* co,
 			   std::size_t system_size_,
-			   MessagingGatewayBCPtr& mg_,
-			   ConcurrentMessageQueuePtr& dsn,
-			   ConcurrentMessageQueuePtr& srn)
+			   MessagingGatewayBC* mg_,
+			   ConcurrentMessageQueue* dsn,
+			   ConcurrentMessageQueue* srn)
   : is_leaf(il),
     my_id(my_id_),
     theory(theory_), 
@@ -105,12 +105,14 @@ RelSatSolver::update_bridge_input(SignatureByCtx::const_iterator it)
 
   int ucl = (val == PartialBeliefSet::DMCS_TRUE) ? lid : -lid;
 
-  /*DMCS_LOG_TRACE("input:    " << *input);
+#if 0
+  DMCS_LOG_TRACE("input:    " << *input);
   DMCS_LOG_TRACE("context:  " << it->ctxId - 1);
   DMCS_LOG_TRACE("bset:     " << b);
   DMCS_LOG_TRACE("localid:  " << lid);
 
-  DMCS_LOG_TRACE("Adding unit clause " << ucl << " to local theory.");*/
+  DMCS_LOG_TRACE("Adding unit clause " << ucl << " to local theory.");
+#endif // 0
 
   xInstance->add_unit_clause(ucl);
 }
@@ -166,7 +168,7 @@ RelSatSolver::prepare_input()
 
 
 void
-RelSatSolver::import_conflicts(const ConflictVecPtr& conflicts)
+RelSatSolver::import_conflicts(const ConflictVec* conflicts)
 {
   xInstance->setOrigTheorySize(xInstance->iClauseCount());
 
@@ -252,16 +254,16 @@ RelSatSolver::solve()
 
   if (ptr && cn)
     {
-      ConflictVecPtr conflicts            = cn->conflicts;
+      ConflictVec* conflicts = cn->conflicts;
       PartialBeliefState* new_partial_ass = cn->partial_ass;
 
       import_conflicts(conflicts);
 
-      ///@todo what happens with conflict and new_partial_ass here?
+      ///@todo TK: what happens with conflict and new_partial_ass here? probably leaks
 
       DMCS_LOG_TRACE(" Got a message from DMCS. conflict = " << *conflicts << ". new_partial_ass = " << *new_partial_ass);
 
-      /*
+#if 0
 	if (partial_ass == 0)
 	{
 	partial_ass = new_partial_ass;
@@ -274,7 +276,8 @@ RelSatSolver::solve()
 	}
 	else
 	{ // continue
-	}*/
+	}
+#endif // 0
   
       // remove input part of the theory (from last solve)
 

@@ -42,18 +42,17 @@ namespace dmcs {
 class StreamingDMCSThread
 {
 public:
-  StreamingDMCSThread(const StreamingCommandTypePtr& scmt_,
-		      const ConcurrentMessageQueuePtr& nfh);
+  StreamingDMCSThread();
+
+  virtual
+  ~StreamingDMCSThread();
 
   void
-  operator()();
+  operator()(StreamingCommandType* scmt, ConcurrentMessageQueue* nfh);
 
-private:
-  const StreamingCommandTypePtr      scmt;
-  ConcurrentMessageQueuePtr          notif_from_handler;
 };
 
-typedef boost::shared_ptr<StreamingDMCSThread> StreamingDMCSThreadPtr;
+
 
 } // namespace dmcs
 

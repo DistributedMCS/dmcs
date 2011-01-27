@@ -32,7 +32,6 @@
 
 #include "dmcs/ConflictNotification.h"
 #include "network/ConcurrentMessageQueueHelper.h"
-#include "mcs/HashedBiMap.h"
 
 #include <boost/thread.hpp>
 
@@ -41,14 +40,12 @@ namespace dmcs {
 class RouterThread
 {
 public:
-  RouterThread(ConcurrentMessageQueuePtr& srn,
-	       ConcurrentMessageQueueVecPtr& rnn)
-    : sat_router_notif(srn), 
-      router_neighbors_notif(rnn)
+  RouterThread()
   { }
 
   void
-  operator()()
+  operator()(ConcurrentMessageQueue* sat_router_notif,
+	     ConcurrentMessageQueueVec* router_neighbors_notif)
   {
     while (1)
       {
@@ -62,6 +59,31 @@ public:
 
 	if (ptr && cn)
 	  {
+	    if (cn->type == ConflictNotification::SHUTDOWN)
+	      {
+		DMCS_LOG_TRACE("Shutdown requested, informing neighbors. Bye for now.");
+
+		// inform all neighbors about the shutdown
+		for (ConcurrentMessageQueueVec::iterator it = router_neighbors_notif->begin();
+		     it != router_neighbors_notif->end(); ++it)
+		  {
+		    std::size_t prio = 0;
+
+		    ConflictNotification* ow_neighbor =
+		      (ConflictNotification*) overwrite_send(*it, &cn, sizeof(cn), prio);
+
+		    if (ow_neighbor)
+		      {
+			delete ow_neighbor;
+			ow_neighbor = 0;
+		      }
+		  }
+
+		return;
+	      }
+
+	    // forward request
+
 	    const std::size_t noff = cn->val;
 	    
 	    DMCS_LOG_TRACE("Got a notification from local solver. noff = " << noff);
@@ -88,9 +110,6 @@ public:
       }
   }
 
-private:
-  ConcurrentMessageQueuePtr     sat_router_notif;
-  ConcurrentMessageQueueVecPtr  router_neighbors_notif;
 };
 
 typedef boost::shared_ptr<RouterThread> RouterThreadPtr;

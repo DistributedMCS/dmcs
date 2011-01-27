@@ -37,45 +37,53 @@
 #include "solver/Conflict.h"
 
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <boost/thread.hpp>
 
 namespace dmcs {
 
 class OutputThread
 {
 public:
-  OutputThread(const connection_ptr& c,
-	       std::size_t ps,
-	       MessagingGatewayBCPtr& m,
-	       ConcurrentMessageQueuePtr& hon);
+  OutputThread();
+
+  virtual
+  ~OutputThread();
 
   void
-  operator()();
+  operator()(connection_ptr c,
+	     std::size_t ps,
+	     MessagingGatewayBC* m,
+	     ConcurrentMessageQueue* hon);
 
 private:
   void
-  loop(const boost::system::error_code& e);
+  loop(const boost::system::error_code& e,
+       connection_ptr conn,
+       MessagingGatewayBC* mg,
+       ConcurrentMessageQueue* handler_output_notif);
+
+  bool
+  wait_for_trigger(ConcurrentMessageQueue* handler_output_notif);
 
   void
-  wait_for_trigger();
+  collect_output(MessagingGatewayBC* mg, PartialBeliefStateVecPtr& res, std::string& header);
 
   void
-  collect_output(PartialBeliefStateVecPtr& res, std::string& header);
+  write_result(connection_ptr conn,
+	       MessagingGatewayBC* mg,
+	       ConcurrentMessageQueue* handler_output_notif,
+	       PartialBeliefStateVecPtr& res,
+	       const std::string& header);
 
   void
-  write_result(PartialBeliefStateVecPtr& res, const std::string& header);
-
-  void
-  write_models(const boost::system::error_code& e,
-	       PartialBeliefStateVecPtr& res);
+  handle_written_header(const boost::system::error_code& e,
+			connection_ptr conn,
+			MessagingGatewayBC* mg,
+			ConcurrentMessageQueue* handler_output_notif,
+			PartialBeliefStateVecPtr& res);
 
 private:
-  const connection_ptr&      conn;
   std::size_t                pack_size;             // Number of models the invoker expects to get
   std::size_t                left_2_send;           // Number of models left to send
-  MessagingGatewayBCPtr      mg;
-  ConcurrentMessageQueuePtr  handler_output_notif;
   bool                       collecting;           // A flag to determine whether we are in collecting mode or not 
                                                    // (if yes then we don't want to wait for any trigger)
 };

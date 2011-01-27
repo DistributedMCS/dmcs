@@ -33,25 +33,27 @@
 
 #include "dmcs/Log.h"
 
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+
+
 namespace dmcs {
 
-OutputThread::OutputThread(const connection_ptr& c,
-			   std::size_t ps,
-			   MessagingGatewayBCPtr& m,
-			   ConcurrentMessageQueuePtr& hon)
-  : conn(c),
-    pack_size(ps),
-    mg(m),
-    handler_output_notif(hon),
-    collecting(false)
+OutputThread::OutputThread()
+{ }
+
+
+OutputThread::~OutputThread()
 {
-  DMCS_LOG_TRACE(" pack_size = " << pack_size);
+  DMCS_LOG_TRACE("So long, suckers. I'm out.");
 }
 
 
-
 void
-OutputThread::loop(const boost::system::error_code& e)
+OutputThread::loop(const boost::system::error_code& e,
+		   connection_ptr conn,
+		   MessagingGatewayBC* mg,
+		   ConcurrentMessageQueue* handler_output_notif)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -62,24 +64,30 @@ OutputThread::loop(const boost::system::error_code& e)
 
       if (!collecting)
 	{
-	  wait_for_trigger();
+	  if (!wait_for_trigger(handler_output_notif))
+	    {
+	      return; // shutdown received
+	    }
 	}
-
-      collect_output(res, header);
-      write_result(res, header);
+      
+      collect_output(mg, res, header);
+      write_result(conn, mg, handler_output_notif, res, header);
     }
   else
     {
-      DMCS_LOG_TRACE(": " << e.message());
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 }
 
 
-
-void
-OutputThread::wait_for_trigger()
+bool
+OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  bool retval = true;
 
   // wait for Handler to tell me to return some models
   OutputNotification* on = 0;
@@ -93,8 +101,18 @@ OutputThread::wait_for_trigger()
 
   if (ptr && on)
     {
-      pack_size = on->pack_size;
-      left_2_send = on->pack_size;
+      if (on->type == OutputNotification::REQUEST)
+	{
+	  pack_size = on->pack_size;
+	  left_2_send = on->pack_size;
+	  retval = true;
+	}
+      else if (on->type == OutputNotification::SHUTDOWN)
+	{
+	  retval = false;
+	}
+
+      assert (on->type == OutputNotification::REQUEST || on->type == OutputNotification::SHUTDOWN);
     }
   else
     {
@@ -103,14 +121,18 @@ OutputThread::wait_for_trigger()
     }
 
   DMCS_LOG_TRACE("Got a message from Handler. pack_size = " << pack_size);
+
+  return retval;
 }
 
 
 
 void
-OutputThread::collect_output(PartialBeliefStateVecPtr& res, std::string& header)
+OutputThread::collect_output(MessagingGatewayBC* mg,
+			     PartialBeliefStateVecPtr& res,
+			     std::string& header)
 {
-  DMCS_LOG_TRACE(" pack_size = " << pack_size << ", left to send = " << left_2_send);
+  DMCS_LOG_TRACE("pack_size = " << pack_size << ", left to send = " << left_2_send);
 
   // Turn this mode on. It's off only when either we collect and send
   // enough pack_size models, or there's no more model to send.
@@ -170,37 +192,58 @@ OutputThread::collect_output(PartialBeliefStateVecPtr& res, std::string& header)
 
 
 void
-OutputThread::write_result(PartialBeliefStateVecPtr& res, const std::string& header)
+OutputThread::write_result(connection_ptr conn,
+			   MessagingGatewayBC* mg,
+			   ConcurrentMessageQueue* handler_output_notif,
+			   PartialBeliefStateVecPtr& res,
+			   const std::string& header)
 {
   DMCS_LOG_TRACE("header = " << header);
 
   if (header.find(HEADER_ANS) != std::string::npos)
-    { // send some models
+    {
+      // send some models
       conn->async_write(header,
-			boost::bind(&OutputThread::write_models, this,
-				    boost::asio::placeholders::error, res));
+			boost::bind(&OutputThread::handle_written_header, this,
+				    boost::asio::placeholders::error,
+				    conn,
+				    mg,
+				    handler_output_notif,
+				    res)
+			);
     }
-  else
-    { // send EOF
+  else // if (header.find(HEADER_EOF) == std::string::npos)
+    {
       assert (header.find(HEADER_EOF) != std::string::npos);
+
+      // send EOF
       conn->async_write(header,
 			boost::bind(&OutputThread::loop, this,
-				    boost::asio::placeholders::error));
+				    boost::asio::placeholders::error,
+				    conn,
+				    mg,
+				    handler_output_notif)
+			);
     }
 
+  //  assert(false && "header is neither HEADER_ANS nor HEADER_EOF");
 }
 
 
 
 void
-OutputThread::write_models(const boost::system::error_code& e, PartialBeliefStateVecPtr& res)
+OutputThread::handle_written_header(const boost::system::error_code& e,
+				    connection_ptr conn,
+				    MessagingGatewayBC* mg,
+				    ConcurrentMessageQueue* handler_output_notif,
+				    PartialBeliefStateVecPtr& res)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
+  
   if (!e)
     {
       assert (left_2_send >= res->size());
-
+      
       left_2_send -= res->size();
       
       // mark end of package by a NULL model
@@ -212,18 +255,22 @@ OutputThread::write_models(const boost::system::error_code& e, PartialBeliefStat
 	}
       
       StreamingBackwardMessage return_mess(res);
-
+      
       boost::asio::ip::tcp::socket& sock = conn->socket();
       boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
-
+      
       DMCS_LOG_TRACE("return message == " << return_mess << " on port " << ep.port());
-
+      
       conn->async_write(return_mess,
 			boost::bind(&OutputThread::loop, this,
-				    boost::asio::placeholders::error));
+				    boost::asio::placeholders::error,
+				    conn,
+				    mg,
+				    handler_output_notif)
+			);
     }
- else
-   {
+  else
+    {
       // An error occurred.
       DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
       throw std::runtime_error(e.message());
@@ -233,11 +280,21 @@ OutputThread::write_models(const boost::system::error_code& e, PartialBeliefStat
 
 
 void
-OutputThread::operator()()
+OutputThread::operator()(connection_ptr c,
+			 std::size_t ps,
+			 MessagingGatewayBC* m,
+			 ConcurrentMessageQueue* hon)
 {
-  DMCS_LOG_TRACE(" Going to call loop()");
+  pack_size = ps;
+  collecting = false;
 
-  loop(boost::system::error_code());
+  //  conn = c;
+  //  mg = m;
+  //  handler_output_notif = hon;
+
+  DMCS_LOG_TRACE("Going to call loop()");
+
+  loop(boost::system::error_code(), c, m, hon);
 }
 
 } // namespace dmcs

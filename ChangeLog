@@ -1,3 +1,40 @@
+2011-01-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am (testInterfaceRelSat_LDADD): Add libdmcs.a
+
+	* include/network/JoinThread.h: Use PODs as thread parameters and implement shutdown.
+	* include/network/Handler.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* testsuite/testInterfaceRelSat.cpp: Likewise.
+	* testsuite/testJoinThread.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueue.h: Add copy ctor.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+
+	* include/dmcs/StreamingDMCSNotification.h: Add SHUTDOWN
+	notification and consistently use PODs as message payload.
+	* include/dmcs/OutputNotification.h: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+
 2011-01-26  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: Project models from local solver to

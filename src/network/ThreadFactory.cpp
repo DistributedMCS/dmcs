@@ -44,8 +44,10 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
 			     const SignaturePtr& ls,
 			     const BeliefStatePtr& lV,
 			     std::size_t ps,
-			     MessagingGatewayBCPtr& m,
-			     const ConcurrentMessageQueuePtr& dsn)
+			     MessagingGatewayBC* m,
+			     ConcurrentMessageQueue* dsn,
+			     ConcurrentMessageQueue* ssn,
+			     HashedBiMap* co)
   : context(c),
     theory(t), 
     local_sig(ls),
@@ -53,8 +55,8 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
     pack_size(ps),
     mg(m),
     dmcs_sat_notif(dsn), 
-    sat_router_notif(new ConcurrentMessageQueue),
-    c2o(new HashedBiMap)
+    sat_router_notif(ssn), 
+    c2o(co)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   // fill up the map: ctx_id <--> offset
@@ -86,10 +88,10 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
       const NeighborPtr nb = *it;
       ConcurrentMessageQueuePtr cmq(new ConcurrentMessageQueue);
 
-      NeighborThread nt(cmq, mg, nb, c2o, ctx_id, pack_size);
+      NeighborThread nt;
       router_neighbors_notif->push_back(cmq);
       
-      boost::thread* nit = new boost::thread(nt);
+      boost::thread* nit = new boost::thread(nt, cmq.get(), mg, nb.get(), c2o, ctx_id, pack_size);
       neighbor_input_threads->push_back(nit);
 
       DMCS_LOG_TRACE("Create neighbor thread " << i << ". DONE");
@@ -106,8 +108,8 @@ ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_n
   const std::size_t system_size = context->getSystemSize();
   const std::size_t no_nbs   = nbs->size();
 
-  JoinThread jt(no_nbs, system_size, mg, joiner_neighbors_notif);
-  boost::thread* t = new boost::thread(jt);
+  JoinThread jt;
+  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, joiner_neighbors_notif.get());
 
   return t;
 }
@@ -141,8 +143,8 @@ ThreadFactory::createRouterThread(ConcurrentMessageQueueVecPtr& router_neighbors
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  RouterThread rt(sat_router_notif, router_neighbors_notif);
-  boost::thread* t = new boost::thread(rt);
+  RouterThread rt;
+  boost::thread* t = new boost::thread(rt, sat_router_notif, router_neighbors_notif.get());
 
   return t;
 }

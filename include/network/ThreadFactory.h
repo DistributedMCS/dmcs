@@ -55,8 +55,10 @@ public:
 		const SignaturePtr& ls,
 		const BeliefStatePtr& lV,
 		std::size_t ps,
-		MessagingGatewayBCPtr& m,
-		const ConcurrentMessageQueuePtr& dsn);
+		MessagingGatewayBC* m,
+		ConcurrentMessageQueue* dsn,
+		ConcurrentMessageQueue* ssn,
+		HashedBiMap* co);
 
   void
   createNeighborThreads(ThreadVecPtr& neighbor_threads,
@@ -75,15 +77,15 @@ public:
   //createOutputThread(const connection_ptr& conn_);
 
 private:
-  const ContextPtr                  context;
-  const TheoryPtr                   theory;
-  const SignaturePtr                local_sig;
-  const BeliefStatePtr              localV;
-  std::size_t                       pack_size;
-  MessagingGatewayBCPtr             mg;
-  ConcurrentMessageQueuePtr         dmcs_sat_notif;
-  ConcurrentMessageQueuePtr         sat_router_notif;
-  HashedBiMapPtr                    c2o;             // hashed bimap from context id to
+  const ContextPtr                context;
+  const TheoryPtr                 theory;
+  const SignaturePtr              local_sig;
+  const BeliefStatePtr            localV;
+  std::size_t                     pack_size;
+  MessagingGatewayBC*             mg;
+  ConcurrentMessageQueue*         dmcs_sat_notif;
+  ConcurrentMessageQueue*         sat_router_notif;
+  HashedBiMap*                    c2o;             // hashed bimap from context id to
 			                             // the offset in the vector of
 				                     // neighbor message queue
 };

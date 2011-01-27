@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE ( testInterfaceRelSat )
   ConcurrentMessageQueuePtr dsn(new ConcurrentMessageQueue);
   ConcurrentMessageQueuePtr srn(new ConcurrentMessageQueue);
 
-  RelSatSolver rss(false, my_id, theory, sig, localV, c2o, system_size, mg, dsn, srn);
+  RelSatSolver rss(false, my_id, theory, sig, localV, c2o.get(), system_size, mg.get(), dsn.get(), srn.get());
 
   DMCS_LOG_DEBUG("Original theory: ");
   rss.print_local_theory();
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE ( testInterfaceRelSat )
   ConflictVec2Ptr learned_conflicts = rss.getLearnedConflicts();
   DMCS_LOG_DEBUG(learned_conflicts);
 
-  ConflictVecPtr conflicts(new ConflictVec);
+  ConflictVec* conflicts = new ConflictVec;
 
   Conflict* cf1 = new Conflict(system_size, PartialBeliefSet());
   PartialBeliefSet& cf1_0 = (*cf1)[0];

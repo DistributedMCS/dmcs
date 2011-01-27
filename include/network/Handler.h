@@ -126,9 +126,6 @@ public:
 
 
 private:
-  OutputThreadPtr                  ot;
-  StreamingDMCSThreadPtr           stdt;
-
   boost::thread*                   output_thread;
   boost::thread*                   streaming_dmcs_thread;
 

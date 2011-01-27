@@ -46,11 +46,11 @@ public:
 		   //const ProxySignatureByLocalPtr mixed_sig_,
 		   const SignaturePtr& local_sig_,
 		   const BeliefStatePtr& localV_,
-		   const HashedBiMapPtr& co,
+		   const HashedBiMap* co,
 		   std::size_t system_size_,
-		   MessagingGatewayBCPtr& mg_,
-		   const ConcurrentMessageQueuePtr& dsn,
-		   const ConcurrentMessageQueuePtr& srn)
+		   MessagingGatewayBC* mg_,
+		   ConcurrentMessageQueue* dsn,
+		   ConcurrentMessageQueue* srn)
     : is_leaf(il),
       my_id(my_id_),
       theory(theory_),
@@ -74,12 +74,12 @@ private:
   const TheoryPtr                theory;
   const SignaturePtr             local_sig;
   const BeliefStatePtr           localV;
-  const HashedBiMapPtr           c2o;
+  const HashedBiMap*           c2o;
   //const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;
-  MessagingGatewayBCPtr          mg;
-  ConcurrentMessageQueuePtr      dmcs_sat_notif;
-  ConcurrentMessageQueuePtr      sat_router_notif;
+  MessagingGatewayBC*          mg;
+  ConcurrentMessageQueue*      dmcs_sat_notif;
+  ConcurrentMessageQueue*      sat_router_notif;
 };
 
 

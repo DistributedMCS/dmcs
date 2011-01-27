@@ -226,11 +226,38 @@ Handler<StreamingCommandType>::~Handler()
 { 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  DMCS_LOG_TRACE("Join Output thread");
+  DMCS_LOG_TRACE("Send SHUTHDOWN and join Output thread");
+
+  OutputNotification* mess_output = new OutputNotification(0, OutputNotification::SHUTDOWN);
+  OutputNotification* ow_output = 
+    (OutputNotification*) overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
+  
+  if (ow_output)
+    {
+      delete ow_output;
+      ow_output = 0;
+    }
+  
   output_thread->join();
 
-  DMCS_LOG_TRACE("Join DMCS thread");
+  DMCS_LOG_TRACE("Send SHUTDOWN and join DMCS thread");
+  
+  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(0,0,0,StreamingDMCSNotification::SHUTDOWN);
+  StreamingDMCSNotification* ow_dmcs = 
+    (StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif, &mess_dmcs, sizeof(mess_dmcs), 0);
+
+  if (ow_dmcs)
+    {
+      delete ow_dmcs;
+      ow_dmcs = 0;
+    }
+
   streaming_dmcs_thread->join();
+
+  DMCS_LOG_TRACE("Cleanup threads and messages")
+
+  delete mess_output;
+  delete mess_dmcs;
 
   delete output_thread;
   delete streaming_dmcs_thread;
@@ -265,8 +292,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
 	  DMCS_LOG_TRACE("creating dmcs thread");
 
-	  stdt = StreamingDMCSThreadPtr(new StreamingDMCSThread(cmd, handler_dmcs_notif));
-	  streaming_dmcs_thread = new boost::thread(*stdt);
+	  StreamingDMCSThread stdt;
+	  streaming_dmcs_thread = new boost::thread(stdt, cmd.get(), handler_dmcs_notif.get());
 
 	  DMCS_LOG_TRACE("creating output thread, pack_size = " << pack_size);
 
@@ -274,8 +301,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // inform OutputThread about new incoming message (request
 	  // the next pack_size models)
 
-	  ot = OutputThreadPtr(new OutputThread(sesh->conn, pack_size, mg, handler_output_notif));
-	  output_thread = new boost::thread(*ot);
+	  OutputThread ot;
+	  output_thread = new boost::thread(ot, sesh->conn, pack_size, mg.get(), handler_output_notif.get());
 
 	  first_call = false;
 	}

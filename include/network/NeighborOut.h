@@ -45,11 +45,11 @@ namespace dmcs {
 /**
  * @brief
  */
-class NeighborOut : BaseStreamer
+class NeighborOut : public BaseStreamer
 {
 public:
   NeighborOut(connection_ptr& conn_, 
-	      ConcurrentMessageQueuePtr& rnn,
+	      ConcurrentMessageQueue* rnn,
 	      std::size_t invoker_, 
 	      std::size_t pack_size_)
     : BaseStreamer(conn_),
@@ -60,6 +60,14 @@ public:
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
     stream(boost::system::error_code());
   }
+
+
+  virtual
+  ~NeighborOut()
+  {
+    DMCS_LOG_TRACE("Neighbor " << invoker << " out.");
+  }
+
 
   void 
   stream(const boost::system::error_code& e)
@@ -77,7 +85,12 @@ public:
 
 	if (ptr && cn)
 	  {
-	    ConflictVecPtr conflicts        = cn->conflicts;
+	    if (cn->type == ConflictNotification::SHUTDOWN)
+	      {
+		return;
+	      }
+
+	    ConflictVec* conflicts = cn->conflicts;
 	    PartialBeliefState* partial_ass = cn->partial_ass;
 
 	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
@@ -86,7 +99,12 @@ public:
 	    std::string header = HEADER_REQ_STM_DMCS;
 	    conn->async_write(header, boost::bind(&NeighborOut::write_message, this,
 						  boost::asio::placeholders::error,
-						  conflicts, partial_ass));
+						  conflicts,
+						  partial_ass
+						  )
+			      );
+
+	    ///@todo TK: conflicts and partial_ass leak here
 	  }
 	else
 	  {
@@ -105,7 +123,7 @@ public:
 
   void
   write_message(const boost::system::error_code& e,
-		ConflictVecPtr conflicts, 
+		ConflictVec* conflicts, 
 		PartialBeliefState* partial_ass)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
@@ -114,7 +132,9 @@ public:
       {
 	StreamingForwardMessage mess(invoker, pack_size, conflicts, partial_ass);
 	conn->async_write(mess, boost::bind(&NeighborOut::clean_up, this,  
-					    boost::asio::placeholders::error, conflicts, partial_ass));
+					    boost::asio::placeholders::error,
+					    conflicts,
+					    partial_ass));
       }
     else
       {
@@ -127,20 +147,23 @@ public:
 
   void
   clean_up(const boost::system::error_code& e,
-	   ConflictVecPtr conflicts, 
+	   ConflictVec* conflicts, 
 	   PartialBeliefState* partial_ass)
   {
     if (!e)
       {
 	// We don't delete partial_ass here. It should be used in other places.
 
+	///@todo TK: conflicts and partial_ass leak here
+
 	for (ConflictVec::const_iterator it = conflicts->begin(); it != conflicts->end(); ++it)
 	  {
 	    Conflict* c = *it;
 	    delete c;
+	    c = 0;
 	  }
 
-	stream(boost::system::error_code());
+	stream(boost::system::error_code()); ///@todo really, recursion?
       }
     else
       {
@@ -151,9 +174,9 @@ public:
 
 
 private:
-  ConcurrentMessageQueuePtr router_neighbor_notif;
-  std::size_t               invoker;
-  std::size_t               pack_size;
+  ConcurrentMessageQueue* router_neighbor_notif;
+  std::size_t             invoker;
+  std::size_t             pack_size;
 };
 
 typedef boost::shared_ptr<NeighborOut> NeighborOutPtr;

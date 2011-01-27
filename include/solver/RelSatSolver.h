@@ -57,12 +57,13 @@ public:
 	       //	       const ProxySignatureByLocalPtr& mixed_sig_,
 	       const SignaturePtr& local_sig_,
 	       const BeliefStatePtr& localV_,
-	       const HashedBiMapPtr& co,
+	       const HashedBiMap* co,
 	       std::size_t system_size_,
-	       MessagingGatewayBCPtr& mg_,
-	       ConcurrentMessageQueuePtr& dsn,
-	       ConcurrentMessageQueuePtr& srn);
+	       MessagingGatewayBC* mg_,
+	       ConcurrentMessageQueue* dsn,
+	       ConcurrentMessageQueue* srn);
 
+  virtual
   ~RelSatSolver();
 
   int
@@ -81,7 +82,7 @@ public:
   receiveSolution(DomainValue* _aAssignment, int _iVariableCount);
 
   void
-  import_conflicts(const ConflictVecPtr& conflicts);
+  import_conflicts(const ConflictVec* conflicts);
 
   void
   import_partial_ass(const PartialBeliefState* partial_ass);
@@ -108,12 +109,12 @@ private:
   const TheoryPtr                theory;
   const SignaturePtr             sig;
   const BeliefStatePtr           localV;
-  const HashedBiMapPtr           c2o;
+  const HashedBiMap*           c2o;
   //  const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;      // this can be taken from localV
-  MessagingGatewayBCPtr          mg;
-  ConcurrentMessageQueuePtr      dmcs_sat_notif;   // to get notification from Handler
-  ConcurrentMessageQueuePtr      sat_router_notif; // to inform Router
+  MessagingGatewayBC*            mg;
+  ConcurrentMessageQueue*        dmcs_sat_notif;   // to get notification from Handler
+  ConcurrentMessageQueue*        sat_router_notif; // to inform Router
   PartialBeliefState*            partial_ass;
   PartialBeliefState*            input;
   ConflictVec2Ptr                learned_conflicts;

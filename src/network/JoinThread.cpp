@@ -36,21 +36,19 @@
 
 namespace dmcs {
 
-JoinThread::JoinThread(std::size_t no_nbs_,
-		       std::size_t ss,
-		       //const HashedBiMapPtr& c2o_,
-		       MessagingGatewayBCPtr& mg_,
-		       ConcurrentMessageQueueVecPtr& jnn)
-  : no_nbs(no_nbs_),
-    system_size(ss),
-    //c2o(c2o_),
-    mg(mg_),
-    joiner_neighbors_notif(jnn)
+JoinThread::JoinThread()
 { }
 
 
+JoinThread::~JoinThread()
+{
+  DMCS_LOG_TRACE("Good bye, cruel world.");
+}
+
+
 bool
-JoinThread::import_belief_states(std::size_t noff, std::size_t peq_cnt, 
+JoinThread::import_belief_states(std::size_t noff,
+				 std::size_t peq_cnt, 
 				 PartialBeliefStatePackagePtr& partial_eqs, 
 				 bm::bvector<>& in_mask,
 				 bm::bvector<>& pack_full,
@@ -237,16 +235,17 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
 
 
 void
-JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs, std::size_t next)
+JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
+			 std::size_t next)
 {
   // empty our local storage for the sake of non-exponential space
   PartialBeliefStateVecPtr& bsv = (*partial_eqs)[next];
   bsv->clear();
 
   // for now, let's put empty conflict and empty ass to notify the neighbors
-  ConflictVecPtr empty_conflicts(new ConflictVec);
+  ConflictVec* empty_conflicts = new ConflictVec;
   PartialBeliefState* empty_ass  = new PartialBeliefState(system_size, PartialBeliefSet());
-  ConflictNotification* cn       = new ConflictNotification(0, empty_conflicts, empty_ass);
+  ConflictNotification* cn       = new ConflictNotification(empty_conflicts, empty_ass, 0);
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
   
@@ -262,10 +261,19 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs, std::size_t 
     }
 }
 
+
 void
-JoinThread::operator()()
+JoinThread::operator()(std::size_t nbs,
+		       std::size_t s,
+		       MessagingGatewayBC* m,
+		       ConcurrentMessageQueueVec* jv)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  mg = m;
+  joiner_neighbors_notif = jv;
+  no_nbs = nbs;
+  system_size = s;
   
   ImportStates import_state = START_UP;
 

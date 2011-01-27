@@ -275,7 +275,7 @@ Options";
 		  std::string header = HEADER_REQ_STM_DMCS;
 		  // USER <--> invoker == 0
 	
-		  ConflictVecPtr conflicts(new ConflictVec);
+		  ConflictVec* conflicts = new ConflictVec;
 		  PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
 
 		  StreamingCommandType::input_type mess(0, pack_size, conflicts, partial_ass);

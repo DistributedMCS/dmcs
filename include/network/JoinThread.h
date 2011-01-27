@@ -45,14 +45,17 @@ namespace dmcs {
 class JoinThread
 {
 public:
-  JoinThread(std::size_t no_nbs_,
-	     std::size_t ss,
-	     //	     const HashedBiMapPtr& c2o_,
-	     MessagingGatewayBCPtr& mg_,
-	     ConcurrentMessageQueueVecPtr& jnn);
+  JoinThread();
+
+  virtual
+  ~JoinThread();
 
   void 
-  operator()();
+  operator()(std::size_t no_nbs,
+	     std::size_t system_size,
+	     MessagingGatewayBC* mg,
+	     ConcurrentMessageQueueVec* joiner_neighbors_notif);
+
 
   enum ImportStates
     {
@@ -63,7 +66,8 @@ public:
 
 private:
   bool
-  import_belief_states(std::size_t noff, std::size_t peq_cnt,
+  import_belief_states(std::size_t noff,
+		       std::size_t peq_cnt,
 		       PartialBeliefStatePackagePtr& partial_eqs, 
 		       bm::bvector<>& in_mask,
 		       bm::bvector<>& end_mask,
@@ -86,9 +90,9 @@ private:
 private:
   std::size_t                  no_nbs;                  // number of neighbors 
   std::size_t                  system_size;
-  //  HashedBiMapPtr               c2o;
-  MessagingGatewayBCPtr        mg;
-  ConcurrentMessageQueueVecPtr joiner_neighbors_notif;
+
+  MessagingGatewayBC*        mg;
+  ConcurrentMessageQueueVec* joiner_neighbors_notif;
 };
 
 } // namespace dmcs

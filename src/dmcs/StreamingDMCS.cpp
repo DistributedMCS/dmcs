@@ -38,6 +38,7 @@
 #include "dmcs/Log.h"
 #include "dmcs/StreamingDMCS.h"
 #include "network/Client.h"
+#include "network/ConcurrentMessageQueueFactory.h"
 #include "network/ConcurrentMessageQueueHelper.h"
 #include "parser/ClaspResultGrammar.h"
 #include "parser/ClaspResultBuilder.h"
@@ -50,13 +51,13 @@
 #include <boost/thread.hpp>
 
 namespace dmcs {
-
-
-StreamingDMCS::StreamingDMCS(const ContextPtr& c, 
-			     const TheoryPtr& t, 
-			     const SignatureVecPtr& s, 
-			     const QueryPlanPtr& qp,
-			     std::size_t bc)
+  
+  
+  StreamingDMCS::StreamingDMCS(const ContextPtr& c, 
+			       const TheoryPtr& t, 
+			       const SignatureVecPtr& s, 
+			       const QueryPlanPtr& qp,
+			       std::size_t bc)
   : BaseDMCS(c, t, s),
     query_plan(qp),
     cacheStats(new CacheStats),
@@ -67,14 +68,68 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c,
     router_thread(0),
     neighbor_threads(new ThreadVec),
     dmcs_sat_notif(new ConcurrentMessageQueue),
+    sat_router_notif(new ConcurrentMessageQueue),
     router_neighbors_notif(new ConcurrentMessageQueueVec),
+    c2o(new HashedBiMap),
     buf_count(bc)
 { }
 
 
 
 StreamingDMCS::~StreamingDMCS()
-{ }
+{
+  DMCS_LOG_TRACE("Join SAT thread");
+  sat_thread->join();
+
+  #warning joining JOIN is not safe
+  DMCS_LOG_TRACE("Join JOIN thread (not safe for now)");
+  //join_thread->join();
+
+  #warning joining ROUTER is not safe
+  DMCS_LOG_TRACE("Join ROUTER thread (not safe for now)");
+
+#if 0
+  ConflictNotification* mess_sat = new ConflictNotification(0,0,0,ConflictNotification::SHUTDOWN);
+  ConflictNotification* ow_sat = 
+    (ConflictNotification*) overwrite_send(sat_router_notif, &mess_sat, sizeof(mess_sat), 0);
+  
+  if (ow_sat)
+    {
+      delete ow_sat;
+      ow_sat = 0;
+    }
+
+  if (router_thread->joinable())
+    {
+      router_thread->join();
+    }
+  else
+    {
+      DMCS_LOG_ERROR("ROUTER thread is not joinable");
+    }
+#endif
+
+  ThreadVec::iterator beg = neighbor_threads->begin();
+  ThreadVec::iterator end = neighbor_threads->end();
+
+  DMCS_LOG_TRACE("Join " <<  std::distance(beg, end) << " NEIGHBOR threads (not thread safe for now)");
+  
+#if 0
+  for (ThreadVec::iterator it = beg; it != end; ++it)
+    {
+      DMCS_LOG_TRACE("Killing Neighbor thread #" << std::distance(it, end));
+      (*it)->join();
+    }
+#endif
+
+  DMCS_LOG_TRACE("Cleanup threads");
+
+  delete sat_thread;
+  delete join_thread;
+  delete router_thread;
+
+  DMCS_LOG_TRACE("Good night, and good luck.");
+}
 
 
 
@@ -104,7 +159,8 @@ StreamingDMCS::initialize(std::size_t invoker,
 
   const SignaturePtr& local_sig = ctx->getSignature();
 
-  ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size, mg, dmcs_sat_notif);
+  ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size,
+		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), c2o.get());
 
   sat_thread = tf.createLocalSolveThread();
 
@@ -120,13 +176,14 @@ StreamingDMCS::initialize(std::size_t invoker,
 
 
 void
-StreamingDMCS::listen(ConcurrentMessageQueuePtr handler_dmcs_notif,
+StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
-		      std::size_t& port)
+		      std::size_t& port,
+		      StreamingDMCSNotification::NotificationType& type)
 {
   // wait for a signal from Handler
-  StreamingDMCSNotification* sn;
+  StreamingDMCSNotification* sn = 0;
   void *ptr         = static_cast<void*>(&sn);
   unsigned int p    = 0;
   std::size_t recvd = 0;
@@ -138,6 +195,7 @@ StreamingDMCS::listen(ConcurrentMessageQueuePtr handler_dmcs_notif,
       invoker   = sn->invoker;
       pack_size = sn->pack_size;
       port      = sn->port;
+      type      = sn->type;
     }
   else
     {
@@ -148,6 +206,7 @@ StreamingDMCS::listen(ConcurrentMessageQueuePtr handler_dmcs_notif,
   DMCS_LOG_TRACE("invoker   = " << invoker);
   DMCS_LOG_TRACE("pack_size = " << pack_size);
   DMCS_LOG_TRACE("port      = " << port);
+  DMCS_LOG_TRACE("type      = " << type);
 }
 
 
@@ -164,10 +223,10 @@ StreamingDMCS::start_up()
   //BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
   //mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
   
-  ConflictVecPtr empty_conflicts(new ConflictVec);
+  ConflictVec* empty_conflicts = new ConflictVec;
   PartialBeliefState* empty_ass  = new PartialBeliefState(system_size, PartialBeliefSet());
   
-  ConflictNotification* mess_sat = new ConflictNotification(0, empty_conflicts, empty_ass);
+  ConflictNotification* mess_sat = new ConflictNotification(empty_conflicts, empty_ass, 0);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(dmcs_sat_notif, &mess_sat, sizeof(mess_sat), 0);
   
@@ -186,9 +245,9 @@ StreamingDMCS::start_up()
 
       assert (router_neighbors_notif->size() == no_nbs);
 
-      ConflictVecPtr empty_conflicts(new ConflictVec);
+      ConflictVec* empty_conflicts = new ConflictVec;
       PartialBeliefState* empty_ass = new PartialBeliefState(system_size, PartialBeliefSet());
-      ConflictNotification* cn      = new ConflictNotification(0, empty_conflicts, empty_ass);
+      ConflictNotification* cn      = new ConflictNotification(empty_conflicts, empty_ass, 0);
 
       for (std::size_t i = 0; i < no_nbs; ++i)
 	{
@@ -220,17 +279,23 @@ StreamingDMCS::work()
 
 
 void
-StreamingDMCS::loop(ConcurrentMessageQueuePtr& handler_dmcs_notif)
+StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 {
-  std::size_t invoker;
-  std::size_t pack_size;
-  std::size_t port;
+  std::size_t invoker = 0;
+  std::size_t pack_size = 0;
+  std::size_t port = 0;
+  StreamingDMCSNotification::NotificationType type = StreamingDMCSNotification::REQUEST;
 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   while (1)
     {
-      listen(handler_dmcs_notif, invoker, pack_size, port);
+      listen(handler_dmcs_notif, invoker, pack_size, port, type);
+
+      if (type == StreamingDMCSNotification::SHUTDOWN)
+	{
+	  break;
+	}
 
       if (!initialized)
 	{

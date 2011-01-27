@@ -55,8 +55,8 @@ BOOST_AUTO_TEST_CASE ( testJoinThread )
   std::size_t offset_3 = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 1;
   std::size_t offset_4 = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + 2;
 
-  JoinThread jt(no_nbs, system_size, mg, jnn);
-  boost::thread t(jt);
+  JoinThread jt;
+  boost::thread t(jt, no_nbs, system_size, mg.get(), jnn.get());
 
   std::istringstream iss;
   

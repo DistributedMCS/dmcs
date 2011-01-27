@@ -46,7 +46,7 @@ class NeighborIn : BaseStreamer
 {
 public:
   NeighborIn(connection_ptr& conn_, 
-	     const MessagingGatewayBCPtr& mg_, 
+	     MessagingGatewayBC* mg_, 
 	     std::size_t noff_)
     : BaseStreamer(conn_),
       mg(mg_),
@@ -129,7 +129,7 @@ public:
   }
 
 private:
-  MessagingGatewayBCPtr    mg;
+  MessagingGatewayBC*    mg;
   std::size_t              noff;        // offset of the neighbor streamer in the vector of MQs
   bool                     first_round;
   StreamingBackwardMessage mess;

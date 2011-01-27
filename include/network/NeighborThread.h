@@ -48,19 +48,24 @@ namespace dmcs {
 class NeighborThread
 {
 public:
-  NeighborThread(ConcurrentMessageQueuePtr& rnn,
-		 MessagingGatewayBCPtr& mg_,
-		 const NeighborPtr& nb_,
-		 const HashedBiMapPtr& c2o_,
-		 const std::size_t invoker_,
-		 const std::size_t pack_size_)
-    : router_neighbor_notif(rnn), mg(mg_), nb(nb_), 
-      c2o(c2o_), invoker(invoker_), pack_size(pack_size_)
+  NeighborThread()
   { }
 
   void
-  operator()()
+  operator()(ConcurrentMessageQueue* rnn,
+	     MessagingGatewayBC* mg_,
+	     const Neighbor* nb_,
+	     const HashedBiMap* c2o_,
+	     const std::size_t invoker_,
+	     const std::size_t pack_size_)
   {
+    router_neighbor_notif = rnn;
+    mg = mg_;
+    nb = nb_; 
+    c2o = c2o_;
+    invoker = invoker_;
+    pack_size = pack_size_;
+
     DMCS_LOG_TRACE("neighbor " << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
 
     boost::asio::io_service io_service;
@@ -128,15 +133,15 @@ private:
   }  
 
 private:
-  ConcurrentMessageQueuePtr     router_neighbor_notif;
-  MessagingGatewayBCPtr         mg;
-  const NeighborPtr             nb;
-  const HashedBiMapPtr          c2o;
-  const std::size_t             invoker;
-  const std::size_t             pack_size;
-  NeighborInPtr                 nip;
-  NeighborOutPtr                nop;
-  connection_ptr                conn;
+  ConcurrentMessageQueue*    router_neighbor_notif;
+  MessagingGatewayBC*        mg;
+  const Neighbor*            nb;
+  const HashedBiMap*         c2o;
+  std::size_t                invoker;
+  std::size_t                pack_size;
+  NeighborInPtr              nip;
+  NeighborOutPtr             nop;
+  connection_ptr             conn;
 };
 
 } // namespace dmcs
