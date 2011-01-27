@@ -347,7 +347,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					 hdl,
 					 sesh, 
 					 cmd,
-					 header)
+					 header,
+					 pack_size)
 			     );
     }
   else
@@ -364,14 +365,15 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 						  HandlerPtr hdl,
 						  SessionMsgPtr sesh,
 						  CmdTypePtr cmd,
-						  boost::shared_ptr<std::string> header)
+						  boost::shared_ptr<std::string> header,
+						  std::size_t pack_size)
 {
   if (!e)
     {
       // Check header
       if (header->find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
-	  DMCS_LOG_TRACE("Got a request. Will inform my slaves about this.");
+	  DMCS_LOG_TRACE("Got a fresh request. Will inform my slaves about this.");
 
 	  // Read the message to get pack_size and conflict, so that we can inform our slaves
 	  sesh->conn->async_read(sesh->mess,
@@ -382,6 +384,37 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 					     cmd,
 					     false) // subsequent call to local job
 				 );
+	}
+      else if (header->find(HEADER_NEXT) != std::string::npos)
+	{
+	  // code duplication with part of do_local_job. Just leave it like this for now
+
+	  // notify OutputThread
+	  OutputNotification* mess_output = new OutputNotification(pack_size);
+	  OutputNotification* ow_output = 
+	    (OutputNotification*) overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
+	  
+	  if (ow_output)
+	    {
+	      delete ow_output;
+	      ow_output = 0;
+	    }
+
+	  // back to waiting for incoming message
+	  
+	  DMCS_LOG_TRACE("Back to waiting for incoming message");
+	  
+	  boost::shared_ptr<std::string> header(new std::string);
+	  
+	  sesh->conn->async_read(*header,
+				 boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
+					     boost::asio::placeholders::error,
+					     hdl,
+					     sesh, 
+					     cmd,
+					     header,
+					     pack_size)
+				 );	  
 	}
       else if (header->find(HEADER_TERMINATE) != std::string::npos)
 	{
@@ -398,7 +431,8 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 					     hdl,
 					     sesh,
 					     cmd,
-					     header)
+					     header,
+					     pack_size)
 				 );
 	}
     }

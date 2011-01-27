@@ -78,20 +78,37 @@ public:
 	ConflictVec* conflicts = cn->conflicts;
 	PartialBeliefState* partial_ass = cn->partial_ass;
 
-	DMCS_LOG_TRACE("Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
+	if (conflicts && partial_ass)
+	  {
+	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
+	    
+	    // write to network
+	    boost::shared_ptr<std::string> header(new std::string(HEADER_REQ_STM_DMCS));
+	    conn->async_write(*header,
+			      boost::bind(&NeighborOut::handle_write_message, this,
+					  boost::asio::placeholders::error,
+					  conn,
+					  invoker,
+					  pack_size,
+					  conflicts,
+					  partial_ass
+					  )
+			      );
+	  }
+	else
+	  { // We should only send HEADER_NEXT
+	    boost::asio::ip::tcp::socket& sock = conn->socket();
+	    boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
+	    DMCS_LOG_TRACE("Got NULL conflicts and ass, going to send HEADER_NEXT to port " << ep.port());
 
-	// write to network
-	const std::string& header = HEADER_REQ_STM_DMCS;
-	conn->async_write(header,
-			  boost::bind(&NeighborOut::handle_write_message, this,
-				      boost::asio::placeholders::error,
-				      conn,
-				      invoker,
-				      pack_size,
-				      conflicts,
-				      partial_ass
-				      )
-			  );
+	    boost::shared_ptr<std::string> header(new std::string(HEADER_NEXT));
+	    conn->async_write(*header,
+			      boost::bind(&NeighborOut::handle_clean_up, this,  
+					  boost::asio::placeholders::error,
+					  conflicts
+					  )
+			      );
+	  }
 
 	///@todo TK: conflicts and partial_ass leak here
 
@@ -138,8 +155,7 @@ public:
 	conn->async_write(mess,
 			  boost::bind(&NeighborOut::handle_clean_up, this,  
 				      boost::asio::placeholders::error,
-				      conflicts,
-				      partial_ass
+				      conflicts
 				      )
 			  );
       }
@@ -154,8 +170,7 @@ public:
 
   void
   handle_clean_up(const boost::system::error_code& e,
-		  ConflictVec* conflicts, 
-		  PartialBeliefState* partial_ass)
+		  ConflictVec* conflicts)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -163,14 +178,18 @@ public:
       {
 	// We don't delete partial_ass here. It should be used in other places.
 
-	///@todo TK: conflicts and partial_ass leak here
-
-	for (ConflictVec::const_iterator it = conflicts->begin();
-	     it != conflicts->end(); ++it)
+	if (conflicts)
 	  {
-	    Conflict* c = *it;
-	    delete c;
-	    c = 0;
+	    for (ConflictVec::const_iterator it = conflicts->begin();
+		 it != conflicts->end(); ++it)
+	      {
+		Conflict* c = *it;
+		if (c)
+		  {
+		    delete c;
+		    c = 0;
+		  }
+	      }
 	  }
       }
     else

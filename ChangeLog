@@ -1,3 +1,16 @@
+2011-01-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp (ask_for_next): Only send NULL
+	pointers.
+
+	* include/network/NeighborOut.h: When receive NULL pointers, send
+	out HEADER_NEXt only.
+
+	* include/network/Handler.tcc: When receive HEADER_NEXT, inform
+	OutputThread only.
+
+	* include/network/Handler.h: Pass pack_size.
+
 2011-01-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcs/StreamingDMCS.cpp (StreamingDMCS::work): Not

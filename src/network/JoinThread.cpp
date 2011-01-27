@@ -255,15 +255,13 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
   PartialBeliefStateVecPtr& bsv = (*partial_eqs)[next];
   bsv->clear();
 
-  // for now, let's put empty conflict and empty ass to notify the neighbors
-  ConflictVec* empty_conflicts = new ConflictVec;
-  PartialBeliefState* empty_ass  = new PartialBeliefState(system_size, PartialBeliefSet());
-  ConflictNotification* cn       = new ConflictNotification(empty_conflicts, empty_ass, 0);
+  // for now, let's put NULL conflicts and ass to notify the neighbors
+  // to continue sending next messages. Only the router sends some conflicts
+  ConflictNotification* cn = new ConflictNotification(0, 0, 0);
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
   
-  DMCS_LOG_TRACE(" Will push: conflict = " << *(cn->conflicts)
-		 <<", partial_ass = " << *(cn->partial_ass));
+  DMCS_LOG_TRACE(" Will push NULL conflicts and asses");
   
   ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
   
