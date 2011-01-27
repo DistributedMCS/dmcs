@@ -35,106 +35,113 @@
 #include "dmcs/ConflictNotification.h"
 #include "dmcs/Log.h"
 #include "dmcs/StreamingForwardMessage.h"
-#include "network/BaseStreamer.h"
 #include "solver/Conflict.h"
+#include "network/connection.hpp"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/string.hpp>
+
 
 namespace dmcs {
 
 /**
  * @brief
  */
-class NeighborOut : public BaseStreamer
+class NeighborOut
 {
 public:
-  NeighborOut(connection_ptr& conn_, 
+  NeighborOut()
+  { }
+
+
+  void
+  operator() (connection_ptr conn,
 	      ConcurrentMessageQueue* rnn,
-	      std::size_t invoker_, 
-	      std::size_t pack_size_)
-    : BaseStreamer(conn_),
-      router_neighbor_notif(rnn), 
-      invoker(invoker_), 
-      pack_size(pack_size_)
+	      std::size_t invoker, 
+	      std::size_t nid,
+	      std::size_t pack_size)
   {
-    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-    stream(boost::system::error_code());
+    while (1)
+      {
+	DMCS_LOG_TRACE("Wait for router notification, nid = " << nid);
+
+	ConflictNotification* cn = wait_router(rnn);
+
+	if (cn->type == ConflictNotification::SHUTDOWN)
+	  {
+	    DMCS_LOG_TRACE("Neighbor " << nid << " out.");
+	    return;
+	  }
+
+	ConflictVec* conflicts = cn->conflicts;
+	PartialBeliefState* partial_ass = cn->partial_ass;
+
+	DMCS_LOG_TRACE("Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
+
+	// write to network
+	const std::string& header = HEADER_REQ_STM_DMCS;
+	conn->async_write(header,
+			  boost::bind(&NeighborOut::handle_write_message, this,
+				      boost::asio::placeholders::error,
+				      conn,
+				      invoker,
+				      pack_size,
+				      conflicts,
+				      partial_ass
+				      )
+			  );
+
+	///@todo TK: conflicts and partial_ass leak here
+
+      }
   }
 
 
-  virtual
-  ~NeighborOut()
+  ConflictNotification*
+  wait_router(ConcurrentMessageQueue* router_neighbor_notif)
   {
-    DMCS_LOG_TRACE("Neighbor " << invoker << " out.");
-  }
-
-
-  void 
-  stream(const boost::system::error_code& e)
-  {
-    if (!e)
+    // wait for a notification from the Router
+    ConflictNotification* cn = 0;
+    void *ptr         = static_cast<void*>(&cn);
+    unsigned int p    = 0;
+    std::size_t recvd = 0;
+    
+    DMCS_LOG_TRACE("Listen to router...");
+    router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
+	
+    if (!ptr || !cn)
       {
-	// wait for a notification from the Router
-	ConflictNotification* cn;
-	void *ptr         = static_cast<void*>(&cn);
-	unsigned int p    = 0;
-	std::size_t recvd = 0;
-
-	DMCS_LOG_TRACE("Listen to router...");
-	router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
-
-	if (ptr && cn)
-	  {
-	    if (cn->type == ConflictNotification::SHUTDOWN)
-	      {
-		return;
-	      }
-
-	    ConflictVec* conflicts = cn->conflicts;
-	    PartialBeliefState* partial_ass = cn->partial_ass;
-
-	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
-
-	    // write to network
-	    std::string header = HEADER_REQ_STM_DMCS;
-	    conn->async_write(header, boost::bind(&NeighborOut::write_message, this,
-						  boost::asio::placeholders::error,
-						  conflicts,
-						  partial_ass
-						  )
-			      );
-
-	    ///@todo TK: conflicts and partial_ass leak here
-	  }
-	else
-	  {
-	    DMCS_LOG_FATAL("Got null message: " << ptr << " " << cn);
-	    assert(ptr != 0 && cn != 0);
-	  }
+	DMCS_LOG_FATAL("Got null message: " << ptr << " " << cn);
+	assert(ptr != 0 && cn != 0);
       }
-    else
-      {
-	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
-	throw std::runtime_error(e.message());
-      }
+
+    return cn;
   }
 
   
 
   void
-  write_message(const boost::system::error_code& e,
-		ConflictVec* conflicts, 
-		PartialBeliefState* partial_ass)
+  handle_write_message(const boost::system::error_code& e,
+		       connection_ptr conn,
+		       std::size_t invoker,
+		       std::size_t pack_size,
+		       ConflictVec* conflicts, 
+		       PartialBeliefState* partial_ass)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
     if (!e)
       {
 	StreamingForwardMessage mess(invoker, pack_size, conflicts, partial_ass);
-	conn->async_write(mess, boost::bind(&NeighborOut::clean_up, this,  
-					    boost::asio::placeholders::error,
-					    conflicts,
-					    partial_ass));
+	conn->async_write(mess,
+			  boost::bind(&NeighborOut::handle_clean_up, this,  
+				      boost::asio::placeholders::error,
+				      conflicts,
+				      partial_ass
+				      )
+			  );
       }
     else
       {
@@ -146,24 +153,25 @@ public:
 
 
   void
-  clean_up(const boost::system::error_code& e,
-	   ConflictVec* conflicts, 
-	   PartialBeliefState* partial_ass)
+  handle_clean_up(const boost::system::error_code& e,
+		  ConflictVec* conflicts, 
+		  PartialBeliefState* partial_ass)
   {
+    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
     if (!e)
       {
 	// We don't delete partial_ass here. It should be used in other places.
 
 	///@todo TK: conflicts and partial_ass leak here
 
-	for (ConflictVec::const_iterator it = conflicts->begin(); it != conflicts->end(); ++it)
+	for (ConflictVec::const_iterator it = conflicts->begin();
+	     it != conflicts->end(); ++it)
 	  {
 	    Conflict* c = *it;
 	    delete c;
 	    c = 0;
 	  }
-
-	stream(boost::system::error_code()); ///@todo really, recursion?
       }
     else
       {
@@ -173,10 +181,6 @@ public:
   }
 
 
-private:
-  ConcurrentMessageQueue* router_neighbor_notif;
-  std::size_t             invoker;
-  std::size_t             pack_size;
 };
 
 typedef boost::shared_ptr<NeighborOut> NeighborOutPtr;
