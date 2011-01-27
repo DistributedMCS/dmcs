@@ -5,7 +5,6 @@ noinst_HEADERS =  \
 		AsynClient.h \
 		BaseClient.h \
 		BaseHandler.h \
-		BaseStreamer.h \
 		Client.h \
 		Client.tcc \
 		ConcurrentMessageDispatcher.h \
@@ -16,7 +15,6 @@ noinst_HEADERS =  \
 		Handler.tcc \
 		JoinThread.h \
 		MessagingGateway.h \
-		NeighborIn.h \
 		NeighborOut.h \
 		NeighborThread.h \
 		OutputThread.h \
