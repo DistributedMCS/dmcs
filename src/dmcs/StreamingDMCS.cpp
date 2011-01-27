@@ -72,7 +72,7 @@ namespace dmcs {
     router_neighbors_notif(new ConcurrentMessageQueueVec),
     c2o(new HashedBiMap),
     buf_count(bc)
-{ }
+  { }
 
 
 
@@ -238,10 +238,9 @@ StreamingDMCS::start_up()
 
   if (no_nbs > 0) // not a leaf context
     {
-
       DMCS_LOG_TRACE("Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
-      DMCS_LOG_TRACE("router_neighbors_notif.size() = ");
-      DMCS_LOG_TRACE(router_neighbors_notif->size());
+
+      DMCS_LOG_TRACE("router_neighbors_notif.size() = " << router_neighbors_notif->size());
 
       assert (router_neighbors_notif->size() == no_nbs);
 
@@ -274,6 +273,9 @@ void
 StreamingDMCS::work()
 {
   // interrupt SAT thread
+#warning NOT IMPLEMENTED, WWWAAAAAAHHH
+  DMCS_LOG_DEBUG("Work is missing");
+
 }
 
 
