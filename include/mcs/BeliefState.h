@@ -518,6 +518,18 @@ struct PartialBeliefSet
     state_bit = pb.state_bit;
   }
 
+  PartialBeliefSet&
+  operator= (const PartialBeliefSet& pb)
+  {
+    if (this != &pb)
+      {
+	assert (pb.value_bit.size() == pb.state_bit.size());
+	value_bit = pb.value_bit;
+	state_bit = pb.state_bit;
+      }
+    return *this;
+  }
+
   inline std::size_t
   size() const
   {

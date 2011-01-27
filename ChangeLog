@@ -1,8 +1,29 @@
 2011-01-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/dmcs/StreamingDMCS.cpp (StreamingDMCS::work): Not
+	implemented yet.
+
+	* include/network/NeighborOut.h: Merge NeighborIn into
+	NeighborThread and threadify NeighborOut.
+	* include/network/NeighborThread.h: Likewise.
+
+	* include/network/BaseStreamer.h: Remove.
+	* include/network/Makefile.am: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+
+	* include/mcs/BeliefState.h: Add operator=.
+
+	* include/dmcs/StreamingBackwardMessage.h: Typo.
+	* include/network/JoinThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* examples/diamond.opt: Fix epsilon bit in V.
+
 	* testsuite/Makefile.am (testInterfaceRelSat_LDADD): Add libdmcs.a
 
 	* include/network/JoinThread.h: Use PODs as thread parameters and implement shutdown.
+
 	* include/network/Handler.h: Likewise.
 	* include/network/Handler.tcc: Likewise.
 	* include/network/NeighborIn.h: Likewise.
