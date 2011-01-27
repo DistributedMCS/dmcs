@@ -273,6 +273,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					    CmdTypePtr cmd,
 					    bool first_call)
 {
+  assert(this == hdl.get());
+
   if (!e)
     {
       // get the unique ID from the port of the connection for creating a unique message gateway just for this session
@@ -337,7 +339,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
       // back to waiting for incoming message
 
-      DMCS_LOG_TRACE("Back to waiting for incoming message");
+      DMCS_LOG_TRACE("Waiting for incoming message from " << invoker << " at " << port << "(" << first_call << ")");
 
       boost::shared_ptr<std::string> header(new std::string);
 
@@ -368,6 +370,8 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 						  boost::shared_ptr<std::string> header,
 						  std::size_t pack_size)
 {
+  assert(this == hdl.get());
+
   if (!e)
     {
       // Check header
