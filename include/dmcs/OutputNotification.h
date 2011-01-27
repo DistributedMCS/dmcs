@@ -40,11 +40,19 @@ namespace dmcs {
 // this to just an integer
 struct OutputNotification
 {
-  OutputNotification(std::size_t pack_size_)
-    : pack_size(pack_size_)
+  enum NotificationType
+    {
+      REQUEST = 0,
+      SHUTDOWN
+    };
+
+  OutputNotification(std::size_t pack_size_, NotificationType t = REQUEST)
+    : pack_size(pack_size_),
+      type(t)
   { }
   
   std::size_t pack_size;
+  NotificationType type;
 };
 
 } // namespace dmcs

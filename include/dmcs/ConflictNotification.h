@@ -30,10 +30,6 @@
 #ifndef CONFLICT_NOTIFICATION_H
 #define CONFLICT_NOTIFICATION_H
 
-#include <boost/thread.hpp>
-#include <boost/thread/future.hpp>
-#include <boost/shared_ptr.hpp>
-
 #include "mcs/BeliefState.h"
 #include "solver/Conflict.h"
 
@@ -41,25 +37,39 @@ namespace dmcs {
 
 struct ConflictNotification
 {
-  ConflictNotification(ConflictVecPtr cs,
-		       PartialBeliefState* pa)
-    : val(0),
-      conflicts(cs),
-      partial_ass(pa)
-  { }
+  enum NotificationType
+    {
+      REQUEST = 0,
+      SHUTDOWN
+    };
 
-  ConflictNotification(std::size_t v,
-		       ConflictVecPtr cs,
-		       PartialBeliefState* pa)
+
+  ConflictNotification(ConflictVec* cs,
+		       PartialBeliefState* pa,
+		       std::size_t v = 0,
+		       NotificationType t = REQUEST)
     : val(v),
       conflicts(cs),
-      partial_ass(pa)
-  { }
+      partial_ass(pa),
+      type(t)
+  { 
+    assert(cs != 0 || t == SHUTDOWN);
+    assert(t == REQUEST || t == SHUTDOWN);
+  }
   
-  std::size_t  val;                // from SAT    --> Router:      val == id of the neighbor to send the assignment
-                                   // from Router --> NeighborOut: val is now unused
-  ConflictVecPtr      conflicts;
-  PartialBeliefState* partial_ass; // partial assignment
+  // from SAT    --> Router:      val == id of the neighbor to send the assignment
+  // from Router --> NeighborOut: val is now unused
+  /// neighbor id
+  std::size_t val;
+
+  /// list of conflicts
+  ConflictVec* conflicts;
+
+  /// partial assignment
+  PartialBeliefState* partial_ass;
+
+  /// notification type
+  NotificationType type;
 };
 
 } // namespace dmcs

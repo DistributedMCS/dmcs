@@ -45,7 +45,7 @@ public:
   StreamingForwardMessage()
     : invoker(0),
       pack_size(0), 
-      // conflicts(0),
+      conflicts(0),
       partial_ass(0)
   { }
 
@@ -55,7 +55,7 @@ public:
 
   StreamingForwardMessage(std::size_t i,
 			  std::size_t ps, 
-			  ConflictVecPtr cs,
+			  ConflictVec* cs,
 			  PartialBeliefState* pa)
     : invoker(i),
       pack_size(ps), 
@@ -66,6 +66,8 @@ public:
       {
 	DMCS_LOG_TRACE("Watch out! NULL partial_ass");
       }
+
+    assert (cs != 0);
   }
 
   std::size_t
@@ -80,7 +82,7 @@ public:
     return pack_size;
   }
 
-  ConflictVecPtr
+  ConflictVec*
   getConflicts() const
   {
     return conflicts;
@@ -93,8 +95,9 @@ public:
   }
 
   void
-  setConflict(ConflictVecPtr cs)
+  setConflict(ConflictVec* cs)
   {
+    assert(cs != 0);
     conflicts = cs;
   }
 
@@ -112,7 +115,7 @@ public:
 private:
   std::size_t         invoker;      // ID of the invoking context
   std::size_t         pack_size;    // The number of models in a package that the invoker expects
-  ConflictVecPtr      conflicts;    // A global conflict that the receiver should obey
+  ConflictVec*        conflicts;    // A global conflict that the receiver should obey
   PartialBeliefState* partial_ass;  // The partial assignment of the whole system
 };
 

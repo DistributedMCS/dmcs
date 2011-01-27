@@ -30,24 +30,30 @@
 #ifndef STREAMING_DMCS_NOTIFICATION_H
 #define STREAMING_DMCS_NOTIFICATION_H
 
-#include <boost/thread/future.hpp>
-#include <boost/shared_ptr.hpp>
-
 namespace dmcs {
 
 struct StreamingDMCSNotification
 {
+  enum NotificationType
+    {
+      REQUEST = 0,
+      SHUTDOWN
+    };
+
   StreamingDMCSNotification(std::size_t invoker_,
 			    std::size_t pack_size_,
-			    std::size_t port_)
+			    std::size_t port_,
+			    NotificationType t = REQUEST)
     : invoker(invoker_), 
       pack_size(pack_size_), 
-      port(port_)
+      port(port_),
+      type(t)
   { }
   
   std::size_t invoker;
   std::size_t pack_size;
   std::size_t port;
+  NotificationType type;
 };
 
 } // namespace dmcs

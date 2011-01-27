@@ -32,6 +32,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
+
 #include "dmcs/BaseDMCS.h"
 #include "dmcs/ConflictNotification.h"
 #include "dmcs/StreamingForwardMessage.h"
@@ -54,6 +55,7 @@ public:
   ///@todo: MD: define appropriate type wrt. DMCS_STATS_INFO or not. Keep
   /// in mind that with StreamingDMCS, we don't return BeliefStates
   /// but rather send them to a message queue
+  #warning no DMCS_STATS_INFO support
 #else
   typedef bool dmcs_value_type;
   typedef bool dmcs_return_type;
@@ -68,14 +70,15 @@ public:
   ~StreamingDMCS();
 
   void
-  loop(ConcurrentMessageQueuePtr& notif_from_handler);
+  loop(ConcurrentMessageQueue* notif_from_handler);
 
 private:
   void
-  listen(ConcurrentMessageQueuePtr notif_from_handler,
+  listen(ConcurrentMessageQueue* notif_from_handler,
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
-	 std::size_t& port);
+	 std::size_t& port,
+	 StreamingDMCSNotification::NotificationType& type);
 
   void
   initialize(std::size_t invoker, 
@@ -99,8 +102,9 @@ private:
   ThreadVecPtr          neighbor_threads;
   MessagingGatewayBCPtr mg;
   ConcurrentMessageQueuePtr    dmcs_sat_notif;
+  ConcurrentMessageQueuePtr    sat_router_notif;
   ConcurrentMessageQueueVecPtr router_neighbors_notif;
-
+  HashedBiMapPtr c2o;
   std::size_t buf_count;
 };
 
