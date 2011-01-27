@@ -254,7 +254,7 @@ Handler<StreamingCommandType>::~Handler()
 
   streaming_dmcs_thread->join();
 
-  DMCS_LOG_TRACE("Cleanup threads and messages")
+  DMCS_LOG_TRACE("Cleanup threads and messages");
 
   delete mess_output;
   delete mess_dmcs;
