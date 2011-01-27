@@ -139,8 +139,9 @@ testJoinThread_LDADD = \
 
 testInterfaceRelSat_SOURCES = testInterfaceRelSat.cpp
 testInterfaceRelSat_LDADD = \
-	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/solver/libsolver.a \
-	$(top_builddir)/relsat-20070104/librelsat.a
+	$(top_builddir)/relsat-20070104/librelsat.a \
+	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/dmcs/liblog.a
