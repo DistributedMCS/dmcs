@@ -96,7 +96,7 @@ typedef boost::shared_ptr<StreamingBackwardMessage> StreamingBackwardMessagePtr;
 
 } // namespace dmcs
 
-#endif // STREAMING_FORWARD_MESSAGE_H
+#endif // STREAMING_BACKWARD_MESSAGE_H
 
 // Local Variables:
 // mode: C++

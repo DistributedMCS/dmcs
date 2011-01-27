@@ -30,7 +30,7 @@
 #ifndef JOIN_THREAD_H
 #define JOIN_THREAD_H
 
-#include "bm/bm.h"
+#include <bm/bm.h>
 
 #include "mcs/BeliefState.h"
 #include "mcs/HashedBiMap.h"

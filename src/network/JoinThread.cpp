@@ -67,9 +67,12 @@ JoinThread::import_belief_states(std::size_t noff,
   if (import_state == FILLING_UP)
     {
       mark_prev_end = bsv->size();
-      /*      mid_it_ref = --bsv->end();
+
+#if 0      
+      mid_it_ref = --bsv->end();
       DMCS_LOG_DEBUG("Begin FILLING UP mode.");
-      DMCS_LOG_DEBUG("mid_it_ref == " << **mid_it_ref);*/
+      DMCS_LOG_DEBUG("mid_it_ref == " << **mid_it_ref);
+#endif //0
     }
 
   for (std::size_t i = 0; i < peq_cnt; ++i)
@@ -94,8 +97,9 @@ JoinThread::import_belief_states(std::size_t noff,
 	  break;
 	}
 
+      DMCS_LOG_TRACE("Storing belief state " << i << " from " << noff);
+
       // normal case, just got a belief state
-      //DMCS_LOG_TRACE("Push 1 belief state into bsv");
       bsv->push_back(bs); 
     }
   
@@ -109,14 +113,15 @@ JoinThread::import_belief_states(std::size_t noff,
       mid_it_ref = bsv->begin();
       std::advance(mid_it_ref, mark_prev_end);
 
-      /*      DMCS_LOG_DEBUG("Before end FILLING UP mode.");
+#if 0
+      DMCS_LOG_DEBUG("Before end FILLING UP mode.");
       DMCS_LOG_DEBUG("mid_it_ref == " << **mid_it_ref);
-      ++mid_it_ref;*/
+      ++mid_it_ref;
+#endif //0
     }
 
   // turn on the bit that is respective to this context
   in_mask.set(noff);
-  //  DMCS_LOG_TRACE("DONE");  
 
   return eom; 
 }
@@ -127,35 +132,40 @@ JoinThread::import_belief_states(std::size_t noff,
 std::size_t 
 JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
 {
-  /*  DMCS_LOG_DEBUG(" Join guided by run_it:");
+#if 1
+  DMCS_LOG_TRACE("Join guided by run_it:");
   for (PartialBeliefStateIteratorVec::const_iterator it = run_it->begin();
        it != run_it->end(); ++it)
     {
       DMCS_LOG_DEBUG(" " << ***it);
-      }*/
+    }
+#endif //0
 
   // We don't need the interface V here
   PartialBeliefStateIteratorVec::const_iterator it = run_it->begin();
-  //DMCS_LOG_DEBUG(" Get first belief state");
-  PartialBeliefState* first_bs = **it;
 
-  // DMCS_LOG_TRACCE(" Initialize result");
+  PartialBeliefState* first_bs = **it;
   PartialBeliefState* result = new PartialBeliefState(*first_bs);
 
+  //DMCS_LOG_TRACE("first belief state: " << *first_bs << "Initialize result: " << *result);
+
   //DMCS_LOG_DEBUG(" Iteratively join with next belief states");
-  ++it;
-  for (; it != run_it->end(); ++it)
+
+  for (++it; it != run_it->end(); ++it)
     {
       PartialBeliefState* next_bs = **it;
       if (!combine(*result, *next_bs))
 	{
-	  //	  DMCS_LOG_DEBUG("INCONSISTENT!\n");
-
+	  DMCS_LOG_TRACE("INCONSISTENT!");
 	  return 0;
 	}
+
+#if 1
+      DMCS_LOG_TRACE("Intermediate RESULT = " << *result);
+#endif//0      
     }
 
-  DMCS_LOG_DEBUG(" RESULT = " << *result << "\n");
+  DMCS_LOG_TRACE("Final RESULT = " << *result << " ... Sending to JOIN_OUT");
 
   // Joining succeeded. Now send this input to SAT solver via JOIN_OUT_MQ
   // be careful that we are blocked here. Use timeout sending instead?
@@ -175,7 +185,9 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
   // initialization
   assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
 
-  /*  DMCS_LOG_DEBUG(" Going to join the following");
+
+#if 1
+  DMCS_LOG_DEBUG(" Going to join the following");
   PartialBeliefStateIteratorVec::const_iterator b = beg_it->begin();
   PartialBeliefStateIteratorVec::const_iterator e = end_it->begin();
   for (; b != beg_it->end(); ++b, ++e)
@@ -185,7 +197,8 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
 	  DMCS_LOG_DEBUG(" " << **it);
 	}
       DMCS_LOG_DEBUG(" ");
-      }*/
+      }
+#endif //0
 
   std::size_t n = partial_eqs->size();
 
@@ -203,7 +216,7 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
       join(run_it);
       inc = n-1;
 
-      // find the greates index whose running iterator incrementable to a non-end()
+      // find the last index whose running iterator incrementable to a non-end()
       while (inc >= 0)
 	{
 	  PartialBeliefStateVec::const_iterator& run_it_ref = (*run_it)[inc];
@@ -285,6 +298,8 @@ JoinThread::operator()(std::size_t nbs,
   bm::bvector<> in_mask;
   bm::bvector<> pack_full;
 
+  DMCS_LOG_TRACE("number of neighbors: " << no_nbs);
+
   // set up a package of empty BeliefStates
   PartialBeliefStatePackagePtr partial_eqs(new PartialBeliefStatePackage);
   for (std::size_t i = 0; i < no_nbs; ++i)
@@ -295,27 +310,28 @@ JoinThread::operator()(std::size_t nbs,
 
   PartialBeliefStateIteratorVecPtr beg_it(new PartialBeliefStateIteratorVec(no_nbs));
   PartialBeliefStateIteratorVecPtr mid_it(new PartialBeliefStateIteratorVec(no_nbs));
-  //DMCS_LOG_TRACE("no_nbs = " << no_nbs);
 
   while (!stop)
     {
       // look at JOIN_IN_MQ for notification of new models arrival
       std::size_t prio = 0;
       int timeout = 0;
-      // notification from neighbor thread
 
+      // notification from neighbor thread
       MessagingGatewayBC::JoinIn nn = 
 	mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
 
-      DMCS_LOG_TRACE("Received: " << nn.ctx_offset << ", " << nn.peq_cnt);
+      DMCS_LOG_TRACE("Received from offset " << nn.ctx_offset << ", " << nn.peq_cnt << " peqs to pick up");
 
       if (nn.peq_cnt == 0)
-	{ // This neighbor is either out of models of UNSAT
+	{ 
+	  // This neighbor is either out of models or UNSAT
 
 	  assert (import_state != FILLING_UP);
 
 	  if (import_state == START_UP)
-	    { // UNSAT
+	    {
+	      // UNSAT
 	      
 	      // The current C, S to the neighbors is bad. I need to
 	      // inform the SAT solver about this by sending him a
@@ -323,41 +339,57 @@ JoinThread::operator()(std::size_t nbs,
 
 	      // Also tell the neighbors (via NeighborOut) to stop
 	      // returning models.
+
+	      DMCS_LOG_TRACE("import_state is STARTUP and peq=0.");
 	    }
 	  else
-	    { // out of models, import == GETTING_NEXT
+	    {
+	      // out of models, import == GETTING_NEXT
 
 	      // We need to ask the next neighbor (now ordered by the
 	      // offset) to give the next package of models.
 
 	      next_neighbor_offset = nn.ctx_offset + 1;
-	      //DMCS_LOG_TRACE(" Increase next_neighbor_offset. Now is: " << next_neighbor_offset);
+
+	      DMCS_LOG_TRACE("Increase next_neighbor_offset. Now is: " << next_neighbor_offset);
+
 	      if (next_neighbor_offset == no_nbs)
 		{
+		  DMCS_LOG_TRACE("Time to say good bye.");
+
 		  stop = true;
 		}
 	      else
 		{
+		  DMCS_LOG_TRACE("Going to ask for next batch of peqs with next_neighbor_offset == " << next_neighbor_offset);
+
 		  asking_next = true;
-		  //DMCS_LOG_TRACE(" Going to ask for next with next_neighbor_offset == " << next_neighbor_offset);
 		  ask_for_next(partial_eqs, next_neighbor_offset);
 		}
 	    }
 	} // (nn.peq_cnt == 0)
       else
-	{ // (nn.peq_cnt != 0)
-	  // first we import the belief states received
-	  import_belief_states(nn.ctx_offset, nn.peq_cnt, partial_eqs, 
-			       in_mask, pack_full,
-			       beg_it, mid_it, import_state);
+	{
+	  // (nn.peq_cnt != 0)
 
-	  DMCS_LOG_TRACE("PartialBeliefState package received: \n" << *partial_eqs);
+	  // first we import the belief states received
+	  import_belief_states(nn.ctx_offset,
+			       nn.peq_cnt,
+			       partial_eqs, 
+			       in_mask,
+			       pack_full,
+			       beg_it,
+			       mid_it,
+			       import_state);
+
+	  DMCS_LOG_TRACE("PartialBeliefState package received:");
+	  DMCS_LOG_TRACE(*partial_eqs);
 
 	  // then if this was a "NEXT" request to this neighbor, we
 	  // have to restart the neighbors before him
 	  if (asking_next)
 	    {
-	      DMCS_LOG_TRACE(" Realized that we are in GETTING_NEXT mode.");
+	      DMCS_LOG_TRACE("Realized that we are in GETTING_NEXT mode.");
 
 	      assert (import_state != START_UP);
 	      assert (nn.ctx_offset == next_neighbor_offset);
@@ -394,6 +426,7 @@ JoinThread::operator()(std::size_t nbs,
 		      PartialBeliefStateVecPtr& bsv = (*partial_eqs)[i];
 		      (*mid_it)[i] = bsv->end();
 		    }
+
 		  join(partial_eqs, beg_it, mid_it);
 		}
 	      else
@@ -425,6 +458,7 @@ JoinThread::operator()(std::size_t nbs,
 		}
 
 	      DMCS_LOG_TRACE(" pack_full.count_range == " << pack_full.count_range(0, no_nbs+1));
+
 	      if (pack_full.count_range(0, no_nbs+1) == no_nbs)
 		{
 		  DMCS_LOG_TRACE(" Pack full, go to get next models");
@@ -441,7 +475,7 @@ JoinThread::operator()(std::size_t nbs,
 
     } // while (!stop)
 
-  DMCS_LOG_TRACE(" DONE. Send a NULL model to JOIN_OUT_MQ");
+  DMCS_LOG_TRACE("DONE. Send a NULL model to JOIN_OUT_MQ");
   mg->sendModel(0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
 }
 

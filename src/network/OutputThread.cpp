@@ -39,8 +39,8 @@
 
 namespace dmcs {
 
-OutputThread::OutputThread()
-{ }
+  OutputThread::OutputThread()
+  { }
 
 
 OutputThread::~OutputThread()
@@ -259,7 +259,8 @@ OutputThread::handle_written_header(const boost::system::error_code& e,
       boost::asio::ip::tcp::socket& sock = conn->socket();
       boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
       
-      DMCS_LOG_TRACE("return message == " << return_mess << " on port " << ep.port());
+      DMCS_LOG_TRACE("return message to port " << ep.port());
+      DMCS_LOG_TRACE(return_mess);
       
       conn->async_write(return_mess,
 			boost::bind(&OutputThread::loop, this,
