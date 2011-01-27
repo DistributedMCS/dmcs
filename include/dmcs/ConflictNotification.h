@@ -40,6 +40,7 @@ struct ConflictNotification
   enum NotificationType
     {
       REQUEST = 0,
+      NEXT,
       SHUTDOWN
     };
 
@@ -53,8 +54,8 @@ struct ConflictNotification
       partial_ass(pa),
       type(t)
   { 
-    assert(cs != 0 || t == SHUTDOWN);
-    assert(t == REQUEST || t == SHUTDOWN);
+    assert(cs != 0 || t == SHUTDOWN || t == NEXT);
+    assert(t == REQUEST || t == SHUTDOWN || t == NEXT);
   }
   
   // from SAT    --> Router:      val == id of the neighbor to send the assignment

@@ -74,12 +74,13 @@ public:
 	    DMCS_LOG_TRACE("Neighbor " << nid << " out.");
 	    return;
 	  }
-
-	ConflictVec* conflicts = cn->conflicts;
-	PartialBeliefState* partial_ass = cn->partial_ass;
-
-	if (conflicts && partial_ass)
+	else if (cn->type == ConflictNotification::REQUEST)
 	  {
+	    ConflictVec* conflicts = cn->conflicts;
+	    PartialBeliefState* partial_ass = cn->partial_ass;
+
+	    assert(conflicts && partial_ass);
+
 	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
 	    
 	    // write to network
@@ -95,19 +96,29 @@ public:
 					  )
 			      );
 	  }
-	else
-	  { // We should only send HEADER_NEXT
+	else if (cn->type == ConflictNotification::NEXT)
+	  {
+	    // We should only send HEADER_NEXT
 	    boost::asio::ip::tcp::socket& sock = conn->socket();
 	    boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
 	    DMCS_LOG_TRACE("Got NULL conflicts and ass, going to send HEADER_NEXT to port " << ep.port());
 
-	    boost::shared_ptr<std::string> header(new std::string(HEADER_NEXT));
-	    conn->async_write(*header,
+	    //boost::shared_ptr<std::string> header(new std::string(HEADER_NEXT));
+
+	    ConflictVec* cs = 0;
+
+	    const std::string& header = HEADER_NEXT;
+
+	    conn->async_write(header,
 			      boost::bind(&NeighborOut::handle_clean_up, this,  
 					  boost::asio::placeholders::error,
-					  conflicts
+					  cs
 					  )
 			      );
+	  }
+	else
+	  {
+	    assert(false && "should not come here");
 	  }
 
 	///@todo TK: conflicts and partial_ass leak here

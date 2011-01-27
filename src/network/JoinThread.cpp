@@ -257,7 +257,7 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
 
   // for now, let's put NULL conflicts and ass to notify the neighbors
   // to continue sending next messages. Only the router sends some conflicts
-  ConflictNotification* cn = new ConflictNotification(0, 0, 0);
+  ConflictNotification* cn = new ConflictNotification(0, 0, 0, ConflictNotification::NEXT);
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
   

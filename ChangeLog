@@ -1,17 +1,10 @@
-2011-01-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-	* src/network/JoinThread.cpp (ask_for_next): Only send NULL
-	pointers.
-
-	* include/network/NeighborOut.h: When receive NULL pointers, send
-	out HEADER_NEXt only.
-
-	* include/network/Handler.tcc: When receive HEADER_NEXT, inform
-	OutputThread only.
-
-	* include/network/Handler.h: Pass pack_size.
-
 2011-01-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Add sanity checks.
+
+	* include/dmcs/ConflictNotification.h: Add NEXT notification type.
+	* include/network/NeighborOut.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
 
 	* src/dmcs/StreamingDMCS.cpp (StreamingDMCS::work): Not
 	implemented yet.
@@ -36,7 +29,6 @@
 	* testsuite/Makefile.am (testInterfaceRelSat_LDADD): Add libdmcs.a
 
 	* include/network/JoinThread.h: Use PODs as thread parameters and implement shutdown.
-
 	* include/network/Handler.h: Likewise.
 	* include/network/Handler.tcc: Likewise.
 	* include/network/NeighborIn.h: Likewise.
@@ -68,6 +60,19 @@
 	* include/dmcs/StreamingForwardMessage.h: Likewise.
 	* include/dmcs/StreamingDMCS.h: Likewise.
 	* include/dmcs/StreamingCommandType.h: Likewise.
+
+2011-01-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp (ask_for_next): Only send NULL
+	pointers.
+
+	* include/network/NeighborOut.h: When receive NULL pointers, send
+	out HEADER_NEXt only.
+
+	* include/network/Handler.tcc: When receive HEADER_NEXT, inform
+	OutputThread only.
+
+	* include/network/Handler.h: Pass pack_size.
 
 2011-01-26  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
