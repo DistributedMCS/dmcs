@@ -258,6 +258,7 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
   ConflictNotification* cn;
   if (nt == ConflictNotification::NEXT)
     {
+      DMCS_LOG_TRACE(" Will push NULL conflicts and asses");
       cn = new ConflictNotification(0, 0, 0, ConflictNotification::NEXT);
     }
   else
@@ -265,11 +266,11 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
       ConflictVec* conflicts = new ConflictVec;
       PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
       cn = new ConflictNotification(conflicts, partial_ass, 0, nt);
+      DMCS_LOG_TRACE(" Will push conflict = " << *conflicts << ", partial_ass = " << *partial_ass);
+      DMCS_LOG_TRACE(" notification type = " << nt);
     }
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
-  
-  DMCS_LOG_TRACE(" Will push NULL conflicts and asses");
   
   ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
   

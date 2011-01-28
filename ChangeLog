@@ -1,5 +1,10 @@
 2011-01-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/NeighborOut.h: Use string header.
+
+	* include/network/NeighborThread.h: Incoming thread: keep reading
+	after receiving EOF
+
 	* src/solver/RelSatSolver.cpp: Add debug info.
 
 	* src/network/JoinThread.cpp: Case distinction: when ask for NEXT,

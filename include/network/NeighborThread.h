@@ -199,6 +199,18 @@ private:
 	    // no message to read, inform the Joiner with (ctx_offset, 0)
 	    assert (header->find(HEADER_EOF) != std::string::npos);
 	    mg->sendJoinIn(0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+
+	    boost::shared_ptr<std::string> header(new std::string);
+	    
+	    // read from network
+	    DMCS_LOG_TRACE("Reading header from network, noff = " << noff);
+	    conn->async_read(*header,
+			     boost::bind(&NeighborThread::handle_read_header, this,  
+					 boost::asio::placeholders::error,
+					 header,
+					 noff
+					 )
+			     );
 	  }
       }
     else

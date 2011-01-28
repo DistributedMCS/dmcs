@@ -84,8 +84,10 @@ public:
 	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
 	    
 	    // write to network
-	    boost::shared_ptr<std::string> header(new std::string(HEADER_REQ_STM_DMCS));
-	    conn->async_write(*header,
+
+	    const std::string& header = HEADER_REQ_STM_DMCS;
+
+	    conn->async_write(header,
 			      boost::bind(&NeighborOut::handle_write_message, this,
 					  boost::asio::placeholders::error,
 					  conn,
