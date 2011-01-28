@@ -34,14 +34,19 @@ namespace dmcs {
 
 RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& rss)
   : relsatsolver(rss)
-{ }
+{ 
+  DMCS_LOG_TRACE("Destructor.");
+}
 
 void
 RelSatSolverThread::operator()()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  relsatsolver->solve();
+  while (1)
+    {
+      relsatsolver->solve();
+    }
 }
 
 } // namespace dmcs

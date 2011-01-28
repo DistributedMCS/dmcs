@@ -247,8 +247,7 @@ OutputThread::handle_written_header(connection_ptr conn,
   boost::asio::ip::tcp::socket& sock = conn->socket();
   boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
       
-  DMCS_LOG_TRACE("return message to port " << ep.port());
-  DMCS_LOG_TRACE(return_mess);
+  DMCS_LOG_TRACE("return message " << return_mess << " to port " << ep.port());
       
   conn->write(return_mess);
 }

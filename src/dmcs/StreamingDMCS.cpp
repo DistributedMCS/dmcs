@@ -302,11 +302,10 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
       if (!initialized)
 	{
 	  initialize(invoker, pack_size, port);
-	  start_up();
 	  initialized = true;
 	}
-
-      work();
+      start_up();
+      //      work();
     }
 }
 

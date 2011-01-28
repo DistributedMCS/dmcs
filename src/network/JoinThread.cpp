@@ -87,7 +87,7 @@ JoinThread::import_belief_states(std::size_t noff,
 	  // End of Package. Otherwise, the neighbor sent me some crap.
 	  assert (i == peq_cnt - 1);
 
-	  DMCS_LOG_TRACE("Reached a NULL model. set bit noff = " << noff);
+	  DMCS_LOG_TRACE("Reached a NULL model. set bit " << noff << " to TRUE.");
 	 
 	  // mark that this neighbor reached its pack_size. 
 	  pack_full.set(noff);
@@ -266,8 +266,7 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
       ConflictVec* conflicts = new ConflictVec;
       PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
       cn = new ConflictNotification(conflicts, partial_ass, 0, nt);
-      DMCS_LOG_TRACE(" Will push conflict = " << *conflicts << ", partial_ass = " << *partial_ass);
-      DMCS_LOG_TRACE(" notification type = " << nt);
+      DMCS_LOG_TRACE(" Will push conflict = " << *conflicts << ", partial_ass = " << *partial_ass << ", notification type = " << nt);
     }
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
@@ -279,6 +278,7 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
       delete ow_neighbor;
       ow_neighbor = 0;
     }
+
 }
 
 
@@ -297,7 +297,6 @@ JoinThread::operator()(std::size_t nbs,
   
   ImportStates import_state = START_UP;
 
-  bool stop         = false;
   bool asking_next  = false;
 
   std::size_t next_neighbor_offset = 0;
@@ -318,7 +317,7 @@ JoinThread::operator()(std::size_t nbs,
   PartialBeliefStateIteratorVecPtr beg_it(new PartialBeliefStateIteratorVec(no_nbs));
   PartialBeliefStateIteratorVecPtr mid_it(new PartialBeliefStateIteratorVec(no_nbs));
 
-  while (!stop)
+  while (1)
     {
       // look at JOIN_IN_MQ for notification of new models arrival
       std::size_t prio = 0;
@@ -362,9 +361,9 @@ JoinThread::operator()(std::size_t nbs,
 
 	      if (next_neighbor_offset == no_nbs)
 		{
-		  DMCS_LOG_TRACE("Time to say good bye.");
-
-		  stop = true;
+		  DMCS_LOG_TRACE("Send a NULL model to JOIN_OUT_MQ");
+		  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+		  next_neighbor_offset = 0;
 		}
 	      else
 		{
@@ -480,10 +479,7 @@ JoinThread::operator()(std::size_t nbs,
 
 	} // (nn.peq_cnt != 0)
 
-    } // while (!stop)
-
-  DMCS_LOG_TRACE("DONE. Send a NULL model to JOIN_OUT_MQ");
-  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+    } // while (1)
 }
 
 

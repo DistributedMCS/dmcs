@@ -1,5 +1,12 @@
 2011-01-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/solver/RelSatSolver.cpp: Refresh after each solve.
+
+	* src/network/JoinThread.cpp: Loop forever.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+	* src/dmcs/StreamingDMCS.cpp: Start_up any time called.
+
 	* include/network/NeighborOut.h: Use string header.
 
 	* include/network/NeighborThread.h: Incoming thread: keep reading

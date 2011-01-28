@@ -243,7 +243,7 @@ RelSatSolver::import_partial_ass(const PartialBeliefState* partial_ass)
 void
 RelSatSolver::solve()
 {
-  // wait for conflict and partial_ass from Handler
+  // wait for conflict and partial_ass from DMCS
   DMCS_LOG_TRACE(" Fresh solving. Wait for a message from DMCS");
   ConflictNotification* cn;
   void *ptr         = static_cast<void*>(&cn);
@@ -265,18 +265,18 @@ RelSatSolver::solve()
 
 #if 0
 	if (partial_ass == 0)
-	{
-	partial_ass = new_partial_ass;
-	DMCS_LOG_TRACE("First time. Going to start");
-	}
+	  {
+	    partial_ass = new_partial_ass;
+	    DMCS_LOG_TRACE("First time. Going to start");
+	  }
 	else if ((*partial_ass) != (*new_partial_ass))
-	{ // now restart
-	partial_ass = new_partial_ass;
-	DMCS_LOG_TRACE("New partial_ass. Going to restart");
-	}
+	  { // now restart
+	    partial_ass = new_partial_ass;
+	    DMCS_LOG_TRACE("New partial_ass. Going to restart");
+	  }
 	else
-	{ // continue
-	}
+	  { // continue
+	  }
 #endif // 0
   
       // remove input part of the theory (from last solve)
@@ -287,6 +287,7 @@ RelSatSolver::solve()
 	{
 	  DMCS_LOG_TRACE("Leaf case. Solve now.");
 	  eResult = xSATSolver->eSolve();
+	  xSATSolver->refresh();
 	}
       else
 	{
@@ -303,8 +304,8 @@ RelSatSolver::solve()
 		  break;
 		}
 	      DMCS_LOG_TRACE("A fresh solving.");
-	      xSATSolver->refresh();
 	      eResult = xSATSolver->eSolve();
+	      xSATSolver->refresh();
 	    }
 	}
 
