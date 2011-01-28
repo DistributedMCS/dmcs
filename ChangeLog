@@ -1,3 +1,10 @@
+2011-01-28  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/connection.hpp (connection::write): Add synchronous write().
+
+	* include/network/OutputThread.h: Fix OutputThread loop.
+	* src/network/OutputThread.cpp: Likewise.
+
 2011-01-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/Handler.tcc: Add sanity checks.
