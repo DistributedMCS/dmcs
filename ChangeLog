@@ -1,5 +1,7 @@
 2011-01-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/JoinThread.cpp: Reset state of JoinThread.
+
 	* src/solver/RelSatSolver.cpp: Refresh after each solve.
 
 	* src/network/JoinThread.cpp: Loop forever.

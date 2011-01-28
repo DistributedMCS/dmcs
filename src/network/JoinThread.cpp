@@ -361,9 +361,15 @@ JoinThread::operator()(std::size_t nbs,
 
 	      if (next_neighbor_offset == no_nbs)
 		{
+		  // reset to the starting state
+		  next_neighbor_offset = 0;
+		  asking_next = false;
+		  import_state = START_UP;
+		  in_mask.clear();
+		  pack_full.clear();
+
 		  DMCS_LOG_TRACE("Send a NULL model to JOIN_OUT_MQ");
 		  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
-		  next_neighbor_offset = 0;
 		}
 	      else
 		{
