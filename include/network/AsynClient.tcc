@@ -134,9 +134,11 @@ AsynClient<ForwardMessType, BackwardMessType>::read_header(const boost::system::
 
   if (!e)
     {
-      conn->async_read(received_header,
+      boost::shared_ptr<std::string> header(new std::string);
+      
+      conn->async_read(*header,
 		       boost::bind(&AsynClient::handle_read_header, this,
-				   boost::asio::placeholders::error, conn));
+				   boost::asio::placeholders::error, conn, header));
     }
   else
     {
@@ -149,15 +151,17 @@ AsynClient<ForwardMessType, BackwardMessType>::read_header(const boost::system::
 
 template<typename ForwardMessType, typename BackwardMessType>
 void
-AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::system::error_code& e, connection_ptr conn)
+AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::system::error_code& e, 
+								  connection_ptr conn,
+								  boost::shared_ptr<std::string> header)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!e)
     {
-      DMCS_LOG_DEBUG("Received header = " << received_header);
+      DMCS_LOG_DEBUG("Received header = " << *header);
 
-      if (received_header.compare(HEADER_EOF) == 0)
+      if (header->compare(HEADER_EOF) == 0)
 	{
 	  terminate();
 	}
@@ -205,7 +209,8 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
 
   if (!e)
     {
-      no_answers++;
+      const PartialBeliefStateVecPtr bss = result.getBeliefStates();
+      no_answers += bss->size();
 
       DMCS_LOG_TRACE("result = " << result << " #" << no_answers);
 
@@ -214,17 +219,14 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
 	  callback(result);
 	}
 
-      const std::string& header_next = HEADER_REQ_STM_DMCS;
-
-      DMCS_LOG_TRACE("send " << header_next);
-
-      //      std::cerr << "send " << header_next << std::endl;
-      //      std::cerr << "result == " << result << std::endl;
-
-      conn->async_write(header_next,
-			boost::bind(&AsynClient::send_message, this,
-				    boost::asio::placeholders::error, conn)
-			);
+      if ((mess.getPackSize() > 0) && (no_answers >= mess.getPackSize()))
+	{
+	  terminate();
+	}
+      else
+	{
+	  read_header(boost::system::error_code(), conn);
+	}
     }
   else
     {

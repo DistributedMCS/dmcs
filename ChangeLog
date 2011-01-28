@@ -1,5 +1,17 @@
 2011-01-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/solver/RelSatSolver.cpp: More debug info.
+
+	* include/network/Handler.tcc: Pass invoker to OutputThread, for
+	output_all (later).
+	* include/network/OutputThread.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/AsynClient.tcc: When gets up to k models, send terminate.
+
+	* include/network/AsynClient.h: Dirty trick for handle_read_header
+	with header as a parameter.
+
 	* src/network/JoinThread.cpp: Reset state of JoinThread.
 
 	* src/solver/RelSatSolver.cpp: Refresh after each solve.

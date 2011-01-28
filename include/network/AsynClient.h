@@ -80,8 +80,14 @@ private:
   void
   read_header(const boost::system::error_code& error, connection_ptr conn);
 
+  ///@todo: this is dirty
   void 
-  handle_read_header(const boost::system::error_code& error, connection_ptr conn);
+  handle_read_header(const boost::system::error_code& error, connection_ptr conn)
+  { }
+
+  void 
+  handle_read_header(const boost::system::error_code& error, connection_ptr conn,
+		     boost::shared_ptr<std::string> header);
 
   void 
   read_answer(const boost::system::error_code& error, connection_ptr conn);
@@ -92,8 +98,8 @@ private:
   void 
   finalize(const boost::system::error_code& error, connection_ptr /* conn */);
 
+  std::size_t      pack_size;
   std::size_t      no_answers;
-  std::string      received_header;
   ForwardMessType  mess;
   BackwardMessType result;
   CallbackFun      callback;

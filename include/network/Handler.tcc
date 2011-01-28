@@ -304,7 +304,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // the next pack_size models)
 
 	  OutputThread ot;
-	  output_thread = new boost::thread(ot, sesh->conn, pack_size, mg.get(), handler_output_notif.get());
+	  output_thread = new boost::thread(ot, sesh->conn, pack_size, mg.get(), handler_output_notif.get(), invoker);
 
 	  first_call = false;
 	}
@@ -371,6 +371,8 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 						  std::size_t pack_size)
 {
   assert(this == hdl.get());
+
+  DMCS_LOG_TRACE("Header == " << *header);
 
   if (!e)
     {

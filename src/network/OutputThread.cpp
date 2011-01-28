@@ -49,11 +49,57 @@ OutputThread::~OutputThread()
 }
 
 
+
 void
 OutputThread::operator()(connection_ptr c,
 			 std::size_t ps,
-			 MessagingGatewayBC* m,
-			 ConcurrentMessageQueue* hon)
+			 MessagingGatewayBC* mg,
+			 ConcurrentMessageQueue* hon,
+			 std::size_t invoker)
+{
+  if (ps == 0)
+    {
+      if (invoker == 0)
+	{
+	  // only output in an unlimited manner at the root
+	  // context. However, each time we output not more than
+	  // DEFAULT_PACKAGE_SIZE models
+	  output_all(c, mg);
+	}
+      else
+	{
+	  output_limit(c, DEFAULT_PACK_SIZE, mg, hon);
+	}
+    }
+  else
+    {
+      output_limit(c, ps, mg, hon);
+    }
+}
+
+
+
+void
+OutputThread::output_all(connection_ptr conn, MessagingGatewayBC* mg)
+{
+  while (1)
+    {
+      PartialBeliefStateVecPtr res(new PartialBeliefStateVec);
+      std::string header;
+
+      left_2_send = DEFAULT_PACK_SIZE;
+      collect_output(mg, res, header);
+      write_result(conn, res, header);
+    }
+}
+
+
+
+void
+OutputThread::output_limit(connection_ptr c,
+			   std::size_t ps,
+			   MessagingGatewayBC* m,
+			   ConcurrentMessageQueue* hon)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -163,7 +209,6 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 		{
 		  // decrease counter because we gained nothing so far.
 		  --i;
-		  //DMCS_LOG_TRACE(" Restart, i = " << i);
 		  continue;
 		}
 	    }
@@ -182,7 +227,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       
       DMCS_LOG_TRACE(" got #" << i << ": bs = " << *bs);
       
-      // Got something is a reasonable time. Continue collecting.
+      // Got something in a reasonable time. Continue collecting.
       res->push_back(bs);
     } // for
 }
@@ -204,10 +249,17 @@ OutputThread::write_result(connection_ptr conn,
 	  conn->write(header);
 	  handle_written_header(conn, res);
 	}
-      else // if (header.find(HEADER_EOF) == std::string::npos)
+      else
 	{
 	  assert (header.find(HEADER_EOF) != std::string::npos);
 	  
+	  if (res->size() > 0)
+	    {
+	      const std::string ans_header = HEADER_ANS;
+	      conn->write(ans_header);
+	      handle_written_header(conn, res);
+	    }
+
 	  // send EOF
 	  conn->write(header);
 	}

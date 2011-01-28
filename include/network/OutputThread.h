@@ -40,6 +40,8 @@
 
 namespace dmcs {
 
+const std::size_t DEFAULT_PACK_SIZE = 10;
+
 class OutputThread
 {
 public:
@@ -52,9 +54,19 @@ public:
   operator()(connection_ptr c,
 	     std::size_t ps,
 	     MessagingGatewayBC* m,
-	     ConcurrentMessageQueue* hon);
+	     ConcurrentMessageQueue* hon,
+	     std::size_t invoker);
 
 private:
+  void
+  output_all(connection_ptr conn, MessagingGatewayBC* mg);
+
+  void
+  output_limit(connection_ptr c,
+	       std::size_t ps,
+	       MessagingGatewayBC* m,
+	       ConcurrentMessageQueue* hon);
+
   bool
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif);
 

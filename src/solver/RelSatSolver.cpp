@@ -299,11 +299,12 @@ RelSatSolver::solve()
 	      xInstance->removeInput();
 	      if (!prepare_input())
 		{
+		  DMCS_LOG_TRACE("Got NULL input from JOIN_OUT_MQ");
 		  // send a NULL model to OUT_MQ to inform OutputThread
 		  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 		  break;
 		}
-	      DMCS_LOG_TRACE("A fresh solving.");
+	      DMCS_LOG_TRACE("A fresh solving. input = " << *input);
 	      eResult = xSATSolver->eSolve();
 	      xSATSolver->refresh();
 	    }
