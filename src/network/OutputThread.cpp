@@ -39,8 +39,8 @@
 
 namespace dmcs {
 
-  OutputThread::OutputThread()
-  { }
+OutputThread::OutputThread()
+{ }
 
 
 OutputThread::~OutputThread()
@@ -50,36 +50,34 @@ OutputThread::~OutputThread()
 
 
 void
-OutputThread::loop(const boost::system::error_code& e,
-		   connection_ptr conn,
-		   MessagingGatewayBC* mg,
-		   ConcurrentMessageQueue* handler_output_notif)
+OutputThread::operator()(connection_ptr c,
+			 std::size_t ps,
+			 MessagingGatewayBC* m,
+			 ConcurrentMessageQueue* hon)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  if (!e)
+  pack_size = ps;
+  collecting = false;
+
+  while (1)
     {
       PartialBeliefStateVecPtr res(new PartialBeliefStateVec);
-      std::string header = "";
+      std::string header;
 
       if (!collecting)
 	{
-	  if (!wait_for_trigger(handler_output_notif))
+	  if (!wait_for_trigger(hon))
 	    {
 	      return; // shutdown received
 	    }
 	}
       
-      collect_output(mg, res, header);
-      write_result(conn, mg, handler_output_notif, res, header);
-    }
-  else
-    {
-      // An error occurred.
-      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
-      throw std::runtime_error(e.message());
+      collect_output(m, res, header);
+      write_result(c, res, header);
     }
 }
+
 
 
 bool
@@ -157,7 +155,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	      // TIME OUT! Going to send whatever I got so far to the parent
 	      if (res->size() > 0)
 		{
-		  DMCS_LOG_TRACE(" Going to send");
+		  DMCS_LOG_TRACE("Going to send HEADER_ANS");
 		  header = HEADER_ANS;
 		  break;
 		}
@@ -172,7 +170,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  else 
 	    {
 	      // either UNSAT or EOF
-	      DMCS_LOG_TRACE(" NOTHING TO OUTPUT, going to send EOF");
+	      DMCS_LOG_TRACE("NOTHING TO OUTPUT, going to send EOF");
 
 	      // Turn off collecting mode
 	      collecting = false; 
@@ -193,37 +191,32 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
 void
 OutputThread::write_result(connection_ptr conn,
-			   MessagingGatewayBC* mg,
-			   ConcurrentMessageQueue* handler_output_notif,
 			   PartialBeliefStateVecPtr& res,
 			   const std::string& header)
 {
   DMCS_LOG_TRACE("header = " << header);
 
-  if (header.find(HEADER_ANS) != std::string::npos)
+  try
     {
-      // send some models
-      conn->async_write(header,
-			boost::bind(&OutputThread::handle_written_header, this,
-				    boost::asio::placeholders::error,
-				    conn,
-				    mg,
-				    handler_output_notif,
-				    res)
-			);
+      if (header.find(HEADER_ANS) != std::string::npos)
+	{
+	  // send some models
+	  conn->write(header);
+	  handle_written_header(conn, res);
+	}
+      else // if (header.find(HEADER_EOF) == std::string::npos)
+	{
+	  assert (header.find(HEADER_EOF) != std::string::npos);
+	  
+	  // send EOF
+	  conn->write(header);
+	}
     }
-  else // if (header.find(HEADER_EOF) == std::string::npos)
+  catch (boost::system::error_code& e)
     {
-      assert (header.find(HEADER_EOF) != std::string::npos);
-
-      // send EOF
-      conn->async_write(header,
-			boost::bind(&OutputThread::loop, this,
-				    boost::asio::placeholders::error,
-				    conn,
-				    mg,
-				    handler_output_notif)
-			);
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
     }
 
   //  assert(false && "header is neither HEADER_ANS nor HEADER_EOF");
@@ -232,71 +225,34 @@ OutputThread::write_result(connection_ptr conn,
 
 
 void
-OutputThread::handle_written_header(const boost::system::error_code& e,
-				    connection_ptr conn,
-				    MessagingGatewayBC* mg,
-				    ConcurrentMessageQueue* handler_output_notif,
+OutputThread::handle_written_header(connection_ptr conn,
 				    PartialBeliefStateVecPtr& res)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
-  if (!e)
+  assert (left_2_send >= res->size());
+  
+  left_2_send -= res->size();
+      
+  // mark end of package by a NULL model
+  if (left_2_send == 0)
     {
-      assert (left_2_send >= res->size());
-      
-      left_2_send -= res->size();
-      
-      // mark end of package by a NULL model
-      if (left_2_send == 0)
-	{
-	  PartialBeliefState* bs = 0;
-	  res->push_back(bs);
-	  collecting = false;
-	}
-      
-      StreamingBackwardMessage return_mess(res);
-      
-      boost::asio::ip::tcp::socket& sock = conn->socket();
-      boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
-      
-      DMCS_LOG_TRACE("return message to port " << ep.port());
-      DMCS_LOG_TRACE(return_mess);
-      
-      conn->async_write(return_mess,
-			boost::bind(&OutputThread::loop, this,
-				    boost::asio::placeholders::error,
-				    conn,
-				    mg,
-				    handler_output_notif)
-			);
+      PartialBeliefState* bs = 0;
+      res->push_back(bs);
+      collecting = false;
     }
-  else
-    {
-      // An error occurred.
-      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
-      throw std::runtime_error(e.message());
-    }
+      
+  StreamingBackwardMessage return_mess(res);
+  
+  boost::asio::ip::tcp::socket& sock = conn->socket();
+  boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
+      
+  DMCS_LOG_TRACE("return message to port " << ep.port());
+  DMCS_LOG_TRACE(return_mess);
+      
+  conn->write(return_mess);
 }
 
-
-
-void
-OutputThread::operator()(connection_ptr c,
-			 std::size_t ps,
-			 MessagingGatewayBC* m,
-			 ConcurrentMessageQueue* hon)
-{
-  pack_size = ps;
-  collecting = false;
-
-  //  conn = c;
-  //  mg = m;
-  //  handler_output_notif = hon;
-
-  DMCS_LOG_TRACE("Going to call loop()");
-
-  loop(boost::system::error_code(), c, m, hon);
-}
 
 } // namespace dmcs
 

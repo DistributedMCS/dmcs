@@ -55,12 +55,6 @@ public:
 	     ConcurrentMessageQueue* hon);
 
 private:
-  void
-  loop(const boost::system::error_code& e,
-       connection_ptr conn,
-       MessagingGatewayBC* mg,
-       ConcurrentMessageQueue* handler_output_notif);
-
   bool
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif);
 
@@ -69,16 +63,11 @@ private:
 
   void
   write_result(connection_ptr conn,
-	       MessagingGatewayBC* mg,
-	       ConcurrentMessageQueue* handler_output_notif,
 	       PartialBeliefStateVecPtr& res,
 	       const std::string& header);
 
   void
-  handle_written_header(const boost::system::error_code& e,
-			connection_ptr conn,
-			MessagingGatewayBC* mg,
-			ConcurrentMessageQueue* handler_output_notif,
+  handle_written_header(connection_ptr conn,
 			PartialBeliefStateVecPtr& res);
 
 private:
