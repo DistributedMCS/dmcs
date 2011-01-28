@@ -421,6 +421,10 @@ RelSatSolver::receiveUNSAT()
       // send a NULL pointer to the SatOutputMessageQueue
       mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
+  // else
+  //  {
+  //    collect_learned_clauses(xSATSolver->getLearnedClauses());
+  //  }
 }
 
 
@@ -442,7 +446,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
       //DMCS_LOG_DEBUG("input: " << *input);
     }
 
-  DMCS_LOG_TRACE("bs:    " << *bs);
+  //  DMCS_LOG_TRACE("bs:    " << *bs);
 
   // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
   PartialBeliefSet& belief = (*bs)[my_id-1];
@@ -476,7 +480,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 	}
     }
 
-  //DMCS_LOG_TRACE("After adding result: bs = " << *bs);
+  DMCS_LOG_TRACE("MODEL from SAT: bs = " << *bs);
 
   // project to my output interface
   project_to(bs, localV, my_id - 1);

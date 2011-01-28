@@ -1,3 +1,12 @@
+2011-01-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Add debug info.
+
+	* src/network/JoinThread.cpp: Case distinction: when ask for NEXT,
+	when ask for a restart.
+
+	* include/network/JoinThread.h (ask_for_next): Add NotificationType.
+
 2011-01-28  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/connection.hpp (connection::write): Add synchronous write().

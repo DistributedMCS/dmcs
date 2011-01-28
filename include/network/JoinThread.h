@@ -36,6 +36,7 @@
 #include "mcs/HashedBiMap.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "solver/Conflict.h"
+#include "dmcs/ConflictNotification.h"
 
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
@@ -77,7 +78,8 @@ private:
 
   void
   ask_for_next(PartialBeliefStatePackagePtr& partial_eqs, 
-	       std::size_t next);
+	       std::size_t next, 
+	       ConflictNotification::NotificationType nt);
 
   std::size_t
   join(const PartialBeliefStateIteratorVecPtr& run_it);

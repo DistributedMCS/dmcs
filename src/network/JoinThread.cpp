@@ -28,7 +28,6 @@
  */
 
 #include "dmcs/BeliefCombination.h"
-#include "dmcs/ConflictNotification.h"
 #include "network/ConcurrentMessageQueueHelper.h"
 #include "network/JoinThread.h"
 
@@ -249,15 +248,24 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
 
 void
 JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
-			 std::size_t next)
+			 std::size_t next, 
+			 ConflictNotification::NotificationType nt)
 {
   // empty our local storage for the sake of non-exponential space
   PartialBeliefStateVecPtr& bsv = (*partial_eqs)[next];
   bsv->clear();
 
-  // for now, let's put NULL conflicts and ass to notify the neighbors
-  // to continue sending next messages. Only the router sends some conflicts
-  ConflictNotification* cn = new ConflictNotification(0, 0, 0, ConflictNotification::NEXT);
+  ConflictNotification* cn;
+  if (nt == ConflictNotification::NEXT)
+    {
+      cn = new ConflictNotification(0, 0, 0, ConflictNotification::NEXT);
+    }
+  else
+    {
+      ConflictVec* conflicts = new ConflictVec;
+      PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
+      cn = new ConflictNotification(conflicts, partial_ass, 0, nt);
+    }
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
   
@@ -362,7 +370,7 @@ JoinThread::operator()(std::size_t nbs,
 		  DMCS_LOG_TRACE("Going to ask for next batch of peqs with next_neighbor_offset == " << next_neighbor_offset);
 
 		  asking_next = true;
-		  ask_for_next(partial_eqs, next_neighbor_offset);
+		  ask_for_next(partial_eqs, next_neighbor_offset, ConflictNotification::NEXT);
 		}
 	    }
 	} // (nn.peq_cnt == 0)
@@ -398,7 +406,7 @@ JoinThread::operator()(std::size_t nbs,
 	      for (std::size_t i = 0; i < next_neighbor_offset; ++i)
 		{
 		  // actually it's asking for a new round of models 
-		  ask_for_next(partial_eqs, i);
+		  ask_for_next(partial_eqs, i, ConflictNotification::REQUEST);
 
 		  // and reset the in bit mask wrt this neighbor
 		  in_mask.set(i, false);
@@ -465,7 +473,7 @@ JoinThread::operator()(std::size_t nbs,
 		  
 		  // always ask for next models from neighbor with offset 0
 		  next_neighbor_offset = 0;
-		  ask_for_next(partial_eqs, 0);
+		  ask_for_next(partial_eqs, 0, ConflictNotification::NEXT);
 		}
 	    } // (in_mask.count_range(0, no_nbs+1) == no_nbs)
 
