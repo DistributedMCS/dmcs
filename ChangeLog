@@ -1,5 +1,11 @@
 2011-01-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/OutputThread.cpp: Send if there is something in res.
+
+	* src/network/JoinThread.cpp: False assertion.
+
+	* include/network/AsynClient.tcc: Add debug info.
+
 	* src/network/JoinThread.cpp: Inform UNSAT from neighbor.
 
 	* include/network/NeighborOut.h: Add port and use sync write.

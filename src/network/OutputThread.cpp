@@ -217,14 +217,23 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	    }
 	  else 
 	    {
-	      // either UNSAT or EOF
-	      DMCS_LOG_TRACE(port << ": NOTHING TO OUTPUT, going to send EOF");
+	      // timeout != 0 ==> either UNSAT or EOF
+	      if (res->size() > 0)
+		{
+		  DMCS_LOG_TRACE(port << ": Going to send HEADER_ANS");
+		  header = HEADER_ANS;
+		  break;
+		}
+	      else
+		{
+		  DMCS_LOG_TRACE(port << ": NOTHING TO OUTPUT, going to send EOF");
 
-	      // Turn off collecting mode
-	      collecting = false; 
+		  // Turn off collecting mode
+		  collecting = false; 
 
-	      header = HEADER_EOF;
-	      break;
+		  header = HEADER_EOF;
+		  break;
+		}
 	    }
 	}
       

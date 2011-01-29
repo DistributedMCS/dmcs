@@ -219,6 +219,8 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
 	  callback(result);
 	}
 
+      DMCS_LOG_TRACE("pack_size = " << mess.getPackSize() << ", no_anwers = " << no_answers);
+
       if ((mess.getPackSize() > 0) && (no_answers >= mess.getPackSize()))
 	{
 	  terminate();

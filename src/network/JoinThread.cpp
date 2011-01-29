@@ -339,7 +339,7 @@ JoinThread::operator()(std::size_t nbs,
 	{ 
 	  // This neighbor is either out of models or UNSAT
 
-	  assert (import_state != FILLING_UP);
+	  //assert (import_state != FILLING_UP);
 
 	  if (import_state == START_UP)
 	    {
@@ -357,7 +357,7 @@ JoinThread::operator()(std::size_t nbs,
 	    }
 	  else
 	    {
-	      // out of models, import == GETTING_NEXT
+	      // out of models, import == GETTING_NEXT v FILLING_UP
 
 	      // We need to ask the next neighbor (now ordered by the
 	      // offset) to give the next package of models.
