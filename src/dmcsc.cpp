@@ -326,7 +326,7 @@ Options";
       // but first read the topology file (quick hack) to get the signatures
       QueryPlanPtr query_plan(new QueryPlan);
 
-      query_plan->read_graph(manager);
+      /*      query_plan->read_graph(manager);
       BeliefStateListPtr belief_state_list;
 #ifdef DMCS_STATS_INFO
       belief_state_list = result->getBeliefStates();
@@ -374,7 +374,7 @@ Options";
 	    }
 
 	  std::cout << ")" << std::endl;
-	}
+	  }*/
 
 #ifdef DEBUG
 

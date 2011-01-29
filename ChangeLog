@@ -1,3 +1,9 @@
+2011-01-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Comment out "printing result."
+
+	* include/network/AsynClient.tcc (handle_read_answer): Fix no_answers.
+
 2011-01-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: More debug info.

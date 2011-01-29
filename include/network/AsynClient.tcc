@@ -210,9 +210,9 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
   if (!e)
     {
       const PartialBeliefStateVecPtr bss = result.getBeliefStates();
-      no_answers += bss->size();
+      no_answers = no_answers + bss->size() - 1;
 
-      DMCS_LOG_TRACE("result = " << result << " #" << no_answers);
+      //DMCS_LOG_TRACE("result = " << result << " #" << no_answers);
 
       if (callback)
 	{
