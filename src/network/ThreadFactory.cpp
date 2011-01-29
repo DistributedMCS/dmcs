@@ -47,7 +47,8 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
 			     MessagingGatewayBC* m,
 			     ConcurrentMessageQueue* dsn,
 			     ConcurrentMessageQueue* ssn,
-			     HashedBiMap* co)
+			     HashedBiMap* co,
+			     std::size_t p)
   : context(c),
     theory(t), 
     local_sig(ls),
@@ -56,7 +57,8 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
     mg(m),
     dmcs_sat_notif(dsn), 
     sat_router_notif(ssn), 
-    c2o(co)
+    c2o(co),
+    port(p)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   // fill up the map: ctx_id <--> offset
@@ -88,13 +90,13 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
       const NeighborPtr nb = *it;
       ConcurrentMessageQueuePtr cmq(new ConcurrentMessageQueue);
 
-      NeighborThread nt;
+      NeighborThread nt(port);
       router_neighbors_notif->push_back(cmq);
       
       boost::thread* nit = new boost::thread(nt, cmq.get(), mg, nb.get(), c2o, ctx_id, pack_size);
       neighbor_input_threads->push_back(nit);
 
-      DMCS_LOG_TRACE("Create neighbor thread " << i << ". DONE");
+      DMCS_LOG_TRACE("Created neighbor thread " << i << " for " << port);
     }
 }
 
@@ -108,7 +110,7 @@ ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_n
   const std::size_t system_size = context->getSystemSize();
   const std::size_t no_nbs   = nbs->size();
 
-  JoinThread jt;
+  JoinThread jt(port);
   boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, joiner_neighbors_notif.get());
 
   return t;
@@ -126,7 +128,7 @@ ThreadFactory::createLocalSolveThread()
   const std::size_t system_size = context->getSystemSize();
 
   SatSolverFactory ssf(is_leaf, my_id, theory, local_sig, localV, c2o, 
-		       system_size, mg, dmcs_sat_notif, sat_router_notif);
+		       system_size, mg, dmcs_sat_notif, sat_router_notif, port);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
@@ -143,7 +145,7 @@ ThreadFactory::createRouterThread(ConcurrentMessageQueueVecPtr& router_neighbors
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  RouterThread rt;
+  RouterThread rt(port);
   boost::thread* t = new boost::thread(rt, sat_router_notif, router_neighbors_notif.get());
 
   return t;

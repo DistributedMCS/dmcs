@@ -46,7 +46,7 @@ namespace dmcs {
 class JoinThread
 {
 public:
-  JoinThread();
+  JoinThread(std::size_t p);
 
   virtual
   ~JoinThread();
@@ -90,6 +90,7 @@ private:
        const PartialBeliefStateIteratorVecPtr& end_it);
 
 private:
+  std::size_t port;
   std::size_t                  no_nbs;                  // number of neighbors 
   std::size_t                  system_size;
 

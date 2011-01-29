@@ -32,13 +32,14 @@
 
 namespace dmcs {
 
-StreamingDMCSThread::StreamingDMCSThread()
-{ }
+  StreamingDMCSThread::StreamingDMCSThread(std::size_t p)
+    : port(p)
+  { }
 
 
 StreamingDMCSThread::~StreamingDMCSThread()
 {
-  DMCS_LOG_TRACE("Gone with the wind.");
+  DMCS_LOG_TRACE(port << ": Gone with the wind.");
 }
 
 

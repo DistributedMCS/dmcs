@@ -61,7 +61,8 @@ public:
 	       std::size_t system_size_,
 	       MessagingGatewayBC* mg_,
 	       ConcurrentMessageQueue* dsn,
-	       ConcurrentMessageQueue* srn);
+	       ConcurrentMessageQueue* srn,
+	       std::size_t p);
 
   virtual
   ~RelSatSolver();
@@ -121,6 +122,8 @@ private:
 
   SATInstance*                   xInstance;
   SATSolver*                     xSATSolver;
+
+  std::size_t port;
 };
 
 typedef boost::shared_ptr<RelSatSolver> RelSatSolverPtr;

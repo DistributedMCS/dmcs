@@ -39,9 +39,14 @@ namespace dmcs {
 
 class RouterThread
 {
+private:
+  std::size_t port;
+
 public:
-  RouterThread()
+  RouterThread(std::size_t p)
+    : port(p)
   { }
+
 
   void
   operator()(ConcurrentMessageQueue* sat_router_notif,
@@ -61,7 +66,7 @@ public:
 	  {
 	    if (cn->type == ConflictNotification::SHUTDOWN)
 	      {
-		DMCS_LOG_TRACE("Shutdown requested, informing neighbors. Bye for now.");
+		DMCS_LOG_TRACE(port << ": Shutdown requested, informing neighbors. Bye for now.");
 
 		// inform all neighbors about the shutdown
 		for (ConcurrentMessageQueueVec::iterator it = router_neighbors_notif->begin();
@@ -86,7 +91,7 @@ public:
 
 	    const std::size_t noff = cn->val;
 	    
-	    DMCS_LOG_TRACE("Got a notification from local solver. noff = " << noff);
+	    DMCS_LOG_TRACE(port << ": Got a notification from local solver. noff = " << noff);
 	    
 	    // inform neighbor at noff about the conflict
 	    ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[noff];
@@ -104,7 +109,7 @@ public:
 	  }
 	else
 	  {
-	    DMCS_LOG_FATAL("Got null message: " << ptr << " " << cn);
+	    DMCS_LOG_FATAL(port << ": Got null message: " << ptr << " " << cn);
 	    assert (ptr != 0 && cn != 0);
 	  }
       }

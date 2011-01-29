@@ -134,6 +134,8 @@ private:
   ConcurrentMessageQueuePtr        handler_output_notif;
 
   MessagingGatewayBCPtr            mg;
+
+  std::size_t port;
 };
 
 } // namespace dmcs

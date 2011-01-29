@@ -58,7 +58,8 @@ public:
 		MessagingGatewayBC* m,
 		ConcurrentMessageQueue* dsn,
 		ConcurrentMessageQueue* ssn,
-		HashedBiMap* co);
+		HashedBiMap* co,
+		std::size_t p);
 
   void
   createNeighborThreads(ThreadVecPtr& neighbor_threads,
@@ -88,6 +89,7 @@ private:
   HashedBiMap*                    c2o;             // hashed bimap from context id to
 			                             // the offset in the vector of
 				                     // neighbor message queue
+  std::size_t port;
 };
 
 

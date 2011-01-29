@@ -1,3 +1,31 @@
+2011-01-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.h: Add port.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/ConcurrentMessageQueueFactory.h: Remove IN and
+	CONFLICT message queue.
+	Map UIDs to vector of message queues.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+
+	* src/dmcsc.cpp: Comment out "printing result."
+
+	* include/network/AsynClient.tcc (handle_read_answer): Fix no_answers.
+
 2011-01-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/mcs/BeliefState.h: Add decision-level support.
@@ -7,12 +35,6 @@
 	* include/network/MessagingGateway.h: Likewise.
 	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
 	* include/network/ConcurrentMessageDispatcher.h: Likewise.
-
-2011-01-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-	* src/dmcsc.cpp: Comment out "printing result."
-
-	* include/network/AsynClient.tcc (handle_read_answer): Fix no_answers.
 
 2011-01-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 

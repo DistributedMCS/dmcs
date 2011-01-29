@@ -50,7 +50,8 @@ public:
 		   std::size_t system_size_,
 		   MessagingGatewayBC* mg_,
 		   ConcurrentMessageQueue* dsn,
-		   ConcurrentMessageQueue* srn)
+		   ConcurrentMessageQueue* srn,
+		   std::size_t p)
     : is_leaf(il),
       my_id(my_id_),
       theory(theory_),
@@ -61,7 +62,8 @@ public:
       system_size(system_size_),
       mg(mg_), 
       dmcs_sat_notif(dsn), 
-      sat_router_notif(srn)
+      sat_router_notif(srn),
+      port(p)
   { }
 
   template<typename aSatSolverTypePtr>
@@ -80,6 +82,7 @@ private:
   MessagingGatewayBC*          mg;
   ConcurrentMessageQueue*      dmcs_sat_notif;
   ConcurrentMessageQueue*      sat_router_notif;
+  std::size_t port;
 };
 
 
@@ -91,7 +94,8 @@ SatSolverFactory::create<RelSatSolverPtr>()
 						theory, local_sig, 
 						localV, c2o, system_size, 
 						mg, dmcs_sat_notif, 
-						sat_router_notif));
+						sat_router_notif,
+						port));
 
   return relsatsolver;
 }

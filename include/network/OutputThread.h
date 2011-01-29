@@ -45,7 +45,7 @@ const std::size_t DEFAULT_PACK_SIZE = 10;
 class OutputThread
 {
 public:
-  OutputThread();
+  OutputThread(std::size_t p);
 
   virtual
   ~OutputThread();
@@ -87,6 +87,7 @@ private:
   std::size_t                left_2_send;           // Number of models left to send
   bool                       collecting;           // A flag to determine whether we are in collecting mode or not 
                                                    // (if yes then we don't want to wait for any trigger)
+  std::size_t port;
 };
 
 typedef boost::shared_ptr<OutputThread> OutputThreadPtr;

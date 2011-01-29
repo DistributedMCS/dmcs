@@ -39,13 +39,14 @@
 
 namespace dmcs {
 
-OutputThread::OutputThread()
+OutputThread::OutputThread(std::size_t p)
+  : port(p)
 { }
 
 
 OutputThread::~OutputThread()
 {
-  DMCS_LOG_TRACE("So long, suckers. I'm out.");
+  DMCS_LOG_TRACE(port << ": So long, suckers. I'm out.");
 }
 
 
@@ -139,7 +140,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
   unsigned int    p = 0;
   std::size_t recvd = 0;
 
-  DMCS_LOG_TRACE("Wait for message from Handler");
+  DMCS_LOG_TRACE(port << ": Wait for message from Handler");
 
   handler_output_notif->receive(ptr, sizeof(on), recvd, p);
 
@@ -164,7 +165,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
       assert(ptr != 0 && on != 0);
     }
 
-  DMCS_LOG_TRACE("Got a message from Handler. pack_size = " << pack_size);
+  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size);
 
   return retval;
 }
@@ -176,7 +177,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 			     PartialBeliefStateVecPtr& res,
 			     std::string& header)
 {
-  DMCS_LOG_TRACE("pack_size = " << pack_size << ", left to send = " << left_2_send);
+  DMCS_LOG_TRACE(port << ": pack_size = " << pack_size << ", left to send = " << left_2_send);
 
   // Turn this mode on. It's off only when either we collect and send
   // enough pack_size models, or there's no more model to send.
@@ -186,27 +187,29 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
   // be careful with weird value of pack_size. Bug just disappreared
   for (std::size_t i = 1; i <= left_2_send; ++i)
     {
-      //DMCS_LOG_TRACE(" Read from MQ");
+      //DMCS_LOG_TRACE(port << ":  Read from MQ");
       
       std::size_t prio       = 0;
       int timeout            = 200; // milisecs
       PartialBeliefState* bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
       
-      //DMCS_LOG_TRACE(" Check result from MQ");
+      //DMCS_LOG_TRACE(port << ":  Check result from MQ");
       if (bs == 0) // Ups, a NULL pointer
 	{
 	  if (timeout == 0)
 	    {
-	      //DMCS_LOG_TRACE(" TIME OUT");
+	      //DMCS_LOG_TRACE(port << ":  TIME OUT");
 	      // TIME OUT! Going to send whatever I got so far to the parent
 	      if (res->size() > 0)
 		{
-		  DMCS_LOG_TRACE("Going to send HEADER_ANS");
+		  DMCS_LOG_TRACE(port << ": Going to send HEADER_ANS");
 		  header = HEADER_ANS;
 		  break;
 		}
 	      else
 		{
+		  DMCS_LOG_TRACE(port << ": Timeout after 200msecs, continuing with " << i-1 << "th bs.");
+
 		  // decrease counter because we gained nothing so far.
 		  --i;
 		  continue;
@@ -215,7 +218,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  else 
 	    {
 	      // either UNSAT or EOF
-	      DMCS_LOG_TRACE("NOTHING TO OUTPUT, going to send EOF");
+	      DMCS_LOG_TRACE(port << ": NOTHING TO OUTPUT, going to send EOF");
 
 	      // Turn off collecting mode
 	      collecting = false; 
@@ -225,7 +228,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	    }
 	}
       
-      DMCS_LOG_TRACE(" got #" << i << ": bs = " << *bs);
+      DMCS_LOG_TRACE(port << ":  got #" << i << ": bs = " << *bs);
       
       // Got something in a reasonable time. Continue collecting.
       res->push_back(bs);
@@ -239,7 +242,7 @@ OutputThread::write_result(connection_ptr conn,
 			   PartialBeliefStateVecPtr& res,
 			   const std::string& header)
 {
-  DMCS_LOG_TRACE("header = " << header);
+  DMCS_LOG_TRACE(port << ": header = " << header);
 
   try
     {
@@ -299,7 +302,7 @@ OutputThread::handle_written_header(connection_ptr conn,
   boost::asio::ip::tcp::socket& sock = conn->socket();
   boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
       
-  DMCS_LOG_TRACE("return message " << return_mess << " to port " << ep.port());
+  DMCS_LOG_TRACE(port << ": return message " << return_mess << " to port " << ep.port());
       
   conn->write(return_mess);
 }

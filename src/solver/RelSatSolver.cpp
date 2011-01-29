@@ -47,7 +47,8 @@ RelSatSolver::RelSatSolver(bool il,
 			   std::size_t system_size_,
 			   MessagingGatewayBC* mg_,
 			   ConcurrentMessageQueue* dsn,
-			   ConcurrentMessageQueue* srn)
+			   ConcurrentMessageQueue* srn,
+			   std::size_t p)
   : is_leaf(il),
     my_id(my_id_),
     theory(theory_), 
@@ -61,7 +62,8 @@ RelSatSolver::RelSatSolver(bool il,
     sat_router_notif(srn),
     learned_conflicts(new ConflictVec2),
     xInstance(new SATInstance(std::cerr)),
-    xSATSolver(new SATSolver(xInstance, std::cerr, this))
+    xSATSolver(new SATSolver(xInstance, std::cerr, this)),
+    port(p)
 {
   xInstance->readTheory(theory, sig->size());
 
@@ -128,7 +130,7 @@ RelSatSolver::prepare_input()
   std::size_t prio = 0;
   int timeout      = 0;
 
-  DMCS_LOG_TRACE("Staring at JOIN_OUT_MQ for the next input!");
+  DMCS_LOG_TRACE(port << ": Waiting at JOIN_OUT_MQ for the next input!");
 
   input = mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
 
@@ -137,7 +139,7 @@ RelSatSolver::prepare_input()
       return false;
     }
 
-  DMCS_LOG_TRACE("input received!");
+  DMCS_LOG_TRACE(port << ": input received!");
 
   xInstance->setSizeWPartialAss(xInstance->iClauseCount());
   
@@ -150,7 +152,7 @@ RelSatSolver::prepare_input()
   SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
   SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
 
-  //DMCS_LOG_TRACE(" Updating input from bridge signature...");
+  //DMCS_LOG_TRACE(port << ":  Updating input from bridge signature...");
 
   for (SignatureByCtx::const_iterator it = local_sig.begin(); it != low; ++it)
     {
@@ -244,7 +246,7 @@ void
 RelSatSolver::solve()
 {
   // wait for conflict and partial_ass from DMCS
-  DMCS_LOG_TRACE(" Fresh solving. Wait for a message from DMCS");
+  DMCS_LOG_TRACE(port << ":  Fresh solving. Wait for a message from DMCS");
   ConflictNotification* cn;
   void *ptr         = static_cast<void*>(&cn);
   unsigned int p    = 0;
@@ -261,18 +263,18 @@ RelSatSolver::solve()
 
       ///@todo TK: what happens with conflict and new_partial_ass here? probably leaks
 
-      DMCS_LOG_TRACE(" Got a message from DMCS. conflict = " << *conflicts << ". new_partial_ass = " << *new_partial_ass);
+      DMCS_LOG_TRACE(port << ":  Got a message from DMCS. conflict = " << *conflicts << ". new_partial_ass = " << *new_partial_ass);
 
 #if 0
 	if (partial_ass == 0)
 	  {
 	    partial_ass = new_partial_ass;
-	    DMCS_LOG_TRACE("First time. Going to start");
+	    DMCS_LOG_TRACE(port << ": First time. Going to start");
 	  }
 	else if ((*partial_ass) != (*new_partial_ass))
 	  { // now restart
 	    partial_ass = new_partial_ass;
-	    DMCS_LOG_TRACE("New partial_ass. Going to restart");
+	    DMCS_LOG_TRACE(port << ": New partial_ass. Going to restart");
 	  }
 	else
 	  { // continue
@@ -285,26 +287,26 @@ RelSatSolver::solve()
 
       if (is_leaf)
 	{
-	  DMCS_LOG_TRACE("Leaf case. Solve now.");
+	  DMCS_LOG_TRACE(port << ": Leaf case. Solve now.");
 	  eResult = xSATSolver->eSolve();
 	  xSATSolver->refresh();
 	}
       else
 	{
-	  DMCS_LOG_TRACE("Intermediate case.");
+	  DMCS_LOG_TRACE(port << ": Intermediate case.");
 
 	  while (1)
 	    {
-	      DMCS_LOG_TRACE("Prepare input before solving.");
+	      DMCS_LOG_TRACE(port << ": Prepare input before solving.");
 	      xInstance->removeInput();
 	      if (!prepare_input())
 		{
-		  DMCS_LOG_TRACE("Got NULL input from JOIN_OUT_MQ");
+		  DMCS_LOG_TRACE(port << ": Got NULL input from JOIN_OUT_MQ");
 		  // send a NULL model to OUT_MQ to inform OutputThread
 		  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 		  break;
 		}
-	      DMCS_LOG_TRACE("A fresh solving. input = " << *input);
+	      DMCS_LOG_TRACE(port << ": A fresh solving. input = " << *input);
 	      eResult = xSATSolver->eSolve();
 	      xSATSolver->refresh();
 	    }
@@ -434,8 +436,6 @@ RelSatSolver::receiveUNSAT()
 void
 RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
   PartialBeliefState* bs;
   // copy input
   if (is_leaf)
@@ -448,7 +448,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
       //DMCS_LOG_DEBUG("input: " << *input);
     }
 
-  //  DMCS_LOG_TRACE("bs:    " << *bs);
+  //  DMCS_LOG_TRACE(port << ": bs:    " << *bs);
 
   // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
   PartialBeliefSet& belief = (*bs)[my_id-1];
@@ -482,7 +482,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 	}
     }
 
-  DMCS_LOG_TRACE("MODEL from SAT: bs = " << *bs);
+  DMCS_LOG_TRACE(port << ": MODEL from SAT: bs = " << *bs);
 
   // project to my output interface
   project_to(bs, localV, my_id - 1);
@@ -490,7 +490,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   // now put this PartialBeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 
-  //DMCS_LOG_TRACE("Solution sent: " << *bs);
+  //DMCS_LOG_TRACE(port << ": Solution sent: " << *bs);
 }
 
 

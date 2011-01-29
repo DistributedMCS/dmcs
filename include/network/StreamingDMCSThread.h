@@ -41,8 +41,11 @@ namespace dmcs {
 
 class StreamingDMCSThread
 {
+protected:
+  std::size_t port;
+
 public:
-  StreamingDMCSThread();
+  StreamingDMCSThread(std::size_t p);
 
   virtual
   ~StreamingDMCSThread();

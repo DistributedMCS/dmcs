@@ -160,7 +160,7 @@ StreamingDMCS::initialize(std::size_t invoker,
   const SignaturePtr& local_sig = ctx->getSignature();
 
   ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size,
-		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), c2o.get());
+		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), c2o.get(), port);
 
   sat_thread = tf.createLocalSolveThread();
 
@@ -170,7 +170,8 @@ StreamingDMCS::initialize(std::size_t invoker,
       join_thread   = tf.createJoinThread(router_neighbors_notif);
       router_thread = tf.createRouterThread(router_neighbors_notif);
     }
-  DMCS_LOG_TRACE(" All threads created!");
+
+  DMCS_LOG_TRACE("All threads created!");
 }
 
 
@@ -203,10 +204,7 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
       assert(ptr != 0 && sn != 0);
     }
 
-  DMCS_LOG_TRACE("invoker   = " << invoker);
-  DMCS_LOG_TRACE("pack_size = " << pack_size);
-  DMCS_LOG_TRACE("port      = " << port);
-  DMCS_LOG_TRACE("type      = " << type);
+  DMCS_LOG_TRACE("invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port << ", type = " << type);
 }
 
 

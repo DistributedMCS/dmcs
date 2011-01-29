@@ -53,8 +53,9 @@ namespace dmcs {
 class NeighborThread
 {
 public:
-  NeighborThread()
-    : nop_thread(0)
+  NeighborThread(std::size_t p)
+    : nop_thread(0),
+      port(p)
   { }
 
 
@@ -139,7 +140,7 @@ private:
 	boost::shared_ptr<std::string> header(new std::string);
 	
 	// read from network
-	DMCS_LOG_TRACE("Reading header from network, offset = " << offset);
+	DMCS_LOG_TRACE(port << ": Reading header from network, offset = " << offset);
 	conn->async_read(*header,
 			 boost::bind(&NeighborThread::handle_read_header, this,  
 				     boost::asio::placeholders::error,
@@ -184,7 +185,7 @@ private:
 	    StreamingBackwardMessagePtr mess(new StreamingBackwardMessage);
 
 	    // read some models
-	    DMCS_LOG_TRACE("Reading message from network");
+	    DMCS_LOG_TRACE(port << ": Reading message from network");
 
 	    conn->async_read(*mess,
 			     boost::bind(&NeighborThread::handle_read_message, this,
@@ -203,7 +204,7 @@ private:
 	    boost::shared_ptr<std::string> header(new std::string);
 	    
 	    // read from network
-	    DMCS_LOG_TRACE("Reading header from network, noff = " << noff);
+	    DMCS_LOG_TRACE(port << ": Reading header from network, noff = " << noff);
 	    conn->async_read(*header,
 			     boost::bind(&NeighborThread::handle_read_header, this,  
 					 boost::asio::placeholders::error,
@@ -229,11 +230,11 @@ private:
     if (!e)
       {
 	// extract a bunch of models from the message and then put each into NEIGHBOR_MQ
-	DMCS_LOG_TRACE("Write to MQs. noff = " << noff);
+	DMCS_LOG_TRACE(port << ": Write to MQs. noff = " << noff);
 	
-	const PartialBeliefStateVecPtr bsv = mess->getBeliefStates();
+	const PartialBeliefStateVecPtr& bsv = mess->getBeliefStates();
 	
-	DMCS_LOG_TRACE("Number of bs received = " << bsv->size());
+	DMCS_LOG_TRACE(port << ": Received " << bsv->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
 	
 	const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 	
@@ -242,17 +243,26 @@ private:
 	     ++it)
 	  {
 	    PartialBeliefState* bs = *it;
+	    if (bs != 0)
+	      {
+		DMCS_LOG_TRACE(port << ": Sending model: " << *bs);
+	      }
+	    else
+	      {
+		DMCS_LOG_TRACE(port << ": Sending model: NULL");
+	      }
 	    mg->sendModel(bs, noff, offset, 0);
 	  }
 	
 	// notify the joiner by putting a JoinMess into JoinMessageQueue
-	mg->sendJoinIn(bsv->size(), noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+	std::size_t bsv_size = bsv->size();
+	mg->sendJoinIn(bsv_size, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
 	
 	
 	boost::shared_ptr<std::string> header(new std::string);
 	
 	// read from network
-	DMCS_LOG_TRACE("Reading header from network, noff = " << noff);
+	DMCS_LOG_TRACE(port << ": Reading header from network, noff = " << noff);
 	conn->async_read(*header,
 			 boost::bind(&NeighborThread::handle_read_header, this,  
 				     boost::asio::placeholders::error,
@@ -279,6 +289,7 @@ private:
   std::size_t                pack_size;
   connection_ptr             conn;
   boost::thread* nop_thread;
+  std::size_t port;
 };
 
 } // namespace dmcs
