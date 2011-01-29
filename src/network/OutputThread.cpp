@@ -208,7 +208,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 		}
 	      else
 		{
-		  DMCS_LOG_TRACE(port << ": Timeout after 200msecs, continuing with " << i-1 << "th bs.");
+		  //DMCS_LOG_TRACE(port << ": Timeout after 200msecs, continuing with " << i-1 << "th bs.");
 
 		  // decrease counter because we gained nothing so far.
 		  --i;

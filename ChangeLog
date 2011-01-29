@@ -1,5 +1,9 @@
 2011-01-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/JoinThread.cpp: Inform UNSAT from neighbor.
+
+	* include/network/NeighborOut.h: Add port and use sync write.
+
 	* include/network/Handler.h: Add port.
 	* src/solver/RelSatSolver.cpp: Likewise.
 	* src/network/ThreadFactory.cpp: Likewise.

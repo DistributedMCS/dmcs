@@ -51,8 +51,12 @@ namespace dmcs {
  */
 class NeighborOut
 {
+private:
+  std::size_t port;
+
 public:
-  NeighborOut()
+  NeighborOut(std::size_t p)
+    : port(p)
   { }
 
 
@@ -65,13 +69,13 @@ public:
   {
     while (1)
       {
-	DMCS_LOG_TRACE("Wait for router notification, nid = " << nid);
+	DMCS_LOG_TRACE(port << ": Wait for router notification, nid = " << nid);
 
 	ConflictNotification* cn = wait_router(rnn);
 
 	if (cn->type == ConflictNotification::SHUTDOWN)
 	  {
-	    DMCS_LOG_TRACE("Neighbor " << nid << " out.");
+	    DMCS_LOG_TRACE(port << ": Neighbor " << nid << " out.");
 	    return;
 	  }
 	else if (cn->type == ConflictNotification::REQUEST)
@@ -81,13 +85,16 @@ public:
 
 	    assert(conflicts && partial_ass);
 
-	    DMCS_LOG_TRACE("Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
+	    DMCS_LOG_TRACE(port << ": Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
 	    
 	    // write to network
 
 	    const std::string& header = HEADER_REQ_STM_DMCS;
 
-	    conn->async_write(header,
+	    conn->write(header);
+	    handle_write_message(boost::system::error_code(), conn, invoker, pack_size, conflicts, partial_ass);
+
+	    /*	    conn->async_write(header,
 			      boost::bind(&NeighborOut::handle_write_message, this,
 					  boost::asio::placeholders::error,
 					  conn,
@@ -96,14 +103,14 @@ public:
 					  conflicts,
 					  partial_ass
 					  )
-			      );
+					  );*/
 	  }
 	else if (cn->type == ConflictNotification::NEXT)
 	  {
 	    // We should only send HEADER_NEXT
 	    boost::asio::ip::tcp::socket& sock = conn->socket();
 	    boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
-	    DMCS_LOG_TRACE("Got NULL conflicts and ass, going to send HEADER_NEXT to port " << ep.port());
+	    DMCS_LOG_TRACE(port << ": Got NULL conflicts and ass, going to send HEADER_NEXT to port " << ep.port());
 
 	    //boost::shared_ptr<std::string> header(new std::string(HEADER_NEXT));
 
@@ -111,12 +118,15 @@ public:
 
 	    const std::string& header = HEADER_NEXT;
 
-	    conn->async_write(header,
+	    conn->write(header);
+	    handle_clean_up(boost::system::error_code(), cs);
+
+	    /*conn->async_write(header,
 			      boost::bind(&NeighborOut::handle_clean_up, this,  
 					  boost::asio::placeholders::error,
 					  cs
 					  )
-			      );
+					  );*/
 	  }
 	else
 	  {
@@ -138,7 +148,7 @@ public:
     unsigned int p    = 0;
     std::size_t recvd = 0;
     
-    DMCS_LOG_TRACE("Listen to router...");
+    DMCS_LOG_TRACE(port << ": Listen to router...");
     router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
 	
     if (!ptr || !cn)
@@ -165,12 +175,16 @@ public:
     if (!e)
       {
 	StreamingForwardMessage mess(invoker, pack_size, conflicts, partial_ass);
-	conn->async_write(mess,
+
+	conn->write(mess);
+	handle_clean_up(boost::system::error_code(), conflicts);
+
+	/*conn->async_write(mess,
 			  boost::bind(&NeighborOut::handle_clean_up, this,  
 				      boost::asio::placeholders::error,
 				      conflicts
 				      )
-			  );
+				      );*/
       }
     else
       {

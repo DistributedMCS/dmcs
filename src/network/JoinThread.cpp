@@ -352,7 +352,8 @@ JoinThread::operator()(std::size_t nbs,
 	      // Also tell the neighbors (via NeighborOut) to stop
 	      // returning models.
 
-	      DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0.");
+	      DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0. Send a NULL model to JOIN_OUT_MQ");
+	      mg->sendModel(0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
 	    }
 	  else
 	    {

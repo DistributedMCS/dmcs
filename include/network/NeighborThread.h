@@ -128,7 +128,7 @@ private:
 	const std::size_t offset                = pair->second;
 	
 	
-	NeighborOut nop;
+	NeighborOut nop(port);
 	nop_thread = new boost::thread(nop,
 				       conn,
 				       router_neighbor_notif,
