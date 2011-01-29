@@ -109,35 +109,35 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // conflict input MQ, announces conflicts from the parent
 
   std::size_t id = uid;
-  mq = createMessageQueue(id, k, sizeof(Conflict*));
+  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Decisionlevel, Conflict>::ModelDecisionlevel));
   md->registerMQ(mq, id);
 
   // create message queue 1 (OUT_MQ)
   // output MQ, announces partial equilibria from the local solver
   
   id++;
-  mq = createMessageQueue(id, k, sizeof(BeliefState*));
+  mq = createMessageQueue(id, k, sizeof(PartialBeliefState*));
   md->registerMQ(mq, id);
 
   // create message queue 2 (CONFLICT_MQ)
   // conflict output MQ, announces new conflicts from the local solver
 
   id++;
-  mq = createMessageQueue(id, k, sizeof(Conflict*));
+  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Decisionlevel, Conflict>::ModelConflict));
   md->registerMQ(mq, id);
 
   // create message queue 3 (JOINT_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
 
   id++;
-  mq = createMessageQueue(id, k, sizeof(BeliefState*));
+  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Decisionlevel, Conflict>::ModelDecisionlevel));
   md->registerMQ(mq, id);
 
   // create message queue 4 (JOIN_IN_MQ)
   // join input MQ, announces pairs of (neighbor_id, partial belief states)
 
   id++;
-  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Conflict>::JoinIn));
+  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Decisionlevel, Conflict>::JoinIn));
   md->registerMQ(mq, id);
 
   // create message queues 5 to 5 + (no_nbs - 1)
@@ -150,7 +150,7 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
       // NEIGHBOR_MQ + noff
       // noff starts from 0
       id++;
-      mq = createMessageQueue(id, k, sizeof(BeliefState*));
+      mq = createMessageQueue(id, k, sizeof(PartialBeliefState*));
       md->registerMQ(mq, id);
     }
 

@@ -46,7 +46,7 @@ namespace dmcs {
   /**
    * @brief a dispatcher for concurrent message queues
    */
-  class ConcurrentMessageDispatcher : public MessagingGateway<PartialBeliefState, Conflict>
+  class ConcurrentMessageDispatcher : public MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>
   {
   private:
     /// here we pile up all MQ's that receive messages
@@ -76,10 +76,10 @@ namespace dmcs {
     sendModel(PartialBeliefState* b, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
-    sendConflict(Conflict* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+    sendModelConflict(PartialBeliefState* b, Conflict* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
-    sendModelConflict(PartialBeliefState* b, Conflict* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+    sendModelDecisionlevel(PartialBeliefState* b, Decisionlevel* d, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
     sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
@@ -87,11 +87,11 @@ namespace dmcs {
     virtual PartialBeliefState*
     recvModel(std::size_t from, std::size_t& prio, int& msecs);
 
-    virtual Conflict*
-    recvConflict(std::size_t from, std::size_t& prio, int& msecs);
-
     virtual struct ModelConflict
     recvModelConflict(std::size_t from, std::size_t& prio, int& msecs);
+
+    virtual struct ModelDecisionlevel
+    recvModelDecisionlevel(std::size_t from, std::size_t& prio, int& msecs);
 
     virtual struct JoinIn
     recvJoinIn(std::size_t from, std::size_t& prio, int& msecs);

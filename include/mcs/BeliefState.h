@@ -561,6 +561,8 @@ typedef boost::shared_ptr<PartialBeliefStatePackage> PartialBeliefStatePackagePt
 typedef std::vector<PartialBeliefStateVec::const_iterator> PartialBeliefStateIteratorVec;
 typedef boost::shared_ptr<PartialBeliefStateIteratorVec> PartialBeliefStateIteratorVecPtr;
 
+typedef std::vector<std::size_t> Decisionlevel;
+
 
 inline bool
 operator== (const PartialBeliefSet& p, const PartialBeliefSet& b)

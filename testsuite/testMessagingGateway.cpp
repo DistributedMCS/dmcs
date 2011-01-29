@@ -1,4 +1,3 @@
-#include "network/MessageQueueFactory.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 
 #define BOOST_TEST_DYN_LINK

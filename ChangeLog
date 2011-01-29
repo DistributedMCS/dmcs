@@ -1,3 +1,13 @@
+2011-01-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/mcs/BeliefState.h: Add decision-level support.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+
 2011-01-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Comment out "printing result."

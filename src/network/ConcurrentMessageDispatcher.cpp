@@ -89,30 +89,6 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
 }
 
 
-bool
-ConcurrentMessageDispatcher::sendConflict(Conflict* c,
-					  std::size_t /* from */,
-					  std::size_t to,
-					  std::size_t /* prio */,
-					  int msecs)
-{
-  ///@todo TK: from and prio are not used
-  assert(mqs.size() > to);
-
-  if (msecs > 0)
-    {
-      return mqs[to]->timed_send(&c, sizeof(c), 0, boost::posix_time::milliseconds(msecs));
-    }
-  else if (msecs < 0)
-    {
-      return mqs[to]->try_send(&c, sizeof(c), 0);
-    }
-  else
-    {
-      mqs[to]->send(&c, sizeof(c), 0);
-      return true;
-    }
-}
 
 
 bool
@@ -134,11 +110,40 @@ ConcurrentMessageDispatcher::sendModelConflict(PartialBeliefState* b,
     }
   else if (msecs < 0)
     {
-      return mqs[to]->try_send(&mc, sizeof(b), 0);
+      return mqs[to]->try_send(&mc, sizeof(mc), 0);
     }
   else
     {
       mqs[to]->send(&mc, sizeof(mc), 0);
+      return true;
+    }
+}
+
+
+bool
+ConcurrentMessageDispatcher::sendModelDecisionlevel(PartialBeliefState* b,
+						    Decisionlevel* d,
+						    std::size_t /* from */,
+						    std::size_t to,
+						    std::size_t /* prio */,
+						    int msecs)
+{
+  ///@todo TK: from and prio are not used
+  assert(mqs.size() > to);
+
+  struct ModelDecisionlevel md = { b, d };
+
+  if (msecs > 0)
+    {
+      return mqs[to]->timed_send(&md, sizeof(md), 0, boost::posix_time::milliseconds(msecs));
+    }
+  else if (msecs < 0)
+    {
+      return mqs[to]->try_send(&md, sizeof(md), 0);
+    }
+  else
+    {
+      mqs[to]->send(&md, sizeof(md), 0);
       return true;
     }
 }
@@ -214,48 +219,8 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
 }
 
 
-Conflict*
-ConcurrentMessageDispatcher::recvConflict(std::size_t from,
-					  std::size_t& /* prio */,
-					  int& msecs)
-{
-  ///@todo TK: prio is not used
-  assert(mqs.size() > from);
 
-  Conflict* c = 0;
-  std::size_t recvd = 0;
-  unsigned int p = 0;
-  void *ptr = static_cast<void*>(&c);
-
-  if (msecs > 0)
-    {
-      if (!mqs[from]->timed_receive(ptr, sizeof(c), recvd, p, boost::posix_time::milliseconds(msecs)))
-	{
-	  msecs = 0;
-	  return 0;
-	}
-    }
-  else if (msecs < 0)
-    {
-      if (!mqs[from]->try_receive(ptr, sizeof(c), recvd, p))
-	{
-	  msecs = 0;
-	  return 0;
-	}
-    }
-  else
-    {
-      mqs[from]->receive(ptr, sizeof(c), recvd, p);
-    }
-
-  assert(sizeof(c) == recvd);
-
-  //prio = p;
-  return c;
-}
-
-
-struct MessagingGateway<PartialBeliefState, Conflict>::ModelConflict
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelConflict
 ConcurrentMessageDispatcher::recvModelConflict(std::size_t from,
 					       std::size_t& /* prio */,
 					       int& msecs)
@@ -296,7 +261,48 @@ ConcurrentMessageDispatcher::recvModelConflict(std::size_t from,
 }
 
 
-struct MessagingGateway<PartialBeliefState, Conflict>::JoinIn
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelDecisionlevel
+ConcurrentMessageDispatcher::recvModelDecisionlevel(std::size_t from,
+						    std::size_t& /* prio */,
+						    int& msecs)
+{
+  assert(mqs.size() > from);
+
+  struct ModelDecisionlevel md = {0,0};
+  std::size_t recvd = 0;
+  unsigned int p = 0;
+  void *ptr = static_cast<void*>(&md);
+
+
+  if (msecs > 0)
+    {
+      if (!mqs[from]->timed_receive(ptr, sizeof(md), recvd, p, boost::posix_time::milliseconds(msecs)))
+	{
+	  msecs = 0;
+	  return md;
+	}
+    }
+  else if (msecs < 0)
+    {
+      if (!mqs[from]->try_receive(ptr, sizeof(md), recvd, p))
+	{
+	  msecs = 0;
+	  return md;
+	}
+    }
+  else
+    {
+      mqs[from]->receive(ptr, sizeof(md), recvd, p);
+    }
+
+  assert(sizeof(md) == recvd);
+
+  //prio = p;
+  return md;
+}
+
+
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::JoinIn
 ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 					std::size_t& /* prio */,
 					int& msecs)

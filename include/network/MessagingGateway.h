@@ -40,10 +40,20 @@ namespace dmcs {
    * @brief Base class for sending and receiving models and conflicts
    * within a dmcsd.
    */
-  template <typename MODEL, typename CONFLICT>
+  template <typename MODEL, typename DECISIONLEVEL, typename CONFLICT>
   class MessagingGateway
   {
   public:
+
+    /**
+     * Used to announce that model @a m has a decisionlevel @a d.
+     */
+    struct ModelDecisionlevel
+    {
+      MODEL* m;
+      DECISIONLEVEL* d;
+    };
+
 
     /** 
      * Used to announce that model @a m has been computed
@@ -83,21 +93,6 @@ namespace dmcs {
 
 
     /** 
-     * Send @a c originating from @a from to @a to with priority @a prio. May block.
-     * 
-     * @param c a pointer to a CONFLICT
-     * @param from sender
-     * @param to receiver
-     * @param prio priority
-     * @param msecs timed and try send with msecs > 0 and msecs < 0, resp.
-     *
-     * @return true if sending failed
-     */
-    virtual bool
-    sendConflict(CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
-
-
-    /** 
      * Send model @a m w.r.t. conflict @a c originating from @a from to @a to with priority @a prio. May block.
      * 
      * @param m a pointer to a MODEL
@@ -110,6 +105,22 @@ namespace dmcs {
      */
     virtual bool
     sendModelConflict(MODEL* m, CONFLICT* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
+
+
+    /** 
+     * Send model @a m w.r.t. decisionlevel @a d originating from @a from to @a to with priority @a prio. May block.
+     * 
+     * @param m a pointer to a MODEL
+     * @param d a pointer to a DECISIONLEVEL
+     * @param from sender
+     * @param to receiver
+     * @param prio priority
+     * @param msecs timed and try send with msecs > 0 and msecs < 0, resp.
+     *
+     * @return true if sending failed
+     */
+    virtual bool
+    sendModelDecisionlevel(MODEL* m, DECISIONLEVEL* d, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
 
 
     /** 
@@ -138,18 +149,6 @@ namespace dmcs {
     virtual MODEL*
     recvModel(std::size_t from, std::size_t& prio, int& msecs) = 0;
 
-    /** 
-     * Receive a pointer to a CONFLICT from @a from. May block.
-     * 
-     * @param from sender
-     * @param prio priority
-     * @param msecs timed and try receive with msecs > 0 and msecs < 0, resp.
-     * 
-     * @return the next pointer to the CONFLICT sent from @a from
-     */
-    virtual CONFLICT*
-    recvConflict(std::size_t from, std::size_t& prio, int& msecs) = 0;
-
 
     /** 
      * Receive a ModelConflict message from @a from with priority @a prio. May block.
@@ -160,6 +159,17 @@ namespace dmcs {
      */
     virtual struct ModelConflict
     recvModelConflict(std::size_t from, std::size_t& prio, int& msecs) = 0;
+
+
+    /** 
+     * Receive a ModelDecisionlevel message from @a from with priority @a prio. May block.
+     * 
+     * @param from sender
+     * @param prio priority
+     * @param msecs timed and try receive with msecs > 0 and msecs < 0, resp.
+     */
+    virtual struct ModelDecisionlevel
+    recvModelDecisionlevel(std::size_t from, std::size_t& prio, int& msecs) = 0;
 
 
     /** 
