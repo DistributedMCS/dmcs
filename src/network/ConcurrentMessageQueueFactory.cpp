@@ -75,20 +75,55 @@ ConcurrentMessageQueueFactory::~ConcurrentMessageQueueFactory()
 
 
 ConcurrentMessageQueuePtr
-ConcurrentMessageQueueFactory::createMessageQueue(std::size_t id, std::size_t max_k, std::size_t /* max_size */)
+ConcurrentMessageQueueFactory::createMessageQueue(std::size_t uid,
+						  std::size_t no_nbs,
+						  std::size_t off,
+						  std::size_t max_k,
+						  std::size_t /* max_size */)
 {
+  boost::mutex::scoped_lock lock(mtx);
+
   ///@todo maybe we should return boost::weak_ptr here
 
-  if (mqs.find(id) != mqs.end())
+  typedef std::map<std::size_t,std::vector<ConcurrentMessageQueuePtr> > mapt;
+
+  mapt::iterator it = mqs.find(uid);
+
+  if (it != mqs.end())
     {
-      return mqs[id];
+      if (off < it->second.size())
+	{
+	  if (it->second[off] != 0) // uid and off
+	    {
+	      return it->second[off];
+	    }
+	  else // uid and no off
+	    {
+	      ConcurrentMessageQueuePtr mq(new ConcurrentMessageQueue(max_k));
+	      it->second[off] = mq;
+	      return mq;
+	    }
+	}
+      else // off > size of mq vector
+	{
+	  assert (off < NEIGHBOR_MQ + no_nbs);
+
+	  it->second.resize(NEIGHBOR_MQ + no_nbs);
+
+	  ConcurrentMessageQueuePtr mq(new ConcurrentMessageQueue(max_k));
+	  it->second[off] = mq;
+	  return mq;
+	}
     }
+  else // no uid and no off
+    {
+      mapt::value_type val = std::make_pair(uid,std::vector<ConcurrentMessageQueuePtr>(NEIGHBOR_MQ + no_nbs));
+      std::pair<mapt::iterator,bool> p = mqs.insert(val);
 
-  ConcurrentMessageQueuePtr mq(new ConcurrentMessageQueue(max_k));
-
-  mqs[id] = mq;
-
-  return mq;
+      ConcurrentMessageQueuePtr mq(new ConcurrentMessageQueue(max_k));
+      p.first->second[off] = mq;
+      return mq;
+    }
 }
 
 
@@ -105,53 +140,35 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   std::size_t k = 5;
 
 
-  // create message queue 0 (IN_MQ)
-  // conflict input MQ, announces conflicts from the parent
-
-  std::size_t id = uid;
-  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Decisionlevel, Conflict>::ModelDecisionlevel));
-  md->registerMQ(mq, id);
-
-  // create message queue 1 (OUT_MQ)
+  // create message queue 0 (OUT_MQ)
   // output MQ, announces partial equilibria from the local solver
   
-  id++;
-  mq = createMessageQueue(id, k, sizeof(PartialBeliefState*));
-  md->registerMQ(mq, id);
+  mq = createMessageQueue(uid, no_nbs, OUT_MQ, k, sizeof(PartialBeliefState*));
+  md->registerMQ(mq, OUT_MQ);
 
-  // create message queue 2 (CONFLICT_MQ)
-  // conflict output MQ, announces new conflicts from the local solver
-
-  id++;
-  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Decisionlevel, Conflict>::ModelConflict));
-  md->registerMQ(mq, id);
-
-  // create message queue 3 (JOINT_OUT_MQ)
+  // create message queue 1 (JOIN_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
 
-  id++;
-  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Decisionlevel, Conflict>::ModelDecisionlevel));
-  md->registerMQ(mq, id);
+  mq = createMessageQueue(uid, no_nbs, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelDecisionlevel));
+  md->registerMQ(mq, JOIN_OUT_MQ);
 
-  // create message queue 4 (JOIN_IN_MQ)
+  // create message queue 2 (JOIN_IN_MQ)
   // join input MQ, announces pairs of (neighbor_id, partial belief states)
 
-  id++;
-  mq = createMessageQueue(id, k, sizeof(MessagingGateway<BeliefState, Decisionlevel, Conflict>::JoinIn));
-  md->registerMQ(mq, id);
+  mq = createMessageQueue(uid, no_nbs, JOIN_IN_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::JoinIn));
+  md->registerMQ(mq, JOIN_IN_MQ);
 
-  // create message queues 5 to 5 + (no_nbs - 1)
+  // create message queues 3 to 3 + (no_nbs - 1)
   // NEIGHBOR_MQ --> NEIGHBOR_MQ + (no_nbs - 1)
 
-  for (std::size_t i = 0; i < no_nbs; ++i)
+  for (std::size_t i = NEIGHBOR_MQ; i < NEIGHBOR_MQ + no_nbs; ++i)
     {
       // partial equilibria MQ, announces a new partial equilibria from a neighbor C_i
 
       // NEIGHBOR_MQ + noff
       // noff starts from 0
-      id++;
-      mq = createMessageQueue(id, k, sizeof(PartialBeliefState*));
-      md->registerMQ(mq, id);
+      mq = createMessageQueue(uid, no_nbs, i, k, sizeof(PartialBeliefState*));
+      md->registerMQ(mq, i);
     }
 
   return md;
@@ -171,19 +188,17 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid)
   ///@todo fixme, code duplication as well...
   std::size_t k = 5;
 
-  // create message queue 0 (IN_MQ)
-  // conflict input MQ, announces conflicts from the parent
-
-  std::size_t id = uid;
-  mq = createMessageQueue(id, k, sizeof(Conflict*));
-  md->registerMQ(mq, id);
-
-  // create message queue 1 (OUT_MQ)
+  // create message queue 0 (OUT_MQ)
   // output MQ, announces partial equilibria
   
-  id++;
-  mq = createMessageQueue(id, k, sizeof(BeliefState*));
-  md->registerMQ(mq, id);
+  mq = createMessageQueue(uid, 0, OUT_MQ, k, sizeof(PartialBeliefState*));
+  md->registerMQ(mq, OUT_MQ);
+
+  // create message queue 1 (JOIN_OUT_MQ)
+  // join output MQ, announces joined belief states from the neighbors
+  
+  mq = createMessageQueue(uid, 0, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelDecisionlevel));
+  md->registerMQ(mq, JOIN_OUT_MQ);
 
   return md;
 }

@@ -56,11 +56,13 @@ private:
   static boost::once_flag flag;
   
   /// global set of message queues
-  std::map<std::size_t,ConcurrentMessageQueuePtr> mqs;
-  
+  std::map<std::size_t,std::vector<ConcurrentMessageQueuePtr> > mqs;
+  /// mutex lock for mqs
+  boost::mutex mtx;  
+
   /// create or get a ConcurrentMessageQueue
   ConcurrentMessageQueuePtr
-  createMessageQueue(std::size_t id, std::size_t max_k, std::size_t max_size);
+  createMessageQueue(std::size_t uid, std::size_t no_nbs, std::size_t off, std::size_t max_k, std::size_t max_size);
   
   
   /// private ctor
@@ -74,9 +76,7 @@ public:
   /// MQ offsets
   enum MQIDs
     {
-      IN_MQ = 0,   // parent context sent conflict
-      OUT_MQ,      // solver created belief state
-      CONFLICT_MQ, // solver created conflict
+      OUT_MQ = 0,      // solver created belief state
       JOIN_OUT_MQ, // joiner created belief state
       JOIN_IN_MQ,  // pairs of (neighbor_id, partial equilibria)
       NEIGHBOR_MQ
