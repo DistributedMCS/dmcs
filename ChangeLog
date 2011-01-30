@@ -1,3 +1,11 @@
+2011-01-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Add debug info.
+
+	* include/network/OutputThread.h: Add a flag to store leftover
+	EOF.
+	* src/network/OutputThread.cpp: Likewise.
+
 2011-01-30  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* testsuite/testJoinThread.cpp: Interrupt thread.

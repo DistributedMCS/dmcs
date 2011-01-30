@@ -73,7 +73,7 @@ private:
   void
   collect_output(MessagingGatewayBC* mg, PartialBeliefStateVecPtr& res, std::string& header);
 
-  void
+  bool
   write_result(connection_ptr conn,
 	       PartialBeliefStateVecPtr& res,
 	       const std::string& header);
@@ -83,10 +83,11 @@ private:
 			PartialBeliefStateVecPtr& res);
 
 private:
-  std::size_t                pack_size;             // Number of models the invoker expects to get
-  std::size_t                left_2_send;           // Number of models left to send
-  bool                       collecting;           // A flag to determine whether we are in collecting mode or not 
-                                                   // (if yes then we don't want to wait for any trigger)
+  std::size_t pack_size;             // Number of models the invoker expects to get
+  std::size_t left_2_send;           // Number of models left to send
+  bool        collecting;            // A flag to determine whether we are in collecting mode or not 
+                                     // (if yes then we don't want to wait for any trigger)
+  bool        eof_left;
   std::size_t port;
 };
 

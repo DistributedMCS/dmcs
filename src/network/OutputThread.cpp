@@ -106,11 +106,17 @@ OutputThread::output_limit(connection_ptr c,
 
   pack_size = ps;
   collecting = false;
+  eof_left = false;
 
   while (1)
     {
       PartialBeliefStateVecPtr res(new PartialBeliefStateVec);
       std::string header;
+
+      if (eof_left)
+	{
+	  assert (!collecting);
+	}
 
       if (!collecting)
 	{
@@ -119,9 +125,18 @@ OutputThread::output_limit(connection_ptr c,
 	      return; // shutdown received
 	    }
 	}
-      
-      collect_output(m, res, header);
-      write_result(c, res, header);
+
+      if (eof_left)
+	{
+	  const std::string header_eof = HEADER_EOF;
+	  c->write(header_eof);
+	  eof_left = false;
+	}
+      else
+	{
+	  collect_output(m, res, header);
+	  eof_left = write_result(c, res, header);
+	}
     }
 }
 
@@ -198,6 +213,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       //DMCS_LOG_TRACE(port << ":  Check result from MQ");
       if (bs == 0) // Ups, a NULL pointer
 	{
+	  DMCS_LOG_TRACE(port << ": Got a NULL pointer. timeout == " << timeout);
 	  if (timeout == 0)
 	    {
 	      //DMCS_LOG_TRACE(port << ":  TIME OUT");
@@ -220,22 +236,9 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  else 
 	    {
 	      // timeout != 0 ==> either UNSAT or EOF
-	      if (res->size() > 0)
-		{
-		  DMCS_LOG_TRACE(port << ": Going to send HEADER_ANS");
-		  header = HEADER_ANS;
-		  break;
-		}
-	      else
-		{
-		  DMCS_LOG_TRACE(port << ": NOTHING TO OUTPUT, going to send EOF");
-
-		  // Turn off collecting mode
-		  collecting = false; 
-
-		  header = HEADER_EOF;
-		  break;
-		}
+	      header = HEADER_EOF;
+	      collecting = false;
+	      break;
 	    }
 	}
       
@@ -247,8 +250,8 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 }
 
 
-
-void
+// return true if there is still EOF to send
+bool
 OutputThread::write_result(connection_ptr conn,
 			   PartialBeliefStateVecPtr& res,
 			   const std::string& header)
@@ -269,14 +272,22 @@ OutputThread::write_result(connection_ptr conn,
 	  
 	  if (res->size() > 0)
 	    {
-	      const std::string ans_header = HEADER_ANS;
+	      // send lefover models
+	      DMCS_LOG_TRACE(port << ": Going to send leftover answers and keep EOF for the next round");
+	      const std::string& ans_header = HEADER_ANS;
 	      conn->write(ans_header);
 	      handle_written_header(conn, res);
+	      return true;
 	    }
-
-	  // send EOF
-	  conn->write(header);
+	  else
+	    {
+	      DMCS_LOG_TRACE(port << ": NOTHING TO OUTPUT, going to send EOF");
+	      // send EOF
+	      conn->write(header);
+	    }
 	}
+      
+      return false;
     }
   catch (boost::system::error_code& e)
     {
