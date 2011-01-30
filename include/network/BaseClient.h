@@ -63,7 +63,7 @@ protected:
   read_header(const boost::system::error_code& error, connection_ptr conn) = 0;
 
   virtual void 
-  handle_read_header(const boost::system::error_code& error, connection_ptr conn) = 0;
+  handle_read_header(const boost::system::error_code& error, connection_ptr conn, boost::shared_ptr<std::string> received_header) = 0;
 
   virtual void 
   read_answer(const boost::system::error_code& error, connection_ptr conn) = 0;

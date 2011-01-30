@@ -136,9 +136,12 @@ Client<CmdType>::read_header(const boost::system::error_code& error, connection_
 
   if (!error)
     {
-      conn->async_read(received_header,
+      boost::shared_ptr<std::string> received_header(new std::string);
+      conn->async_read(*received_header,
 		       boost::bind(&Client::handle_read_header, this,
-				   boost::asio::placeholders::error, conn));
+				   boost::asio::placeholders::error,
+				   conn,
+				   received_header));
     }
   else
     {
@@ -150,15 +153,15 @@ Client<CmdType>::read_header(const boost::system::error_code& error, connection_
 
 template<typename CmdType>
 void
-Client<CmdType>::handle_read_header(const boost::system::error_code& error, connection_ptr conn)
+Client<CmdType>::handle_read_header(const boost::system::error_code& error, connection_ptr conn, boost::shared_ptr<std::string> received_header)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!error)
     {
-      DMCS_LOG_DEBUG("Received header = " << received_header);
+      DMCS_LOG_DEBUG("Received header = " << *received_header);
 
-      if (received_header.compare("DMCS EOF") == 0)
+      if (received_header->compare("DMCS EOF") == 0)
 	{
 	  finalize(error, conn);
 	}
@@ -203,8 +206,9 @@ Client<CmdType>::handle_read_answer(const boost::system::error_code& error, conn
 
   if (!error)
     {
-      DMCS_LOG_DEBUG(__PRETTY_FUNCTION__ << " Got an answer: " << result);
-      read_header(boost::system::error_code(), conn);
+      DMCS_LOG_TRACE("Got an answer: " << result);
+#warning this blocks the io_service!
+      read_header(boost::system::error_code(), conn); ///@todo no good, recursive call, this will block the io_service...
     }
   else
     {

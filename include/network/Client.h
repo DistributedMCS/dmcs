@@ -72,7 +72,7 @@ class Client : public BaseClient
   read_header(const boost::system::error_code& error, connection_ptr conn);
 
   void 
-  handle_read_header(const boost::system::error_code& error, connection_ptr conn);
+  handle_read_header(const boost::system::error_code& error, connection_ptr conn, boost::shared_ptr<std::string> header);
 
   void 
   read_answer(const boost::system::error_code& error, connection_ptr conn);
@@ -83,7 +83,6 @@ class Client : public BaseClient
   void 
   finalize(const boost::system::error_code& error, connection_ptr /* conn */);
 
-  std::string received_header;
   typename CmdType::input_type mess;
   typename CmdType::return_type result;
 };

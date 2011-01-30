@@ -80,11 +80,6 @@ private:
   void
   read_header(const boost::system::error_code& error, connection_ptr conn);
 
-  ///@todo: this is dirty
-  void 
-  handle_read_header(const boost::system::error_code& error, connection_ptr conn)
-  { }
-
   void 
   handle_read_header(const boost::system::error_code& error, connection_ptr conn,
 		     boost::shared_ptr<std::string> header);
