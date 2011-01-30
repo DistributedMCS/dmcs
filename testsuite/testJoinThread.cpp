@@ -268,5 +268,7 @@ BOOST_AUTO_TEST_CASE ( testJoinThread )
 
   BOOST_CHECK_EQUAL(join_count, 4);
 
+
+  t.interrupt();
   t.join();
 }

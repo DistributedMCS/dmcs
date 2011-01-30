@@ -1,5 +1,7 @@
 2011-01-30  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* testsuite/testJoinThread.cpp: Interrupt thread.
+
 	* testsuite/testInterfaceRelSat.cpp: Fix FTBFS.
 	* testsuite/testJoinThread.cpp: Likewise.
 
