@@ -75,6 +75,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
 
 void
 ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
+				     NeighborThreadVecPtr& neighbors,
 				     ConcurrentMessageQueueVecPtr& router_neighbors_notif)
 {
   const NeighborListPtr& nbs    = context->getNeighbors();
@@ -87,13 +88,15 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
     {
       DMCS_LOG_TRACE("Create neighbor thread " << i);
 
-      const NeighborPtr nb = *it;
       ConcurrentMessageQueuePtr cmq(new ConcurrentMessageQueue);
-
-      NeighborThread nt(port);
       router_neighbors_notif->push_back(cmq);
+
+      NeighborThread* nt = new NeighborThread(port);
+      neighbors->push_back(nt);
+
+      const NeighborPtr nb = *it;
       
-      boost::thread* nit = new boost::thread(nt, cmq.get(), mg, nb.get(), c2o, ctx_id, pack_size);
+      boost::thread* nit = new boost::thread(*nt, cmq.get(), mg, nb.get(), c2o, ctx_id, pack_size);
       neighbor_input_threads->push_back(nit);
 
       DMCS_LOG_TRACE("Created neighbor thread " << i << " for " << port);

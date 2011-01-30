@@ -36,7 +36,6 @@
 #include "mcs/HashedBiMap.h"
 #include "network/NeighborOut.h"
 #include "network/ConcurrentMessageQueueFactory.h"
-
 #include "dmcs/StreamingBackwardMessage.h"
 #include "network/connection.hpp"
 
@@ -55,6 +54,7 @@ class NeighborThread
 public:
   NeighborThread(std::size_t p)
     : nop_thread(0),
+      io_service(new boost::asio::io_service),
       port(p)
   { }
 
@@ -62,13 +62,21 @@ public:
   virtual
   ~NeighborThread()
   {
-    DMCS_LOG_TRACE("Killing me softly");
+    DMCS_LOG_TRACE(port << ": Killing me softly");
 
     if (nop_thread)
       {
-	nop_thread->join();
-	delete nop_thread;
+	nop_thread->interrupt();
+
+	if (nop_thread->joinable())
+	  {
+	    nop_thread->join();
+	    delete nop_thread;
+	    nop_thread = 0;
+	    DMCS_LOG_TRACE(port << ": Joined NeighborOut");
+	  }
       }
+
   }
 
 
@@ -87,33 +95,53 @@ public:
     invoker = invoker_;
     pack_size = pack_size_;
 
-    DMCS_LOG_TRACE("neighbor " << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
+    DMCS_LOG_TRACE(port << ": starting neighbor " << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
 
-    boost::asio::io_service io_service;
-    boost::asio::ip::tcp::resolver resolver(io_service);
+    boost::asio::ip::tcp::resolver resolver(*io_service);
     boost::asio::ip::tcp::resolver::query query(nb->hostname, nb->port);
     boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
     boost::asio::ip::tcp::endpoint endpoint = *res_it;
-    
-    conn = connection_ptr(new connection(io_service));
+
+    connection_ptr conn(new connection(*io_service));
 
     conn->socket().async_connect(endpoint,
 				 boost::bind(&NeighborThread::establish_connections, this,
 					     boost::asio::placeholders::error,
-					     ++res_it));
+					     conn,
+					     ++res_it)
+				 );
 
-    //DMCS_LOG_TRACE("io_service.run()");
 
-    boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
-    io_service.run();
-    t.join();
+    DMCS_LOG_TRACE(port << ": starting neighbor " << nb->neighbor_id << " io_service");
+
+    boost::shared_ptr<boost::thread> nip(new boost::thread(boost::bind(&boost::asio::io_service::run, io_service)));
+
+    nip->join(); // waits for termination
+
+    DMCS_LOG_TRACE(port << ": io_service for neighbor " << nb->neighbor_id << " done");
+  }
+
+
+
+  void
+  stop()
+  {
+    DMCS_LOG_TRACE(port << ": stopping io_service " << io_service);
+
+    if (io_service)
+      {
+	io_service->stop(); // terminate io_service
+	DMCS_LOG_TRACE(port << ": io_service stopped");
+      }
   }
 
 
 private:
 
+
   void
   establish_connections(const boost::system::error_code& e,
+			connection_ptr conn,
 			boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
   {
     if (!e)
@@ -144,9 +172,8 @@ private:
 	conn->async_read(*header,
 			 boost::bind(&NeighborThread::handle_read_header, this,  
 				     boost::asio::placeholders::error,
+				     conn,
 				     header,
-				     //conn,
-				     //mg,
 				     offset
 				     )
 			 );
@@ -160,12 +187,14 @@ private:
 	conn->socket().async_connect(endpoint,
 				     boost::bind(&NeighborThread::establish_connections, this,
 						 boost::asio::placeholders::error,
-						 ++endpoint_iterator));
+						 conn,
+						 ++endpoint_iterator)
+				     );
       }
     else
       {
 	// An error occurred.
-	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << port << ": " << e.message());
 	throw std::runtime_error(e.message());
     }
   }  
@@ -175,6 +204,7 @@ private:
  
   void
   handle_read_header(const boost::system::error_code& e,
+		     connection_ptr conn,
 		     boost::shared_ptr<std::string> header,
 		     std::size_t noff)
   {
@@ -190,6 +220,7 @@ private:
 	    conn->async_read(*mess,
 			     boost::bind(&NeighborThread::handle_read_message, this,
 					 boost::asio::placeholders::error,
+					 conn,
 					 mess,
 					 noff
 					 )
@@ -208,6 +239,7 @@ private:
 	    conn->async_read(*header,
 			     boost::bind(&NeighborThread::handle_read_header, this,  
 					 boost::asio::placeholders::error,
+					 conn,
 					 header,
 					 noff
 					 )
@@ -216,7 +248,7 @@ private:
       }
     else
       {
-	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << port << ": " << e.message());
 	throw std::runtime_error(e.message());
       }
   }
@@ -224,6 +256,7 @@ private:
 
   void
   handle_read_message(const boost::system::error_code& e,
+		      connection_ptr conn,
 		      StreamingBackwardMessagePtr mess,
 		      std::size_t noff)
   {
@@ -265,6 +298,7 @@ private:
 	conn->async_read(*header,
 			 boost::bind(&NeighborThread::handle_read_header, this,  
 				     boost::asio::placeholders::error,
+				     conn,
 				     header,
 				     noff
 				     )
@@ -272,7 +306,7 @@ private:
       }
     else
       {
-	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << port << ": " << e.message());
 	throw std::runtime_error(e.message());
       }
   }
@@ -286,10 +320,17 @@ private:
   const HashedBiMap*         c2o;
   std::size_t                invoker;
   std::size_t                pack_size;
-  connection_ptr             conn;
   boost::thread* nop_thread;
+  boost::thread* nip_thread;
+  boost::shared_ptr<boost::asio::io_service> io_service;
   std::size_t port;
 };
+
+
+  typedef std::vector<NeighborThread*> NeighborThreadVec;
+  typedef boost::shared_ptr<NeighborThreadVec> NeighborThreadVecPtr;
+
+
 
 } // namespace dmcs
 

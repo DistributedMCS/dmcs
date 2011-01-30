@@ -167,10 +167,14 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 	  pack_size = on->pack_size;
 	  left_2_send = on->pack_size;
 	  retval = true;
+
+	  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size);
 	}
       else if (on->type == OutputNotification::SHUTDOWN)
 	{
 	  retval = false;
+
+	  DMCS_LOG_TRACE(port << ": Got SHUTDOWN from Handler.");
 	}
       else
 	{
@@ -182,8 +186,6 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
       DMCS_LOG_FATAL("Got null message: " << ptr << " " << on);
       assert(ptr != 0 && on != 0);
     }
-
-  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size);
 
   return retval;
 }

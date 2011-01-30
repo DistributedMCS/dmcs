@@ -60,6 +60,13 @@ public:
   { }
 
 
+  virtual
+  ~NeighborOut()
+  {
+    DMCS_LOG_TRACE(port << ": Good bye.");
+  }
+
+
   void
   operator() (connection_ptr conn,
 	      ConcurrentMessageQueue* rnn,
@@ -75,7 +82,12 @@ public:
 
 	if (cn->type == ConflictNotification::SHUTDOWN)
 	  {
-	    DMCS_LOG_TRACE(port << ": Neighbor " << nid << " out.");
+	    DMCS_LOG_TRACE(port << ": Neighbor " << nid << " received SHUTDOWN, propagating TERMINATE...");
+
+	    const std::string& header = HEADER_TERMINATE;
+
+	    conn->write(header);
+
 	    return;
 	  }
 	else if (cn->type == ConflictNotification::REQUEST)
@@ -92,9 +104,11 @@ public:
 	    const std::string& header = HEADER_REQ_STM_DMCS;
 
 	    conn->write(header);
-	    handle_write_message(boost::system::error_code(), conn, invoker, pack_size, conflicts, partial_ass);
+	    handle_write_message(conn, invoker, pack_size, conflicts, partial_ass);
 
-	    /*	    conn->async_write(header,
+
+#if 0
+	     conn->async_write(header,
 			      boost::bind(&NeighborOut::handle_write_message, this,
 					  boost::asio::placeholders::error,
 					  conn,
@@ -103,7 +117,8 @@ public:
 					  conflicts,
 					  partial_ass
 					  )
-					  );*/
+					  );
+#endif
 	  }
 	else if (cn->type == ConflictNotification::NEXT)
 	  {
@@ -114,19 +129,18 @@ public:
 
 	    //boost::shared_ptr<std::string> header(new std::string(HEADER_NEXT));
 
-	    ConflictVec* cs = 0;
-
 	    const std::string& header = HEADER_NEXT;
 
 	    conn->write(header);
-	    handle_clean_up(boost::system::error_code(), cs);
 
-	    /*conn->async_write(header,
+#if 0
+	    conn->async_write(header,
 			      boost::bind(&NeighborOut::handle_clean_up, this,  
 					  boost::asio::placeholders::error,
 					  cs
 					  )
-					  );*/
+			      );
+#endif
 	  }
 	else
 	  {
@@ -163,8 +177,7 @@ public:
   
 
   void
-  handle_write_message(const boost::system::error_code& e,
-		       connection_ptr conn,
+  handle_write_message(connection_ptr conn,
 		       std::size_t invoker,
 		       std::size_t pack_size,
 		       ConflictVec* conflicts, 
@@ -172,60 +185,37 @@ public:
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-    if (!e)
+    StreamingForwardMessage mess(invoker, pack_size, conflicts, partial_ass);
+
+    conn->write(mess);
+
+    // We don't delete partial_ass here. It should be used in other places.
+
+    if (conflicts)
       {
-	StreamingForwardMessage mess(invoker, pack_size, conflicts, partial_ass);
-
-	conn->write(mess);
-	handle_clean_up(boost::system::error_code(), conflicts);
-
-	/*conn->async_write(mess,
-			  boost::bind(&NeighborOut::handle_clean_up, this,  
-				      boost::asio::placeholders::error,
-				      conflicts
-				      )
-				      );*/
-      }
-    else
-      {
-	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
-	throw std::runtime_error(e.message());
-      }
-  }
-
-
-
-  void
-  handle_clean_up(const boost::system::error_code& e,
-		  ConflictVec* conflicts)
-  {
-    DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
-    if (!e)
-      {
-	// We don't delete partial_ass here. It should be used in other places.
-
-	if (conflicts)
+	for (ConflictVec::const_iterator it = conflicts->begin();
+	     it != conflicts->end(); ++it)
 	  {
-	    for (ConflictVec::const_iterator it = conflicts->begin();
-		 it != conflicts->end(); ++it)
+	    Conflict* c = *it;
+	    if (c)
 	      {
-		Conflict* c = *it;
-		if (c)
-		  {
-		    delete c;
-		    c = 0;
-		  }
+		delete c;
+		c = 0;
 	      }
 	  }
       }
-    else
-      {
-	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
-	throw std::runtime_error(e.message());
-      }
-  }
 
+
+#if 0
+    conn->async_write(mess,
+		      boost::bind(&NeighborOut::handle_clean_up, this,  
+				  boost::asio::placeholders::error,
+				  conflicts
+				  )
+		      );
+#endif
+  }
+  
 
 };
 

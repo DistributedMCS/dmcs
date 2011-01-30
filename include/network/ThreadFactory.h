@@ -35,6 +35,7 @@
 #include "mcs/ProxySignatureByLocal.h"
 #include "mcs/Theory.h"
 #include "network/BaseClient.h"
+#include "network/NeighborThread.h"
 #include "network/connection.hpp"
 #include "solver/RelSatSolver.h"
 
@@ -63,6 +64,7 @@ public:
 
   void
   createNeighborThreads(ThreadVecPtr& neighbor_threads,
+			NeighborThreadVecPtr& neighbors,
 			ConcurrentMessageQueueVecPtr& router_neighbors_notif);
 
   boost::thread*

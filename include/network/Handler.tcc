@@ -215,8 +215,11 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e,
 // *********************************************************************************************************************
 // Specialized methods for streaming dmcs
 Handler<StreamingCommandType>::Handler()
-  : handler_dmcs_notif(new ConcurrentMessageQueue),
-    handler_output_notif(new ConcurrentMessageQueue)
+     : output_thread(0),
+       streaming_dmcs_thread(0),
+       handler_dmcs_notif(new ConcurrentMessageQueue),
+       handler_output_notif(new ConcurrentMessageQueue)
+
 { 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 }
@@ -224,43 +227,34 @@ Handler<StreamingCommandType>::Handler()
 
 Handler<StreamingCommandType>::~Handler()
 { 
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
-  DMCS_LOG_TRACE(port << ": Send SHUTHDOWN and join Output thread");
-
-  OutputNotification* mess_output = new OutputNotification(0, OutputNotification::SHUTDOWN);
-  OutputNotification* ow_output = 
-    (OutputNotification*) overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
-  
-  if (ow_output)
+  DMCS_LOG_TRACE(port << ": Join OUTPUT thread");
+ 
+  if (output_thread && output_thread->joinable())
     {
-      delete ow_output;
-      ow_output = 0;
+      output_thread->interrupt();
+      output_thread->join();
     }
-  
-  output_thread->join();
-
-  DMCS_LOG_TRACE(port << ": Send SHUTDOWN and join DMCS thread");
-  
-  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(0,0,0,StreamingDMCSNotification::SHUTDOWN);
-  StreamingDMCSNotification* ow_dmcs = 
-    (StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif, &mess_dmcs, sizeof(mess_dmcs), 0);
-
-  if (ow_dmcs)
+  else
     {
-      delete ow_dmcs;
-      ow_dmcs = 0;
+      DMCS_LOG_ERROR(port << ": OUTPUT thread not joinable");
     }
 
-  streaming_dmcs_thread->join();
+  DMCS_LOG_TRACE(port << ": Join DMCS thread");
 
-  DMCS_LOG_TRACE(port << ": Cleanup threads and messages");
+  if (streaming_dmcs_thread && streaming_dmcs_thread->joinable())
+    {
+      streaming_dmcs_thread->interrupt();
+      streaming_dmcs_thread->join();
+    }
+  else
+    {
+      DMCS_LOG_ERROR(port << ": DMCS thread not joinable");
+    }
 
-  delete mess_output;
-  delete mess_dmcs;
+  DMCS_LOG_TRACE(port << ": Cleanup threads");
 
-  delete output_thread;
-  delete streaming_dmcs_thread;
+  if (output_thread) { delete output_thread; output_thread = 0; }
+  if (streaming_dmcs_thread) { delete streaming_dmcs_thread; streaming_dmcs_thread = 0; }
 
   DMCS_LOG_TRACE(port << ": So long, and thanks for all the fish.");
 }
@@ -290,7 +284,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  DMCS_LOG_TRACE(port << ": First and only initialization, creating MessagingGateway");
 
 	  ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
-	  mg = mqf.createMessagingGateway(port); // we use the port as unique id
+	  mg = mqf.createMessagingGateway(port, 5); // we use the port as unique id
 
 	  DMCS_LOG_TRACE(port << ": creating dmcs thread");
 
@@ -425,6 +419,32 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  // don't do anything, session will disappear
 
 	  DMCS_LOG_TRACE(port << ": Closing session with context " << sesh->mess.getInvoker());
+
+	  DMCS_LOG_TRACE(port << ": Send SHUTHDOWN to Output thread");
+
+	  OutputNotification* mess_output = new OutputNotification(0, OutputNotification::SHUTDOWN);
+	  OutputNotification* ow_output = 
+	    (OutputNotification*) overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
+	  
+	  if (ow_output)
+	    {
+	      delete ow_output;
+	      ow_output = 0;
+	    }
+	  
+	  DMCS_LOG_TRACE(port << ": Send SHUTDOWN to DMCS thread");
+	  
+	  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(0,0,0,StreamingDMCSNotification::SHUTDOWN);
+	  StreamingDMCSNotification* ow_dmcs = 
+	    (StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif, &mess_dmcs, sizeof(mess_dmcs), 0);
+	  
+	  if (ow_dmcs)
+	    {
+	      delete ow_dmcs;
+	      ow_dmcs = 0;
+	    }
+
+	  return;
 	}
       else 
 	{

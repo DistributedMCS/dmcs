@@ -1,3 +1,34 @@
+2011-01-30  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Propagate TERMINATE messages.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueueFactory.h: Support for max queue size.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* testsuite/testJoinThread.cpp: Likewise.
+	* testsuite/testInterfaceRelSat.cpp: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+
+	* testsuite/testJoinThread.cpp: Interrupt thread.
+
+	* testsuite/testInterfaceRelSat.cpp: Fix FTBFS.
+
+	* testsuite/testJoinThread.cpp: Likewise.
+
+	* src/network/OutputThread.cpp: Fix warning.
+
+	* include/network/AsynClient.h (handle_read_header): Clean-up.
+	* include/network/BaseClient.h: Likewise.
+	* include/network/Client.h: Likewise.
+	* include/network/Client.tcc: Likewise.
+
 2011-01-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/OutputThread.cpp: Return EOF to user immediately
@@ -14,20 +45,6 @@
 	* include/network/OutputThread.h: Add a flag to store leftover
 	EOF.
 	* src/network/OutputThread.cpp: Likewise.
-
-2011-01-30  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* testsuite/testJoinThread.cpp: Interrupt thread.
-
-	* testsuite/testInterfaceRelSat.cpp: Fix FTBFS.
-	* testsuite/testJoinThread.cpp: Likewise.
-
-	* src/network/OutputThread.cpp: Fix warning.
-
-	* include/network/AsynClient.h (handle_read_header): Clean-up.
-	* include/network/BaseClient.h: Likewise.
-	* include/network/Client.h: Likewise.
-	* include/network/Client.tcc: Likewise.
 
 2011-01-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 

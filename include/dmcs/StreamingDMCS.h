@@ -100,6 +100,7 @@ private:
   boost::thread*        join_thread;
   boost::thread*        router_thread;
   ThreadVecPtr          neighbor_threads;
+  NeighborThreadVecPtr  neighbors;
   MessagingGatewayBCPtr mg;
   ConcurrentMessageQueuePtr    dmcs_sat_notif;
   ConcurrentMessageQueuePtr    sat_router_notif;

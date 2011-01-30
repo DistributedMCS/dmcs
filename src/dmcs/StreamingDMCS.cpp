@@ -67,6 +67,7 @@ namespace dmcs {
     join_thread(0),
     router_thread(0),
     neighbor_threads(new ThreadVec),
+    neighbors(new NeighborThreadVec),
     dmcs_sat_notif(new ConcurrentMessageQueue),
     sat_router_notif(new ConcurrentMessageQueue),
     router_neighbors_notif(new ConcurrentMessageQueueVec),
@@ -79,16 +80,32 @@ namespace dmcs {
 StreamingDMCS::~StreamingDMCS()
 {
   DMCS_LOG_TRACE("Join SAT thread");
-  sat_thread->join();
 
-  #warning joining JOIN is not safe
-  DMCS_LOG_TRACE("Join JOIN thread (not safe for now)");
-  //join_thread->join();
+  if (sat_thread && sat_thread->joinable())
+    {
+      sat_thread->interrupt();
+      sat_thread->join();
+    }
+  else
+    {
+      DMCS_LOG_ERROR("SAT thread is not joinable");
+    }
 
-  #warning joining ROUTER is not safe
-  DMCS_LOG_TRACE("Join ROUTER thread (not safe for now)");
+  DMCS_LOG_TRACE("Join JOIN thread");
+  
+  if (join_thread && join_thread->joinable())
+    {
+      join_thread->interrupt();
+      join_thread->join();
+    }
+  else
+    {
+      DMCS_LOG_ERROR("JOIN thread is not joinable");
+    }
 
-#if 0
+
+  DMCS_LOG_TRACE("Informing ROUTER.");
+
   ConflictNotification* mess_sat = new ConflictNotification(0,0,0,ConflictNotification::SHUTDOWN);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(sat_router_notif, &mess_sat, sizeof(mess_sat), 0);
@@ -99,34 +116,76 @@ StreamingDMCS::~StreamingDMCS()
       ow_sat = 0;
     }
 
-  if (router_thread->joinable())
+
+  ConcurrentMessageQueueVec::iterator rbeg = router_neighbors_notif->begin();
+  ConcurrentMessageQueueVec::iterator rend = router_neighbors_notif->end();
+
+  DMCS_LOG_TRACE("Informing " << std::distance(rbeg, rend) << " neighbors.");
+
+  // inform all neighbors about the shutdown
+  for (ConcurrentMessageQueueVec::iterator it = rbeg; it != rend; ++it)
     {
+      ConflictNotification* ow_neighbor =
+	(ConflictNotification*) overwrite_send(*it, &mess_sat, sizeof(mess_sat), 0);
+
+      DMCS_LOG_TRACE("Sent SHUTDOWN to neighbor " << std::distance(it, rend));
+
+      if (ow_neighbor)
+	{
+	  delete ow_neighbor;
+	  ow_neighbor = 0;
+	}
+    }
+
+  DMCS_LOG_TRACE("Join ROUTER thread");
+
+  if (router_thread && router_thread->joinable())
+    {
+      router_thread->interrupt();
       router_thread->join();
     }
   else
     {
       DMCS_LOG_ERROR("ROUTER thread is not joinable");
     }
-#endif
+
 
   ThreadVec::iterator beg = neighbor_threads->begin();
   ThreadVec::iterator end = neighbor_threads->end();
 
-  DMCS_LOG_TRACE("Join " <<  std::distance(beg, end) << " NEIGHBOR threads (not thread safe for now)");
-  
-#if 0
+  NeighborThreadVec::iterator nbeg = neighbors->begin();
+  NeighborThreadVec::iterator nend = neighbors->end();
+
+  assert(std::distance(beg,end) == std::distance(nbeg,nend));
+
+  DMCS_LOG_TRACE("Stop " <<  std::distance(beg, end) << " NEIGHBOR threads");
+
+  for (NeighborThreadVec::iterator nit = nbeg; nit != nend; ++nit)
+    {
+      DMCS_LOG_TRACE("Stop NEIGHBOR thread #" << std::distance(nit, nend));
+
+      assert(*nit);
+
+      (*nit)->stop();
+    }
+
+  DMCS_LOG_TRACE("Join " <<  std::distance(beg, end) << " NEIGHBOR threads");
+
   for (ThreadVec::iterator it = beg; it != end; ++it)
     {
-      DMCS_LOG_TRACE("Killing Neighbor thread #" << std::distance(it, end));
+      DMCS_LOG_TRACE("Join NEIGHBOR thread #" << std::distance(it, end));
+
+      assert(*it);
+
+      (*it)->interrupt();
       (*it)->join();
     }
-#endif
 
   DMCS_LOG_TRACE("Cleanup threads");
 
-  delete sat_thread;
-  delete join_thread;
-  delete router_thread;
+  if (sat_thread) { delete sat_thread; sat_thread = 0; }
+  if (join_thread) { delete join_thread; join_thread = 0; }
+  if (router_thread) { delete router_thread; router_thread = 0; } 
 
   DMCS_LOG_TRACE("Good night, and good luck.");
 }
@@ -144,7 +203,7 @@ StreamingDMCS::initialize(std::size_t invoker,
   DMCS_LOG_TRACE("Here create mqs and threads. no_nbs = " << no_nbs);
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
-  mg = mqf.createMessagingGateway(port, no_nbs); // we use the port as unique id
+  mg = mqf.createMessagingGateway(port, no_nbs, 5); // we use the port as unique id
 
   BeliefStatePtr localV;
   if (invoker == 0)
@@ -166,7 +225,7 @@ StreamingDMCS::initialize(std::size_t invoker,
 
   if (no_nbs > 0)
     {
-      tf.createNeighborThreads(neighbor_threads, router_neighbors_notif);
+      tf.createNeighborThreads(neighbor_threads, neighbors, router_neighbors_notif);
       join_thread   = tf.createJoinThread(router_neighbors_notif);
       router_thread = tf.createRouterThread(router_neighbors_notif);
     }

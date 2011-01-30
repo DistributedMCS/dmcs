@@ -48,6 +48,13 @@ public:
   { }
 
 
+  virtual
+  ~RouterThread()
+  {
+    DMCS_LOG_TRACE(port << ": Cheerio!");
+  }
+
+
   void
   operator()(ConcurrentMessageQueue* sat_router_notif,
 	     ConcurrentMessageQueueVec* router_neighbors_notif)
@@ -55,10 +62,12 @@ public:
     while (1)
       {
 	// wait for any conflict from the local solver
-	ConflictNotification* cn;
+	ConflictNotification* cn = 0;
 	void *ptr         = static_cast<void*>(&cn);
 	unsigned int p    = 0;
 	std::size_t recvd = 0;
+
+	DMCS_LOG_TRACE(port << ": Waiting for notification.");
 
 	sat_router_notif->receive(ptr, sizeof(cn), recvd, p);
 
@@ -66,16 +75,21 @@ public:
 	  {
 	    if (cn->type == ConflictNotification::SHUTDOWN)
 	      {
-		DMCS_LOG_TRACE(port << ": Shutdown requested, informing neighbors. Bye for now.");
+#if 0
+		ConcurrentMessageQueueVec::iterator beg = router_neighbors_notif->begin();
+		ConcurrentMessageQueueVec::iterator end = router_neighbors_notif->end();
+
+		DMCS_LOG_TRACE(port << ": SHUTDOWN requested, informing " << std::distance(beg, end) << " neighbors.");
 
 		// inform all neighbors about the shutdown
-		for (ConcurrentMessageQueueVec::iterator it = router_neighbors_notif->begin();
-		     it != router_neighbors_notif->end(); ++it)
+		for (ConcurrentMessageQueueVec::iterator it = beg; it != end; ++it)
 		  {
 		    std::size_t prio = 0;
 
 		    ConflictNotification* ow_neighbor =
 		      (ConflictNotification*) overwrite_send(*it, &cn, sizeof(cn), prio);
+
+		    DMCS_LOG_TRACE(port << ": Sent SHUTDOWN to neighbor " << std::distance(it, end));
 
 		    if (ow_neighbor)
 		      {
@@ -83,28 +97,33 @@ public:
 			ow_neighbor = 0;
 		      }
 		  }
+#endif //0
+
+		DMCS_LOG_TRACE(port << ": SHUTDOWN requested");
 
 		return;
 	      }
-
-	    // forward request
-
-	    const std::size_t noff = cn->val;
-	    
-	    DMCS_LOG_TRACE(port << ": Got a notification from local solver. noff = " << noff);
-	    
-	    // inform neighbor at noff about the conflict
-	    ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[noff];
-	    
-	    std::size_t p1 = 0;
-
-	    ConflictNotification* ow_neighbor =
-	      (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), p1);
-
-	    if (ow_neighbor)
+	    else
 	      {
-		delete ow_neighbor;
-		ow_neighbor = 0;
+		// forward request
+
+		const std::size_t noff = cn->val;
+	    
+		DMCS_LOG_TRACE(port << ": Got a notification from local solver. noff = " << noff);
+	    
+		// inform neighbor at noff about the conflict
+		ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[noff];
+		
+		std::size_t p1 = 0;
+
+		ConflictNotification* ow_neighbor =
+		  (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), p1);
+		
+		if (ow_neighbor)
+		  {
+		    delete ow_neighbor;
+		    ow_neighbor = 0;
+		  }
 	      }
 	  }
 	else
