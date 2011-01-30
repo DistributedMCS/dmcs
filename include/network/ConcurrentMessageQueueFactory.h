@@ -100,22 +100,24 @@ public:
    * 
    * @param uid a number that is unique to the whole computer
    * @param no_nbs no_nbs is the number of neighbors
+   * @param k max queue size
    * 
    * @return a MessagingGateway
    */
   MessagingGatewayBCPtr
-  createMessagingGateway(std::size_t uid, std::size_t no_nbs);
+  createMessagingGateway(std::size_t uid, std::size_t no_nbs, std::size_t k);
   
   
   /** 
    * Creates a messaging gateway only with incoming and outgoing queues IN_MQ and OUT_MQ, resp.
    * 
    * @param uid a number that is unique to the whole computer
+   * @param k max queue size
    * 
    * @return a MessagingGateway
    */
   MessagingGatewayBCPtr
-  createMessagingGateway(std::size_t uid);
+  createMessagingGateway(std::size_t uid, std::size_t k);
   
 };
   

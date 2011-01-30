@@ -49,13 +49,8 @@ worker(MessagingGatewayBCPtr& mg, boost::promise<int>& p)
 
 BOOST_AUTO_TEST_CASE( testMessagingGateway )
 {
-#if 0
-  boost::shared_ptr<MessagingGateway<BeliefState,Conflict> > mg1 =
-    MessageQueueFactory().createMessagingGateway(0, 5);
-#endif //0
-
   ConcurrentMessageQueueFactory& f = ConcurrentMessageQueueFactory::instance();
-  MessagingGatewayBCPtr mg2 = f.createMessagingGateway(0, 5);
+  MessagingGatewayBCPtr mg2 = f.createMessagingGateway(0, 5, 5);
 
   PartialBeliefState* b1 = (PartialBeliefState*) 0xdeadbeef;
   PartialBeliefState* b2 = 0;

@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE ( testJoinThread )
   */
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
-  MessagingGatewayBCPtr mg = mqf.createMessagingGateway(port, no_nbs);
+  MessagingGatewayBCPtr mg = mqf.createMessagingGateway(port, no_nbs, 5);
 
   ConcurrentMessageQueueVecPtr jnn(new ConcurrentMessageQueueVec);
   ConcurrentMessageQueuePtr    n0 (new ConcurrentMessageQueue);

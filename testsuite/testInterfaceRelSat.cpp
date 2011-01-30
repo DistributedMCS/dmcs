@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE ( testInterfaceRelSat )
   c2o->insert(Int2Int(3, 1));
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
-  MessagingGatewayBCPtr mg = mqf.createMessagingGateway(2421);
+  MessagingGatewayBCPtr mg = mqf.createMessagingGateway(2421, 5);
 
   ConcurrentMessageQueuePtr dsn(new ConcurrentMessageQueue);
   ConcurrentMessageQueuePtr srn(new ConcurrentMessageQueue);

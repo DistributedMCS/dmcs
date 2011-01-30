@@ -128,17 +128,13 @@ ConcurrentMessageQueueFactory::createMessageQueue(std::size_t uid,
 
 
 MessagingGatewayBCPtr
-ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size_t no_nbs)
+ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size_t no_nbs, std::size_t k)
 {
   ///@todo TK: all MQs need to have a unique name in the _process_, thus
   ///we need to add the port number of creating session to the id
 
   boost::shared_ptr<ConcurrentMessageDispatcher> md(new ConcurrentMessageDispatcher);
   ConcurrentMessageQueuePtr mq;
-
-  ///@todo fixme, code duplication as well...
-  std::size_t k = 5;
-
 
   // create message queue 0 (OUT_MQ)
   // output MQ, announces partial equilibria from the local solver
@@ -177,16 +173,13 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
 
 
 MessagingGatewayBCPtr
-ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid)
+ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size_t k)
 {
   ///@todo TK: all MQs need to have a unique name in the _process_, thus
   ///we need to add the port number of creating session to the id
 
   boost::shared_ptr<ConcurrentMessageDispatcher> md(new ConcurrentMessageDispatcher);
   ConcurrentMessageQueuePtr mq;
-
-  ///@todo fixme, code duplication as well...
-  std::size_t k = 5;
 
   // create message queue 0 (OUT_MQ)
   // output MQ, announces partial equilibria
