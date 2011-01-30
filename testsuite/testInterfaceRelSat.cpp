@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE ( testInterfaceRelSat )
   ConcurrentMessageQueuePtr dsn(new ConcurrentMessageQueue);
   ConcurrentMessageQueuePtr srn(new ConcurrentMessageQueue);
 
-  RelSatSolver rss(false, my_id, theory, sig, localV, c2o.get(), system_size, mg.get(), dsn.get(), srn.get());
+  RelSatSolver rss(false, my_id, theory, sig, localV, c2o.get(), system_size, mg.get(), dsn.get(), srn.get(), 42);
 
   DMCS_LOG_DEBUG("Original theory: ");
   rss.print_local_theory();

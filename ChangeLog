@@ -1,3 +1,15 @@
+2011-01-30  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/testInterfaceRelSat.cpp: Fix FTBFS.
+	* testsuite/testJoinThread.cpp: Likewise.
+
+	* src/network/OutputThread.cpp: Fix warning.
+
+	* include/network/AsynClient.h (handle_read_header): Clean-up.
+	* include/network/BaseClient.h: Likewise.
+	* include/network/Client.h: Likewise.
+	* include/network/Client.tcc: Likewise.
+
 2011-01-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/OutputThread.cpp: Send if there is something in res.
