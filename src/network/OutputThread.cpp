@@ -39,8 +39,8 @@
 
 namespace dmcs {
 
-OutputThread::OutputThread(std::size_t p)
-  : port(p)
+  OutputThread::OutputThread(std::size_t i, std::size_t p)
+    : invoker(i), port(p)
 { }
 
 
@@ -55,8 +55,7 @@ void
 OutputThread::operator()(connection_ptr c,
 			 std::size_t ps,
 			 MessagingGatewayBC* mg,
-			 ConcurrentMessageQueue* hon,
-			 std::size_t invoker)
+			 ConcurrentMessageQueue* hon)
 {
   if (ps == 0)
     {
@@ -128,14 +127,16 @@ OutputThread::output_limit(connection_ptr c,
 
       if (eof_left)
 	{
+	  DMCS_LOG_TRACE(port << ": Send leftover EOF");
 	  const std::string header_eof = HEADER_EOF;
 	  c->write(header_eof);
 	  eof_left = false;
 	}
       else
 	{
+	  DMCS_LOG_TRACE(port << ": Go to collect output");
 	  collect_output(m, res, header);
-	  eof_left = write_result(c, res, header);
+	  write_result(c, res, header);
 	}
     }
 }
@@ -213,7 +214,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       //DMCS_LOG_TRACE(port << ":  Check result from MQ");
       if (bs == 0) // Ups, a NULL pointer
 	{
-	  DMCS_LOG_TRACE(port << ": Got a NULL pointer. timeout == " << timeout);
+	  //DMCS_LOG_TRACE(port << ": Got a NULL pointer. timeout == " << timeout);
 	  if (timeout == 0)
 	    {
 	      //DMCS_LOG_TRACE(port << ":  TIME OUT");
@@ -250,8 +251,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 }
 
 
-// return true if there is still EOF to send
-bool
+void
 OutputThread::write_result(connection_ptr conn,
 			   PartialBeliefStateVecPtr& res,
 			   const std::string& header)
@@ -260,6 +260,7 @@ OutputThread::write_result(connection_ptr conn,
 
   try
     {
+      eof_left = false;
       if (header.find(HEADER_ANS) != std::string::npos)
 	{
 	  // send some models
@@ -274,20 +275,24 @@ OutputThread::write_result(connection_ptr conn,
 	    {
 	      // send lefover models
 	      DMCS_LOG_TRACE(port << ": Going to send leftover answers and keep EOF for the next round");
+	      eof_left = true;
 	      const std::string& ans_header = HEADER_ANS;
 	      conn->write(ans_header);
 	      handle_written_header(conn, res);
-	      return true;
+
+	      if (invoker == 0)
+		{
+		  DMCS_LOG_TRACE(port << ": The BOSS called, notify him about EOF");
+		  conn->write(header);
+		  eof_left = false;
+		}
 	    }
 	  else
 	    {
 	      DMCS_LOG_TRACE(port << ": NOTHING TO OUTPUT, going to send EOF");
-	      // send EOF
 	      conn->write(header);
 	    }
 	}
-      
-      return false;
     }
   catch (boost::system::error_code& e)
     {
@@ -312,7 +317,7 @@ OutputThread::handle_written_header(connection_ptr conn,
   left_2_send -= res->size();
       
   // mark end of package by a NULL model
-  if (left_2_send == 0)
+  if (left_2_send == 0 || eof_left)
     {
       PartialBeliefState* bs = 0;
       res->push_back(bs);

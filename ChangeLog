@@ -1,5 +1,14 @@
 2011-01-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/OutputThread.cpp: Return EOF to user immediately
+	after having all results.
+
+	* include/network/NeighborThread.h: Inform JoinIn before sending
+	models, in order not to be blocked by the size of MQs.
+
+	* include/network/Handler.tcc: Pass invoker to OutputThread.
+	* include/network/OutputThread.h: Likewise.
+
 	* src/solver/RelSatSolver.cpp: Add debug info.
 
 	* include/network/OutputThread.h: Add a flag to store leftover

@@ -45,7 +45,7 @@ const std::size_t DEFAULT_PACK_SIZE = 10;
 class OutputThread
 {
 public:
-  OutputThread(std::size_t p);
+  OutputThread(std::size_t i, std::size_t p);
 
   virtual
   ~OutputThread();
@@ -54,8 +54,7 @@ public:
   operator()(connection_ptr c,
 	     std::size_t ps,
 	     MessagingGatewayBC* m,
-	     ConcurrentMessageQueue* hon,
-	     std::size_t invoker);
+	     ConcurrentMessageQueue* hon);
 
 private:
   void
@@ -73,7 +72,7 @@ private:
   void
   collect_output(MessagingGatewayBC* mg, PartialBeliefStateVecPtr& res, std::string& header);
 
-  bool
+  void
   write_result(connection_ptr conn,
 	       PartialBeliefStateVecPtr& res,
 	       const std::string& header);
@@ -88,6 +87,7 @@ private:
   bool        collecting;            // A flag to determine whether we are in collecting mode or not 
                                      // (if yes then we don't want to wait for any trigger)
   bool        eof_left;
+  std::size_t invoker;
   std::size_t port;
 };
 

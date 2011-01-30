@@ -237,6 +237,10 @@ private:
 	DMCS_LOG_TRACE(port << ": Received " << bsv->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
 	
 	const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
+
+	// notify the joiner by putting a JoinMess into JoinMessageQueue
+	std::size_t bsv_size = bsv->size();
+	mg->sendJoinIn(bsv_size, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
 	
 	for (PartialBeliefStateVec::const_iterator it = bsv->begin();
 	     it != bsv->end();
@@ -253,11 +257,6 @@ private:
 	      }
 	    mg->sendModel(bs, noff, offset, 0);
 	  }
-	
-	// notify the joiner by putting a JoinMess into JoinMessageQueue
-	std::size_t bsv_size = bsv->size();
-	mg->sendJoinIn(bsv_size, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
-	
 	
 	boost::shared_ptr<std::string> header(new std::string);
 	
