@@ -156,8 +156,10 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 	{
 	  retval = false;
 	}
-
-      assert (on->type == OutputNotification::REQUEST || on->type == OutputNotification::SHUTDOWN);
+      else
+	{
+	  assert (false);
+	}
     }
   else
     {
