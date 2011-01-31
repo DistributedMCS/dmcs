@@ -276,15 +276,27 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
       port = ep.port();
 
-      const std::size_t invoker                = sesh->mess.getInvoker();
-      const std::size_t pack_size              = sesh->mess.getPackSize();
+      const std::size_t invoker           = sesh->mess.getInvoker();
+      const std::size_t request_pack_size = sesh->mess.getPackSize();
+      std::size_t pack_size;
+
+      ///@todo: when request_pack_size is too big, compute the size of MQs based on some heuristics
+      if (request_pack_size == 0)
+	{
+	  assert (invoker == 0);
+	  pack_size = DEFAULT_PACK_SIZE;
+	}
+      else
+	{
+	  pack_size = request_pack_size;
+	}
 
       if (first_call)
 	{
 	  DMCS_LOG_TRACE(port << ": First and only initialization, creating MessagingGateway");
 
 	  ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
-	  mg = mqf.createMessagingGateway(port, 5); // we use the port as unique id
+	  mg = mqf.createMessagingGateway(port, pack_size); 
 
 	  DMCS_LOG_TRACE(port << ": creating dmcs thread");
 
@@ -297,8 +309,18 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // inform OutputThread about new incoming message (request
 	  // the next pack_size models)
 
+	  bool return_all;
+	  if (request_pack_size == 0)
+	    {
+	      return_all = true;
+	    }
+	  else
+	    {
+	      return_all = false;
+	    }
+
 	  OutputThread ot(invoker, port);
-	  output_thread = new boost::thread(ot, sesh->conn, pack_size, mg.get(), handler_output_notif.get());
+	  output_thread = new boost::thread(ot, sesh->conn, return_all, mg.get(), handler_output_notif.get());
 
 	  first_call = false;
 	}

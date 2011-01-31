@@ -422,7 +422,7 @@ RelSatSolver::receiveUNSAT()
 
   if (is_leaf)
     {
-      // send a NULL pointer to the SatOutputMessageQueue
+      DMCS_LOG_TRACE(port << ": Send a NULL pointer to OUT_MQ");
       mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
   // else

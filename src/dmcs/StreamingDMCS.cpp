@@ -203,7 +203,14 @@ StreamingDMCS::initialize(std::size_t invoker,
   DMCS_LOG_TRACE("Here create mqs and threads. no_nbs = " << no_nbs);
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
-  mg = mqf.createMessagingGateway(port, no_nbs, 5); // we use the port as unique id
+  if (pack_size == 0)
+    {
+      mg = mqf.createMessagingGateway(port, no_nbs, DEFAULT_PACK_SIZE); // we use the port as unique id
+    }
+  else
+    {
+      mg = mqf.createMessagingGateway(port, no_nbs, pack_size);
+    }
 
   BeliefStatePtr localV;
   if (invoker == 0)

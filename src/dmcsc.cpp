@@ -61,10 +61,12 @@
 
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <string> 
 
 using namespace dmcs;
 
+std::set<PartialBeliefState> final_result;
 
 //@todo: can we reuse endpoint, io_service from main()?
 void
@@ -100,6 +102,14 @@ void
 handle_belief_state(StreamingBackwardMessage& m)
 {
   std::cerr << "recvd: " << m << std::endl;
+  const PartialBeliefStateVecPtr result = m.getBeliefStates();
+  /*  std::cerr << "Got result" << std::endl;
+  for (PartialBeliefStateVec::const_iterator it = result->begin(); it != result->end(); ++it)
+    {
+      std::cerr << "Result pushing" << std::endl;
+      final_result.insert(**it);
+    }
+    std::cerr << "Result pushed" << std::endl;*/
 }
 
 
@@ -293,6 +303,9 @@ Options";
 		  io_service.run();
 
 		  no_beliefstates = c.getNoAnswers();
+
+		  std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
+		  std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
 
 		  ///@todo TK: conflict and partial_ass leaks here
 		}

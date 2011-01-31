@@ -53,27 +53,22 @@ OutputThread::~OutputThread()
 
 void
 OutputThread::operator()(connection_ptr c,
-			 std::size_t ps,
+			 bool return_all,
 			 MessagingGatewayBC* mg,
 			 ConcurrentMessageQueue* hon)
 {
-  if (ps == 0)
+  if (return_all)
     {
-      if (invoker == 0)
-	{
-	  // only output in an unlimited manner at the root
-	  // context. However, each time we output not more than
-	  // DEFAULT_PACKAGE_SIZE models
-	  output_all(c, mg);
-	}
-      else
-	{
-	  output_limit(c, DEFAULT_PACK_SIZE, mg, hon);
-	}
+      // only output in an unlimited manner at the root context is
+      // allowed. However, each time we output not more than
+      // DEFAULT_PACKAGE_SIZE models
+
+      assert (invoker == 0);
+      output_all(c, mg);
     }
   else
     {
-      output_limit(c, ps, mg, hon);
+      output_limit(c, mg, hon);
     }
 }
 
@@ -97,13 +92,11 @@ OutputThread::output_all(connection_ptr conn, MessagingGatewayBC* mg)
 
 void
 OutputThread::output_limit(connection_ptr c,
-			   std::size_t ps,
 			   MessagingGatewayBC* m,
 			   ConcurrentMessageQueue* hon)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  pack_size = ps;
   collecting = false;
   eof_left = false;
 
