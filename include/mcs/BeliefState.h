@@ -561,8 +561,6 @@ typedef boost::shared_ptr<PartialBeliefStatePackage> PartialBeliefStatePackagePt
 typedef std::vector<PartialBeliefStateVec::const_iterator> PartialBeliefStateIteratorVec;
 typedef boost::shared_ptr<PartialBeliefStateIteratorVec> PartialBeliefStateIteratorVecPtr;
 
-typedef std::vector<std::size_t> Decisionlevel;
-
 
 inline bool
 operator== (const PartialBeliefSet& p, const PartialBeliefSet& b)
@@ -657,6 +655,57 @@ setEpsilon(PartialBeliefSet& pb)
   pb.state_bit.set(0);
   pb.value_bit.set(0); // just want to have it clean
 }
+
+// ***************************************************************************************
+typedef std::vector<std::size_t> VecSizeT;
+
+
+struct Decisionlevel
+{
+  VecSizeT* declev_at_dl;   // mapping from atoms to decision level
+  VecSizeT* declev_dl_at;  // and the other way around
+
+  Decisionlevel(std::size_t global_sig_size)
+    : declev_at_dl(new VecSizeT(global_sig_size)),
+      declev_dl_at(new VecSizeT)
+  { }
+
+  Decisionlevel(const Decisionlevel& dl)
+  {
+    declev_at_dl = dl.declev_at_dl;
+    declev_dl_at = dl.declev_dl_at;
+  }
+
+  void
+  setDecisionlevel(std::size_t atom_id, std::size_t level)
+  {
+    assert (atom_id <= declev_at_dl->size());
+    assert (level == declev_dl_at->size() + 1);
+    
+    std::size_t& dl = (*declev_at_dl)[atom_id - 1];
+
+    assert (dl == 0);
+
+    dl = level;
+    declev_dl_at->push_back(atom_id);
+  }
+
+  std::size_t
+  getDecisionlevel(std::size_t atom_id)
+  {
+    assert (atom_id <= declev_at_dl->size());
+
+    return (*declev_at_dl)[atom_id - 1];
+  }
+
+  std::size_t
+  getAtom(std::size_t level)
+  {
+    assert (level <= declev_dl_at->size());
+
+    return (*declev_dl_at)[level - 1];
+  }
+};
 
 
 } // namespace dmcs
@@ -1007,7 +1056,6 @@ operator<< (std::ostream& os, const dmcs::PartialBeliefStateIteratorVecPtr& pbsi
   return os;
 }
 
-
 } // namespace std
 
 
@@ -1101,7 +1149,6 @@ inline void serialize(Archive& ar, dmcs::BeliefSet& belief, const unsigned int f
 {
   split_free(ar, belief, file_version);
 }
-
 
 // ***************************************************************************************
 // PartialBeliefState, for streaming DMCS
