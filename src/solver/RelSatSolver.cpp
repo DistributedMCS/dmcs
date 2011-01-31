@@ -60,7 +60,9 @@ RelSatSolver::RelSatSolver(bool il,
     mg(mg_),
     dmcs_sat_notif(dsn),
     sat_router_notif(srn),
-    learned_conflicts(new ConflictVec2),
+    learned_conflicts(new ConflictBufVec),
+    new_conflicts_beg(new ConflictBufIterVec),
+    new_conflicts_end(new ConflictBufIterVec),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this)),
     port(p)
@@ -71,8 +73,10 @@ RelSatSolver::RelSatSolver(bool il,
   std::size_t no_nbs = c2o->size();
   for (std::size_t i = 0; i < no_nbs; ++i)
     {
-      ConflictVecPtr cv(new ConflictVec);
-      learned_conflicts->push_back(cv);
+      ConflictBufPtr cb(new ConflictBuf(CIRCULAR_BUF_SIZE));
+      learned_conflicts->push_back(cb);
+      new_conflicts_beg->push_back(cb->begin());
+      new_conflicts_end->push_back(cb->end());
     }
 }
 
@@ -324,7 +328,7 @@ RelSatSolver::solve()
 
 
 void
-RelSatSolver::collect_learned_clauses(ClauseList& learned_clauses)
+RelSatSolver::collect_learned_clauses(ClauseList& sat_learned_clauses)
 {
   // in order not to be specific to relsat, we convert the learned
   // clauses to PartialBeliefState format for transferring over the
@@ -339,9 +343,28 @@ RelSatSolver::collect_learned_clauses(ClauseList& learned_clauses)
   // hence it's not flexible to extend the implementation to make use
   // of other SAT solvers.
 
-  for (int i = 0; i < learned_clauses.iClauseCount(); ++i)
+  assert (learned_conflicts->size() == new_conflicts_beg->size());
+
+  ConflictBufVec::const_iterator lc_it = learned_conflicts->begin();
+  ConflictBufIterVec::iterator beg_it = new_conflicts_beg->begin();
+
+  for (; lc_it != learned_conflicts->end(); ++lc_it, ++beg_it)
     {
-      ::Clause* c = learned_clauses.pClause(i);
+      ConflictBufPtr lc = *lc_it;
+      ConflictBuf::iterator old_end_it = lc->end();
+      if (lc->size() > 0)
+	{
+	  *beg_it = --old_end_it;
+	}
+      else
+	{
+	  *beg_it = old_end_it;
+	}
+    }
+
+  for (int i = 0; i < sat_learned_clauses.iClauseCount(); ++i)
+    {
+      ::Clause* c = sat_learned_clauses.pClause(i);
       Conflict* conflict = new Conflict(system_size, PartialBeliefSet());
       PartialBeliefSet* neighbor_ref;
 
@@ -408,8 +431,27 @@ RelSatSolver::collect_learned_clauses(ClauseList& learned_clauses)
 
 	  const std::size_t neighbor_offset = pair->second;
 
-	  ConflictVecPtr& storage_ref = (*learned_conflicts)[neighbor_offset];
-	  storage_ref->push_back(conflict);
+	  ConflictBufPtr& storage_ref = (*learned_conflicts)[neighbor_offset];
+
+	  if (!cached(conflict, storage_ref))
+	    {
+	      storage_ref->push_back(conflict);
+	    }
+	}
+    } // for (int i = 0;
+
+
+
+  lc_it = learned_conflicts->begin();
+  beg_it = new_conflicts_beg->begin();
+
+  for (; lc_it != learned_conflicts->end(); ++lc_it, ++beg_it)
+    {
+      ConflictBufPtr lc = *lc_it;
+      ConflictBuf::iterator old_end_it = lc->end();
+      if (*beg_it != lc->end())
+	{
+	  (*beg_it)++;
 	}
     }
 }
@@ -425,10 +467,10 @@ RelSatSolver::receiveUNSAT()
       DMCS_LOG_TRACE(port << ": Send a NULL pointer to OUT_MQ");
       mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
-  // else
-  //  {
-  //    collect_learned_clauses(xSATSolver->getLearnedClauses());
-  //  }
+  else
+    {
+      collect_learned_clauses(xSATSolver->getLearnedClauses());
+    }
 }
 
 
@@ -503,6 +545,8 @@ RelSatSolver::print_local_theory()
       DMCS_LOG_DEBUG(*c);
     }
 }
+
+
 
 } // namespace dmcs
 

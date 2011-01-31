@@ -1,5 +1,14 @@
 2011-01-31  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/testInterfaceRelSat.cpp: Update test case.
+
+	* src/solver/RelSatSolver.cpp: Selectively collect conflicts from relsat.
+
+	* src/dmcsc.cpp: Clean up.
+
+	* include/solver/Conflict.h: Add ConflictBuf.
+	* include/solver/RelSatSolver.h: Likewise.
+
 	* src/solver/RelSatSolver.cpp: Add debug info.
 
 	* include/network/Handler.tcc: Support returning all models when

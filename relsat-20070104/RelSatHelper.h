@@ -165,7 +165,7 @@ operator<< (std::ostream& os, const SATInstance& si)
   return os;
 }
 
-
+/*
 inline std::ostream&
 operator<< (std::ostream& os, const VariableStruct& vs)
 {
@@ -203,7 +203,7 @@ operator<< (std::ostream& os, const VariableStruct& vs)
   //os << "pSolutionInfo:          " << *vs.pSolutionInfo << std::endl;
 
   return os;
-}
+  }*/
 
 #endif
 

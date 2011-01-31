@@ -27,6 +27,7 @@
  * 
  */
 
+#include <boost/circular_buffer.hpp>
 
 #include "mcs/BeliefState.h"
 
@@ -49,6 +50,52 @@ typedef boost::shared_ptr<ConflictVec2> ConflictVec2Ptr;
 // no operator<< is needed for ConflictVec, ConflictVecPtr,
 // ConflictVec2, ConflictVec2Ptr as long as Conflict ==
 // PartialBeliefState.
+
+
+typedef boost::circular_buffer<Conflict*> ConflictBuf;
+typedef boost::shared_ptr<ConflictBuf> ConflictBufPtr;
+
+typedef std::vector<ConflictBufPtr> ConflictBufVec;
+typedef boost::shared_ptr<ConflictBufVec> ConflictBufVecPtr;
+
+typedef std::vector<ConflictBuf::iterator> ConflictBufIterVec;
+typedef boost::shared_ptr<ConflictBufIterVec> ConflictBufIterVecPtr;
+
+
+inline bool
+cached(Conflict* c, ConflictBufPtr& storage)
+{
+  for (ConflictBuf::const_iterator it = storage->begin(); it != storage->end(); ++it)
+    {
+      if (*c == **it)
+	{
+	  return true;
+	}
+    }
+  return false;
+}
+
+inline std::ostream&
+operator<< (std::ostream& os, const ConflictBuf& cb)
+{
+  for (ConflictBuf::const_iterator it = cb.begin(); it != cb.end(); ++it)
+    {
+      os << **it << std::endl;
+    }
+  return os;
+}
+
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const ConflictBufVec& cbv)
+{
+  for (ConflictBufVec::const_iterator it = cbv.begin(); it != cbv.end(); ++it)
+    {
+      os << **it << std::endl;
+    }
+  return os;
+}
 
 } // namespace dmcs
 

@@ -130,6 +130,12 @@ public:
   void
   clean_up();
 
+  ClauseList&
+  getLearnedClauses()
+  {
+    return _xLearnedClauses;
+  }
+
 private:
   boolean _bVerifySolution();
   boolean _bOutputSolution();

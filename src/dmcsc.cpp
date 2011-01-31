@@ -102,14 +102,15 @@ void
 handle_belief_state(StreamingBackwardMessage& m)
 {
   std::cerr << "recvd: " << m << std::endl;
-  const PartialBeliefStateVecPtr result = m.getBeliefStates();
-  /*  std::cerr << "Got result" << std::endl;
+  const PartialBeliefStateVecPtr& result = m.getBeliefStates();
+
   for (PartialBeliefStateVec::const_iterator it = result->begin(); it != result->end(); ++it)
     {
-      std::cerr << "Result pushing" << std::endl;
-      final_result.insert(**it);
+      if (*it != 0)
+	{
+	  final_result.insert(**it);
+	}
     }
-    std::cerr << "Result pushed" << std::endl;*/
 }
 
 

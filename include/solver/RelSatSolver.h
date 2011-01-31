@@ -36,6 +36,7 @@
 #include "solver/BaseSolver.h"
 #include "solver/Conflict.h"
 
+#include "relsat-20070104/RelSatHelper.h"
 #include "relsat-20070104/SATInstance.h"
 #include "relsat-20070104/SATSolver.h"
 
@@ -46,6 +47,8 @@
 
 
 namespace dmcs {
+
+const std::size_t CIRCULAR_BUF_SIZE = 100;
 
 // Wrapper for relsat
 class RelSatSolver : public BaseSolver
@@ -91,10 +94,16 @@ public:
   void
   print_local_theory();
 
-  ConflictVec2Ptr
+  ConflictBufVecPtr
   getLearnedConflicts()
   {
     return learned_conflicts;
+  }
+
+  ConflictBufIterVecPtr
+  getNewLearnedConflicts()
+  {
+    return new_conflicts_beg;
   }
 
 private:
@@ -118,7 +127,8 @@ private:
   ConcurrentMessageQueue*        sat_router_notif; // to inform Router
   PartialBeliefState*            partial_ass;
   PartialBeliefState*            input;
-  ConflictVec2Ptr                learned_conflicts;
+  ConflictBufVecPtr              learned_conflicts;
+  ConflictBufIterVecPtr          new_conflicts_beg;
 
   SATInstance*                   xInstance;
   SATSolver*                     xSATSolver;
