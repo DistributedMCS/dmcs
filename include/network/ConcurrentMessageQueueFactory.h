@@ -48,6 +48,8 @@ namespace dmcs {
 typedef MessagingGateway<PartialBeliefState, Decisionlevel, Conflict> MessagingGatewayBC;
 typedef boost::shared_ptr<MessagingGatewayBC> MessagingGatewayBCPtr;
 
+const std::size_t DEFAULT_PACK_SIZE = 20;
+
 class ConcurrentMessageQueueFactory : private boost::noncopyable
 {
 private:
