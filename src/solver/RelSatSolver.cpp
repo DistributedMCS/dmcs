@@ -62,7 +62,6 @@ RelSatSolver::RelSatSolver(bool il,
     sat_router_notif(srn),
     learned_conflicts(new ConflictBufVec),
     new_conflicts_beg(new ConflictBufIterVec),
-    new_conflicts_end(new ConflictBufIterVec),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this)),
     port(p)
@@ -76,7 +75,6 @@ RelSatSolver::RelSatSolver(bool il,
       ConflictBufPtr cb(new ConflictBuf(CIRCULAR_BUF_SIZE));
       learned_conflicts->push_back(cb);
       new_conflicts_beg->push_back(cb->begin());
-      new_conflicts_end->push_back(cb->end());
     }
 }
 
