@@ -364,27 +364,32 @@ RelSatSolver::collect_learned_clauses(ClauseList& sat_learned_clauses)
     {
       ::Clause* c = sat_learned_clauses.pClause(i);
       Conflict* conflict = new Conflict(system_size, PartialBeliefSet());
-      PartialBeliefSet* neighbor_ref;
+      PartialBeliefSet* neighbor_ref = 0;
 
       std::size_t from_neighbor = 0;
 
       for (int j = 0; j < c->iVariableCount(); ++j)
 	{
-	  int atom = back_2_lit(c->eConstrainedLiteral(j));
+	  const int atom = back_2_lit(c->eConstrainedLiteral(j));
 
 	  assert (atom != 0);
-	  std::size_t abs_atom = std::abs(atom);
+	  const std::size_t abs_atom = std::abs(atom);
 
 	  const SignatureByLocal& sig_by_local    = boost::get<Tag::Local>(*sig);
 	  SignatureByLocal::const_iterator loc_it = sig_by_local.find(abs_atom);
 
 	  assert (loc_it != sig_by_local.end());
 
-	  std::size_t orig_ctx = loc_it->ctxId;
+	  const std::size_t orig_ctx = loc_it->ctxId;
 
-	  if (orig_ctx == my_id)
+	  if (orig_ctx == my_id || from_neighbor != orig_ctx) // let's get outta here
 	    {
-	      // We don't care about conflict in the local context
+	      // orig_ctx == my_id: We don't care about conflict in the local context
+	      //
+	      // orig_ctx != from_neighbor: this learned clause
+	      // includes atoms from different neighbors, we don't
+	      // collect it
+
 	      from_neighbor = 0;
 	      break;
 	    }
@@ -393,13 +398,12 @@ RelSatSolver::collect_learned_clauses(ClauseList& sat_learned_clauses)
 	      from_neighbor = orig_ctx;
 	      neighbor_ref  = &((*conflict)[from_neighbor - 1]);
 	    }
-	  else if (from_neighbor != orig_ctx)
+	  else
 	    {
-	      // this learned clause includes atoms from different
-	      // neighbors, we don't collect it
-	      from_neighbor = 0;
-	      break;
+	      assert(false);
 	    }
+
+	  assert(neighbor_ref != 0);
 
 	  if (atom > 0)
 	    {

@@ -1,3 +1,8 @@
+2011-02-01  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp (collect_learned_clauses): Fix
+	warning and code simplification.
+
 2011-01-31  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/BeliefState.h: Set up Decisionlevel as a struct of 2 VecSizeT*.
