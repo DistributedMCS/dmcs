@@ -33,6 +33,8 @@
 #include <stack>
 #include <boost/shared_ptr.hpp>
 
+#include <numeric>
+
 #ifndef CHOICE_POINT_H
 #define CHOICE_POINT_H
 
