@@ -44,6 +44,7 @@ RelSatSolver::RelSatSolver(bool il,
 			   const TheoryPtr& theory_, 
 			   const SignaturePtr& sig_,
 			   const BeliefStatePtr& localV_,
+			   const VecSizeTPtr& oss,
 			   //			   const ProxySignatureByLocalPtr& mixed_sig_,
 			   const HashedBiMap* co,
 			   std::size_t system_size_,
@@ -56,6 +57,7 @@ RelSatSolver::RelSatSolver(bool il,
     theory(theory_), 
     sig(sig_),
     localV(localV_),
+    orig_sigs_size(oss),
     c2o(co),
     //    mixed_sig(mixed_sig_),
     system_size(system_size_),
@@ -67,7 +69,10 @@ RelSatSolver::RelSatSolver(bool il,
     trail(new Trail),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this)),
-    port(p)
+    port(p),
+    parent_conflicts(0),
+    parent_ass(0),
+    parent_decision(0)
 {
   xInstance->readTheory(theory, sig->size());
 
@@ -261,31 +266,34 @@ RelSatSolver::solve()
 
   if (ptr && cn)
     {
-      ConflictVec* conflicts = cn->conflicts;
-      PartialBeliefState* new_partial_ass = cn->partial_ass;
+      if (parent_conflicts != 0)
+	{
+	  delete parent_conflicts;
+	  parent_conflicts = 0;
+	}
 
-      import_conflicts(conflicts);
+      if (parent_ass != 0)
+	{
+	  delete parent_ass;
+	  parent_ass = 0;
+	}
 
-      ///@todo TK: what happens with conflict and new_partial_ass here? probably leaks
+      if (parent_decision != 0)
+	{
+	  delete parent_decision;
+	  parent_decision = 0;
+	}
 
-      DMCS_LOG_TRACE(port << ":  Got a message from DMCS. conflict = " << *conflicts << ". new_partial_ass = " << *new_partial_ass);
+      parent_conflicts = cn->conflicts;
+      parent_ass = cn->partial_ass;
+      parent_decision = cn->decision;
 
-#if 0
-	if (partial_ass == 0)
-	  {
-	    partial_ass = new_partial_ass;
-	    DMCS_LOG_TRACE(port << ": First time. Going to start");
-	  }
-	else if ((*partial_ass) != (*new_partial_ass))
-	  { // now restart
-	    partial_ass = new_partial_ass;
-	    DMCS_LOG_TRACE(port << ": New partial_ass. Going to restart");
-	  }
-	else
-	  { // continue
-	  }
-#endif // 0
-  
+      import_conflicts(parent_conflicts);
+
+      DMCS_LOG_TRACE(port << ":  Got a message from DMCS. parent_conflicts = " << *parent_conflicts 
+		     << ". parent_ass = " << *parent_ass
+		     << ". parent_decision = " << *parent_decision);
+
       // remove input part of the theory (from last solve)
 
       relsat_enum eResult;
@@ -482,6 +490,7 @@ RelSatSolver::receiveEOF()
   else
     {
       DMCS_LOG_TRACE(port << ": EOF, now backtrack");
+
       ConflictNotification* next_flip;
       do 
 	{
@@ -501,7 +510,7 @@ RelSatSolver::receiveEOF()
 	}
       else
 	{
-	  DMCS_LOG_TRACE(port << ": Next possibility to push, let's notify router");
+	  DMCS_LOG_TRACE(port << ": Next possibility to push, let's notify router. next_flip == " << *next_flip);
 
 	  ConflictNotification* ow_sat = 
 	    (ConflictNotification*) overwrite_send(sat_router_notif, &next_flip, sizeof(next_flip), 0);
@@ -529,6 +538,55 @@ RelSatSolver::receiveUNSAT()
   else
     {
       collect_learned_clauses(xSATSolver->getLearnedClauses());
+
+      // take decision level from parent into account
+      if (trail->empty())
+	{
+	  PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
+	  Decisionlevel* decision;
+	  const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
+	  SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
+	  SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
+	  SignatureByCtx::const_iterator it;
+
+	  // pick the first bridge atom to flip
+	  if (local_sig.begin() != low)
+	    {
+	      it = local_sig.begin();
+	    }
+	  else
+	    {
+	      assert (up != local_sig.end());
+	      it = up;
+	    }
+
+	  const std::size_t gid = global_id(it, orig_sigs_size);
+
+	  // set the opposite value in input
+	  PartialBeliefSet& input_pbs = (*input)[it->ctxId - 1];
+	  PartialBeliefSet& partial_ass_pbs = (*partial_ass)[it->ctxId - 1];
+
+	  PartialBeliefSet::TruthVal val = testBeliefSet(input_pbs, it->localId);
+	  assert (val != PartialBeliefSet::DMCS_UNDEF);
+	  
+	  if (val == PartialBeliefSet::DMCS_TRUE)
+	    {
+	      setBeliefSet(partial_ass_pbs, it->localId, PartialBeliefSet::DMCS_FALSE);
+	    }
+	  else
+	    {
+	      setBeliefSet(partial_ass_pbs, it->localId);
+	    }
+
+	  decision->setDecisionlevel(gid);
+
+	  ChoicePointPtr cp(new ChoicePoint(input, decision));
+	  trail->push(cp);
+	  
+	} // if (trail->empty())
+      else
+	{
+	} // if (trail->empty())
     }
 }
 

@@ -78,6 +78,15 @@ struct ConflictNotification
   NotificationType type;
 };
 
+
+inline std::ostream&
+operator<< (std::ostream& os, const ConflictNotification& cn)
+{
+  os << "conflicts: " << *(cn.conflicts) << std::endl
+     << "partial_ass: " << *(cn.partial_ass) << std::endl
+     << "decision: " << *(cn.decision);
+}
+
 } // namespace dmcs
 
 #endif // CONFLICT_NOTIFICATION_H

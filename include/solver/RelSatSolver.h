@@ -61,6 +61,7 @@ public:
 	       //	       const ProxySignatureByLocalPtr& mixed_sig_,
 	       const SignaturePtr& local_sig_,
 	       const BeliefStatePtr& localV_,
+	       const VecSizeTPtr& oss,
 	       const HashedBiMap* co,
 	       std::size_t system_size_,
 	       MessagingGatewayBC* mg_,
@@ -123,13 +124,15 @@ private:
   const TheoryPtr                theory;
   const SignaturePtr             sig;
   const BeliefStatePtr           localV;
-  const HashedBiMap*           c2o;
+  const HashedBiMap*             c2o;
   //  const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;      // this can be taken from localV
   MessagingGatewayBC*            mg;
   ConcurrentMessageQueue*        dmcs_sat_notif;   // to get notification from Handler
   ConcurrentMessageQueue*        sat_router_notif; // to inform Router
-  PartialBeliefState*            partial_ass;
+  ConflictVec*                   parent_conflicts;
+  PartialBeliefState*            parent_ass;
+  Decisionlevel*                 parent_decision;
   PartialBeliefState*            input;
   ConflictBufVecPtr              learned_conflicts;
   ConflictBufIterVecPtr          new_conflicts_beg;

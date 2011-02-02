@@ -1,5 +1,17 @@
 2011-02-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/solver/ChoicePoint.h: Get global id of an atom.
+
+	* include/dmcs/ConflictNotification.h: opeator<<
+
+	* include/network/ThreadFactory.h: Pass orig_sigs_size to
+	RelSatSolver.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
 	* src/solver/RelSatSolver.cpp: Try next flipping possibility when
 	receiving EOF.
 

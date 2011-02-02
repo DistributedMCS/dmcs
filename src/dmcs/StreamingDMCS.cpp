@@ -227,7 +227,7 @@ StreamingDMCS::initialize(std::size_t invoker,
 
   const SignaturePtr& local_sig = ctx->getSignature();
 
-  ThreadFactory tf(ctx, theory, local_sig, localV,  pack_size,
+  ThreadFactory tf(ctx, theory, local_sig, localV,  orig_sigs_size, pack_size,
 		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), c2o.get(), port);
 
   sat_thread = tf.createLocalSolveThread();

@@ -46,6 +46,7 @@ public:
 		   //const ProxySignatureByLocalPtr mixed_sig_,
 		   const SignaturePtr& local_sig_,
 		   const BeliefStatePtr& localV_,
+		   const VecSizeTPtr& oss,
 		   const HashedBiMap* co,
 		   std::size_t system_size_,
 		   MessagingGatewayBC* mg_,
@@ -58,6 +59,7 @@ public:
       //      mixed_sig(mixed_sig_),
       local_sig(local_sig_),
       localV(localV_),
+      orig_sigs_size(oss),
       c2o(co),
       system_size(system_size_),
       mg(mg_), 
@@ -76,6 +78,7 @@ private:
   const TheoryPtr                theory;
   const SignaturePtr             local_sig;
   const BeliefStatePtr           localV;
+  const VecSizeTPtr              orig_sigs_size;
   const HashedBiMap*           c2o;
   //const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;
@@ -92,7 +95,8 @@ SatSolverFactory::create<RelSatSolverPtr>()
 {
   RelSatSolverPtr relsatsolver(new RelSatSolver(is_leaf, my_id, 
 						theory, local_sig, 
-						localV, c2o, system_size, 
+						localV, orig_sigs_size,
+						c2o, system_size, 
 						mg, dmcs_sat_notif, 
 						sat_router_notif,
 						port));

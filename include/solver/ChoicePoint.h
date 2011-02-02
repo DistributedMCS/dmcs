@@ -62,6 +62,21 @@ operator<< (std::ostream& os, const ChoicePoint& cp)
 }
 
 
+inline std::size_t
+global_id(SignatureByCtx::const_iterator& it, const VecSizeTPtr& orig_sigs_size)
+{
+  const std::size_t ctx_id = it->ctxId;
+  VecSizeT::iterator jt = orig_sigs_size->begin();
+  std::advance(jt, ctx_id - 1);
+
+  std::size_t count = std::accumulate(orig_sigs_size->begin(), jt, 0);
+  
+  const std::size_t local_id = it->localId;
+
+  return count + local_id;
+}
+
+
 inline ConflictNotification*
 getNextFlip(ChoicePointPtr& cp, VecSizeTPtr& orig_sigs_size)
 {
@@ -87,8 +102,13 @@ getNextFlip(ChoicePointPtr& cp, VecSizeTPtr& orig_sigs_size)
   // check for safety
   assert (testBeliefSet(*jt, atom_gid) != PartialBeliefSet::DMCS_UNDEF);
 
-  // get the next on bit
+  // get the next bit which is on, and was not decided
   std::size_t next_atom = jt->state_bit.get_next(atom_gid);
+
+  while ((next_atom != 0) && (decision->getDecisionlevel(next_atom) != 0))
+    {
+      next_atom = jt->state_bit.get_next(atom_gid);
+    }
 
   if (next_atom == 0)
     {

@@ -43,6 +43,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
 			     const TheoryPtr& t,
 			     const SignaturePtr& ls,
 			     const BeliefStatePtr& lV,
+			     const VecSizeTPtr& oss,
 			     std::size_t ps,
 			     MessagingGatewayBC* m,
 			     ConcurrentMessageQueue* dsn,
@@ -53,6 +54,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
     theory(t), 
     local_sig(ls),
     localV(lV),
+    orig_sigs_size(oss),
     pack_size(ps),
     mg(m),
     dmcs_sat_notif(dsn), 
@@ -130,7 +132,7 @@ ThreadFactory::createLocalSolveThread()
   const std::size_t my_id       = context->getContextID();
   const std::size_t system_size = context->getSystemSize();
 
-  SatSolverFactory ssf(is_leaf, my_id, theory, local_sig, localV, c2o, 
+  SatSolverFactory ssf(is_leaf, my_id, theory, local_sig, localV, orig_sigs_size, c2o, 
 		       system_size, mg, dmcs_sat_notif, sat_router_notif, port);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();

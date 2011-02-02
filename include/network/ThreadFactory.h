@@ -55,6 +55,7 @@ public:
 		const TheoryPtr& t,
 		const SignaturePtr& ls,
 		const BeliefStatePtr& lV,
+		const VecSizeTPtr& oss,
 		std::size_t ps,
 		MessagingGatewayBC* m,
 		ConcurrentMessageQueue* dsn,
@@ -84,6 +85,7 @@ private:
   const TheoryPtr                 theory;
   const SignaturePtr              local_sig;
   const BeliefStatePtr            localV;
+  const VecSizeTPtr               orig_sigs_size;
   std::size_t                     pack_size;
   MessagingGatewayBC*             mg;
   ConcurrentMessageQueue*         dmcs_sat_notif;
