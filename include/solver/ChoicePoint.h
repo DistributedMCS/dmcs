@@ -27,13 +27,12 @@
  * 
  */
 
+#include <numeric>
 
 #include "mcs/BeliefState.h"
 
 #include <stack>
 #include <boost/shared_ptr.hpp>
-
-#include <numeric>
 
 #ifndef CHOICE_POINT_H
 #define CHOICE_POINT_H
@@ -78,7 +77,7 @@ global_id(SignatureByCtx::const_iterator& it, const VecSizeTPtr& orig_sigs_size)
   return count + local_id;
 }
 
-
+/// used when receiving EOF
 inline ConflictNotification*
 getNextFlip(ChoicePointPtr& cp, VecSizeTPtr& orig_sigs_size)
 {
@@ -142,6 +141,44 @@ getNextFlip(ChoicePointPtr& cp, VecSizeTPtr& orig_sigs_size)
   ConflictNotification* cn = new ConflictNotification(0, partial_ass, decision);
 
   return cn;
+}
+
+
+inline SignatureByCtx::const_iterator
+findFirstUndecided(const std::size_t my_id,
+		   const SignatureByCtx& local_sig, 
+		   Decisionlevel* decision,
+		   const VecSizeTPtr& orig_sigs_size)
+{
+  SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
+  SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
+  SignatureByCtx::const_iterator it  = local_sig.begin();
+
+  // pick the first undecided bridge atom (by parent) to flip
+  std::size_t gid = 0;
+  for (; it != low; ++it)
+    {
+      ///@todo: this can be improved if we represent a "BeliefState" as a "bit vector"
+      gid = global_id(it, orig_sigs_size); 
+      if (decision->getDecisionlevel(gid) == 0) // notice that decision now is parent_decision
+	{
+	  break;
+	}
+    }
+  
+  if (it == low)
+    {
+      for (it = up; it != local_sig.end(); ++it)
+	{
+	  gid = global_id(it, orig_sigs_size);
+	  if (decision->getDecisionlevel(gid) == 0)
+	    {
+	      break;
+	    }
+	}
+    }
+
+  return it;
 }
 
 } // namespace dmcs

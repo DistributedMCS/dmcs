@@ -1,3 +1,9 @@
+2011-02-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Working on backtracking.
+
+	* include/solver/ChoicePoint.h: Find first undecided atom.
+
 2011-02-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/solver/ChoicePoint.h: Include numeric.
