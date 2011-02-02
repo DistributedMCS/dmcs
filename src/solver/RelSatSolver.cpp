@@ -27,8 +27,10 @@
  * 
  */
 
+#include <boost/thread.hpp>
 
 #include "dmcs/BeliefCombination.h"
+#include "network/ConcurrentMessageQueueHelper.h"
 #include "solver/RelSatSolver.h"
 #include "relsat-20070104/RelSatHelper.h"
 #include "relsat-20070104/SATInstance.h"
@@ -62,6 +64,7 @@ RelSatSolver::RelSatSolver(bool il,
     sat_router_notif(srn),
     learned_conflicts(new ConflictBufVec),
     new_conflicts_beg(new ConflictBufIterVec),
+    trail(new Trail),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this)),
     port(p)
@@ -309,6 +312,9 @@ RelSatSolver::solve()
 		  break;
 		}
 	      DMCS_LOG_TRACE(port << ": A fresh solving. input = " << *input);
+	      
+	      boost::this_thread::interruption_point();
+
 	      eResult = xSATSolver->eSolve();
 	      xSATSolver->refresh();
 	    }
@@ -454,6 +460,57 @@ RelSatSolver::collect_learned_clauses(ClauseList& sat_learned_clauses)
       if (*beg_it != lc->end())
 	{
 	  (*beg_it)++;
+	}
+    }
+}
+
+
+
+void
+RelSatSolver::receiveEOF()
+{
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  // go to stack, pick the next flipping possibility and go. If the
+  // stack is empty or there is no more possibility to flip then send
+  // NULL to OUT_MQ
+
+  if (trail->empty())
+    {
+      DMCS_LOG_TRACE(port << ": Empty stack, EOF. Send a NULL pointer to OUT_MQ");
+      mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+    }
+  else
+    {
+      DMCS_LOG_TRACE(port << ": EOF, now backtrack");
+      ConflictNotification* next_flip;
+      do 
+	{
+	  ChoicePointPtr& cp = trail->top();
+	  next_flip = getNextFlip(cp, orig_sigs_size);
+	  if (next_flip != 0)
+	    {
+	      break;
+	    }
+	}
+      while (!trail->empty());
+
+      if (next_flip == 0)
+	{
+	  DMCS_LOG_TRACE(port << ": Out of every thing. Send a NULL pointer to OUT_MQ");
+	  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+	}
+      else
+	{
+	  DMCS_LOG_TRACE(port << ": Next possibility to push, let's notify router");
+
+	  ConflictNotification* ow_sat = 
+	    (ConflictNotification*) overwrite_send(sat_router_notif, &next_flip, sizeof(next_flip), 0);
+	  
+	  if (ow_sat)
+	    {
+	      delete ow_sat;
+	      ow_sat = 0;
+	    }
 	}
     }
 }

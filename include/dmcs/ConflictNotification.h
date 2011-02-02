@@ -47,11 +47,13 @@ struct ConflictNotification
 
   ConflictNotification(ConflictVec* cs,
 		       PartialBeliefState* pa,
+		       Decisionlevel* d,
 		       std::size_t v = 0,
 		       NotificationType t = REQUEST)
     : val(v),
       conflicts(cs),
       partial_ass(pa),
+      decision(d),
       type(t)
   { 
     assert(cs != 0 || t == SHUTDOWN || t == NEXT);
@@ -68,6 +70,9 @@ struct ConflictNotification
 
   /// partial assignment
   PartialBeliefState* partial_ass;
+
+  /// decision level
+  Decisionlevel* decision;
 
   /// notification type
   NotificationType type;

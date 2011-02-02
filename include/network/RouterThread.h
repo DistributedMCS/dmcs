@@ -87,7 +87,7 @@ public:
 		    std::size_t prio = 0;
 
 		    ConflictNotification* ow_neighbor =
-		      (ConflictNotification*) overwrite_send(*it, &cn, sizeof(cn), prio);
+		      (ConflictNotification*) overwrite_send(it->get(), &cn, sizeof(cn), prio);
 
 		    DMCS_LOG_TRACE(port << ": Sent SHUTDOWN to neighbor " << std::distance(it, end));
 
@@ -117,7 +117,7 @@ public:
 		std::size_t p1 = 0;
 
 		ConflictNotification* ow_neighbor =
-		  (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), p1);
+		  (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), p1);
 		
 		if (ow_neighbor)
 		  {

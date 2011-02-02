@@ -1,3 +1,34 @@
+2011-02-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Try next flipping possibility when
+	receiving EOF.
+
+	* src/network/RelSatSolverThread.cpp: Catch restart request.
+
+	* include/solver/ChoicePoint.h: Add ChoicePoint.h
+	* include/solver/Makefile.am: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Use
+	ConcurrentMessageQueue*
+	* include/network/Handler.tcc: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/mcs/BeliefState.h: Add helper methods for Decisionlevel.
+
+	* include/dmcs/StreamingDMCSNotification.h: Add restart related stuff.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/dmcs/ConflictNotification.h: Add decision level.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/dmcs/CommandTypeFactory.h: Add orig_sigs_size.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/dmcsd.cpp: Likewise.
+
 2011-02-01  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp (collect_learned_clauses): Fix

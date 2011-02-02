@@ -3,6 +3,8 @@
 #include <memory.h>
 #include <stdlib.h>
 
+#include <boost/thread.hpp>
+
 //////////////
 // Includes
 #include "Clause.h"
@@ -221,6 +223,9 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
   bFailed_ = 0;
   boolean bReturnValue = 0;
   while (1) {
+
+    boost::this_thread::interruption_point();
+
     if (_bTimeLimitExpired()) {
       bFailed_ = 1;
       return bReturnValue;
@@ -241,13 +246,13 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
       if (_iCurrentVariable == _iVariableCount) {
         if (_bOutputSolution()) {
 	  xOutputStream << "c   Solution limit reached. " << endl;
-	  wrapper->receiveUNSAT();
+	  wrapper->receiveEOF();
 	  return bReturnValue;
 	}
       }
       if (_bSpecialBackup()) {
 	xOutputStream << "c   All solutions found." << endl;
-	wrapper->receiveUNSAT();
+	wrapper->receiveEOF();
 	return bReturnValue;
       }
     }
@@ -369,6 +374,9 @@ boolean SATSolver::_bRestartLoop(boolean& bFailed_)
   time(&iLastRestart);
   time_t now;
   while (1) {
+
+    boost::this_thread::interruption_point();
+
     if (_bTimeLimitExpired()) {
       bFailed_ = 1;
       return bReturnValue;

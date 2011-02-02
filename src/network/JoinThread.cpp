@@ -274,7 +274,7 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
   
-  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
+  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
   
   if (ow_neighbor)
     {

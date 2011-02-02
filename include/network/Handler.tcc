@@ -323,16 +323,23 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  output_thread = new boost::thread(ot, sesh->conn, return_all, mg.get(), handler_output_notif.get());
 
 	  first_call = false;
-	}
+	} // if (first_call)
+
+      ConflictVec* conflicts = sesh->mess.getConflicts();
+      PartialBeliefState* partial_ass = sesh->mess.getPartialAss();
+      Decisionlevel* decision = sesh->mess.getDecisionlevel();
+
+      
 
       DMCS_LOG_TRACE(port << ": Notify my slaves of the new message");
 
       // notify StreamingDMCS
-      DMCS_LOG_TRACE(port << ": invoker   = " << invoker << ", pack_size = " << pack_size << ", port      = " << port);
+      DMCS_LOG_TRACE(port << ": invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port);
 
-      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(invoker, pack_size, port);
+      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(invoker, pack_size, port, 
+									   conflicts, partial_ass, decision);
       StreamingDMCSNotification* ow_dmcs = 
-	(StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif, &mess_dmcs, sizeof(mess_dmcs), 0);
+	(StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif.get(), &mess_dmcs, sizeof(mess_dmcs), 0);
 
       if (ow_dmcs)
 	{
@@ -343,7 +350,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       // notify OutputThread
       OutputNotification* mess_output = new OutputNotification(pack_size);
       OutputNotification* ow_output = 
-	(OutputNotification*) overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
+	(OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
 
       if (ow_output)
 	{
@@ -412,7 +419,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  // notify OutputThread
 	  OutputNotification* mess_output = new OutputNotification(pack_size);
 	  OutputNotification* ow_output = 
-	    (OutputNotification*) overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
+	    (OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
 	  
 	  if (ow_output)
 	    {
@@ -446,7 +453,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 
 	  OutputNotification* mess_output = new OutputNotification(0, OutputNotification::SHUTDOWN);
 	  OutputNotification* ow_output = 
-	    (OutputNotification*) overwrite_send(handler_output_notif, &mess_output, sizeof(mess_output), 0);
+	    (OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
 	  
 	  if (ow_output)
 	    {
@@ -456,9 +463,9 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  
 	  DMCS_LOG_TRACE(port << ": Send SHUTDOWN to DMCS thread");
 	  
-	  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(0,0,0,StreamingDMCSNotification::SHUTDOWN);
+	  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(0,0,0,0,0,0,StreamingDMCSNotification::SHUTDOWN);
 	  StreamingDMCSNotification* ow_dmcs = 
-	    (StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif, &mess_dmcs, sizeof(mess_dmcs), 0);
+	    (StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif.get(), &mess_dmcs, sizeof(mess_dmcs), 0);
 	  
 	  if (ow_dmcs)
 	    {

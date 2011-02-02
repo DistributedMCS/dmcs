@@ -288,11 +288,13 @@ Options";
 	
 		  ConflictVec* conflicts = new ConflictVec;
 		  PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
+		  Decisionlevel* decision = new Decisionlevel();
 
-		  StreamingCommandType::input_type mess(0, pack_size, conflicts, partial_ass);
+		  StreamingCommandType::input_type mess(0, pack_size, conflicts, partial_ass, decision);
 
-		  DMCS_LOG_DEBUG("Empty starting conflict:" << *conflicts);
-		  DMCS_LOG_DEBUG("Empty starting assignment:" << *partial_ass);
+		  DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
+		  DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);
+		  DMCS_LOG_DEBUG("Empty starting decision level:" << *decision);
 
 
 		  AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(io_service, it, header, mess);

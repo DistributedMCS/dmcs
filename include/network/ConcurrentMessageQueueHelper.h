@@ -37,7 +37,7 @@
 namespace dmcs {
 
 inline void*
-overwrite_send(ConcurrentMessageQueuePtr& cmq,
+overwrite_send(ConcurrentMessageQueue* cmq,
 	       const void* buf,
 	       std::size_t size,
 	       unsigned int prio)

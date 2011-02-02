@@ -94,17 +94,20 @@ public:
 	  {
 	    ConflictVec* conflicts = cn->conflicts;
 	    PartialBeliefState* partial_ass = cn->partial_ass;
+	    Decisionlevel* decision = cn->decision;
 
-	    assert(conflicts && partial_ass);
+	    assert(conflicts && partial_ass && decision);
 
-	    DMCS_LOG_TRACE(port << ": Got from Router: conflict = " << *conflicts << "*partial_ass = " << *partial_ass);
+	    DMCS_LOG_TRACE(port << ": Got from Router: conflict = " << *conflicts 
+			   << ", partial_ass = " << *partial_ass 
+			   << ", decision = " << *decision);
 	    
 	    // write to network
 
 	    const std::string& header = HEADER_REQ_STM_DMCS;
 
 	    conn->write(header);
-	    handle_write_message(conn, invoker, pack_size, conflicts, partial_ass);
+	    handle_write_message(conn, invoker, pack_size, conflicts, partial_ass, decision);
 
 
 #if 0
@@ -181,11 +184,12 @@ public:
 		       std::size_t invoker,
 		       std::size_t pack_size,
 		       ConflictVec* conflicts, 
-		       PartialBeliefState* partial_ass)
+		       PartialBeliefState* partial_ass,
+		       Decisionlevel* decision)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-    StreamingForwardMessage mess(invoker, pack_size, conflicts, partial_ass);
+    StreamingForwardMessage mess(invoker, pack_size, conflicts, partial_ass, decision);
 
     conn->write(mess);
 

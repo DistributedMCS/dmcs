@@ -356,6 +356,7 @@ Options";
 
       // shared between two modes
       SignatureVecPtr global_sigs(new SignatureVec);
+      VecSizeTPtr orig_sigs_size(new VecSizeT);
       SignaturePtr sig;
 
       if (dynamic) 
@@ -567,13 +568,15 @@ Options";
 	      DMCS_LOG_ERROR("MCSen with no contexts are not allowed.");
 	      return 1;
 	    }
-	  
+	 
+
 	  // extract the global signature from the query plan
 	  for (std::size_t i = 1; i <= system_size; ++i)
 	    {
 	      const Signature& loc_sig = query_plan->getSignature(i);
 	      SignaturePtr loc_sig_ptr(new Signature(loc_sig));
 	      global_sigs->push_back(loc_sig_ptr);
+	      orig_sigs_size->push_back(loc_sig_ptr->size());
 	    }
 
 	  DMCS_LOG_DEBUG("Global signatures:");
@@ -647,8 +650,8 @@ Options";
 						       bridge_rules, context_info,
 						       mt, sba_count, limit_answers, 
 						       limit_bind_rules, heuristics, 
-						       prefix, global_sigs, sig, query_plan,
-						       loopFormula));
+						       prefix, global_sigs, orig_sigs_size,
+						       sig, query_plan, loopFormula));
       
       // Server can deal with different kinds of messages
       ServerPtr server(new Server(ctf, io_service, endpoint));

@@ -62,7 +62,8 @@ public:
 #endif
 
   StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, 
-		const SignatureVecPtr& s, 
+		const SignatureVecPtr& s,
+		VecSizeTPtr& oss,
 		const QueryPlanPtr& query_plan_, 
 		std::size_t buf_count_);
 
@@ -78,6 +79,9 @@ private:
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
 	 std::size_t& port,
+	 ConflictVec* conflicts,
+	 PartialBeliefState* partial_ass,
+	 Decisionlevel* decision,
 	 StreamingDMCSNotification::NotificationType& type);
 
   void
@@ -86,13 +90,13 @@ private:
 	     std::size_t port);
 
   void
-  start_up();
-
-  void
-  work();
+  start_up(ConflictVec* conflicts,
+	   PartialBeliefState* partial_ass,
+	   Decisionlevel* decision);
 
 private:
   QueryPlanPtr          query_plan;
+  VecSizeTPtr           orig_sigs_size;
   CacheStatsPtr         cacheStats;
   CachePtr              cache;
   bool                  initialized;
@@ -107,6 +111,7 @@ private:
   ConcurrentMessageQueueVecPtr router_neighbors_notif;
   HashedBiMapPtr c2o;
   std::size_t buf_count;
+  bool first_round;
 };
 
 typedef boost::shared_ptr<StreamingDMCS> StreamingDMCSPtr;

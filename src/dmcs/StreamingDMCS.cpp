@@ -44,6 +44,7 @@
 #include "parser/ClaspResultBuilder.h"
 #include "parser/ParserDirector.h"
 
+#include <numeric>
 #include <vector>
 #include <sstream>
 #include <boost/bind.hpp>
@@ -52,13 +53,14 @@
 
 namespace dmcs {
   
-  
-  StreamingDMCS::StreamingDMCS(const ContextPtr& c, 
-			       const TheoryPtr& t, 
-			       const SignatureVecPtr& s, 
-			       const QueryPlanPtr& qp,
-			       std::size_t bc)
+StreamingDMCS::StreamingDMCS(const ContextPtr& c, 
+			     const TheoryPtr& t, 
+			     const SignatureVecPtr& s, 
+			     VecSizeTPtr& oss,
+			     const QueryPlanPtr& qp,
+			     std::size_t bc)
   : BaseDMCS(c, t, s),
+    orig_sigs_size(oss),
     query_plan(qp),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats)),
@@ -72,7 +74,8 @@ namespace dmcs {
     sat_router_notif(new ConcurrentMessageQueue),
     router_neighbors_notif(new ConcurrentMessageQueueVec),
     c2o(new HashedBiMap),
-    buf_count(bc)
+    buf_count(bc),
+    first_round(true)
   { }
 
 
@@ -108,14 +111,13 @@ StreamingDMCS::~StreamingDMCS()
 
   ConflictNotification* mess_sat = new ConflictNotification(0,0,0,ConflictNotification::SHUTDOWN);
   ConflictNotification* ow_sat = 
-    (ConflictNotification*) overwrite_send(sat_router_notif, &mess_sat, sizeof(mess_sat), 0);
+    (ConflictNotification*) overwrite_send(sat_router_notif.get(), &mess_sat, sizeof(mess_sat), 0);
   
   if (ow_sat)
     {
       delete ow_sat;
       ow_sat = 0;
     }
-
 
   ConcurrentMessageQueueVec::iterator rbeg = router_neighbors_notif->begin();
   ConcurrentMessageQueueVec::iterator rend = router_neighbors_notif->end();
@@ -126,7 +128,7 @@ StreamingDMCS::~StreamingDMCS()
   for (ConcurrentMessageQueueVec::iterator it = rbeg; it != rend; ++it)
     {
       ConflictNotification* ow_neighbor =
-	(ConflictNotification*) overwrite_send(*it, &mess_sat, sizeof(mess_sat), 0);
+	(ConflictNotification*) overwrite_send(it->get(), &mess_sat, sizeof(mess_sat), 0);
 
       DMCS_LOG_TRACE("Sent SHUTDOWN to neighbor " << std::distance(it, rend));
 
@@ -247,6 +249,9 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
 		      std::size_t& port,
+		      ConflictVec* conflicts,
+		      PartialBeliefState* partial_ass,
+		      Decisionlevel* decision,
 		      StreamingDMCSNotification::NotificationType& type)
 {
   // wait for a signal from Handler
@@ -259,10 +264,22 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 
   if (ptr && sn)
     {
-      invoker   = sn->invoker;
-      pack_size = sn->pack_size;
-      port      = sn->port;
-      type      = sn->type;
+      invoker     = sn->invoker;
+      pack_size   = sn->pack_size;
+      port        = sn->port;
+      conflicts   = sn->conflicts;
+      partial_ass = sn->partial_ass;
+      decision    = sn->decision;
+      type        = sn->type;
+
+      if (!decision->initialized())
+	{
+	  std::size_t global_sig_size = std::accumulate(orig_sigs_size->begin(), 
+							orig_sigs_size->end(),
+							0);
+
+	  decision->setGlobalSigSize(global_sig_size);
+	}
     }
   else
     {
@@ -275,29 +292,33 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 
 
 void
-StreamingDMCS::start_up()
+StreamingDMCS::start_up(ConflictVec* conflicts,
+			PartialBeliefState* partial_ass,
+			Decisionlevel* decision)
 {
-  const std::size_t system_size = ctx->getSystemSize();
-  const NeighborListPtr& nbs    = ctx->getNeighbors();
+  const NeighborListPtr& nbs = ctx->getNeighbors();
   const std::size_t no_nbs      = nbs->size();
 
+  DMCS_LOG_TRACE("Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
 
-  DMCS_LOG_TRACE("Trigger SAT solver with empty conflict and empty ass.");
-
-  //BeliefState* empty_model = new BeliefState(system_size, BeliefSet());
-  //mg->sendModel(empty_model, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
-  
-  ConflictVec* empty_conflicts = new ConflictVec;
-  PartialBeliefState* empty_ass  = new PartialBeliefState(system_size, PartialBeliefSet());
-  
-  ConflictNotification* mess_sat = new ConflictNotification(empty_conflicts, empty_ass, 0);
+  ConflictNotification* mess_sat = new ConflictNotification(conflicts, partial_ass, decision, 0);
   ConflictNotification* ow_sat = 
-    (ConflictNotification*) overwrite_send(dmcs_sat_notif, &mess_sat, sizeof(mess_sat), 0);
+    (ConflictNotification*) overwrite_send(dmcs_sat_notif.get(), &mess_sat, sizeof(mess_sat), 0);
   
   if (ow_sat)
     {
       delete ow_sat;
       ow_sat = 0;
+    }
+
+  if (first_round)
+    {
+      first_round = false;
+    }
+  else
+    {
+      // interrupt relsat
+      sat_thread->interrupt();
     }
 
   if (no_nbs > 0) // not a leaf context
@@ -308,9 +329,7 @@ StreamingDMCS::start_up()
 
       assert (router_neighbors_notif->size() == no_nbs);
 
-      ConflictVec* empty_conflicts = new ConflictVec;
-      PartialBeliefState* empty_ass = new PartialBeliefState(system_size, PartialBeliefSet());
-      ConflictNotification* cn      = new ConflictNotification(empty_conflicts, empty_ass, 0);
+      ConflictNotification* cn = new ConflictNotification(conflicts, partial_ass, decision, 0);
 
       for (std::size_t i = 0; i < no_nbs; ++i)
 	{
@@ -318,9 +337,10 @@ StreamingDMCS::start_up()
 	  ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
 
 	  DMCS_LOG_TRACE(__PRETTY_FUNCTION__ << " Will push: conflict = " << *(cn->conflicts)
-			 <<", partial_ass = " << *(cn->partial_ass));
+			 <<", partial_ass = " << *(cn->partial_ass) 
+			 << ", decision_level = " << *(cn->decision));
 
-	  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq, &cn, sizeof(cn), 0);
+	  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
 
 	  if (ow_neighbor)
 	    {
@@ -334,29 +354,26 @@ StreamingDMCS::start_up()
 
 
 void
-StreamingDMCS::work()
-{
-  // interrupt SAT thread
-#warning NOT IMPLEMENTED, WWWAAAAAAHHH
-  DMCS_LOG_DEBUG("Work is missing");
-
-}
-
-
-
-void
 StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 {
   std::size_t invoker = 0;
   std::size_t pack_size = 0;
   std::size_t port = 0;
+  ConflictVec* conflicts = 0;
+  PartialBeliefState* partial_ass = 0;
+  Decisionlevel* decision = 0;
+
   StreamingDMCSNotification::NotificationType type = StreamingDMCSNotification::REQUEST;
 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   while (1)
     {
-      listen(handler_dmcs_notif, invoker, pack_size, port, type);
+      listen(handler_dmcs_notif, 
+	     invoker, pack_size, 
+	     port, conflicts,
+	     partial_ass, 
+	     decision, type);
 
       if (type == StreamingDMCSNotification::SHUTDOWN)
 	{
@@ -368,8 +385,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 	  initialize(invoker, pack_size, port);
 	  initialized = true;
 	}
-      start_up();
-      //      work();
+      start_up(conflicts, partial_ass, decision);
     }
 }
 

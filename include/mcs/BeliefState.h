@@ -658,12 +658,18 @@ setEpsilon(PartialBeliefSet& pb)
 
 // ***************************************************************************************
 typedef std::vector<std::size_t> VecSizeT;
+typedef boost::shared_ptr<VecSizeT> VecSizeTPtr;
 
 
 struct Decisionlevel
 {
   VecSizeT* declev_at_dl;   // mapping from atoms to decision level
   VecSizeT* declev_dl_at;  // and the other way around
+
+  Decisionlevel()
+    : declev_at_dl(new VecSizeT),
+      declev_dl_at(new VecSizeT)
+  { }
 
   Decisionlevel(std::size_t global_sig_size)
     : declev_at_dl(new VecSizeT(global_sig_size)),
@@ -676,18 +682,51 @@ struct Decisionlevel
     declev_dl_at = dl.declev_dl_at;
   }
 
+  bool
+  initialized()
+  {
+    return (declev_at_dl->size() > 0);
+  }
+
+  std::size_t
+  last()
+  {
+    assert (declev_dl_at->size() > 0);
+
+    return declev_dl_at->back();
+  }
+
   void
-  setDecisionlevel(std::size_t atom_id, std::size_t level)
+  pop_back()
+  {
+    const std::size_t atom_id = declev_dl_at->back();
+    (*declev_at_dl)[atom_id] = 0;
+    declev_dl_at->pop_back();
+  }
+
+  void
+  setDecisionlevel(std::size_t atom_id)
   {
     assert (atom_id <= declev_at_dl->size());
-    assert (level == declev_dl_at->size() + 1);
     
     std::size_t& dl = (*declev_at_dl)[atom_id - 1];
 
     assert (dl == 0);
 
-    dl = level;
+    dl = declev_dl_at->size() + 1;
     declev_dl_at->push_back(atom_id);
+  }
+
+  void
+  setGlobalSigSize(std::size_t global_sig_size)
+  {
+    declev_at_dl->resize(global_sig_size, 0);
+  }
+
+  std::size_t
+  getGlobalSigSize()
+  {
+    return declev_at_dl->size();
   }
 
   std::size_t
@@ -705,15 +744,39 @@ struct Decisionlevel
 
     return (*declev_dl_at)[level - 1];
   }
+
+  template<class Archive>
+  void serialize(Archive& ar, const unsigned int /* verison */)
+  {
+    ar & declev_at_dl;
+    ar & declev_dl_at;
+  }
 };
 
+
+inline std::ostream&
+operator<< (std::ostream& os, const Decisionlevel& decision)
+{
+  os << "{ ";
+
+  VecSizeT::const_iterator it = decision.declev_dl_at->begin();
+  std::size_t i = 1;
+  
+  for (; it != decision.declev_dl_at->end(); ++it, ++i)
+    {
+      os << i << ":" << *it << " ";
+    }
+
+  os << "}";
+
+  return os;
+}
 
 } // namespace dmcs
 
 
 namespace std
 {
-
 
 /** 
  * Output true/false bits in a partial belief set @a pb on @a os.

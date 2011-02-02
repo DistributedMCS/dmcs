@@ -45,7 +45,17 @@ RelSatSolverThread::operator()()
 
   while (1)
     {
-      relsatsolver->solve();
+      try 
+	{
+	  relsatsolver->solve();
+	}
+      catch(const boost::thread_interrupted& ex)
+	{
+	  DMCS_LOG_TRACE("Got interrupted, will now restart.");
+	  
+	  // reset sat solver
+	  
+	}
     }
 }
 

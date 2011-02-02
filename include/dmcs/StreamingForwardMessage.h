@@ -56,11 +56,13 @@ public:
   StreamingForwardMessage(std::size_t i,
 			  std::size_t ps, 
 			  ConflictVec* cs,
-			  PartialBeliefState* pa)
+			  PartialBeliefState* pa,
+			  Decisionlevel* d)
     : invoker(i),
       pack_size(ps), 
       conflicts(cs),
-      partial_ass(pa)
+      partial_ass(pa),
+      decision(d)
   {
     if (partial_ass == 0)
       {
@@ -68,6 +70,7 @@ public:
       }
 
     assert (cs != 0);
+    assert (d  != 0);
   }
 
   std::size_t
@@ -101,6 +104,12 @@ public:
     conflicts = cs;
   }
 
+  Decisionlevel*
+  getDecisionlevel()
+  {
+    return decision;
+  }
+
 public:
   template <typename Archive>
   void
@@ -110,6 +119,7 @@ public:
     ar & pack_size;
     ar & conflicts;
     ar & partial_ass;
+    ar & decision;
   }
 
 private:
@@ -117,6 +127,7 @@ private:
   std::size_t         pack_size;    // The number of models in a package that the invoker expects
   ConflictVec*        conflicts;    // A global conflict that the receiver should obey
   PartialBeliefState* partial_ass;  // The partial assignment of the whole system
+  Decisionlevel*      decision;
 };
 
 typedef boost::shared_ptr<StreamingForwardMessage> StreamingForwardMessagePtr;

@@ -34,6 +34,7 @@
 #include "mcs/ProxySignatureByLocal.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "solver/BaseSolver.h"
+#include "solver/ChoicePoint.h"
 #include "solver/Conflict.h"
 
 #include "relsat-20070104/RelSatHelper.h"
@@ -78,6 +79,9 @@ public:
 
   void
   collect_learned_clauses(ClauseList& learned_clauses);
+
+  void
+  receiveEOF();
 
   void
   receiveUNSAT();
@@ -129,6 +133,8 @@ private:
   PartialBeliefState*            input;
   ConflictBufVecPtr              learned_conflicts;
   ConflictBufIterVecPtr          new_conflicts_beg;
+  TrailPtr                       trail;
+  VecSizeTPtr                    orig_sigs_size;
 
   SATInstance*                   xInstance;
   SATSolver*                     xSATSolver;

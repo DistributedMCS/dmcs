@@ -66,6 +66,7 @@ public:
 		     std::size_t heuristics_,
 		     const std::string& prefix_,
 		     SignatureVecPtr& global_sigs_,
+		     VecSizeTPtr& oss,
 		     SignaturePtr& sig_,
 		     QueryPlanPtr& query_plan_,
 		     TheoryPtr& loopFormula_,
@@ -82,6 +83,7 @@ public:
       heuristics(heuristics_),
       prefix(prefix_),
       global_sigs(global_sigs_),
+      orig_sigs_size(oss),
       sig(sig_),
       query_plan(query_plan_),
       loopFormula(loopFormula_),
@@ -106,6 +108,7 @@ private:
   std::size_t heuristics;
   const std::string& prefix;
   SignatureVecPtr global_sigs;
+  VecSizeTPtr orig_sigs_size;
   SignaturePtr sig;
   QueryPlanPtr query_plan;
   TheoryPtr loopFormula;
@@ -149,7 +152,7 @@ template<>
 inline StreamingCommandTypePtr
 CommandTypeFactory::create<StreamingCommandTypePtr>()
 {
-  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, query_plan, buf_count));
+  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, orig_sigs_size, query_plan, buf_count));
   StreamingCommandTypePtr stm_opt_dmcs(new StreamingCommandType(stm_dmcs));
 
   return stm_opt_dmcs;
