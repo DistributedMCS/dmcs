@@ -82,9 +82,9 @@ struct ConflictNotification
 inline std::ostream&
 operator<< (std::ostream& os, const ConflictNotification& cn)
 {
-  os << "conflicts: " << *(cn.conflicts) << std::endl
-     << "partial_ass: " << *(cn.partial_ass) << std::endl
-     << "decision: " << *(cn.decision);
+  return os << "conflicts: " << *(cn.conflicts) << std::endl
+	    << "partial_ass: " << *(cn.partial_ass) << std::endl
+	    << "decision: " << *(cn.decision);
 }
 
 } // namespace dmcs

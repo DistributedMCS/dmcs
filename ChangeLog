@@ -1,3 +1,10 @@
+2011-02-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/solver/ChoicePoint.h: Include numeric.
+
+	* include/dmcs/ConflictNotification.h: Return ostream in
+	operator<<.
+
 2011-02-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/solver/ChoicePoint.h: Get global id of an atom.
