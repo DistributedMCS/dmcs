@@ -1,5 +1,14 @@
 2011-02-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/solver/RelSatSolver.h: Add refresh.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/QueryPlan.h: Setup meta_neighbors.
+	* src/dmcs/QueryPlan.cpp: Likewise.
+
+	* include/dmcs/Neighbor.h: Add vector of NeighborList.
+
 	* src/dmcs/StreamingDMCS.cpp: Get neighbors from query_plan.
 	* src/network/ThreadFactory.cpp: Likewise.
 	* include/network/ThreadFactory.h: Likewise.

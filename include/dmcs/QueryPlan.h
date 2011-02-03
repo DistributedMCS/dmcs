@@ -161,8 +161,11 @@ struct QueryPlan
   void
   remove_connection(std::size_t context1, std::size_t context2);
 
-  NeighborListPtr
+  NeighborListPtr&
   getNeighbors(std::size_t context_id);
+
+  void
+  setupMetaNeighbors();
 
   EdgesPtr
   getEdges();
@@ -192,6 +195,8 @@ struct QueryPlan
   EdgeInterfaceProperty interface;
   GraphNameProperty gname;
   VertexMapPtr vmap;
+  NeighborListVecPtr meta_neighbors;
+  bool first_round;
 };
 
 typedef boost::shared_ptr<QueryPlan> QueryPlanPtr;

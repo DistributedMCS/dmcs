@@ -33,6 +33,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -62,6 +63,8 @@ struct Neighbor
 typedef boost::shared_ptr<Neighbor> NeighborPtr;
 typedef std::list<NeighborPtr> NeighborList;
 typedef boost::shared_ptr<NeighborList> NeighborListPtr;
+typedef std::vector<NeighborListPtr> NeighborListVec;
+typedef boost::shared_ptr<NeighborListVec> NeighborListVecPtr;
 
 
 struct compareNeighbors
@@ -107,6 +110,23 @@ operator<< (std::ostream& os, const NeighborList& neighbors)
   return os;
 }
 
+
+inline std::ostream&
+operator<< (std::ostream& os, const NeighborListVec& meta_neighbors)
+{
+  os << "{\n";
+
+  if (!meta_neighbors.empty())
+    {
+      for (NeighborListVec::const_iterator it = meta_neighbors.begin(); it != meta_neighbors.end(); ++it)
+	{
+	  os << **it << std::endl;
+	}
+    }
+
+  os << "}\n";
+  return os;
+}
 
 inline std::istream&
 operator>> (std::istream& is, Neighbor& nb)

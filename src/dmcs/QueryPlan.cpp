@@ -27,6 +27,7 @@
  * 
  */
 
+#include "dmcs/Log.h"
 #include "dmcs/QueryPlan.h"
 #include "generator/QueryPlanWriter.h"
 
@@ -36,7 +37,9 @@ using namespace dmcs::generator;
 QueryPlan::QueryPlan()
   : graph(0),
     gname(boost::get_property(graph, boost::graph_name)),
-    vmap(new VertexMap)
+    vmap(new VertexMap),
+    meta_neighbors(new NeighborListVec),
+    first_round(true)
 {
   setupProperties();
 }
@@ -66,6 +69,39 @@ QueryPlan::setupProperties()
   dp.property(GNAME_LB, gname);
 }
 
+
+void
+QueryPlan::setupMetaNeighbors()
+{
+  std::size_t system_size = boost::num_vertices(graph);
+
+  DMCS_LOG_TRACE("system_size = " << system_size);
+
+  for (std::size_t i = 0; i < system_size; ++i)
+    {
+      NeighborListPtr nbs(new NeighborList);
+  
+      Vertex v = boost::vertex((*vmap)[i], graph);
+      OutEdgeIter out_i;
+      OutEdgeIter out_end;
+  
+      boost::tie(out_i, out_end) = out_edges(v, graph); 
+      for (; out_i != out_end; ++out_i) 
+	{
+	  Vertex t = boost::target(*out_i, graph);
+	  std::size_t nid = name[t];
+	  
+	  NeighborPtr nb(new Neighbor(nid+1, getHostname(nid+1), getPort(nid+1)));
+	  
+	  nbs->push_back(nb);
+	}
+
+      DMCS_LOG_TRACE("Push");
+      meta_neighbors->push_back(nbs);
+    }
+
+  DMCS_LOG_TRACE("meta neighbors:\n" << *meta_neighbors);
+}
 
 
 const BeliefStatePtr&
@@ -239,29 +275,17 @@ QueryPlan::remove_connection(std::size_t context_id1, std::size_t context_id2)
 
 
 
-NeighborListPtr
+NeighborListPtr&
 QueryPlan::getNeighbors(std::size_t context_id)
 {
-  //std::cerr << "in get Neighbors with VMAP"<< std::endl;
-  NeighborListPtr nbs(new NeighborList);
-  
-  Vertex v = boost::vertex((*vmap)[context_id-1], graph);
-  OutEdgeIter out_i;
-  OutEdgeIter out_end;
-  
-  boost::tie(out_i, out_end) = out_edges(v, graph); 
-  for (; out_i != out_end; ++out_i) 
+  if (first_round)
     {
-      Vertex t = boost::target(*out_i, graph);
-      std::size_t nid = name[t];
-
-      NeighborPtr nb(new Neighbor(nid+1, getHostname(nid+1), getPort(nid+1)));
-
-      nbs->push_back(nb);
+      setupMetaNeighbors();
+      first_round = false;
     }
 
-  return nbs;
-  }
+  return (*meta_neighbors)[context_id - 1];
+}
 
 
 EdgesPtr

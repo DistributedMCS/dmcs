@@ -191,8 +191,7 @@ RelSatSolver::import_conflicts(const ConflictVec* conflicts)
   VariableSet xNegativeVariables(sig_size);
 
   for (ConflictVec::const_iterator it = conflicts->begin(); it != conflicts->end(); ++it)
-    {
-      xPositiveVariables.vClear();
+    {      xPositiveVariables.vClear();
       xNegativeVariables.vClear();
 
       Conflict* conflict = *it;
@@ -255,6 +254,15 @@ RelSatSolver::import_partial_ass(const PartialBeliefState* partial_ass)
 
 
 void
+RelSatSolver::refresh()
+{
+  xInstance->removePartialAss();
+  xSATSolver->refresh();
+}
+
+
+
+void
 RelSatSolver::solve()
 {
   // wait for conflict and partial_ass from DMCS
@@ -291,6 +299,7 @@ RelSatSolver::solve()
       parent_decision = cn->decision;
 
       import_conflicts(parent_conflicts);
+      import_partial_ass(parent_ass);
 
       DMCS_LOG_TRACE(port << ":  Got a message from DMCS. parent_conflicts = " << *parent_conflicts 
 		     << ". parent_ass = " << *parent_ass
@@ -549,6 +558,7 @@ RelSatSolver::backtrack()
     {
       ChoicePointPtr& cp = trail->top();
       decision = cp->decision; // parent_decision is included
+      interface_impossible = cp->input;
     } // if (trail->empty())
   
   it = findFirstUndecided(my_id, local_sig, decision, orig_sigs_size);
@@ -570,7 +580,7 @@ RelSatSolver::backtrack()
 	  while (last_decided_atom > (*ot))
 	    {
 	      last_decided_atom -= (*ot);
-	      ++it;
+	      ++ot;
 	      ++jt;
 	    }
 	  
@@ -578,7 +588,7 @@ RelSatSolver::backtrack()
 	}
       
       // There is an atom to flip. Set the opposite value in input
-      PartialBeliefSet& input_pbs = (*input)[it->ctxId - 1];
+      PartialBeliefSet& input_pbs = (*interface_impossible)[it->ctxId - 1];
       PartialBeliefSet& partial_ass_pbs = (*partial_ass)[it->ctxId - 1];
       
       PartialBeliefSet::TruthVal val = testBeliefSet(input_pbs, it->localId);
@@ -598,7 +608,12 @@ RelSatSolver::backtrack()
       
       ChoicePointPtr cp(new ChoicePoint(input, decision));
       trail->push(cp);
-    }
+
+      // send notification to router. Need to send a bunch of things
+      // and cover all neighbors instead of sending to just a single
+      // neighbor as before
+      
+    } // if (trail->empty())
 }
 
 

@@ -54,7 +54,7 @@ RelSatSolverThread::operator()()
 	  DMCS_LOG_TRACE("Got interrupted, will now restart.");
 	  
 	  // reset sat solver
-	  
+	  relsatsolver->refresh(); // including remove_input
 	}
     }
 }

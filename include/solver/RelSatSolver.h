@@ -101,6 +101,9 @@ public:
   import_partial_ass(const PartialBeliefState* partial_ass);
 
   void
+  refresh();
+
+  void
   print_local_theory();
 
   ConflictBufVecPtr
