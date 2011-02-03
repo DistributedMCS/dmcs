@@ -45,6 +45,7 @@ ThreadFactory::ThreadFactory(bool cd,
 			     const SignaturePtr& ls,
 			     const BeliefStatePtr& lV,
 			     const VecSizeTPtr& oss,
+			     const NeighborListPtr& ns,
 			     std::size_t ps,
 			     MessagingGatewayBC* m,
 			     ConcurrentMessageQueue* dsn,
@@ -57,6 +58,7 @@ ThreadFactory::ThreadFactory(bool cd,
     local_sig(ls),
     localV(lV),
     orig_sigs_size(oss),
+    nbs(ns),
     pack_size(ps),
     mg(m),
     dmcs_sat_notif(dsn), 
@@ -66,7 +68,6 @@ ThreadFactory::ThreadFactory(bool cd,
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   // fill up the map: ctx_id <--> offset
-  const NeighborListPtr& nbs = context->getNeighbors();
   std::size_t off = 0;
   for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it, ++off)
     {
@@ -82,7 +83,6 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 				     NeighborThreadVecPtr& neighbors,
 				     ConcurrentMessageQueueVecPtr& router_neighbors_notif)
 {
-  const NeighborListPtr& nbs    = context->getNeighbors();
   const std::size_t ctx_id      = context->getContextID();
 
   DMCS_LOG_TRACE("Going to create " << nbs->size() << " neighbor threads.");
@@ -116,7 +116,6 @@ ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_n
 				Decisionlevel* decision)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  const NeighborListPtr& nbs = context->getNeighbors();
   const std::size_t system_size = context->getSystemSize();
   const std::size_t no_nbs   = nbs->size();
 
@@ -133,7 +132,6 @@ boost::thread*
 ThreadFactory::createLocalSolveThread()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  const NeighborListPtr& nbs    = context->getNeighbors();
   bool is_leaf                  = (nbs->size() == 0);
   const std::size_t my_id       = context->getContextID();
   const std::size_t system_size = context->getSystemSize();

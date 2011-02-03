@@ -206,8 +206,6 @@ StreamingDMCS::initialize(std::size_t invoker,
 {
   std::size_t my_id = ctx->getContextID();
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
-  //const NeighborListPtr& nbs = ctx->getNeighbors();
-
   std::size_t no_nbs         = nbs->size(); 
 
   DMCS_LOG_TRACE("Here create mqs and threads. no_nbs = " << no_nbs);
@@ -235,7 +233,7 @@ StreamingDMCS::initialize(std::size_t invoker,
 
   const SignaturePtr& local_sig = ctx->getSignature();
 
-  ThreadFactory tf(conflicts_driven, ctx, theory, local_sig, localV,  orig_sigs_size, pack_size,
+  ThreadFactory tf(conflicts_driven, ctx, theory, local_sig, localV,  orig_sigs_size, nbs, pack_size,
 		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), c2o.get(), port);
 
   sat_thread = tf.createLocalSolveThread();

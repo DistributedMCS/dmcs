@@ -1,5 +1,9 @@
 2011-02-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/dmcs/StreamingDMCS.cpp: Get neighbors from query_plan.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+
 	* src/solver/RelSatSolver.cpp: Do nothing when trail is empty. The
 	outer loop takes care of sending NULL to OUT_MQ.
 

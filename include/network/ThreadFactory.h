@@ -57,6 +57,7 @@ public:
 		const SignaturePtr& ls,
 		const BeliefStatePtr& lV,
 		const VecSizeTPtr& oss,
+		const NeighborListPtr& ns,
 		std::size_t ps,
 		MessagingGatewayBC* m,
 		ConcurrentMessageQueue* dsn,
@@ -91,13 +92,14 @@ private:
   const SignaturePtr              local_sig;
   const BeliefStatePtr            localV;
   const VecSizeTPtr               orig_sigs_size;
+  const NeighborListPtr           nbs;
   std::size_t                     pack_size;
   MessagingGatewayBC*             mg;
   ConcurrentMessageQueue*         dmcs_sat_notif;
   ConcurrentMessageQueue*         sat_router_notif;
   HashedBiMap*                    c2o;             // hashed bimap from context id to
-			                             // the offset in the vector of
-				                     // neighbor message queue
+			                           // the offset in the vector of
+				                   // neighbor message queue
   std::size_t port;
 };
 
