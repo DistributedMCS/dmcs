@@ -56,10 +56,12 @@ namespace dmcs {
 StreamingDMCS::StreamingDMCS(const ContextPtr& c, 
 			     const TheoryPtr& t, 
 			     const SignatureVecPtr& s, 
+			     bool cd,
 			     VecSizeTPtr& oss,
 			     const QueryPlanPtr& qp,
 			     std::size_t bc)
   : BaseDMCS(c, t, s),
+    conflicts_driven(cd),
     orig_sigs_size(oss),
     query_plan(qp),
     cacheStats(new CacheStats),
@@ -109,7 +111,7 @@ StreamingDMCS::~StreamingDMCS()
 
   DMCS_LOG_TRACE("Informing ROUTER.");
 
-  ConflictNotification* mess_sat = new ConflictNotification(0,0,0,ConflictNotification::SHUTDOWN);
+  ConflictNotification* mess_sat = new ConflictNotification(0,0,0,0,ConflictNotification::SHUTDOWN);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(sat_router_notif.get(), &mess_sat, sizeof(mess_sat), 0);
   
@@ -197,9 +199,15 @@ StreamingDMCS::~StreamingDMCS()
 void
 StreamingDMCS::initialize(std::size_t invoker, 
 			  std::size_t pack_size, 
-			  std::size_t port)
+			  std::size_t port,
+			  ConflictVec* conflicts,
+			  PartialBeliefState* partial_ass,
+			  Decisionlevel* decision)
 {
-  const NeighborListPtr& nbs = ctx->getNeighbors();
+  std::size_t my_id = ctx->getContextID();
+  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
+  //const NeighborListPtr& nbs = ctx->getNeighbors();
+
   std::size_t no_nbs         = nbs->size(); 
 
   DMCS_LOG_TRACE("Here create mqs and threads. no_nbs = " << no_nbs);
@@ -227,7 +235,7 @@ StreamingDMCS::initialize(std::size_t invoker,
 
   const SignaturePtr& local_sig = ctx->getSignature();
 
-  ThreadFactory tf(ctx, theory, local_sig, localV,  orig_sigs_size, pack_size,
+  ThreadFactory tf(conflicts_driven, ctx, theory, local_sig, localV,  orig_sigs_size, pack_size,
 		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), c2o.get(), port);
 
   sat_thread = tf.createLocalSolveThread();
@@ -235,7 +243,7 @@ StreamingDMCS::initialize(std::size_t invoker,
   if (no_nbs > 0)
     {
       tf.createNeighborThreads(neighbor_threads, neighbors, router_neighbors_notif);
-      join_thread   = tf.createJoinThread(router_neighbors_notif);
+      join_thread   = tf.createJoinThread(router_neighbors_notif, conflicts, partial_ass, decision);
       router_thread = tf.createRouterThread(router_neighbors_notif);
     }
 
@@ -249,9 +257,9 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
 		      std::size_t& port,
-		      ConflictVec* conflicts,
-		      PartialBeliefState* partial_ass,
-		      Decisionlevel* decision,
+		      ConflictVec*& conflicts,
+		      PartialBeliefState*& partial_ass,
+		      Decisionlevel*& decision,
 		      StreamingDMCSNotification::NotificationType& type)
 {
   // wait for a signal from Handler
@@ -296,8 +304,15 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 			PartialBeliefState* partial_ass,
 			Decisionlevel* decision)
 {
-  const NeighborListPtr& nbs = ctx->getNeighbors();
+
+
+  std::size_t my_id = ctx->getContextID();
+  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
   const std::size_t no_nbs      = nbs->size();
+
+  assert (conflicts);
+  assert (partial_ass);
+  assert (decision);
 
   DMCS_LOG_TRACE("Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
 
@@ -382,7 +397,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 
       if (!initialized)
 	{
-	  initialize(invoker, pack_size, port);
+	  initialize(invoker, pack_size, port, conflicts, partial_ass, decision);
 	  initialized = true;
 	}
       start_up(conflicts, partial_ass, decision);

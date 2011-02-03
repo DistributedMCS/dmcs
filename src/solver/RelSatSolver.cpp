@@ -40,6 +40,7 @@
 namespace dmcs {
 
 RelSatSolver::RelSatSolver(bool il,
+			   bool cd,
 			   std::size_t my_id_,
 			   const TheoryPtr& theory_, 
 			   const SignaturePtr& sig_,
@@ -53,6 +54,7 @@ RelSatSolver::RelSatSolver(bool il,
 			   ConcurrentMessageQueue* srn,
 			   std::size_t p)
   : is_leaf(il),
+    conflicts_driven(cd),
     my_id(my_id_),
     theory(theory_), 
     sig(sig_),
@@ -525,6 +527,81 @@ RelSatSolver::receiveEOF()
 }
 
 
+
+void
+RelSatSolver::backtrack()
+{
+  collect_learned_clauses(xSATSolver->getLearnedClauses());
+  const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
+  SignatureByCtx::const_iterator it;
+  Decisionlevel* decision;
+  PartialBeliefState* interface_impossible;
+  PartialBeliefState* partial_ass;
+  
+  *partial_ass = *parent_ass;
+  
+  if (trail->empty())
+    {
+      *decision = *parent_decision;
+      *interface_impossible = *input;
+    } // if (trail->empty())
+  else
+    {
+      ChoicePointPtr& cp = trail->top();
+      decision = cp->decision; // parent_decision is included
+    } // if (trail->empty())
+  
+  it = findFirstUndecided(my_id, local_sig, decision, orig_sigs_size);
+  
+  if (it == local_sig.end())
+    {
+      DMCS_LOG_TRACE(port << ": The parents decided all of my bridge atoms and I am still UNSAT. Send a NULL pointer to OUT_MQ");
+      mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+    }
+  else
+    {
+      if (!trail->empty())
+	{
+	  // Cancel the last push 
+	  std::size_t last_decided_atom = decision->last();
+	  
+	  VecSizeT::const_iterator ot = orig_sigs_size->begin();
+	  PartialBeliefState::iterator jt = partial_ass->begin();
+	  while (last_decided_atom > (*ot))
+	    {
+	      last_decided_atom -= (*ot);
+	      ++it;
+	      ++jt;
+	    }
+	  
+	  setBeliefSet(*jt, last_decided_atom, PartialBeliefSet::DMCS_UNDEF);
+	}
+      
+      // There is an atom to flip. Set the opposite value in input
+      PartialBeliefSet& input_pbs = (*input)[it->ctxId - 1];
+      PartialBeliefSet& partial_ass_pbs = (*partial_ass)[it->ctxId - 1];
+      
+      PartialBeliefSet::TruthVal val = testBeliefSet(input_pbs, it->localId);
+      assert (val != PartialBeliefSet::DMCS_UNDEF);
+      
+      if (val == PartialBeliefSet::DMCS_TRUE)
+	{
+	  setBeliefSet(partial_ass_pbs, it->localId, PartialBeliefSet::DMCS_FALSE);
+	}
+      else
+	{
+	  setBeliefSet(partial_ass_pbs, it->localId);
+	}
+      
+      const std::size_t gid = global_id(it, orig_sigs_size);
+      decision->setDecisionlevel(gid);
+      
+      ChoicePointPtr cp(new ChoicePoint(input, decision));
+      trail->push(cp);
+    }
+}
+
+
 void
 RelSatSolver::receiveUNSAT()
 {
@@ -537,72 +614,9 @@ RelSatSolver::receiveUNSAT()
     }
   else
     {
-      collect_learned_clauses(xSATSolver->getLearnedClauses());
-      const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
-      SignatureByCtx::const_iterator it;
-      Decisionlevel* decision;
-      PartialBeliefState* interface_impossible;
-      PartialBeliefState* partial_ass;
-
-      *partial_ass = *parent_ass;
-
-      if (trail->empty())
+      if (conflicts_driven)
 	{
-	  *decision = *parent_decision;
-	  *interface_impossible = *input;
-	} // if (trail->empty())
-      else
-	{
-	  ChoicePointPtr& cp = trail->top();
-	  decision = cp->decision; // parent_decision is included
-	} // if (trail->empty())
-
-      it = findFirstUndecided(my_id, local_sig, decision, orig_sigs_size);
-
-      if (it == local_sig.end())
-	{
-	  DMCS_LOG_TRACE(port << ": The parents decided all of my bridge atoms and I am still UNSAT. Send a NULL pointer to OUT_MQ");
-	  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
-	}
-      else
-	{
-	  if (!trail->empty())
-	    {
-	      // Cancel the last push 
-	      std::size_t last_decided_atom = decision->last();
-
-	      VecSizeT::const_iterator ot = orig_sigs_size->begin();
-	      PartialBeliefState::const_iterator jt = partial_ass->begin();
-	      while (last_decided_atom > (*ot))
-		{
-		  last_decided_atom -= (*ot);
-		  ++it;
-		  ++jt;
-		}
-
-	      setBeliefSet(*jt, last_decided_atom, PartialBeliefSet::DMCS_UNDEF);
-	    }
-
-	  // There is an atom to flip. Set the opposite value in input
-	  PartialBeliefSet& input_pbs = (*input)[it->ctxId - 1];
-	  PartialBeliefSet& partial_ass_pbs = (*partial_ass)[it->ctxId - 1];
-	  
-	  PartialBeliefSet::TruthVal val = testBeliefSet(input_pbs, it->localId);
-	  assert (val != PartialBeliefSet::DMCS_UNDEF);
-	  
-	  if (val == PartialBeliefSet::DMCS_TRUE)
-	    {
-	      setBeliefSet(partial_ass_pbs, it->localId, PartialBeliefSet::DMCS_FALSE);
-	    }
-	  else
-	    {
-	      setBeliefSet(partial_ass_pbs, it->localId);
-	    }
-	  
-	  decision->setDecisionlevel(gid);
-	  
-	  ChoicePointPtr cp(new ChoicePoint(input, decision));
-	  trail->push(cp);
+	  backtrack();
 	}
     }
 }

@@ -55,7 +55,10 @@ public:
   operator()(std::size_t no_nbs,
 	     std::size_t system_size,
 	     MessagingGatewayBC* mg,
-	     ConcurrentMessageQueueVec* joiner_neighbors_notif);
+	     ConcurrentMessageQueueVec* joiner_neighbors_notif,
+	     ConflictVec* cs,
+	     PartialBeliefState* pa,
+	     Decisionlevel* d);
 
 
   enum ImportStates
@@ -96,6 +99,9 @@ private:
 
   MessagingGatewayBC*        mg;
   ConcurrentMessageQueueVec* joiner_neighbors_notif;
+  ConflictVec*              parent_conflicts;
+  PartialBeliefState*        parent_ass;
+  Decisionlevel*             parent_decision;
 };
 
 } // namespace dmcs

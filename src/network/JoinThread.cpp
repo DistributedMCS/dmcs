@@ -261,15 +261,16 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
   ConflictNotification* cn;
   if (nt == ConflictNotification::NEXT)
     {
-      DMCS_LOG_TRACE(port << ":  Will push NULL conflicts and asses");
-      cn = new ConflictNotification(0, 0, 0, ConflictNotification::NEXT);
+      DMCS_LOG_TRACE(port << ":  Will push NULL conflicts, asses, and decisions");
+      cn = new ConflictNotification(0, 0, 0, 0, ConflictNotification::NEXT);
     }
   else
     {
-      ConflictVec* conflicts = new ConflictVec;
-      PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
-      cn = new ConflictNotification(conflicts, partial_ass, 0, nt);
-      DMCS_LOG_TRACE(port << ":  Will push conflict = " << *conflicts << ", partial_ass = " << *partial_ass << ", notification type = " << nt);
+      cn = new ConflictNotification(parent_conflicts, parent_ass, parent_decision, 0, nt);
+      DMCS_LOG_TRACE(port << ":  Will push parent_conflicts = " << *parent_conflicts 
+		     << ", parent_ass = " << *parent_ass 
+		     << ", parent_decision = " << *parent_decision
+		     << ", notification type = " << nt);
     }
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
@@ -289,12 +290,19 @@ void
 JoinThread::operator()(std::size_t nbs,
 		       std::size_t s,
 		       MessagingGatewayBC* m,
-		       ConcurrentMessageQueueVec* jv)
+		       ConcurrentMessageQueueVec* jv,
+		       ConflictVec* cs,
+		       PartialBeliefState* pa,
+		       Decisionlevel* d)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   mg = m;
   joiner_neighbors_notif = jv;
+  parent_conflicts = cs;
+  parent_ass = pa;
+  parent_decision = d;
+
   no_nbs = nbs;
   system_size = s;
   

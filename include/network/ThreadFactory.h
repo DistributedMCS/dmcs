@@ -51,7 +51,8 @@ typedef boost::shared_ptr<ThreadVec> ThreadVecPtr;
 class ThreadFactory
 {
 public:
-  ThreadFactory(const ContextPtr& c, 
+  ThreadFactory(bool cd,
+		const ContextPtr& c, 
 		const TheoryPtr& t,
 		const SignaturePtr& ls,
 		const BeliefStatePtr& lV,
@@ -69,7 +70,10 @@ public:
 			ConcurrentMessageQueueVecPtr& router_neighbors_notif);
 
   boost::thread*
-  createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_notif);
+  createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_notif,
+		   ConflictVec* conflicts,
+		   PartialBeliefState* partial_ass,
+		   Decisionlevel* decision);
 
   boost::thread*
   createLocalSolveThread();
@@ -81,6 +85,7 @@ public:
   //createOutputThread(const connection_ptr& conn_);
 
 private:
+  bool conflicts_driven;
   const ContextPtr                context;
   const TheoryPtr                 theory;
   const SignaturePtr              local_sig;

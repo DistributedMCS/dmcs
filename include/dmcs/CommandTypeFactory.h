@@ -54,6 +54,7 @@ class CommandTypeFactory
 public:
   CommandTypeFactory(std::size_t ctx_id_,
 		     std::size_t system_size_,
+		     bool cd,
 		     RulesPtr& local_kb_,
 		     NeighborListPtr& neighbor_list_,
 		     BridgeRulesPtr& schematic_bridge_rules_,
@@ -73,6 +74,7 @@ public:
 		     std::size_t buf_count_ = 100)
     : ctx_id(ctx_id_),
       system_size(system_size_),
+      conflicts_driven(cd),
       schematic_bridge_rules(schematic_bridge_rules_),
       bridge_rules(bridge_rules_),
       context_info(context_info_),
@@ -98,6 +100,7 @@ public:
 private:
   std::size_t ctx_id;
   std::size_t system_size;
+  bool conflicts_driven;
   BridgeRulesPtr schematic_bridge_rules;
   BridgeRulesPtr bridge_rules;
   NeighborListPtr context_info;
@@ -152,7 +155,8 @@ template<>
 inline StreamingCommandTypePtr
 CommandTypeFactory::create<StreamingCommandTypePtr>()
 {
-  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, orig_sigs_size, query_plan, buf_count));
+  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, conflicts_driven,
+					      orig_sigs_size, query_plan, buf_count));
   StreamingCommandTypePtr stm_opt_dmcs(new StreamingCommandType(stm_dmcs));
 
   return stm_opt_dmcs;

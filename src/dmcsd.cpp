@@ -234,6 +234,7 @@ main(int argc, char* argv[])
       std::size_t limit_bind_rules = 0;
       std::size_t heuristics = 0;
       bool dynamic = false;
+      bool conflicts_driven = false;
       std::string logging;
 
       const char* help_description = "\
@@ -274,6 +275,7 @@ Options";
 	(HEURISTICS, boost::program_options::value<std::size_t>(&heuristics)->default_value(1), "choose heuristics")
 	(LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
 	(DAEMONIZE, "start dmcsd in the background")
+	(CONFLICTS_DRIVEN, boost::program_options::value<bool>(&conflicts_driven)->default_value(false), "choose using conflicts driven")
 	;
       
       boost::program_options::variables_map vm;        
@@ -645,7 +647,7 @@ Options";
 
       // Store all information into a CommandTypeFactory, which is
       // responsible for creating the command types later
-      CommandTypeFactoryPtr ctf(new CommandTypeFactory(myid, system_size, local_kb, 
+      CommandTypeFactoryPtr ctf(new CommandTypeFactory(myid, system_size, conflicts_driven, local_kb, 
 						       neighbor_list, schematic_bridge_rules, 
 						       bridge_rules, context_info,
 						       mt, sba_count, limit_answers, 

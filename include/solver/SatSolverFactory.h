@@ -41,6 +41,7 @@ class SatSolverFactory
 {
 public:
   SatSolverFactory(bool il,
+		   bool cd,
 		   std::size_t my_id_,
 		   const TheoryPtr& theory_,
 		   //const ProxySignatureByLocalPtr mixed_sig_,
@@ -54,6 +55,7 @@ public:
 		   ConcurrentMessageQueue* srn,
 		   std::size_t p)
     : is_leaf(il),
+      conflicts_driven(cd),
       my_id(my_id_),
       theory(theory_),
       //      mixed_sig(mixed_sig_),
@@ -74,6 +76,7 @@ public:
 
 private:
   bool                           is_leaf;
+  bool                           conflicts_driven;
   std::size_t                    my_id;
   const TheoryPtr                theory;
   const SignaturePtr             local_sig;
@@ -93,7 +96,8 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(is_leaf, my_id, 
+  RelSatSolverPtr relsatsolver(new RelSatSolver(is_leaf, conflicts_driven,
+						my_id, 
 						theory, local_sig, 
 						localV, orig_sigs_size,
 						c2o, system_size, 

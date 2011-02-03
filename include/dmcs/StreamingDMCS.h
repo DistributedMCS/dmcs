@@ -63,7 +63,7 @@ public:
 
   StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, 
 		const SignatureVecPtr& s,
-		VecSizeTPtr& oss,
+		bool cd, VecSizeTPtr& oss,
 		const QueryPlanPtr& query_plan_, 
 		std::size_t buf_count_);
 
@@ -79,15 +79,18 @@ private:
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
 	 std::size_t& port,
-	 ConflictVec* conflicts,
-	 PartialBeliefState* partial_ass,
-	 Decisionlevel* decision,
+	 ConflictVec*& conflicts,
+	 PartialBeliefState*& partial_ass,
+	 Decisionlevel*& decision,
 	 StreamingDMCSNotification::NotificationType& type);
 
   void
   initialize(std::size_t invoker, 
 	     std::size_t pack_size,
-	     std::size_t port);
+	     std::size_t port,
+	     ConflictVec* conflicts,
+	     PartialBeliefState* partial_ass,
+	     Decisionlevel* decision);
 
   void
   start_up(ConflictVec* conflicts,
@@ -95,6 +98,7 @@ private:
 	   Decisionlevel* decision);
 
 private:
+  bool conflicts_driven;
   QueryPlanPtr          query_plan;
   VecSizeTPtr           orig_sigs_size;
   CacheStatsPtr         cacheStats;
