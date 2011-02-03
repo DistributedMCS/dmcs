@@ -280,7 +280,7 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
       decision    = sn->decision;
       type        = sn->type;
 
-      if (!decision->initialized())
+      if ((decision != 0) && (!decision->initialized()))
 	{
 	  std::size_t global_sig_size = std::accumulate(orig_sigs_size->begin(), 
 							orig_sigs_size->end(),

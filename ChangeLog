@@ -1,11 +1,17 @@
 2011-02-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/solver/RelSatSolver.cpp: Do nothing when trail is empty. The
+	outer loop takes care of sending NULL to OUT_MQ.
+
+	* src/dmcs/StreamingDMCS.cpp: Check for NULL pointer.
+
 	* include/dmcs/CommandTypeFactory.h: Add conflicts_driven related stuff.
 	* src/solver/RelSatSolver.cpp: Likewise.
 	* src/network/ThreadFactory.cpp: Likewise.
 	* src/network/JoinThread.cpp: Likewise.
 	* src/dmcsd.cpp: Likewise.
 	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
 	* include/solver/SatSolverFactory.h: Likewise.
 	* include/solver/RelSatSolver.h: Likewise.
 	* include/network/ThreadFactory.h: Likewise.

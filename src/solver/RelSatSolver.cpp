@@ -486,8 +486,8 @@ RelSatSolver::receiveEOF()
 
   if (trail->empty())
     {
-      DMCS_LOG_TRACE(port << ": Empty stack, EOF. Send a NULL pointer to OUT_MQ");
-      mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+      //DMCS_LOG_TRACE(port << ": Empty stack, EOF. Send a NULL pointer to OUT_MQ");
+      //mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
   else
     {
