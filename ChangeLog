@@ -1,3 +1,8 @@
+2011-02-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* examples/run-streaming.sh: Add runner scripts.
+	* examples/run-opt.sh: Likewise.
+
 2011-02-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: Fix output projection.
