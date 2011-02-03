@@ -1,4 +1,6 @@
-2011-02-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+2011-02-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Fix output projection.
 
 	* include/solver/RelSatSolver.h: Add refresh.
 	* src/network/RelSatSolverThread.cpp: Likewise.
