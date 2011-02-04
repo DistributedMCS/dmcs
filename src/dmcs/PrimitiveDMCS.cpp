@@ -130,7 +130,7 @@ PrimitiveDMCS::getBeliefStates(PrimitiveMessage& mess)
 #endif // DMCS_STATS_INFO
 
 #ifdef DEBUG
-    BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
+      //    BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
 #endif // DEBUG
 
     BeliefStateListPtr belief_states(new BeliefStateList);

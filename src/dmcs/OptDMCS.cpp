@@ -149,7 +149,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 #endif // DMCS_STATS_INFO
 
 #ifdef DEBUG
-  BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
+  //  BeliefStatePtr all_masked(new BeliefState(n, maxBeliefSet()));
   //printBeliefStatesNicely(std::cerr, local_belief_states, all_masked, query_plan);
 #endif
 
