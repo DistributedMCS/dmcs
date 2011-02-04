@@ -1,5 +1,14 @@
 2011-02-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/solver/RelSatSolver.cpp: Send new learned conflicts to Router.
+
+	* include/solver/Conflict.h: operator<< for ConflictVec2p.
+
+	* include/network/RouterThread.h: Pass on conflicts to NeighborOut.
+
+	* include/dmcs/UnsatNotification.h: Add UnsatNotification.
+	* include/dmcs/Makefile.am: Likewise.
+
 	* include/generator/LogicVisitor.h: Print out the rules with atom
 	names from signature.
 	* src/generator/staticGen.cpp: Likewise.

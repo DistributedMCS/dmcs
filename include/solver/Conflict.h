@@ -45,6 +45,7 @@ typedef PartialBeliefState Conflict;
 typedef std::vector<Conflict*> ConflictVec;
 typedef boost::shared_ptr<ConflictVec> ConflictVecPtr;
 typedef std::vector<ConflictVecPtr> ConflictVec2;
+typedef std::vector<ConflictVec*> ConflictVec2p;
 typedef boost::shared_ptr<ConflictVec2> ConflictVec2Ptr;
 
 // no operator<< is needed for ConflictVec, ConflictVecPtr,
@@ -74,6 +75,19 @@ cached(Conflict* c, ConflictBufPtr& storage)
     }
   return false;
 }
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const ConflictVec2p& cv)
+{
+  for (ConflictVec2p::const_iterator it = cv.begin(); it != cv.end(); ++it)
+    {
+      os << **it << std::endl;
+    }
+
+  return os;
+}
+
 
 inline std::ostream&
 operator<< (std::ostream& os, const ConflictBuf& cb)

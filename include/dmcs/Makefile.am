@@ -29,4 +29,5 @@ noinst_HEADERS =  \
 		StreamingDMCS.h \
 		StreamingDMCSNotification.h \
 		StreamingForwardMessage.h \
-		StreamingBackwardMessage.h
+		StreamingBackwardMessage.h \
+		UnsatNotification.h

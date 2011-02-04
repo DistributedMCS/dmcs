@@ -31,6 +31,7 @@
 #define ROUTER_THREAD_H
 
 #include "dmcs/ConflictNotification.h"
+#include "dmcs/UnsatNotification.h"
 #include "network/ConcurrentMessageQueueHelper.h"
 
 #include <boost/thread.hpp>
@@ -62,18 +63,18 @@ public:
     while (1)
       {
 	// wait for any conflict from the local solver
-	ConflictNotification* cn = 0;
-	void *ptr         = static_cast<void*>(&cn);
+	UnsatNotification* un = 0;
+	void *ptr         = static_cast<void*>(&un);
 	unsigned int p    = 0;
 	std::size_t recvd = 0;
 
-	DMCS_LOG_TRACE(port << ": Waiting for notification.");
+	DMCS_LOG_TRACE(port << ": Waiting for notification from SAT solver.");
 
-	sat_router_notif->receive(ptr, sizeof(cn), recvd, p);
+	sat_router_notif->receive(ptr, sizeof(un), recvd, p);
 
-	if (ptr && cn)
+	if (ptr && un)
 	  {
-	    if (cn->type == ConflictNotification::SHUTDOWN)
+	    if (un->type == ConflictNotification::SHUTDOWN)
 	      {
 #if 0
 		ConcurrentMessageQueueVec::iterator beg = router_neighbors_notif->begin();
@@ -107,29 +108,41 @@ public:
 	      {
 		// forward request
 
-		const std::size_t noff = cn->val;
-	    
-		DMCS_LOG_TRACE(port << ": Got a notification from local solver. noff = " << noff);
-	    
-		// inform neighbor at noff about the conflict
-		ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[noff];
-		
-		std::size_t p1 = 0;
+		ConflictVec2p* new_conflicts    = un->all_new_conflicts;
+		PartialBeliefState* partial_ass = un->partial_ass;
+		Decisionlevel* decision         = un->decision;
 
-		ConflictNotification* ow_neighbor =
-		  (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), p1);
-		
-		if (ow_neighbor)
+		ConflictVec2p::const_iterator ct = new_conflicts->begin();
+
+		ConcurrentMessageQueueVec::iterator beg = router_neighbors_notif->begin();
+		ConcurrentMessageQueueVec::iterator end = router_neighbors_notif->end();
+
+		for (ConcurrentMessageQueueVec::iterator it = beg; it != end; ++it, ++ct)
 		  {
-		    delete ow_neighbor;
-		    ow_neighbor = 0;
+		    ConflictVec* c_vec = *ct;
+		    ConflictNotification* cn = new ConflictNotification(c_vec, partial_ass, decision);
+		    std::size_t prio = 0;
+
+		    DMCS_LOG_TRACE(port << ": Send restart request to noff = " << std::distance(beg, it) 
+				   << ". Content. conflicts = " << *c_vec 
+				   << ". partial_ass = " << *partial_ass
+				   << ". decision = " << *decision);
+
+		    ConflictNotification* ow_neighbor =
+		      (ConflictNotification*) overwrite_send(it->get(), &cn, sizeof(cn), prio);
+
+		    if (ow_neighbor)
+		      {
+			delete ow_neighbor;
+			ow_neighbor = 0;
+		      }
 		  }
 	      }
 	  }
 	else
 	  {
-	    DMCS_LOG_FATAL(port << ": Got null message: " << ptr << " " << cn);
-	    assert (ptr != 0 && cn != 0);
+	    DMCS_LOG_FATAL(port << ": Got null message: " << ptr << " " << un);
+	    assert (ptr != 0 && un != 0);
 	  }
       }
   }

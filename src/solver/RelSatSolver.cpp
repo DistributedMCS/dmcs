@@ -30,6 +30,7 @@
 #include <boost/thread.hpp>
 
 #include "dmcs/BeliefCombination.h"
+#include "dmcs/UnsatNotification.h"
 #include "network/ConcurrentMessageQueueHelper.h"
 #include "solver/RelSatSolver.h"
 #include "relsat-20070104/RelSatHelper.h"
@@ -541,6 +542,24 @@ void
 RelSatSolver::backtrack()
 {
   collect_learned_clauses(xSATSolver->getLearnedClauses());
+  
+  // pick new learned conflicts from the circular buffer
+  const std::size_t no_nbs = learned_conflicts->size();
+  ConflictVec2p* new_conflicts = new ConflictVec2p(no_nbs);
+  for (std::size_t i = 0; i < no_nbs; ++i)
+    {
+      ConflictVec*& new_conflicts_i_ref              = (*new_conflicts)[i];
+      ConflictBufPtr& learned_conflicts_i_ref        = (*learned_conflicts)[i];
+      ConflictBuf::iterator& new_conflicts_beg_i_ref = (*new_conflicts_beg)[i];
+
+      new_conflicts_i_ref = new ConflictVec;
+
+      for (ConflictBuf::iterator it = new_conflicts_beg_i_ref; it != learned_conflicts_i_ref->end(); ++it)
+	{
+	  new_conflicts_i_ref->push_back(*it);
+	}
+    }
+
   const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
   SignatureByCtx::const_iterator it;
   Decisionlevel* decision;
@@ -612,6 +631,15 @@ RelSatSolver::backtrack()
       // send notification to router. Need to send a bunch of things
       // and cover all neighbors instead of sending to just a single
       // neighbor as before
+      UnsatNotification* mess_router = new UnsatNotification(new_conflicts, partial_ass, decision);
+      UnsatNotification* ow_router = 
+	(UnsatNotification*) overwrite_send(sat_router_notif, &mess_router, sizeof(mess_router), 0);
+
+      if (ow_router)
+	{
+	  delete ow_router;
+	  ow_router = 0;
+	}
       
     } // if (trail->empty())
 }
