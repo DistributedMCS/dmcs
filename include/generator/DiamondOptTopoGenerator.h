@@ -73,6 +73,7 @@ public:
 	  BeliefStatePtr bs_34 = getInterface(lcim, id+1, id+2);
 
 	  update(bs_24, bs_34);
+	  putInterface(lcim, id+1, id+2, bs_24);
 
 	  break;
 	}

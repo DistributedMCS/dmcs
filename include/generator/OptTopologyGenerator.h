@@ -44,8 +44,7 @@ typedef std::map<ContextPair, BeliefStatePtr> LocalInterfaceMap;
 typedef boost::shared_ptr<LocalInterfaceMap> LocalInterfaceMapPtr;
 
 
-inline
-BeliefStatePtr
+inline BeliefStatePtr
 getInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to)
 {
   ContextPair cp(from, to);
@@ -54,6 +53,17 @@ getInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to)
   assert (lcim_it != lcim->end());
 
   return lcim_it->second;
+}
+
+
+inline void
+putInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to, const BeliefStatePtr& bs)
+{
+  ContextPair cp(from, to);
+  LocalInterfaceMap::iterator lcim_it = lcim->find(cp);
+  assert (lcim_it != lcim->end());
+
+  lcim_it->second = bs;
 }
 
 

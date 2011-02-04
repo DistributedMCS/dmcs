@@ -54,8 +54,11 @@ update(BeliefStatePtr& s, const BeliefStatePtr& t)
 
   for (; s_it != s->end(); ++s_it, ++t_it)
     {
-      assert (s_it->size() > 0 && t_it->size() > 0); // just to be sure
-      *s_it |= *t_it;
+      //assert (s_it->size() > 0 && t_it->size() > 0); // just to be sure
+      if (t_it->size() > 0)
+	{
+	  *s_it |= *t_it;
+	}
     }
 }
 

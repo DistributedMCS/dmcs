@@ -58,13 +58,20 @@ ContextGenerator::generate()
       local_kb->clear();
       bridge_rules->clear();
 
+      DMCS_LOG_TRACE("Generate local KB of context i = " << i);
+
       generate_local_kb();
+
+      DMCS_LOG_TRACE("Generate BR of context i = " << i);
       
       NeighborVecPtr neighbors = (*orig_topo)[i-1];
       if (neighbors->size() > 0)
 	{
 	  generate_bridge_rule_list(i);
 	}
+
+      DMCS_LOG_TRACE("Generate BR of context i = " << i << ". DONE");
+
 
       write_local_kb(i);
       write_bridge_rules(i);
@@ -95,8 +102,12 @@ ContextGenerator::generate()
   if (topology_type != PURE_RING_TOPOLOGY && topology_type != RING_EDGE_TOPOLOGY
       && topology_type != MULTIPLE_RING_TOPOLOGY)
     {
-      (*minV)[0] = maxBeliefSet();
+      SignaturePtr& bs = (*sigmas)[0];
+      std::size_t range = bs->size();
+      (*minV)[0] = maxBeliefSet(range);
     }
+
+  DMCS_LOG_TRACE("DONE");
 }
 
 

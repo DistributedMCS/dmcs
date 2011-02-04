@@ -1,3 +1,22 @@
+2011-02-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/generator/staticGen.cpp: Comment out generate dlv command
+	lines for now.
+
+	* src/dmcs/OptDMCS.cpp: Comment out all_masked for now.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+
+	* src/dmcs/BeliefCombination.cpp: Move assertion to if condition.
+
+	* include/mcs/BeliefState.h: Generate maxBeliefSet wrt some
+	range. Convert BeliefState output format to be compatible with
+	operator>>.
+	* src/generator/ContextGenerator.cpp: Likewise.
+
+	* include/generator/OptTopologyGenerator.h: Add putInterface.
+
+	* include/generator/DiamondOptTopoGenerator.h: Fix opt-diamond generator.
+
 2011-02-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* examples/run-streaming.sh: Add runner scripts.

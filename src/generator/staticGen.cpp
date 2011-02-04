@@ -283,8 +283,7 @@ init()
   setup_topos();
 
   // initialize minV as we now know the system size
-  BeliefStatePtr someV(new BeliefState(no_contexts, BeliefSet()));
-  minV = someV;
+  minV = BeliefStatePtr(new BeliefState(no_contexts, BeliefSet()));
 
   // now set all epsilon bits to 1
   for (std::size_t i = 0; i < no_contexts; ++i)
@@ -376,14 +375,14 @@ generate_contexts()
   // interface in the optimal topology.
 
 #ifdef DEBUG
-  DMCS_LOG_DEBUG("minV: " << minV);
-  DMCS_LOG_DEBUG("Original local interface:");
+  DMCS_LOG_TRACE("minV: " << *minV);
+  DMCS_LOG_TRACE("Original local interface:");
 
   for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
     {
       ContextPair cp = it->first;
 
-      DMCS_LOG_DEBUG("(" << cp.first << ", " << cp.second << ") --> " << it->second);
+      DMCS_LOG_TRACE("(" << cp.first << ", " << cp.second << ") --> " << it->second);
     }
 #endif
 }
@@ -890,8 +889,8 @@ main(int argc, char* argv[])
   DMCS_LOG_TRACE("print_command_lines");
   print_command_lines();
 
-  DMCS_LOG_TRACE("print_dlv_command_lines");
-  print_dlv_command_lines();
+  //DMCS_LOG_TRACE("print_dlv_command_lines");
+  //print_dlv_command_lines();
 
   // binary tree topology is a special case, orig_qp can be reused to
   // print opt_qp. Hence, we just need to print without any further
@@ -900,7 +899,7 @@ main(int argc, char* argv[])
     {
       print_query_plan(orig_qp, prefix + OPT_EXT);
       print_opt_command_lines();
-      print_opt_dlv_command_lines();
+      //print_opt_dlv_command_lines();
     }
 
   // only for some fixed topologies where optimization is possible
@@ -911,7 +910,7 @@ main(int argc, char* argv[])
       generate_query_plan(opt_qp, opt_lcim);
       print_query_plan(opt_qp,  prefix + OPT_EXT);
       print_opt_command_lines();
-      print_opt_dlv_command_lines();
+      //print_opt_dlv_command_lines();
     }
 
   return 0;

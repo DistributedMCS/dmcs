@@ -103,10 +103,10 @@ setBeliefSet(BeliefSet& b, std::size_t pos, bool val = true)
  * @return BeliefSet with every bit set to 1
  */
 inline BeliefSet
-maxBeliefSet()
+maxBeliefSet(std::size_t right)
 {
   BeliefSet b;
-  b.set();
+  b.set_range(0, right);
   return b;
 }
 
@@ -232,11 +232,11 @@ operator<< (std::ostream& os, const dmcs::BeliefSet& bv)
   std::size_t count = bv.count();
   if (count == 0)
     {
-      os << "[ ]";
+      os << "{}";
       return os;
     }
 
-  os << "[";
+  os << "{";
   std::size_t bit = bv.get_first();
   do
     {
@@ -244,12 +244,12 @@ operator<< (std::ostream& os, const dmcs::BeliefSet& bv)
       bit = bv.get_next(bit);
       if (bit)
 	{
-	  os << ", ";
+	  os << " ";
 	}
     }
   while (bit);
 
-  return os << "]";
+  return os << "}";
 }
 
 
