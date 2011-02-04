@@ -1,5 +1,14 @@
 2011-02-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/generator/LogicVisitor.h: Print out the rules with atom
+	names from signature.
+	* src/generator/staticGen.cpp: Likewise.
+	* src/generator/dmcsGen.cpp: Likewise.
+	* src/generator/LogicVisitor.cpp: Likewise.
+	* src/generator/ContextGenerator.cpp: Likewise.
+	* include/mcs/Signature.h: Likewise.
+	* include/generator/dmcsGen.h: Likewise.
+
 	* src/generator/staticGen.cpp: Comment out generate dlv command
 	lines for now.
 

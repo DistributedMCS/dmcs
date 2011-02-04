@@ -31,25 +31,34 @@
 #include <sstream>
 
 #include "generator/dmcsGen.h"
+#include "dmcs/Log.h"
 
 namespace dmcs { namespace generator {
 
 void
 genSignatures(SignatureVecPtr sigmas, std::size_t no_contexts, std::size_t no_atoms)
 {
-  std::stringstream out;
+  std::stringstream ctx_id;
+  std::stringstream atm_id;
   std::string atom_name;
 
   for (std::size_t i = 1; i <= no_contexts; ++i)
     {
-      out.str("");
-      out << i;
+      ctx_id.str("");
+      ctx_id << i;
       SignaturePtr s(new Signature);
 
       // create local Signature for context i
       for (std::size_t j = 0; j < no_atoms; ++j)
 	{
-	  atom_name = (char)(j + 'a') + out.str();
+	  atm_id.str("");
+	  atm_id << j+1;
+
+	  // atom name of the form: context_contextid, then atom_atomid
+	  // ciaj for short
+	  // e.g., c1a2
+	  atom_name = "c" + ctx_id.str() + "a" + atm_id.str();
+
 	  s->insert(Symbol(atom_name, i, j+1, j+1));
 	}
       sigmas->push_back(s);
@@ -62,7 +71,8 @@ void
 genInterface(InterfaceVecPtr context_interfaces, 
 	     std::size_t no_contexts, 
 	     std::size_t no_atoms,
-	     std::size_t no_interface_atoms)
+	     std::size_t no_interface_atoms,
+	     SignatureVecPtr sigmas)
 {
   for (std::size_t i = 1; i <= no_contexts; ++i)
     {
@@ -83,19 +93,19 @@ genInterface(InterfaceVecPtr context_interfaces,
       context_interfaces->push_back(c_i_interface);
     }
 
-#ifdef DEBUG
-  std::cerr << "Interface of contexts:" << std::endl;
+  //#ifdef DEBUG
+  DMCS_LOG_TRACE("Interface of contexts:");
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
-      std::cerr << "C_" << i+1 << ": ";
+      DMCS_LOG_TRACE("C_" << i+1 << ": ");
       Interface ci = (*context_interfaces)[i];
+      
       for (std::size_t j = 0; j < no_interface_atoms; ++j)
 	{
-	  std::cerr << ci[j] << "=" << (char)(ci[j] +'a' - 1) << " ";
+	  DMCS_LOG_TRACE(atom_name(sigmas, i+1, ci[j]));
 	}
-      std::cerr << std::endl;
     }
-#endif // DEBUG  
+  //#endif // DEBUG  
 
 }
 

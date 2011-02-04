@@ -52,16 +52,16 @@ LogicVisitor::getStream()
 }
 
 void
-LogicVisitor::visitRules(const ContextPtr& context)
+LogicVisitor::visitRules(const ContextPtr& context, const SignatureVecPtr& sigmas)
 {
   for (Rules::const_iterator it = context->getLocalKB()->begin(); it != context->getLocalKB()->end(); ++it)
     {
-      visitRule(*it,context->getContextID());
+      visitRule(*it,context->getContextID(), sigmas);
     }
 }
 
 void
-LogicVisitor::visitRule(const RulePtr& t,const std::size_t contextId )
+LogicVisitor::visitRule(const RulePtr& t, const std::size_t contextId, const SignatureVecPtr& sigmas)
 {
   bool multiple = false;
 
@@ -72,7 +72,8 @@ LogicVisitor::visitRule(const RulePtr& t,const std::size_t contextId )
 	{
 	  stream << "v ";
 	}
-      stream << (char)((*it) + 'a' -1) << "" << contextId << " ";
+      stream << atom_name(sigmas, contextId, *it);
+
       multiple = true;
     }  
 
@@ -86,7 +87,7 @@ LogicVisitor::visitRule(const RulePtr& t,const std::size_t contextId )
 	{
 	  stream << ", ";
 	}
-      stream << (char)((*it) + 'a' -1) << "" << contextId ;
+      stream << atom_name(sigmas, contextId, *it);
       multiple = true;      
     }
   
@@ -97,7 +98,7 @@ LogicVisitor::visitRule(const RulePtr& t,const std::size_t contextId )
 	{
 	  stream << ", ";
 	}
-      stream << "not " << (char)((*it) + 'a' - 1)<< "" << contextId;
+      stream << "not " << atom_name(sigmas, contextId, *it);
       multiple = true;     
     }
   stream << "." << std::endl;
@@ -105,17 +106,17 @@ LogicVisitor::visitRule(const RulePtr& t,const std::size_t contextId )
 
 
 void
-LogicVisitor::visitBridgeRules(const ContextPtr& context)
+LogicVisitor::visitBridgeRules(const ContextPtr& context, const SignatureVecPtr& sigmas)
 {
   for (BridgeRules::const_iterator it = context->getBridgeRules()->begin(); it != context->getBridgeRules()->end(); ++it)
     {
-      visitBridgeRule(*it, context->getContextID());
+      visitBridgeRule(*it, context->getContextID(), sigmas);
     }
 }
 
 
 void
-LogicVisitor::visitBridgeRule(const BridgeRulePtr& t, const std::size_t contextId)
+LogicVisitor::visitBridgeRule(const BridgeRulePtr& t, const std::size_t contextId, const SignatureVecPtr& sigmas)
 {
   bool multiple = false;
 
@@ -126,7 +127,7 @@ LogicVisitor::visitBridgeRule(const BridgeRulePtr& t, const std::size_t contextI
 	{
 	  stream << "v ";
 	}
-      stream << (char)((*it)+96)<< ""<< contextId << " ";
+      stream << atom_name(sigmas, contextId, *it);
       multiple = true;
     }
 
@@ -140,7 +141,7 @@ LogicVisitor::visitBridgeRule(const BridgeRulePtr& t, const std::size_t contextI
 	{
 	  stream << ", ";
 	}
-      printPositiveBridgeRule(stream,*it);
+      printPositiveBridgeRule(stream, *it, sigmas);
       //      stream << "(" << it->first << ":" << (char)(it->second + 'a' - 1)<< "" << it->first << ")";
       multiple = true;      
     }
@@ -152,7 +153,7 @@ LogicVisitor::visitBridgeRule(const BridgeRulePtr& t, const std::size_t contextI
 	{
 	  stream << ", ";
 	}
-      printNegativeBridgeRule(stream,*it);
+      printNegativeBridgeRule(stream, *it, sigmas);
       //      stream << "not (" << it->first << ":" << (char)(it->second + 'a' - 1)<< "" << it->first << ")";
       multiple = true;     
     }
@@ -161,13 +162,13 @@ LogicVisitor::visitBridgeRule(const BridgeRulePtr& t, const std::size_t contextI
 }
 
 void
-LogicVisitor::printPositiveBridgeRule(std::ostream& os,const BridgeAtom& b)
+LogicVisitor::printPositiveBridgeRule(std::ostream& os,const BridgeAtom& b, const SignatureVecPtr& sigmas)
 {
-  os << "(" << b.first << ":" << (char)(b.second + 'a' - 1)<< "" << b.first << ")";
+  os << "(" << b.first << ":" << atom_name(sigmas, b.first, b.second) << ")";
 }
 
 void
-LogicVisitor::printNegativeBridgeRule(std::ostream& os,const BridgeAtom& b)
+LogicVisitor::printNegativeBridgeRule(std::ostream& os,const BridgeAtom& b, const SignatureVecPtr& sigmas)
 {
-  os << "not (" << b.first << ":" << (char)(b.second + 'a' - 1)<< "" << b.first << ")";
+  os << "not (" << b.first << ":" << atom_name(sigmas, b.first, b.second) << ")";
 }

@@ -279,7 +279,7 @@ void
 init()
 {
   genSignatures(sigmas, no_contexts, no_atoms);
-  genInterface(context_interfaces, no_contexts, no_atoms, no_interface_atoms);
+  genInterface(context_interfaces, no_contexts, no_atoms, no_interface_atoms, sigmas);
   setup_topos();
 
   // initialize minV as we now know the system size

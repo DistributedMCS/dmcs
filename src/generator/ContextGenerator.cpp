@@ -297,7 +297,7 @@ ContextGenerator::write_local_kb(std::size_t id)
   LogicVisitor lv(oss);
   for (Rules::const_iterator it = local_kb->begin(); it != local_kb->end(); ++it)
     {
-      lv.visitRule(*it, id);
+      lv.visitRule(*it, id, sigmas);
     }
   file_lp << oss.str();
   file_lp.close();
@@ -320,7 +320,7 @@ ContextGenerator::write_bridge_rules(std::size_t id)
   LogicVisitor lv(oss);
   for (BridgeRules::const_iterator it = bridge_rules->begin(); it != bridge_rules->end(); ++it)
     {
-      lv.visitBridgeRule(*it, id);
+      lv.visitBridgeRule(*it, id, sigmas);
     }
   file_br << oss.str();
   file_br.close();  

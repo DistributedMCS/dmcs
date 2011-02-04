@@ -55,22 +55,22 @@ public:
   getStream();
 
   void 
-  visitRules(const ContextPtr& context);
+  visitRules(const ContextPtr& context, const SignatureVecPtr& sigmas);
 
   void 
-  visitBridgeRules(const ContextPtr& context);
+  visitBridgeRules(const ContextPtr& context, const SignatureVecPtr& sigmas);
 
   void
-  visitRule(const RulePtr& rule, const std::size_t contextId);
+  visitRule(const RulePtr& rule, const std::size_t contextId, const SignatureVecPtr& sigmas);
 
   void
-  visitBridgeRule(const BridgeRulePtr& bridgeRule, const std::size_t contextId);
+  visitBridgeRule(const BridgeRulePtr& bridgeRule, const std::size_t contextId, const SignatureVecPtr& sigmas);
 
   virtual void
-  printPositiveBridgeRule(std::ostream& os,const BridgeAtom& b);
+  printPositiveBridgeRule(std::ostream& os,const BridgeAtom& b, const SignatureVecPtr& sigmas);
   
   virtual void
-  printNegativeBridgeRule(std::ostream& os,const BridgeAtom& b);
+  printNegativeBridgeRule(std::ostream& os,const BridgeAtom& b, const SignatureVecPtr& sigmas);
 
 };
 

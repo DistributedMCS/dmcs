@@ -42,7 +42,8 @@ genSignatures(SignatureVecPtr sigmas, std::size_t no_contexts, std::size_t no_at
 
 void
 genInterface(InterfaceVecPtr context_interfaces, std::size_t no_contexts, 
-	     std::size_t no_atoms, std::size_t no_interface_atoms);
+	     std::size_t no_atoms, std::size_t no_interface_atoms,
+	     SignatureVecPtr sigmas);
 
   } // namespace generator
 } // dmcs

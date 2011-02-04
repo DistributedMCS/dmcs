@@ -233,6 +233,19 @@ typedef boost::multi_index::index<Signature, Tag::SymCtx>::type SignatureBySymCt
 /// query Signature by local ID
 typedef boost::multi_index::index<Signature, Tag::Local>::type SignatureByLocal;
 
+inline std::string
+atom_name(const SignatureVecPtr& sigmas, std::size_t ctx_id, std::size_t atm_id)
+{
+  SignaturePtr sig = (*sigmas)[ctx_id - 1];
+  const SignatureByLocal& local_sig = boost::get<Tag::Local>(*sig);
+  SignatureByLocal::const_iterator loc_it = local_sig.find(atm_id);
+
+  assert (loc_it != local_sig.end());
+
+  return loc_it->sym;
+}
+
+
 } // namespace dmcs
 
 #endif // _SIGNATURE_H
