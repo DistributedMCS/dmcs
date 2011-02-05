@@ -1,3 +1,13 @@
+2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Fix flipping.
+
+	* include/solver/RelSatSolver.h: Directly pass learned_clauses to RelSatSolver.
+
+	* include/solver/ChoicePoint.h: local_id --> orig_id
+
+	* include/mcs/BeliefState.h: Improve output info.
+
 2011-02-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: Send new learned conflicts to Router.

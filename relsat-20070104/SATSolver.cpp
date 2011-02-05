@@ -88,21 +88,21 @@ relsat_enum SATSolver::eSolve()
   _iBranchSelections = _iVariablesLabeled = _iContradictions = 0;
   if (!_bInitialize()) {
     eReturn = UNSAT;
-    wrapper->receiveUNSAT();
+    wrapper->receiveUNSAT(_xLearnedClauses);
   }
   else {
     // Here we do an initial unit propagation to handle base unit clauses.
     if (_bUnitPropagate()) {
       eReturn = UNSAT;
       
-      //DMCS_LOG_TRACE(" UNSAT after UnitPropagation. Now call bBackup() to learn some clause.");
+      //std::cerr <<" UNSAT after UnitPropagation. Now call bBackup() to learn some clause." << std::endl;
 
       _bBackup();
 
-      //DMCS_LOG_TRACE(" Number of learned clauses = " << _xLearnedClauses.iClauseCount());
-      //DMCS_LOG_TRACE(" Learned Clauses: " << _xLearnedClauses);
+      //std::cerr <<" Number of learned clauses = " << _xLearnedClauses.iClauseCount() << std::endl;
+      //std::cerr << " Learned Clauses: " << _xLearnedClauses << std::endl;
 
-      wrapper->receiveUNSAT();
+      wrapper->receiveUNSAT(_xLearnedClauses);
     }
     else {
       //DMCS_LOG_TRACE(" _bUnitPropagate and no UNSAT found");
@@ -126,10 +126,10 @@ relsat_enum SATSolver::eSolve()
       else {
 	eReturn = UNSAT;
 
-	//DMCS_LOG_TRACE("UNSAT after Loop.");
-	//DMCS_LOG_TRACE("Number of learned clauses = " << _xLearnedClauses.iClauseCount());
-	//DMCS_LOG_TRACE("Learned Clauses: " << _xLearnedClauses);
-	wrapper->receiveUNSAT();
+	//std::cerr <<"UNSAT after Loop." << std::endl;
+      //std::cerr <<"Number of learned clauses = " << _xLearnedClauses.iClauseCount() << std::endl;
+      //std::cerr <<"Learned Clauses: " << _xLearnedClauses << std::endl;
+	wrapper->receiveUNSAT(_xLearnedClauses);
       }
     }
   }
@@ -268,7 +268,7 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
 
       if (_bUnitPropagate()) {
 
-	//DMCS_LOG_TRACE(" Now call _bBackup()");
+	//std::cerr <<" Now call _bBackup()");
 
 	if (_bBackup()) {
 	  return bReturnValue;
@@ -1175,6 +1175,7 @@ inline Clause* SATSolver::_pLearn()
 {
   if (_pPositiveBackup->iCount() + _pNegativeBackup->iCount() <= _iLearnOrder) {
     Clause* pLearn = new Clause(*_pPositiveBackup, *_pNegativeBackup);
+    //    DMCS_LOG_TRACE("Add pLearn = " << *pLearn);
     _xLearnedClauses.vAddClause(pLearn);
     int i = _iCurrentVariable-1;
     boolean bFoundFirst = 0;

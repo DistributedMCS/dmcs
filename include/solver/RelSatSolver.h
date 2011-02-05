@@ -83,13 +83,13 @@ public:
   collect_learned_clauses(ClauseList& learned_clauses);
 
   void
-  backtrack();
+  backtrack(ClauseList& learned_clauses);
 
   void
   receiveEOF();
 
   void
-  receiveUNSAT();
+  receiveUNSAT(ClauseList& learned_clauses);
 
   void
   receiveSolution(DomainValue* _aAssignment, int _iVariableCount);

@@ -757,7 +757,7 @@ struct Decisionlevel
 inline std::ostream&
 operator<< (std::ostream& os, const Decisionlevel& decision)
 {
-  os << "{ ";
+  os << "{ (" << decision.declev_at_dl->size() << ") ";
 
   VecSizeT::const_iterator it = decision.declev_dl_at->begin();
   std::size_t i = 1;

@@ -386,9 +386,14 @@ RelSatSolver::collect_learned_clauses(ClauseList& sat_learned_clauses)
 	}
     }
 
+  DMCS_LOG_TRACE("new_conflicts_beg initialized");
+
   for (int i = 0; i < sat_learned_clauses.iClauseCount(); ++i)
     {
+      DMCS_LOG_TRACE("i = " << i);
       ::Clause* c = sat_learned_clauses.pClause(i);
+      DMCS_LOG_TRACE("Picked c from sat_learned_clauses");
+
       Conflict* conflict = new Conflict(system_size, PartialBeliefSet());
       PartialBeliefSet* neighbor_ref = 0;
 
@@ -539,39 +544,50 @@ RelSatSolver::receiveEOF()
 
 
 void
-RelSatSolver::backtrack()
+RelSatSolver::backtrack(ClauseList& learned_clauses)
 {
-  collect_learned_clauses(xSATSolver->getLearnedClauses());
+  //collect_learned_clauses(xSATSolver->getLearnedClauses());
+  collect_learned_clauses(learned_clauses);
+
+  DMCS_LOG_TRACE(port << ": New clauses learned");
   
   // pick new learned conflicts from the circular buffer
   const std::size_t no_nbs = learned_conflicts->size();
-  ConflictVec2p* new_conflicts = new ConflictVec2p(no_nbs);
+
+  ///@todo: who can clean up new_conflicts?
+  ConflictVec2p* new_conflicts = new ConflictVec2p;
+
+  DMCS_LOG_TRACE(port << ": New learned conflicts: ");
+
   for (std::size_t i = 0; i < no_nbs; ++i)
     {
+      ConflictVec* tmp_cv = new ConflictVec;
+      new_conflicts->push_back(tmp_cv);
+
       ConflictVec*& new_conflicts_i_ref              = (*new_conflicts)[i];
+
       ConflictBufPtr& learned_conflicts_i_ref        = (*learned_conflicts)[i];
       ConflictBuf::iterator& new_conflicts_beg_i_ref = (*new_conflicts_beg)[i];
-
-      new_conflicts_i_ref = new ConflictVec;
 
       for (ConflictBuf::iterator it = new_conflicts_beg_i_ref; it != learned_conflicts_i_ref->end(); ++it)
 	{
 	  new_conflicts_i_ref->push_back(*it);
 	}
+      DMCS_LOG_TRACE(port << ": i = " << i << ". new conflicts = " << *new_conflicts_i_ref);
     }
 
   const SignatureByCtx& local_sig = boost::get<Tag::Ctx>(*sig);
   SignatureByCtx::const_iterator it;
   Decisionlevel* decision;
   PartialBeliefState* interface_impossible;
-  PartialBeliefState* partial_ass;
+  PartialBeliefState* partial_ass = new PartialBeliefState(*parent_ass);
   
-  *partial_ass = *parent_ass;
+  //  *partial_ass = *parent_ass;
   
   if (trail->empty())
     {
-      *decision = *parent_decision;
-      *interface_impossible = *input;
+      decision = new Decisionlevel(*parent_decision);
+      interface_impossible = new PartialBeliefState(*input);
     } // if (trail->empty())
   else
     {
@@ -579,8 +595,12 @@ RelSatSolver::backtrack()
       decision = cp->decision; // parent_decision is included
       interface_impossible = cp->input;
     } // if (trail->empty())
+
+  DMCS_LOG_TRACE(port << ": Got parent_ass = " << *partial_ass << ", and parent_decision = " << *decision);
   
   it = findFirstUndecided(my_id, local_sig, decision, orig_sigs_size);
+
+  DMCS_LOG_TRACE(port << ": Got first undecided atom it = " << it->sym);
   
   if (it == local_sig.end())
     {
@@ -609,21 +629,25 @@ RelSatSolver::backtrack()
       // There is an atom to flip. Set the opposite value in input
       PartialBeliefSet& input_pbs = (*interface_impossible)[it->ctxId - 1];
       PartialBeliefSet& partial_ass_pbs = (*partial_ass)[it->ctxId - 1];
+
+      DMCS_LOG_TRACE("interface_impossible = "<< *interface_impossible);
       
-      PartialBeliefSet::TruthVal val = testBeliefSet(input_pbs, it->localId);
+      PartialBeliefSet::TruthVal val = testBeliefSet(input_pbs, it->origId);
       assert (val != PartialBeliefSet::DMCS_UNDEF);
       
       if (val == PartialBeliefSet::DMCS_TRUE)
 	{
-	  setBeliefSet(partial_ass_pbs, it->localId, PartialBeliefSet::DMCS_FALSE);
+	  setBeliefSet(partial_ass_pbs, it->origId, PartialBeliefSet::DMCS_FALSE);
 	}
       else
 	{
-	  setBeliefSet(partial_ass_pbs, it->localId);
+	  setBeliefSet(partial_ass_pbs, it->origId);
 	}
       
       const std::size_t gid = global_id(it, orig_sigs_size);
       decision->setDecisionlevel(gid);
+
+      DMCS_LOG_TRACE(port << ": Flip atom = " << *it << ". global_id = " << gid);
       
       ChoicePointPtr cp(new ChoicePoint(input, decision));
       trail->push(cp);
@@ -632,6 +656,9 @@ RelSatSolver::backtrack()
       // and cover all neighbors instead of sending to just a single
       // neighbor as before
       UnsatNotification* mess_router = new UnsatNotification(new_conflicts, partial_ass, decision);
+
+      DMCS_LOG_TRACE(port << ": Send to Router: " << *mess_router);
+
       UnsatNotification* ow_router = 
 	(UnsatNotification*) overwrite_send(sat_router_notif, &mess_router, sizeof(mess_router), 0);
 
@@ -646,7 +673,7 @@ RelSatSolver::backtrack()
 
 
 void
-RelSatSolver::receiveUNSAT()
+RelSatSolver::receiveUNSAT(ClauseList& learned_clauses)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -659,7 +686,8 @@ RelSatSolver::receiveUNSAT()
     {
       if (conflicts_driven)
 	{
-	  backtrack();
+	  DMCS_LOG_TRACE(port << ": In conflicts driven mode. Will now backtrack.");
+	  backtrack(learned_clauses);
 	}
     }
 }
@@ -678,10 +706,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   else
     {
       bs = new PartialBeliefState(*input);
-      //DMCS_LOG_DEBUG("input: " << *input);
     }
-
-  //  DMCS_LOG_TRACE(port << ": bs:    " << *bs);
 
   // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
   PartialBeliefSet& belief = (*bs)[my_id-1];

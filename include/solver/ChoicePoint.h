@@ -29,6 +29,7 @@
 
 #include <numeric>
 
+#include "dmcs/Log.h"
 #include "mcs/BeliefState.h"
 
 #include <stack>
@@ -72,9 +73,11 @@ global_id(SignatureByCtx::const_iterator& it, const VecSizeTPtr& orig_sigs_size)
 
   std::size_t count = std::accumulate(orig_sigs_size->begin(), jt, 0);
   
-  const std::size_t local_id = it->localId;
+  const std::size_t orig_id = it->origId;
 
-  return count + local_id;
+  DMCS_LOG_TRACE("ctx_id = " << ctx_id << ", count = " << count << ", orig_id = " << orig_id);
+
+  return count + orig_id;
 }
 
 /// used when receiving EOF
