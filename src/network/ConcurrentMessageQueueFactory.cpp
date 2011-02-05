@@ -145,7 +145,7 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 1 (JOIN_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
 
-  mq = createMessageQueue(uid, no_nbs, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelDecisionlevel));
+  mq = createMessageQueue(uid, no_nbs, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelSession));
   md->registerMQ(mq, JOIN_OUT_MQ);
 
   // create message queue 2 (JOIN_IN_MQ)
@@ -190,7 +190,7 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 1 (JOIN_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
   
-  mq = createMessageQueue(uid, 0, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelDecisionlevel));
+  mq = createMessageQueue(uid, 0, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelSession));
   md->registerMQ(mq, JOIN_OUT_MQ);
 
   return md;

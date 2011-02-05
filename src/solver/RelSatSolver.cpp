@@ -147,7 +147,11 @@ RelSatSolver::prepare_input()
 
   DMCS_LOG_TRACE(port << ": Waiting at JOIN_OUT_MQ for the next input!");
 
-  input = mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
+  struct MessagingGatewayBC::ModelSession ms = 
+    mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
+
+  input = ms.m;
+  std::size_t sid = ms.sid; ///@todo FIXME
 
   if (input == 0)
     {
@@ -332,7 +336,7 @@ RelSatSolver::solve()
 		{
 		  DMCS_LOG_TRACE(port << ": Got NULL input from JOIN_OUT_MQ");
 		  // send a NULL model to OUT_MQ to inform OutputThread
-		  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
+		  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); ///@todo FIXME
 		  break;
 		}
 	      DMCS_LOG_TRACE(port << ": A fresh solving. input = " << *input);
@@ -505,6 +509,7 @@ RelSatSolver::receiveEOF()
 
   if (trail->empty())
     {
+      ///@todo WTF?x
       //DMCS_LOG_TRACE(port << ": Empty stack, EOF. Send a NULL pointer to OUT_MQ");
       //mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
@@ -527,7 +532,7 @@ RelSatSolver::receiveEOF()
       if (next_flip == 0)
 	{
 	  DMCS_LOG_TRACE(port << ": Out of every thing. Send a NULL pointer to OUT_MQ");
-	  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+	  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0); ///@todo FIXME
 	}
       else
 	{
@@ -613,7 +618,7 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
   if (it == local_sig.end())
     {
       DMCS_LOG_TRACE(port << ": The parents decided all of my bridge atoms and I am still UNSAT. Send a NULL pointer to OUT_MQ");
-      mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0); ///@todo FIXME
     }
   else
     {
@@ -691,7 +696,7 @@ RelSatSolver::receiveUNSAT(ClauseList& learned_clauses)
   if (is_leaf)
     {
       DMCS_LOG_TRACE(port << ": Send a NULL pointer to OUT_MQ");
-      mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0); ///@todo FIXME
     }
   else
     {
@@ -759,7 +764,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   // attach parent_session_id to the output models
 
   // now put this PartialBeliefState to the SatOutputMessageQueue
-  mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
+  mg->sendModel(bs, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); ///@todo FIXME
 
   //DMCS_LOG_TRACE(port << ": Solution sent: " << *bs);
 }

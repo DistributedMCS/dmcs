@@ -84,7 +84,11 @@ JoinThread::import_belief_states(std::size_t noff,
 
       //DMCS_LOG_TRACE(port << ": Read up to " << peq_cnt << " belief states");
 
-      PartialBeliefState* bs = mg->recvModel(offset, prio, timeout);
+      struct MessagingGatewayBC::ModelSession ms =
+	mg->recvModel(offset, prio, timeout);
+      PartialBeliefState* bs = ms.m;
+      std::size_t sid = ms.sid; ///@todo FIXME
+
       if (bs == 0)
 	{
 	  // End of Package. Otherwise, the neighbor sent me some crap.
@@ -173,7 +177,7 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
 
   // Joining succeeded. Now send this input to SAT solver via JOIN_OUT_MQ
   // be careful that we are blocked here. Use timeout sending instead?
-  mg->sendModel(result, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+  mg->sendModel(result, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0); ///@todo FIXME
 
   return 1;
 }
@@ -363,7 +367,7 @@ JoinThread::operator()(std::size_t nbs,
 	      // returning models.
 
 	      DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0. Send a NULL model to JOIN_OUT_MQ");
-	      mg->sendModel(0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+	      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0); ///@todo FIXME
 	    }
 	  else
 	    {
@@ -386,7 +390,7 @@ JoinThread::operator()(std::size_t nbs,
 		  pack_full.clear();
 
 		  DMCS_LOG_TRACE(port << ": Send a NULL model to JOIN_OUT_MQ");
-		  mg->sendModel(0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+		  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0); ///@todo FIXME
 		}
 	      else
 		{

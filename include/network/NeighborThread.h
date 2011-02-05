@@ -230,7 +230,7 @@ private:
 	  {
 	    // no message to read, inform the Joiner with (ctx_offset, 0)
 	    assert (header->find(HEADER_EOF) != std::string::npos);
-	    mg->sendJoinIn(0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+	    mg->sendJoinIn(0, 0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0); ///@todo FIXME
 
 	    boost::shared_ptr<std::string> header(new std::string);
 	    
@@ -273,7 +273,7 @@ private:
 
 	// notify the joiner by putting a JoinMess into JoinMessageQueue
 	std::size_t bsv_size = bsv->size();
-	mg->sendJoinIn(bsv_size, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+	mg->sendJoinIn(bsv_size, 0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0); ///@todo FIXME
 	
 	for (PartialBeliefStateVec::const_iterator it = bsv->begin();
 	     it != bsv->end();
@@ -288,7 +288,7 @@ private:
 	      {
 		DMCS_LOG_TRACE(port << ": Sending model: NULL");
 	      }
-	    mg->sendModel(bs, noff, offset, 0);
+	    mg->sendModel(bs, 0, noff, offset, 0); ///@todo FIXME
 	  }
 	
 	boost::shared_ptr<std::string> header(new std::string);

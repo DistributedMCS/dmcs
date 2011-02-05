@@ -39,8 +39,8 @@
 
 namespace dmcs {
 
-  OutputThread::OutputThread(std::size_t i, std::size_t p)
-    : invoker(i), port(p)
+OutputThread::OutputThread(std::size_t i, std::size_t p)
+  : invoker(i), port(p)
 { }
 
 
@@ -204,7 +204,11 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       
       std::size_t prio       = 0;
       int timeout            = 200; // milisecs
-      PartialBeliefState* bs = mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+
+      struct MessagingGatewayBC::ModelSession ms =
+	mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+      PartialBeliefState* bs = ms.m;
+      std::size_t sid = ms.sid; ///@todo FIXME
       
       //DMCS_LOG_TRACE(port << ":  Check result from MQ");
       if (bs == 0) // Ups, a NULL pointer

@@ -45,6 +45,8 @@ namespace dmcs {
   {
   public:
 
+    ///@todo cleanup
+#if 0
     /**
      * Used to announce that model @a m has a decisionlevel @a d.
      */
@@ -64,23 +66,36 @@ namespace dmcs {
       MODEL* m;
       CONFLICT* c;
     };
+#endif//0
 
 
     /** 
-     * Used to announce that context @a ctx_id has sent @a 
-     * partial equilibria peq.
+     * Used to announce that model @a m has been computed
+     * w.r.t. session @a sid.
+     */
+    struct ModelSession
+    {
+      MODEL* m;
+      std::size_t sid;
+    };
+
+    /** 
+     * Used to announce that context @a ctx_id has sent @a peq_cnt
+     * partial equilibria for session @a sid.
      */
     struct JoinIn
     {
       std::size_t ctx_offset;
       std::size_t peq_cnt;
+      std::size_t sid;
     };
 
 
     /** 
-     * Send @a m originating from @a from to @a to with priority @a prio. May block.
+     * Send @a m w.r.t. @a sid originating from @a from to @a to with priority @a prio. May block.
      * 
      * @param m a pointer to a MODEL
+     * @param sid session id
      * @param from sender
      * @param to receiver
      * @param prio priority
@@ -89,9 +104,10 @@ namespace dmcs {
      * @return true if sending failed
      */
     virtual bool
-    sendModel(MODEL* m, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
+    sendModel(MODEL* m, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
 
 
+#if 0
     /** 
      * Send model @a m w.r.t. conflict @a c originating from @a from to @a to with priority @a prio. May block.
      * 
@@ -121,12 +137,14 @@ namespace dmcs {
      */
     virtual bool
     sendModelDecisionlevel(MODEL* m, DECISIONLEVEL* d, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
+#endif//0
 
 
     /** 
      * Send a JoinIn message from @a from to @a to with priority @a prio. Must not block.
      * 
      * @param k we have k partial equilibria ready to retrieve
+     * @param sid session id
      * @param from sender
      * @param to receiver
      * @param prio priority
@@ -135,10 +153,10 @@ namespace dmcs {
      * @return true if sending failed
      */
     virtual bool
-    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
+    sendJoinIn(std::size_t k, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
 
     /** 
-     * Receive a pointer to a MODEL from @a from. May block.
+     * Receive a ModelSession message from @a from. May block.
      * 
      * @param from sender
      * @param prio priority
@@ -146,10 +164,11 @@ namespace dmcs {
      * 
      * @return the next pointer to the MODEL sent from @a from
      */
-    virtual MODEL*
+    virtual struct ModelSession
     recvModel(std::size_t from, std::size_t& prio, int& msecs) = 0;
 
 
+#if 0
     /** 
      * Receive a ModelConflict message from @a from with priority @a prio. May block.
      * 
@@ -170,7 +189,7 @@ namespace dmcs {
      */
     virtual struct ModelDecisionlevel
     recvModelDecisionlevel(std::size_t from, std::size_t& prio, int& msecs) = 0;
-
+#endif //0
 
     /** 
      * Receive a JoinIn message from @a from with priority @a prio. May block.

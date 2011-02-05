@@ -73,25 +73,29 @@ namespace dmcs {
     registerMQ(ConcurrentMessageQueuePtr& mq, std::size_t id);
 
     virtual bool
-    sendModel(PartialBeliefState* b, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+    sendModel(PartialBeliefState* b, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
+#if 0
     virtual bool
     sendModelConflict(PartialBeliefState* b, Conflict* c, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
     sendModelDecisionlevel(PartialBeliefState* b, Decisionlevel* d, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+#endif //0
 
     virtual bool
-    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+    sendJoinIn(std::size_t k, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
-    virtual PartialBeliefState*
+    virtual struct ModelSession
     recvModel(std::size_t from, std::size_t& prio, int& msecs);
 
+#if 0
     virtual struct ModelConflict
     recvModelConflict(std::size_t from, std::size_t& prio, int& msecs);
 
     virtual struct ModelDecisionlevel
     recvModelDecisionlevel(std::size_t from, std::size_t& prio, int& msecs);
+#endif //0
 
     virtual struct JoinIn
     recvJoinIn(std::size_t from, std::size_t& prio, int& msecs);

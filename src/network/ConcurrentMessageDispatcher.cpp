@@ -65,6 +65,7 @@ ConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr& mq, std::size
 
 bool
 ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
+				       std::size_t sid,
 				       std::size_t /* from */,
 				       std::size_t to,
 				       std::size_t /* prio */,
@@ -73,24 +74,26 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
   ///@todo TK: from and prio are not used
   assert(mqs.size() > to);
 
+  struct ModelSession ms = { b, sid };
+
   if (msecs > 0)
     {
-      return mqs[to]->timed_send(&b, sizeof(b), 0, boost::posix_time::milliseconds(msecs));
+      return mqs[to]->timed_send(&ms, sizeof(ms), 0, boost::posix_time::milliseconds(msecs));
     }
   else if (msecs < 0)
     {
-      return mqs[to]->try_send(&b, sizeof(b), 0);
+      return mqs[to]->try_send(&ms, sizeof(ms), 0);
     }
   else
     {
-      mqs[to]->send(&b, sizeof(b), 0);
+      mqs[to]->send(&ms, sizeof(ms), 0);
       return true;
     }
 }
 
 
 
-
+#if 0
 bool
 ConcurrentMessageDispatcher::sendModelConflict(PartialBeliefState* b,
 					       Conflict* c,
@@ -147,10 +150,12 @@ ConcurrentMessageDispatcher::sendModelDecisionlevel(PartialBeliefState* b,
       return true;
     }
 }
+#endif//0
 
 
 bool
 ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
+					std::size_t sid,
 					std::size_t from,
 					std::size_t to,
 					std::size_t /* prio */,
@@ -160,7 +165,7 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
   assert(mqs.size() > to);
   assert(mqs.size() > from);
 
-  struct JoinIn ji = { from, k };
+  struct JoinIn ji = { from, k, sid };
 
   if (msecs > 0)
     {
@@ -178,7 +183,7 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
 }
 
 
-PartialBeliefState*
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelSession
 ConcurrentMessageDispatcher::recvModel(std::size_t from,
 				       std::size_t& /* prio */,
 				       int& msecs)
@@ -186,40 +191,44 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
   ///@todo TK: prio is not used
   assert(mqs.size() > from);
 
-  PartialBeliefState* b = 0;
+  struct ModelSession ms = {0,0};
   std::size_t recvd = 0;
   unsigned int p = 0;
-  void *ptr = static_cast<void*>(&b);
+  void *ptr = static_cast<void*>(&ms);
 
   if (msecs > 0)
     {
-      if (!mqs[from]->timed_receive(ptr, sizeof(b), recvd, p, boost::posix_time::milliseconds(msecs)))
+      if (!mqs[from]->timed_receive(ptr, sizeof(ms), recvd, p, boost::posix_time::milliseconds(msecs)))
 	{
 	  msecs = 0;
-	  return 0;
+	  ms.m = 0;
+	  ms.sid = 0;
+	  return ms;
 	}
     }
   else if (msecs < 0)
     {
-      if (!mqs[from]->try_receive(ptr, sizeof(b), recvd, p))
+      if (!mqs[from]->try_receive(ptr, sizeof(ms), recvd, p))
 	{
 	  msecs = 0;
-	  return 0;
+	  ms.m = 0;
+	  ms.sid = 0;
+	  return ms;
 	}
     }
   else
     {
-      mqs[from]->receive(ptr, sizeof(b), recvd, p);
+      mqs[from]->receive(ptr, sizeof(ms), recvd, p);
     }
 
-  assert(sizeof(b) == recvd);
+  assert(sizeof(ms) == recvd);
 
   //prio = p;
-  return b;
+  return ms;
 }
 
 
-
+#if 0
 struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelConflict
 ConcurrentMessageDispatcher::recvModelConflict(std::size_t from,
 					       std::size_t& /* prio */,
@@ -300,6 +309,7 @@ ConcurrentMessageDispatcher::recvModelDecisionlevel(std::size_t from,
   //prio = p;
   return md;
 }
+#endif//0
 
 
 struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::JoinIn
@@ -309,7 +319,7 @@ ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 {
   assert(mqs.size() > from);
 
-  struct JoinIn ji = {0,0};
+  struct JoinIn ji = {0,0,0};
   std::size_t recvd = 0;
   unsigned int p = 0;
   void *ptr = static_cast<void*>(&ji);
