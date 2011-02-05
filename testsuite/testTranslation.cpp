@@ -8,7 +8,7 @@
 #include "loopformula/DimacsVisitor.h"
 #include "loopformula/LocalLoopFormulaBuilder.h"
 #include "loopformula/CNFLocalLoopFormulaBuilder.h"
-#include "loopformula/EquiCNFLocalLoopFormulaBuilder.h"
+//#include "loopformula/EquiCNFLocalLoopFormulaBuilder.h"
 #include "loopformula/LoopFormulaDirector.h"
 
 #include "parser/BRGrammar.h"
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( testCNFTranslation )
   std::size_t size = std::distance(low,up);
 
   //construct loop formulae
-  CNFLocalLoopFormulaBuilder lf_builder(sig,size);
+  CNFLocalLoopFormulaBuilder lf_builder(size, 0); ///wtf?
   //  EquiCNFLocalLoopFormulaBuilder lf_builder(sig,size);
   LoopFormulaDirector director;
   director.setBuilder(&lf_builder);
@@ -105,8 +105,8 @@ BOOST_AUTO_TEST_CASE( testCNFTranslation )
   // use Dimacs visitor to check the result 
   TheoryPtr formula;
   formula = lf_builder.getFormula();
-  SignaturePtr resultSig;
-  resultSig = lf_builder.getSignature();
+  //  SignaturePtr resultSig;
+  //  resultSig = lf_builder.getSignature();
  
   std::fstream fs("cnfLoopformula.txt",std::ios::out);
   //  std::fstream fs("equicnfLoopformula.txt",std::ios::out);
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE( testCNFTranslation )
 
 
   DimacsVisitor v(fs);
-  v.visitTheory(formula, resultSig->size());
+  v.visitTheory(formula, size);
   fs.close();
 
 }

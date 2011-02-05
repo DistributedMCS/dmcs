@@ -1,3 +1,18 @@
+2011-02-05  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* examples/run-opt.sh: Add run support.
+	* examples/run-streaming.sh: Likewise.
+
+	* testsuite/testTranslation.cpp: Fix testcase.
+
+	* include/loopformula/CNFLocalLoopFormulaBuilder.h: Merged Luca's loopformula fix.
+	* include/loopformula/IMPLocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/LocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/LoopFormulaDirector.h: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/loopformula/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/loopformula/LocalLoopFormulaBuilder.cpp: Likewise.
+
 2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: Fix flipping.
