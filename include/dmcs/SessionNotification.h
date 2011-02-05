@@ -38,11 +38,19 @@ namespace dmcs {
 
 struct SessionNotification
 {
-  SessionNotification(std::size_t sid)
-    : session_id(sid)
+  enum NotificationType
+    {
+      REQUEST = 0,
+      SHUTDOWN
+    };
+
+  SessionNotification(std::size_t sid, NotificationType t = REQUEST)
+    : session_id(sid),
+      type(t)
   { }
   
   std::size_t session_id;
+  NotificationType type;
 };
 
 } // namespace dmcs

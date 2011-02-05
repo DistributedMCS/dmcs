@@ -28,6 +28,7 @@
  */
 
 #include "dmcs/BeliefCombination.h"
+#include "dmcs/SessionNotification.h"
 #include "network/ConcurrentMessageQueueHelper.h"
 #include "network/JoinThread.h"
 
@@ -554,6 +555,36 @@ JoinThread::operator()(std::size_t nbs,
 	{
 	  // refresh Joiner's state and then back to processing
 	  //??? How do I clean up partial_eqs here, because it's local in process
+
+	  // read notification from SAT to update my session id
+	// wait for any conflict from the local solver
+	SessionNotification* sn = 0;
+	void *ptr         = static_cast<void*>(&sn);
+	unsigned int p    = 0;
+	std::size_t recvd = 0;
+
+	DMCS_LOG_TRACE(port << ": Waiting for notification about new session id from SAT solver.");
+
+	sat_joiner_notif->receive(ptr, sizeof(sn), recvd, p);
+
+	if (ptr && sn)
+	  {
+	    if (sn->type == SessionNotification::SHUTDOWN)
+	      {
+		break;
+	      }
+	    else
+	      {
+		session_id = sn->session_id;
+		delete sn;
+		sn = 0;
+	      }
+	  }
+	else
+	  {
+	    DMCS_LOG_FATAL(port << ": Got null message: " << ptr << " " << sn);
+	    assert (ptr != 0 && sn != 0);
+	  }
 	}
     }
 }
