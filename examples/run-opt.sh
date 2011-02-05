@@ -4,6 +4,7 @@
 export MALLOC_CHECK_=0
 
 export GNUTIME='/usr/bin/time --portability -o' # time command
+export RUN='run -s 1000 -t 180 -k -o'
 export TIMEFORMAT=$'\nreal\t%3R\nuser\t%3U\nsys\t%3S' # time format
 export TESTSPATH='.' # path to lp/br/opt
 export DMCSPATH='../build/src' # path to dmcsd/dmcsc
@@ -14,10 +15,10 @@ LOGDAEMONS=yes # log daemon output
 
 # test instance
 export TOPO=tree
-declare -i CTX=100
-declare -i SIG=9
-declare -i BRS=4
-declare -i RLS=4
+declare -i CTX=10
+declare -i SIG=20
+declare -i BRS=5
+declare -i RLS=5
 export INST=a
 
 export MODE=opt
@@ -37,10 +38,11 @@ for (( N = 1 ; N <= $CTX ; N++ )); do
 	INPUT=$TESTSPATH/$TESTNAME
 	INPUTN=$TESTSPATH/$TESTNAME-$N
 
+	LOGN=/dev/null
+	RUNLOGN=/dev/null
 	if [ x$LOGDAEMONS = xyes ] ; then
 		LOGN=$LOGPATH/$TESTNAME-$MODE-$N.log
-	else
-		LOGN=/dev/null
+		RUNLOGN=$LOGPATH/$TESTNAME-$MODE-run-$N.log
 	fi
 
 	DMCSDOPTS="--context=$N --port=$((MINPORT+N)) --kb=$INPUTN.lp --br=$INPUTN.br --topology=$INPUT.opt"
@@ -50,15 +52,7 @@ for (( N = 1 ; N <= $CTX ; N++ )); do
 	    set -x
 	fi
 
-	if [ x$MODE = xstreaming ] ; then
-
-	    $DMCSD $DMCSDOPTS > $LOGN 2>&1 &
-
-	else
-
-	    $DMCSD $DMCSDOPTS > $LOGN 2>&1 &
-
-	fi
+	$RUN $RUNLOGN $DMCSD $DMCSDOPTS > $LOGN 2>&1 &
 
 	set +x
 
@@ -71,6 +65,7 @@ sleep 5
 LOGTIME=$LOGPATH/$TESTNAME-$MODE-time.log
 LOGCOUT=$LOGPATH/$TESTNAME-$MODE.log
 LOGCERR=$LOGPATH/$TESTNAME-$MODE-err.log
+LOGRUN=$LOGPATH/$TESTNAME-$MODE-run.log
 
 if [ x$VERBOSE = xyes ] ; then
     #echo Starting client with localhost:$((MINPORT+1)) and systemsize $CTX, logs=$LOGCOUT, $LOGCERR, $LOGTIME
@@ -81,11 +76,11 @@ DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX"
 
 if [ x$MODE = xstreaming ] ; then
 
-    $GNUTIME $LOGTIME $DMCSC $DMCSCOPTS --s=1 --k=$PACK > $LOGCOUT 2> $LOGCERR
+    $GNUTIME $LOGTIME $RUN $LOGRUN $DMCSC $DMCSCOPTS --s=1 --k=$PACK > $LOGCOUT 2> $LOGCERR
 
 else
 
-    $GNUTIME $LOGTIME $DMCSC $DMCSCOPTS --s=0 > $LOGCOUT 2> $LOGCERR
+    $GNUTIME $LOGTIME $RUN $LOGRUN $DMCSC $DMCSCOPTS --s=0 > $LOGCOUT 2> $LOGCERR
 
 fi
 
