@@ -197,7 +197,8 @@ StreamingDMCS::~StreamingDMCS()
 
 
 void
-StreamingDMCS::initialize(std::size_t invoker, 
+StreamingDMCS::initialize(std::size_t session_id,
+			  std::size_t invoker, 
 			  std::size_t pack_size, 
 			  std::size_t port,
 			  ConflictVec* conflicts,
@@ -233,8 +234,10 @@ StreamingDMCS::initialize(std::size_t invoker,
 
   const SignaturePtr& local_sig = ctx->getSignature();
 
-  ThreadFactory tf(conflicts_driven, ctx, theory, local_sig, localV,  orig_sigs_size, nbs, pack_size,
-		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), c2o.get(), port);
+  ThreadFactory tf(conflicts_driven, ctx, theory, local_sig, localV,  
+		   orig_sigs_size, nbs, pack_size, session_id,
+		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), 
+		   c2o.get(), port);
 
   sat_thread = tf.createLocalSolveThread();
 
@@ -252,6 +255,7 @@ StreamingDMCS::initialize(std::size_t invoker,
 
 void
 StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
+		      std::size_t& session_id,
 		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
 		      std::size_t& port,
@@ -270,6 +274,7 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 
   if (ptr && sn)
     {
+      session_id  = sn->session_id;
       invoker     = sn->invoker;
       pack_size   = sn->pack_size;
       port        = sn->port;
@@ -369,6 +374,7 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 void
 StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 {
+  std::size_t session_id = 0;
   std::size_t invoker = 0;
   std::size_t pack_size = 0;
   std::size_t port = 0;
@@ -383,6 +389,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
   while (1)
     {
       listen(handler_dmcs_notif, 
+	     session_id,
 	     invoker, pack_size, 
 	     port, conflicts,
 	     partial_ass, 
@@ -395,7 +402,8 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 
       if (!initialized)
 	{
-	  initialize(invoker, pack_size, port, conflicts, partial_ass, decision);
+	  initialize(session_id, invoker, pack_size, 
+		     port, conflicts, partial_ass, decision);
 	  initialized = true;
 	}
       start_up(conflicts, partial_ass, decision);

@@ -111,6 +111,7 @@ public:
 		ConflictVec2p* new_conflicts    = un->all_new_conflicts;
 		PartialBeliefState* partial_ass = un->partial_ass;
 		Decisionlevel* decision         = un->decision;
+		std::size_t session_id          = un->session_id;
 
 		ConflictVec2p::const_iterator ct = new_conflicts->begin();
 
@@ -120,11 +121,12 @@ public:
 		for (ConcurrentMessageQueueVec::iterator it = beg; it != end; ++it, ++ct)
 		  {
 		    ConflictVec* c_vec = *ct;
-		    ConflictNotification* cn = new ConflictNotification(c_vec, partial_ass, decision);
+		    ConflictNotification* cn = new ConflictNotification(c_vec, partial_ass, decision, session_id);
 		    std::size_t prio = 0;
 
 		    DMCS_LOG_TRACE(port << ": Send restart request to noff = " << std::distance(beg, it) 
-				   << ". Content. conflicts = " << *c_vec 
+				   << ". session_id = " << session_id
+				   << ". conflicts = " << *c_vec 
 				   << ". partial_ass = " << *partial_ass
 				   << ". decision = " << *decision);
 

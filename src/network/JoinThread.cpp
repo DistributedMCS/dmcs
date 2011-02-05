@@ -35,8 +35,10 @@
 
 namespace dmcs {
 
-JoinThread::JoinThread(std::size_t p)
-  : port(p)
+JoinThread::JoinThread(std::size_t p,
+		       std::size_t sid)
+  : port(p),
+    session_id(sid)
 { }
 
 
@@ -262,11 +264,11 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
   if (nt == ConflictNotification::NEXT)
     {
       DMCS_LOG_TRACE(port << ":  Will push NULL conflicts, asses, and decisions");
-      cn = new ConflictNotification(0, 0, 0, 0, ConflictNotification::NEXT);
+      cn = new ConflictNotification(0, 0, 0, session_id, ConflictNotification::NEXT);
     }
   else
     {
-      cn = new ConflictNotification(parent_conflicts, parent_ass, parent_decision, 0, nt);
+      cn = new ConflictNotification(parent_conflicts, parent_ass, parent_decision, session_id, nt);
       DMCS_LOG_TRACE(port << ":  Will push parent_conflicts = " << *parent_conflicts 
 		     << ", parent_ass = " << *parent_ass 
 		     << ", parent_decision = " << *parent_decision

@@ -58,6 +58,7 @@ public:
   RelSatSolver(bool il,
 	       bool cd,
 	       std::size_t my_id_,
+	       std::size_t sid,
 	       const TheoryPtr& theory_,
 	       //	       const ProxySignatureByLocalPtr& mixed_sig_,
 	       const SignaturePtr& local_sig_,
@@ -129,6 +130,7 @@ private:
   bool                           is_leaf;
   bool                           conflicts_driven;
   std::size_t                    my_id;
+  std::size_t                    session_id;
   const TheoryPtr                theory;
   const SignaturePtr             sig;
   const BeliefStatePtr           localV;

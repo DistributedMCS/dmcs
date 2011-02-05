@@ -40,14 +40,16 @@ struct StreamingDMCSNotification
       SHUTDOWN
     };
 
-  StreamingDMCSNotification(std::size_t i,
+  StreamingDMCSNotification(std::size_t sid,
+			    std::size_t i,
 			    std::size_t ps,
 			    std::size_t p,
 			    ConflictVec* c,
 			    PartialBeliefState* pa,
 			    Decisionlevel* d,
 			    NotificationType t = REQUEST)
-    : invoker(i), 
+    : session_id(sid),
+      invoker(i), 
       pack_size(ps), 
       port(p),
       conflicts(c),
@@ -56,6 +58,7 @@ struct StreamingDMCSNotification
       type(t)
   { }
   
+  std::size_t  session_id;
   std::size_t  invoker;
   std::size_t  pack_size;
   std::size_t  port;

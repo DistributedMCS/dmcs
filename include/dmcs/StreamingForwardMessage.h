@@ -53,12 +53,14 @@ public:
   ~StreamingForwardMessage() 
   { }
 
-  StreamingForwardMessage(std::size_t i,
+  StreamingForwardMessage(std::size_t sid,
+			  std::size_t i,
 			  std::size_t ps, 
 			  ConflictVec* cs,
 			  PartialBeliefState* pa,
 			  Decisionlevel* d)
-    : invoker(i),
+    : session_id(sid), 
+      invoker(i),
       pack_size(ps), 
       conflicts(cs),
       partial_ass(pa),
@@ -71,6 +73,12 @@ public:
 
     assert (cs != 0);
     assert (d  != 0);
+  }
+
+  std::size_t
+  getSessionId() const
+  {
+    return session_id;
   }
 
   std::size_t
@@ -115,6 +123,7 @@ public:
   void
   serialize(Archive& ar, const unsigned int /* version */)
   {
+    ar & session_id;
     ar & invoker;
     ar & pack_size;
     ar & conflicts;
@@ -123,6 +132,7 @@ public:
   }
 
 private:
+  std::size_t         session_id;   // For filtering old models
   std::size_t         invoker;      // ID of the invoking context
   std::size_t         pack_size;    // The number of models in a package that the invoker expects
   ConflictVec*        conflicts;    // A global conflict that the receiver should obey
@@ -141,7 +151,8 @@ inline std::ostream&
 operator<< (std::ostream& os, const dmcs::StreamingForwardMessage& sfMess)
 {
 
-  os << sfMess.getInvoker()     << ", " 
+  os << sfMess.getSessionId() << ", " 
+     << sfMess.getInvoker()     << ", " 
      << sfMess.getPackSize()    << " {"
      << *sfMess.getConflicts()   << "} ["
      << *sfMess.getPartialAss() << "] ";

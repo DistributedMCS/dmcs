@@ -48,17 +48,19 @@ struct UnsatNotification
   UnsatNotification(ConflictVec2p* cs,
 		    PartialBeliefState* pa,
 		    Decisionlevel* d,
+		    std::size_t sid,
 		    NotificationType t = REQUEST)
     : all_new_conflicts(cs),
       partial_ass(pa),
       decision(d),
+      session_id(sid),
       type(t)
   { 
     assert(cs != 0 || t == SHUTDOWN || t == NEXT);
     assert(t == REQUEST || t == SHUTDOWN || t == NEXT);
   }
   
-  /// list of conflicts
+  /// list of vector of conflicts
   ConflictVec2p* all_new_conflicts;
 
   /// partial assignment
@@ -66,6 +68,8 @@ struct UnsatNotification
 
   /// decision level
   Decisionlevel* decision;
+
+  std::size_t session_id;
 
   /// notification type
   NotificationType type;
@@ -75,7 +79,8 @@ struct UnsatNotification
 inline std::ostream&
 operator<< (std::ostream& os, const UnsatNotification& un)
 {
-  return os << "conflicts: " << *(un.all_new_conflicts) << std::endl
+  return os << "session id: " << un.session_id << std::endl
+	    << "conflicts: " << *(un.all_new_conflicts) << std::endl
 	    << "partial_ass: " << *(un.partial_ass) << std::endl
 	    << "decision: " << *(un.decision);
 }

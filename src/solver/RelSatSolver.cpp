@@ -43,6 +43,7 @@ namespace dmcs {
 RelSatSolver::RelSatSolver(bool il,
 			   bool cd,
 			   std::size_t my_id_,
+			   std::size_t sid,
 			   const TheoryPtr& theory_, 
 			   const SignaturePtr& sig_,
 			   const BeliefStatePtr& localV_,
@@ -57,6 +58,7 @@ RelSatSolver::RelSatSolver(bool il,
   : is_leaf(il),
     conflicts_driven(cd),
     my_id(my_id_),
+    session_id(sid),
     theory(theory_), 
     sig(sig_),
     localV(localV_),
@@ -591,6 +593,10 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
     } // if (trail->empty())
   else
     {
+      // session_id from ChoicePoint is far too old and not important
+      // for the restart, we will just simply increase our session_id
+      // counter
+
       ChoicePointPtr& cp = trail->top();
       decision = cp->decision; // parent_decision is included
       interface_impossible = cp->input;
@@ -655,7 +661,10 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
       // send notification to router. Need to send a bunch of things
       // and cover all neighbors instead of sending to just a single
       // neighbor as before
-      UnsatNotification* mess_router = new UnsatNotification(new_conflicts, partial_ass, decision);
+
+      // send out UNSAT notification with new session id
+      session_id++;
+      UnsatNotification* mess_router = new UnsatNotification(new_conflicts, partial_ass, decision, session_id);
 
       DMCS_LOG_TRACE(port << ": Send to Router: " << *mess_router);
 

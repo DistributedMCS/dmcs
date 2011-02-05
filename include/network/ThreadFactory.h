@@ -59,6 +59,7 @@ public:
 		const VecSizeTPtr& oss,
 		const NeighborListPtr& ns,
 		std::size_t ps,
+		std::size_t sid,
 		MessagingGatewayBC* m,
 		ConcurrentMessageQueue* dsn,
 		ConcurrentMessageQueue* ssn,
@@ -94,6 +95,7 @@ private:
   const VecSizeTPtr               orig_sigs_size;
   const NeighborListPtr           nbs;
   std::size_t                     pack_size;
+  std::size_t                     session_id;
   MessagingGatewayBC*             mg;
   ConcurrentMessageQueue*         dmcs_sat_notif;
   ConcurrentMessageQueue*         sat_router_notif;

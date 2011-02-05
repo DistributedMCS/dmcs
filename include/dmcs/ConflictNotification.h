@@ -48,9 +48,9 @@ struct ConflictNotification
   ConflictNotification(ConflictVec* cs,
 		       PartialBeliefState* pa,
 		       Decisionlevel* d,
-		       std::size_t v = 0,
+		       std::size_t sid,
 		       NotificationType t = REQUEST)
-    : val(v),
+    : session_id(sid),
       conflicts(cs),
       partial_ass(pa),
       decision(d),
@@ -60,10 +60,7 @@ struct ConflictNotification
     assert(t == REQUEST || t == SHUTDOWN || t == NEXT);
   }
   
-  // from SAT    --> Router:      val == id of the neighbor to send the assignment
-  // from Router --> NeighborOut: val is now unused
-  /// neighbor id
-  std::size_t val;
+  std::size_t session_id;
 
   /// list of conflicts
   ConflictVec* conflicts;
@@ -82,7 +79,8 @@ struct ConflictNotification
 inline std::ostream&
 operator<< (std::ostream& os, const ConflictNotification& cn)
 {
-  return os << "conflicts: " << *(cn.conflicts) << std::endl
+  return os << "session_id = " << cn.session_id << std::endl
+	    << "conflicts: " << *(cn.conflicts) << std::endl
 	    << "partial_ass: " << *(cn.partial_ass) << std::endl
 	    << "decision: " << *(cn.decision);
 }

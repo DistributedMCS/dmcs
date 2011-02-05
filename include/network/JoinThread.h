@@ -46,7 +46,8 @@ namespace dmcs {
 class JoinThread
 {
 public:
-  JoinThread(std::size_t p);
+  JoinThread(std::size_t p,
+	     std::size_t sid);
 
   virtual
   ~JoinThread();
@@ -94,8 +95,9 @@ private:
 
 private:
   std::size_t port;
-  std::size_t                  no_nbs;                  // number of neighbors 
-  std::size_t                  system_size;
+  std::size_t no_nbs;                  // number of neighbors 
+  std::size_t system_size;
+  std::size_t session_id;
 
   MessagingGatewayBC*        mg;
   ConcurrentMessageQueueVec* joiner_neighbors_notif;

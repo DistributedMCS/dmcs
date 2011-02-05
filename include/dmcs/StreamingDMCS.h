@@ -76,6 +76,7 @@ public:
 private:
   void
   listen(ConcurrentMessageQueue* notif_from_handler,
+	 std::size_t& session_id,
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
 	 std::size_t& port,
@@ -85,7 +86,8 @@ private:
 	 StreamingDMCSNotification::NotificationType& type);
 
   void
-  initialize(std::size_t invoker, 
+  initialize(std::size_t session_id,
+	     std::size_t invoker, 
 	     std::size_t pack_size,
 	     std::size_t port,
 	     ConflictVec* conflicts,

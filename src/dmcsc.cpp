@@ -290,7 +290,8 @@ Options";
 		  PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
 		  Decisionlevel* decision = new Decisionlevel();
 
-		  StreamingCommandType::input_type mess(0, pack_size, conflicts, partial_ass, decision);
+		  // session_id = 0, invoker = 0
+		  StreamingCommandType::input_type mess(0, 0, pack_size, conflicts, partial_ass, decision);
 
 		  DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
 		  DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);

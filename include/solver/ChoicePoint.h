@@ -141,7 +141,9 @@ getNextFlip(ChoicePointPtr& cp, VecSizeTPtr& orig_sigs_size)
 
   decision->pop_back();
   decision->setDecisionlevel(next_atom);
-  ConflictNotification* cn = new ConflictNotification(0, partial_ass, decision);
+
+  // conflicts = 0, session_id = 0 --> will be set outside
+  ConflictNotification* cn = new ConflictNotification(0, partial_ass, decision, 0);
 
   return cn;
 }
