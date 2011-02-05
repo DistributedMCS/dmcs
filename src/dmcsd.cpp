@@ -628,7 +628,7 @@ Options";
 	  DMCS_LOG_DEBUG("Sig input to LF: " << *sig);
 	  
 	  // construct loop formulas
-	  CNFLocalLoopFormulaBuilder lf_builder(sig, size);
+	  CNFLocalLoopFormulaBuilder lf_builder(size, 0 ); //sig->size() - size);
 	  LoopFormulaDirector director;
 	  director.setBuilder(&lf_builder);
 	  director.construct(local_kb, bridge_rules);

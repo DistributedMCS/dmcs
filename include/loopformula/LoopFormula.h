@@ -130,7 +130,7 @@ supportFormula(AtomSetIterator abeg, AtomSetIterator aend,
 	       RuleIterator rbeg, RuleIterator rend,
 	       std::list<EpsilonConjunction>& disj)
 {
-  for (RuleIterator it = rbeg; it != rend; ++it) 
+  for (RuleIterator it = rbeg; it != rend; ++it)
     {
       EpsilonConjunction literals; // conjunction of literals
       std::back_insert_iterator<EpsilonConjunction::Conjunction> nlins(literals.negLiterals);
@@ -138,17 +138,19 @@ supportFormula(AtomSetIterator abeg, AtomSetIterator aend,
       const Head& head = getHead(**it);
 
       Head copyh;
-      for(Head::const_iterator ith=head.begin();ith!=head.end();ith++)
-          	  copyh.push_back(*ith);
-
+      for (Head::const_iterator ith=head.begin();ith!=head.end();ith++)
+	{
+	  copyh.push_back(*ith);
+	}
+      
       copyh.sort();
 
       std::set_difference(copyh.begin(), copyh.end(), abeg, aend, nlins);
 
       const NegativeBody& nbody = getNegativeBody(**it);
       std::copy(nbody.begin(), nbody.end(), nlins);
-      // std::transform(nbody.begin(), nbody.end(), nlins, std::negate<Atom>());
-      
+      std::transform(nbody.begin(), nbody.end(), nlins, std::negate<Atom>());
+
       const PositiveBody& pbody = getPositiveBody(**it);
       std::back_insert_iterator<EpsilonConjunction::Conjunction> plins(literals.posLiterals);
       std::copy(pbody.begin(), pbody.end(), plins);
@@ -203,6 +205,7 @@ supportFormula(AtomSetIterator abeg, AtomSetIterator aend,
       ClausePtr currentRule (new Clause);
 
       std::back_insert_iterator<Clause> jt (*currentRule);
+
       const PositiveBody& pbody = getPositiveBody(**it);
       std::copy(pbody.begin(), pbody.end(),jt);
 
@@ -210,13 +213,13 @@ supportFormula(AtomSetIterator abeg, AtomSetIterator aend,
       ClausePtr currentRuleHeadPrime (new Clause);
       const Head& head = getHead(**it);
 
+      std::back_insert_iterator<Clause> nlins1(*currentRuleHeadPrime);
+
       Head copyh;
       for(Head::const_iterator ith=head.begin();ith!=head.end();ith++)
           	  copyh.push_back(*ith);
 
       copyh.sort();
-
-      std::back_insert_iterator<Clause> nlins1(*currentRuleHeadPrime);
 
       std::set_difference(copyh.begin(), copyh.end(), abeg, aend, nlins1);
       currentRuleHeadPrime = createNegatedConjunction(currentRuleHeadPrime->begin(),

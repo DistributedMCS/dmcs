@@ -82,8 +82,8 @@ protected:
 
 public:
 
-   IMPLocalLoopFormulaBuilder(const SignaturePtr& s, std::size_t size)
-     : LocalLoopFormulaBuilder (s,size)
+   IMPLocalLoopFormulaBuilder(std::size_t size,std::size_t placement)
+     : LocalLoopFormulaBuilder (size,placement)
   { }
 
   // add sth to return values if needed

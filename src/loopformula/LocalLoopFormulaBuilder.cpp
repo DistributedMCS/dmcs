@@ -73,15 +73,29 @@ LocalLoopFormulaBuilder::buildBridgeKappa(const BridgeRulesPtr& bridgeRules)
 	  assert(*jt > 0);
 	  (result->first)->push_back(*jt);
 	  fillKappaHead(*jt);
+	  
+#ifdef DEBUG
+	  std::cerr << "bb: " << *jt << std::endl;
+#endif
 	}
       
       // postive body
-      const PositiveBridgeBody& pb = getPositiveBody(*it);  
+      const PositiveBridgeBody& pb = getPositiveBody(*it);
       for (PositiveBridgeBody::const_iterator jt = pb.begin();jt != pb.end(); ++jt)
 	{
 	  assert(jt->second > 0);
-	  (result->second.first)->push_back(jt->second);
-	  fillKappaPositiveBody(jt->second);
+
+	  std::size_t id = jt->second + placement;
+
+	  assert (id);
+
+	  //put placement
+	  (result->second.first)->push_back(id);
+	  fillKappaPositiveBody(id);
+	  
+#if defined(DEBUG)
+	  std::cerr << "posb: " << jt->second << " " << id << std::endl;
+#endif //DEBUG
 	}
       
       // negative body
@@ -89,12 +103,23 @@ LocalLoopFormulaBuilder::buildBridgeKappa(const BridgeRulesPtr& bridgeRules)
       for (NegativeBridgeBody::const_iterator jt = nb.begin(); jt != nb.end(); ++jt)
 	{
 	  assert(jt->second > 0);
-	  (result->second.second)->push_back(jt->second);
-	  fillKappaNegativeBody(jt->second);
+
+	  std::size_t id = jt->second + placement;
+
+	  assert (id);
+
+	  //put placement
+	  (result->second.second)->push_back(id);
+	  fillKappaNegativeBody(id);
+	  
+#ifdef DEBUG
+	  std::cerr << "negb: " << jt->second << " " << id << std::endl;
+#endif
 	}
       res->push_back(result);
       storeKappaDataStructure();
     }
+
   return res;
 }
 
@@ -105,10 +130,9 @@ LocalLoopFormulaBuilder::createDependencyGraphAndKBKappa(const RulesPtr& kb)
   // add positive kb dependencies to the graph
   for (Rules::const_iterator it = kb->begin(); it != kb->end(); ++it)
     {
-
       initialiseKappaDataStructure();
 
-      bool createdPbody = false;      
+      bool createdPbody = false;
       const Head& h = getHead(*it);
 
       for (Head::const_iterator jt = h.begin(); jt != h.end(); ++jt)
@@ -117,7 +141,7 @@ LocalLoopFormulaBuilder::createDependencyGraphAndKBKappa(const RulesPtr& kb)
 	  fillKappaHead(*jt);
 	  for (PositiveBody::const_iterator kt = (*it)->second.first->begin(); kt != (*it)->second.first->end(); ++kt)
 	    {
-	      boost::add_edge((*jt-1), (*kt-1), localDependencyGraph);            
+	      boost::add_edge((*jt-1), (*kt-1), localDependencyGraph);
 	      if (!createdPbody)
 		{
 		  assert(*kt > 0);
@@ -139,24 +163,27 @@ LocalLoopFormulaBuilder::createDependencyGraphAndKBKappa(const RulesPtr& kb)
 
 void
 LocalLoopFormulaBuilder::checkStronglyConnected(Loop& possibleLoop,
-						const RulesPtr& kb, 
+						Graph* graph,
+						const RulesPtr& kb,
 						const RulesPtr& br)
 {
   Graph *G = 0;
-
+  
   // this if condition is needed, otherwise a segmentation fault occurs
-  if (possibleLoop.size() == boost::num_vertices(localDependencyGraph))
+  if (possibleLoop.size() == boost::num_vertices(*graph))
     {
-      G = &localDependencyGraph;
+      G = graph;
     }
   else
     {
-      G = &(localDependencyGraph.create_subgraph(possibleLoop.begin(),
-						 possibleLoop.end())); 
+      G = &((*graph).create_subgraph(possibleLoop.begin(),
+				     possibleLoop.end()));
     }
+
+  assert (G != 0);
   
   std::vector<vertex_descriptor> component(boost::num_vertices(*G));
-
+  
   int num = boost::strong_components(*G, &component[0]);
   
   if (num == 1)
@@ -171,42 +198,69 @@ LocalLoopFormulaBuilder::checkStronglyConnected(Loop& possibleLoop,
 
 void
 LocalLoopFormulaBuilder::checkAllInducedSubGraphs(Loop possibleLoop,
-						  vertex_descriptor value,
-						  const RulesPtr& kb, 
+						  Graph* graph,
+						  unsigned int index,
+						  Loop& component_graph,
+						  const RulesPtr& kb,
 						  const RulesPtr& br)
 {
-  if (value == boost::num_vertices(localDependencyGraph))
+  if (index == boost::num_vertices(*graph))
     {
-      possibleLoop.push_back(value-1);
-      checkStronglyConnected(possibleLoop,kb,br);
+      possibleLoop.push_back(component_graph[index-1]);
+      checkStronglyConnected(possibleLoop,graph,kb,br);
     }
   else
     {
-      possibleLoop.push_back(value-1);
+      possibleLoop.push_back(component_graph[index-1]);
       if (possibleLoop.size() > 1)
 	{
-	  checkStronglyConnected(possibleLoop,kb,br);
+	  checkStronglyConnected(possibleLoop,graph,kb,br);
 	}
 
-      for (vertex_descriptor i = value+1;
-	   i <= boost::num_vertices(localDependencyGraph);
+      for (unsigned int i = index+1;
+	   i <= boost::num_vertices(*graph);
 	   i++)
 	{
-	  checkAllInducedSubGraphs(possibleLoop, i,kb,br);
+	  checkAllInducedSubGraphs(possibleLoop,graph,index,component_graph,kb,br);
 	}
     }
 }
 
+//patched version of the original strategy
+//1) first compute the SCC components of the graph
+//2) for each subgraph strongly connected explore all the subset of its vertex as before
+//3) @todo further optimization is needed (e.g., removing vertex or edges from the actual strong connected component)
 
 void 
 LocalLoopFormulaBuilder::buildLambda(const RulesPtr& kb, const RulesPtr& br)
 {
-
+  //first compute the connected components of the original graph
+  std::vector<vertex_descriptor> component (boost::num_vertices(localDependencyGraph));
+  int num = boost::strong_components(localDependencyGraph, &component[0]);
+  Loops component_graphs(num);
   for (vertex_descriptor i = 1; i < boost::num_vertices(localDependencyGraph); i++)
     {
-      Loop possibleLoop; // start with empty loop
-      checkAllInducedSubGraphs(possibleLoop, i,kb,br);
+      component_graphs[component[i]].push_back(i);
     }
+  
+  //now for each component explore the subset of nodes
+  Graph* graph;
+  for(int k=0;k<num;k++)
+    {
+      graph = &(localDependencyGraph.create_subgraph(component_graphs[k].begin(),
+						     component_graphs[k].end()));
+      
+      
+      for (unsigned int i = 1; i < boost::num_vertices(*graph); i++)
+	{
+	  Loop possibleLoop; // start with empty loop
+	  checkAllInducedSubGraphs(possibleLoop, graph,i,component_graphs[k],kb,br);
+	}
+    }
+
+#if defined(DEBUG)  
+  std::cerr<<"FINISHED "<<std::endl;
+#endif//DEBUG
 
   boost::graph_traits<Graph>::vertex_iterator vit;
   boost::graph_traits<Graph>::vertex_iterator vend;
@@ -218,6 +272,10 @@ LocalLoopFormulaBuilder::buildLambda(const RulesPtr& kb, const RulesPtr& br)
     {
       Loop singleton(1, (*vit+1));
       createLocalLoopFormulae(singleton, kb, br);
+
+#if defined(DEBUG)
+      std::cerr<<"HERE";
+#endif//DEBUG
     }
 }
 
@@ -232,8 +290,16 @@ LocalLoopFormulaBuilder::createLocalLoopFormulae(Loop loop, const RulesPtr& kb, 
   Rules::const_iterator kend = kb->end();
   Rules::const_iterator bbeg = br->begin();
   Rules::const_iterator bend = br->end();
-
+  
+#if 0
+  std::cout<<"CREATING LOOP "<<std::endl;
+  for( Loop::const_iterator lbeg = loop.begin();lbeg!=loop.end();lbeg++)
+    std::cout<<*lbeg<<std::endl;
+  
+  std::cout<<"CREATING LOOP END"<<std::endl;
+#endif//0
+  
   std::vector<Rules::const_iterator> esr = externalSupportRules(lbeg, lend, kbeg, kend);
   std::vector<Rules::const_iterator> sr = supportRules(lbeg, lend, bbeg, bend);
-  createSupportFormula(lbeg,lend,esr,sr);  
+  createSupportFormula(lbeg,lend,esr,sr);
 }

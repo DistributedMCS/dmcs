@@ -84,11 +84,38 @@ CNFLocalLoopFormulaBuilder::createSupportFormula(Loop::const_iterator lbeg,
   ClausePtr loop = createNegatedConjunction(lbeg,lend);
   add(formula,loop);
 
+#if 0
+  std::cerr<<"CONSIDERING ..."<<std::endl;
+  DimacsVisitor v1(std::cerr);
+  v1.visitTheory(formula,0);
+#endif//0
+
   supportFormula(lbeg, lend, esr.begin(), esr.end(), formula);
+
+#if 0
+  std::cerr << "CONSIDERING1 ..."<<std::endl;
+  v1.visitTheory(formula,0);
+#endif//0
+
+
   supportFormula(lbeg, lend, sr.begin(), sr.end(), formula);
+
+#if 0
+  std::cerr<<"CONSIDERING2 ..."<<std::endl;
+  v1.visitTheory(formula,0);
+#endif//0
+
   ClausePtr empty(new Clause);
   TheoryPtr resultingCNF(new Theory);
+
   resultingCNF = createCNF(formula, empty);    
+
+#if 0
+  std::cerr<<"ADDING ..."<<std::endl;
+  DimacsVisitor v(std::cerr);
+  v.visitTheory(resultingCNF,0);
+#endif//0
+
   add(cnfFormula,resultingCNF);
 
 }

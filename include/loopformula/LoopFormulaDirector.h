@@ -30,8 +30,8 @@
 #ifndef LOOPFORMULADIRECTOR_H
 #define LOOPFORMULADIRECTOR_H
 
-#include "LoopFormulaBuilder.h"
-
+#include "loopformula/LoopFormulaBuilder.h"
+#include "mcs/Signature.h"
 #include <iostream>
 
 
@@ -76,10 +76,50 @@ public:
     RulesPtr ref_br = builder->buildBridgeKappa(br);
 
 #if defined(DEBUG)
+    for(BridgeRules::iterator it_r=(*br).begin();it_r!= (*br).end();++it_r)
+    {
+    	const BridgeRulePtr& r=(*it_r);
+    	std::cerr<<getHead(r).front()<<std::endl;
+    	for(PositiveBridgeBody::const_iterator itc=getPositiveBody(r).begin();itc!=getPositiveBody(r).end();++itc)
+    	{
+	  std::cerr<<(*itc).second<<std::endl;
+    	}
+
+    	for(NegativeBridgeBody::const_iterator itc=getNegativeBody(r).begin();itc!=getNegativeBody(r).end();++itc)
+	  {
+	    std::cerr<<"-"<<(*itc).second<<std::endl;
+    	}
+
+    }
+
+    std::cerr << "output bridge kappa" << std::endl;
+
+    for(Rules::iterator it_r=(*ref_br).begin();it_r!= (*ref_br).end();++it_r)
+    {
+    	const RulePtr& r=(*it_r);
+    	std::cerr<<getHead(r).front()<<std::endl;
+    	for(PositiveBody::const_iterator itc=getPositiveBody(r).begin();itc!=getPositiveBody(r).end();++itc)
+    	{
+    		std::cerr<<*itc<<std::endl;
+    	}
+
+    	for(NegativeBody::const_iterator itc=getNegativeBody(r).begin();itc!=getNegativeBody(r).end();++itc)
+    	{
+    		std::cerr<<"-"<<*itc<<std::endl;
+    	}
+
+    }
+#endif
+
+#if defined(DEBUG)
     std::cerr << "creating lambda" << std::endl;
 #endif
 
     builder->buildLambda(kb, ref_br);
+
+#if defined(DEBUG)
+    std::cerr << "finish lambda" << std::endl;
+#endif
   }
 
 };

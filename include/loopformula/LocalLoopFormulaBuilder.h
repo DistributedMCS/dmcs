@@ -54,16 +54,16 @@ protected:
   
   
   Graph localDependencyGraph;
-  const SignaturePtr sig;
+  size_t placement;
 
   typedef std::vector<vertex_descriptor> Loop;
   typedef std::vector<Loop> Loops;
 
   void
-  checkAllInducedSubGraphs(Loop possibleLoop, vertex_descriptor value,const RulesPtr& kb, const RulesPtr& br);
+  checkAllInducedSubGraphs(Loop possibleLoop,  Graph* graph,unsigned int index,Loop& component_graph,const RulesPtr& kb, const RulesPtr& br);
 
   void
-  checkStronglyConnected(Loop& possibleLoop,const RulesPtr& kb, const RulesPtr& br);
+  checkStronglyConnected(Loop& possibleLoop,Graph* G,const RulesPtr& kb, const RulesPtr& br);
 
   void
   createLocalLoopFormulae(Loop loop,const RulesPtr& kb, const RulesPtr& br);
@@ -80,9 +80,9 @@ protected:
 
 public:
 
-  LocalLoopFormulaBuilder(const SignaturePtr& s, std::size_t size)
+  LocalLoopFormulaBuilder(std::size_t size, std::size_t placement_)
      : localDependencyGraph(size),
-       sig(new Signature(*s))
+       placement(placement_)
   { }
 
   RulesPtr
@@ -94,11 +94,6 @@ public:
   void
   buildLambda (const RulesPtr&, const RulesPtr&);
 
-  const SignaturePtr&
-  getSignature() const
-  {
-    return sig;
-  }
 };
 
 

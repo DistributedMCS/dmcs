@@ -62,8 +62,8 @@ protected:
 
 public:
 
-  CNFLocalLoopFormulaBuilder(const SignaturePtr& s, std::size_t size)
-    :LocalLoopFormulaBuilder(s,size),
+  CNFLocalLoopFormulaBuilder(std::size_t size,std::size_t placement)
+    :LocalLoopFormulaBuilder(size,placement),
      cnfFormula(new Theory)
   { }
   
