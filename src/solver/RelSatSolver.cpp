@@ -43,7 +43,7 @@ namespace dmcs {
 RelSatSolver::RelSatSolver(bool il,
 			   bool cd,
 			   std::size_t my_id_,
-			   std::size_t sid,
+			   std::size_t my_sid,
 			   const TheoryPtr& theory_, 
 			   const SignaturePtr& sig_,
 			   const BeliefStatePtr& localV_,
@@ -58,7 +58,7 @@ RelSatSolver::RelSatSolver(bool il,
   : is_leaf(il),
     conflicts_driven(cd),
     my_id(my_id_),
-    session_id(sid),
+    my_session_id(my_sid),
     theory(theory_), 
     sig(sig_),
     localV(localV_),
@@ -300,11 +300,13 @@ RelSatSolver::solve()
       parent_conflicts = cn->conflicts;
       parent_ass = cn->partial_ass;
       parent_decision = cn->decision;
+      parent_session_id = cn->session_id;
 
       import_conflicts(parent_conflicts);
       import_partial_ass(parent_ass);
 
-      DMCS_LOG_TRACE(port << ":  Got a message from DMCS. parent_conflicts = " << *parent_conflicts 
+      DMCS_LOG_TRACE(port << ":  Got a message from DMCS. parent_session_id = " << parent_session_id
+		     << ". parent_conflicts = " << *parent_conflicts 
 		     << ". parent_ass = " << *parent_ass
 		     << ". parent_decision = " << *parent_decision);
 
@@ -663,8 +665,8 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
       // neighbor as before
 
       // send out UNSAT notification with new session id
-      session_id++;
-      UnsatNotification* mess_router = new UnsatNotification(new_conflicts, partial_ass, decision, session_id);
+      my_session_id++;
+      UnsatNotification* mess_router = new UnsatNotification(new_conflicts, partial_ass, decision, my_session_id);
 
       DMCS_LOG_TRACE(port << ": Send to Router: " << *mess_router);
 
@@ -753,6 +755,8 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 
   // project to my output interface
   project_to(bs, localV);
+
+  // attach parent_session_id to the output models
 
   // now put this PartialBeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);

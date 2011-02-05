@@ -76,7 +76,7 @@ public:
 private:
   void
   listen(ConcurrentMessageQueue* notif_from_handler,
-	 std::size_t& session_id,
+	 std::size_t& parent_session_id,
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
 	 std::size_t& port,
@@ -86,7 +86,7 @@ private:
 	 StreamingDMCSNotification::NotificationType& type);
 
   void
-  initialize(std::size_t session_id,
+  initialize(std::size_t parent_session_id,
 	     std::size_t invoker, 
 	     std::size_t pack_size,
 	     std::size_t port,
@@ -97,7 +97,8 @@ private:
   void
   start_up(ConflictVec* conflicts,
 	   PartialBeliefState* partial_ass,
-	   Decisionlevel* decision);
+	   Decisionlevel* decision,
+	   std::size_t parent_session_id);
 
 private:
   bool conflicts_driven;
@@ -118,6 +119,7 @@ private:
   HashedBiMapPtr c2o;
   std::size_t buf_count;
   bool first_round;
+  std::size_t my_starting_session_id;
 };
 
 typedef boost::shared_ptr<StreamingDMCS> StreamingDMCSPtr;

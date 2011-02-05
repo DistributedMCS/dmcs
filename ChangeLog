@@ -1,3 +1,12 @@
+2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingDMCS.h: Distinguish my_session_id and
+	parent_session_id.
+	* include/network/Handler.tcc: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
 2011-02-05  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* examples/run-opt.sh: Add run support.

@@ -276,7 +276,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
       port = ep.port();
 
-      const std::size_t session_id        = sesh->mess.getSessionId();
+      const std::size_t parent_session_id = sesh->mess.getSessionId();
       const std::size_t invoker           = sesh->mess.getInvoker();
       const std::size_t request_pack_size = sesh->mess.getPackSize();
       std::size_t pack_size;
@@ -333,9 +333,9 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       DMCS_LOG_TRACE(port << ": Notify my slaves of the new message");
 
       // notify StreamingDMCS
-      DMCS_LOG_TRACE(port << ": session_id = " << session_id << ", invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port);
+      DMCS_LOG_TRACE(port << ": parent_session_id = " << parent_session_id << ", invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port);
 
-      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(session_id, invoker, pack_size, port, 
+      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(parent_session_id, invoker, pack_size, port, 
 									   conflicts, partial_ass, decision);
       StreamingDMCSNotification* ow_dmcs = 
 	(StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif.get(), &mess_dmcs, sizeof(mess_dmcs), 0);

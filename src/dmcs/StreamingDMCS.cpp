@@ -77,7 +77,8 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c,
     router_neighbors_notif(new ConcurrentMessageQueueVec),
     c2o(new HashedBiMap),
     buf_count(bc),
-    first_round(true)
+    first_round(true),
+    my_starting_session_id(0)
   { }
 
 
@@ -197,7 +198,7 @@ StreamingDMCS::~StreamingDMCS()
 
 
 void
-StreamingDMCS::initialize(std::size_t session_id,
+StreamingDMCS::initialize(std::size_t parent_session_id,
 			  std::size_t invoker, 
 			  std::size_t pack_size, 
 			  std::size_t port,
@@ -235,7 +236,7 @@ StreamingDMCS::initialize(std::size_t session_id,
   const SignaturePtr& local_sig = ctx->getSignature();
 
   ThreadFactory tf(conflicts_driven, ctx, theory, local_sig, localV,  
-		   orig_sigs_size, nbs, pack_size, session_id,
+		   orig_sigs_size, nbs, pack_size, my_starting_session_id,
 		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), 
 		   c2o.get(), port);
 
@@ -255,7 +256,7 @@ StreamingDMCS::initialize(std::size_t session_id,
 
 void
 StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
-		      std::size_t& session_id,
+		      std::size_t& parent_session_id,
 		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
 		      std::size_t& port,
@@ -274,7 +275,7 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 
   if (ptr && sn)
     {
-      session_id  = sn->session_id;
+      parent_session_id = sn->session_id;
       invoker     = sn->invoker;
       pack_size   = sn->pack_size;
       port        = sn->port;
@@ -305,7 +306,8 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 void
 StreamingDMCS::start_up(ConflictVec* conflicts,
 			PartialBeliefState* partial_ass,
-			Decisionlevel* decision)
+			Decisionlevel* decision,
+			std::size_t parent_session_id)
 {
 
 
@@ -319,7 +321,7 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 
   DMCS_LOG_TRACE("Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
 
-  ConflictNotification* mess_sat = new ConflictNotification(conflicts, partial_ass, decision, 0);
+  ConflictNotification* mess_sat = new ConflictNotification(conflicts, partial_ass, decision, parent_session_id);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(dmcs_sat_notif.get(), &mess_sat, sizeof(mess_sat), 0);
   
@@ -347,7 +349,7 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 
       assert (router_neighbors_notif->size() == no_nbs);
 
-      ConflictNotification* cn = new ConflictNotification(conflicts, partial_ass, decision, 0);
+      ConflictNotification* cn = new ConflictNotification(conflicts, partial_ass, decision, my_starting_session_id);
 
       for (std::size_t i = 0; i < no_nbs; ++i)
 	{
@@ -374,7 +376,7 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 void
 StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 {
-  std::size_t session_id = 0;
+  std::size_t parent_session_id = 0;
   std::size_t invoker = 0;
   std::size_t pack_size = 0;
   std::size_t port = 0;
@@ -389,7 +391,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
   while (1)
     {
       listen(handler_dmcs_notif, 
-	     session_id,
+	     parent_session_id,
 	     invoker, pack_size, 
 	     port, conflicts,
 	     partial_ass, 
@@ -402,11 +404,11 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 
       if (!initialized)
 	{
-	  initialize(session_id, invoker, pack_size, 
+	  initialize(parent_session_id, invoker, pack_size, 
 		     port, conflicts, partial_ass, decision);
 	  initialized = true;
 	}
-      start_up(conflicts, partial_ass, decision);
+      start_up(conflicts, partial_ass, decision, parent_session_id);
     }
 }
 
