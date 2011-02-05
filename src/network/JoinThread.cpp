@@ -276,6 +276,13 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
 
   // empty our local storage for the sake of non-exponential space
   PartialBeliefStateVecPtr& bsv = (*partial_eqs)[next];
+  for (PartialBeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
+    {
+      PartialBeliefState* pbs = *it;
+      delete pbs;
+      pbs = 0;
+    }
+
   bsv->clear();
 
   ConflictNotification* cn;
@@ -307,26 +314,9 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
 
 
 void
-JoinThread::operator()(std::size_t nbs,
-		       std::size_t s,
-		       MessagingGatewayBC* m,
-		       ConcurrentMessageQueueVec* jv,
-		       ConcurrentMessageQueue* sjn,
-		       ConflictVec* cs,
-		       PartialBeliefState* pa,
-		       Decisionlevel* d)
+JoinThread::process()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
-  mg = m;
-  joiner_neighbors_notif = jv;
-  sat_joiner_notif = sjn;
-  parent_conflicts = cs;
-  parent_ass = pa;
-  parent_decision = d;
-
-  no_nbs = nbs;
-  system_size = s;
   
   ImportStates import_state = START_UP;
 
@@ -531,6 +521,42 @@ JoinThread::operator()(std::size_t nbs,
     } // while (1)
 }
 
+
+void
+JoinThread::operator()(std::size_t nbs,
+		       std::size_t s,
+		       MessagingGatewayBC* m,
+		       ConcurrentMessageQueueVec* jv,
+		       ConcurrentMessageQueue* sjn,
+		       ConflictVec* cs,
+		       PartialBeliefState* pa,
+		       Decisionlevel* d)
+{
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  mg = m;
+  joiner_neighbors_notif = jv;
+  sat_joiner_notif = sjn;
+  parent_conflicts = cs;
+  parent_ass = pa;
+  parent_decision = d;
+  
+  no_nbs = nbs;
+  system_size = s;
+  
+  while (1)
+    {
+      try
+	{
+	  process();
+	}
+      catch (const boost::thread_interrupted& ex)
+	{
+	  // refresh Joiner's state and then back to processing
+	  //??? How do I clean up partial_eqs here, because it's local in process
+	}
+    }
+}
 
 } // namespace dmcs
 

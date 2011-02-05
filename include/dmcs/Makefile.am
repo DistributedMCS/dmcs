@@ -24,6 +24,7 @@ noinst_HEADERS =  \
                 QueryPlan.h \
                 QueryPlan.tcc \
 		ReturnMessage.h \
+		SessionNotification.h \
 		StatsInfo.h \
 		StreamingCommandType.h \
 		StreamingDMCS.h \

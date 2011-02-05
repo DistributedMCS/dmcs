@@ -30,6 +30,7 @@
 #include <boost/thread.hpp>
 
 #include "dmcs/BeliefCombination.h"
+#include "dmcs/SessionNotification.h"
 #include "dmcs/UnsatNotification.h"
 #include "network/ConcurrentMessageQueueHelper.h"
 #include "solver/RelSatSolver.h"
@@ -630,7 +631,7 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
   if (it == local_sig.end())
     {
       DMCS_LOG_TRACE(port << ": The parents decided all of my bridge atoms and I am still UNSAT. Send a NULL pointer to OUT_MQ");
-      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0); ///@todo FIXME
+      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
   else
     {
@@ -677,12 +678,28 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
       ChoicePointPtr cp(new ChoicePoint(input, decision));
       trail->push(cp);
 
+      // mark that we are in a new session (expect new models)
+      my_session_id++;
+
+      // interrupt join_thread, inform it about the new session_id
+      SessionNotification* mess_joiner = new SessionNotification(my_session_id);
+
+      SessionNotification* ow_joiner =
+	(SessionNotification*) overwrite_send(sat_joiner_notif, &mess_joiner, sizeof(mess_joiner), 0);
+
+      if (ow_joiner)
+	{
+	  delete ow_joiner;
+	  ow_joiner = 0;
+	}
+
+      join_thread->interrupt();
+
       // send notification to router. Need to send a bunch of things
       // and cover all neighbors instead of sending to just a single
       // neighbor as before
 
       // send out UNSAT notification with new session id
-      my_session_id++;
       UnsatNotification* mess_router = new UnsatNotification(new_conflicts, partial_ass, decision, my_session_id);
 
       DMCS_LOG_TRACE(port << ": Send to Router: " << *mess_router);

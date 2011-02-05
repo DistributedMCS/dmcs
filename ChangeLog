@@ -1,5 +1,14 @@
 2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/solver/RelSatSolver.cpp: Inform JoinThread of the new session.
+
+	* src/network/JoinThread.cpp: Catch when interrupted.
+
+	* include/network/JoinThread.h: add process().
+
+	* include/dmcs/SessionNotification.h: Add SessionNotification.h
+	* include/dmcs/Makefile.am: Likewise.
+
 	* src/network/JoinThread.cpp: Filter out old models.
 	* src/solver/RelSatSolver.cpp: Likewise.
 

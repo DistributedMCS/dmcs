@@ -94,6 +94,9 @@ private:
        const PartialBeliefStateIteratorVecPtr& beg_it, 
        const PartialBeliefStateIteratorVecPtr& end_it);
 
+  void
+  process();
+
 private:
   std::size_t port;
   std::size_t no_nbs;                  // number of neighbors 
