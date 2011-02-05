@@ -116,6 +116,7 @@ private:
   ConcurrentMessageQueuePtr    dmcs_sat_notif;
   ConcurrentMessageQueuePtr    sat_router_notif;
   ConcurrentMessageQueueVecPtr router_neighbors_notif;
+  ConcurrentMessageQueuePtr    sat_joiner_notif;
   HashedBiMapPtr c2o;
   std::size_t buf_count;
   bool first_round;

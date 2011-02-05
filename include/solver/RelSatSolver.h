@@ -42,6 +42,7 @@
 #include "relsat-20070104/SATSolver.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 
 #ifndef REL_SAT_SOLVER_H
 #define REL_SAT_SOLVER_H
@@ -69,6 +70,8 @@ public:
 	       MessagingGatewayBC* mg_,
 	       ConcurrentMessageQueue* dsn,
 	       ConcurrentMessageQueue* srn,
+	       ConcurrentMessageQueue* sjn,
+	       boost::thread* jt,
 	       std::size_t p);
 
   virtual
@@ -141,6 +144,7 @@ private:
   MessagingGatewayBC*            mg;
   ConcurrentMessageQueue*        dmcs_sat_notif;   // to get notification from Handler
   ConcurrentMessageQueue*        sat_router_notif; // to inform Router
+  ConcurrentMessageQueue*        sat_joiner_notif; // to inform Joiner in case of UNSAT
   ConflictVec*                   parent_conflicts;
   PartialBeliefState*            parent_ass;
   Decisionlevel*                 parent_decision;
@@ -149,6 +153,7 @@ private:
   ConflictBufIterVecPtr          new_conflicts_beg;
   TrailPtr                       trail;
   VecSizeTPtr                    orig_sigs_size;
+  boost::thread*                 join_thread;
 
   SATInstance*                   xInstance;
   SATSolver*                     xSATSolver;

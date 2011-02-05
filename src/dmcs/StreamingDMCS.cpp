@@ -75,6 +75,7 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c,
     dmcs_sat_notif(new ConcurrentMessageQueue),
     sat_router_notif(new ConcurrentMessageQueue),
     router_neighbors_notif(new ConcurrentMessageQueueVec),
+    sat_joiner_notif(new ConcurrentMessageQueue),
     c2o(new HashedBiMap),
     buf_count(bc),
     first_round(true),
@@ -238,15 +239,21 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
   ThreadFactory tf(conflicts_driven, ctx, theory, local_sig, localV,  
 		   orig_sigs_size, nbs, pack_size, my_starting_session_id,
 		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), 
-		   c2o.get(), port);
+		   sat_joiner_notif.get(), c2o.get(), port);
 
-  sat_thread = tf.createLocalSolveThread();
+
 
   if (no_nbs > 0)
     {
       tf.createNeighborThreads(neighbor_threads, neighbors, router_neighbors_notif);
-      join_thread   = tf.createJoinThread(router_neighbors_notif, conflicts, partial_ass, decision);
+      join_thread   = tf.createJoinThread(router_neighbors_notif, sat_joiner_notif, 
+					  conflicts, partial_ass, decision);
       router_thread = tf.createRouterThread(router_neighbors_notif);
+      sat_thread = tf.createLocalSolveThread(join_thread);
+    }
+  else
+    {
+      sat_thread = tf.createLocalSolveThread(0);
     }
 
   DMCS_LOG_TRACE("All threads created!");

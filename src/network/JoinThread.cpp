@@ -297,6 +297,7 @@ JoinThread::operator()(std::size_t nbs,
 		       std::size_t s,
 		       MessagingGatewayBC* m,
 		       ConcurrentMessageQueueVec* jv,
+		       ConcurrentMessageQueue* sjn,
 		       ConflictVec* cs,
 		       PartialBeliefState* pa,
 		       Decisionlevel* d)
@@ -305,6 +306,7 @@ JoinThread::operator()(std::size_t nbs,
 
   mg = m;
   joiner_neighbors_notif = jv;
+  sat_joiner_notif = sjn;
   parent_conflicts = cs;
   parent_ass = pa;
   parent_decision = d;

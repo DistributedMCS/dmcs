@@ -50,7 +50,8 @@ ThreadFactory::ThreadFactory(bool cd,
 			     std::size_t sid,
 			     MessagingGatewayBC* m,
 			     ConcurrentMessageQueue* dsn,
-			     ConcurrentMessageQueue* ssn,
+			     ConcurrentMessageQueue* srn,
+			     ConcurrentMessageQueue* sjn,
 			     HashedBiMap* co,
 			     std::size_t p)
   : conflicts_driven(cd),
@@ -64,7 +65,8 @@ ThreadFactory::ThreadFactory(bool cd,
     session_id(sid),
     mg(m),
     dmcs_sat_notif(dsn), 
-    sat_router_notif(ssn), 
+    sat_router_notif(srn), 
+    sat_joiner_notif(sjn),
     c2o(co),
     port(p)
 {
@@ -113,6 +115,7 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 
 boost::thread*
 ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_notif,
+				ConcurrentMessageQueuePtr& sat_joiner_notif,
 				ConflictVec* conflicts,
 				PartialBeliefState* partial_ass,
 				Decisionlevel* decision)
@@ -123,7 +126,7 @@ ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_n
 
   JoinThread jt(port, session_id);
   boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, joiner_neighbors_notif.get(),
-				       conflicts, partial_ass, decision);
+				       sat_joiner_notif.get(), conflicts, partial_ass, decision);
 
   return t;
 }
@@ -131,7 +134,7 @@ ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_n
 
 
 boost::thread*
-ThreadFactory::createLocalSolveThread()
+ThreadFactory::createLocalSolveThread(boost::thread* join_thread)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   bool is_leaf                  = (nbs->size() == 0);
@@ -140,7 +143,7 @@ ThreadFactory::createLocalSolveThread()
 
   SatSolverFactory ssf(is_leaf, conflicts_driven, my_id, session_id, theory, local_sig, 
 		       localV, orig_sigs_size, c2o, system_size, mg, dmcs_sat_notif, 
-		       sat_router_notif, port);
+		       sat_router_notif, sat_joiner_notif, join_thread, port);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

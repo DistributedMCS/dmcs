@@ -57,6 +57,7 @@ public:
 	     std::size_t system_size,
 	     MessagingGatewayBC* mg,
 	     ConcurrentMessageQueueVec* joiner_neighbors_notif,
+	     ConcurrentMessageQueue* sat_joiner_notif,
 	     ConflictVec* cs,
 	     PartialBeliefState* pa,
 	     Decisionlevel* d);
@@ -101,7 +102,8 @@ private:
 
   MessagingGatewayBC*        mg;
   ConcurrentMessageQueueVec* joiner_neighbors_notif;
-  ConflictVec*              parent_conflicts;
+  ConcurrentMessageQueue*    sat_joiner_notif;
+  ConflictVec*               parent_conflicts;
   PartialBeliefState*        parent_ass;
   Decisionlevel*             parent_decision;
 };

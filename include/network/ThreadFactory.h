@@ -62,7 +62,8 @@ public:
 		std::size_t sid,
 		MessagingGatewayBC* m,
 		ConcurrentMessageQueue* dsn,
-		ConcurrentMessageQueue* ssn,
+		ConcurrentMessageQueue* srn,
+		ConcurrentMessageQueue* sjn,
 		HashedBiMap* co,
 		std::size_t p);
 
@@ -73,12 +74,13 @@ public:
 
   boost::thread*
   createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_notif,
+		   ConcurrentMessageQueuePtr& sat_joiner_notif,
 		   ConflictVec* conflicts,
 		   PartialBeliefState* partial_ass,
 		   Decisionlevel* decision);
 
   boost::thread*
-  createLocalSolveThread();
+  createLocalSolveThread(boost::thread* join_thread);
 
   boost::thread*
   createRouterThread(ConcurrentMessageQueueVecPtr& router_neighbors_notif);
@@ -98,7 +100,8 @@ private:
   std::size_t                     session_id;
   MessagingGatewayBC*             mg;
   ConcurrentMessageQueue*         dmcs_sat_notif;
-  ConcurrentMessageQueue*         sat_router_notif;
+  ConcurrentMessageQueue*         sat_router_notif;			
+  ConcurrentMessageQueue*         sat_joiner_notif;
   HashedBiMap*                    c2o;             // hashed bimap from context id to
 			                           // the offset in the vector of
 				                   // neighbor message queue

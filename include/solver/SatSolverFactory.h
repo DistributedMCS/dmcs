@@ -54,6 +54,8 @@ public:
 		   MessagingGatewayBC* mg_,
 		   ConcurrentMessageQueue* dsn,
 		   ConcurrentMessageQueue* srn,
+		   ConcurrentMessageQueue* sjn,
+		   boost::thread* jt,
 		   std::size_t p)
     : is_leaf(il),
       conflicts_driven(cd),
@@ -69,6 +71,8 @@ public:
       mg(mg_), 
       dmcs_sat_notif(dsn), 
       sat_router_notif(srn),
+      sat_joiner_notif(sjn),
+      join_thread(jt),
       port(p)
   { }
 
@@ -91,6 +95,8 @@ private:
   MessagingGatewayBC*          mg;
   ConcurrentMessageQueue*      dmcs_sat_notif;
   ConcurrentMessageQueue*      sat_router_notif;
+  ConcurrentMessageQueue*      sat_joiner_notif;
+  boost::thread*               join_thread;
   std::size_t port;
 };
 
@@ -106,6 +112,8 @@ SatSolverFactory::create<RelSatSolverPtr>()
 						c2o, system_size, 
 						mg, dmcs_sat_notif, 
 						sat_router_notif,
+						sat_joiner_notif,
+						join_thread,
 						port));
 
   return relsatsolver;
