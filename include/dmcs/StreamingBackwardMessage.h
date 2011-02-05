@@ -48,8 +48,8 @@ public:
   virtual ~StreamingBackwardMessage() 
   { }
 
-  StreamingBackwardMessage(PartialBeliefStateVecPtr& result_)
-    : result(result_)
+  StreamingBackwardMessage(PartialBeliefStateVecPtr& r, VecSizeTPtr& r_sid)
+    : result(r), result_sid(r_sid)
   { }
 
   PartialBeliefStateVecPtr
@@ -58,33 +58,47 @@ public:
     return result;
   }
 
+  VecSizeTPtr
+  getSessionId() const
+  {
+    return result_sid;
+  }
+
 public:
   template <typename Archive>
   void
   serialize(Archive& ar, const unsigned int /* version */)
   {
     ar & result;
+    ar & result_sid;
   }
 
 private:
   PartialBeliefStateVecPtr result;
+  VecSizeTPtr result_sid;
 };
 
 inline std::ostream&
 operator<< (std::ostream& os, const StreamingBackwardMessage& sbMess)
 {
   const PartialBeliefStateVecPtr& result = sbMess.getBeliefStates();
-  os << "{ ";
-  for (PartialBeliefStateVec::const_iterator it = result->begin();
-       it != result->end(); ++it)
+  const VecSizeTPtr& result_sid = sbMess.getSessionId();
+
+  assert (result->size() == result_sid->size());
+
+  PartialBeliefStateVec::const_iterator it = result->begin();
+  VecSizeT::const_iterator jt = result_sid->begin();
+
+  os << "{ " ;
+  for (; it != result->end(); ++it, ++jt)
     {
       if (*it)
 	{
-	  os << **it << std::endl;
+	  os << "(" << **it << ", " << *jt << ")"<< std::endl;
 	}
       else
 	{
-	  os << "NULL" << std::endl;
+	  os << "(NULL, 0)" << std::endl;
 	}
     }
   os << " }";

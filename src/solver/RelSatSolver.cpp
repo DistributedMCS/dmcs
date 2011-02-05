@@ -155,10 +155,17 @@ RelSatSolver::prepare_input()
     mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
 
   input = ms.m;
-  std::size_t sid = ms.sid; ///@todo FIXME
+  std::size_t sid = ms.sid;
 
   if (input == 0)
     {
+      return false;
+    }
+
+  if (sid != my_session_id)
+    {
+      assert (sid < my_session_id);
+      DMCS_LOG_TRACE(port << ": Receive old joined input from sid = " << sid << ", while my current session id = " << my_session_id);
       return false;
     }
 
@@ -202,7 +209,8 @@ RelSatSolver::import_conflicts(const ConflictVec* conflicts)
   VariableSet xNegativeVariables(sig_size);
 
   for (ConflictVec::const_iterator it = conflicts->begin(); it != conflicts->end(); ++it)
-    {      xPositiveVariables.vClear();
+    {      
+      xPositiveVariables.vClear();
       xNegativeVariables.vClear();
 
       Conflict* conflict = *it;

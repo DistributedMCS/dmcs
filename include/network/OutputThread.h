@@ -67,16 +67,19 @@ private:
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif);
 
   void
-  collect_output(MessagingGatewayBC* mg, PartialBeliefStateVecPtr& res, std::string& header);
+  collect_output(MessagingGatewayBC* mg, PartialBeliefStateVecPtr& res, 
+		 VecSizeTPtr& res_sid, std::string& header);
 
   void
   write_result(connection_ptr conn,
 	       PartialBeliefStateVecPtr& res,
+	       VecSizeTPtr& res_sid,
 	       const std::string& header);
 
   void
   handle_written_header(connection_ptr conn,
-			PartialBeliefStateVecPtr& res);
+			PartialBeliefStateVecPtr& res,
+			VecSizeTPtr& res_sid);
 
 private:
   std::size_t pack_size;             // Number of models the invoker expects to get

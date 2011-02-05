@@ -1,5 +1,19 @@
 2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/JoinThread.cpp: Filter out old models.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/ConcurrentMessageDispatcher.h: Back to just sending
+	ctx_id and peq_cnt.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+
+	* include/dmcs/StreamingBackwardMessage.h: Attach with each belief
+	state a session_id.
+	* include/network/NeighborThread.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* include/network/OutputThread.h: Likewise.
+
 	* include/dmcs/StreamingDMCS.h: Add communication channel between
 	SAT solver and Joiner.
 	* src/solver/RelSatSolver.cpp: Likewise.

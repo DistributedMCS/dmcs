@@ -58,8 +58,7 @@ JoinThread::import_belief_states(std::size_t noff,
 				 PartialBeliefStateIteratorVecPtr& mid_it,
 				 ImportStates import_state)
 {
-  // end of models 
-  bool eom = false; 
+  bool imported_something = false;
   const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
   // read BeliefState* from NEIGHBOR_MQ
@@ -87,7 +86,7 @@ JoinThread::import_belief_states(std::size_t noff,
       struct MessagingGatewayBC::ModelSession ms =
 	mg->recvModel(offset, prio, timeout);
       PartialBeliefState* bs = ms.m;
-      std::size_t sid = ms.sid; ///@todo FIXME
+      std::size_t sid = ms.sid;
 
       if (bs == 0)
 	{
@@ -99,7 +98,11 @@ JoinThread::import_belief_states(std::size_t noff,
 	  DMCS_LOG_TRACE(port << ": Reached a NULL model. set bit " << noff << " to TRUE.");
 	 
 	  // mark that this neighbor reached its pack_size. 
-	  pack_full.set(noff);
+	  
+	  if (imported_something)
+	    {
+	      pack_full.set(noff);
+	    }
 
 	  // NULL models are not used for joining
 	  break;
@@ -108,7 +111,12 @@ JoinThread::import_belief_states(std::size_t noff,
       DMCS_LOG_TRACE(port << ": Storing belief state " << i << " from " << noff);
 
       // normal case, just got a belief state
-      bsv->push_back(bs); 
+      if (sid == session_id)
+	{
+	  bsv->push_back(bs);
+	  imported_something = true;
+	}
+      // otherwise, just ignore this belief state because it belongs to an old session
     }
   
   if (import_state != FILLING_UP)
@@ -128,10 +136,14 @@ JoinThread::import_belief_states(std::size_t noff,
 #endif //0
     }
 
-  // turn on the bit that is respective to this context
-  in_mask.set(noff);
+  if (imported_something)
+    {
+      // turn on the bit that is respective to this context
+      in_mask.set(noff);
+      return true;
+    }
 
-  return eom; 
+  return false;
 }
 
 
@@ -170,14 +182,14 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
 
 #if 1
       DMCS_LOG_TRACE(port << ": Intermediate RESULT = " << *result);
-#endif//0      
+#endif //0
     }
 
   DMCS_LOG_TRACE(port << ": Final RESULT = " << *result << " ... Sending to JOIN_OUT");
 
   // Joining succeeded. Now send this input to SAT solver via JOIN_OUT_MQ
   // be careful that we are blocked here. Use timeout sending instead?
-  mg->sendModel(result, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0); ///@todo FIXME
+  mg->sendModel(result, session_id, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
 
   return 1;
 }
@@ -260,6 +272,8 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
 			 std::size_t next, 
 			 ConflictNotification::NotificationType nt)
 {
+  boost::this_thread::interruption_point();
+
   // empty our local storage for the sake of non-exponential space
   PartialBeliefStateVecPtr& bsv = (*partial_eqs)[next];
   bsv->clear();
@@ -288,8 +302,8 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
       delete ow_neighbor;
       ow_neighbor = 0;
     }
-
 }
+
 
 
 void
@@ -349,7 +363,7 @@ JoinThread::operator()(std::size_t nbs,
       MessagingGatewayBC::JoinIn nn = 
 	mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
 
-      DMCS_LOG_TRACE(port << ": Received from offset " << nn.ctx_offset << ", " << nn.peq_cnt << " peqs to pick up");
+      DMCS_LOG_TRACE(port << ": Received from offset " << nn.ctx_offset << ", " << nn.peq_cnt << " peqs to pick up.");
 
       if (nn.peq_cnt == 0)
 	{ 
@@ -408,14 +422,20 @@ JoinThread::operator()(std::size_t nbs,
 	  // (nn.peq_cnt != 0)
 
 	  // first we import the belief states received
-	  import_belief_states(nn.ctx_offset,
-			       nn.peq_cnt,
-			       partial_eqs, 
-			       in_mask,
-			       pack_full,
-			       beg_it,
-			       mid_it,
-			       import_state);
+	  
+	  bool imported_something = import_belief_states(nn.ctx_offset,
+							 nn.peq_cnt,
+							 partial_eqs, 
+							 in_mask,
+							 pack_full,
+							 beg_it,
+							 mid_it,
+							 import_state);
+
+	  if (!imported_something)
+	    {
+	      continue;
+	    }
 
 	  DMCS_LOG_TRACE(port << ": PartialBeliefState package received:");
 	  DMCS_LOG_TRACE(*partial_eqs);

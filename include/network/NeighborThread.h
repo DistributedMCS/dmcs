@@ -266,6 +266,9 @@ private:
 	DMCS_LOG_TRACE(port << ": Write to MQs. noff = " << noff);
 	
 	const PartialBeliefStateVecPtr& bsv = mess->getBeliefStates();
+	const VecSizeTPtr& session_id = mess->getSessionId();
+
+	assert (bsv->size() == session_id->size());
 	
 	DMCS_LOG_TRACE(port << ": Received " << bsv->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
 	
@@ -273,22 +276,24 @@ private:
 
 	// notify the joiner by putting a JoinMess into JoinMessageQueue
 	std::size_t bsv_size = bsv->size();
-	mg->sendJoinIn(bsv_size, 0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0); ///@todo FIXME
-	
-	for (PartialBeliefStateVec::const_iterator it = bsv->begin();
-	     it != bsv->end();
-	     ++it)
+
+	mg->sendJoinIn(bsv_size, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+
+	PartialBeliefStateVec::const_iterator it = bsv->begin();	
+	VecSizeT::const_iterator jt = session_id->begin();
+
+	for (; it != bsv->end(); ++it, ++jt)
 	  {
 	    PartialBeliefState* bs = *it;
 	    if (bs != 0)
 	      {
-		DMCS_LOG_TRACE(port << ": Sending model: " << *bs);
+		DMCS_LOG_TRACE(port << ": Sending model = " << *bs << ", sid = " << *jt);
 	      }
 	    else
 	      {
 		DMCS_LOG_TRACE(port << ": Sending model: NULL");
 	      }
-	    mg->sendModel(bs, 0, noff, offset, 0); ///@todo FIXME
+	    mg->sendModel(bs, *jt, noff, offset, 0); 
 	  }
 	
 	boost::shared_ptr<std::string> header(new std::string);
