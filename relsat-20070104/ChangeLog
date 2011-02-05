@@ -1,3 +1,7 @@
+2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.cpp: Directly pass learned clauses to wrapper.
+
 2011-02-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.cpp: Add interruption points.
