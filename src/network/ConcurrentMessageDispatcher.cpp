@@ -155,7 +155,6 @@ ConcurrentMessageDispatcher::sendModelDecisionlevel(PartialBeliefState* b,
 
 bool
 ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
-					std::size_t sid,
 					std::size_t from,
 					std::size_t to,
 					std::size_t /* prio */,
@@ -165,7 +164,7 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
   assert(mqs.size() > to);
   assert(mqs.size() > from);
 
-  struct JoinIn ji = { from, k, sid };
+  struct JoinIn ji = { from, k };
 
   if (msecs > 0)
     {
@@ -319,7 +318,7 @@ ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 {
   assert(mqs.size() > from);
 
-  struct JoinIn ji = {0,0,0};
+  struct JoinIn ji = {0,0};
   std::size_t recvd = 0;
   unsigned int p = 0;
   void *ptr = static_cast<void*>(&ji);

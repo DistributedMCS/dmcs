@@ -84,7 +84,7 @@ namespace dmcs {
 #endif //0
 
     virtual bool
-    sendJoinIn(std::size_t k, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual struct ModelSession
     recvModel(std::size_t from, std::size_t& prio, int& msecs);

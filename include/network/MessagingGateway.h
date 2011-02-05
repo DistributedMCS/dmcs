@@ -87,7 +87,6 @@ namespace dmcs {
     {
       std::size_t ctx_offset;
       std::size_t peq_cnt;
-      std::size_t sid;
     };
 
 
@@ -153,7 +152,7 @@ namespace dmcs {
      * @return true if sending failed
      */
     virtual bool
-    sendJoinIn(std::size_t k, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
+    sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
 
     /** 
      * Receive a ModelSession message from @a from. May block.
