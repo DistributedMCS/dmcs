@@ -1,3 +1,32 @@
+2011-02-05  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/testCombination.cpp: Fix or disable testcases.
+	* testsuite/testInterfaceRelSat.cpp: Likewise.
+	* testsuite/testJoinThread.cpp: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+
+	* include/network/MessagingGateway.h: Add session id.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+
+	* examples/run-opt.sh: Add run support.
+	* examples/run-streaming.sh: Likewise.
+
+	* testsuite/testTranslation.cpp: Fix testcase.
+
+	* include/loopformula/CNFLocalLoopFormulaBuilder.h: Merged Luca's loopformula fix.
+	* include/loopformula/IMPLocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/LocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/LoopFormulaDirector.h: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/loopformula/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/loopformula/LocalLoopFormulaBuilder.cpp: Likewise.
+
 2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: Inform JoinThread of the new session.
@@ -68,30 +97,6 @@
 	* include/solver/ChoicePoint.h: local_id --> orig_id
 
 	* include/mcs/BeliefState.h: Improve output info.
-
-2011-02-05  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* include/network/MessagingGateway.h: Add session id.
-	* include/network/ConcurrentMessageDispatcher.h: Likewise.
-	* src/solver/RelSatSolver.cpp: Likewise.
-	* src/network/OutputThread.cpp: Likewise.
-	* src/network/JoinThread.cpp: Likewise.
-	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
-	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
-	* include/network/NeighborThread.h: Likewise.
-
-	* examples/run-opt.sh: Add run support.
-	* examples/run-streaming.sh: Likewise.
-
-	* testsuite/testTranslation.cpp: Fix testcase.
-
-	* include/loopformula/CNFLocalLoopFormulaBuilder.h: Merged Luca's loopformula fix.
-	* include/loopformula/IMPLocalLoopFormulaBuilder.h: Likewise.
-	* include/loopformula/LocalLoopFormulaBuilder.h: Likewise.
-	* include/loopformula/LoopFormulaDirector.h: Likewise.
-	* src/dmcsd.cpp: Likewise.
-	* src/loopformula/CNFLocalLoopFormulaBuilder.cpp: Likewise.
-	* src/loopformula/LocalLoopFormulaBuilder.cpp: Likewise.
 
 2011-02-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 

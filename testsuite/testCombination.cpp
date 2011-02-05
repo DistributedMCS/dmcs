@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( testBeliefStateCombination )
   BOOST_CHECK_EQUAL(cs->size(), 2);
   BOOST_CHECK_EQUAL(ct->size(), 2);
 
-  BeliefStatePtr Vmax(new BeliefState(system_size, maxBeliefSet()));
+  BeliefStatePtr Vmax(new BeliefState(system_size, maxBeliefSet(32)));
 
   // now combine
   BeliefStateListPtr cu = combine(cs, ct, Vmax);
