@@ -523,7 +523,7 @@ RelSatSolver::receiveEOF()
   if (trail->empty())
     {
       ///@todo WTF?x
-      //DMCS_LOG_TRACE(port << ": Empty stack, EOF. Send a NULL pointer to OUT_MQ");
+      DMCS_LOG_TRACE(port << ": Empty stack, EOF. Send a NULL pointer to OUT_MQ");
       mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
   else
@@ -604,8 +604,6 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
   PartialBeliefState* interface_impossible;
   PartialBeliefState* partial_ass = new PartialBeliefState(*parent_ass);
   
-  //  *partial_ass = *parent_ass;
-  
   if (trail->empty())
     {
       decision = new Decisionlevel(*parent_decision);
@@ -630,6 +628,18 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
   
   if (it == local_sig.end())
     {
+      if (interface_impossible)
+	{
+	  delete interface_impossible;
+	  interface_impossible = 0;
+	}
+
+      if (decision)
+	{
+	  delete decision;
+	  decision = 0;
+	}
+
       DMCS_LOG_TRACE(port << ": The parents decided all of my bridge atoms and I am still UNSAT. Send a NULL pointer to OUT_MQ");
       mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }

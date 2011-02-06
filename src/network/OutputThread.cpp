@@ -247,6 +247,12 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  res->push_back(bs);
 	  res_sid->push_back(sid);
 	}
+      else
+	{
+	  // clean up
+	  delete bs;
+	  bs = 0;
+	}
     } // for
 
   if (res->size() > 0)
@@ -344,6 +350,16 @@ OutputThread::handle_written_header(connection_ptr conn,
   DMCS_LOG_TRACE(port << ": return message " << return_mess << " to port " << ep.port());
       
   conn->write(return_mess);
+
+  // clean up
+  for (PartialBeliefStateVec::iterator it = res->begin(); it != res->end(); ++it)
+    {
+      if (*it)
+	{
+	  delete *it;
+	  *it = 0;
+	}
+    }
 }
 
 

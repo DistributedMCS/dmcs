@@ -122,7 +122,7 @@ public:
 					  conflicts,
 					  partial_ass
 					  )
-					  );
+			       );
 #endif
 	  }
 	else if (cn->type == ConflictNotification::NEXT)
@@ -196,8 +196,8 @@ public:
 
     conn->write(mess);
 
-    // We don't delete partial_ass here. It should be used in other places.
-
+    // partial_ass and decision are deleted by RelSatSolver, upon
+    // exceeding the possibility to backtrack
     if (conflicts)
       {
 	for (ConflictVec::const_iterator it = conflicts->begin();

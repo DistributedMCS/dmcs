@@ -121,7 +121,9 @@ public:
 		for (ConcurrentMessageQueueVec::iterator it = beg; it != end; ++it, ++ct)
 		  {
 		    ConflictVec* c_vec = *ct;
-		    ConflictNotification* cn = new ConflictNotification(c_vec, partial_ass, decision, session_id);
+
+		    ConflictNotification* cn = new ConflictNotification(c_vec, partial_ass, 
+									decision, session_id);
 		    std::size_t prio = 0;
 
 		    DMCS_LOG_TRACE(port << ": Send restart request to noff = " << std::distance(beg, it) 
@@ -139,6 +141,9 @@ public:
 			ow_neighbor = 0;
 		      }
 		  }
+
+		/// check me
+		delete new_conflicts;
 	      }
 	  }
 	else

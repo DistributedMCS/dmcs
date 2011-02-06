@@ -1,5 +1,13 @@
 2011-02-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/RouterThread.h: Fix memory leaks.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/NeighborOut.h: Add some comment.
+	* include/solver/RelSatSolver.h: Likewise.
+
 	* include/network/Handler.tcc: Remove case --k=0.
 	* include/network/OutputThread.h: Likewise.
 	* src/network/OutputThread.cpp: Likewise.

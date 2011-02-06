@@ -284,11 +284,11 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
 
   // empty our local storage for the sake of non-exponential space
   PartialBeliefStateVecPtr& bsv = (*partial_eqs)[next];
-  for (PartialBeliefStateVec::const_iterator it = bsv->begin(); it != bsv->end(); ++it)
+  for (PartialBeliefStateVec::iterator it = bsv->begin(); it != bsv->end(); ++it)
     {
-      PartialBeliefState* pbs = *it;
-      delete pbs;
-      pbs = 0;
+      assert (*it);
+      delete *it;
+      *it = 0;
     }
 
   bsv->clear();
@@ -348,185 +348,205 @@ JoinThread::process()
   PartialBeliefStateIteratorVecPtr beg_it(new PartialBeliefStateIteratorVec(no_nbs));
   PartialBeliefStateIteratorVecPtr mid_it(new PartialBeliefStateIteratorVec(no_nbs));
 
-  while (1)
+  try 
     {
-      // look at JOIN_IN_MQ for notification of new models arrival
-      std::size_t prio = 0;
-      int timeout = 0;
-
-      // notification from neighbor thread
-
-      DMCS_LOG_TRACE(port << ": Waiting at JOIN_IN for notification of NEW MODELS ARRIVAL");
-
-      MessagingGatewayBC::JoinIn nn = 
-	mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
-
-      DMCS_LOG_TRACE(port << ": Received from offset " << nn.ctx_offset << ", " << nn.peq_cnt << " peqs to pick up.");
-
-      if (nn.peq_cnt == 0)
-	{ 
-	  // This neighbor is either out of models or UNSAT
-
-	  //assert (import_state != FILLING_UP);
-
-	  if (import_state == START_UP)
-	    {
-	      // UNSAT
+      while (1)
+	{
+	  // look at JOIN_IN_MQ for notification of new models arrival
+	  std::size_t prio = 0;
+	  int timeout = 0;
+	  
+	  // notification from neighbor thread
+	  
+	  DMCS_LOG_TRACE(port << ": Waiting at JOIN_IN for notification of NEW MODELS ARRIVAL");
+	  
+	  MessagingGatewayBC::JoinIn nn = 
+	    mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
+	  
+	  DMCS_LOG_TRACE(port << ": Received from offset " << nn.ctx_offset << ", " << nn.peq_cnt << " peqs to pick up.");
+	  
+	  if (nn.peq_cnt == 0)
+	    { 
+	      // This neighbor is either out of models or UNSAT
 	      
-	      // The current C, S to the neighbors is bad. I need to
-	      // inform the SAT solver about this by sending him a
-	      // NULL model.
-
-	      // Also tell the neighbors (via NeighborOut) to stop
-	      // returning models.
-
-	      DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0. Send a NULL model to JOIN_OUT_MQ");
-	      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0); ///@todo FIXME
-	    }
-	  else
-	    {
-	      // out of models, import == GETTING_NEXT v FILLING_UP
-
-	      // We need to ask the next neighbor (now ordered by the
-	      // offset) to give the next package of models.
-
-	      next_neighbor_offset = nn.ctx_offset + 1;
-
-	      DMCS_LOG_TRACE(port << ": Increase next_neighbor_offset. Now is: " << next_neighbor_offset);
-
-	      if (next_neighbor_offset == no_nbs)
+	      //assert (import_state != FILLING_UP);
+	      
+	      if (import_state == START_UP)
 		{
-		  // reset to the starting state
-		  next_neighbor_offset = 0;
-		  asking_next = false;
-		  import_state = START_UP;
-		  in_mask.clear();
-		  pack_full.clear();
-
-		  DMCS_LOG_TRACE(port << ": Send a NULL model to JOIN_OUT_MQ");
+		  // UNSAT
+		  
+		  // The current C, S to the neighbors is bad. I need to
+		  // inform the SAT solver about this by sending him a
+		  // NULL model.
+		  
+		  // Also tell the neighbors (via NeighborOut) to stop
+		  // returning models.
+		  
+		  DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0. Send a NULL model to JOIN_OUT_MQ");
 		  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0); ///@todo FIXME
 		}
 	      else
 		{
-		  DMCS_LOG_TRACE(port << ": Going to ask for next batch of peqs with next_neighbor_offset == " << next_neighbor_offset);
-
-		  asking_next = true;
-		  ask_for_next(partial_eqs, next_neighbor_offset, ConflictNotification::NEXT);
-		}
-	    }
-	} // (nn.peq_cnt == 0)
-      else
-	{
-	  // (nn.peq_cnt != 0)
-
-	  // first we import the belief states received
-	  
-	  bool imported_something = import_belief_states(nn.ctx_offset,
-							 nn.peq_cnt,
-							 partial_eqs, 
-							 in_mask,
-							 pack_full,
-							 beg_it,
-							 mid_it,
-							 import_state);
-
-	  if (!imported_something)
-	    {
-	      continue;
-	    }
-
-	  DMCS_LOG_TRACE(port << ": PartialBeliefState package received:");
-	  DMCS_LOG_TRACE(*partial_eqs);
-
-	  // then if this was a "NEXT" request to this neighbor, we
-	  // have to restart the neighbors before him
-	  if (asking_next)
-	    {
-	      DMCS_LOG_TRACE(port << ": Realized that we are in GETTING_NEXT mode.");
-
-	      assert (import_state != START_UP);
-	      assert (nn.ctx_offset == next_neighbor_offset);
-
-	      asking_next  = false;
-	      import_state = START_UP;
-
-	      for (std::size_t i = 0; i < next_neighbor_offset; ++i)
-		{
-		  // actually it's asking for a new round of models 
-		  ask_for_next(partial_eqs, i, ConflictNotification::REQUEST);
-
-		  // and reset the in bit mask wrt this neighbor
-		  in_mask.set(i, false);
-
-		  // further possible improvement: if neighbor at
-		  // offset i has in total less than pack_size models,
-		  // then we just keep his models as asking for a new
-		  // round will return the same thing.
-		}
-	    }
-
-	  // At this point, we can check whether joining is possible
-	  if (in_mask.count_range(0, no_nbs+1) == no_nbs)
-	    {
-	      if (import_state == START_UP || import_state == GETTING_NEXT)
-		{
-		  import_state = FILLING_UP;
-
-		  DMCS_LOG_TRACE(port << ": First time joining");
-
-		  for (std::size_t i = 0; i < no_nbs; ++i)
+		  // out of models, import == GETTING_NEXT v FILLING_UP
+		  
+		  // We need to ask the next neighbor (now ordered by the
+		  // offset) to give the next package of models.
+		  
+		  next_neighbor_offset = nn.ctx_offset + 1;
+		  
+		  DMCS_LOG_TRACE(port << ": Increase next_neighbor_offset. Now is: " << next_neighbor_offset);
+		  
+		  if (next_neighbor_offset == no_nbs)
 		    {
-		      PartialBeliefStateVecPtr& bsv = (*partial_eqs)[i];
-		      (*mid_it)[i] = bsv->end();
+		      // reset to the starting state
+		      next_neighbor_offset = 0;
+		      asking_next = false;
+		      import_state = START_UP;
+		      in_mask.clear();
+		      pack_full.clear();
+		      
+		      DMCS_LOG_TRACE(port << ": Send a NULL model to JOIN_OUT_MQ");
+		      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0); ///@todo FIXME
 		    }
-
-		  join(partial_eqs, beg_it, mid_it);
-		}
-	      else
-		{
-		  DMCS_LOG_TRACE(port << ":  NOT a first time joining ==> do it selectively");
-		  for (std::size_t i = 0; i < no_nbs; ++i)
+		  else
 		    {
-		      PartialBeliefStateVecPtr& bsv = (*partial_eqs)[i];
-		      PartialBeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[i];
-		      if (mid_it_ref != bsv->end())
+		      DMCS_LOG_TRACE(port << ": Going to ask for next batch of peqs with next_neighbor_offset == " << next_neighbor_offset);
+		      
+		      asking_next = true;
+		      ask_for_next(partial_eqs, next_neighbor_offset, ConflictNotification::NEXT);
+		    }
+		}
+	    } // (nn.peq_cnt == 0)
+	  else
+	    {
+	      // (nn.peq_cnt != 0)
+	      
+	      // first we import the belief states received
+	      
+	      bool imported_something = import_belief_states(nn.ctx_offset,
+							     nn.peq_cnt,
+							     partial_eqs, 
+							     in_mask,
+							     pack_full,
+							     beg_it,
+							     mid_it,
+							     import_state);
+	      
+	      if (!imported_something)
+		{
+		  continue;
+		}
+	      
+	      DMCS_LOG_TRACE(port << ": PartialBeliefState package received:");
+	      DMCS_LOG_TRACE(*partial_eqs);
+	      
+	      // then if this was a "NEXT" request to this neighbor, we
+	      // have to restart the neighbors before him
+	      if (asking_next)
+		{
+		  DMCS_LOG_TRACE(port << ": Realized that we are in GETTING_NEXT mode.");
+		  
+		  assert (import_state != START_UP);
+		  assert (nn.ctx_offset == next_neighbor_offset);
+		  
+		  asking_next  = false;
+		  import_state = START_UP;
+		  
+		  for (std::size_t i = 0; i < next_neighbor_offset; ++i)
+		    {
+		      // actually it's asking for a new round of models 
+		      ask_for_next(partial_eqs, i, ConflictNotification::REQUEST);
+		      
+		      // and reset the in bit mask wrt this neighbor
+		      in_mask.set(i, false);
+		      
+		      // further possible improvement: if neighbor at
+		      // offset i has in total less than pack_size models,
+		      // then we just keep his models as asking for a new
+		      // round will return the same thing.
+		    }
+		}
+	      
+	      // At this point, we can check whether joining is possible
+	      if (in_mask.count_range(0, no_nbs+1) == no_nbs)
+		{
+		  if (import_state == START_UP || import_state == GETTING_NEXT)
+		    {
+		      import_state = FILLING_UP;
+		      
+		      DMCS_LOG_TRACE(port << ": First time joining");
+		      
+		      for (std::size_t i = 0; i < no_nbs; ++i)
 			{
-			  // This neighbor has some new models.
-			  DMCS_LOG_DEBUG("Neighbor at offset " << i << " has some new models.");
-			  PartialBeliefStateVec::const_iterator& beg_it_ref = (*beg_it)[i];
-			  
-			  // This is the range of new models that we want to join.
-
-			  DMCS_LOG_DEBUG("mid_it = " << **mid_it_ref);
-
-			  beg_it_ref = mid_it_ref;
-			  mid_it_ref = bsv->end();
-			  
-			  join(partial_eqs, beg_it, mid_it);
-			  
-			  // Restart begin position, because the new models are now all in.
-			  beg_it_ref = bsv->begin();
+			  PartialBeliefStateVecPtr& bsv = (*partial_eqs)[i];
+			  (*mid_it)[i] = bsv->end();
+			}
+		      
+		      join(partial_eqs, beg_it, mid_it);
+		    }
+		  else
+		    {
+		      DMCS_LOG_TRACE(port << ":  NOT a first time joining ==> do it selectively");
+		      for (std::size_t i = 0; i < no_nbs; ++i)
+			{
+			  PartialBeliefStateVecPtr& bsv = (*partial_eqs)[i];
+			  PartialBeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[i];
+			  if (mid_it_ref != bsv->end())
+			    {
+			      // This neighbor has some new models.
+			      DMCS_LOG_DEBUG("Neighbor at offset " << i << " has some new models.");
+			      PartialBeliefStateVec::const_iterator& beg_it_ref = (*beg_it)[i];
+			      
+			      // This is the range of new models that we want to join.
+			      
+			      DMCS_LOG_DEBUG("mid_it = " << **mid_it_ref);
+			      
+			      beg_it_ref = mid_it_ref;
+			      mid_it_ref = bsv->end();
+			      
+			      join(partial_eqs, beg_it, mid_it);
+			      
+			      // Restart begin position, because the new models are now all in.
+			      beg_it_ref = bsv->begin();
+			    }
 			}
 		    }
-		}
-
-	      DMCS_LOG_TRACE(port << ":  pack_full.count_range == " << pack_full.count_range(0, no_nbs+1));
-
-	      if (pack_full.count_range(0, no_nbs+1) == no_nbs)
-		{
-		  DMCS_LOG_TRACE(port << ":  Pack full, go to get next models");
-		  import_state = GETTING_NEXT;
-		  asking_next  = true;
 		  
-		  // always ask for next models from neighbor with offset 0
-		  next_neighbor_offset = 0;
-		  ask_for_next(partial_eqs, 0, ConflictNotification::NEXT);
-		}
-	    } // (in_mask.count_range(0, no_nbs+1) == no_nbs)
+		  DMCS_LOG_TRACE(port << ":  pack_full.count_range == " << pack_full.count_range(0, no_nbs+1));
+		  
+		  if (pack_full.count_range(0, no_nbs+1) == no_nbs)
+		    {
+		      DMCS_LOG_TRACE(port << ":  Pack full, go to get next models");
+		      import_state = GETTING_NEXT;
+		      asking_next  = true;
+		      
+		      // always ask for next models from neighbor with offset 0
+		      next_neighbor_offset = 0;
+		      ask_for_next(partial_eqs, 0, ConflictNotification::NEXT);
+		    }
+		} // (in_mask.count_range(0, no_nbs+1) == no_nbs)
+	      
+	    } // (nn.peq_cnt != 0)
+	  
+	} // while (1)
+    } // try
+  catch (const boost::thread_interrupted& ex)
+    {
+      // clean up
+      for (PartialBeliefStatePackage::iterator it = partial_eqs->begin(); 
+	   it != partial_eqs->end(); ++it)
+	{
+	  PartialBeliefStateVecPtr& bsv = *it;
+	  for (PartialBeliefStateVec::iterator jt = bsv->begin(); 
+	       jt != bsv->end(); ++jt)
+	    {
+	      delete *jt;
+	      *jt = 0;
+	    }
+	}
 
-	} // (nn.peq_cnt != 0)
-
-    } // while (1)
+      throw ex;
+    }
 }
 
 

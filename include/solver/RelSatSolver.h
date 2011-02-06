@@ -149,7 +149,7 @@ private:
   PartialBeliefState*            parent_ass;
   Decisionlevel*                 parent_decision;
   PartialBeliefState*            input;
-  ConflictBufVecPtr              learned_conflicts;
+  ConflictBufVecPtr              learned_conflicts;  ///@todo: MD: fix memory leaks
   ConflictBufIterVecPtr          new_conflicts_beg;
   TrailPtr                       trail;
   VecSizeTPtr                    orig_sigs_size;
