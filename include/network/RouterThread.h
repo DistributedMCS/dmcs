@@ -74,7 +74,7 @@ public:
 
 	if (ptr && un)
 	  {
-	    if (un->type == ConflictNotification::SHUTDOWN)
+	    if (un->type == UnsatNotification::SHUTDOWN)
 	      {
 #if 0
 		ConcurrentMessageQueueVec::iterator beg = router_neighbors_notif->begin();

@@ -1,5 +1,7 @@
 2011-02-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/RouterThread.h: Fix warning.
+
 	* include/dmcs/OutputNotification.h: Add parent_session_id.
 
 	* src/network/JoinThread.cpp: Filter with parent_session_id.
