@@ -1,3 +1,20 @@
+2011-02-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/OutputNotification.h: Add parent_session_id.
+
+	* src/network/JoinThread.cpp: Filter with parent_session_id.
+
+	* src/solver/RelSatSolver.cpp: Send NULL pointer with
+	parent_session_id.
+
+	* include/network/OutputThread.h: Filter output models with parent_session_id.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/Handler.h: Keep parent_session_id around.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/SessionNotification.h: Add operator<<
+
 2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Run io_service in its own thread in streaming mode.

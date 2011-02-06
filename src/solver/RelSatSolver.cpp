@@ -349,7 +349,7 @@ RelSatSolver::solve()
 		{
 		  DMCS_LOG_TRACE(port << ": Got NULL input from JOIN_OUT_MQ");
 		  // send a NULL model to OUT_MQ to inform OutputThread
-		  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); ///@todo FIXME
+		  mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
 		  break;
 		}
 	      DMCS_LOG_TRACE(port << ": A fresh solving. input = " << *input);
@@ -524,7 +524,7 @@ RelSatSolver::receiveEOF()
     {
       ///@todo WTF?x
       //DMCS_LOG_TRACE(port << ": Empty stack, EOF. Send a NULL pointer to OUT_MQ");
-      //mg->sendModel(0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+      mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
   else
     {
@@ -545,7 +545,7 @@ RelSatSolver::receiveEOF()
       if (next_flip == 0)
 	{
 	  DMCS_LOG_TRACE(port << ": Out of every thing. Send a NULL pointer to OUT_MQ");
-	  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0); ///@todo FIXME
+	  mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
 	}
       else
 	{
@@ -631,7 +631,7 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
   if (it == local_sig.end())
     {
       DMCS_LOG_TRACE(port << ": The parents decided all of my bridge atoms and I am still UNSAT. Send a NULL pointer to OUT_MQ");
-      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+      mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
   else
     {
@@ -684,6 +684,8 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
       // interrupt join_thread, inform it about the new session_id
       SessionNotification* mess_joiner = new SessionNotification(my_session_id);
 
+      DMCS_LOG_TRACE(port << ": Send SessionNotification to Joiner " << *mess_joiner);
+
       SessionNotification* ow_joiner =
 	(SessionNotification*) overwrite_send(sat_joiner_notif, &mess_joiner, sizeof(mess_joiner), 0);
 
@@ -693,6 +695,7 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
 	  ow_joiner = 0;
 	}
 
+      DMCS_LOG_TRACE(port << ": Interrupt Joiner");
       join_thread->interrupt();
 
       // send notification to router. Need to send a bunch of things
@@ -724,10 +727,10 @@ RelSatSolver::receiveUNSAT(ClauseList& learned_clauses)
 
   if (is_leaf)
     {
-      DMCS_LOG_TRACE(port << ": Send a NULL pointer to OUT_MQ");
-      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0); ///@todo FIXME
+      DMCS_LOG_TRACE(port << ": UNSAT. Send a NULL pointer to OUT_MQ to close this session.");
+      mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
-  else
+  else 
     {
       if (conflicts_driven)
 	{
@@ -793,9 +796,9 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   // attach parent_session_id to the output models
 
   // now put this PartialBeliefState to the SatOutputMessageQueue
-  mg->sendModel(bs, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); ///@todo FIXME
+  mg->sendModel(bs, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 
-  //DMCS_LOG_TRACE(port << ": Solution sent: " << *bs);
+  DMCS_LOG_TRACE(port << ": Solution sent: " << *bs << ", with parent session id = " << parent_session_id);
 }
 
 

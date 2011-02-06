@@ -123,7 +123,8 @@ public:
 		     BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
 		     BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
 		     boost::shared_ptr<std::string> header,
-		     std::size_t pack_size);
+		     std::size_t pack_size,
+		     std::size_t parent_session_id);
 
 
 private:

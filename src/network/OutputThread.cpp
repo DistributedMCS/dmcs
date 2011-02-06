@@ -130,8 +130,10 @@ OutputThread::output_limit(connection_ptr c,
       else
 	{
 	  DMCS_LOG_TRACE(port << ": Go to collect output");
-	  collect_output(m, res, res_sid, header);
-	  write_result(c, res, res_sid, header);
+	  if (collect_output(m, res, res_sid, header))
+	    {
+	      write_result(c, res, res_sid, header);
+	    }
 	}
     }
 }
@@ -161,9 +163,10 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 	{
 	  pack_size = on->pack_size;
 	  left_2_send = on->pack_size;
+	  parent_session_id = on->parent_session_id;
 	  retval = true;
 
-	  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size);
+	  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
 	}
       else if (on->type == OutputNotification::SHUTDOWN)
 	{
@@ -187,7 +190,8 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 
 
 
-void
+// return true if we actually collected something
+bool
 OutputThread::collect_output(MessagingGatewayBC* mg,
 			     PartialBeliefStateVecPtr& res,
 			     VecSizeTPtr& res_sid,
@@ -200,7 +204,6 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
   collecting = true; 
   header = HEADER_ANS;
   
-  // be careful with weird value of pack_size. Bug just disappreared
   for (std::size_t i = 1; i <= left_2_send; ++i)
     {
       //DMCS_LOG_TRACE(port << ":  Read from MQ");
@@ -210,6 +213,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
       struct MessagingGatewayBC::ModelSession ms =
 	mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+
       PartialBeliefState* bs = ms.m;
       std::size_t sid = ms.sid; ///@todo FIXME
       
@@ -219,8 +223,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  //DMCS_LOG_TRACE(port << ": Got a NULL pointer. timeout == " << timeout);
 	  if (timeout == 0)
 	    {
-	      //DMCS_LOG_TRACE(port << ":  TIME OUT");
-	      // TIME OUT! Going to send whatever I got so far to the parent
+	      //DMCS_LOG_TRACE(port << ":  TIME OUT. Going to send whatever I got so far to the parent");
 	      if (res->size() > 0)
 		{
 		  DMCS_LOG_TRACE(port << ": Going to send HEADER_ANS");
@@ -239,18 +242,43 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  else 
 	    {
 	      // timeout != 0 ==> either UNSAT or EOF
-	      header = HEADER_EOF;
-	      collecting = false;
-	      break;
+	      if (sid == parent_session_id)
+		{
+		  DMCS_LOG_TRACE(port << ": Got UNSAT or EOF. sid = " << sid << ", parent_session_id = " << parent_session_id << ". Turn off collecting mode.");
+		  header = HEADER_EOF;
+		  collecting = false;
+		  break;
+		}
+	      else
+		{
+		  DMCS_LOG_TRACE(port << ": Got UNSAT or EOF. sid = " << sid << ", parent_session_id = " << parent_session_id << ". IGNORE.");
+		  --i;
+		  continue;
+		}
 	    }
 	}
       
-      DMCS_LOG_TRACE(port << ":  got #" << i << ": bs = " << *bs);
+      DMCS_LOG_TRACE(port << ":  got #" << i << ": bs = " << *bs << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
       
       // Got something in a reasonable time. Continue collecting.
-      res->push_back(bs);
-      res_sid->push_back(sid);
+
+      // It is weird if sid > parent_session_id, because SAT solver
+      // always sends a NULL pointer when it is interrupted
+      assert (sid < parent_session_id || sid == parent_session_id);
+
+      if (sid == parent_session_id)
+	{
+	  res->push_back(bs);
+	  res_sid->push_back(sid);
+	}
     } // for
+
+  if (res->size() > 0)
+    {
+      return true;
+    }
+
+  return false;
 }
 
 

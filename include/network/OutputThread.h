@@ -66,7 +66,7 @@ private:
   bool
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif);
 
-  void
+  bool
   collect_output(MessagingGatewayBC* mg, PartialBeliefStateVecPtr& res, 
 		 VecSizeTPtr& res_sid, std::string& header);
 
@@ -88,6 +88,7 @@ private:
                                      // (if yes then we don't want to wait for any trigger)
   bool        eof_left;
   std::size_t invoker;
+  std::size_t parent_session_id;     // used to filter out old models
   std::size_t port;
 };
 

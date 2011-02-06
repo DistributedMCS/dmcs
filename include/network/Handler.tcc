@@ -335,6 +335,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       // notify StreamingDMCS
       DMCS_LOG_TRACE(port << ": parent_session_id = " << parent_session_id << ", invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port);
 
+      DMCS_LOG_TRACE(port << ": Notify DMCS");
       StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(parent_session_id, invoker, pack_size, port, 
 									   conflicts, partial_ass, decision);
       StreamingDMCSNotification* ow_dmcs = 
@@ -347,7 +348,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	}
 
       // notify OutputThread
-      OutputNotification* mess_output = new OutputNotification(pack_size);
+      DMCS_LOG_TRACE(port << ": Notify OutputThread");
+      OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id);
       OutputNotification* ow_output = 
 	(OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
 
@@ -370,7 +372,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					 sesh, 
 					 cmd,
 					 header,
-					 pack_size)
+					 pack_size,
+					 parent_session_id)
 			     );
     }
   else
@@ -388,7 +391,8 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 						  SessionMsgPtr sesh,
 						  CmdTypePtr cmd,
 						  boost::shared_ptr<std::string> header,
-						  std::size_t pack_size)
+						  std::size_t pack_size,
+						  std::size_t parent_session_id)
 {
   assert(this == hdl.get());
 
@@ -416,7 +420,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  // code duplication with part of do_local_job. Just leave it like this for now
 
 	  // notify OutputThread
-	  OutputNotification* mess_output = new OutputNotification(pack_size);
+	  OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id);
 	  OutputNotification* ow_output = 
 	    (OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
 	  
@@ -439,7 +443,8 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 					     sesh, 
 					     cmd,
 					     header,
-					     pack_size)
+					     pack_size,
+					     parent_session_id)
 				 );	  
 	}
       else if (header->find(HEADER_TERMINATE) != std::string::npos)
@@ -450,7 +455,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 
 	  DMCS_LOG_TRACE(port << ": Send SHUTHDOWN to Output thread");
 
-	  OutputNotification* mess_output = new OutputNotification(0, OutputNotification::SHUTDOWN);
+	  OutputNotification* mess_output = new OutputNotification(0, parent_session_id, OutputNotification::SHUTDOWN);
 	  OutputNotification* ow_output = 
 	    (OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
 	  
@@ -486,7 +491,8 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 					     sesh,
 					     cmd,
 					     header,
-					     pack_size)
+					     pack_size, 
+					     parent_session_id)
 				 );
 	}
     }

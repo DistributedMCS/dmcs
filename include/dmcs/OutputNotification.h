@@ -46,12 +46,16 @@ struct OutputNotification
       SHUTDOWN
     };
 
-  OutputNotification(std::size_t pack_size_, NotificationType t = REQUEST)
-    : pack_size(pack_size_),
+  OutputNotification(std::size_t ps, 
+		     std::size_t psid,
+		     NotificationType t = REQUEST)
+    : pack_size(ps),
+      parent_session_id(psid),
       type(t)
   { }
   
   std::size_t pack_size;
+  std::size_t parent_session_id;
   NotificationType type;
 };
 

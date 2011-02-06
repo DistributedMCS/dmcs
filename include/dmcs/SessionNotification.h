@@ -53,6 +53,13 @@ struct SessionNotification
   NotificationType type;
 };
 
+inline std::ostream&
+operator<< (std::ostream& os, const SessionNotification& sn)
+{
+  os << "("<< sn.session_id << ")";
+  return os;
+}
+
 } // namespace dmcs
 
 #endif // SESSION_NOTIFICATION_H

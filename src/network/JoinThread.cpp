@@ -92,32 +92,39 @@ JoinThread::import_belief_states(std::size_t noff,
       if (bs == 0)
 	{
 	  // End of Package. Otherwise, the neighbor sent me some crap.
-	  DMCS_LOG_TRACE(port << ": got empty model from offset " << offset << " i == " << i << ", peq_cnt == " << peq_cnt);
+	  DMCS_LOG_TRACE(port << ": got empty model from noff " << noff << ". i == " << i << ", peq_cnt == " << peq_cnt);
 
 	  assert (i == peq_cnt - 1);
 
-	  DMCS_LOG_TRACE(port << ": Reached a NULL model. set bit " << noff << " to TRUE.");
-	 
 	  // mark that this neighbor reached its pack_size. 
 	  
 	  if (imported_something)
 	    {
+	      DMCS_LOG_TRACE(port << ": Reached a NULL model. Set bit " << noff << " to TRUE.");
 	      pack_full.set(noff);
+	    }
+	  else
+	    {
+	      DMCS_LOG_TRACE(port << ": Reached a NULL model from an old session. Jusrt ignore.");
 	    }
 
 	  // NULL models are not used for joining
 	  break;
 	}
 
-      DMCS_LOG_TRACE(port << ": Storing belief state " << i << " from " << noff);
-
+      DMCS_LOG_TRACE(port << ": Got bs = " << *bs << ". sid = " << sid);
       // normal case, just got a belief state
       if (sid == session_id)
 	{
+	  DMCS_LOG_TRACE(port << ": Storing belief state " << i << " from " << noff);
 	  bsv->push_back(bs);
 	  imported_something = true;
 	}
-      // otherwise, just ignore this belief state because it belongs to an old session
+      else
+	{
+	  DMCS_LOG_TRACE(port << ": Ignore this belief state because it belongs to an old session");
+	}
+
     }
   
   if (import_state != FILLING_UP)
@@ -549,6 +556,7 @@ JoinThread::operator()(std::size_t nbs,
     {
       try
 	{
+	  DMCS_LOG_TRACE(port << ": Going to process now.");
 	  process();
 	}
       catch (const boost::thread_interrupted& ex)
@@ -578,6 +586,7 @@ JoinThread::operator()(std::size_t nbs,
 		session_id = sn->session_id;
 		delete sn;
 		sn = 0;
+		DMCS_LOG_TRACE(port << ": Got new session_id = " << session_id);
 	      }
 	  }
 	else
