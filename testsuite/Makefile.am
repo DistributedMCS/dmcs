@@ -94,7 +94,9 @@ testTranslation_LDADD = \
 testSignature_SOURCES = testSignature.cpp
 
 testQueryPlan_SOURCES = testQueryPlan.cpp
-testQueryPlan_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+testQueryPlan_LDADD = \
+	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/dmcs/liblog.a
 
 testClaspResultOnlineParser_SOURCES = testClaspResultOnlineParser.cpp
 testClaspResultOnlineParser_LDADD = \
