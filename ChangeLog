@@ -1,3 +1,9 @@
+2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Run io_service in its own thread in streaming mode.
+
+	* testsuite/Makefile.am (testQueryPlan_LDADD): Add liblog.a.
+
 2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/JoinThread.cpp: Get new session id from SAT.

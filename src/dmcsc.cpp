@@ -101,7 +101,10 @@ instantiate(ContextSubstitutionPtr ctx_sub, const std::string& hostName, const s
 void
 handle_belief_state(StreamingBackwardMessage& m)
 {
+#ifdef DEBUG
   std::cerr << "recvd: " << m << std::endl;
+#endif
+
   const PartialBeliefStateVecPtr& result = m.getBeliefStates();
 
   for (PartialBeliefStateVec::const_iterator it = result->begin(); it != result->end(); ++it)
@@ -200,8 +203,8 @@ Options";
 	}
 
       // setup connection
-      boost::asio::io_service io_service;
-      boost::asio::ip::tcp::resolver resolver(io_service);
+      boost::shared_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
+      boost::asio::ip::tcp::resolver resolver(*io_service);
       boost::asio::ip::tcp::resolver::query query(hostName, port);
       boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
       boost::asio::ip::tcp::endpoint endpoint = *it;
@@ -218,8 +221,8 @@ Options";
 	  DMCS_LOG_DEBUG("Message = " << mess);
 	  
 	  std::string header = HEADER_REQ_DYN_DMCS;
-	  Client<DynamicCommandType> c(io_service, it, header, mess);
-	  io_service.run();
+	  Client<DynamicCommandType> c(*io_service, it, header, mess);
+	  io_service->run();
 
 	  DynamicConfiguration::dynmcs_return_type result = c.getResult();
 
@@ -258,11 +261,11 @@ Options";
 
 	      std::string header = HEADER_REQ_PRI_DMCS;
 	      PrimitiveMessage mess(V);
-	      Client<PrimitiveCommandType> c(io_service, it, header, mess);
+	      Client<PrimitiveCommandType> c(*io_service, it, header, mess);
 	      
 	      DMCS_LOG_DEBUG("Running ioservice.");
 	  
-	      io_service.run();
+	      io_service->run();
 
 	      DMCS_LOG_DEBUG("Getting results.");
 	  
@@ -276,7 +279,7 @@ Options";
 	      no_beliefstates = result->size();
 #endif
 	    }
-	  else // Opt DMCS
+	  else // opt or streaming DMCS
 	    {
 	      // for now, we work on streaming DMCS for the opt topology. 
 	      if (streaming)
@@ -286,44 +289,55 @@ Options";
 		  std::string header = HEADER_REQ_STM_DMCS;
 		  // USER <--> invoker == 0
 	
-		  ConflictVec* conflicts = new ConflictVec;
-		  PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
-		  Decisionlevel* decision = new Decisionlevel();
+		  //		  for (;;)
+		  //		    {
+		      ConflictVec* conflicts = new ConflictVec;
+		      PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
+		      Decisionlevel* decision = new Decisionlevel();
 
-		  // session_id = 0, invoker = 0
-		  StreamingCommandType::input_type mess(0, 0, pack_size, conflicts, partial_ass, decision);
+		      // session_id = 0, invoker = 0
+		      StreamingCommandType::input_type mess(0, 0, pack_size, conflicts, partial_ass, decision);
+		      
+		      DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
+		      DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);
+		      DMCS_LOG_DEBUG("Empty starting decision level:" << *decision);
 
-		  DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
-		  DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);
-		  DMCS_LOG_DEBUG("Empty starting decision level:" << *decision);
 
+		      AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
 
-		  AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(io_service, it, header, mess);
+		      c.setCallback(&handle_belief_state);
 
-		  c.setCallback(&handle_belief_state);
+		      DMCS_LOG_DEBUG("Starting io_service thread.");
 
-		  DMCS_LOG_DEBUG("Running ioservice.");
+		      boost::shared_ptr<boost::thread> iot(new boost::thread(boost::bind(&boost::asio::io_service::run, io_service)));
 
-		  io_service.run();
+		      iot->join(); // waits for termination
 
-		  no_beliefstates = c.getNoAnswers();
+		      //io_service.run();
 
-		  std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
-		  std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
+		      no_beliefstates = c.getNoAnswers();
 
+		      std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
+		      std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
+
+		      delete conflicts;
+		      delete partial_ass;
+		      delete decision;
+
+		      //}
 		  ///@todo TK: conflict and partial_ass leaks here
 		}
-	      else
+	      else // opt mode
 		{
 		  DMCS_LOG_DEBUG("Opt mode.");
 
 		  std::string header = HEADER_REQ_OPT_DMCS;
 		  OptCommandType::input_type mess(0); // invoker ID ?
-		  Client<OptCommandType> c(io_service, it, header, mess);
+		  Client<OptCommandType> c(*io_service, it, header, mess);
 
 		  DMCS_LOG_DEBUG("Running ioservice.");
 
-		  io_service.run();
+		  io_service->run();
 	      
 		  DMCS_LOG_DEBUG("Getting results.");
 
@@ -343,7 +357,8 @@ Options";
       // but first read the topology file (quick hack) to get the signatures
       QueryPlanPtr query_plan(new QueryPlan);
 
-      /*      query_plan->read_graph(manager);
+#if 0
+      query_plan->read_graph(manager);
       BeliefStateListPtr belief_state_list;
 #ifdef DMCS_STATS_INFO
       belief_state_list = result->getBeliefStates();
@@ -391,7 +406,8 @@ Options";
 	    }
 
 	  std::cout << ")" << std::endl;
-	  }*/
+	  }
+#endif//0
 
 #ifdef DEBUG
 
