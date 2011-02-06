@@ -63,6 +63,8 @@
 #include <iostream>
 #include <set>
 #include <string> 
+#include <csignal>
+
 
 using namespace dmcs;
 
@@ -95,9 +97,14 @@ instantiate(ContextSubstitutionPtr ctx_sub, const std::string& hostName, const s
     }
 }
 
+std::size_t no_beliefstates = 0;
+bool complete = false;
 
 std::set<PartialBeliefState> final_result;
 std::size_t handled_belief_states = 0;
+
+boost::posix_time::ptime start_time;
+
 
 void
 handle_belief_state(StreamingBackwardMessage& m)
@@ -108,17 +115,53 @@ handle_belief_state(StreamingBackwardMessage& m)
 
   const PartialBeliefStateVecPtr& result = m.getBeliefStates();
 
-  for (PartialBeliefStateVec::const_iterator it = result->begin(); it != result->end(); ++it)
+  for (PartialBeliefStateVec::iterator it = result->begin(); it != result->end(); ++it)
     {
       if (*it != 0)
 	{
-	  final_result.insert(**it);
+	  std::pair<std::set<PartialBeliefState>::iterator,bool> p = final_result.insert(**it);
+
+	  if (p.second)
+	    {
+	      no_beliefstates++;
+	      std::cout << "Partial Equilibrium #" << no_beliefstates << ": ( " << *p.first << ")" << std::endl;
+
+	      boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
+
+	      std::cerr << "[" << diff.total_seconds() << "." << diff.total_milliseconds() << "] "
+			<< "Partial Equilibrium #" << no_beliefstates << ": ( " << *p.first << ")" << std::endl;
+	    }
+
+	  delete *it;
+	  *it = 0;
 	}
     }
 
   handled_belief_states += result->size() - 1;
 }
 
+
+void
+handle_signal(int signum)
+{
+  if (signum == SIGINT)
+    {
+      std::cout << "Total Number of Equilibria: " << no_beliefstates;
+
+      if (!complete)
+	{
+	  std::cout << "+";
+	}
+  
+      std::cout << std::endl;
+
+      exit(0);
+    }
+  else if (signum == SIGALRM)
+    {
+      //std::cerr << "Timeout: " << timeout << std::endl;
+    }
+}
 
 
 int
@@ -138,7 +181,6 @@ main(int argc, char* argv[])
       bool streaming = false;
       BeliefStatePtr V(new BeliefState);
 
-      std::size_t no_beliefstates = 0;
       bool all_answers = false;
       
       const char* help_description = "\
@@ -310,12 +352,25 @@ Options";
 
 		  c.setCallback(&handle_belief_state);
 
+
+		  // catch Ctrl-C and interrupts
+		  sig_t s = signal(SIGINT, handle_signal);
+		  if (s == SIG_ERR)
+		    {
+		      perror("signal");
+		      exit(1);
+		    }
+
+
 		  bool keep_running = true;
 		  bool last_round = false;
 		  std::size_t next_count = 0;
 		  std::size_t model_count = 0;
 		  std::size_t last_model_count = 0;
 		  std::size_t diff_count = 0;
+
+		  // start iterating
+		  start_time = boost::posix_time::microsec_clock::local_time();
 		  
 		  while (keep_running)
 		    {
@@ -360,8 +415,8 @@ Options";
 		  
 		  no_beliefstates = final_result.size();
 
-		  std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
-		  std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
+		  //std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
+		  //std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
 
 		  delete conflicts;
 		  delete partial_ass;
