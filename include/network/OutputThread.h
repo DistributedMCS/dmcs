@@ -50,19 +50,10 @@ public:
 
   void
   operator()(connection_ptr c,
-	     bool return_all,
 	     MessagingGatewayBC* m,
 	     ConcurrentMessageQueue* hon);
 
 private:
-  void
-  output_all(connection_ptr conn, MessagingGatewayBC* mg);
-
-  void
-  output_limit(connection_ptr c,
-	       MessagingGatewayBC* m,
-	       ConcurrentMessageQueue* hon);
-
   bool
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif);
 
@@ -87,6 +78,7 @@ private:
   bool        collecting;            // A flag to determine whether we are in collecting mode or not 
                                      // (if yes then we don't want to wait for any trigger)
   bool        eof_left;
+  bool        end_of_everything;
   std::size_t invoker;
   std::size_t parent_session_id;     // used to filter out old models
   std::size_t port;

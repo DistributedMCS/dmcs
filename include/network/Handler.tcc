@@ -278,19 +278,9 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
       const std::size_t parent_session_id = sesh->mess.getSessionId();
       const std::size_t invoker           = sesh->mess.getInvoker();
-      const std::size_t request_pack_size = sesh->mess.getPackSize();
-      std::size_t pack_size;
+      const std::size_t pack_size = sesh->mess.getPackSize();
 
-      ///@todo: when request_pack_size is too big, compute the size of MQs based on some heuristics
-      if (request_pack_size == 0)
-	{
-	  assert (invoker == 0);
-	  pack_size = DEFAULT_PACK_SIZE;
-	}
-      else
-	{
-	  pack_size = request_pack_size;
-	}
+      assert (pack_size > 0);
 
       if (first_call)
 	{
@@ -310,18 +300,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // inform OutputThread about new incoming message (request
 	  // the next pack_size models)
 
-	  bool return_all;
-	  if (request_pack_size == 0)
-	    {
-	      return_all = true;
-	    }
-	  else
-	    {
-	      return_all = false;
-	    }
-
 	  OutputThread ot(invoker, port);
-	  output_thread = new boost::thread(ot, sesh->conn, return_all, mg.get(), handler_output_notif.get());
+	  output_thread = new boost::thread(ot, sesh->conn, mg.get(), handler_output_notif.get());
 
 	  first_call = false;
 	} // if (first_call)
@@ -420,7 +400,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  // code duplication with part of do_local_job. Just leave it like this for now
 
 	  // notify OutputThread
-	  OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id);
+	  OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id, OutputNotification::GET_NEXT);
 	  OutputNotification* ow_output = 
 	    (OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
 	  

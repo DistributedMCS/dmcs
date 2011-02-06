@@ -43,6 +43,7 @@ struct OutputNotification
   enum NotificationType
     {
       REQUEST = 0,
+      GET_NEXT,
       SHUTDOWN
     };
 

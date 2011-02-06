@@ -40,7 +40,8 @@
 namespace dmcs {
 
 OutputThread::OutputThread(std::size_t i, std::size_t p)
-  : invoker(i), port(p)
+  : invoker(i), port(p),
+    end_of_everything(false)
 { }
 
 
@@ -53,48 +54,8 @@ OutputThread::~OutputThread()
 
 void
 OutputThread::operator()(connection_ptr c,
-			 bool return_all,
 			 MessagingGatewayBC* mg,
 			 ConcurrentMessageQueue* hon)
-{
-  if (return_all)
-    {
-      // only output in an unlimited manner at the root context is
-      // allowed. However, each time we output not more than
-      // DEFAULT_PACKAGE_SIZE models
-
-      assert (invoker == 0);
-      output_all(c, mg);
-    }
-  else
-    {
-      output_limit(c, mg, hon);
-    }
-}
-
-
-
-void
-OutputThread::output_all(connection_ptr conn, MessagingGatewayBC* mg)
-{
-  while (1)
-    {
-      PartialBeliefStateVecPtr res(new PartialBeliefStateVec);
-      VecSizeTPtr res_sid(new VecSizeT);
-      std::string header;
-
-      left_2_send = DEFAULT_PACK_SIZE;
-      collect_output(mg, res, res_sid, header);
-      write_result(conn, res, res_sid, header);
-    }
-}
-
-
-
-void
-OutputThread::output_limit(connection_ptr c,
-			   MessagingGatewayBC* m,
-			   ConcurrentMessageQueue* hon)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -120,17 +81,24 @@ OutputThread::output_limit(connection_ptr c,
 	    }
 	}
 
-      if (eof_left)
+      if (end_of_everything)
+	{
+	  DMCS_LOG_TRACE(port << ": In end_of_everything mode. Send EOF");
+	  const std::string header_eof = HEADER_EOF;
+	  c->write(header_eof);
+	}
+      else if (eof_left)
 	{
 	  DMCS_LOG_TRACE(port << ": Send leftover EOF");
 	  const std::string header_eof = HEADER_EOF;
 	  c->write(header_eof);
 	  eof_left = false;
+	  end_of_everything = true;
 	}
       else
 	{
 	  DMCS_LOG_TRACE(port << ": Go to collect output");
-	  if (collect_output(m, res, res_sid, header))
+	  if (collect_output(mg, res, res_sid, header))
 	    {
 	      write_result(c, res, res_sid, header);
 	    }
@@ -159,16 +127,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 
   if (ptr && on)
     {
-      if (on->type == OutputNotification::REQUEST)
-	{
-	  pack_size = on->pack_size;
-	  left_2_send = on->pack_size;
-	  parent_session_id = on->parent_session_id;
-	  retval = true;
-
-	  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
-	}
-      else if (on->type == OutputNotification::SHUTDOWN)
+      if (on->type == OutputNotification::SHUTDOWN)
 	{
 	  retval = false;
 
@@ -176,7 +135,24 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 	}
       else
 	{
-	  assert (false);
+	  pack_size = on->pack_size;
+	  left_2_send = on->pack_size;
+	  parent_session_id = on->parent_session_id;
+	  retval = true;
+
+	  if (on->type == OutputNotification::REQUEST) // reset
+	    {
+	      DMCS_LOG_TRACE(port << ": Got a message REQUEST from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
+	      end_of_everything = false;
+	    }
+	  else if (on->type == OutputNotification::GET_NEXT)
+	    {
+	      DMCS_LOG_TRACE(port << ": Got a message GET_NEXT from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
+	    }
+	  else
+	    {
+	      assert (false);
+	    }
 	}
     }
   else
@@ -312,16 +288,18 @@ OutputThread::write_result(connection_ptr conn,
 	      conn->write(ans_header);
 	      handle_written_header(conn, res, res_sid);
 
+	      /*
 	      if (invoker == 0)
 		{
 		  DMCS_LOG_TRACE(port << ": The BOSS called, notify him about EOF");
 		  conn->write(header);
 		  eof_left = false;
-		}
+		  }*/
 	    }
 	  else
 	    {
 	      DMCS_LOG_TRACE(port << ": NOTHING TO OUTPUT, going to send EOF");
+	      end_of_everything = true;
 	      conn->write(header);
 	    }
 	}

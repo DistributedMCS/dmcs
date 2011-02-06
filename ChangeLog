@@ -1,5 +1,11 @@
 2011-02-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/Handler.tcc: Remove case --k=0.
+	* include/network/OutputThread.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/dmcs/OutputNotification.h: Add type GET_NEXT.
+
 	* include/network/RouterThread.h: Fix warning.
 
 	* include/dmcs/OutputNotification.h: Add parent_session_id.
