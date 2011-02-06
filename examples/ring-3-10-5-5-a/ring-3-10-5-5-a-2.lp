@@ -1,0 +1,9 @@
+c2a1:- not c2a2.
+c2a2:- not c2a1.
+c2a3:- not c2a4.
+c2a4:- not c2a3.
+c2a5:- not c2a6.
+c2a6:- not c2a5.
+c2a7:- not c2a8.
+c2a8:- not c2a9.
+c2a9:- not c2a10.

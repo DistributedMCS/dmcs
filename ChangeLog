@@ -1,5 +1,7 @@
 2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* examples/ring-3-10-5-5-a: New example.
+
 	* include/dmcs/StreamingForwardMessage.h: Fix streaming
 	asynchronous client.
 	* include/network/AsynClient.tcc: Likewise.
