@@ -1,3 +1,16 @@
+2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingForwardMessage.h: Fix streaming
+	asynchronous client.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/network/AsynClient.h: Likewise.
+	* include/network/BaseClient.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* src/dmcsc.cpp: Run io_service in its own thread in streaming mode.
+
+	* testsuite/Makefile.am (testQueryPlan_LDADD): Add liblog.a.
+
 2011-02-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/RouterThread.h: Fix memory leaks.
@@ -30,12 +43,6 @@
 	* include/network/Handler.tcc: Likewise.
 
 	* include/dmcs/SessionNotification.h: Add operator<<
-
-2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
-
-	* src/dmcsc.cpp: Run io_service in its own thread in streaming mode.
-
-	* testsuite/Makefile.am (testQueryPlan_LDADD): Add liblog.a.
 
 2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 

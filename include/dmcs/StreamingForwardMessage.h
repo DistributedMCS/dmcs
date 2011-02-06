@@ -93,6 +93,12 @@ public:
     return pack_size;
   }
 
+  void
+  setPackSize(std::size_t k)
+  {
+    pack_size = k;
+  }
+
   ConflictVec*
   getConflicts() const
   {

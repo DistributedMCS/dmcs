@@ -66,7 +66,6 @@
 
 using namespace dmcs;
 
-std::set<PartialBeliefState> final_result;
 
 //@todo: can we reuse endpoint, io_service from main()?
 void
@@ -97,6 +96,8 @@ instantiate(ContextSubstitutionPtr ctx_sub, const std::string& hostName, const s
 }
 
 
+std::set<PartialBeliefState> final_result;
+std::size_t handled_belief_states = 0;
 
 void
 handle_belief_state(StreamingBackwardMessage& m)
@@ -114,6 +115,8 @@ handle_belief_state(StreamingBackwardMessage& m)
 	  final_result.insert(**it);
 	}
     }
+
+  handled_belief_states += result->size() - 1;
 }
 
 
@@ -286,46 +289,83 @@ Options";
 		{
 		  DMCS_LOG_DEBUG("Streaming mode.");
 
-		  std::string header = HEADER_REQ_STM_DMCS;
 		  // USER <--> invoker == 0
 	
-		  //		  for (;;)
-		  //		    {
-		      ConflictVec* conflicts = new ConflictVec;
-		      PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
-		      Decisionlevel* decision = new Decisionlevel();
+		  ConflictVec* conflicts = new ConflictVec;
+		  PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
+		  Decisionlevel* decision = new Decisionlevel();
 
-		      // session_id = 0, invoker = 0
-		      StreamingCommandType::input_type mess(0, 0, pack_size, conflicts, partial_ass, decision);
+		  std::size_t k = pack_size > 0 ? pack_size : 10; // default: k is 10
+
+		  // session_id = 0, invoker = 0
+		  StreamingCommandType::input_type mess(0, 0, k, conflicts, partial_ass, decision);
 		      
-		      DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
-		      DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);
-		      DMCS_LOG_DEBUG("Empty starting decision level:" << *decision);
+		  DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
+		  DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);
+		  DMCS_LOG_DEBUG("Empty starting decision level:" << *decision);
+		      
+		  std::string header = HEADER_REQ_STM_DMCS;
 
+		  AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
 
-		      AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
+		  c.setCallback(&handle_belief_state);
 
-		      c.setCallback(&handle_belief_state);
+		  bool keep_running = true;
+		  bool last_round = false;
+		  std::size_t next_count = 0;
+		  std::size_t model_count = 0;
+		  std::size_t last_model_count = 0;
+		  std::size_t diff_count = 0;
+		  
+		  while (keep_running)
+		    {
+		      DMCS_LOG_DEBUG("Entering round " << next_count);
+		      
+		      io_service->run(); // wait for one round
+		      
+		      // model number accounting
+		      last_model_count = model_count;
+		      model_count = handled_belief_states;
+		      diff_count = final_result.size() - diff_count;
+		      next_count++;
 
-		      DMCS_LOG_DEBUG("Starting io_service thread.");
+		      // decide what to do next
+		      
+		      if (last_round)
+			{
+			  keep_running = false;
+			}
+		      else
+			{
+			  io_service->reset(); // ready for the next round
+			  
+			  if (diff_count > 0 && diff_count < k) // setup next k here
+			    {
+			      DMCS_LOG_TRACE("Got " << diff_count << " partial belief states, getting next batch of size " << k);
+			      c.next(k);
+			    }
+			  else if (pack_size == 0 && model_count > last_model_count)
+			    {
+			      DMCS_LOG_TRACE("fixpoint not reached yet, get next " << k << " belief states");
+			      c.next(k);
+			    }
+			  else // fixpoint reached, last round
+			    {
+			      DMCS_LOG_TRACE("fixpoint reached: model_count = " << model_count << ", final_result: " << final_result.size());
+			      c.terminate();
+			      last_round = true;
+			    }
+			}
+		    }
+		  
+		  no_beliefstates = final_result.size();
 
-		      boost::shared_ptr<boost::thread> iot(new boost::thread(boost::bind(&boost::asio::io_service::run, io_service)));
+		  std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
+		  std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
 
-		      iot->join(); // waits for termination
-
-		      //io_service.run();
-
-		      no_beliefstates = c.getNoAnswers();
-
-		      std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
-		      std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
-
-		      delete conflicts;
-		      delete partial_ass;
-		      delete decision;
-
-		      //}
-		  ///@todo TK: conflict and partial_ass leaks here
+		  delete conflicts;
+		  delete partial_ass;
+		  delete decision;
 		}
 	      else // opt mode
 		{

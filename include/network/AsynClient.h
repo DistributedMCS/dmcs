@@ -49,12 +49,6 @@ class AsynClient : public BaseClient
 	     const std::string& h,
 	     ForwardMessType& fm);
 
-  std::size_t
-  getNoAnswers()
-  {
-    return no_answers;
-  }
-
 
   typedef void (*CallbackFun)(BackwardMessType&);
 
@@ -64,6 +58,9 @@ class AsynClient : public BaseClient
     callback = f;
   }
 
+
+  bool
+  next(std::size_t k);
 
   void
   terminate();
@@ -94,9 +91,9 @@ private:
   finalize(const boost::system::error_code& error, connection_ptr /* conn */);
 
   std::size_t      pack_size;
-  std::size_t      no_answers;
   ForwardMessType  mess;
   BackwardMessType result;
+  std::size_t      no_answers;
   CallbackFun      callback;
 };
 
