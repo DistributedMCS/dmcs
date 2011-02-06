@@ -323,7 +323,7 @@ project_to(PartialBeliefState* bs, const BeliefStatePtr& V, std::size_t pos)
   assert((bs->size() == V->size()) && (pos < V->size()));
 
   PartialBeliefSet& b_pos = (*bs)[pos];
-  const BeliefSet   v_pos = (*V)[pos];
+  const BeliefSet&  v_pos = (*V)[pos];
 
   b_pos.value_bit &= v_pos;
   b_pos.state_bit &= v_pos;

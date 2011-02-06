@@ -1,3 +1,11 @@
+2011-02-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Send NULL at leaf, when EOF.
+
+	* src/dmcs/BeliefCombination.cpp: Add &.
+
+	* include/solver/RelSatSolver.h: Add reset_slaves().
+
 2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* examples/ring-3-10-5-5-a: New example.

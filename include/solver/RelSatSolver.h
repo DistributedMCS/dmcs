@@ -127,6 +127,9 @@ private:
   prepare_input();
 
   void
+  reset_slaves(ConflictVec2p* new_conflicts, PartialBeliefState* partial_ass, Decisionlevel* decision);
+
+  void
   update_bridge_input(SignatureByCtx::const_iterator);
 
 private:
@@ -154,6 +157,7 @@ private:
   TrailPtr                       trail;
   VecSizeTPtr                    orig_sigs_size;
   boost::thread*                 join_thread;
+  bool                           first_round;
 
   SATInstance*                   xInstance;
   SATSolver*                     xSATSolver;

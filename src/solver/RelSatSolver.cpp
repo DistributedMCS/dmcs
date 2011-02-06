@@ -82,7 +82,8 @@ RelSatSolver::RelSatSolver(bool il,
     port(p),
     parent_conflicts(0),
     parent_ass(0),
-    parent_decision(0)
+    parent_decision(0),
+    first_round(true)
 {
   xInstance->readTheory(theory, sig->size());
 
@@ -341,6 +342,17 @@ RelSatSolver::solve()
 	{
 	  DMCS_LOG_TRACE(port << ": Intermediate case.");
 
+	  if (first_round)
+	    {
+	      first_round = false;
+	    }
+	  else
+	    {
+	      // reset Joiner and NeighborOut (through Router)
+	      ///@todo: add empty new conflicts
+	      //reset_slaves(parent_ass, parent_decision);
+	    }
+
 	  while (1)
 	    {
 	      DMCS_LOG_TRACE(port << ": Prepare input before solving.");
@@ -520,13 +532,24 @@ RelSatSolver::receiveEOF()
   // stack is empty or there is no more possibility to flip then send
   // NULL to OUT_MQ
 
+#if 0
   if (trail->empty())
     {
       ///@todo WTF?x
-      DMCS_LOG_TRACE(port << ": Empty stack, EOF. Send a NULL pointer to OUT_MQ");
-      mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+      //DMCS_LOG_TRACE(port << ": Empty stack, EOF. Send a NULL pointer to OUT_MQ");
+      //mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
-  else
+  //    else
+#endif //0
+
+  if (is_leaf)
+    {
+      DMCS_LOG_TRACE(port << ": EOF at leaf. Send a NULL pointer to OUT_MQ");
+      mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+      return;
+    }
+
+  if (!trail->empty())
     {
       DMCS_LOG_TRACE(port << ": EOF, now backtrack");
 
@@ -688,47 +711,54 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
       ChoicePointPtr cp(new ChoicePoint(input, decision));
       trail->push(cp);
 
-      // mark that we are in a new session (expect new models)
-      my_session_id++;
-
-      // interrupt join_thread, inform it about the new session_id
-      SessionNotification* mess_joiner = new SessionNotification(my_session_id);
-
-      DMCS_LOG_TRACE(port << ": Send SessionNotification to Joiner " << *mess_joiner);
-
-      SessionNotification* ow_joiner =
-	(SessionNotification*) overwrite_send(sat_joiner_notif, &mess_joiner, sizeof(mess_joiner), 0);
-
-      if (ow_joiner)
-	{
-	  delete ow_joiner;
-	  ow_joiner = 0;
-	}
-
-      DMCS_LOG_TRACE(port << ": Interrupt Joiner");
-      join_thread->interrupt();
-
-      // send notification to router. Need to send a bunch of things
-      // and cover all neighbors instead of sending to just a single
-      // neighbor as before
-
-      // send out UNSAT notification with new session id
-      UnsatNotification* mess_router = new UnsatNotification(new_conflicts, partial_ass, decision, my_session_id);
-
-      DMCS_LOG_TRACE(port << ": Send to Router: " << *mess_router);
-
-      UnsatNotification* ow_router = 
-	(UnsatNotification*) overwrite_send(sat_router_notif, &mess_router, sizeof(mess_router), 0);
-
-      if (ow_router)
-	{
-	  delete ow_router;
-	  ow_router = 0;
-	}
+      reset_slaves(new_conflicts, partial_ass, decision);
       
     } // if (trail->empty())
 }
 
+
+
+void
+RelSatSolver::reset_slaves(ConflictVec2p* new_conflicts, PartialBeliefState* partial_ass, Decisionlevel* decision)
+{
+  // mark that we are in a new session (expect new models)
+  my_session_id++;
+  
+  // interrupt join_thread, inform it about the new session_id
+  SessionNotification* mess_joiner = new SessionNotification(my_session_id);
+  
+  DMCS_LOG_TRACE(port << ": Send SessionNotification to Joiner " << *mess_joiner);
+  
+  SessionNotification* ow_joiner =
+    (SessionNotification*) overwrite_send(sat_joiner_notif, &mess_joiner, sizeof(mess_joiner), 0);
+  
+  if (ow_joiner)
+    {
+      delete ow_joiner;
+      ow_joiner = 0;
+    }
+  
+  DMCS_LOG_TRACE(port << ": Interrupt Joiner");
+  join_thread->interrupt();
+  
+  // send notification to router. Need to send a bunch of things
+  // and cover all neighbors instead of sending to just a single
+  // neighbor as before
+  
+  // send out UNSAT notification with new session id
+  UnsatNotification* mess_router = new UnsatNotification(new_conflicts, partial_ass, decision, my_session_id);
+  
+  DMCS_LOG_TRACE(port << ": Send to Router: " << *mess_router);
+  
+  UnsatNotification* ow_router = 
+    (UnsatNotification*) overwrite_send(sat_router_notif, &mess_router, sizeof(mess_router), 0);
+  
+  if (ow_router)
+    {
+      delete ow_router;
+      ow_router = 0;
+    }
+}
 
 void
 RelSatSolver::receiveUNSAT(ClauseList& learned_clauses)
@@ -801,6 +831,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   DMCS_LOG_TRACE(port << ": MODEL from SAT: bs = " << *bs);
 
   // project to my output interface
+  DMCS_LOG_TRACE(port << ": localV  = " << *localV);
   project_to(bs, localV);
 
   // attach parent_session_id to the output models
