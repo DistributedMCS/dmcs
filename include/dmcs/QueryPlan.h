@@ -38,6 +38,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <map>
 
@@ -197,6 +198,7 @@ struct QueryPlan
   VertexMapPtr vmap;
   NeighborListVecPtr meta_neighbors;
   bool first_round;
+  boost::mutex mtx;
 };
 
 typedef boost::shared_ptr<QueryPlan> QueryPlanPtr;

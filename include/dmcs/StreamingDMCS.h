@@ -98,7 +98,8 @@ private:
   start_up(ConflictVec* conflicts,
 	   PartialBeliefState* partial_ass,
 	   Decisionlevel* decision,
-	   std::size_t parent_session_id);
+	   std::size_t parent_session_id,
+	   std::size_t port);
 
 private:
   bool conflicts_driven;

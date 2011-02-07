@@ -290,20 +290,30 @@ RelSatSolver::import_conflicts(const ConflictVec* conflicts)
 void
 RelSatSolver::import_partial_ass(const PartialBeliefState* partial_ass)
 {
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+  DMCS_LOG_TRACE(port << ": xIntance.size() before importing partial_ass = " << xInstance->iClauseCount());
+
   xInstance->setSizeWConflict(xInstance->iClauseCount());
   for (Signature::const_iterator it = sig->begin(); it != sig->end(); ++it)
     {
+      DMCS_LOG_TRACE(port << ": Checking atom " << *it);
       const PartialBeliefSet& b = (*partial_ass)[it->ctxId - 1];
       int lid = it->localId;
+
+      DMCS_LOG_TRACE(port << ": belief set = " << b);
 
       PartialBeliefSet::TruthVal val = testBeliefSet(b, it->origId);
       
       if (val != PartialBeliefSet::DMCS_UNDEF)
 	{
+	  DMCS_LOG_TRACE(port << ": Set value for " << *it);
 	  int ucl = (val == PartialBeliefSet::DMCS_TRUE) ? lid : -lid;
 	  xInstance->add_unit_clause(ucl);
 	}
     }
+  DMCS_LOG_TRACE(port << ": xIntance.size() after importing partial_ass = " << xInstance->iClauseCount());
+  xInstance->setSizeWPartialAss(xInstance->iClauseCount());
 }
 
 
@@ -399,7 +409,9 @@ RelSatSolver::solve()
 	  while (1)
 	    {
 	      DMCS_LOG_TRACE(port << ": Prepare input before solving.");
+	      DMCS_LOG_TRACE(port << ": xIntance.size() before removing input = " << xInstance->iClauseCount());
 	      xInstance->removeInput();
+	      DMCS_LOG_TRACE(port << ": xIntance.size() after removing input = " << xInstance->iClauseCount());
 	      if (!prepare_input())
 		{
 		  DMCS_LOG_TRACE(port << ": Got NULL input from JOIN_OUT_MQ. Send a NULL model to OUT_MQ to inform OutputThread");

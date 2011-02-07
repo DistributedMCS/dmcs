@@ -211,7 +211,7 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
   std::size_t no_nbs         = nbs->size(); 
 
-  DMCS_LOG_TRACE("Here create mqs and threads. no_nbs = " << no_nbs);
+  DMCS_LOG_TRACE(port << ": Here create mqs and threads. no_nbs = " << no_nbs);
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
   if (pack_size == 0)
@@ -256,7 +256,7 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
       sat_thread = tf.createLocalSolveThread(0);
     }
 
-  DMCS_LOG_TRACE("All threads created!");
+  DMCS_LOG_TRACE(port << ": All threads created!");
 }
 
 
@@ -302,11 +302,11 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
     }
   else
     {
-      DMCS_LOG_FATAL("Got null message: " << ptr << " " << sn);
+      DMCS_LOG_FATAL(port << ": Got null message: " << ptr << " " << sn);
       assert(ptr != 0 && sn != 0);
     }
 
-  DMCS_LOG_TRACE("invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port << ", type = " << type);
+  DMCS_LOG_TRACE(port << ": invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port << ", type = " << type);
 }
 
 
@@ -314,7 +314,8 @@ void
 StreamingDMCS::start_up(ConflictVec* conflicts,
 			PartialBeliefState* partial_ass,
 			Decisionlevel* decision,
-			std::size_t parent_session_id)
+			std::size_t parent_session_id,
+			std::size_t port)
 {
 
 
@@ -327,11 +328,11 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 
   if (conflicts)
     {
-      DMCS_LOG_TRACE("Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
+      DMCS_LOG_TRACE(port << ": Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
     }
   else 
     {
-      DMCS_LOG_TRACE("Trigger SAT solver with conflicts = NULL and partial ass = " << *partial_ass);
+      DMCS_LOG_TRACE(port << ": Trigger SAT solver with conflicts = NULL and partial ass = " << *partial_ass);
     }
 
   ConflictNotification* mess_sat = new ConflictNotification(conflicts, partial_ass, decision, parent_session_id);
@@ -350,9 +351,9 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 
       if (no_nbs > 0) // not a leaf context
 	{
-	  DMCS_LOG_TRACE("Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
+	  DMCS_LOG_TRACE(port << ": Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
 	  
-	  DMCS_LOG_TRACE("router_neighbors_notif.size() = " << router_neighbors_notif->size());
+	  DMCS_LOG_TRACE(port << ": router_neighbors_notif.size() = " << router_neighbors_notif->size());
 	  
 	  assert (router_neighbors_notif->size() == no_nbs);
 	  
@@ -360,10 +361,10 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 	  
 	  for (std::size_t i = 0; i < no_nbs; ++i)
 	    {
-	      DMCS_LOG_TRACE(" First push to offset " << i);
+	      DMCS_LOG_TRACE(port << ": First push to offset " << i);
 	      ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
 	      
-	      DMCS_LOG_TRACE(__PRETTY_FUNCTION__ << " Will push: conflictS = NULL"
+	      DMCS_LOG_TRACE(port << ": Will push: conflictS = NULL"
 			     <<", partial_ass = " << *(cn->partial_ass) 
 			     << ", decision_level = " << *(cn->decision));
 	      
@@ -421,7 +422,8 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 		     port, conflicts, partial_ass, decision);
 	  initialized = true;
 	}
-      start_up(conflicts, partial_ass, decision, parent_session_id);
+      start_up(conflicts, partial_ass, decision, 
+	       parent_session_id, port);
     }
 }
 

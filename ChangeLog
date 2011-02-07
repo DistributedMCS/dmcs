@@ -1,5 +1,14 @@
 2011-02-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+
+
+	* src/dmcs/StreamingDMCS.cpp: Support port in debug output.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/QueryPlan.h: Add mutex lock for creating NeighborList.
+	* src/dmcs/QueryPlan.cpp (getNeighbors): Likewise.
+
 	* src/dmcs/StreamingDMCS.cpp: Trigger neighbors only at the first
 	round.
 
