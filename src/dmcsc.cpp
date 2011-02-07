@@ -105,6 +105,8 @@ std::size_t handled_belief_states = 0;
 
 boost::posix_time::ptime start_time;
 
+boost::mutex print_mutex;
+
 
 void
 handle_belief_state(StreamingBackwardMessage& m)
@@ -124,6 +126,9 @@ handle_belief_state(StreamingBackwardMessage& m)
 	  if (p.second)
 	    {
 	      no_beliefstates++;
+
+	      boost::mutex::scoped_lock lock(print_mutex);
+
 	      std::cout << "Partial Equilibrium #" << no_beliefstates << ": ( " << *p.first << ")" << std::endl;
 
 	      boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
@@ -140,8 +145,6 @@ handle_belief_state(StreamingBackwardMessage& m)
   handled_belief_states += result->size() - 1;
 }
 
-
-boost::mutex print_mutex;
 
 
 void

@@ -1,6 +1,7 @@
 2011-02-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Add total model sampling.
+	(handle_belief_state): Fix locking.
 
 	* examples/run-streaming.sh: Add timelimit support, make run and
 	timelimit optional.
