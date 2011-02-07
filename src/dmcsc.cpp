@@ -141,27 +141,54 @@ handle_belief_state(StreamingBackwardMessage& m)
 }
 
 
+boost::mutex print_mutex;
+
+
 void
 handle_signal(int signum)
 {
-  if (signum == SIGINT)
+  if (signum == SIGINT) // interrupted, print current stats
     {
-      std::cout << "Total Number of Equilibria: " << no_beliefstates;
+      boost::mutex::scoped_lock lock(print_mutex);
 
-      if (!complete)
-	{
-	  std::cout << "+";
-	}
-  
-      std::cout << std::endl;
+      std::cerr << "Total Number of Received Equilibria: " << handled_belief_states << std::endl;
+
+      std::cout << "Total Number of Equilibria: " << no_beliefstates << "+" << std::endl;
 
       exit(0);
     }
+#if 0
   else if (signum == SIGALRM)
     {
-      //std::cerr << "Timeout: " << timeout << std::endl;
+      std::cerr << "Timeout: " << timeout << std::endl;
     }
+#endif
 }
+
+
+struct SamplingThread
+{
+  void
+  operator() (int msecs)
+  {
+    while (1)
+      {
+	boost::this_thread::sleep(boost::posix_time::milliseconds(msecs));
+
+	{
+	  boost::mutex::scoped_lock lock(print_mutex);
+
+
+	  boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
+
+	  std::cerr << "[" << diff.total_seconds() << "." << diff.total_milliseconds() << "] "
+		    << "Received partial equilibria: " << handled_belief_states << std::endl;
+	}
+      }
+  }
+
+};
+
 
 
 int
@@ -338,6 +365,7 @@ Options";
 		  Decisionlevel* decision = new Decisionlevel();
 
 		  std::size_t k = pack_size > 0 ? pack_size : 10; // default: k is 10
+		  complete = pack_size > 0 ? false : true;		  
 
 		  // session_id = 0, invoker = 0
 		  StreamingCommandType::input_type mess(0, 0, k, conflicts, partial_ass, decision);
@@ -369,8 +397,12 @@ Options";
 		  std::size_t last_model_count = 0;
 		  std::size_t diff_count = 0;
 
+		  SamplingThread sampler;
+
 		  // start iterating
 		  start_time = boost::posix_time::microsec_clock::local_time();
+
+		  boost::thread sampler_thread(sampler, 1000);
 		  
 		  while (keep_running)
 		    {
@@ -519,7 +551,14 @@ Options";
       std::cout << "# " << no_beliefstates << std::endl;
       std::cout << *result->getStatsInfo() << std::endl;
 #else
-      std::cout << "Total Number of Equilibria: " << no_beliefstates << std::endl;
+      std::cout << "Total Number of Equilibria: " << no_beliefstates;
+
+      if (!complete)
+	{
+	  std::cout << "+";
+	}
+
+      std::cout << std::endl;
 #endif // DMCS_STATS_INFO
 	}
     }

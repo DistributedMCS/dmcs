@@ -1,5 +1,7 @@
 2011-02-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* src/dmcsc.cpp: Add total model sampling.
+
 	* examples/run-streaming.sh: Add timelimit support, make run and
 	timelimit optional.
 	Time all daemons and client with time --verbose.
