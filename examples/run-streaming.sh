@@ -6,7 +6,7 @@ export MALLOC_CHECK_=0
 declare -i TIMEOUT=100
 declare -i MEMOUT=1000
 
-export GNUTIME="/usr/bin/time --portability -o" # time command
+export GNUTIME="/usr/bin/time --verbose -o" # time command
 export RUN="run -s $MEMOUT -t $((TIMEOUT+20)) -k -o"
 export TIMELIMIT="timelimit -p -s 1 -t $TIMEOUT -T 20"
 export TIMEFORMAT=$'\nreal\t%3R\nuser\t%3U\nsys\t%3S' # time format
@@ -21,10 +21,10 @@ LOGDAEMONS=yes # log daemon output
 
 # test instance
 export TOPO=ring
-declare -i CTX=10
-declare -i SIG=20
-declare -i BRS=10
-declare -i RLS=10
+declare -i CTX=3
+declare -i SIG=10
+declare -i BRS=5
+declare -i RLS=5
 export INST=a
 
 export MODE=streaming
@@ -45,6 +45,11 @@ declare -i MINPORT=5000
 export DMCSD=$DMCSPATH/dmcsd
 export DMCSC=$DMCSPATH/dmcsc
 
+
+STATSLOG=$LOGPATH/$TESTNAME-$MODE-status.log
+
+date > $STATSLOG
+
 declare -i N
 for (( N = 1 ; N <= $CTX ; N++ )); do
 
@@ -53,9 +58,11 @@ for (( N = 1 ; N <= $CTX ; N++ )); do
 
 	LOGN=/dev/null
 	RUNLOGN=/dev/null
+	TIMELOGN=/dev/null
 	if [ x$LOGDAEMONS = xyes ] ; then
 		LOGN=$LOGPATH/$TESTNAME-$MODE-$N.log
 		RUNLOGN=$LOGPATH/$TESTNAME-$MODE-run-$N.log
+		TIMELOGN=$LOGPATH/$TESTNAME-$MODE-time-$N.log
 	fi
 
 	DMCSDOPTS="--context=$N --port=$((MINPORT+N)) --kb=$INPUTN.lp --br=$INPUTN.br --topology=$INPUT.opt"
@@ -74,7 +81,7 @@ for (( N = 1 ; N <= $CTX ; N++ )); do
 	    set -x
 	fi
 
-	$DMCSDRUN > $LOGN 2>&1 &
+	$GNUTIME $TIMELOGN $DMCSDRUN > $LOGN 2>&1 &
 
 	set +x
 
@@ -111,8 +118,26 @@ fi
 
 $GNUTIME $LOGTIME $DMCSCRUN > $LOGCOUT 2> $LOGCERR
 
+DMCSCRET=$?
+
 set +x
+
+
+echo >> $STATSLOG
+
+if [ $DMCSCRET = 0 ]; then
+	echo PASS: $TESTNAME-$MODE >> $STATSLOG
+else
+	egrep -H "^Status" $LOGPATH/$TESTNAME-$MODEL-run*.log >> $STATSLOG
+	echo FAILED: $TESTNAME-$MODE >> $STATSLOG
+fi
+
+echo >> $STATSLOG
+
+date >> $STATSLOG
 
 # just to be safe
 killall -1 dmcsd # 2>/dev/null
 killall -9 dmcsd 2>/dev/null
+
+cat $STATSLOG

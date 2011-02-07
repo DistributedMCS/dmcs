@@ -2,7 +2,10 @@
 
 	* examples/run-streaming.sh: Add timelimit support, make run and
 	timelimit optional.
+	Time all daemons and client with time --verbose.
 	* examples/run-opt.sh: Likewise.
+	* examples/ring-3-10-5-5-a/run-streaming.sh: Likewise.
+	* examples/ring-3-10-5-5-a/run-opt.sh: Likewise.
 
 2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
