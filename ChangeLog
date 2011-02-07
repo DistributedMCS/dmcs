@@ -1,3 +1,9 @@
+2011-02-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* examples/run-streaming.sh: Add timelimit support, make run and
+	timelimit optional.
+	* examples/run-opt.sh: Likewise.
+
 2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Add SIGINT signal handler and sampling of models.
