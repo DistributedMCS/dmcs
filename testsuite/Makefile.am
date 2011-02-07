@@ -124,7 +124,9 @@ testGraphProp_SOURCES = testGraphProp.cpp
 testGraphProp_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testMessagingGateway_SOURCES = testMessagingGateway.cpp
-testMessagingGateway_LDADD = $(top_builddir)/src/network/libthreads.a
+testMessagingGateway_LDADD = \
+	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/src/dmcs/liblog.a
 
 testConnection_SOURCES = testConnection.cpp
 testConnection_LDADD = \
