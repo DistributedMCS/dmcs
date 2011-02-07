@@ -113,37 +113,66 @@ public:
 		Decisionlevel* decision         = un->decision;
 		std::size_t session_id          = un->session_id;
 
-		ConflictVec2p::const_iterator ct = new_conflicts->begin();
-
 		ConcurrentMessageQueueVec::iterator beg = router_neighbors_notif->begin();
 		ConcurrentMessageQueueVec::iterator end = router_neighbors_notif->end();
 
-		for (ConcurrentMessageQueueVec::iterator it = beg; it != end; ++it, ++ct)
+		if (new_conflicts)
 		  {
-		    ConflictVec* c_vec = *ct;
 
-		    ConflictNotification* cn = new ConflictNotification(c_vec, partial_ass, 
-									decision, session_id);
-		    std::size_t prio = 0;
-
-		    DMCS_LOG_TRACE(port << ": Send restart request to noff = " << std::distance(beg, it) 
-				   << ". session_id = " << session_id
-				   << ". conflicts = " << *c_vec 
-				   << ". partial_ass = " << *partial_ass
-				   << ". decision = " << *decision);
-
-		    ConflictNotification* ow_neighbor =
-		      (ConflictNotification*) overwrite_send(it->get(), &cn, sizeof(cn), prio);
-
-		    if (ow_neighbor)
+		    ConflictVec2p::const_iterator ct = new_conflicts->begin();
+		    
+		    for (ConcurrentMessageQueueVec::iterator it = beg; it != end; ++it, ++ct)
 		      {
-			delete ow_neighbor;
-			ow_neighbor = 0;
+			ConflictVec* c_vec = *ct;
+			
+			ConflictNotification* cn = new ConflictNotification(c_vec, partial_ass, 
+									    decision, session_id);
+			std::size_t prio = 0;
+			
+			DMCS_LOG_TRACE(port << ": Send restart request to noff = " << std::distance(beg, it) 
+				       << ". session_id = " << session_id
+				       << ". conflicts = " << *c_vec 
+				       << ". partial_ass = " << *partial_ass
+				       << ". decision = " << *decision);
+			
+			ConflictNotification* ow_neighbor =
+			  (ConflictNotification*) overwrite_send(it->get(), &cn, sizeof(cn), prio);
+			
+			if (ow_neighbor)
+			  {
+			    delete ow_neighbor;
+			    ow_neighbor = 0;
+			  }
+		      }
+		    /// check me
+		    delete new_conflicts;
+		  }
+		else
+		  {
+		    // NULL new_conflicts, also inform each NeighborOut to send out NULL
+		    for (ConcurrentMessageQueueVec::iterator it = beg; it != end; ++it)
+		      {
+			ConflictNotification* cn = new ConflictNotification(0, partial_ass, 
+									    decision, session_id);
+			std::size_t prio = 0;
+			
+			DMCS_LOG_TRACE(port << ": Send restart request to noff = " << std::distance(beg, it) 
+				       << ". session_id = " << session_id
+				       << ". conflicts = NULL" 
+				       << ". partial_ass = " << *partial_ass
+				       << ". decision = " << *decision);
+			
+			ConflictNotification* ow_neighbor =
+			  (ConflictNotification*) overwrite_send(it->get(), &cn, sizeof(cn), prio);
+			
+			if (ow_neighbor)
+			  {
+			    delete ow_neighbor;
+			    ow_neighbor = 0;
+			  }
 		      }
 		  }
 
-		/// check me
-		delete new_conflicts;
 	      }
 	  }
 	else

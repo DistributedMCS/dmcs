@@ -56,7 +56,7 @@ struct ConflictNotification
       decision(d),
       type(t)
   { 
-    assert(cs != 0 || t == SHUTDOWN || t == NEXT);
+    //assert(cs != 0 || t == SHUTDOWN || t == NEXT);
     assert(t == REQUEST || t == SHUTDOWN || t == NEXT);
   }
   
@@ -79,10 +79,21 @@ struct ConflictNotification
 inline std::ostream&
 operator<< (std::ostream& os, const ConflictNotification& cn)
 {
-  return os << "session_id = " << cn.session_id << std::endl
-	    << "conflicts: " << *(cn.conflicts) << std::endl
-	    << "partial_ass: " << *(cn.partial_ass) << std::endl
-	    << "decision: " << *(cn.decision);
+  os << "session_id = " << cn.session_id << std::endl;
+
+  if (cn.conflicts)
+    {
+      os << "conflicts: " << *(cn.conflicts) << std::endl;
+    }
+  else
+    {
+      os << "conflicts: NULL " << std::endl;
+    }
+
+  os << "partial_ass: " << *(cn.partial_ass) << std::endl
+     << "decision: " << *(cn.decision);
+
+  return os;
 }
 
 } // namespace dmcs

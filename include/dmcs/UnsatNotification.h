@@ -56,7 +56,7 @@ struct UnsatNotification
       session_id(sid),
       type(t)
   { 
-    assert(cs != 0 || t == SHUTDOWN || t == NEXT);
+    //    assert(cs != 0 || t == SHUTDOWN || t == NEXT);
     assert(t == REQUEST || t == SHUTDOWN || t == NEXT);
   }
   
@@ -79,10 +79,17 @@ struct UnsatNotification
 inline std::ostream&
 operator<< (std::ostream& os, const UnsatNotification& un)
 {
-  return os << "session id: " << un.session_id << std::endl
-	    << "conflicts: " << *(un.all_new_conflicts) << std::endl
-	    << "partial_ass: " << *(un.partial_ass) << std::endl
-	    << "decision: " << *(un.decision);
+  os << "session id: " << un.session_id << std::endl;
+
+  if (un.all_new_conflicts)
+    {
+      os << "conflicts: " << *(un.all_new_conflicts) << std::endl;
+    }
+
+  os << "partial_ass: " << *(un.partial_ass) << std::endl
+     << "decision: " << *(un.decision);
+
+  return os;
 }
 
 } // namespace dmcs

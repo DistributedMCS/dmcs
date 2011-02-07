@@ -71,7 +71,11 @@ public:
 	DMCS_LOG_TRACE("Watch out! NULL partial_ass");
       }
 
-    assert (cs != 0);
+    if (cs == 0)
+      {
+	DMCS_LOG_TRACE("Watch out! NULL conflicts");
+      }
+
     assert (d  != 0);
   }
 

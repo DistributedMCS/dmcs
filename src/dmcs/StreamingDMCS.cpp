@@ -322,11 +322,17 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
   const std::size_t no_nbs      = nbs->size();
 
-  assert (conflicts);
   assert (partial_ass);
   assert (decision);
 
-  DMCS_LOG_TRACE("Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
+  if (conflicts)
+    {
+      DMCS_LOG_TRACE("Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
+    }
+  else 
+    {
+      DMCS_LOG_TRACE("Trigger SAT solver with conflicts = NULL and partial ass = " << *partial_ass);
+    }
 
   ConflictNotification* mess_sat = new ConflictNotification(conflicts, partial_ass, decision, parent_session_id);
   ConflictNotification* ow_sat = 
@@ -341,40 +347,40 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
   if (first_round)
     {
       first_round = false;
+
+      if (no_nbs > 0) // not a leaf context
+	{
+	  DMCS_LOG_TRACE("Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
+	  
+	  DMCS_LOG_TRACE("router_neighbors_notif.size() = " << router_neighbors_notif->size());
+	  
+	  assert (router_neighbors_notif->size() == no_nbs);
+	  
+	  ConflictNotification* cn = new ConflictNotification(0, partial_ass, decision, my_starting_session_id);
+	  
+	  for (std::size_t i = 0; i < no_nbs; ++i)
+	    {
+	      DMCS_LOG_TRACE(" First push to offset " << i);
+	      ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
+	      
+	      DMCS_LOG_TRACE(__PRETTY_FUNCTION__ << " Will push: conflictS = NULL"
+			     <<", partial_ass = " << *(cn->partial_ass) 
+			     << ", decision_level = " << *(cn->decision));
+	      
+	      ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
+	      
+	      if (ow_neighbor)
+		{
+		  delete ow_neighbor;
+		  ow_neighbor = 0;
+		}
+	    }
+	}
     }
   else
     {
       // interrupt relsat
       sat_thread->interrupt();
-    }
-
-  if (no_nbs > 0) // not a leaf context
-    {
-      DMCS_LOG_TRACE("Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
-
-      DMCS_LOG_TRACE("router_neighbors_notif.size() = " << router_neighbors_notif->size());
-
-      assert (router_neighbors_notif->size() == no_nbs);
-
-      ConflictNotification* cn = new ConflictNotification(conflicts, partial_ass, decision, my_starting_session_id);
-
-      for (std::size_t i = 0; i < no_nbs; ++i)
-	{
-	  DMCS_LOG_TRACE(" First push to offset " << i);
-	  ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
-
-	  DMCS_LOG_TRACE(__PRETTY_FUNCTION__ << " Will push: conflict = " << *(cn->conflicts)
-			 <<", partial_ass = " << *(cn->partial_ass) 
-			 << ", decision_level = " << *(cn->decision));
-
-	  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
-
-	  if (ow_neighbor)
-	    {
-	      delete ow_neighbor;
-	      ow_neighbor = 0;
-	    }
-	}
     }
 }
 

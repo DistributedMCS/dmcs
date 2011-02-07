@@ -97,13 +97,23 @@ public:
 	    Decisionlevel* decision = cn->decision;
 	    std::size_t session_id = cn->session_id;
 
-	    assert(conflicts && partial_ass && decision);
+	    assert(partial_ass && decision);
 
-	    DMCS_LOG_TRACE(port << ": Got from Router: session_id = " << session_id
-			   << ", conflict = " << *conflicts 
-			   << ", partial_ass = " << *partial_ass 
-			   << ", decision = " << *decision);
-	    
+	    if (conflicts)
+	      {
+		DMCS_LOG_TRACE(port << ": Got from Router: session_id = " << session_id
+			       << ", conflict = " << *conflicts 
+			       << ", partial_ass = " << *partial_ass 
+			       << ", decision = " << *decision);
+	      }
+	    else
+	      {
+		DMCS_LOG_TRACE(port << ": Got from Router: session_id = " << session_id
+			       << ", conflict = NULL" 
+			       << ", partial_ass = " << *partial_ass 
+			       << ", decision = " << *decision);
+	      }
+
 	    // write to network
 
 	    const std::string& header = HEADER_REQ_STM_DMCS;

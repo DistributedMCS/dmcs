@@ -232,6 +232,12 @@ RelSatSolver::prepare_input()
 void
 RelSatSolver::import_conflicts(const ConflictVec* conflicts)
 {
+  // No new conflicts to import
+  if (!conflicts)
+    {
+      return;
+    }
+
   xInstance->setOrigTheorySize(xInstance->iClauseCount());
 
   std::size_t sig_size = sig->size();
@@ -351,10 +357,20 @@ RelSatSolver::solve()
       import_conflicts(parent_conflicts);
       import_partial_ass(parent_ass);
 
-      DMCS_LOG_TRACE(port << ":  Got a message from DMCS. parent_session_id = " << parent_session_id
-		     << ". parent_conflicts = " << *parent_conflicts 
-		     << ". parent_ass = " << *parent_ass
-		     << ". parent_decision = " << *parent_decision);
+      if (parent_conflicts)
+	{
+	  DMCS_LOG_TRACE(port << ":  Got a message from DMCS. parent_session_id = " << parent_session_id
+			 << ". parent_conflicts = " << *parent_conflicts 
+			 << ". parent_ass = " << *parent_ass
+			 << ". parent_decision = " << *parent_decision);
+	}
+      else
+	{
+	  DMCS_LOG_TRACE(port << ":  Got a message from DMCS. parent_session_id = " << parent_session_id
+			 << ". parent_conflicts = NULL" 
+			 << ". parent_ass = " << *parent_ass
+			 << ". parent_decision = " << *parent_decision);
+	}
 
       // remove input part of the theory (from last solve)
 
@@ -377,8 +393,7 @@ RelSatSolver::solve()
 	  else
 	    {
 	      // reset Joiner and NeighborOut (through Router)
-	      ///@todo: add empty new conflicts
-	      //reset_slaves(parent_ass, parent_decision);
+	      reset_slaves(0, parent_ass, parent_decision);
 	    }
 
 	  while (1)
