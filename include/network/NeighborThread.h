@@ -230,7 +230,8 @@ private:
 	  {
 	    // no message to read, inform the Joiner with (ctx_offset, 0)
 	    assert (header->find(HEADER_EOF) != std::string::npos);
-	    mg->sendJoinIn(0, 0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0); ///@todo FIXME
+	    //mg->sendJoinIn(0, 0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0); ///@todo FIXME
+	    mg->sendJoinIn(0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0, 0);
 
 	    boost::shared_ptr<std::string> header(new std::string);
 	    
@@ -277,7 +278,7 @@ private:
 	// notify the joiner by putting a JoinMess into JoinMessageQueue
 	std::size_t bsv_size = bsv->size();
 
-	mg->sendJoinIn(bsv_size, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+	mg->sendJoinIn(bsv_size, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0, 0);
 
 	PartialBeliefStateVec::const_iterator it = bsv->begin();	
 	VecSizeT::const_iterator jt = session_id->begin();
@@ -287,11 +288,11 @@ private:
 	    PartialBeliefState* bs = *it;
 	    if (bs != 0)
 	      {
-		DMCS_LOG_TRACE(port << ": Sending model = " << *bs << ", sid = " << *jt);
+		DMCS_LOG_TRACE(port << ": Sending model = " << *bs << ", sid = " << *jt << " from " << noff << " to " << offset);
 	      }
 	    else
 	      {
-		DMCS_LOG_TRACE(port << ": Sending model: NULL");
+		DMCS_LOG_TRACE(port << ": Sending model: NULL" << ", sid = " << *jt << " from " << noff << " to " << offset);
 	      }
 	    mg->sendModel(bs, *jt, noff, offset, 0); 
 	  }

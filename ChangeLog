@@ -1,11 +1,10 @@
-2011-02-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-	* src/network/OutputThread.cpp: Add some more debug info.
-
-	* include/solver/RelSatSolver.h: Add update_local_input().
-	* src/solver/RelSatSolver.cpp: Likewise.
-
 2011-02-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am (testMessagingGateway_LDADD): Add liblog.a
+
+	* src/network/ConcurrentMessageDispatcher.cpp: Enable logging.
+
+	* include/network/NeighborThread.h: Fix queue parameters.
 
 	* src/dmcsc.cpp: Add total model sampling.
 	(handle_belief_state): Fix locking.
@@ -13,9 +12,17 @@
 	* examples/run-streaming.sh: Add timelimit support, make run and
 	timelimit optional.
 	Time all daemons and client with time --verbose.
+	Kill daemons before grep run logs.
 	* examples/run-opt.sh: Likewise.
 	* examples/ring-3-10-5-5-a/run-streaming.sh: Likewise.
 	* examples/ring-3-10-5-5-a/run-opt.sh: Likewise.
+
+2011-02-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/OutputThread.cpp: Add some more debug info.
+
+	* include/solver/RelSatSolver.h: Add update_local_input().
+	* src/solver/RelSatSolver.cpp: Likewise.
 
 2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
