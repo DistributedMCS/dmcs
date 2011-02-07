@@ -32,6 +32,7 @@
 #include "mcs/BeliefState.h"
 #include "solver/Conflict.h"
 #include "network/ConcurrentMessageDispatcher.h"
+#include "dmcs/Log.h"
 
 using namespace dmcs;
 
@@ -76,19 +77,25 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
 
   struct ModelSession ms = { b, sid };
 
+  bool ret = true;
+
   if (msecs > 0)
     {
-      return mqs[to]->timed_send(&ms, sizeof(ms), 0, boost::posix_time::milliseconds(msecs));
+      ret = mqs[to]->timed_send(&ms, sizeof(ms), 0, boost::posix_time::milliseconds(msecs));
+      DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ms.m << "," << ms.sid << "}, " << msecs << ") = " << ret);
     }
   else if (msecs < 0)
     {
-      return mqs[to]->try_send(&ms, sizeof(ms), 0);
+      ret = mqs[to]->try_send(&ms, sizeof(ms), 0);
+      DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ms.m << "," << ms.sid << "}, " << msecs << ") = " << ret);
     }
   else
     {
       mqs[to]->send(&ms, sizeof(ms), 0);
-      return true;
+      DMCS_LOG_TRACE("mq #" << to << ": send({" << ms.m << "," << ms.sid << "}, " << msecs << ") = " << ret);
     }
+
+  return ret;
 }
 
 
@@ -166,19 +173,25 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
 
   struct JoinIn ji = { from, k };
 
+  bool ret = true;
+
   if (msecs > 0)
     {
-      return mqs[to]->timed_send(&ji, sizeof(ji), 0, boost::posix_time::milliseconds(msecs));
+      ret = mqs[to]->timed_send(&ji, sizeof(ji), 0, boost::posix_time::milliseconds(msecs));
+      DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = " << ret);
     }
   else if (msecs < 0)
     {
-      return mqs[to]->try_send(&ji, sizeof(ji), 0);
+      ret = mqs[to]->try_send(&ji, sizeof(ji), 0);
+      DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = " << ret);
     }
   else
     {
       mqs[to]->send(&ji, sizeof(ji), 0);
-      return true;
+      DMCS_LOG_TRACE("mq #" << to << ": send({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = " << ret);
     }
+
+  return ret;
 }
 
 
@@ -199,25 +212,35 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(ms), recvd, p, boost::posix_time::milliseconds(msecs)))
 	{
+	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << "," << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
+
 	  msecs = 0;
 	  ms.m = 0;
 	  ms.sid = 0;
 	  return ms;
 	}
+
+      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << "," << ms.sid << "}, " << msecs << ") = true");
     }
   else if (msecs < 0)
     {
       if (!mqs[from]->try_receive(ptr, sizeof(ms), recvd, p))
 	{
+	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ms.m << "," << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
+
 	  msecs = 0;
 	  ms.m = 0;
 	  ms.sid = 0;
 	  return ms;
 	}
+
+      DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ms.m << "," << ms.sid << "}, " << msecs << ") = true");
     }
   else
     {
       mqs[from]->receive(ptr, sizeof(ms), recvd, p);
+
+      DMCS_LOG_TRACE("mq #" << from << ": receive({" << ms.m << "," << ms.sid << "}, " << msecs << ") = true");
     }
 
   assert(sizeof(ms) == recvd);
@@ -327,21 +350,26 @@ ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(ji), recvd, p, boost::posix_time::milliseconds(msecs)))
 	{
+	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = false, setting everything 0 now.");
 	  msecs = 0;
 	  return ji;
 	}
+      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = true");
     }
   else if (msecs < 0)
     {
       if (!mqs[from]->try_receive(ptr, sizeof(ji), recvd, p))
 	{
+	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = false, setting everything 0 now.");
 	  msecs = 0;
 	  return ji;
 	}
+      DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = true");
     }
   else
     {
       mqs[from]->receive(ptr, sizeof(ji), recvd, p);
+      DMCS_LOG_TRACE("mq #" << from << ": receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = true");
     }
 
   assert(sizeof(ji) == recvd);
