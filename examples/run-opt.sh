@@ -122,22 +122,21 @@ DMCSCRET=$?
 
 set +x
 
+# just to be safe
+killall -1 dmcsd # 2>/dev/null
+killall -9 dmcsd 2>/dev/null
 
 echo >> $STATSLOG
 
 if [ $DMCSCRET = 0 ]; then
 	echo PASS: $TESTNAME-$MODE >> $STATSLOG
 else
-	egrep -H "^Status" $LOGPATH/$TESTNAME-$MODEL-run*.log >> $STATSLOG
+	egrep -H "status" $LOGPATH/$TESTNAME-$MODE-run*.log >> $STATSLOG
 	echo FAILED: $TESTNAME-$MODE >> $STATSLOG
 fi
 
 echo >> $STATSLOG
 
 date >> $STATSLOG
-
-# just to be safe
-killall -1 dmcsd # 2>/dev/null
-killall -9 dmcsd 2>/dev/null
 
 cat $STATSLOG

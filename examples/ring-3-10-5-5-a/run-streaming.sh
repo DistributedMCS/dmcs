@@ -14,8 +14,8 @@ export TESTSPATH='.' # path to lp/br/opt
 export DMCSPATH='../../build/src' # path to dmcsd/dmcsc
 export LOGPATH='.' # path to output logfiles
 
-DORUN=no # run with `run'
-DOTIMELIMIT=no # run with `timelimit'
+DORUN=yes # run with `run'
+DOTIMELIMIT=yes # run with `timelimit'
 VERBOSE=yes # output stuff
 LOGDAEMONS=yes # log daemon output
 
@@ -122,22 +122,21 @@ DMCSCRET=$?
 
 set +x
 
+# just to be safe
+killall -1 dmcsd # 2>/dev/null
+killall -9 dmcsd 2>/dev/null
 
 echo >> $STATSLOG
 
 if [ $DMCSCRET = 0 ]; then
 	echo PASS: $TESTNAME-$MODE >> $STATSLOG
 else
-	egrep -H "^Status" $LOGPATH/$TESTNAME-$MODEL-run*.log >> $STATSLOG
+	egrep -H "status" $LOGPATH/$TESTNAME-$MODE-run*.log >> $STATSLOG
 	echo FAILED: $TESTNAME-$MODE >> $STATSLOG
 fi
 
 echo >> $STATSLOG
 
 date >> $STATSLOG
-
-# just to be safe
-killall -1 dmcsd # 2>/dev/null
-killall -9 dmcsd 2>/dev/null
 
 cat $STATSLOG
