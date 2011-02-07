@@ -142,6 +142,28 @@ RelSatSolver::update_bridge_input(SignatureByCtx::const_iterator it)
 
 
 
+void
+RelSatSolver::update_local_input(PartialBeliefSet& my_belief_set, 
+				 SignatureByCtx::const_iterator low, 
+				 SignatureByCtx::const_iterator up)
+{
+  for (SignatureByCtx::const_iterator it = low; it != up; ++it)
+    {
+      assert (it->localId == it->origId);
+
+      int oid = it->origId;
+
+      PartialBeliefSet::TruthVal val = testBeliefSet(my_belief_set, oid);
+
+      if (val != PartialBeliefSet::DMCS_UNDEF)
+	{
+	  int ucl = (val == PartialBeliefSet::DMCS_TRUE) ? oid : -oid;
+	  xInstance->add_unit_clause(ucl);
+	}
+    }
+}
+
+
 // return false when there is no more input to read
 bool
 RelSatSolver::prepare_input()
@@ -194,6 +216,12 @@ RelSatSolver::prepare_input()
   for (SignatureByCtx::const_iterator it = up; it != local_sig.end(); ++it)
     {
       update_bridge_input(it);
+    }
+
+  PartialBeliefSet& my_belief_set = (*input)[my_id-1];
+  if (isEpsilon(my_belief_set))
+    {
+      update_local_input(my_belief_set, low, up);
     }
 
   return true;
@@ -359,8 +387,7 @@ RelSatSolver::solve()
 	      xInstance->removeInput();
 	      if (!prepare_input())
 		{
-		  DMCS_LOG_TRACE(port << ": Got NULL input from JOIN_OUT_MQ");
-		  // send a NULL model to OUT_MQ to inform OutputThread
+		  DMCS_LOG_TRACE(port << ": Got NULL input from JOIN_OUT_MQ. Send a NULL model to OUT_MQ to inform OutputThread");
 		  mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
 		  break;
 		}
@@ -816,15 +843,16 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
       // just to be safe
       assert (cid < system_size);
       
-      PartialBeliefSet& belief = (*bs)[cid];
+      PartialBeliefSet& neighbor_belief = (*bs)[cid];
+      setEpsilon(neighbor_belief);
 
       if (_aAssignment[i]) 
 	{
-	  setBeliefSet(belief, loc_it->origId);
+	  setBeliefSet(neighbor_belief, loc_it->origId);
 	}
       else
 	{
-	  setBeliefSet(belief, loc_it->origId, PartialBeliefSet::DMCS_FALSE);
+	  setBeliefSet(neighbor_belief, loc_it->origId, PartialBeliefSet::DMCS_FALSE);
 	}
     }
 

@@ -199,7 +199,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  //DMCS_LOG_TRACE(port << ": Got a NULL pointer. timeout == " << timeout);
 	  if (timeout == 0)
 	    {
-	      //DMCS_LOG_TRACE(port << ":  TIME OUT. Going to send whatever I got so far to the parent");
+	      DMCS_LOG_TRACE(port << ":  TIME OUT. Going to send whatever I got so far to the parent");
 	      if (res->size() > 0)
 		{
 		  DMCS_LOG_TRACE(port << ": Going to send HEADER_ANS");
@@ -220,7 +220,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	      // timeout != 0 ==> either UNSAT or EOF
 	      if (sid == parent_session_id)
 		{
-		  DMCS_LOG_TRACE(port << ": Got UNSAT or EOF. sid = " << sid << ", parent_session_id = " << parent_session_id << ". Turn off collecting mode.");
+		  DMCS_LOG_TRACE(port << ": timeout = " << timeout << ". Got UNSAT or EOF. sid = " << sid << ", parent_session_id = " << parent_session_id << ". Turn off collecting mode.");
 		  header = HEADER_EOF;
 		  collecting = false;
 		  break;
@@ -347,7 +347,7 @@ OutputThread::handle_written_header(connection_ptr conn,
   boost::asio::ip::tcp::socket& sock = conn->socket();
   boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
       
-  DMCS_LOG_TRACE(port << ": return message " << return_mess << " to port " << ep.port());
+  DMCS_LOG_TRACE(port << ": return message " << return_mess << " to port " << ep.port() << ". Number of belief states = " << res->size());
       
   conn->write(return_mess);
 

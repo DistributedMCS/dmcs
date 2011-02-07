@@ -127,10 +127,17 @@ private:
   prepare_input();
 
   void
-  reset_slaves(ConflictVec2p* new_conflicts, PartialBeliefState* partial_ass, Decisionlevel* decision);
+  reset_slaves(ConflictVec2p* new_conflicts, 
+	       PartialBeliefState* partial_ass, 
+	       Decisionlevel* decision);
 
   void
   update_bridge_input(SignatureByCtx::const_iterator);
+
+  void
+  update_local_input(PartialBeliefSet& my_belief_set, 
+		     SignatureByCtx::const_iterator low, 
+		     SignatureByCtx::const_iterator up);
 
 private:
   bool                           is_leaf;

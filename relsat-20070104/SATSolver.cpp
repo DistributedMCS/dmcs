@@ -251,7 +251,7 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
 	}
       }
       if (_bSpecialBackup()) {
-	xOutputStream << "c   All solutions found." << endl;
+	xOutputStream << "c   All solutions found. Number of solutions = " << _iSolutionCount << endl;
 	wrapper->receiveEOF();
 	return bReturnValue;
       }

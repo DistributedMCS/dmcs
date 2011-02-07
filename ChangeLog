@@ -1,3 +1,10 @@
+2011-02-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/OutputThread.cpp: Add some more debug info.
+
+	* include/solver/RelSatSolver.h: Add update_local_input().
+	* src/solver/RelSatSolver.cpp: Likewise.
+
 2011-02-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Add total model sampling.
