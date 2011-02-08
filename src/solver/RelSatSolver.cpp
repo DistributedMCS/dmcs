@@ -586,6 +586,8 @@ RelSatSolver::receiveEOF()
   // stack is empty or there is no more possibility to flip then send
   // NULL to OUT_MQ
 
+  boost::this_thread::interruption_point();
+
 #if 0
   if (trail->empty())
     {
@@ -611,7 +613,7 @@ RelSatSolver::receiveEOF()
       do 
 	{
 	  ChoicePointPtr& cp = trail->top();
-	  next_flip = getNextFlip(cp, orig_sigs_size);
+	  next_flip = getNextFlip(port, my_id, cp, orig_sigs_size, parent_ass);
 	  if (next_flip != 0)
 	    {
 	      break;
@@ -626,7 +628,7 @@ RelSatSolver::receiveEOF()
 	}
       else
 	{
-	  DMCS_LOG_TRACE(port << ": Next possibility to push, let's notify router. next_flip == " << *next_flip);
+	  DMCS_LOG_TRACE(port << ": Next possibility to push, let's notify router. next_flip ==\n " << *next_flip);
 
 	  ConflictNotification* ow_sat = 
 	    (ConflictNotification*) overwrite_send(sat_router_notif, &next_flip, sizeof(next_flip), 0);
@@ -645,6 +647,8 @@ RelSatSolver::receiveEOF()
 void
 RelSatSolver::backtrack(ClauseList& learned_clauses)
 {
+  boost::this_thread::interruption_point();
+
   //collect_learned_clauses(xSATSolver->getLearnedClauses());
   collect_learned_clauses(learned_clauses);
 
@@ -762,7 +766,7 @@ RelSatSolver::backtrack(ClauseList& learned_clauses)
 
       DMCS_LOG_TRACE(port << ": Flip atom = " << *it << ". global_id = " << gid);
       
-      ChoicePointPtr cp(new ChoicePoint(input, decision));
+      ChoicePointPtr cp(new ChoicePoint(interface_impossible, decision));
       trail->push(cp);
 
       reset_slaves(new_conflicts, partial_ass, decision);

@@ -707,6 +707,7 @@ struct Decisionlevel
   void
   setDecisionlevel(std::size_t atom_id)
   {
+    assert (atom_id > 0);
     assert (atom_id <= declev_at_dl->size());
     
     std::size_t& dl = (*declev_at_dl)[atom_id - 1];
@@ -732,6 +733,7 @@ struct Decisionlevel
   std::size_t
   getDecisionlevel(std::size_t atom_id)
   {
+    assert (atom_id > 0);
     assert (atom_id <= declev_at_dl->size());
 
     return (*declev_at_dl)[atom_id - 1];

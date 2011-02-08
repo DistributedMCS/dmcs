@@ -563,6 +563,7 @@ Options";
 	  ///@todo change when the manager is added
 	  query_plan->read_graph(filename_topo);
 	  system_size = query_plan->getSystemSize();
+	  query_plan->setupMetaNeighbors();
 
 	  // Empty MSCs are not allowed!
 	  if (system_size == 0)

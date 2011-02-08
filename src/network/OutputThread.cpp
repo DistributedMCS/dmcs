@@ -240,9 +240,9 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
       // It is weird if sid > parent_session_id, because SAT solver
       // always sends a NULL pointer when it is interrupted
-      assert (sid < parent_session_id || sid == parent_session_id);
+      //assert (sid < parent_session_id || sid == parent_session_id);
 
-      if (sid == parent_session_id)
+      if (sid >= parent_session_id)
 	{
 	  res->push_back(bs);
 	  res_sid->push_back(sid);
@@ -256,6 +256,10 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
     } // for
 
   if (res->size() > 0)
+    {
+      return true;
+    }
+  else if (header.find(HEADER_EOF) != std::string::npos)
     {
       return true;
     }

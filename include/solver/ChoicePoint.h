@@ -80,39 +80,105 @@ global_id(SignatureByCtx::const_iterator& it, const VecSizeTPtr& orig_sigs_size)
   return count + orig_id;
 }
 
+
+inline std::size_t
+global_id(std::size_t ctx_offset, std::size_t bit_position, const VecSizeTPtr& orig_sigs_size)
+{
+  VecSizeT::iterator orig_offset = orig_sigs_size->begin();
+  std::advance(orig_offset, ctx_offset);
+
+  std::size_t count = std::accumulate(orig_sigs_size->begin(), orig_offset, 0);
+
+  return count + bit_position;
+}
+
 /// used when receiving EOF
 inline ConflictNotification*
-getNextFlip(ChoicePointPtr& cp, VecSizeTPtr& orig_sigs_size)
+getNextFlip(std::size_t port, std::size_t my_id, ChoicePointPtr& cp, 
+	    VecSizeTPtr& orig_sigs_size, PartialBeliefState* old_partial_ass)
 {
   PartialBeliefState* input = cp->input;
   Decisionlevel* decision = cp->decision;
 
+  DMCS_LOG_TRACE(port << ": ChoicePoint = " << *cp);
+
   std::size_t atom_gid = decision->last(); // global id of the atom
+
+  DMCS_LOG_TRACE(port << ": last decided atom = " << atom_gid);
 
   assert (atom_gid <= decision->getGlobalSigSize());
  
   VecSizeT::const_iterator it = orig_sigs_size->begin();
   PartialBeliefState::const_iterator jt = input->begin();
-  std::size_t pos = 0;
+  std::size_t ctx_pos = 0;
   while (atom_gid > (*it))
     {
       atom_gid -= (*it);
       ++it;
       ++jt;
-      ++pos;
+      ++ctx_pos;
     }
+
+  DMCS_LOG_TRACE(port << ": After localizing, get ctx_id = " << ctx_pos << ", atom_id = " << atom_gid);
+
+  assert (ctx_pos != my_id);
 
   // Now, atom_gid is the position of the bit representing the atom
   // check for safety
   assert (testBeliefSet(*jt, atom_gid) != PartialBeliefSet::DMCS_UNDEF);
 
   // get the next bit which is on, and was not decided
-  std::size_t next_atom = jt->state_bit.get_next(atom_gid);
 
-  while ((next_atom != 0) && (decision->getDecisionlevel(next_atom) != 0))
+  std::size_t next_atom = jt->state_bit.get_next(atom_gid);
+  std::size_t next_atom_gid;
+
+  while (jt != input->end())
     {
-      next_atom = jt->state_bit.get_next(atom_gid);
+      next_atom_gid = global_id(ctx_pos, next_atom, orig_sigs_size);
+
+      DMCS_LOG_TRACE(port << ": next_atom = " << next_atom << "next_atom_gid = " << next_atom_gid
+		     << ", decision = " << decision->getDecisionlevel(next_atom_gid));
+
+      while ((next_atom != 0) && (decision->getDecisionlevel(next_atom_gid) != 0))
+	{
+	  next_atom = jt->state_bit.get_next(next_atom);
+	  next_atom_gid = global_id(ctx_pos, next_atom, orig_sigs_size);
+	  DMCS_LOG_TRACE(port << ": next_atom = " << next_atom << ", next_atom_gid = " << next_atom_gid 
+			 << ", decision = " << decision->getDecisionlevel(next_atom_gid));
+	}
+
+      if (next_atom != 0)
+	{
+	  break;
+	}
+
+      while (next_atom == 0)
+	{
+	  ++jt;
+	  ++ctx_pos;
+
+	  if (jt == input->end())
+	    {
+	      break;
+	    }
+
+	  if (ctx_pos == my_id)
+	    {
+	      ++jt;
+	      ++ctx_pos;
+	      if (jt == input->end())
+		{
+		  break;
+		}
+	    }
+
+	  next_atom = jt->state_bit.get_first();
+	  assert (next_atom == 0);
+	  next_atom = jt->state_bit.get_next(next_atom);
+	}
     }
+
+  DMCS_LOG_TRACE(port << ": FINALLY: next_atom = " << next_atom << "next_atom_gid = " << next_atom_gid);
 
   if (next_atom == 0)
     {
@@ -124,10 +190,10 @@ getNextFlip(ChoicePointPtr& cp, VecSizeTPtr& orig_sigs_size)
   // but later when we transfer the decision level back and ford, this
   // should help with setting up more than 1 atoms.
   const std::size_t system_size = orig_sigs_size->size();
-  PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
+  PartialBeliefState* partial_ass = new PartialBeliefState(*old_partial_ass);
   
   PartialBeliefState::iterator pa_it = partial_ass->begin();
-  std::advance(pa_it, pos);
+  std::advance(pa_it, ctx_pos);
 
   // set the oposite value of the corresponding assignment in input.
   if (testBeliefSet(*jt, next_atom) == PartialBeliefSet::DMCS_TRUE)
@@ -140,7 +206,7 @@ getNextFlip(ChoicePointPtr& cp, VecSizeTPtr& orig_sigs_size)
     }
 
   decision->pop_back();
-  decision->setDecisionlevel(next_atom);
+  decision->setDecisionlevel(next_atom_gid);
 
   // conflicts = 0, session_id = 0 --> will be set outside
   ConflictNotification* cn = new ConflictNotification(0, partial_ass, decision, 0);
@@ -155,6 +221,9 @@ findFirstUndecided(const std::size_t my_id,
 		   Decisionlevel* decision,
 		   const VecSizeTPtr& orig_sigs_size)
 {
+  // this function guarantees that the first undecided atom is not
+  // from my context
+
   SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
   SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
   SignatureByCtx::const_iterator it  = local_sig.begin();

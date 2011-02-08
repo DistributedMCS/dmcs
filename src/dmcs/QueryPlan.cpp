@@ -278,13 +278,8 @@ QueryPlan::remove_connection(std::size_t context_id1, std::size_t context_id2)
 NeighborListPtr&
 QueryPlan::getNeighbors(std::size_t context_id)
 {
-  boost::mutex::scoped_lock(mtx);
-
-  if (first_round)
-    {
-      first_round = false;
-      setupMetaNeighbors();
-    }
+  assert (meta_neighbors->size() > 0);
+  assert (context_id <= meta_neighbors->size());
 
   return (*meta_neighbors)[context_id - 1];
 }

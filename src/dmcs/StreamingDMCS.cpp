@@ -326,25 +326,6 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
   assert (partial_ass);
   assert (decision);
 
-  if (conflicts)
-    {
-      DMCS_LOG_TRACE(port << ": Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
-    }
-  else 
-    {
-      DMCS_LOG_TRACE(port << ": Trigger SAT solver with conflicts = NULL and partial ass = " << *partial_ass);
-    }
-
-  ConflictNotification* mess_sat = new ConflictNotification(conflicts, partial_ass, decision, parent_session_id);
-  ConflictNotification* ow_sat = 
-    (ConflictNotification*) overwrite_send(dmcs_sat_notif.get(), &mess_sat, sizeof(mess_sat), 0);
-  
-  if (ow_sat)
-    {
-      delete ow_sat;
-      ow_sat = 0;
-    }
-
   if (first_round)
     {
       first_round = false;
@@ -381,7 +362,28 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
   else
     {
       // interrupt relsat
+      DMCS_LOG_TRACE(port << ": Interrupt SAT");
       sat_thread->interrupt();
+    }
+
+
+  if (conflicts)
+    {
+      DMCS_LOG_TRACE(port << ": Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
+    }
+  else 
+    {
+      DMCS_LOG_TRACE(port << ": Trigger SAT solver with conflicts = NULL and partial ass = " << *partial_ass);
+    }
+
+  ConflictNotification* mess_sat = new ConflictNotification(conflicts, partial_ass, decision, parent_session_id);
+  ConflictNotification* ow_sat = 
+    (ConflictNotification*) overwrite_send(dmcs_sat_notif.get(), &mess_sat, sizeof(mess_sat), 0);
+  
+  if (ow_sat)
+    {
+      delete ow_sat;
+      ow_sat = 0;
     }
 }
 
