@@ -31,6 +31,7 @@
 
 #include "dmcs/Log.h"
 #include "mcs/BeliefState.h"
+#include "dmcs/UnsatNotification.h"
 
 #include <stack>
 #include <boost/shared_ptr.hpp>
@@ -93,9 +94,10 @@ global_id(std::size_t ctx_offset, std::size_t bit_position, const VecSizeTPtr& o
 }
 
 /// used when receiving EOF
-inline ConflictNotification*
+inline UnsatNotification*
 getNextFlip(std::size_t port, std::size_t my_id, ChoicePointPtr& cp, 
-	    VecSizeTPtr& orig_sigs_size, PartialBeliefState* old_partial_ass)
+	    VecSizeTPtr& orig_sigs_size, PartialBeliefState* old_partial_ass,
+	    std::size_t my_session_id)
 {
   PartialBeliefState* input = cp->input;
   Decisionlevel* decision = cp->decision;
@@ -209,7 +211,7 @@ getNextFlip(std::size_t port, std::size_t my_id, ChoicePointPtr& cp,
   decision->setDecisionlevel(next_atom_gid);
 
   // conflicts = 0, session_id = 0 --> will be set outside
-  ConflictNotification* cn = new ConflictNotification(0, partial_ass, decision, 0);
+  UnsatNotification* cn = new UnsatNotification(0, partial_ass, decision, my_session_id);
 
   return cn;
 }

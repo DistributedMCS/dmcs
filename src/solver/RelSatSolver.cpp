@@ -609,11 +609,11 @@ RelSatSolver::receiveEOF()
     {
       DMCS_LOG_TRACE(port << ": EOF, now backtrack");
 
-      ConflictNotification* next_flip;
+      UnsatNotification* next_flip;
       do 
 	{
 	  ChoicePointPtr& cp = trail->top();
-	  next_flip = getNextFlip(port, my_id, cp, orig_sigs_size, parent_ass);
+	  next_flip = getNextFlip(port, my_id, cp, orig_sigs_size, parent_ass, my_session_id);
 	  if (next_flip != 0)
 	    {
 	      break;
@@ -630,14 +630,16 @@ RelSatSolver::receiveEOF()
 	{
 	  DMCS_LOG_TRACE(port << ": Next possibility to push, let's notify router. next_flip ==\n " << *next_flip);
 
-	  ConflictNotification* ow_sat = 
-	    (ConflictNotification*) overwrite_send(sat_router_notif, &next_flip, sizeof(next_flip), 0);
+	  UnsatNotification* ow_sat = 
+	    (UnsatNotification*) overwrite_send(sat_router_notif, &next_flip, sizeof(next_flip), 0);
 	  
 	  if (ow_sat)
 	    {
 	      delete ow_sat;
 	      ow_sat = 0;
 	    }
+
+	  DMCS_LOG_TRACE(port << ": Notification to Router DONE!");
 	}
     }
 }
