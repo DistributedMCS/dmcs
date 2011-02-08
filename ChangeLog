@@ -1,5 +1,9 @@
 2011-02-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/OutputThread.h: Quickly sort & unique result
+	before return.
+	* src/network/OutputThread.cpp: Likewise.
+
 	* include/solver/ChoicePoint.h: Fix mismatch type between SAT and Router.
 	* src/solver/RelSatSolver.cpp: Likewise.
 

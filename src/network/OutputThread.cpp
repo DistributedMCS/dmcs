@@ -64,8 +64,11 @@ OutputThread::operator()(connection_ptr c,
 
   while (1)
     {
-      PartialBeliefStateVecPtr res(new PartialBeliefStateVec);
-      VecSizeTPtr res_sid(new VecSizeT);
+      //      PartialBeliefStateVecPtr res(new PartialBeliefStateVec);
+      //      VecSizeTPtr res_sid(new VecSizeT);
+      
+      PbsResultListPtr res(new PbsResultList);
+
       std::string header;
 
       if (eof_left)
@@ -98,9 +101,11 @@ OutputThread::operator()(connection_ptr c,
       else
 	{
 	  DMCS_LOG_TRACE(port << ": Go to collect output");
-	  if (collect_output(mg, res, res_sid, header))
+	  //if (collect_output(mg, res, res_sid, header))
+	  if (collect_output(mg, res, header))
 	    {
-	      write_result(c, res, res_sid, header);
+	      //write_result(c, res, res_sid, header);
+	      write_result(c, res, header);
 	    }
 	}
     }
@@ -169,8 +174,9 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 // return true if we actually collected something
 bool
 OutputThread::collect_output(MessagingGatewayBC* mg,
-			     PartialBeliefStateVecPtr& res,
-			     VecSizeTPtr& res_sid,
+			     //PartialBeliefStateVecPtr& res,
+			     //VecSizeTPtr& res_sid,
+			     PbsResultListPtr& res,
 			     std::string& header)
 {
   DMCS_LOG_TRACE(port << ": pack_size = " << pack_size << ", left to send = " << left_2_send);
@@ -244,8 +250,10 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
       if (sid >= parent_session_id)
 	{
-	  res->push_back(bs);
-	  res_sid->push_back(sid);
+	  PbsResult pbs(bs, sid);
+	  res->push_back(pbs);
+	  //res->push_back(bs);
+	  //res_sid->push_back(sid);
 	}
       else
 	{
@@ -270,8 +278,9 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
 void
 OutputThread::write_result(connection_ptr conn,
-			   PartialBeliefStateVecPtr& res,
-			   VecSizeTPtr& res_sid,
+			   //PartialBeliefStateVecPtr& res,
+			   //VecSizeTPtr& res_sid,
+			   PbsResultListPtr& res,
 			   const std::string& header)
 {
   DMCS_LOG_TRACE(port << ": header = " << header);
@@ -283,7 +292,8 @@ OutputThread::write_result(connection_ptr conn,
 	{
 	  // send some models
 	  conn->write(header);
-	  handle_written_header(conn, res, res_sid);
+	  //handle_written_header(conn, res, res_sid);
+	  handle_written_header(conn, res);
 	}
       else
 	{
@@ -296,7 +306,8 @@ OutputThread::write_result(connection_ptr conn,
 	      eof_left = true;
 	      const std::string& ans_header = HEADER_ANS;
 	      conn->write(ans_header);
-	      handle_written_header(conn, res, res_sid);
+	      //handle_written_header(conn, res, res_sid)
+	      handle_written_header(conn, res);
 
 	      /*
 	      if (invoker == 0)
@@ -328,25 +339,43 @@ OutputThread::write_result(connection_ptr conn,
 
 void
 OutputThread::handle_written_header(connection_ptr conn,
-				    PartialBeliefStateVecPtr& res,
-				    VecSizeTPtr& res_sid)
+				    //PartialBeliefStateVecPtr& res,
+				    //VecSizeTPtr& res_sid)
+				    PbsResultListPtr& res)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
   assert (left_2_send >= res->size());
   
   left_2_send -= res->size();
+
+  res->sort(my_compare);
+  res->unique();
       
   // mark end of package by a NULL model
   if (left_2_send == 0 || eof_left)
     {
       PartialBeliefState* bs = 0;
-      res->push_back(bs);
-      res_sid->push_back(0);
+      //res->push_back(bs);
+      //res_sid->push_back(0);
+      PbsResult p(bs, 0);
+      res->push_back(p);
       collecting = false;
     }
+  
+  PartialBeliefStateVecPtr res_pbs(new PartialBeliefStateVec);
+  VecSizeTPtr res_sid(new VecSizeT);
+
+  for (PbsResultList::const_iterator it = res->begin(); it != res->end(); ++it)
+    {
+      PartialBeliefState* p = it->pbs;
+      std::size_t sid = it->session_id;
+      res_pbs->push_back(p);
+      res_sid->push_back(sid);
+    }
       
-  StreamingBackwardMessage return_mess(res, res_sid);
+  //  StreamingBackwardMessage return_mess(res, res_sid);
+  StreamingBackwardMessage return_mess(res_pbs, res_sid);
   
   boost::asio::ip::tcp::socket& sock = conn->socket();
   boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
@@ -356,7 +385,8 @@ OutputThread::handle_written_header(connection_ptr conn,
   conn->write(return_mess);
 
   // clean up
-  for (PartialBeliefStateVec::iterator it = res->begin(); it != res->end(); ++it)
+  //for (PartialBeliefStateVec::iterator it = res->begin(); it != res->end(); ++it)
+  for (PartialBeliefStateVec::iterator it = res_pbs->begin(); it != res_pbs->end(); ++it)
     {
       if (*it)
 	{
