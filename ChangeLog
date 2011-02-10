@@ -1,3 +1,7 @@
+2011-02-10  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* examples/run-dyn.sh: Add dynamic dmcs runner.
+
 2011-02-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/OutputThread.h: Quickly sort & unique result
