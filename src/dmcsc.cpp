@@ -304,10 +304,12 @@ Options";
 	  DMCS_LOG_DEBUG("FINAL RESULT: ");
 	  DMCS_LOG_DEBUG(*result);
 
-
-	  // instantiate the system, then write .br and .sh files
-	  ContextSubstitutionList::const_iterator it = result->begin();
-	  instantiate(*it, hostName, port);
+	  if (result->size() > 0)
+	    {
+	      // instantiate the system, then write .br and .sh files
+	      ContextSubstitutionList::const_iterator it = result->begin();
+	      instantiate(*it, hostName, port);
+	    }
 	}
       else // ground mode
 	{
@@ -419,6 +421,7 @@ Options";
 		      diff_count = final_result.size() - diff_count;
 		      next_count++;
 
+
 		      // decide what to do next
 		      
 		      if (last_round)
@@ -432,16 +435,21 @@ Options";
 			  if (diff_count > 0 && diff_count < k) // setup next k here
 			    {
 			      DMCS_LOG_TRACE("Got " << diff_count << " partial belief states, getting next batch of size " << k);
-			      c.next(k);
+
+			      mess.setPackSize(k);
+			      c.next(mess);
 			    }
 			  else if (pack_size == 0 && model_count > last_model_count)
 			    {
 			      DMCS_LOG_TRACE("fixpoint not reached yet, get next " << k << " belief states");
-			      c.next(k);
+
+			      mess.setPackSize(k);
+			      c.next(mess);
 			    }
 			  else // fixpoint reached, last round
 			    {
 			      DMCS_LOG_TRACE("fixpoint reached: model_count = " << model_count << ", final_result: " << final_result.size());
+
 			      c.terminate();
 			      last_round = true;
 			    }
@@ -456,6 +464,12 @@ Options";
 		  delete conflicts;
 		  delete partial_ass;
 		  delete decision;
+
+		  sampler_thread.interrupt();
+		  if (sampler_thread.joinable())
+		    {
+		      sampler_thread.join();
+		    }
 		}
 	      else // opt mode
 		{

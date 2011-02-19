@@ -48,41 +48,58 @@
 namespace dmcs {
 
 template<typename ForwardMessType, typename BackwardMessType>
-AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_service& io_service,
+AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_service& ios,
 							  boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
 							  const std::string& h,
 							  ForwardMessType& fm)
-  : BaseClient(io_service, endpoint_iterator, h),
-    pack_size(fm.getPackSize()),
-    mess(fm),
-    no_answers(0),
+  : the_conn(new connection(ios)),
     callback(0)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
-  assert(pack_size > 0);
+  assert(fm.getPackSize() > 0);
 
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 
-  conn->socket().async_connect(endpoint,
-			       boost::bind(&AsynClient::send_header, this,
-					   boost::asio::placeholders::error,
-					   ++endpoint_iterator));
+  boost::shared_ptr<std::string> header(new std::string(h));
+
+  boost::shared_ptr<ForwardMessType> mess(new ForwardMessType(fm));
+
+  the_conn->socket().async_connect(endpoint,
+				   boost::bind(&AsynClient::send_header, this,
+					       boost::asio::placeholders::error,
+					       ++endpoint_iterator,
+					       the_conn,
+					       header,
+					       mess
+					       )
+				   );
 }
 
 
 template<typename ForwardMessType, typename BackwardMessType>
 void
 AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::error_code& e,
-							   boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
+							   boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+							   connection_ptr conn,
+							   boost::shared_ptr<std::string> my_header,
+							   boost::shared_ptr<ForwardMessType> mess)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!e)
     {
+      DMCS_LOG_TRACE("Send header: " << *my_header << ", pass mess: " << *mess);
+
       // The connection is now established successfully
-      conn->async_write(my_header, boost::bind(&AsynClient::send_message, this,
-					       boost::asio::placeholders::error, conn));
+      conn->async_write(*my_header,
+			boost::bind(&AsynClient::send_message, this,
+				    boost::asio::placeholders::error,
+				    conn,
+				    my_header,
+				    mess
+				    )
+			);
       
     }
   else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator())
@@ -94,7 +111,12 @@ AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::
       conn->socket().async_connect(endpoint,
 				   boost::bind(&AsynClient::send_header, this,
 					       boost::asio::placeholders::error,
-					       ++endpoint_iterator));
+					       ++endpoint_iterator,
+					       conn,
+					       my_header,
+					       mess
+					       )
+				   );
     }
   else
     {
@@ -109,17 +131,24 @@ AsynClient<ForwardMessType, BackwardMessType>::send_header(const boost::system::
 template<typename ForwardMessType, typename BackwardMessType>
 void
 AsynClient<ForwardMessType, BackwardMessType>::send_message(const boost::system::error_code& e,
-							    connection_ptr conn)
+							    connection_ptr conn,
+							    boost::shared_ptr<std::string> my_header,
+							    boost::shared_ptr<ForwardMessType> mess)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!e)
     {
-      DMCS_LOG_DEBUG("neighborMess = " << mess);
+      DMCS_LOG_DEBUG("Sending message: " << *mess << " for header: " << *my_header);
 
-      conn->async_write(mess,
+      conn->async_write(*mess,
 			boost::bind(&AsynClient::read_header, this,
-				    boost::asio::placeholders::error, conn));
+				    boost::asio::placeholders::error,
+				    conn,
+				    my_header,
+				    mess
+				    )
+			);
     }
   else
     {
@@ -133,17 +162,22 @@ AsynClient<ForwardMessType, BackwardMessType>::send_message(const boost::system:
 template<typename ForwardMessType, typename BackwardMessType>
 void
 AsynClient<ForwardMessType, BackwardMessType>::read_header(const boost::system::error_code& e,
-							   connection_ptr conn)
+							   connection_ptr conn,
+							   boost::shared_ptr<std::string> my_header,
+							   boost::shared_ptr<ForwardMessType> mess)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!e)
     {
-      boost::shared_ptr<std::string> header(new std::string);
-      
-      conn->async_read(*header,
+      conn->async_read(*my_header,
 		       boost::bind(&AsynClient::handle_read_header, this,
-				   boost::asio::placeholders::error, conn, header));
+				   boost::asio::placeholders::error,
+				   conn,
+				   my_header,
+				   mess
+				   )
+		       );
     }
   else
     {
@@ -158,15 +192,16 @@ template<typename ForwardMessType, typename BackwardMessType>
 void
 AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::system::error_code& e, 
 								  connection_ptr conn,
-								  boost::shared_ptr<std::string> header)
+								  boost::shared_ptr<std::string> my_header,
+								  boost::shared_ptr<ForwardMessType> mess)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!e)
     {
-      DMCS_LOG_TRACE("Received header = " << *header);
+      DMCS_LOG_TRACE("Received header = " << *my_header);
 
-      if (header->compare(HEADER_EOF) == 0) // read next or terminate
+      if (my_header->compare(HEADER_EOF) == 0) // read next or terminate
 	{
 	  // check for next thing to do here, calling function decides...
 	  //
@@ -176,29 +211,19 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_header(const boost::s
 	}
       else // read answer
 	{
-	  read_answer(e, conn);
+	  boost::shared_ptr<BackwardMessType> result(new BackwardMessType);
+
+	  conn->async_read(*result,
+			   boost::bind(&AsynClient::handle_read_answer, this,
+				       boost::asio::placeholders::error,
+				       conn,
+				       my_header,
+				       mess,
+				       result
+				       )
+			   );
+
 	}
-    }
-  else
-    {
-      // An error occurred.
-      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
-      throw std::runtime_error(e.message());
-    }
-}
-
-
-template<typename ForwardMessType, typename BackwardMessType>
-void 
-AsynClient<ForwardMessType, BackwardMessType>::read_answer(const boost::system::error_code& e, connection_ptr conn)
-{
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
-  if (!e)
-    {
-      conn->async_read(result,
-		       boost::bind(&AsynClient::handle_read_answer, this,
-		       boost::asio::placeholders::error, conn));
     }
   else
     {
@@ -213,41 +238,46 @@ AsynClient<ForwardMessType, BackwardMessType>::read_answer(const boost::system::
 template<typename ForwardMessType, typename BackwardMessType>
 void 
 AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::system::error_code& e,
-								  connection_ptr conn)
+								  connection_ptr conn,
+								  boost::shared_ptr<std::string> my_header,
+								  boost::shared_ptr<ForwardMessType> mess,
+								  boost::shared_ptr<BackwardMessType> result)
+
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   if (!e)
     {
-      const PartialBeliefStateVecPtr bss = result.getBeliefStates();
-      no_answers = no_answers + bss->size() - 1;
+      const PartialBeliefStateVecPtr& bss = result->getBeliefStates();
+
+      assert ( (bss->size() - 1) <= mess->getPackSize() );
+
+      const std::size_t next_k = mess->getPackSize() - (bss->size() - 1);
 
       if (callback)
 	{
-	  callback(result);
+	  callback(*result);
 	}
 
-      DMCS_LOG_TRACE("pack_size = " << pack_size << ", no_anwers = " << no_answers);
+      DMCS_LOG_TRACE("pack_size = " << mess->getPackSize() << ", next_k = " << next_k);
 
-      if (no_answers >= pack_size)
+      if (next_k == 0)
 	{
 	  // done, fade out
 	  DMCS_LOG_TRACE("done, let's get back");
 	}
       else
 	{
-	  std::size_t next_k = pack_size - no_answers;
+	  DMCS_LOG_TRACE("requesting next batch: " << next_k);
 
-	  DMCS_LOG_TRACE("request next batch: " << next_k);
+	  *my_header = HEADER_NEXT;
 
-	  my_header = HEADER_NEXT;
-
-	  mess.setPackSize(next_k);
+	  mess->setPackSize(next_k);
 
 	  boost::system::error_code e;
 	  boost::asio::ip::tcp::resolver::iterator it;
 
-	  send_header(e, it);
+	  send_header(e, it, conn, my_header, mess);
 	}
     }
   else
@@ -262,24 +292,21 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
 
 template<typename ForwardMessType, typename BackwardMessType>
 bool
-AsynClient<ForwardMessType, BackwardMessType>::next(std::size_t k)
+AsynClient<ForwardMessType, BackwardMessType>::next(ForwardMessType& m)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  assert (k > 0);
-
-  my_header = HEADER_NEXT;
+  assert (m.getPackSize() > 0);
 
   // setup next k messages...
 
-  pack_size = k;
-  no_answers = 0;
-  mess.setPackSize(k);
+  boost::shared_ptr<std::string> my_header(new std::string(HEADER_NEXT));
+  boost::shared_ptr<ForwardMessType> mess(new ForwardMessType(m));
 
   boost::system::error_code e;
   boost::asio::ip::tcp::resolver::iterator it;
 
-  send_header(e, it);
+  send_header(e, it, the_conn, my_header, mess);
 
   return true;
 }
@@ -292,12 +319,14 @@ AsynClient<ForwardMessType, BackwardMessType>::terminate()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  const std::string& header = HEADER_TERMINATE;
+  boost::shared_ptr<std::string> my_header(new std::string(HEADER_TERMINATE));
 
-  conn->async_write(header,
-		    boost::bind(&AsynClient::finalize, this,
-				boost::asio::placeholders::error, conn)
-		    );
+  the_conn->async_write(*my_header,
+			boost::bind(&AsynClient::finalize, this,
+				    boost::asio::placeholders::error,
+				    the_conn,
+				    my_header)
+			);
 }
 
 
@@ -306,7 +335,8 @@ AsynClient<ForwardMessType, BackwardMessType>::terminate()
 template<typename ForwardMessType, typename BackwardMessType>
 void
 AsynClient<ForwardMessType, BackwardMessType>::finalize(const boost::system::error_code& e,
-							connection_ptr /* conn */)
+							connection_ptr /* conn */,
+							boost::shared_ptr<std::string> /* my_header */)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -316,7 +346,7 @@ AsynClient<ForwardMessType, BackwardMessType>::finalize(const boost::system::err
       // io_service will run out of work to do and the client will
       // exit.
 
-      conn->socket().close();
+      the_conn->socket().close();
     }
   else
     {

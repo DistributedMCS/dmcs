@@ -109,6 +109,14 @@ public:
   virtual
   ~Handler();
 
+
+  void 
+  do_next_batch(const boost::system::error_code& e,
+		BaseHandler<StreamingCommandType>::HandlerPtr hdl,
+		BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
+		BaseHandler<StreamingCommandType>::CmdTypePtr cmd);
+
+
   void 
   do_local_job(const boost::system::error_code& e,
 	       BaseHandler<StreamingCommandType>::HandlerPtr hdl,
@@ -123,7 +131,6 @@ public:
 		     BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
 		     BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
 		     boost::shared_ptr<std::string> header,
-		     std::size_t pack_size,
 		     std::size_t parent_session_id);
 
 

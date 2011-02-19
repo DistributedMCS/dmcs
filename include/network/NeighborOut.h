@@ -80,23 +80,25 @@ public:
 
 	ConflictNotification* cn = wait_router(rnn);
 
+	ConflictVec* conflicts = cn->conflicts;
+	PartialBeliefState* partial_ass = cn->partial_ass;
+	Decisionlevel* decision = cn->decision;
+	std::size_t session_id = cn->session_id;
+
+	std::string header;
+
 	if (cn->type == ConflictNotification::SHUTDOWN)
 	  {
 	    DMCS_LOG_TRACE(port << ": Neighbor " << nid << " received SHUTDOWN, propagating TERMINATE...");
 
-	    const std::string& header = HEADER_TERMINATE;
+	    header = HEADER_TERMINATE;
 
 	    conn->write(header);
 
-	    return;
+	    return; // done with looping
 	  }
 	else if (cn->type == ConflictNotification::REQUEST)
 	  {
-	    ConflictVec* conflicts = cn->conflicts;
-	    PartialBeliefState* partial_ass = cn->partial_ass;
-	    Decisionlevel* decision = cn->decision;
-	    std::size_t session_id = cn->session_id;
-
 	    assert(partial_ass && decision);
 
 	    if (conflicts)
@@ -114,26 +116,7 @@ public:
 			       << ", decision = " << *decision);
 	      }
 
-	    // write to network
-
-	    const std::string& header = HEADER_REQ_STM_DMCS;
-
-	    conn->write(header);
-	    handle_write_message(conn, invoker, pack_size, conflicts, partial_ass, decision, session_id);
-
-
-#if 0
-	     conn->async_write(header,
-			      boost::bind(&NeighborOut::handle_write_message, this,
-					  boost::asio::placeholders::error,
-					  conn,
-					  invoker,
-					  pack_size,
-					  conflicts,
-					  partial_ass
-					  )
-			       );
-#endif
+	    header = HEADER_REQ_STM_DMCS;
 	  }
 	else if (cn->type == ConflictNotification::NEXT)
 	  {
@@ -142,20 +125,7 @@ public:
 	    boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
 	    DMCS_LOG_TRACE(port << ": Got NULL conflicts and ass, going to send HEADER_NEXT to port " << ep.port());
 
-	    //boost::shared_ptr<std::string> header(new std::string(HEADER_NEXT));
-
-	    const std::string& header = HEADER_NEXT;
-
-	    conn->write(header);
-
-#if 0
-	    conn->async_write(header,
-			      boost::bind(&NeighborOut::handle_clean_up, this,  
-					  boost::asio::placeholders::error,
-					  cs
-					  )
-			      );
-#endif
+	    header = HEADER_NEXT;
 	  }
 	else
 	  {
@@ -164,8 +134,18 @@ public:
 
 	///@todo TK: conflicts and partial_ass leak here
 
+	conn->write(header);
+
+	write_message(conn,
+		      invoker,
+		      pack_size,
+		      conflicts,
+		      partial_ass,
+		      decision,
+		      session_id);
       }
   }
+
 
 
   ConflictNotification*
@@ -192,17 +172,22 @@ public:
   
 
   void
-  handle_write_message(connection_ptr conn,
-		       std::size_t invoker,
-		       std::size_t pack_size,
-		       ConflictVec* conflicts, 
-		       PartialBeliefState* partial_ass,
-		       Decisionlevel* decision,
-		       std::size_t session_id)
+  write_message(connection_ptr conn,
+		std::size_t invoker,
+		std::size_t pack_size,
+		ConflictVec* conflicts, 
+		PartialBeliefState* partial_ass,
+		Decisionlevel* decision,
+		std::size_t session_id)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-    StreamingForwardMessage mess(session_id, invoker, pack_size, conflicts, partial_ass, decision);
+    StreamingForwardMessage mess(session_id,
+				 invoker,
+				 pack_size,
+				 conflicts,
+				 partial_ass,
+				 decision);
 
     conn->write(mess);
 
@@ -221,16 +206,6 @@ public:
 	      }
 	  }
       }
-
-
-#if 0
-    conn->async_write(mess,
-		      boost::bind(&NeighborOut::handle_clean_up, this,  
-				  boost::asio::placeholders::error,
-				  conflicts
-				  )
-		      );
-#endif
   }
   
 

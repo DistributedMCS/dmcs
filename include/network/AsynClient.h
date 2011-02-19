@@ -41,9 +41,9 @@ namespace dmcs {
  * @brief
  */
 template <typename ForwardMessType, typename BackwardMessType>
-class AsynClient : public BaseClient
+class AsynClient // : public BaseClient
 {
- public:
+public:
   AsynClient(boost::asio::io_service& io_service,
 	     boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
 	     const std::string& h,
@@ -60,7 +60,7 @@ class AsynClient : public BaseClient
 
 
   bool
-  next(std::size_t k);
+  next(ForwardMessType&);
 
   void
   terminate();
@@ -69,32 +69,44 @@ class AsynClient : public BaseClient
 private:
   void 
   send_header(const boost::system::error_code& error,
-	      boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
+	      boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+	      connection_ptr conn,
+	      boost::shared_ptr<std::string> my_header,
+	      boost::shared_ptr<ForwardMessType> mess);
 
   void
-  send_message(const boost::system::error_code& error, connection_ptr conn);
+  send_message(const boost::system::error_code& error,
+	       connection_ptr conn,
+	       boost::shared_ptr<std::string> my_header,
+	       boost::shared_ptr<ForwardMessType> mess);
 
   void
-  read_header(const boost::system::error_code& error, connection_ptr conn);
+  read_header(const boost::system::error_code& error,
+	      connection_ptr conn,
+	      boost::shared_ptr<std::string> my_header,
+	      boost::shared_ptr<ForwardMessType> mess);
 
   void 
-  handle_read_header(const boost::system::error_code& error, connection_ptr conn,
-		     boost::shared_ptr<std::string> header);
+  handle_read_header(const boost::system::error_code& error,
+		     connection_ptr conn,
+		     boost::shared_ptr<std::string> my_header,
+		     boost::shared_ptr<ForwardMessType> mess);
 
   void 
-  read_answer(const boost::system::error_code& error, connection_ptr conn);
+  handle_read_answer(const boost::system::error_code& error,
+		     connection_ptr conn,
+		     boost::shared_ptr<std::string> my_header,
+		     boost::shared_ptr<ForwardMessType> mess,
+		     boost::shared_ptr<BackwardMessType> result);
 
   void 
-  handle_read_answer(const boost::system::error_code& error, connection_ptr conn);
+  finalize(const boost::system::error_code& error,
+	   connection_ptr /* conn */,
+	   boost::shared_ptr<std::string> my_header);
 
-  void 
-  finalize(const boost::system::error_code& error, connection_ptr /* conn */);
 
-  std::size_t      pack_size;
-  ForwardMessType  mess;
-  BackwardMessType result;
-  std::size_t      no_answers;
-  CallbackFun      callback;
+  connection_ptr the_conn;
+  CallbackFun    callback;
 };
 
 } // namespace dmcs

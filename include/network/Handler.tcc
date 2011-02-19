@@ -352,7 +352,6 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					 sesh, 
 					 cmd,
 					 header,
-					 pack_size,
 					 parent_session_id)
 			     );
     }
@@ -365,13 +364,79 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 }
 
 
+
+
+void
+Handler<StreamingCommandType>::do_next_batch(const boost::system::error_code& e,
+					     HandlerPtr hdl,
+					     SessionMsgPtr sesh,
+					     CmdTypePtr cmd)
+{
+  assert(this == hdl.get());
+
+  if (!e)
+    {
+      const std::size_t parent_session_id = sesh->mess.getSessionId();
+      const std::size_t invoker           = sesh->mess.getInvoker();
+      const std::size_t pack_size         = sesh->mess.getPackSize();
+
+      assert (pack_size > 0);
+
+      ConflictVec* conflicts = sesh->mess.getConflicts();
+      PartialBeliefState* partial_ass = sesh->mess.getPartialAss();
+      Decisionlevel* decision = sesh->mess.getDecisionlevel();
+
+      ///@todo what todo with those guys above??
+
+
+      // code duplication with part of do_local_job. Just leave it like this for now
+      
+      DMCS_LOG_TRACE(port << ": notify output with GET_NEXT, pack_size=" << pack_size << ", psid=" << parent_session_id);
+
+      // notify OutputThread
+      OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id, OutputNotification::GET_NEXT);
+      OutputNotification* ow_output = 
+	(OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
+	  
+      if (ow_output)
+	{
+	  delete ow_output;
+	  ow_output = 0;
+	}
+      
+      // back to waiting for incoming message
+      
+      DMCS_LOG_TRACE(port << ": Back to waiting for incoming message");
+      
+      boost::shared_ptr<std::string> next_header(new std::string);
+      
+      sesh->conn->async_read(*next_header,
+			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
+					 boost::asio::placeholders::error,
+					 hdl,
+					 sesh, 
+					 cmd,
+					 next_header,
+					 parent_session_id)
+			     );	  
+    }
+  else
+    {
+      // An error occurred.
+      DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
+      throw std::runtime_error(e.message());
+    }
+}
+
+
+
+
 void
 Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e,
 						  HandlerPtr hdl,
 						  SessionMsgPtr sesh,
 						  CmdTypePtr cmd,
 						  boost::shared_ptr<std::string> header,
-						  std::size_t pack_size,
 						  std::size_t parent_session_id)
 {
   assert(this == hdl.get());
@@ -383,7 +448,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
       // Check header
       if (header->find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
-	  DMCS_LOG_TRACE(port << ": Got a fresh request. Will inform my slaves about this.");
+	  DMCS_LOG_TRACE(port << ": Got a STREAMING request. Will inform my slaves about this.");
 
 	  // Read the message to get pack_size and conflict, so that we can inform our slaves
 	  sesh->conn->async_read(sesh->mess,
@@ -397,35 +462,16 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	}
       else if (header->find(HEADER_NEXT) != std::string::npos)
 	{
-	  // code duplication with part of do_local_job. Just leave it like this for now
+	  DMCS_LOG_TRACE(port << ": Got a NEXT request. Will inform my slaves about this.");
 
-	  // notify OutputThread
-	  OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id, OutputNotification::GET_NEXT);
-	  OutputNotification* ow_output = 
-	    (OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
-	  
-	  if (ow_output)
-	    {
-	      delete ow_output;
-	      ow_output = 0;
-	    }
-
-	  // back to waiting for incoming message
-	  
-	  DMCS_LOG_TRACE(port << ": Back to waiting for incoming message");
-	  
-	  boost::shared_ptr<std::string> header(new std::string);
-	  
-	  sesh->conn->async_read(*header,
-				 boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
+	  // Read the message to get pack_size and conflict, so that we can inform our slaves
+	  sesh->conn->async_read(sesh->mess,
+				 boost::bind(&Handler<StreamingCommandType>::do_next_batch, this,
 					     boost::asio::placeholders::error,
 					     hdl,
-					     sesh, 
-					     cmd,
-					     header,
-					     pack_size,
-					     parent_session_id)
-				 );	  
+					     sesh,
+					     cmd) // subsequent call to local job
+				 );
 	}
       else if (header->find(HEADER_TERMINATE) != std::string::npos)
 	{
@@ -463,17 +509,23 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	}
       else 
 	{
-	  DMCS_LOG_ERROR("Got a crappy header: " << *header << ". Back to waiting for the next header.");
-	  sesh->conn->async_read(*header,
+	  DMCS_LOG_ERROR(port << ": Got a crappy header: >>" << *header << "<<. Bailing out.");
+
+	  throw std::runtime_error("Received unexpected header: >>" + *header + "<<");
+
+#if 0
+	  boost::shared_ptr<std::string> next_header(new std::string);
+	  sesh->conn->async_read(*next_header,
 				 boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
 					     boost::asio::placeholders::error,
 					     hdl,
 					     sesh,
 					     cmd,
-					     header,
+					     next_header,
 					     pack_size, 
 					     parent_session_id)
 				 );
+#endif// 0
 	}
     }
   else
