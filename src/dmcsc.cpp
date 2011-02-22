@@ -304,12 +304,12 @@ Options";
 	  DMCS_LOG_DEBUG("FINAL RESULT: ");
 	  DMCS_LOG_DEBUG(*result);
 
-	  if (result->size() > 0)
-	    {
+	  //if (result->size() > 0)
+	  //  {
 	      // instantiate the system, then write .br and .sh files
-	      ContextSubstitutionList::const_iterator it = result->begin();
-	      instantiate(*it, hostName, port);
-	    }
+	  //    ContextSubstitutionList::const_iterator it = result->begin();
+	  //    instantiate(*it, hostName, port);
+	  //  }
 	}
       else // ground mode
 	{

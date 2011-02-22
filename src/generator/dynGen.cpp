@@ -51,10 +51,11 @@ using namespace dmcs::generator;
 #define INP_EXT "inp"
 #define DOT_EXT "dot"
 #define SH_EXT  "sh"
+#define TIME_EXT "tim"
 
 #define DMCSD "dmcsd"
 #define DMCSC "dmcsc"
-#define TESTSDIR "tests"
+#define TESTSDIR "."
 #define LOCALHOST "localhost"
 #define LIMIT_ANSWERS "n"
 #define LIMIT_BIND_RULES "b"
@@ -85,6 +86,7 @@ using namespace dmcs::generator;
 
 #define TESTSPATH "$TESTSPATH"
 #define DMCSPATH  "$DMCSPATH"
+#define RESPATH  "$RESPATH"
 
 #define HELP_MESSAGE_TOPO "Choose topology for the initial dynamic system\n\
     0: Random Topology\n\
@@ -308,22 +310,26 @@ generate_command_lines(std::size_t heuristics)
 
   std::string filename_sh = prefix;
   filename_sh = filename_sh + out.str() + "." + SH_EXT;
+
+  std::string filename_time = prefix;
+  filename_time = filename_time + out.str() + "." + TIME_EXT;
   
   file_command_lines.open(filename.c_str());
   file_script.open(filename_sh.c_str());
 
   file_script << "#!/bin/bash" << std::endl
-	      << "export TESTSPATH=\'tests\'" << std::endl
-	      << "export DMCSPATH=\'.\'" << std::endl;
+	      << "export TESTSPATH=\'.\'" << std::endl
+	      << "export DMCSPATH=\'../../build/src\'" << std::endl
+	      << "export RESPATH=\'./result\'" << std::endl;
 
   file_script << "killall dmcsd\n";
 
   for (std::size_t i = 1; i <= poolsize; ++i)
     {
-      file_command_lines << "./dmcsd --context=" << i << " --port=" << 5000+i 
-			 << " --kb=tests/" << prefix << "-" << i 
-			 << ".lp --br=tests/" << prefix << "-" << i 
-			 << ".br --dynamic=1 --mm=tests/" << prefix << ".inp --n=" 
+      file_command_lines << "../../build-dbg/src/dmcsd --context=" << i << " --port=" << 5000+i 
+			 << " --kb=./" << prefix << "-" << i 
+			 << ".lp --br=./" << prefix << "-" << i 
+			 << ".br --dynamic=1 --mm=./" << prefix << ".inp --n=" 
 			 << limit_answers << " --b=" << limit_bind_rules << " --h=" << out.str() << "\n";
 
       file_script << "$DMCSPATH/dmcsd --context=" << i << " --port=" << 5000+i 
@@ -342,15 +348,16 @@ generate_command_lines(std::size_t heuristics)
 	}
     }
 
-  file_command_lines << "./dmcsc --hostname=localhost --port=5001 --dynamic=1\n";
+  file_command_lines << "gtime --verbose --o ./result/" << filename_time << " ../../build-dbg/src/dmcsc --hostname=localhost --port=5001 --dynamic=1\n";
 
   out.str("");
   out << time_sleep;
 
   // need to sleep for some second for all contexts to start up
   file_script << "sleep " << out.str() << std::endl;
-  file_script << "$DMCSPATH/dmcsc --hostname=localhost --port=5001 --dynamic=1\n";
+  //  file_script << "$DMCSPATH/dmcsc --hostname=localhost --port=5001 --dynamic=1\n";
 
+  file_script << "gtime --verbose --o " << " $RESPATH/" << filename_time << " $DMCSPATH/dmcsc --hostname=localhost --port=5001 --dynamic=1\n";
   file_script << "killall dmcsd\n";
 
   file_command_lines.close();

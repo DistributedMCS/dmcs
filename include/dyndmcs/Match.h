@@ -80,6 +80,7 @@ namespace Tag
   struct TarCtx       {};
   struct Image        {};
   struct Quality      {};
+  struct SrcCtt       {};
 }
 
 

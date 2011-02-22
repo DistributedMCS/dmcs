@@ -65,16 +65,39 @@ public:
 	}
       }
     
-    // a context with id > 1 has matches to a context with lower id with probability of 2/10
+    // a context with id > 1 has matches to [i/3] contexts with lower id with probability of 8/10
     if (id > 1)
       {
-	std::size_t flipping = rand() % 10;
-	if (flipping < 2)
+	std::size_t no_back_edge = id / 2;
+	if (no_back_edge == 0)
 	  {
-	    std::size_t pn = (rand() % (id-1)) + 1;
-	    generate_matches(id, pn);
-	    generate_bridge_rules(id);
-	    has_matches = true;
+	    no_back_edge = 1;
+	  }
+
+	std::cerr << "no_back_edge = " << no_back_edge << std::endl;
+
+	std::vector<std::size_t> chosen;
+
+	for (std::size_t j = 0; j < no_back_edge; ++j)
+	  {
+	    std::size_t flipping = rand() % 10;
+	    if (flipping < 8)
+	      {
+		while (1)
+		  {
+		    std::size_t pn = (rand() % (id-1)) + 1;
+		    std::vector<std::size_t>::const_iterator it = std::find(chosen.begin(), chosen.end(), pn);
+		    if (it == chosen.end())
+		      {
+			std::cerr << "generate matches (" << id << ", " << pn << ")" << std::endl;
+			chosen.push_back(pn);
+			generate_matches(id, pn);
+			generate_bridge_rules(id);
+			has_matches = true;
+			break;
+		      }
+		  }
+	      }
 	  }
     }
     

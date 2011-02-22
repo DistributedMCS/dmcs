@@ -197,6 +197,9 @@ DynamicConfiguration::lconfig(const std::size_t root,
   PositiveBridgeBody::const_iterator pb_end = getPositiveBody(*r_beg).end();
   NegativeBridgeBody::const_iterator nb_beg = getNegativeBody(*r_beg).begin();
   NegativeBridgeBody::const_iterator nb_end = getNegativeBody(*r_beg).end();
+
+  PositiveBridgeBody::const_iterator fixed_pb_beg = getPositiveBody(*r_beg).begin();
+  NegativeBridgeBody::const_iterator fixed_nb_beg = getNegativeBody(*r_beg).begin();
   
   // call a DFS procedure to find all substitution for this rule. 
   // the recursion is controled by 2 pairs of body iterators, for the positive and
@@ -206,7 +209,9 @@ DynamicConfiguration::lconfig(const std::size_t root,
 
   stop_bind_rules = false;
   no_bind_rules = 0;
-  output_queue_r = bind_rule(pb_beg, pb_end, nb_beg, nb_end, ctx_substitution_sofar, dfs_level+1);
+  output_queue_r = bind_rule(pb_beg, pb_end, nb_beg, nb_end, 
+			     fixed_pb_beg, fixed_nb_beg,
+			     ctx_substitution_sofar, dfs_level+1);
 
   // Don't need to sort in output_queue_r because we already applied
   // some quality in ordering the contexts to be bound
@@ -347,11 +352,78 @@ DynamicConfiguration::invoke_neighbors(const std::size_t root,
 }
 
 
+
+bool
+DynamicConfiguration::duplicate(PositiveBridgeBody::const_iterator fixed_pb_beg, 
+				PositiveBridgeBody::const_iterator pb_beg,
+				PositiveBridgeBody::const_iterator pb_end,
+				NegativeBridgeBody::const_iterator fixed_nb_beg,
+				NegativeBridgeBody::const_iterator nb_beg,
+				NegativeBridgeBody::const_iterator nb_end,
+				ContextSubstitutionPtr ctx_substitution_sofar,
+				ContextID potential_neighbor,
+				ContextTerm ctt,
+				std::size_t dfs_level)
+{
+  DMCS_LOG_TRACE(TABS(dfs_level) << "ctx_substitution_sofar = " << *ctx_substitution_sofar);
+
+  const ContextSubstitutionBySrcCtt& css_ctt = boost::get<Tag::SrcCtt>(*ctx_substitution_sofar);
+
+  for (PositiveBridgeBody::const_iterator it = fixed_pb_beg; it != pb_beg; ++it)
+    {
+      BridgeAtom sba = *it;
+      ContextTerm ctt_new = sba.first;
+
+      if (ctt == ctt_new)
+	{
+	  return false;
+	}
+
+      if (isCtxVar(ctt_new))
+	{
+	  ContextSubstitutionBySrcCtt::const_iterator jt = css_ctt.find(ctt_new);
+	  assert (jt != css_ctt.end());
+	  if (jt->tarCtx == potential_neighbor)
+	    {
+	      return true;
+	    }
+	}
+    }
+
+  if (pb_beg == pb_end)
+    {
+      for (NegativeBridgeBody::const_iterator it = fixed_nb_beg; it != nb_beg; ++it)
+	{
+	  BridgeAtom sba = *it;
+	  ContextTerm ctt_new = sba.first;
+
+	  if (ctt == ctt_new)
+	    {
+	      return false;
+	    }
+
+	  if (isCtxVar(ctt_new))
+	    {
+	      ContextSubstitutionBySrcCtt::const_iterator jt = css_ctt.find(ctt_new);
+	      assert (jt != css_ctt.end());
+	      if (jt->tarCtx == potential_neighbor)
+		{
+		  return true;
+		}
+	    }
+	}
+    }
+
+  return false;  
+}
+
 ContextSubstitutionListPtr
 DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg, 
 				PositiveBridgeBody::const_iterator pb_end,
 				NegativeBridgeBody::const_iterator nb_beg,
 				NegativeBridgeBody::const_iterator nb_end,
+				PositiveBridgeBody::const_iterator fixed_pb_beg, 
+				NegativeBridgeBody::const_iterator fixed_nb_beg,
 				ContextSubstitutionPtr ctx_substitution_sofar,
 				std::size_t dfs_level)
 {
@@ -411,7 +483,9 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
       if ((!isCtxVar(ctt) && (sb_type == IS_ORDINARY_BELIEF))) // ordinary s-bridge atom, then just go ahead
 	{
 	  DMCS_LOG_DEBUG(TABS(dfs_level) << "An ordinary s-bridge atom. Continues...");
-	  return bind_rule(pb_next, pb_end, nb_next, nb_end, ctx_substitution_sofar, dfs_level+1);
+	  return bind_rule(pb_next, pb_end, nb_next, nb_end, 
+			   fixed_pb_beg, fixed_nb_beg, 
+			   ctx_substitution_sofar, dfs_level+1);
 	}
       else if (!isCtxVar(ctt)) // context term is a context id
 	{
@@ -461,7 +535,9 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 	      ContextSubstitutionPtr next_ctx_substitution(new ContextSubstitution(*ctx_substitution_sofar));
 	      next_ctx_substitution->insert(ContextMatch(ctt, src_sym,tar_ctx, img_sym, quality));
 			  
-	      ContextSubstitutionListPtr intermediate_ctx_subs = bind_rule(pb_next, pb_end, nb_next, nb_end, next_ctx_substitution, dfs_level+1);
+	      ContextSubstitutionListPtr intermediate_ctx_subs = bind_rule(pb_next, pb_end, nb_next, nb_end, 
+									   fixed_pb_beg, fixed_nb_beg,
+									   next_ctx_substitution, dfs_level+1);
 	      
 	      ctx_subs->insert(ctx_subs->end(), intermediate_ctx_subs->begin(), intermediate_ctx_subs->end());
 	      
@@ -505,15 +581,24 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 
 	      DMCS_LOG_DEBUG("potential_neighbor = " << potential_neighbor);
 
-	      MatchTableIteratorVec::iterator it = std::find_if(mti.begin(), mti.end(), CompareMatch(potential_neighbor));
-
-	      if (it == mti.end())
+	      if (!duplicate(fixed_pb_beg, pb_beg, pb_end,
+			     fixed_nb_beg, nb_beg, nb_end,
+			     ctx_substitution_sofar, potential_neighbor, ctt, dfs_level))
 		{
-		  mti.push_back(low);
+		  MatchTableIteratorVec::iterator it = std::find_if(mti.begin(), mti.end(), CompareMatch(potential_neighbor));
+		  
+		  if (it == mti.end())
+		    {
+		      mti.push_back(low);
+		    }
+		}
+	      else 
+		{
+		  DMCS_LOG_DEBUG(TABS(dfs_level) << "Got duplication!");
 		}
 	    }
 	  
-	  // check whether the context variable was already instantiated	  
+	  // check whether the context variable was already instantiated
 	  ContextSubstitution::const_iterator it = ctx_substitution_sofar->find(ctt);
 
 	  if (it == ctx_substitution_sofar->end()) // context term has not yet been instantiated
@@ -524,9 +609,9 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 	      // neighbors by different heuristice criteria
 
 	      MatchTableIteratorVecIteratorListPtr mti_iter(new MatchTableIteratorVecIteratorList);
-	      for (MatchTableIteratorVec::iterator it = mti.begin(); it != mti.end(); ++it)
+	      for (MatchTableIteratorVec::iterator jt = mti.begin(); jt != mti.end(); ++jt)
 		{
-		  mti_iter->push_back(it);
+		  mti_iter->push_back(jt);
 		}
 
 	      switch (heuristics)
@@ -592,7 +677,9 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 		  ContextSubstitutionPtr next_ctx_substitution(new ContextSubstitution(*ctx_substitution_sofar));
 		  next_ctx_substitution->insert(ContextMatch(ctt, src_sym,tar_ctx, img_sym, quality));
 		  
-		  ContextSubstitutionListPtr intermediate_ctx_subs = bind_rule(pb_next, pb_end, nb_next, nb_end, next_ctx_substitution, dfs_level+1);
+		  ContextSubstitutionListPtr intermediate_ctx_subs = bind_rule(pb_next, pb_end, nb_next, nb_end, 
+									       fixed_pb_beg, fixed_nb_beg,
+									       next_ctx_substitution, dfs_level+1);
 		  
 		  ctx_subs->insert(ctx_subs->end(), intermediate_ctx_subs->begin(), intermediate_ctx_subs->end());
 
@@ -678,7 +765,9 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 			  ContextSubstitutionPtr next_ctx_substitution(new ContextSubstitution(*ctx_substitution_sofar));
 			  next_ctx_substitution->insert(ContextMatch(ctt, src_sym,tar_ctx, img_sym, quality));
 			  
-			  ContextSubstitutionListPtr intermediate_ctx_subs = bind_rule(pb_next, pb_end, nb_next, nb_end, next_ctx_substitution, dfs_level+1);
+			  ContextSubstitutionListPtr intermediate_ctx_subs = bind_rule(pb_next, pb_end, nb_next, nb_end, 
+										       fixed_pb_beg, fixed_nb_beg,
+										       next_ctx_substitution, dfs_level+1);
 			  
 			  ctx_subs->insert(ctx_subs->end(), intermediate_ctx_subs->begin(), intermediate_ctx_subs->end());
 			  
@@ -689,7 +778,9 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 
 		  DMCS_LOG_DEBUG(TABS(dfs_level) << "Go to the next atom.");
 
-		  return bind_rule(pb_next, pb_end, nb_next, nb_end, ctx_substitution_sofar, dfs_level+1);
+		  return bind_rule(pb_next, pb_end, nb_next, nb_end, 
+				   fixed_pb_beg, fixed_nb_beg,
+				   ctx_substitution_sofar, dfs_level+1);
 		}
 	    }
 	}

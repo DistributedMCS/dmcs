@@ -119,6 +119,8 @@ public:
 	    PositiveBridgeBody::const_iterator pb_end,
 	    NegativeBridgeBody::const_iterator nb_beg,
 	    NegativeBridgeBody::const_iterator nb_end,
+	    PositiveBridgeBody::const_iterator fixed_pb_beg, 
+	    NegativeBridgeBody::const_iterator fixed_nb_beg,
 	    ContextSubstitutionPtr ctx_subtitution_sofar,
 	    std::size_t dfs_level);
 
@@ -131,6 +133,18 @@ private:
 
   std::size_t
   resulted_system_size(GraphPtr g);
+
+  bool
+  duplicate(PositiveBridgeBody::const_iterator fixed_pb_beg, 
+	    PositiveBridgeBody::const_iterator pb_beg,
+	    PositiveBridgeBody::const_iterator pb_end,
+	    NegativeBridgeBody::const_iterator fixed_nb_beg,
+	    NegativeBridgeBody::const_iterator nb_beg,
+	    NegativeBridgeBody::const_iterator nb_end,
+	    ContextSubstitutionPtr ctx_subtitution_sofar,
+	    ContextID potential_neighbor,
+	    ContextTerm ctt,
+	    std::size_t dfs_level);
 
 private:
   std::size_t ctx_id;

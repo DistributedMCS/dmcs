@@ -126,6 +126,11 @@ typedef boost::multi_index_container<
     boost::multi_index::ordered_non_unique<
       boost::multi_index::tag<Tag::TarCtx>,
       boost::multi_index::member<ContextMatch, ContextID, &ContextMatch::tarCtx>
+      >,
+
+    boost::multi_index::ordered_unique<
+      boost::multi_index::tag<Tag::SrcCtt>,
+      boost::multi_index::member<ContextMatch, ContextTerm, &ContextMatch::ctx_term>
       >
 
     >
@@ -134,6 +139,7 @@ typedef boost::multi_index_container<
 typedef boost::multi_index::index<ContextSubstitution, Tag::SrcSymTarImg>::type ContextSubstitutionBySrcSymTarImg;
 typedef boost::multi_index::index<ContextSubstitution, Tag::SrcSym>::type ContextSubstitutionBySrcSym;
 typedef boost::multi_index::index<ContextSubstitution, Tag::TarCtx>::type ContextSubstitutionByTarCtx;
+typedef boost::multi_index::index<ContextSubstitution, Tag::SrcCtt>::type ContextSubstitutionBySrcCtt;
 
 typedef boost::shared_ptr<ContextSubstitution> ContextSubstitutionPtr;
 typedef std::list<ContextSubstitutionPtr> ContextSubstitutionList;

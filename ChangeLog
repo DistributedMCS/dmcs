@@ -1,3 +1,23 @@
+2011-02-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/generator/DynRakeTopoGenerator.h: Update Rake topo with
+	more back edges.
+
+2011-02-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: No instantiation for now.
+
+	* src/generator/dynGen.cpp: Fix some paths.
+
+	* include/dyndmcs/DynamicConfiguration.h: Check for duplication,
+	to enforce inequalities.
+	* src/dyndmcs/DynamicConfiguration.cpp: Likewise.
+
+	* include/dyndmcs/ContextSubstitution.h: Add order by ctx_term.
+	* include/dyndmcs/Match.h: Likewise.
+
+	* include/dyndmcs/BaseSortingStrategy.h: Fix heuristics order.
+
 2011-02-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* include/network/AsynClient.tcc: Allow for changing k between sessions.
