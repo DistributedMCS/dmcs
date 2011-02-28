@@ -69,10 +69,12 @@ public:
 	    id = i*n + j;
 	    generate_matches(id, id+1);
 	    generate_matches(id, id+n);
+	    generate_matches(id, id+n+1);
 	    generate_bridge_rules(id);
 	  }
 	id = (i+1)*n;
 	generate_matches(id, id+n);
+	generate_matches(id, id+n-1);
 	generate_bridge_rules(id);
       }
 
@@ -80,6 +82,7 @@ public:
       {
 	id = (m-1)*n + j;
 	generate_matches(id, id+1);
+	generate_matches(id, id-n+1);
 	generate_bridge_rules(id);
       }
   }

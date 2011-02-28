@@ -581,21 +581,21 @@ DynamicConfiguration::bind_rule(PositiveBridgeBody::const_iterator pb_beg,
 
 	      DMCS_LOG_DEBUG("potential_neighbor = " << potential_neighbor);
 
-	      if (!duplicate(fixed_pb_beg, pb_beg, pb_end,
+	      /*	      if (!duplicate(fixed_pb_beg, pb_beg, pb_end,
 			     fixed_nb_beg, nb_beg, nb_end,
 			     ctx_substitution_sofar, potential_neighbor, ctt, dfs_level))
-		{
+			     {*/
 		  MatchTableIteratorVec::iterator it = std::find_if(mti.begin(), mti.end(), CompareMatch(potential_neighbor));
 		  
 		  if (it == mti.end())
 		    {
 		      mti.push_back(low);
 		    }
-		}
+		  /*}
 	      else 
 		{
 		  DMCS_LOG_DEBUG(TABS(dfs_level) << "Got duplication!");
-		}
+		  }*/
 	    }
 	  
 	  // check whether the context variable was already instantiated
@@ -796,7 +796,7 @@ DynamicConfiguration::compute_topology(ContextSubstitutionListPtr ctx_subs, std:
   out << heuristics;
 
   std::string filename_stats = prefix;
-  filename_stats = "result/" + filename_stats + out.str() + ".sta";
+  filename_stats = "result-without-ie/" + filename_stats + out.str() + ".sta";
 
   std::ofstream file_stats;
   file_stats.open(filename_stats.c_str());
@@ -824,7 +824,7 @@ DynamicConfiguration::compute_topology(ContextSubstitutionListPtr ctx_subs, std:
       // Heuristic index
       out.str("");
       out << heuristics;
-      filename = "result/" + filename + "-result-" + out.str() + "-";
+      filename = "result-without-ie/" + filename + "-result-" + out.str() + "-";
 
       // Result index
       out.str("");

@@ -304,6 +304,8 @@ Options";
 	  DMCS_LOG_DEBUG("FINAL RESULT: ");
 	  DMCS_LOG_DEBUG(*result);
 
+	  std::cerr << "FINAL RESULT:\n" << *result << std::endl;
+
 	  //if (result->size() > 0)
 	  //  {
 	      // instantiate the system, then write .br and .sh files

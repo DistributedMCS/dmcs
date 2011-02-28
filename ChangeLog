@@ -1,5 +1,15 @@
 2011-02-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/dmcsc.cpp: Write result even in non-debug mode.
+
+	* src/dyndmcs/DynamicConfiguration.cpp: Run in non-inequality
+	atoms mode.
+
+	* include/generator/DynRakeTopoGenerator.h: Make it more sparse.
+
+	* include/generator/DynGridTopoGenerator.h: Generate diagonal
+	edges.
+
 	* include/network/NeighborThread.h: Remove nip_thread.
 
 	* include/network/NeighborOut.h: Fix memory leaks.

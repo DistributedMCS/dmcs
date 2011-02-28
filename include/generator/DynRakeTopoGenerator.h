@@ -68,7 +68,7 @@ public:
     // a context with id > 1 has matches to [i/3] contexts with lower id with probability of 8/10
     if (id > 1)
       {
-	std::size_t no_back_edge = id / 2;
+	std::size_t no_back_edge = id / 3;
 	if (no_back_edge == 0)
 	  {
 	    no_back_edge = 1;
@@ -81,7 +81,7 @@ public:
 	for (std::size_t j = 0; j < no_back_edge; ++j)
 	  {
 	    std::size_t flipping = rand() % 10;
-	    if (flipping < 8)
+	    if (flipping < 7)
 	      {
 		while (1)
 		  {
