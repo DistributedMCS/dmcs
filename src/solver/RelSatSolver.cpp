@@ -178,6 +178,13 @@ RelSatSolver::prepare_input()
   struct MessagingGatewayBC::ModelSession ms = 
     mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
 
+  // old input is now outdated
+  if (input)
+    {
+      delete input;
+      input = 0;
+    }
+
   input = ms.m;
   std::size_t sid = ms.sid;
 
@@ -363,6 +370,9 @@ RelSatSolver::solve()
       parent_ass = cn->partial_ass;
       parent_decision = cn->decision;
       parent_session_id = cn->session_id;
+
+      delete cn;
+      cn = 0;
 
       import_conflicts(parent_conflicts);
       import_partial_ass(parent_ass);
@@ -607,6 +617,8 @@ RelSatSolver::receiveEOF()
 
   if (!trail->empty())
     {
+      assert (conflict_driven);
+      
       DMCS_LOG_TRACE(port << ": EOF, now backtrack");
 
       UnsatNotification* next_flip;

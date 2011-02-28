@@ -299,6 +299,10 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 
 	  decision->setGlobalSigSize(global_sig_size);
 	}
+
+      // safe to delete sn here, pointers inside it are preserved
+      delete sn;
+      sn = 0;
     }
   else
     {
@@ -317,11 +321,9 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 			std::size_t parent_session_id,
 			std::size_t port)
 {
-
-
   std::size_t my_id = ctx->getContextID();
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
-  const std::size_t no_nbs      = nbs->size();
+  const std::size_t no_nbs = nbs->size();
 
   assert (partial_ass);
   assert (decision);

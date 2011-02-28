@@ -1,3 +1,11 @@
+2011-02-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/NeighborThread.h: Remove nip_thread.
+
+	* include/network/NeighborOut.h: Fix memory leaks.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
 2011-02-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/generator/DynGridTopoGenerator.h: Add more edges to

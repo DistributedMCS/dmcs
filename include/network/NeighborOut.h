@@ -95,6 +95,9 @@ public:
 
 	    conn->write(header);
 
+	    delete cn;
+	    cn = 0;
+
 	    return; // done with looping
 	  }
 	else if (cn->type == ConflictNotification::REQUEST)

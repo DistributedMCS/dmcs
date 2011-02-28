@@ -327,7 +327,6 @@ private:
   std::size_t                invoker;
   std::size_t                pack_size;
   boost::thread* nop_thread;
-  boost::thread* nip_thread;
   boost::shared_ptr<boost::asio::io_service> io_service;
   std::size_t port;
 };
