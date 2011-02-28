@@ -1,7 +1,10 @@
 2011-02-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/generator/DynGridTopoGenerator.h: Add more edges to
+	guarantee results.
+
 	* include/generator/DynRakeTopoGenerator.h: Update Rake topo with
-	more back edges.
+	more back edges. Change some randomize parameters.
 
 2011-02-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
