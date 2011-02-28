@@ -135,6 +135,9 @@ public:
 	    assert(false && "should not come here");
 	  }
 
+	delete cn;
+	cn = 0;
+
 	///@todo TK: conflicts and partial_ass leak here
 
 	conn->write(header);

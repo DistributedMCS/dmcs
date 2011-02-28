@@ -159,6 +159,9 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 	      assert (false);
 	    }
 	}
+
+      delete on;
+      on = 0;
     }
   else
     {

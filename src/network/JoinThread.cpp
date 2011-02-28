@@ -328,7 +328,7 @@ JoinThread::process()
   
   ImportStates import_state = START_UP;
 
-  bool asking_next  = false;
+  bool asking_next = false;
 
   std::size_t next_neighbor_offset = 0;
 
@@ -599,13 +599,18 @@ JoinThread::operator()(std::size_t nbs,
 	  {
 	    if (sn->type == SessionNotification::SHUTDOWN)
 	      {
+		delete sn;
+		sn = 0;
+
 		break;
 	      }
 	    else
 	      {
 		session_id = sn->session_id;
+
 		delete sn;
 		sn = 0;
+
 		DMCS_LOG_TRACE(port << ": Got new session_id = " << session_id);
 	      }
 	  }
