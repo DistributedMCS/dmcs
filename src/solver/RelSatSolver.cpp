@@ -617,7 +617,7 @@ RelSatSolver::receiveEOF()
 
   if (!trail->empty())
     {
-      assert (conflict_driven);
+      assert (conflicts_driven);
       
       DMCS_LOG_TRACE(port << ": EOF, now backtrack");
 
