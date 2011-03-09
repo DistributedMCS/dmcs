@@ -83,6 +83,7 @@ RelSatSolver::RelSatSolver(bool il,
     parent_conflicts(0),
     parent_ass(0),
     parent_decision(0),
+    input(0),
     first_round(true)
 {
   xInstance->readTheory(theory, sig->size());
@@ -181,6 +182,7 @@ RelSatSolver::prepare_input()
   // old input is now outdated
   if (input)
     {
+      DMCS_LOG_TRACE(port << ": Going to delete old input");
       delete input;
       input = 0;
     }

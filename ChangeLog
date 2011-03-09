@@ -1,3 +1,12 @@
+2011-03-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Initialize input for the sake of safety.
+
+	* src/dmcs/StreamingDMCS.cpp: Don't mix ConflictNotification sent
+	to different NeighborOut.
+
+	* include/dmcs/StreamingForwardMessage.h: Decision can be NULL.
+
 2011-02-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Write result even in non-debug mode.

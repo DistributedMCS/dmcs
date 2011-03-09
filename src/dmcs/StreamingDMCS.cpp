@@ -340,12 +340,12 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 	  
 	  assert (router_neighbors_notif->size() == no_nbs);
 	  
-	  ConflictNotification* cn = new ConflictNotification(0, partial_ass, decision, my_starting_session_id);
-	  
 	  for (std::size_t i = 0; i < no_nbs; ++i)
 	    {
 	      DMCS_LOG_TRACE(port << ": First push to offset " << i);
 	      ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
+
+	      ConflictNotification* cn = new ConflictNotification(0, partial_ass, decision, my_starting_session_id);
 	      
 	      DMCS_LOG_TRACE(port << ": Will push: conflictS = NULL"
 			     <<", partial_ass = " << *(cn->partial_ass) 

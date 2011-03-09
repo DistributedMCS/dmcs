@@ -76,7 +76,7 @@ public:
 	DMCS_LOG_TRACE("Watch out! NULL conflicts");
       }
 
-    assert (d  != 0);
+    //assert (d  != 0);
   }
 
   std::size_t
