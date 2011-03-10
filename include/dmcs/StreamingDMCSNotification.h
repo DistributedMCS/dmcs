@@ -44,17 +44,11 @@ struct StreamingDMCSNotification
 			    std::size_t i,
 			    std::size_t ps,
 			    std::size_t p,
-			    ConflictVec* c,
-			    PartialBeliefState* pa,
-			    Decisionlevel* d,
-			    NotificationType t = REQUEST)
+			    NotificationType t)
     : session_id(sid),
       invoker(i), 
       pack_size(ps), 
       port(p),
-      conflicts(c),
-      partial_ass(pa),
-      decision(d),
       type(t)
   { }
   
@@ -62,9 +56,6 @@ struct StreamingDMCSNotification
   std::size_t  invoker;
   std::size_t  pack_size;
   std::size_t  port;
-  ConflictVec* conflicts;
-  PartialBeliefState* partial_ass;
-  Decisionlevel* decision;
   NotificationType type;
 };
 
