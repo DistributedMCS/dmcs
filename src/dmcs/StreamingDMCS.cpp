@@ -110,19 +110,6 @@ StreamingDMCS::~StreamingDMCS()
       DMCS_LOG_ERROR("JOIN thread is not joinable");
     }
 
-
-  DMCS_LOG_TRACE("Informing ROUTER.");
-
-  ConflictNotification* mess_sat = new ConflictNotification(0,0,0,0,ConflictNotification::SHUTDOWN);
-  ConflictNotification* ow_sat = 
-    (ConflictNotification*) overwrite_send(sat_router_notif.get(), &mess_sat, sizeof(mess_sat), 0);
-  
-  if (ow_sat)
-    {
-      delete ow_sat;
-      ow_sat = 0;
-    }
-
   ConcurrentMessageQueueVec::iterator rbeg = router_neighbors_notif->begin();
   ConcurrentMessageQueueVec::iterator rend = router_neighbors_notif->end();
 
@@ -131,7 +118,7 @@ StreamingDMCS::~StreamingDMCS()
   // inform all neighbors about the shutdown
   for (ConcurrentMessageQueueVec::iterator it = rbeg; it != rend; ++it)
     {
-      ConflictNotification* neighbor_mess = new ConflictNotification(0,0,0,0,ConflictNotification::SHUTDOWN);
+      ConflictNotification* neighbor_mess = new ConflictNotification(0, ConflictNotification::FROM_DMCS, ConflictNotification::SHUTDOWN);
       ConflictNotification* ow_neighbor =
 	(ConflictNotification*) overwrite_send(it->get(), &neighbor_mess, sizeof(neighbor_mess), 0);
 
@@ -203,10 +190,7 @@ void
 StreamingDMCS::initialize(std::size_t parent_session_id,
 			  std::size_t invoker, 
 			  std::size_t pack_size, 
-			  std::size_t port,
-			  ConflictVec* conflicts,
-			  PartialBeliefState* partial_ass,
-			  Decisionlevel* decision)
+			  std::size_t port)
 {
   std::size_t my_id = ctx->getContextID();
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
@@ -239,17 +223,15 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
 
   ThreadFactory tf(conflicts_driven, ctx, theory, local_sig, localV,  
 		   orig_sigs_size, nbs, pack_size, my_starting_session_id,
-		   mg.get(), dmcs_sat_notif.get(), sat_router_notif.get(), 
+		   mg.get(), dmcs_sat_notif.get(),
 		   sat_joiner_notif.get(), c2o.get(), port);
 
 
 
   if (no_nbs > 0)
     {
-      tf.createNeighborThreads(neighbor_threads, neighbors, router_neighbors_notif);
-      join_thread   = tf.createJoinThread(router_neighbors_notif, sat_joiner_notif, 
-					  conflicts, partial_ass, decision);
-      router_thread = tf.createRouterThread(router_neighbors_notif);
+      tf.createNeighborThreads(neighbor_threads, neighbors, neighbors_notif);
+      join_thread   = tf.createJoinThread(neighbors_notif, sat_joiner_notif);
       sat_thread = tf.createLocalSolveThread(join_thread);
     }
   else
@@ -268,9 +250,6 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
 		      std::size_t& port,
-		      ConflictVec*& conflicts,
-		      PartialBeliefState*& partial_ass,
-		      Decisionlevel*& decision,
 		      StreamingDMCSNotification::NotificationType& type)
 {
   // wait for a signal from Handler
@@ -287,9 +266,6 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
       invoker     = sn->invoker;
       pack_size   = sn->pack_size;
       port        = sn->port;
-      conflicts   = sn->conflicts;
-      partial_ass = sn->partial_ass;
-      decision    = sn->decision;
       type        = sn->type;
 
       if ((decision != 0) && (!decision->initialized()))
@@ -316,10 +292,7 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 
 
 void
-StreamingDMCS::start_up(ConflictVec* conflicts,
-			PartialBeliefState* partial_ass,
-			Decisionlevel* decision,
-			std::size_t parent_session_id,
+StreamingDMCS::start_up(std::size_t parent_session_id,
 			std::size_t port)
 {
   std::size_t my_id = ctx->getContextID();
@@ -346,11 +319,7 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
 	      DMCS_LOG_TRACE(port << ": First push to offset " << i);
 	      ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
 
-	      ConflictNotification* cn = new ConflictNotification(0, partial_ass, decision, my_starting_session_id);
-	      
-	      DMCS_LOG_TRACE(port << ": Will push: conflictS = NULL"
-			     <<", partial_ass = " << *(cn->partial_ass) 
-			     << ", decision_level = " << *(cn->decision));
+	      ConflictNotification* cn = new ConflictNotification(my_starting_session_id, ConflictNotification::FROM_DMCS, ConflictNofication::REQUEST);
 	      
 	      ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
 	      
@@ -370,16 +339,7 @@ StreamingDMCS::start_up(ConflictVec* conflicts,
     }
 
 
-  if (conflicts)
-    {
-      DMCS_LOG_TRACE(port << ": Trigger SAT solver with conflicts = " << *conflicts << " and partial ass = " << *partial_ass);
-    }
-  else 
-    {
-      DMCS_LOG_TRACE(port << ": Trigger SAT solver with conflicts = NULL and partial ass = " << *partial_ass);
-    }
-
-  ConflictNotification* mess_sat = new ConflictNotification(conflicts, partial_ass, decision, parent_session_id);
+  ConflictNotification* mess_sat = new ConflictNotification(parent_session_id, ConflictNotification::FROM_DMCS, ConflictNofication::REQUEST);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(dmcs_sat_notif.get(), &mess_sat, sizeof(mess_sat), 0);
   
@@ -399,9 +359,6 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
   std::size_t invoker = 0;
   std::size_t pack_size = 0;
   std::size_t port = 0;
-  ConflictVec* conflicts = 0;
-  PartialBeliefState* partial_ass = 0;
-  Decisionlevel* decision = 0;
 
   StreamingDMCSNotification::NotificationType type = StreamingDMCSNotification::REQUEST;
 
@@ -412,9 +369,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
       listen(handler_dmcs_notif, 
 	     parent_session_id,
 	     invoker, pack_size, 
-	     port, conflicts,
-	     partial_ass, 
-	     decision, type);
+	     port, type);
 
       if (type == StreamingDMCSNotification::SHUTDOWN)
 	{
@@ -423,12 +378,10 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 
       if (!initialized)
 	{
-	  initialize(parent_session_id, invoker, pack_size, 
-		     port, conflicts, partial_ass, decision);
+	  initialize(parent_session_id, invoker, pack_size, port);
 	  initialized = true;
 	}
-      start_up(conflicts, partial_ass, decision, 
-	       parent_session_id, port);
+      start_up(parent_session_id, port);
     }
 }
 

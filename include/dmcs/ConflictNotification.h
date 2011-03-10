@@ -44,34 +44,24 @@ struct ConflictNotification
       SHUTDOWN
     };
 
+  enum SenderIdentification
+    {
+      FROM_DMCS = 0,
+      FROM_JOINER,
+      FROM_ROUTER
+    };
 
-  ConflictNotification(ConflictVec* cs,
-		       PartialBeliefState* pa,
-		       Decisionlevel* d,
-		       std::size_t sid,
-		       NotificationType t = REQUEST)
+  ConflictNotification(std::size_t sid,
+		       SenderIdentification s,
+		       NotificationType t)
     : session_id(sid),
-      conflicts(cs),
-      partial_ass(pa),
-      decision(d),
       type(t)
   { 
-    //assert(cs != 0 || t == SHUTDOWN || t == NEXT);
     assert(t == REQUEST || t == SHUTDOWN || t == NEXT);
   }
   
   std::size_t session_id;
-
-  /// list of conflicts
-  ConflictVec* conflicts;
-
-  /// partial assignment
-  PartialBeliefState* partial_ass;
-
-  /// decision level
-  Decisionlevel* decision;
-
-  /// notification type
+  SenderIdentification sender; // identifier of the thread that sent this 
   NotificationType type;
 };
 
@@ -79,19 +69,29 @@ struct ConflictNotification
 inline std::ostream&
 operator<< (std::ostream& os, const ConflictNotification& cn)
 {
-  os << "session_id = " << cn.session_id << std::endl;
+  os << "session_id = " << cn.session_id << std::endl
+     << "sender = ";
 
-  if (cn.conflicts)
+  switch (cn.sender)
     {
-      os << "conflicts: " << *(cn.conflicts) << std::endl;
+    case ConflictNotification::FROM_DMCS:
+      {
+	os << "DMCS";
+	break;
+      }
+    case ConflictNotification::FROM_JOINER:
+      {
+	os << "JOINER";
+	break;
+      }
+    case ConflictNotification::FROM_ROUTER:
+      {
+	os << "ROUTER";
+	break;
+      }
     }
-  else
-    {
-      os << "conflicts: NULL " << std::endl;
-    }
-
-  os << "partial_ass: " << *(cn.partial_ass) << std::endl
-     << "decision: " << *(cn.decision);
+  
+  os << std::endl;
 
   return os;
 }

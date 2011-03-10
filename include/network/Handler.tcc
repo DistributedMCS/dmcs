@@ -277,7 +277,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       port = ep.port();
 
       const std::size_t parent_session_id = sesh->mess.getSessionId();
-      const std::size_t invoker           = sesh->mess.getInvoker();
+      const std::size_t invoker = sesh->mess.getInvoker();
       const std::size_t pack_size = sesh->mess.getPackSize();
 
       assert (pack_size > 0);
@@ -306,18 +306,13 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  first_call = false;
 	} // if (first_call)
 
-      ConflictVec* conflicts = sesh->mess.getConflicts();
-      PartialBeliefState* partial_ass = sesh->mess.getPartialAss();
-      Decisionlevel* decision = sesh->mess.getDecisionlevel();
-
       DMCS_LOG_TRACE(port << ": Notify my slaves of the new message");
 
       // notify StreamingDMCS
       DMCS_LOG_TRACE(port << ": parent_session_id = " << parent_session_id << ", invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port);
 
       DMCS_LOG_TRACE(port << ": Notify DMCS");
-      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(parent_session_id, invoker, pack_size, port, 
-									   conflicts, partial_ass, decision);
+      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(parent_session_id, invoker, pack_size, port);
       StreamingDMCSNotification* ow_dmcs = 
 	(StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif.get(), &mess_dmcs, sizeof(mess_dmcs), 0);
 
@@ -329,7 +324,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
       // notify OutputThread
       DMCS_LOG_TRACE(port << ": Notify OutputThread");
-      OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id);
+      OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id, OutputNotification::REQUEST);
       OutputNotification* ow_output = 
 	(OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
 
@@ -382,19 +377,12 @@ Handler<StreamingCommandType>::do_next_batch(const boost::system::error_code& e,
 
       assert (pack_size > 0);
 
-      ConflictVec* conflicts = sesh->mess.getConflicts();
-      PartialBeliefState* partial_ass = sesh->mess.getPartialAss();
-      Decisionlevel* decision = sesh->mess.getDecisionlevel();
-
-      ///@todo what todo with those guys above??
-
-
       // code duplication with part of do_local_job. Just leave it like this for now
       
       DMCS_LOG_TRACE(port << ": notify output with GET_NEXT, pack_size=" << pack_size << ", psid=" << parent_session_id);
 
       // notify OutputThread
-      OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id, OutputNotification::GET_NEXT);
+      OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id, OutputNotification::NEXT);
       OutputNotification* ow_output = 
 	(OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
 	  
@@ -495,7 +483,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 
 	  std::size_t session_id = sesh->mess.getSessionId();
 	  
-	  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(session_id, 0,0,0,0,0,0,StreamingDMCSNotification::SHUTDOWN);
+	  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(session_id, 0, 0, 0, StreamingDMCSNotification::SHUTDOWN);
 	  StreamingDMCSNotification* ow_dmcs = 
 	    (StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif.get(), &mess_dmcs, sizeof(mess_dmcs), 0);
 	  

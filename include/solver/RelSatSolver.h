@@ -57,20 +57,15 @@ class RelSatSolver : public BaseSolver
 {
 public:
   RelSatSolver(bool il,
-	       bool cd,
 	       std::size_t my_id_,
 	       std::size_t my_sid,
 	       const TheoryPtr& theory_,
-	       //	       const ProxySignatureByLocalPtr& mixed_sig_,
 	       const SignaturePtr& local_sig_,
 	       const BeliefStatePtr& localV_,
-	       const VecSizeTPtr& oss,
 	       const HashedBiMap* co,
 	       std::size_t system_size_,
 	       MessagingGatewayBC* mg_,
 	       ConcurrentMessageQueue* dsn,
-	       ConcurrentMessageQueue* srn,
-	       ConcurrentMessageQueue* sjn,
 	       boost::thread* jt,
 	       std::size_t p);
 
@@ -84,12 +79,6 @@ public:
   solve();
 
   void
-  collect_learned_clauses(ClauseList& learned_clauses);
-
-  void
-  backtrack(ClauseList& learned_clauses);
-
-  void
   receiveEOF();
 
   void
@@ -99,37 +88,14 @@ public:
   receiveSolution(DomainValue* _aAssignment, int _iVariableCount);
 
   void
-  import_conflicts(const ConflictVec* conflicts);
-
-  void
-  import_partial_ass(const PartialBeliefState* partial_ass);
-
-  void
   refresh();
 
   void
   print_local_theory();
 
-  ConflictBufVecPtr
-  getLearnedConflicts()
-  {
-    return learned_conflicts;
-  }
-
-  ConflictBufIterVecPtr
-  getNewLearnedConflicts()
-  {
-    return new_conflicts_beg;
-  }
-
 private:
   bool
   prepare_input();
-
-  void
-  reset_slaves(ConflictVec2p* new_conflicts, 
-	       PartialBeliefState* partial_ass, 
-	       Decisionlevel* decision);
 
   void
   update_bridge_input(SignatureByCtx::const_iterator);
@@ -141,7 +107,6 @@ private:
 
 private:
   bool                           is_leaf;
-  bool                           conflicts_driven;
   std::size_t                    my_id;
   std::size_t                    parent_session_id;
   std::size_t                    my_session_id;
@@ -149,20 +114,10 @@ private:
   const SignaturePtr             sig;
   const BeliefStatePtr           localV;
   const HashedBiMap*             c2o;
-  //  const ProxySignatureByLocalPtr mixed_sig;
   std::size_t                    system_size;      // this can be taken from localV
   MessagingGatewayBC*            mg;
-  ConcurrentMessageQueue*        dmcs_sat_notif;   // to get notification from Handler
-  ConcurrentMessageQueue*        sat_router_notif; // to inform Router
-  ConcurrentMessageQueue*        sat_joiner_notif; // to inform Joiner in case of UNSAT
-  ConflictVec*                   parent_conflicts;
-  PartialBeliefState*            parent_ass;
-  Decisionlevel*                 parent_decision;
+  ConcurrentMessageQueue*        dmcs_sat_notif;   // to get notification from StreamingDMCS
   PartialBeliefState*            input;
-  ConflictBufVecPtr              learned_conflicts;  ///@todo: MD: fix memory leaks
-  ConflictBufIterVecPtr          new_conflicts_beg;
-  TrailPtr                       trail;
-  VecSizeTPtr                    orig_sigs_size;
   boost::thread*                 join_thread;
   bool                           first_round;
 

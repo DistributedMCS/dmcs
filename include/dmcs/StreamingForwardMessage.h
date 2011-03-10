@@ -44,9 +44,7 @@ public:
   // public default ctor, everything 0 for now
   StreamingForwardMessage()
     : invoker(0),
-      pack_size(0), 
-      conflicts(0),
-      partial_ass(0)
+      pack_size(0)
   { }
 
   virtual
@@ -55,29 +53,11 @@ public:
 
   StreamingForwardMessage(std::size_t sid,
 			  std::size_t i,
-			  std::size_t ps, 
-			  ConflictVec* cs,
-			  PartialBeliefState* pa,
-			  Decisionlevel* d)
+			  std::size_t ps)
     : session_id(sid), 
       invoker(i),
-      pack_size(ps), 
-      conflicts(cs),
-      partial_ass(pa),
-      decision(d)
-  {
-    if (partial_ass == 0)
-      {
-	DMCS_LOG_TRACE("Watch out! NULL partial_ass");
-      }
-
-    if (cs == 0)
-      {
-	DMCS_LOG_TRACE("Watch out! NULL conflicts");
-      }
-
-    //assert (d  != 0);
-  }
+      pack_size(ps)
+  { }
 
   std::size_t
   getSessionId() const
@@ -103,31 +83,6 @@ public:
     pack_size = k;
   }
 
-  ConflictVec*
-  getConflicts() const
-  {
-    return conflicts;
-  }
-
-  PartialBeliefState*
-  getPartialAss() const
-  {
-    return partial_ass;
-  }
-
-  void
-  setConflict(ConflictVec* cs)
-  {
-    assert(cs != 0);
-    conflicts = cs;
-  }
-
-  Decisionlevel*
-  getDecisionlevel()
-  {
-    return decision;
-  }
-
 public:
   template <typename Archive>
   void
@@ -136,18 +91,12 @@ public:
     ar & session_id;
     ar & invoker;
     ar & pack_size;
-    ar & conflicts;
-    ar & partial_ass;
-    ar & decision;
   }
 
 private:
   std::size_t         session_id;   // For filtering old models
   std::size_t         invoker;      // ID of the invoking context
   std::size_t         pack_size;    // The number of models in a package that the invoker expects
-  ConflictVec*        conflicts;    // A global conflict that the receiver should obey
-  PartialBeliefState* partial_ass;  // The partial assignment of the whole system
-  Decisionlevel*      decision;
 };
 
 typedef boost::shared_ptr<StreamingForwardMessage> StreamingForwardMessagePtr;
@@ -162,10 +111,8 @@ operator<< (std::ostream& os, const dmcs::StreamingForwardMessage& sfMess)
 {
 
   os << sfMess.getSessionId() << ", " 
-     << sfMess.getInvoker()     << ", " 
-     << sfMess.getPackSize()    << " {"
-     << *sfMess.getConflicts()   << "} ["
-     << *sfMess.getPartialAss() << "] ";
+     << sfMess.getInvoker() << ", " 
+     << sfMess.getPackSize();
   
   return os;
 }

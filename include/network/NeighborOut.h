@@ -79,10 +79,6 @@ public:
 	DMCS_LOG_TRACE(port << ": Wait for router notification, nid = " << nid);
 
 	ConflictNotification* cn = wait_router(rnn);
-
-	ConflictVec* conflicts = cn->conflicts;
-	PartialBeliefState* partial_ass = cn->partial_ass;
-	Decisionlevel* decision = cn->decision;
 	std::size_t session_id = cn->session_id;
 
 	std::string header;
@@ -102,23 +98,6 @@ public:
 	  }
 	else if (cn->type == ConflictNotification::REQUEST)
 	  {
-	    assert(partial_ass && decision);
-
-	    if (conflicts)
-	      {
-		DMCS_LOG_TRACE(port << ": Got from Router: session_id = " << session_id
-			       << ", conflict = " << *conflicts 
-			       << ", partial_ass = " << *partial_ass 
-			       << ", decision = " << *decision);
-	      }
-	    else
-	      {
-		DMCS_LOG_TRACE(port << ": Got from Router: session_id = " << session_id
-			       << ", conflict = NULL" 
-			       << ", partial_ass = " << *partial_ass 
-			       << ", decision = " << *decision);
-	      }
-
 	    header = HEADER_REQ_STM_DMCS;
 	  }
 	else if (cn->type == ConflictNotification::NEXT)
@@ -126,7 +105,7 @@ public:
 	    // We should only send HEADER_NEXT
 	    boost::asio::ip::tcp::socket& sock = conn->socket();
 	    boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
-	    DMCS_LOG_TRACE(port << ": Got NULL conflicts and ass, going to send HEADER_NEXT to port " << ep.port());
+	    DMCS_LOG_TRACE(port << ": Going to send HEADER_NEXT to port " << ep.port());
 
 	    header = HEADER_NEXT;
 	  }
@@ -138,21 +117,14 @@ public:
 	//delete cn;
 	//cn = 0;
 
-	///@todo TK: conflicts and partial_ass leak here
-
 	conn->write(header);
 
 	write_message(conn,
 		      invoker,
 		      pack_size,
-		      conflicts,
-		      partial_ass,
-		      decision,
 		      session_id);
       }
   }
-
-
 
   ConflictNotification*
   wait_router(ConcurrentMessageQueue* router_neighbor_notif)
@@ -181,37 +153,15 @@ public:
   write_message(connection_ptr conn,
 		std::size_t invoker,
 		std::size_t pack_size,
-		ConflictVec* conflicts, 
-		PartialBeliefState* partial_ass,
-		Decisionlevel* decision,
 		std::size_t session_id)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
     StreamingForwardMessage mess(session_id,
 				 invoker,
-				 pack_size,
-				 conflicts,
-				 partial_ass,
-				 decision);
+				 pack_size);
 
     conn->write(mess);
-
-    // partial_ass and decision are deleted by RelSatSolver, upon
-    // exceeding the possibility to backtrack
-    if (conflicts)
-      {
-	for (ConflictVec::const_iterator it = conflicts->begin();
-	     it != conflicts->end(); ++it)
-	  {
-	    Conflict* c = *it;
-	    if (c)
-	      {
-		delete c;
-		c = 0;
-	      }
-	  }
-      }
   }
   
 

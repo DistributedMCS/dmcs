@@ -36,20 +36,18 @@
 
 namespace dmcs {
 
-// Keep it as a class for now. If nothing changes then we can reduce
-// this to just an integer
 struct OutputNotification
 {
   enum NotificationType
     {
       REQUEST = 0,
-      GET_NEXT,
+      NEXT,
       SHUTDOWN
     };
 
   OutputNotification(std::size_t ps, 
 		     std::size_t psid,
-		     NotificationType t = REQUEST)
+		     NotificationType t)
     : pack_size(ps),
       parent_session_id(psid),
       type(t)

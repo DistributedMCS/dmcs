@@ -80,25 +80,16 @@ private:
 	 std::size_t& invoker,
 	 std::size_t& pack_size,
 	 std::size_t& port,
-	 ConflictVec*& conflicts,
-	 PartialBeliefState*& partial_ass,
-	 Decisionlevel*& decision,
 	 StreamingDMCSNotification::NotificationType& type);
 
   void
   initialize(std::size_t parent_session_id,
 	     std::size_t invoker, 
 	     std::size_t pack_size,
-	     std::size_t port,
-	     ConflictVec* conflicts,
-	     PartialBeliefState* partial_ass,
-	     Decisionlevel* decision);
+	     std::size_t port);
 
   void
-  start_up(ConflictVec* conflicts,
-	   PartialBeliefState* partial_ass,
-	   Decisionlevel* decision,
-	   std::size_t parent_session_id,
+  start_up(std::size_t parent_session_id,
 	   std::size_t port);
 
 private:
