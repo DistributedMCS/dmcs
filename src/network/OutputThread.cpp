@@ -160,8 +160,8 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 	    }
 	}
 
-      delete on;
-      on = 0;
+      //delete on;
+      //on = 0;
     }
   else
     {
@@ -261,6 +261,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       else
 	{
 	  // clean up
+	  DMCS_LOG_TRACE(port << ": Delete bs because it is outdated. sid = " << sid << " < parent_session_id = " << parent_session_id);
 	  delete bs;
 	  bs = 0;
 	}
@@ -389,6 +390,7 @@ OutputThread::handle_written_header(connection_ptr conn,
 
   // clean up
   //for (PartialBeliefStateVec::iterator it = res->begin(); it != res->end(); ++it)
+  DMCS_LOG_TRACE(port << ": Going to clean up");
   for (PartialBeliefStateVec::iterator it = res_pbs->begin(); it != res_pbs->end(); ++it)
     {
       if (*it)
@@ -397,6 +399,7 @@ OutputThread::handle_written_header(connection_ptr conn,
 	  *it = 0;
 	}
     }
+  DMCS_LOG_TRACE(port << ": Done with cleaning up");
 }
 
 

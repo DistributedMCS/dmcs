@@ -599,8 +599,8 @@ JoinThread::operator()(std::size_t nbs,
 	  {
 	    if (sn->type == SessionNotification::SHUTDOWN)
 	      {
-		delete sn;
-		sn = 0;
+		//delete sn;
+		//sn = 0;
 
 		break;
 	      }
@@ -608,8 +608,8 @@ JoinThread::operator()(std::size_t nbs,
 	      {
 		session_id = sn->session_id;
 
-		delete sn;
-		sn = 0;
+		//delete sn;
+		//sn = 0;
 
 		DMCS_LOG_TRACE(port << ": Got new session_id = " << session_id);
 	      }

@@ -373,8 +373,11 @@ RelSatSolver::solve()
       parent_decision = cn->decision;
       parent_session_id = cn->session_id;
 
-      delete cn;
-      cn = 0;
+      //delete cn;
+      //cn = 0;
+
+      assert (parent_ass);
+      assert (parent_decision);
 
       import_conflicts(parent_conflicts);
       import_partial_ass(parent_ass);
@@ -911,10 +914,12 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 
   // attach parent_session_id to the output models
 
+  DMCS_LOG_TRACE(port << ": Going to send: " << *bs << ", with parent session id = " << parent_session_id);
+
   // now put this PartialBeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 
-  DMCS_LOG_TRACE(port << ": Solution sent: " << *bs << ", with parent session id = " << parent_session_id);
+  // Models should be cleaned by OutputThread
 }
 
 

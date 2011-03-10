@@ -102,8 +102,8 @@ public:
 
 		DMCS_LOG_TRACE(port << ": SHUTDOWN requested");
 
-		delete un;
-		un = 0;
+		//delete un;
+		//un = 0;
 
 		return;
 	      }
@@ -176,8 +176,8 @@ public:
 		      }
 		  }
 
-		delete un;
-		un = 0;
+		//delete un;
+		//un = 0;
 
 	      }
 	  }

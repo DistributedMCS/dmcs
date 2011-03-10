@@ -131,8 +131,9 @@ StreamingDMCS::~StreamingDMCS()
   // inform all neighbors about the shutdown
   for (ConcurrentMessageQueueVec::iterator it = rbeg; it != rend; ++it)
     {
+      ConflictNotification* neighbor_mess = new ConflictNotification(0,0,0,0,ConflictNotification::SHUTDOWN);
       ConflictNotification* ow_neighbor =
-	(ConflictNotification*) overwrite_send(it->get(), &mess_sat, sizeof(mess_sat), 0);
+	(ConflictNotification*) overwrite_send(it->get(), &neighbor_mess, sizeof(neighbor_mess), 0);
 
       DMCS_LOG_TRACE("Sent SHUTDOWN to neighbor " << std::distance(it, rend));
 
@@ -301,8 +302,8 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 	}
 
       // safe to delete sn here, pointers inside it are preserved
-      delete sn;
-      sn = 0;
+      //delete sn;
+      //sn = 0;
     }
   else
     {

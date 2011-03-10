@@ -1,3 +1,15 @@
+2011-03-10  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/ConcurrentMessageDispatcher.cpp: More debugging information.
+
+	* src/dmcs/StreamingDMCS.cpp: Send different messages to different neighbors.
+
+	* include/network/NeighborOut.h: Comment out some delete for debugging.
+	* include/network/RouterThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
 2011-03-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: Initialize input for the sake of safety.
