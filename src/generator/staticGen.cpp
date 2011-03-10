@@ -611,8 +611,9 @@ print_opt_command_lines()
   // Initialization for shell scripts
   file_command_line_opt_sh << "#!/bin/bash" << std::endl
 			   << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
-			   << "export TESTSPATH='" TESTSDIR "'" << std::endl
-			   << "export DMCSPATH='.'" << std::endl;
+    //			   << "export TESTSPATH='" TESTSDIR "'" << std::endl
+			   << "export TESTSPATH='.'" << std::endl
+			   << "export DMCSPATH='../../../build-dbg/src'" << std::endl;
 
   // dmcsd commands
   // ./dmcsd <id> <hostname> <port> <filename_lp> <filename_br> <filename_topo> 
@@ -667,7 +668,7 @@ print_opt_command_lines()
     " --" PORT "=" + port1.str() +
     " --" SYSTEM_SIZE "=" + system_size.str();
   
-  file_command_line_opt_sh << command_line_opt_sh << std::endl << "killall " DMCSD << std::endl;
+  file_command_line_opt_sh << "sleep 5\n" << command_line_opt_sh << std::endl << "killall " DMCSD << std::endl;
   file_command_line_opt << command_line_opt << std::endl;
 
   file_command_line_opt_sh.close();
