@@ -105,14 +105,15 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 
 
 boost::thread*
-ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif)
+ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif,
+				std::size_t pack_size)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   const std::size_t system_size = context->getSystemSize();
   const std::size_t no_nbs   = nbs->size();
 
   JoinThread jt(port, session_id);
-  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, neighbors_notif.get());
+  boost::thread* t = new boost::thread(jt, no_nbs, system_size, pack_size, mg, neighbors_notif.get());
 
   return t;
 }

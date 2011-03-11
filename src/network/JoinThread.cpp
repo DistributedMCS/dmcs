@@ -539,6 +539,7 @@ JoinThread::process()
 void
 JoinThread::operator()(std::size_t nbs,
 		       std::size_t s,
+		       std::size_t ps,
 		       MessagingGatewayBC* m,
 		       ConcurrentMessageQueueVec* jv)
 {
@@ -546,6 +547,7 @@ JoinThread::operator()(std::size_t nbs,
 
   mg = m;
   joiner_neighbors_notif = jv;
+  pack_size = ps;
   
   no_nbs = nbs;
   system_size = s;

@@ -69,7 +69,8 @@ public:
 			ConcurrentMessageQueueVecPtr& neighbors_notif);
 
   boost::thread*
-  createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif);
+  createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif,
+		   std::size_t pack_size);
 
   boost::thread*
   createLocalSolveThread();

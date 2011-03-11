@@ -54,13 +54,14 @@ public:
   void 
   operator()(std::size_t no_nbs,
 	     std::size_t system_size,
+	     std::size_t ps,
 	     MessagingGatewayBC* mg,
 	     ConcurrentMessageQueueVec* joiner_neighbors_notif);
 
 
   enum ImportStates
     {
-      START_UP = 0,   // the very fist start. We need this in order to distinguish between UNSAT and EOF
+      START_UP = 0,   // the very first start. We need this in order to distinguish between UNSAT and EOF
       FILLING_UP,     // the state where not all models have returned the full package of models
       GETTING_NEXT    // next round, meaning that we reached PACK_FULL before and now want to ask a neighbor for its next models
     };
@@ -97,6 +98,7 @@ private:
   std::size_t no_nbs;                  // number of neighbors 
   std::size_t system_size;
   std::size_t session_id;
+  std::size_t pack_size;         // the real upper-bound of number of models that we ask the neighbors
 
   MessagingGatewayBC*        mg;
   ConcurrentMessageQueueVec* joiner_neighbors_notif;
