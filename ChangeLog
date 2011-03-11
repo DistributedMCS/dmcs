@@ -1,3 +1,8 @@
+2011-03-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/OutputThread.h: Stateless OutputThread.
+	* src/network/OutputThread.cpp: Likewise.
+
 2011-03-11  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/dmcs/StreamingBackwardMessage.h: Combine partial belief states and session id into ModelSessionId.

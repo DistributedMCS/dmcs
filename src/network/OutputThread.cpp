@@ -40,8 +40,7 @@
 namespace dmcs {
 
 OutputThread::OutputThread(std::size_t i, std::size_t p)
-  : invoker(i), port(p),
-    end_of_everything(false)
+  : invoker(i), port(p)
 { }
 
 
@@ -59,49 +58,31 @@ OutputThread::operator()(connection_ptr c,
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  collecting = false;
-  eof_left = false;
-
+  std::size_t pack_size;
+  std::size_t parent_session_id;
+  
   while (1)
     {
       ModelSessionIdListPtr res(new ModelSessionIdList);
 
       std::string header;
 
-      if (eof_left)
+      if (!wait_for_trigger(hon, pack_size, parent_session_id))
 	{
-	  assert (!collecting);
+	  return; // shutdown received
 	}
 
-      if (!collecting)
-	{
-	  if (!wait_for_trigger(hon))
-	    {
-	      return; // shutdown received
-	    }
-	}
+      collect_output(mg, res, pack_size, parent_session_id);
 
-      if (end_of_everything)
+      if (res->size() > 0)
 	{
-	  DMCS_LOG_TRACE(port << ": In end_of_everything mode. Send EOF");
-	  const std::string header_eof = HEADER_EOF;
-	  c->write(header_eof);
-	}
-      else if (eof_left)
-	{
-	  DMCS_LOG_TRACE(port << ": Send leftover EOF");
-	  const std::string header_eof = HEADER_EOF;
-	  c->write(header_eof);
-	  eof_left = false;
-	  end_of_everything = true;
+	  write_result(c, res);
 	}
       else
 	{
-	  DMCS_LOG_TRACE(port << ": Go to collect output");
-	  if (collect_output(mg, res, header))
-	    {
-	      write_result(c, res, header);
-	    }
+	  DMCS_LOG_TRACE(port << ": No more answer to send. Send EOF");
+	  const std::string header_eof = HEADER_EOF;
+	  c->write(header_eof);
 	}
     }
 }
@@ -109,7 +90,9 @@ OutputThread::operator()(connection_ptr c,
 
 
 bool
-OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
+OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
+			       std::size_t& pack_size,
+			       std::size_t& parent_session_id)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -136,23 +119,11 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
       else
 	{
 	  pack_size = on->pack_size;
-	  left_2_send = on->pack_size;
 	  parent_session_id = on->parent_session_id;
 	  retval = true;
 
-	  if (on->type == OutputNotification::REQUEST) // reset
-	    {
-	      DMCS_LOG_TRACE(port << ": Got a message REQUEST from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
-	      end_of_everything = false;
-	    }
-	  else if (on->type == OutputNotification::NEXT)
-	    {
-	      DMCS_LOG_TRACE(port << ": Got a message NEXT from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
-	    }
-	  else
-	    {
-	      assert (false);
-	    }
+	  assert ((on->type == OutputNotification::REQUEST) || (on->type == OutputNotification::NEXT));
+	  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
 	}
 
       //delete on;
@@ -169,20 +140,14 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 
 
 
-// return true if we actually collected something
-bool
+void
 OutputThread::collect_output(MessagingGatewayBC* mg,
 			     ModelSessionIdListPtr& res,
-			     std::string& header)
+			     std::size_t pack_size,
+			     std::size_t parent_session_id)
 {
-  DMCS_LOG_TRACE(port << ": pack_size = " << pack_size << ", left to send = " << left_2_send);
-
-  // Turn this mode on. It's off only when either we collect and send
-  // enough pack_size models, or there's no more model to send.
-  collecting = true; 
-  header = HEADER_ANS;
-  
-  for (std::size_t i = 1; i <= left_2_send; ++i)
+  // collect up to pack_size models
+  for (std::size_t i = 1; i <= pack_size; ++i)
     {
       //DMCS_LOG_TRACE(port << ":  Read from MQ");
       
@@ -205,7 +170,6 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	      if (res->size() > 0)
 		{
 		  DMCS_LOG_TRACE(port << ": Going to send HEADER_ANS");
-		  header = HEADER_ANS;
 		  break;
 		}
 	      else
@@ -220,93 +184,63 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  else 
 	    {
 	      // timeout != 0 ==> either UNSAT or EOF
-	      if (sid == parent_session_id)
+	      if (i == 1)
 		{
-		  DMCS_LOG_TRACE(port << ": timeout = " << timeout << ". Got UNSAT or EOF. sid = " << sid << ", parent_session_id = " << parent_session_id << ". Turn off collecting mode.");
-		  header = HEADER_EOF;
-		  collecting = false;
-		  break;
+		  return;
 		}
 	      else
 		{
-		  DMCS_LOG_TRACE(port << ": Got UNSAT or EOF. sid = " << sid << ", parent_session_id = " << parent_session_id << ". IGNORE.");
-		  --i;
-		  continue;
+		  // push back this NULL pointer to the message queue so that we will read it the next time
+		  mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
 		}
+
 	    }
 	}
       
       DMCS_LOG_TRACE(port << ":  got #" << i << ": bs = " << *bs << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
       
       // Got something in a reasonable time. Continue collecting.
+      ModelSessionId msi(bs, sid);
+      res->push_back(msi);
 
-      // It is weird if sid > parent_session_id, because SAT solver
-      // always sends a NULL pointer when it is interrupted
-      //assert (sid < parent_session_id || sid == parent_session_id);
-
-      if (sid >= parent_session_id)
-	{
-	  ModelSessionId ms(bs, sid);
-	  res->push_back(ms);
-	}
-      else
-	{
-	  // clean up
-	  DMCS_LOG_TRACE(port << ": Delete bs because it is outdated. sid = " << sid << " < parent_session_id = " << parent_session_id);
-	  delete bs;
-	  bs = 0;
-	}
     } // for
-
-  if (res->size() > 0)
-    {
-      return true;
-    }
-  else if (header.find(HEADER_EOF) != std::string::npos)
-    {
-      return true;
-    }
-
-  return false;
 }
 
 
 void
 OutputThread::write_result(connection_ptr conn,
-			   ModelSessionIdListPtr& res,
-			   const std::string& header)
+			   ModelSessionIdListPtr& res)
 {
   DMCS_LOG_TRACE(port << ": header = " << header);
 
   try
     {
-      eof_left = false;
-      if (header.find(HEADER_ANS) != std::string::npos)
+      const std::string header = HEADER_ANS;
+      conn->write(header);
+
+      // now write the result
+      res->sort(my_compare);
+      res->unique();
+
+      StreamingBackwardMessage return_mess(res);
+  
+      boost::asio::ip::tcp::socket& sock = conn->socket();
+      boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
+      DMCS_LOG_TRACE(port << ": return message " << return_mess << " to port " << ep.port() << ". Number of belief states = " << res->size());
+      
+      conn->write(return_mess);
+
+      // clean up
+      DMCS_LOG_TRACE(port << ": Going to clean up");
+      for (ModelSessionIdList::iterator it = res->begin(); it != res->end(); ++it)
 	{
-	  // send some models
-	  conn->write(header);
-	  handle_written_header(conn, res);
-	}
-      else
-	{
-	  assert (header.find(HEADER_EOF) != std::string::npos);
-	  
-	  if (res->size() > 0)
+	  if (it->partial_belief_state)
 	    {
-	      // send lefover models
-	      DMCS_LOG_TRACE(port << ": Going to send leftover answers and keep EOF for the next round");
-	      eof_left = true;
-	      const std::string& ans_header = HEADER_ANS;
-	      conn->write(ans_header);
-	      handle_written_header(conn, res);
-	    }
-	  else
-	    {
-	      DMCS_LOG_TRACE(port << ": NOTHING TO OUTPUT, going to send EOF");
-	      end_of_everything = true;
-	      conn->write(header);
+	      delete it->partial_belief_state;
+	      it->partial_belief_state = 0;
 	    }
 	}
+      DMCS_LOG_TRACE(port << ": Done with cleaning up");
     }
   catch (boost::system::error_code& e)
     {
@@ -314,52 +248,6 @@ OutputThread::write_result(connection_ptr conn,
       DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
       throw std::runtime_error(e.message());
     }
-}
-
-
-
-void
-OutputThread::handle_written_header(connection_ptr conn,
-				    ModelSessionIdListPtr& res)
-{
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  
-  assert (left_2_send >= res->size());
-  
-  left_2_send -= res->size();
-
-  res->sort(my_compare);
-  res->unique();
-      
-  // mark end of package by a NULL model
-  if (left_2_send == 0 || eof_left)
-    {
-      PartialBeliefState* bs = 0;
-      ModelSessionId ms(bs, 0);
-      res->push_back(ms);
-      collecting = false;
-    }
-      
-  StreamingBackwardMessage return_mess(res);
-  
-  boost::asio::ip::tcp::socket& sock = conn->socket();
-  boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
-      
-  DMCS_LOG_TRACE(port << ": return message " << return_mess << " to port " << ep.port() << ". Number of belief states = " << res->size());
-      
-  conn->write(return_mess);
-
-  // clean up
-  DMCS_LOG_TRACE(port << ": Going to clean up");
-  for (ModelSessionIdList::iterator it = res->begin(); it != res->end(); ++it)
-    {
-      if (it->partial_belief_state)
-	{
-	  delete it->partial_belief_state;
-	  it->partial_belief_state = 0;
-	}
-    }
-  DMCS_LOG_TRACE(port << ": Done with cleaning up");
 }
 
 

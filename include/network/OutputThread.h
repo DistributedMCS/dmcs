@@ -35,7 +35,6 @@
 #include "mcs/BeliefState.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/connection.hpp"
-#include "solver/Conflict.h"
 
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
@@ -58,31 +57,23 @@ public:
 
 private:
   bool
-  wait_for_trigger(ConcurrentMessageQueue* handler_output_notif);
+  wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
+		   std::size_t& pack_size,
+		   std::size_t& parent_session_id);
 
-  bool
+  void
   collect_output(MessagingGatewayBC* mg, 
 		 ModelSessionIdListPtr& res,
-		 std::string& header);
+		 std::size_t pack_size,
+		 std::size_t parent_session_id);
 
   void
   write_result(connection_ptr conn,
-	       ModelSessionIdListPtr& res,
-	       const std::string& header);
+	       ModelSessionIdListPtr& res);
 
-  void
-  handle_written_header(connection_ptr conn,
-			ModelSessionIdListPtr& res);
 
 private:
-  std::size_t pack_size;             // Number of models the invoker expects to get
-  std::size_t left_2_send;           // Number of models left to send
-  bool        collecting;            // A flag to determine whether we are in collecting mode or not 
-                                     // (if yes then we don't want to wait for any trigger)
-  bool        eof_left;
-  bool        end_of_everything;
   std::size_t invoker;
-  std::size_t parent_session_id;     // used to filter out old models
   std::size_t port;
 };
 
