@@ -66,7 +66,6 @@ public:
 	       std::size_t system_size_,
 	       MessagingGatewayBC* mg_,
 	       ConcurrentMessageQueue* dsn,
-	       boost::thread* jt,
 	       std::size_t p);
 
   virtual
@@ -118,7 +117,6 @@ private:
   MessagingGatewayBC*            mg;
   ConcurrentMessageQueue*        dmcs_sat_notif;   // to get notification from StreamingDMCS
   PartialBeliefState*            input;
-  boost::thread*                 join_thread;
   bool                           first_round;
 
   SATInstance*                   xInstance;

@@ -1,4 +1,32 @@
+2011-03-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/CommandTypeFactory.h: Continue cleaning conflicts
+	related stuff.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+
 2011-03-10  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/ConflictNotification.h: On cleaning conflicts
+	related stuff.
+	* include/dmcs/OutputNotification.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
 
 	* src/network/ConcurrentMessageDispatcher.cpp: More debugging information.
 

@@ -312,7 +312,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       DMCS_LOG_TRACE(port << ": parent_session_id = " << parent_session_id << ", invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port);
 
       DMCS_LOG_TRACE(port << ": Notify DMCS");
-      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(parent_session_id, invoker, pack_size, port);
+      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(parent_session_id, invoker, pack_size, port, StreamingDMCSNotification::REQUEST);
       StreamingDMCSNotification* ow_dmcs = 
 	(StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif.get(), &mess_dmcs, sizeof(mess_dmcs), 0);
 

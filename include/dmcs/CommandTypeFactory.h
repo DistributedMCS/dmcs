@@ -155,8 +155,7 @@ template<>
 inline StreamingCommandTypePtr
 CommandTypeFactory::create<StreamingCommandTypePtr>()
 {
-  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, conflicts_driven,
-					      orig_sigs_size, query_plan, buf_count));
+  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, query_plan));
   StreamingCommandTypePtr stm_opt_dmcs(new StreamingCommandType(stm_dmcs));
 
   return stm_opt_dmcs;

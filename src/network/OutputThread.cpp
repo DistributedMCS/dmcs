@@ -150,7 +150,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 	      DMCS_LOG_TRACE(port << ": Got a message REQUEST from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
 	      end_of_everything = false;
 	    }
-	  else if (on->type == OutputNotification::GET_NEXT)
+	  else if (on->type == OutputNotification::NEXT)
 	    {
 	      DMCS_LOG_TRACE(port << ": Got a message GET_NEXT from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
 	    }

@@ -35,6 +35,7 @@
 #include "dmcs/BeliefCombination.h"
 #include "dmcs/CommandType.h"
 #include "dmcs/Cache.h"
+#include "dmcs/ConflictNotification.h"
 #include "dmcs/Log.h"
 #include "dmcs/StreamingDMCS.h"
 #include "network/Client.h"
@@ -56,28 +57,19 @@ namespace dmcs {
 StreamingDMCS::StreamingDMCS(const ContextPtr& c, 
 			     const TheoryPtr& t, 
 			     const SignatureVecPtr& s, 
-			     bool cd,
-			     VecSizeTPtr& oss,
-			     const QueryPlanPtr& qp,
-			     std::size_t bc)
+			     const QueryPlanPtr& qp)
   : BaseDMCS(c, t, s),
-    conflicts_driven(cd),
-    orig_sigs_size(oss),
     query_plan(qp),
     cacheStats(new CacheStats),
     cache(new Cache(cacheStats)),
     initialized(false),
     sat_thread(0),
     join_thread(0),
-    router_thread(0),
     neighbor_threads(new ThreadVec),
     neighbors(new NeighborThreadVec),
     dmcs_sat_notif(new ConcurrentMessageQueue),
-    sat_router_notif(new ConcurrentMessageQueue),
-    router_neighbors_notif(new ConcurrentMessageQueueVec),
-    sat_joiner_notif(new ConcurrentMessageQueue),
+    neighbors_notif(new ConcurrentMessageQueueVec),
     c2o(new HashedBiMap),
-    buf_count(bc),
     first_round(true),
     my_starting_session_id(0)
   { }
@@ -110,8 +102,8 @@ StreamingDMCS::~StreamingDMCS()
       DMCS_LOG_ERROR("JOIN thread is not joinable");
     }
 
-  ConcurrentMessageQueueVec::iterator rbeg = router_neighbors_notif->begin();
-  ConcurrentMessageQueueVec::iterator rend = router_neighbors_notif->end();
+  ConcurrentMessageQueueVec::iterator rbeg = neighbors_notif->begin();
+  ConcurrentMessageQueueVec::iterator rend = neighbors_notif->end();
 
   DMCS_LOG_TRACE("Informing " << std::distance(rbeg, rend) << " neighbors.");
 
@@ -129,18 +121,6 @@ StreamingDMCS::~StreamingDMCS()
 	  delete ow_neighbor;
 	  ow_neighbor = 0;
 	}
-    }
-
-  DMCS_LOG_TRACE("Join ROUTER thread");
-
-  if (router_thread && router_thread->joinable())
-    {
-      router_thread->interrupt();
-      router_thread->join();
-    }
-  else
-    {
-      DMCS_LOG_ERROR("ROUTER thread is not joinable");
     }
 
 
@@ -179,7 +159,6 @@ StreamingDMCS::~StreamingDMCS()
 
   if (sat_thread) { delete sat_thread; sat_thread = 0; }
   if (join_thread) { delete join_thread; join_thread = 0; }
-  if (router_thread) { delete router_thread; router_thread = 0; } 
 
   DMCS_LOG_TRACE("Good night, and good luck.");
 }
@@ -221,18 +200,17 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
 
   const SignaturePtr& local_sig = ctx->getSignature();
 
-  ThreadFactory tf(conflicts_driven, ctx, theory, local_sig, localV,  
-		   orig_sigs_size, nbs, pack_size, my_starting_session_id,
+  ThreadFactory tf(ctx, theory, local_sig, localV,  
+		   nbs, pack_size, my_starting_session_id,
 		   mg.get(), dmcs_sat_notif.get(),
-		   sat_joiner_notif.get(), c2o.get(), port);
+		   c2o.get(), port);
 
 
 
   if (no_nbs > 0)
     {
       tf.createNeighborThreads(neighbor_threads, neighbors, neighbors_notif);
-      join_thread   = tf.createJoinThread(neighbors_notif, sat_joiner_notif);
-      sat_thread = tf.createLocalSolveThread(join_thread);
+      join_thread   = tf.createJoinThread(neighbors_notif);
     }
   else
     {
@@ -268,15 +246,6 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
       port        = sn->port;
       type        = sn->type;
 
-      if ((decision != 0) && (!decision->initialized()))
-	{
-	  std::size_t global_sig_size = std::accumulate(orig_sigs_size->begin(), 
-							orig_sigs_size->end(),
-							0);
-
-	  decision->setGlobalSigSize(global_sig_size);
-	}
-
       // safe to delete sn here, pointers inside it are preserved
       //delete sn;
       //sn = 0;
@@ -310,16 +279,16 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
 	{
 	  DMCS_LOG_TRACE(port << ": Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
 	  
-	  DMCS_LOG_TRACE(port << ": router_neighbors_notif.size() = " << router_neighbors_notif->size());
+	  DMCS_LOG_TRACE(port << ": neighbors_notif.size() = " << neighbors_notif->size());
 	  
-	  assert (router_neighbors_notif->size() == no_nbs);
+	  assert (neighbors_notif->size() == no_nbs);
 	  
 	  for (std::size_t i = 0; i < no_nbs; ++i)
 	    {
 	      DMCS_LOG_TRACE(port << ": First push to offset " << i);
-	      ConcurrentMessageQueuePtr& cmq = (*router_neighbors_notif)[i];
+	      ConcurrentMessageQueuePtr& cmq = (*neighbors_notif)[i];
 
-	      ConflictNotification* cn = new ConflictNotification(my_starting_session_id, ConflictNotification::FROM_DMCS, ConflictNofication::REQUEST);
+	      ConflictNotification* cn = new ConflictNotification(my_starting_session_id, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
 	      
 	      ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
 	      
@@ -339,7 +308,7 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
     }
 
 
-  ConflictNotification* mess_sat = new ConflictNotification(parent_session_id, ConflictNotification::FROM_DMCS, ConflictNofication::REQUEST);
+  ConflictNotification* mess_sat = new ConflictNotification(parent_session_id, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(dmcs_sat_notif.get(), &mess_sat, sizeof(mess_sat), 0);
   

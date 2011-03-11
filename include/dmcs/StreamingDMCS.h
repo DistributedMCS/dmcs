@@ -63,9 +63,7 @@ public:
 
   StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, 
 		const SignatureVecPtr& s,
-		bool cd, VecSizeTPtr& oss,
-		const QueryPlanPtr& query_plan_, 
-		std::size_t buf_count_);
+		const QueryPlanPtr& qp);
 
   virtual
   ~StreamingDMCS();
@@ -93,24 +91,18 @@ private:
 	   std::size_t port);
 
 private:
-  bool conflicts_driven;
   QueryPlanPtr          query_plan;
-  VecSizeTPtr           orig_sigs_size;
   CacheStatsPtr         cacheStats;
   CachePtr              cache;
   bool                  initialized;
   boost::thread*        sat_thread;
   boost::thread*        join_thread;
-  boost::thread*        router_thread;
   ThreadVecPtr          neighbor_threads;
   NeighborThreadVecPtr  neighbors;
   MessagingGatewayBCPtr mg;
   ConcurrentMessageQueuePtr    dmcs_sat_notif;
-  ConcurrentMessageQueuePtr    sat_router_notif;
-  ConcurrentMessageQueueVecPtr router_neighbors_notif;
-  ConcurrentMessageQueuePtr    sat_joiner_notif;
+  ConcurrentMessageQueueVecPtr neighbors_notif;
   HashedBiMapPtr c2o;
-  std::size_t buf_count;
   bool first_round;
   std::size_t my_starting_session_id;
 };

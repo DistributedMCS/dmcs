@@ -41,38 +41,26 @@ class SatSolverFactory
 {
 public:
   SatSolverFactory(bool il,
-		   bool cd,
 		   std::size_t my_id_,
 		   std::size_t sid,
 		   const TheoryPtr& theory_,
-		   //const ProxySignatureByLocalPtr mixed_sig_,
 		   const SignaturePtr& local_sig_,
 		   const BeliefStatePtr& localV_,
-		   const VecSizeTPtr& oss,
 		   const HashedBiMap* co,
 		   std::size_t system_size_,
 		   MessagingGatewayBC* mg_,
 		   ConcurrentMessageQueue* dsn,
-		   ConcurrentMessageQueue* srn,
-		   ConcurrentMessageQueue* sjn,
-		   boost::thread* jt,
 		   std::size_t p)
     : is_leaf(il),
-      conflicts_driven(cd),
       my_id(my_id_),
       session_id(sid),
       theory(theory_),
-      //      mixed_sig(mixed_sig_),
       local_sig(local_sig_),
       localV(localV_),
-      orig_sigs_size(oss),
       c2o(co),
       system_size(system_size_),
       mg(mg_), 
       dmcs_sat_notif(dsn), 
-      sat_router_notif(srn),
-      sat_joiner_notif(sjn),
-      join_thread(jt),
       port(p)
   { }
 
@@ -82,21 +70,15 @@ public:
 
 private:
   bool                           is_leaf;
-  bool                           conflicts_driven;
   std::size_t                    my_id;
   std::size_t                    session_id;
   const TheoryPtr                theory;
   const SignaturePtr             local_sig;
   const BeliefStatePtr           localV;
-  const VecSizeTPtr              orig_sigs_size;
-  const HashedBiMap*           c2o;
-  //const ProxySignatureByLocalPtr mixed_sig;
+  const HashedBiMap*             c2o;
   std::size_t                    system_size;
-  MessagingGatewayBC*          mg;
-  ConcurrentMessageQueue*      dmcs_sat_notif;
-  ConcurrentMessageQueue*      sat_router_notif;
-  ConcurrentMessageQueue*      sat_joiner_notif;
-  boost::thread*               join_thread;
+  MessagingGatewayBC*            mg;
+  ConcurrentMessageQueue*        dmcs_sat_notif;
   std::size_t port;
 };
 
@@ -105,15 +87,12 @@ template<>
 inline RelSatSolverPtr
 SatSolverFactory::create<RelSatSolverPtr>()
 {
-  RelSatSolverPtr relsatsolver(new RelSatSolver(is_leaf, conflicts_driven,
+  RelSatSolverPtr relsatsolver(new RelSatSolver(is_leaf,
 						my_id, session_id,
 						theory, local_sig, 
-						localV, orig_sigs_size,
+						localV,
 						c2o, system_size, 
 						mg, dmcs_sat_notif, 
-						sat_router_notif,
-						sat_joiner_notif,
-						join_thread,
 						port));
 
   return relsatsolver;

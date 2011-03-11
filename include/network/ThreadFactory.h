@@ -51,57 +51,43 @@ typedef boost::shared_ptr<ThreadVec> ThreadVecPtr;
 class ThreadFactory
 {
 public:
-  ThreadFactory(bool cd,
-		const ContextPtr& c, 
+  ThreadFactory(const ContextPtr& c, 
 		const TheoryPtr& t,
 		const SignaturePtr& ls,
 		const BeliefStatePtr& lV,
-		const VecSizeTPtr& oss,
 		const NeighborListPtr& ns,
 		std::size_t ps,
 		std::size_t sid,
 		MessagingGatewayBC* m,
 		ConcurrentMessageQueue* dsn,
-		ConcurrentMessageQueue* srn,
-		ConcurrentMessageQueue* sjn,
 		HashedBiMap* co,
 		std::size_t p);
 
   void
   createNeighborThreads(ThreadVecPtr& neighbor_threads,
 			NeighborThreadVecPtr& neighbors,
-			ConcurrentMessageQueueVecPtr& router_neighbors_notif);
+			ConcurrentMessageQueueVecPtr& neighbors_notif);
 
   boost::thread*
-  createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_notif,
-		   ConcurrentMessageQueuePtr& sat_joiner_notif,
-		   ConflictVec* conflicts,
-		   PartialBeliefState* partial_ass,
-		   Decisionlevel* decision);
+  createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif);
 
   boost::thread*
   createLocalSolveThread(boost::thread* join_thread);
 
-  boost::thread*
-  createRouterThread(ConcurrentMessageQueueVecPtr& router_neighbors_notif);
 
   //boost::thread*
   //createOutputThread(const connection_ptr& conn_);
 
 private:
-  bool conflicts_driven;
   const ContextPtr                context;
   const TheoryPtr                 theory;
   const SignaturePtr              local_sig;
   const BeliefStatePtr            localV;
-  const VecSizeTPtr               orig_sigs_size;
   const NeighborListPtr           nbs;
   std::size_t                     pack_size;
   std::size_t                     session_id;
   MessagingGatewayBC*             mg;
   ConcurrentMessageQueue*         dmcs_sat_notif;
-  ConcurrentMessageQueue*         sat_router_notif;			
-  ConcurrentMessageQueue*         sat_joiner_notif;
   HashedBiMap*                    c2o;             // hashed bimap from context id to
 			                           // the offset in the vector of
 				                   // neighbor message queue

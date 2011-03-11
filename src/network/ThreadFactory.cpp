@@ -39,34 +39,26 @@
 
 namespace dmcs {
 
-ThreadFactory::ThreadFactory(bool cd,
-			     const ContextPtr& c, 
+ThreadFactory::ThreadFactory(const ContextPtr& c, 
 			     const TheoryPtr& t,
 			     const SignaturePtr& ls,
 			     const BeliefStatePtr& lV,
-			     const VecSizeTPtr& oss,
 			     const NeighborListPtr& ns,
 			     std::size_t ps,
 			     std::size_t sid,
 			     MessagingGatewayBC* m,
 			     ConcurrentMessageQueue* dsn,
-			     ConcurrentMessageQueue* srn,
-			     ConcurrentMessageQueue* sjn,
 			     HashedBiMap* co,
 			     std::size_t p)
-  : conflicts_driven(cd),
-    context(c),
+  : context(c),
     theory(t), 
     local_sig(ls),
     localV(lV),
-    orig_sigs_size(oss),
     nbs(ns),
     pack_size(ps),
     session_id(sid),
     mg(m),
     dmcs_sat_notif(dsn), 
-    sat_router_notif(srn), 
-    sat_joiner_notif(sjn),
     c2o(co),
     port(p)
 {
@@ -85,7 +77,7 @@ ThreadFactory::ThreadFactory(bool cd,
 void
 ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 				     NeighborThreadVecPtr& neighbors,
-				     ConcurrentMessageQueueVecPtr& router_neighbors_notif)
+				     ConcurrentMessageQueueVecPtr& neighbors_notif)
 {
   const std::size_t ctx_id      = context->getContextID();
 
@@ -97,7 +89,7 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
       DMCS_LOG_TRACE("Create neighbor thread " << i);
 
       ConcurrentMessageQueuePtr cmq(new ConcurrentMessageQueue);
-      router_neighbors_notif->push_back(cmq);
+      neighbors_notif->push_back(cmq);
 
       NeighborThread* nt = new NeighborThread(port);
       neighbors->push_back(nt);
@@ -114,19 +106,14 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 
 
 boost::thread*
-ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& joiner_neighbors_notif,
-				ConcurrentMessageQueuePtr& sat_joiner_notif,
-				ConflictVec* conflicts,
-				PartialBeliefState* partial_ass,
-				Decisionlevel* decision)
+ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   const std::size_t system_size = context->getSystemSize();
   const std::size_t no_nbs   = nbs->size();
 
   JoinThread jt(port, session_id);
-  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, joiner_neighbors_notif.get(),
-				       sat_joiner_notif.get(), conflicts, partial_ass, decision);
+  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, neighbors_notif.get());
 
   return t;
 }
@@ -141,9 +128,9 @@ ThreadFactory::createLocalSolveThread(boost::thread* join_thread)
   const std::size_t my_id       = context->getContextID();
   const std::size_t system_size = context->getSystemSize();
 
-  SatSolverFactory ssf(is_leaf, conflicts_driven, my_id, session_id, theory, local_sig, 
-		       localV, orig_sigs_size, c2o, system_size, mg, dmcs_sat_notif, 
-		       sat_router_notif, sat_joiner_notif, join_thread, port);
+  SatSolverFactory ssf(is_leaf, my_id, session_id, theory, local_sig, 
+		       localV, c2o, system_size, mg, dmcs_sat_notif, 
+		        port);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
@@ -153,29 +140,6 @@ ThreadFactory::createLocalSolveThread(boost::thread* join_thread)
   return t;
 }
 
-
-
-boost::thread*
-ThreadFactory::createRouterThread(ConcurrentMessageQueueVecPtr& router_neighbors_notif)
-{
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
-  RouterThread rt(port);
-  boost::thread* t = new boost::thread(rt, sat_router_notif, router_neighbors_notif.get());
-
-  return t;
-}
-
-
-  /*
-boost::thread*
-ThreadFactory::createOutputThread(const connection_ptr& conn)
-{
-  OutputThread ots(conn, pack_size, mg, onf);
-  boost::thread* t = new boost::thread(ots);
-
-  return t;
-  }*/
 
 } // namespace dmcs
 
