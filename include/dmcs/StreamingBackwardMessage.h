@@ -31,6 +31,7 @@
 #define STREAMING_BACKWARD_MESSAGE_H
 
 #include "Message.h"
+#include "dmcs/ModelSessionId.h"
 #include "mcs/BeliefState.h"
 
 #include <boost/serialization/vector.hpp>
@@ -48,21 +49,9 @@ public:
   virtual ~StreamingBackwardMessage() 
   { }
 
-  StreamingBackwardMessage(PartialBeliefStateVecPtr& r, VecSizeTPtr& r_sid)
-    : result(r), result_sid(r_sid)
+  StreamingBackwardMessage(ModelSessionIdListPtr& msl)
+    : result(msl)
   { }
-
-  PartialBeliefStateVecPtr
-  getBeliefStates() const
-  {
-    return result;
-  }
-
-  VecSizeTPtr
-  getSessionId() const
-  {
-    return result_sid;
-  }
 
 public:
   template <typename Archive>
@@ -70,38 +59,24 @@ public:
   serialize(Archive& ar, const unsigned int /* version */)
   {
     ar & result;
-    ar & result_sid;
+  }
+
+  const ModelSessionIdListPtr&
+  getResult() const
+  {
+    return result;
   }
 
 private:
-  PartialBeliefStateVecPtr result;
-  VecSizeTPtr result_sid;
+  ModelSessionIdListPtr result;
 };
+
+
 
 inline std::ostream&
 operator<< (std::ostream& os, const StreamingBackwardMessage& sbMess)
 {
-  const PartialBeliefStateVecPtr& result = sbMess.getBeliefStates();
-  const VecSizeTPtr& result_sid = sbMess.getSessionId();
-
-  assert (result->size() == result_sid->size());
-
-  PartialBeliefStateVec::const_iterator it = result->begin();
-  VecSizeT::const_iterator jt = result_sid->begin();
-
-  os << "{ " ;
-  for (; it != result->end(); ++it, ++jt)
-    {
-      if (*it)
-	{
-	  os << "(" << **it << ", " << *jt << ")"<< std::endl;
-	}
-      else
-	{
-	  os << "(NULL, 0)" << std::endl;
-	}
-    }
-  os << " }";
+  os << *(sbMess.getResult());
 
   return os;
 }

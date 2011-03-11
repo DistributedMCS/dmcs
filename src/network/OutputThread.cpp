@@ -64,10 +64,7 @@ OutputThread::operator()(connection_ptr c,
 
   while (1)
     {
-      //      PartialBeliefStateVecPtr res(new PartialBeliefStateVec);
-      //      VecSizeTPtr res_sid(new VecSizeT);
-      
-      PbsResultListPtr res(new PbsResultList);
+      ModelSessionIdListPtr res(new ModelSessionIdList);
 
       std::string header;
 
@@ -101,10 +98,8 @@ OutputThread::operator()(connection_ptr c,
       else
 	{
 	  DMCS_LOG_TRACE(port << ": Go to collect output");
-	  //if (collect_output(mg, res, res_sid, header))
 	  if (collect_output(mg, res, header))
 	    {
-	      //write_result(c, res, res_sid, header);
 	      write_result(c, res, header);
 	    }
 	}
@@ -177,9 +172,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 // return true if we actually collected something
 bool
 OutputThread::collect_output(MessagingGatewayBC* mg,
-			     //PartialBeliefStateVecPtr& res,
-			     //VecSizeTPtr& res_sid,
-			     PbsResultListPtr& res,
+			     ModelSessionIdListPtr& res,
 			     std::string& header)
 {
   DMCS_LOG_TRACE(port << ": pack_size = " << pack_size << ", left to send = " << left_2_send);
@@ -253,10 +246,8 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
       if (sid >= parent_session_id)
 	{
-	  PbsResult pbs(bs, sid);
-	  res->push_back(pbs);
-	  //res->push_back(bs);
-	  //res_sid->push_back(sid);
+	  ModelSessionId ms(bs, sid);
+	  res->push_back(ms);
 	}
       else
 	{
@@ -282,9 +273,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
 void
 OutputThread::write_result(connection_ptr conn,
-			   //PartialBeliefStateVecPtr& res,
-			   //VecSizeTPtr& res_sid,
-			   PbsResultListPtr& res,
+			   ModelSessionIdListPtr& res,
 			   const std::string& header)
 {
   DMCS_LOG_TRACE(port << ": header = " << header);
@@ -296,7 +285,6 @@ OutputThread::write_result(connection_ptr conn,
 	{
 	  // send some models
 	  conn->write(header);
-	  //handle_written_header(conn, res, res_sid);
 	  handle_written_header(conn, res);
 	}
       else
@@ -310,7 +298,6 @@ OutputThread::write_result(connection_ptr conn,
 	      eof_left = true;
 	      const std::string& ans_header = HEADER_ANS;
 	      conn->write(ans_header);
-	      //handle_written_header(conn, res, res_sid)
 	      handle_written_header(conn, res);
 	    }
 	  else
@@ -333,9 +320,7 @@ OutputThread::write_result(connection_ptr conn,
 
 void
 OutputThread::handle_written_header(connection_ptr conn,
-				    //PartialBeliefStateVecPtr& res,
-				    //VecSizeTPtr& res_sid)
-				    PbsResultListPtr& res)
+				    ModelSessionIdListPtr& res)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
@@ -350,26 +335,12 @@ OutputThread::handle_written_header(connection_ptr conn,
   if (left_2_send == 0 || eof_left)
     {
       PartialBeliefState* bs = 0;
-      //res->push_back(bs);
-      //res_sid->push_back(0);
-      PbsResult p(bs, 0);
-      res->push_back(p);
+      ModelSessionId ms(bs, 0);
+      res->push_back(ms);
       collecting = false;
     }
-  
-  PartialBeliefStateVecPtr res_pbs(new PartialBeliefStateVec);
-  VecSizeTPtr res_sid(new VecSizeT);
-
-  for (PbsResultList::const_iterator it = res->begin(); it != res->end(); ++it)
-    {
-      PartialBeliefState* p = it->pbs;
-      std::size_t sid = it->session_id;
-      res_pbs->push_back(p);
-      res_sid->push_back(sid);
-    }
       
-  //  StreamingBackwardMessage return_mess(res, res_sid);
-  StreamingBackwardMessage return_mess(res_pbs, res_sid);
+  StreamingBackwardMessage return_mess(res);
   
   boost::asio::ip::tcp::socket& sock = conn->socket();
   boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
@@ -379,15 +350,13 @@ OutputThread::handle_written_header(connection_ptr conn,
   conn->write(return_mess);
 
   // clean up
-  //for (PartialBeliefStateVec::iterator it = res->begin(); it != res->end(); ++it)
   DMCS_LOG_TRACE(port << ": Going to clean up");
-  for (PartialBeliefStateVec::iterator it = res_pbs->begin(); it != res_pbs->end(); ++it)
+  for (ModelSessionIdList::iterator it = res->begin(); it != res->end(); ++it)
     {
-      if (*it)
+      if (it->partial_belief_state)
 	{
-	  
-	  delete *it;
-	  *it = 0;
+	  delete it->partial_belief_state;
+	  it->partial_belief_state = 0;
 	}
     }
   DMCS_LOG_TRACE(port << ": Done with cleaning up");

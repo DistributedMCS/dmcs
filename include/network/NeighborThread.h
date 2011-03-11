@@ -62,7 +62,7 @@ public:
   virtual
   ~NeighborThread()
   {
-    DMCS_LOG_TRACE(port << ": Killing me softly");
+    DMCS_LOG_TRACE(port << ": Terminating NeighborThread.");
 
     if (nop_thread)
       {
@@ -266,35 +266,33 @@ private:
 	// extract a bunch of models from the message and then put each into NEIGHBOR_MQ
 	DMCS_LOG_TRACE(port << ": Write to MQs. noff = " << noff);
 	
-	const PartialBeliefStateVecPtr& bsv = mess->getBeliefStates();
-	const VecSizeTPtr& session_id = mess->getSessionId();
-
-	assert (bsv->size() == session_id->size());
+	const ModelSessionIdListPtr& msl = mess->getResult();
 	
-	DMCS_LOG_TRACE(port << ": Received " << bsv->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
+	DMCS_LOG_TRACE(port << ": Received " << msl->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
 	
 	const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
 	// notify the joiner by putting a JoinMess into JoinMessageQueue
-	std::size_t bsv_size = bsv->size();
+	std::size_t bsv_size = msl->size();
 
 	mg->sendJoinIn(bsv_size, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0, 0);
 
-	PartialBeliefStateVec::const_iterator it = bsv->begin();	
-	VecSizeT::const_iterator jt = session_id->begin();
+	ModelSessionIdList::const_iterator it = msl->begin();	
 
-	for (; it != bsv->end(); ++it, ++jt)
+	for (; it != msl->end(); ++it)
 	  {
-	    PartialBeliefState* bs = *it;
+	    PartialBeliefState* bs = it->partial_belief_state;
+	    std::size_t sid = it->session_id;
+
 	    if (bs != 0)
 	      {
-		DMCS_LOG_TRACE(port << ": Sending model = " << *bs << ", sid = " << *jt << " from " << noff << " to " << offset);
+		DMCS_LOG_TRACE(port << ": Sending model = " << *bs << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
 	    else
 	      {
-		DMCS_LOG_TRACE(port << ": Sending model: NULL" << ", sid = " << *jt << " from " << noff << " to " << offset);
+		DMCS_LOG_TRACE(port << ": Sending model: NULL" << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
-	    mg->sendModel(bs, *jt, noff, offset, 0); 
+	    mg->sendModel(bs, sid, noff, offset, 0); 
 	  }
 	
 	boost::shared_ptr<std::string> header(new std::string);
@@ -332,8 +330,9 @@ private:
 };
 
 
-  typedef std::vector<NeighborThread*> NeighborThreadVec;
-  typedef boost::shared_ptr<NeighborThreadVec> NeighborThreadVecPtr;
+
+typedef std::vector<NeighborThread*> NeighborThreadVec;
+typedef boost::shared_ptr<NeighborThreadVec> NeighborThreadVecPtr;
 
 
 

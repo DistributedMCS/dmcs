@@ -30,6 +30,7 @@
 #ifndef OUTPUT_THREAD_H
 #define OUTPUT_THREAD_H
 
+#include "dmcs/ModelSessionId.h"
 #include "dmcs/OutputNotification.h"
 #include "mcs/BeliefState.h"
 #include "network/ConcurrentMessageQueueFactory.h"
@@ -40,44 +41,6 @@
 #include <boost/shared_ptr.hpp>
 
 namespace dmcs {
-
-struct PbsResult
-{
-  PartialBeliefState* pbs;
-  std::size_t session_id;
-
-  PbsResult(PartialBeliefState* p, std::size_t sid)
-    : pbs(p), session_id(sid)
-  {
-  }
-};
-
-typedef std::list<PbsResult> PbsResultList;
-typedef boost::shared_ptr<PbsResultList> PbsResultListPtr;
-
-inline bool
-my_compare(const PbsResult& pbs1, const PbsResult& pbs2)
-{
-  if (*(pbs1.pbs) < *(pbs2.pbs))
-    {
-      return true;
-    }
-  else if (*(pbs1.pbs) == *(pbs2.pbs))
-    {
-      if (pbs1.session_id > pbs2.session_id)
-	{
-	  return true;
-	}
-    }
-  
-  return false;
-}
-
-inline bool
-operator== (const PbsResult& pbs1, const PbsResult& pbs2)
-{
-  return (*(pbs1.pbs) == *(pbs2.pbs));
-}
 
 
 class OutputThread
@@ -99,23 +62,17 @@ private:
 
   bool
   collect_output(MessagingGatewayBC* mg, 
-		 //PartialBeliefStateVecPtr& res, 
-		 //VecSizeTPtr& res_sid, 
-		 PbsResultListPtr& res,
+		 ModelSessionIdListPtr& res,
 		 std::string& header);
 
   void
   write_result(connection_ptr conn,
-	       //PartialBeliefStateVecPtr& res,
-	       //VecSizeTPtr& res_sid,
-	       PbsResultListPtr& res,
+	       ModelSessionIdListPtr& res,
 	       const std::string& header);
 
   void
   handle_written_header(connection_ptr conn,
-			//PartialBeliefStateVecPtr& res,
-			//VecSizeTPtr& res_sid);
-			PbsResultListPtr& res);
+			ModelSessionIdListPtr& res);
 
 private:
   std::size_t pack_size;             // Number of models the invoker expects to get

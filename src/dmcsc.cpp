@@ -115,13 +115,14 @@ handle_belief_state(StreamingBackwardMessage& m)
   std::cerr << "recvd: " << m << std::endl;
 #endif
 
-  const PartialBeliefStateVecPtr& result = m.getBeliefStates();
+  const ModelSessionIdListPtr& result = m.getResult();
 
-  for (PartialBeliefStateVec::iterator it = result->begin(); it != result->end(); ++it)
+  for (ModelSessionIdList::iterator it = result->begin(); it != result->end(); ++it)
     {
-      if (*it != 0)
+      PartialBeliefState* pbs = it->partial_belief_state;
+      if (pbs != 0)
 	{
-	  std::pair<std::set<PartialBeliefState>::iterator,bool> p = final_result.insert(**it);
+	  std::pair<std::set<PartialBeliefState>::iterator,bool> p = final_result.insert(*pbs);
 
 	  if (p.second)
 	    {
@@ -137,8 +138,8 @@ handle_belief_state(StreamingBackwardMessage& m)
 			<< "Partial Equilibrium #" << no_beliefstates << ": ( " << *p.first << ")" << std::endl;
 	    }
 
-	  delete *it;
-	  *it = 0;
+	  delete pbs;
+	  pbs = 0;
 	}
     }
 

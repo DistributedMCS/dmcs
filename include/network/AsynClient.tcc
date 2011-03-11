@@ -248,11 +248,11 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
 
   if (!e)
     {
-      const PartialBeliefStateVecPtr& bss = result->getBeliefStates();
+      const ModelSessionIdListPtr& msl = result->getResult();
 
-      assert ( (bss->size() - 1) <= mess->getPackSize() );
+      assert ( (msl->size() - 1) <= mess->getPackSize() );
 
-      const std::size_t next_k = mess->getPackSize() - (bss->size() - 1);
+      const std::size_t next_k = mess->getPackSize() - (msl->size() - 1);
 
       if (callback)
 	{

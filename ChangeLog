@@ -1,5 +1,12 @@
 2011-03-11  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/dmcs/StreamingBackwardMessage.h: Combine partial belief states and session id into ModelSessionId.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+
 	* include/network/JoinThread.h: Pass pack_size to JoinThread.
 	* src/network/ThreadFactory.cpp: Likewise.
 	* src/network/JoinThread.cpp: Likewise.
