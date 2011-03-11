@@ -210,7 +210,7 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
   if (no_nbs > 0)
     {
       tf.createNeighborThreads(neighbor_threads, neighbors, neighbors_notif);
-      join_thread = tf.createJoinThread(neighbors_notif);
+      join_thread = tf.createJoinThread(neighbors_notif, pack_size);
     }
 
   sat_thread = tf.createLocalSolveThread();
