@@ -28,14 +28,12 @@
  */
 
 
-#include "dmcs/ConflictNotification.h"
 #include "dmcs/Context.h"
 #include "mcs/HashedBiMap.h"
 #include "mcs/ProxySignatureByLocal.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "solver/BaseSolver.h"
 #include "solver/ChoicePoint.h"
-#include "solver/Conflict.h"
 
 #include "relsat-20070104/RelSatHelper.h"
 #include "relsat-20070104/SATInstance.h"

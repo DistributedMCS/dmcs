@@ -210,12 +210,10 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
   if (no_nbs > 0)
     {
       tf.createNeighborThreads(neighbor_threads, neighbors, neighbors_notif);
-      join_thread   = tf.createJoinThread(neighbors_notif);
+      join_thread = tf.createJoinThread(neighbors_notif);
     }
-  else
-    {
-      sat_thread = tf.createLocalSolveThread(0);
-    }
+
+  sat_thread = tf.createLocalSolveThread();
 
   DMCS_LOG_TRACE(port << ": All threads created!");
 }
@@ -268,46 +266,32 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
   const std::size_t no_nbs = nbs->size();
 
-  assert (partial_ass);
-  assert (decision);
-
-  if (first_round)
+  if (no_nbs > 0) 
     {
-      first_round = false;
-
-      if (no_nbs > 0) // not a leaf context
+      DMCS_LOG_TRACE(port << ": Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
+      
+      DMCS_LOG_TRACE(port << ": neighbors_notif.size() = " << neighbors_notif->size());
+      
+      assert (neighbors_notif->size() == no_nbs);
+      
+      for (std::size_t i = 0; i < no_nbs; ++i)
 	{
-	  DMCS_LOG_TRACE(port << ": Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
+	  DMCS_LOG_TRACE(port << ": First push to offset " << i);
+	  ConcurrentMessageQueuePtr& cmq = (*neighbors_notif)[i];
 	  
-	  DMCS_LOG_TRACE(port << ": neighbors_notif.size() = " << neighbors_notif->size());
+	  ConflictNotification* cn = new ConflictNotification(my_starting_session_id, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
 	  
-	  assert (neighbors_notif->size() == no_nbs);
+	  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
 	  
-	  for (std::size_t i = 0; i < no_nbs; ++i)
+	  if (ow_neighbor)
 	    {
-	      DMCS_LOG_TRACE(port << ": First push to offset " << i);
-	      ConcurrentMessageQueuePtr& cmq = (*neighbors_notif)[i];
-
-	      ConflictNotification* cn = new ConflictNotification(my_starting_session_id, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
-	      
-	      ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
-	      
-	      if (ow_neighbor)
-		{
-		  delete ow_neighbor;
-		  ow_neighbor = 0;
-		}
+	      delete ow_neighbor;
+	      ow_neighbor = 0;
 	    }
 	}
     }
-  else
-    {
-      // interrupt relsat
-      DMCS_LOG_TRACE(port << ": Interrupt SAT");
-      sat_thread->interrupt();
-    }
 
-
+  DMCS_LOG_TRACE(port << ": Wake up SAT solver.");
   ConflictNotification* mess_sat = new ConflictNotification(parent_session_id, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(dmcs_sat_notif.get(), &mess_sat, sizeof(mess_sat), 0);

@@ -45,7 +45,7 @@ JoinThread::JoinThread(std::size_t p,
 
 JoinThread::~JoinThread()
 {
-  DMCS_LOG_TRACE(port << ": Good bye, cruel world.");
+  DMCS_LOG_TRACE(port << ": Terminating JoinThread.");
 }
 
 
@@ -498,7 +498,7 @@ JoinThread::process()
 			}
 		    }
 		  
-		  DMCS_LOG_TRACE(port << ":  pack_full.count_range == " << pack_full.count_range(0, no_nbs+1));
+		  DMCS_LOG_TRACE(port << ": pack_full.count_range == " << pack_full.count_range(0, no_nbs+1));
 		  
 		  if (pack_full.count_range(0, no_nbs+1) == no_nbs)
 		    {

@@ -47,7 +47,7 @@ OutputThread::OutputThread(std::size_t i, std::size_t p)
 
 OutputThread::~OutputThread()
 {
-  DMCS_LOG_TRACE(port << ": So long, suckers. I'm out.");
+  DMCS_LOG_TRACE(port << ": Terminating OutputThread.");
 }
 
 
@@ -152,7 +152,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif)
 	    }
 	  else if (on->type == OutputNotification::NEXT)
 	    {
-	      DMCS_LOG_TRACE(port << ": Got a message GET_NEXT from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
+	      DMCS_LOG_TRACE(port << ": Got a message NEXT from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
 	    }
 	  else
 	    {
@@ -200,7 +200,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
 
       PartialBeliefState* bs = ms.m;
-      std::size_t sid = ms.sid; ///@todo FIXME
+      std::size_t sid = ms.sid; 
       
       //DMCS_LOG_TRACE(port << ":  Check result from MQ");
       if (bs == 0) // Ups, a NULL pointer
@@ -208,7 +208,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  //DMCS_LOG_TRACE(port << ": Got a NULL pointer. timeout == " << timeout);
 	  if (timeout == 0)
 	    {
-	      DMCS_LOG_TRACE(port << ":  TIME OUT. Going to send whatever I got so far to the parent");
+	      DMCS_LOG_TRACE(port << ": TIME OUT. Going to send whatever I got so far to the parent");
 	      if (res->size() > 0)
 		{
 		  DMCS_LOG_TRACE(port << ": Going to send HEADER_ANS");
@@ -312,14 +312,6 @@ OutputThread::write_result(connection_ptr conn,
 	      conn->write(ans_header);
 	      //handle_written_header(conn, res, res_sid)
 	      handle_written_header(conn, res);
-
-	      /*
-	      if (invoker == 0)
-		{
-		  DMCS_LOG_TRACE(port << ": The BOSS called, notify him about EOF");
-		  conn->write(header);
-		  eof_left = false;
-		  }*/
 	    }
 	  else
 	    {
@@ -335,8 +327,6 @@ OutputThread::write_result(connection_ptr conn,
       DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
       throw std::runtime_error(e.message());
     }
-
-  //  assert(false && "header is neither HEADER_ANS nor HEADER_EOF");
 }
 
 
@@ -395,6 +385,7 @@ OutputThread::handle_written_header(connection_ptr conn,
     {
       if (*it)
 	{
+	  
 	  delete *it;
 	  *it = 0;
 	}

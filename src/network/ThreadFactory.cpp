@@ -120,7 +120,7 @@ ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif)
 
 
 boost::thread*
-ThreadFactory::createLocalSolveThread(boost::thread* join_thread)
+ThreadFactory::createLocalSolveThread()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   bool is_leaf                  = (nbs->size() == 0);
@@ -128,8 +128,7 @@ ThreadFactory::createLocalSolveThread(boost::thread* join_thread)
   const std::size_t system_size = context->getSystemSize();
 
   SatSolverFactory ssf(is_leaf, my_id, session_id, theory, local_sig, 
-		       localV, c2o, system_size, mg, dmcs_sat_notif, 
-		        port);
+		       localV, c2o, system_size, mg, dmcs_sat_notif, port);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

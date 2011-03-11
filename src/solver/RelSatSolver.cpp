@@ -30,6 +30,7 @@
 #include <boost/thread.hpp>
 
 #include "dmcs/BeliefCombination.h"
+#include "dmcs/ConflictNotification.h"
 #include "network/ConcurrentMessageQueueHelper.h"
 #include "solver/RelSatSolver.h"
 #include "relsat-20070104/RelSatHelper.h"
@@ -219,7 +220,6 @@ RelSatSolver::refresh()
 void
 RelSatSolver::solve()
 {
-  // wait for conflict and partial_ass from DMCS
   DMCS_LOG_TRACE(port << ":  Fresh solving. Wait for a message from DMCS");
   ConflictNotification* cn;
   void *ptr         = static_cast<void*>(&cn);
@@ -263,8 +263,6 @@ RelSatSolver::solve()
 		}
 	      DMCS_LOG_TRACE(port << ": A fresh solving. input = " << *input);
 	      
-	      boost::this_thread::interruption_point();
-
 	      eResult = xSATSolver->eSolve();
 	      xSATSolver->refresh();
 	    }

@@ -72,11 +72,7 @@ public:
   createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif);
 
   boost::thread*
-  createLocalSolveThread(boost::thread* join_thread);
-
-
-  //boost::thread*
-  //createOutputThread(const connection_ptr& conn_);
+  createLocalSolveThread();
 
 private:
   const ContextPtr                context;
