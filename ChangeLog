@@ -1,4 +1,7 @@
-2011-03-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+2011-03-11  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Makefile.am: Remove RouterThread.
+	* src/network/ThreadFactory.cpp: Likewise.
 
 	* include/dmcs/CommandTypeFactory.h: Continue cleaning conflicts
 	related stuff.
@@ -12,6 +15,7 @@
 	* include/network/ThreadFactory.h: Likewise.
 	* include/network/Handler.tcc: Likewise.
 	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
 
 2011-03-10  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 

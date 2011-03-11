@@ -66,15 +66,6 @@ RelSatSolver::RelSatSolver(bool il,
     input(0)
 {
   xInstance->readTheory(theory, sig->size());
-
-  // prepare storage for conflicts learned by the solver
-  std::size_t no_nbs = c2o->size();
-  for (std::size_t i = 0; i < no_nbs; ++i)
-    {
-      ConflictBufPtr cb(new ConflictBuf(CIRCULAR_BUF_SIZE));
-      learned_conflicts->push_back(cb);
-      new_conflicts_beg->push_back(cb->begin());
-    }
 }
 
 

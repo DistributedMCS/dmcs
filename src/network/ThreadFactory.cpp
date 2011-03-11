@@ -33,7 +33,6 @@
 #include "network/NeighborThread.h"
 #include "network/OutputThread.h"
 #include "network/RelSatSolverThread.h"
-#include "network/RouterThread.h"
 #include "network/ThreadFactory.h"
 #include "solver/SatSolverFactory.h"
 

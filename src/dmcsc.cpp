@@ -375,7 +375,7 @@ Options";
 		  complete = pack_size > 0 ? false : true;		  
 
 		  // session_id = 0, invoker = 0
-		  StreamingCommandType::input_type mess(0, 0, k, conflicts, partial_ass, decision);
+		  StreamingCommandType::input_type mess(0, 0, k);
 		      
 		  DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
 		  DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);
