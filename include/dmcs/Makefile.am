@@ -11,6 +11,7 @@ noinst_HEADERS =  \
 		Context.h \
 		Debug.h \
 		Log.h \
+		ModelSessionId.h \
 		Message.h \
 		Neighbor.h \
 		OptCommandType.h \
