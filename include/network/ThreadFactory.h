@@ -60,6 +60,7 @@ public:
 		std::size_t sid,
 		MessagingGatewayBC* m,
 		ConcurrentMessageQueue* dsn,
+		ConcurrentMessageQueue* djn,
 		HashedBiMap* co,
 		std::size_t p);
 
@@ -69,8 +70,7 @@ public:
 			ConcurrentMessageQueueVecPtr& neighbors_notif);
 
   boost::thread*
-  createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif,
-		   std::size_t pack_size);
+  createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif);
 
   boost::thread*
   createLocalSolveThread();
@@ -85,6 +85,7 @@ private:
   std::size_t                     session_id;
   MessagingGatewayBC*             mg;
   ConcurrentMessageQueue*         dmcs_sat_notif;
+  ConcurrentMessageQueue*         dmcs_joiner_notif;
   HashedBiMap*                    c2o;             // hashed bimap from context id to
 			                           // the offset in the vector of
 				                   // neighbor message queue

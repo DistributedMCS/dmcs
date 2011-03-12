@@ -54,8 +54,8 @@ public:
   void 
   operator()(std::size_t no_nbs,
 	     std::size_t system_size,
-	     std::size_t ps,
 	     MessagingGatewayBC* mg,
+	     ConcurrentMessageQueue* dmcs_joiner_notif,
 	     ConcurrentMessageQueueVec* joiner_neighbors_notif);
 
 
@@ -93,6 +93,16 @@ private:
   void
   process();
 
+  void
+  wait_dmcs(std::size_t& pack_size);
+
+  void
+  request_neighbor(std::size_t nid, std::size_t pack_size,
+		   ConflictNotification::NotificationType nt);
+
+  void
+  import_and_join(VecSizeTPtr request_size);
+
 private:
   std::size_t port;
   std::size_t no_nbs;                  // number of neighbors 
@@ -101,6 +111,7 @@ private:
   std::size_t pack_size;         // the real upper-bound of number of models that we ask the neighbors
 
   MessagingGatewayBC*        mg;
+  ConcurrentMessageQueue*    dmcs_joiner_notif;
   ConcurrentMessageQueueVec* joiner_neighbors_notif;
 };
 

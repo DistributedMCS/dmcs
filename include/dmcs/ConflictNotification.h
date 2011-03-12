@@ -52,15 +52,19 @@ struct ConflictNotification
     };
 
   ConflictNotification(std::size_t sid,
+		       std::size_t ps,
 		       SenderIdentification s,
 		       NotificationType t)
     : session_id(sid),
+      pack_size(ps),
+      sender(s),
       type(t)
   { 
     assert(t == REQUEST || t == SHUTDOWN || t == NEXT);
   }
   
   std::size_t session_id;
+  std::size_t pack_size;
   SenderIdentification sender; // identifier of the thread that sent this 
   NotificationType type;
 };

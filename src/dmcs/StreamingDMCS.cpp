@@ -110,7 +110,7 @@ StreamingDMCS::~StreamingDMCS()
   // inform all neighbors about the shutdown
   for (ConcurrentMessageQueueVec::iterator it = rbeg; it != rend; ++it)
     {
-      ConflictNotification* neighbor_mess = new ConflictNotification(0, ConflictNotification::FROM_DMCS, ConflictNotification::SHUTDOWN);
+      ConflictNotification* neighbor_mess = new ConflictNotification(0, 0, ConflictNotification::FROM_DMCS, ConflictNotification::SHUTDOWN);
       ConflictNotification* ow_neighbor =
 	(ConflictNotification*) overwrite_send(it->get(), &neighbor_mess, sizeof(neighbor_mess), 0);
 
@@ -202,7 +202,7 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
 
   ThreadFactory tf(ctx, theory, local_sig, localV,  
 		   nbs, pack_size, my_starting_session_id,
-		   mg.get(), dmcs_sat_notif.get(),
+		   mg.get(), dmcs_sat_notif.get(), dmcs_joiner_notif.get(),
 		   c2o.get(), port);
 
 
@@ -210,7 +210,7 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
   if (no_nbs > 0)
     {
       tf.createNeighborThreads(neighbor_threads, neighbors, neighbors_notif);
-      join_thread = tf.createJoinThread(neighbors_notif, pack_size);
+      join_thread = tf.createJoinThread(neighbors_notif);
     }
 
   sat_thread = tf.createLocalSolveThread();
@@ -260,6 +260,7 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 
 void
 StreamingDMCS::start_up(std::size_t parent_session_id,
+			std::size_t pack_size,
 			std::size_t port)
 {
   std::size_t my_id = ctx->getContextID();
@@ -268,6 +269,19 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
 
   if (no_nbs > 0) 
     {
+      DMCS_LOG_TRACE(port << ": Intermediate context. Trigger JoinThread.");
+      
+      ConflictNotification* mess_joiner = new ConflictNotification(parent_session_id, pack_size, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
+      ConflictNotification* ow_joiner = 
+	(ConflictNotification*) overwrite_send(dmcs_joiner_notif.get(), &mess_joiner, sizeof(mess_joiner), 0);
+      
+      if (ow_joiner)
+	{
+	  delete ow_joiner;
+	  ow_joiner = 0;
+	}
+
+      /*
       DMCS_LOG_TRACE(port << ": Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
       
       DMCS_LOG_TRACE(port << ": neighbors_notif.size() = " << neighbors_notif->size());
@@ -289,10 +303,11 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
 	      ow_neighbor = 0;
 	    }
 	}
+      */
     }
 
   DMCS_LOG_TRACE(port << ": Wake up SAT solver.");
-  ConflictNotification* mess_sat = new ConflictNotification(parent_session_id, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
+  ConflictNotification* mess_sat = new ConflictNotification(parent_session_id, pack_size, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(dmcs_sat_notif.get(), &mess_sat, sizeof(mess_sat), 0);
   
@@ -334,7 +349,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 	  initialize(parent_session_id, invoker, pack_size, port);
 	  initialized = true;
 	}
-      start_up(parent_session_id, port);
+      start_up(parent_session_id, pack_size, port);
     }
 }
 

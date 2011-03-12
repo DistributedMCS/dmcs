@@ -291,8 +291,10 @@ JoinThread::ask_for_next(PartialBeliefStatePackagePtr& partial_eqs,
 
   bsv->clear();
 
+  std::size_t left_pack_size;
+
   ConflictNotification* cn;
-  cn = new ConflictNotification(session_id, ConflictNotification::FROM_JOINER, nt);
+  cn = new ConflictNotification(session_id, left_pack_size, ConflictNotification::FROM_JOINER, nt);
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[next];
   
@@ -536,23 +538,134 @@ JoinThread::process()
 }
 
 
+
+void
+JoinThread::wait_dmcs(std::size_t& pack_size)
+{
+}
+
+
+
+void
+JoinThread::request_neighbor(std::size_t nid, std::size_t pack_size, ConflictNotification::NotificationType nt)
+{
+}
+
+
+
+void
+JoinThread::import_and_join(VecSizeTPtr request_size)
+{
+  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  
+  ImportStates import_state = START_UP;
+
+  bool asking_next = false;
+
+  std::size_t next_neighbor_offset = 0;
+
+  bm::bvector<> in_mask;
+  bm::bvector<> pack_full;
+
+  // set up a package of empty BeliefStates
+  PartialBeliefStatePackagePtr partial_eqs(new PartialBeliefStatePackage);
+  for (std::size_t i = 0; i < no_nbs; ++i)
+    {
+      PartialBeliefStateVecPtr bsv(new PartialBeliefStateVec);
+      partial_eqs->push_back(bsv);
+    }
+
+  PartialBeliefStateIteratorVecPtr beg_it(new PartialBeliefStateIteratorVec(no_nbs));
+  PartialBeliefStateIteratorVecPtr mid_it(new PartialBeliefStateIteratorVec(no_nbs));
+
+  while (1)
+    {
+      std::size_t prio = 0;
+      int timeout = 0;
+	  
+      // notification from neighbor thread
+	  
+      DMCS_LOG_TRACE(port << ": Waiting at JOIN_IN for notification of NEW MODELS ARRIVAL");
+	  
+      MessagingGatewayBC::JoinIn nn = 
+	mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
+	  
+      DMCS_LOG_TRACE(port << ": Received from offset " << nn.ctx_offset << ", " << nn.peq_cnt << " peqs to pick up.");
+
+      if (nn.peq_cnt == 0)
+	{
+	  // This neighbor is either out of models or UNSAT
+	  if (import_state == START_UP)
+	    {
+	      // UNSAT
+	      // Inform the SAT solver about this by sending him a
+	      // NULL model.
+	      DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0. Send a NULL model to JOIN_OUT_MQ");
+	      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+
+	      ///@todo: Also tell the neighbors (via NeighborOut) to stop
+	      /// returning models.
+		  
+	    }
+
+	} // if (nn.peq_cnt == 0)
+      else
+	{
+	  // out of models, import == GETTING_NEXT v FILLING_UP
+		  
+	  // We need to ask the next neighbor (now ordered by the
+	  // offset) to give the next package of models.
+	  
+	  next_neighbor_offset = nn.ctx_offset + 1;
+	  
+	  DMCS_LOG_TRACE(port << ": Increase next_neighbor_offset. Now is: " << next_neighbor_offset);
+	  
+	  if (next_neighbor_offset == no_nbs)
+	    {
+	      DMCS_LOG_TRACE(port << ": Send a NULL model to JOIN_OUT_MQ");
+	      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+	    }
+	}
+    } // while (1)
+}
+
+
+
 void
 JoinThread::operator()(std::size_t nbs,
 		       std::size_t s,
-		       std::size_t ps,
 		       MessagingGatewayBC* m,
+		       ConcurrentMessageQueue* djn,
 		       ConcurrentMessageQueueVec* jv)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   mg = m;
+  dmcs_joiner_notif = djn;
   joiner_neighbors_notif = jv;
-  pack_size = ps;
-  
   no_nbs = nbs;
   system_size = s;
-  
-  process();
+
+  VecSizeTPtr request_size(new VecSizeT(no_nbs, 0));
+
+  // process();
+
+  std::size_t pack_size;
+  while (1)
+    {
+      // Trigger from dmcs
+      wait_dmcs(pack_size);
+
+      // First action: notify all neighbors to return me pack_size models (via NeighborOut)
+      for (std::size_t i = 0; i < no_nbs; ++i)
+	{
+	  (*request_size)[i] = pack_size;
+	  request_neighbor(i, pack_size, ConflictNotification::REQUEST);
+	}
+
+      import_and_join(request_size);
+      
+    }
 }
 
 } // namespace dmcs

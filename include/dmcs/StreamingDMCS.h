@@ -88,6 +88,7 @@ private:
 
   void
   start_up(std::size_t parent_session_id,
+	   std::size_t pack_size,
 	   std::size_t port);
 
 private:
@@ -101,6 +102,7 @@ private:
   NeighborThreadVecPtr  neighbors;
   MessagingGatewayBCPtr mg;
   ConcurrentMessageQueuePtr    dmcs_sat_notif;
+  ConcurrentMessageQueuePtr    dmcs_joiner_notif;
   ConcurrentMessageQueueVecPtr neighbors_notif;
   HashedBiMapPtr c2o;
   bool first_round;

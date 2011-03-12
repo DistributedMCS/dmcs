@@ -1,3 +1,16 @@
+2011-03-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: On implementing stateful Joiner.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Notify Joiner.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/dmcs/ConflictNotification.h: Inlucde pack_size in the
+	notification.
+
 2011-03-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/OutputThread.h: Stateless OutputThread.

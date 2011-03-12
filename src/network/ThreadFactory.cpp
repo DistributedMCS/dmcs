@@ -47,6 +47,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
 			     std::size_t sid,
 			     MessagingGatewayBC* m,
 			     ConcurrentMessageQueue* dsn,
+			     ConcurrentMessageQueue* djn,
 			     HashedBiMap* co,
 			     std::size_t p)
   : context(c),
@@ -58,6 +59,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
     session_id(sid),
     mg(m),
     dmcs_sat_notif(dsn), 
+    dmcs_joiner_notif(djn), 
     c2o(co),
     port(p)
 {
@@ -105,15 +107,14 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 
 
 boost::thread*
-ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif,
-				std::size_t pack_size)
+ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   const std::size_t system_size = context->getSystemSize();
   const std::size_t no_nbs   = nbs->size();
 
   JoinThread jt(port, session_id);
-  boost::thread* t = new boost::thread(jt, no_nbs, system_size, pack_size, mg, neighbors_notif.get());
+  boost::thread* t = new boost::thread(jt, no_nbs, system_size,  mg, dmcs_joiner_notif, neighbors_notif.get());
 
   return t;
 }
