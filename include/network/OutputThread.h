@@ -56,7 +56,7 @@ public:
 	     ConcurrentMessageQueue* hon);
 
 private:
-  bool
+  OutputNotification::NotificationType
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 		   std::size_t& pack_size,
 		   std::size_t& parent_session_id);
@@ -75,6 +75,7 @@ private:
 private:
   std::size_t invoker;
   std::size_t port;
+  bool eof_mode;
 };
 
 typedef boost::shared_ptr<OutputThread> OutputThreadPtr;

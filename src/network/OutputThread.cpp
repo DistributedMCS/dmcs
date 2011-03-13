@@ -40,7 +40,7 @@
 namespace dmcs {
 
 OutputThread::OutputThread(std::size_t i, std::size_t p)
-  : invoker(i), port(p)
+  : invoker(i), port(p), eof_mode(false)
 { }
 
 
@@ -66,36 +66,46 @@ OutputThread::operator()(connection_ptr c,
     {
       res->clear();
 
-      if (!wait_for_trigger(hon, pack_size, parent_session_id))
+      OutputNotification::NotificationType nt = wait_for_trigger(hon, pack_size, parent_session_id);
+
+      if (nt == OutputNotification::SHUTDOWN)
 	{
 	  return; // shutdown received
 	}
-
-      collect_output(mg, res, pack_size, parent_session_id);
-
-      if (res->size() > 0)
+      else if (nt == OutputNotification::NEXT && eof_mode)
 	{
-	  write_result(c, res);
+	  DMCS_LOG_TRACE(port << ": in EOF mode. Send EOF");
+	  const std::string header_eof = HEADER_EOF;
+	  c->write(header_eof);	  
 	}
       else
 	{
-	  DMCS_LOG_TRACE(port << ": No more answer to send. Send EOF");
-	  const std::string header_eof = HEADER_EOF;
-	  c->write(header_eof);
+	  eof_mode = false;
+	  collect_output(mg, res, pack_size, parent_session_id);
+
+	  if (res->size() > 0)
+	    {
+	      write_result(c, res);
+	    }
+	  else
+	    {
+	      eof_mode = true;
+	      DMCS_LOG_TRACE(port << ": No more answer to send. Send EOF");
+	      const std::string header_eof = HEADER_EOF;
+	      c->write(header_eof);
+	    }
 	}
     }
 }
 
 
 
-bool
+OutputNotification::NotificationType
 OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 			       std::size_t& pack_size,
 			       std::size_t& parent_session_id)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
-  bool retval = true;
 
   // wait for Handler to tell me to return some models
   OutputNotification* on = 0;
@@ -111,15 +121,12 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
     {
       if (on->type == OutputNotification::SHUTDOWN)
 	{
-	  retval = false;
-
 	  DMCS_LOG_TRACE(port << ": Got SHUTDOWN from Handler.");
 	}
       else
 	{
 	  pack_size = on->pack_size;
 	  parent_session_id = on->parent_session_id;
-	  retval = true;
 
 	  assert ((on->type == OutputNotification::REQUEST) || (on->type == OutputNotification::NEXT));
 	  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
@@ -134,7 +141,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
       assert(ptr != 0 && on != 0);
     }
 
-  return retval;
+  return on->type;
 }
 
 
