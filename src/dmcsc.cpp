@@ -368,9 +368,9 @@ Options";
 
 		  // USER <--> invoker == 0
 	
-		  ConflictVec* conflicts = new ConflictVec;
-		  PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
-		  Decisionlevel* decision = new Decisionlevel();
+		  //ConflictVec* conflicts = new ConflictVec;
+		  //PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
+		  //Decisionlevel* decision = new Decisionlevel();
 
 		  std::size_t k = pack_size > 0 ? pack_size : 10; // default: k is 10
 		  complete = pack_size > 0 ? false : true;		  
@@ -378,9 +378,9 @@ Options";
 		  // session_id = 0, invoker = 0
 		  StreamingCommandType::input_type mess(0, 0, k);
 		      
-		  DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
-		  DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);
-		  DMCS_LOG_DEBUG("Empty starting decision level:" << *decision);
+		  //DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
+		  //DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);
+		  //DMCS_LOG_DEBUG("Empty starting decision level:" << *decision);
 		      
 		  std::string header = HEADER_REQ_STM_DMCS;
 
@@ -464,9 +464,9 @@ Options";
 		  //std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
 		  //std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
 
-		  delete conflicts;
-		  delete partial_ass;
-		  delete decision;
+		  //delete conflicts;
+		  //delete partial_ass;
+		  //delete decision;
 
 		  sampler_thread.interrupt();
 		  if (sampler_thread.joinable())
