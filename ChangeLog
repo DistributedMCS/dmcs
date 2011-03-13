@@ -1,5 +1,11 @@
 2011-03-13  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/dmcsc.cpp: Clean up.
+
+	* include/network/OutputThread.h: If EOF then always return EOF
+	wrt NEXT request.
+	* src/network/OutputThread.cpp: Likewise.
+
 	* include/network/JoinThread.h: Implementing stateful Joiner.
 	* src/solver/RelSatSolver.cpp: Likewise.
 	* src/network/ThreadFactory.cpp: Likewise.
