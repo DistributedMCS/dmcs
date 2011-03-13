@@ -599,7 +599,7 @@ JoinThread::request_neighbor(PartialBeliefStatePackage* partial_eqs,
 
 
 
-bool
+void
 JoinThread::import_belief_states1(std::size_t noff,
 				  std::size_t peq_cnt, 
 				  PartialBeliefStatePackagePtr& partial_eqs, 
@@ -674,11 +674,7 @@ JoinThread::import_belief_states1(std::size_t noff,
 	{
 	  pack_full.set(noff);
 	}
-
-      return true;
     }
-
-  return false;
 }
 
 
@@ -728,15 +724,23 @@ JoinThread::import_and_join(VecSizeTPtr request_size, std::size_t pack_size)
 	  // This neighbor is either out of models or UNSAT
 	  if (import_state == START_UP)
 	    {
-	      // UNSAT
-	      // Inform the SAT solver about this by sending him a
-	      // NULL model.
-	      DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0. Send a NULL model to JOIN_OUT_MQ");
-	      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
-
-	      ///@todo: Also tell the neighbors (via NeighborOut) to stop
-	      /// returning models.
+	      std::size_t& current_request_size = (*request_size)[nn.ctx_offset];
+	      if (current_request_size == pack_size)
+		{
+		  // UNSAT
+		  // Inform the SAT solver about this by sending him a
+		  // NULL model.
+		  DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0. Send a NULL model to JOIN_OUT_MQ");
+		  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
 		  
+		  ///@todo: Also tell the neighbors (via NeighborOut) to stop
+		  /// returning models.
+		}
+	      else
+		{
+		  current_request_size = 0;
+		  pack_full.set(nn.ctx_offset);
+		}
 	    }
 	  else
 	    {
@@ -766,20 +770,16 @@ JoinThread::import_and_join(VecSizeTPtr request_size, std::size_t pack_size)
 	} // if (nn.peq_cnt == 0)
       else // (nn.peq_cnt != 0)
 	{
-	  bool imported_something = import_belief_states1(nn.ctx_offset,
-							 nn.peq_cnt,
-							 partial_eqs, 
-							 in_mask,
-							 pack_full,
-							 beg_it,
-							 mid_it,
-							 (*request_size)[nn.ctx_offset],
-							 import_state);
-
-	  if (!imported_something)
-	    {
-	      continue;
-	    }
+	  std::size_t& current_request_size = (*request_size)[nn.ctx_offset];
+	  import_belief_states1(nn.ctx_offset,
+				nn.peq_cnt,
+				partial_eqs, 
+				in_mask,
+				pack_full,
+				beg_it,
+				mid_it,
+				current_request_size,
+				import_state);
 
 	  DMCS_LOG_TRACE(port << ": PartialBeliefState package received:");
 	  DMCS_LOG_TRACE(*partial_eqs);
@@ -810,6 +810,11 @@ JoinThread::import_and_join(VecSizeTPtr request_size, std::size_t pack_size)
 		  // then we just keep his models as asking for a new
 		  // round will return the same thing.
 		}
+	    }
+
+	  if (current_request_size > 0)
+	    {
+	      request_neighbor(0, nn.ctx_offset, current_request_size, ConflictNotification::NEXT);
 	    }
 
 	  // At this point, we can check whether joining is possible

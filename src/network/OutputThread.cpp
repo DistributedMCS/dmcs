@@ -193,17 +193,18 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 		{
 		  DMCS_LOG_TRACE(port << ": push back this NULL pointer to the message queue so that we will read it the next time");
 		  mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+		  return;
 		}
-
 	    }
 	}
+      else
+	{
+	  DMCS_LOG_TRACE(port << ":  got #" << i << ": bs = " << *bs << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
       
-      DMCS_LOG_TRACE(port << ":  got #" << i << ": bs = " << *bs << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
-      
-      // Got something in a reasonable time. Continue collecting.
-      ModelSessionId msi(bs, sid);
-      res->push_back(msi);
-
+	  // Got something in a reasonable time. Continue collecting.
+	  ModelSessionId msi(bs, sid);
+	  res->push_back(msi);
+	}
     } // for
 }
 

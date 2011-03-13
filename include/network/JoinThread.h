@@ -101,7 +101,7 @@ private:
 		   std::size_t nid, std::size_t pack_size,
 		   ConflictNotification::NotificationType nt);
 
-  bool
+  void
   import_belief_states1(std::size_t noff,
 			std::size_t peq_cnt,
 			PartialBeliefStatePackagePtr& partial_eqs, 
