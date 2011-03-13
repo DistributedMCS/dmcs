@@ -114,7 +114,7 @@ ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif)
   const std::size_t no_nbs   = nbs->size();
 
   JoinThread jt(port, session_id);
-  boost::thread* t = new boost::thread(jt, no_nbs, system_size,  mg, dmcs_joiner_notif, neighbors_notif.get());
+  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, dmcs_joiner_notif, neighbors_notif.get());
 
   return t;
 }

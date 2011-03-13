@@ -60,12 +60,11 @@ OutputThread::operator()(connection_ptr c,
 
   std::size_t pack_size;
   std::size_t parent_session_id;
+  ModelSessionIdListPtr res(new ModelSessionIdList);
   
   while (1)
     {
-      ModelSessionIdListPtr res(new ModelSessionIdList);
-
-      std::string header;
+      res->clear();
 
       if (!wait_for_trigger(hon, pack_size, parent_session_id))
 	{
@@ -166,10 +165,11 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  //DMCS_LOG_TRACE(port << ": Got a NULL pointer. timeout == " << timeout);
 	  if (timeout == 0)
 	    {
-	      DMCS_LOG_TRACE(port << ": TIME OUT. Going to send whatever I got so far to the parent");
+	      DMCS_LOG_TRACE(port << ": TIME OUT");
+
 	      if (res->size() > 0)
 		{
-		  DMCS_LOG_TRACE(port << ": Going to send HEADER_ANS");
+		  DMCS_LOG_TRACE(port << ": Going to send whatever I got so far to the parent");
 		  break;
 		}
 	      else
@@ -186,11 +186,12 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	      // timeout != 0 ==> either UNSAT or EOF
 	      if (i == 1)
 		{
+		  DMCS_LOG_TRACE(port << ": TIME OUT at i == 1. RETURN NOW!");
 		  return;
 		}
 	      else
 		{
-		  // push back this NULL pointer to the message queue so that we will read it the next time
+		  DMCS_LOG_TRACE(port << ": push back this NULL pointer to the message queue so that we will read it the next time");
 		  mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
 		}
 
@@ -211,8 +212,6 @@ void
 OutputThread::write_result(connection_ptr conn,
 			   ModelSessionIdListPtr& res)
 {
-  DMCS_LOG_TRACE(port << ": header = " << header);
-
   try
     {
       const std::string header = HEADER_ANS;

@@ -542,19 +542,150 @@ JoinThread::process()
 void
 JoinThread::wait_dmcs(std::size_t& pack_size)
 {
+    // wait for a notification from StreamingDMCS
+    ConflictNotification* cn = 0;
+    void *ptr         = static_cast<void*>(&cn);
+    unsigned int p    = 0;
+    std::size_t recvd = 0;
+    
+    DMCS_LOG_TRACE(port << ": Listen to dmcs...");
+    dmcs_joiner_notif->receive(ptr, sizeof(cn), recvd, p);
+	
+    if (!ptr || !cn)
+      {
+	DMCS_LOG_FATAL("Got null message: " << ptr << " " << cn);
+	assert(ptr != 0 && cn != 0);
+      }
+
+    pack_size = cn->pack_size;
+    DMCS_LOG_TRACE(port << ": Got a notification from dmcs. pack_size = " << pack_size);
 }
 
 
 
+
 void
-JoinThread::request_neighbor(std::size_t nid, std::size_t pack_size, ConflictNotification::NotificationType nt)
+JoinThread::request_neighbor(PartialBeliefStatePackage* partial_eqs,
+			     std::size_t nid, std::size_t pack_size,
+			     ConflictNotification::NotificationType nt)
 {
+  if (partial_eqs)
+    {
+      // empty our local storage for the sake of non-exponential space
+      PartialBeliefStateVecPtr& bsv = (*partial_eqs)[nid];
+      for (PartialBeliefStateVec::iterator it = bsv->begin(); it != bsv->end(); ++it)
+	{
+	  assert (*it);
+	  delete *it;
+	  *it = 0;
+	}
+      
+      bsv->clear();
+    }
+
+  ConflictNotification* cn;
+  cn = new ConflictNotification(session_id, pack_size, ConflictNotification::FROM_JOINER, nt);
+
+  ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[nid];
+  
+  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
+  
+  if (ow_neighbor)
+    {
+      delete ow_neighbor;
+      ow_neighbor = 0;
+    }
 }
 
 
 
+bool
+JoinThread::import_belief_states1(std::size_t noff,
+				  std::size_t peq_cnt, 
+				  PartialBeliefStatePackagePtr& partial_eqs, 
+				  bm::bvector<>& in_mask,
+				  bm::bvector<>& pack_full,
+				  PartialBeliefStateIteratorVecPtr& beg_it, 
+				  PartialBeliefStateIteratorVecPtr& mid_it,
+				  std::size_t& request_size,
+				  ImportStates import_state)
+{
+  assert (request_size != 0 && peq_cnt <= request_size);
+
+  std::size_t no_imported = 0;
+  const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
+
+  // read BeliefState* from NEIGHBOR_MQ
+  PartialBeliefStateVecPtr& bsv = (*partial_eqs)[noff];
+  std::size_t mark_prev_end = 0;
+
+  if (import_state == FILLING_UP)
+    {
+      mark_prev_end = bsv->size();
+    }
+
+  for (std::size_t i = 0; i < peq_cnt; ++i)
+    {
+      std::size_t prio = 0;
+      int timeout = 0;
+
+      //DMCS_LOG_TRACE(port << ": Read up to " << peq_cnt << " belief states");
+
+      struct MessagingGatewayBC::ModelSession ms = mg->recvModel(offset, prio, timeout);
+      PartialBeliefState* bs = ms.m;
+      std::size_t sid = ms.sid;
+
+      assert (bs);
+
+      DMCS_LOG_TRACE(port << ": Got bs = " << *bs << ". sid = " << sid);
+      // normal case, just got a belief state
+      if (sid == session_id)
+	{
+	  DMCS_LOG_TRACE(port << ": Storing belief state " << i << " from " << noff);
+	  bsv->push_back(bs);
+	  no_imported++;
+	}
+      else
+	{
+	  DMCS_LOG_TRACE(port << ": Ignore this belief state because it belongs to an old session");
+	}
+
+    }
+
+
+  if (import_state != FILLING_UP)
+    {
+      (*beg_it)[noff] = bsv->begin();
+    }
+  else
+    {
+      PartialBeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[noff];
+      mid_it_ref = bsv->begin();
+      std::advance(mid_it_ref, mark_prev_end);
+    }
+
+  if (no_imported > 0)
+    {
+      // turn on the bit that is respective to this context
+      in_mask.set(noff);
+      request_size -= no_imported;
+
+      if (request_size == 0)
+	{
+	  pack_full.set(noff);
+	}
+
+      return true;
+    }
+
+  return false;
+}
+
+
+
+
 void
-JoinThread::import_and_join(VecSizeTPtr request_size)
+JoinThread::import_and_join(VecSizeTPtr request_size, std::size_t pack_size)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
@@ -607,25 +738,143 @@ JoinThread::import_and_join(VecSizeTPtr request_size)
 	      /// returning models.
 		  
 	    }
-
-	} // if (nn.peq_cnt == 0)
-      else
-	{
-	  // out of models, import == GETTING_NEXT v FILLING_UP
-		  
-	  // We need to ask the next neighbor (now ordered by the
-	  // offset) to give the next package of models.
-	  
-	  next_neighbor_offset = nn.ctx_offset + 1;
-	  
-	  DMCS_LOG_TRACE(port << ": Increase next_neighbor_offset. Now is: " << next_neighbor_offset);
-	  
-	  if (next_neighbor_offset == no_nbs)
+	  else
 	    {
-	      DMCS_LOG_TRACE(port << ": Send a NULL model to JOIN_OUT_MQ");
-	      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+	      // out of models, import == GETTING_NEXT v FILLING_UP
+	      
+	      // We need to ask the next neighbor (now ordered by the
+	      // offset) to give the next package of models.
+	      
+	      next_neighbor_offset = nn.ctx_offset + 1;
+	      
+	      DMCS_LOG_TRACE(port << ": Increase next_neighbor_offset. Now is: " << next_neighbor_offset);
+	      
+	      if (next_neighbor_offset == no_nbs)
+		{
+		  DMCS_LOG_TRACE(port << ": Send a NULL model to JOIN_OUT_MQ");
+		  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+		  return;
+		}
+	      else
+		{
+		  DMCS_LOG_TRACE(port << ": Going to ask for next batch of peqs with next_neighbor_offset == " << next_neighbor_offset);
+		  asking_next = true;
+		  (*request_size)[next_neighbor_offset] = pack_size;
+		  request_neighbor(partial_eqs.get(), next_neighbor_offset, pack_size, ConflictNotification::NEXT);
+		}
 	    }
-	}
+	} // if (nn.peq_cnt == 0)
+      else // (nn.peq_cnt != 0)
+	{
+	  bool imported_something = import_belief_states1(nn.ctx_offset,
+							 nn.peq_cnt,
+							 partial_eqs, 
+							 in_mask,
+							 pack_full,
+							 beg_it,
+							 mid_it,
+							 (*request_size)[nn.ctx_offset],
+							 import_state);
+
+	  if (!imported_something)
+	    {
+	      continue;
+	    }
+
+	  DMCS_LOG_TRACE(port << ": PartialBeliefState package received:");
+	  DMCS_LOG_TRACE(*partial_eqs);
+
+	  // then if this was a "NEXT" request to this neighbor, we
+	  // have to restart the neighbors before him
+	  if (asking_next)
+	    {
+	      DMCS_LOG_TRACE(port << ": Realized that we are in GETTING_NEXT mode.");
+	      
+	      assert (import_state != START_UP);
+	      assert (nn.ctx_offset == next_neighbor_offset);
+	      
+	      asking_next  = false;
+	      import_state = START_UP;
+	      
+	      for (std::size_t i = 0; i < next_neighbor_offset; ++i)
+		{
+		  // actually it's asking for a new round of models 
+		  (*request_size)[i] = pack_size;
+		  request_neighbor(partial_eqs.get(), i, pack_size, ConflictNotification::REQUEST);
+		  
+		  // and reset the in bit mask wrt this neighbor
+		  in_mask.set(i, false);
+		  
+		  // further possible improvement: if neighbor at
+		  // offset i has in total less than pack_size models,
+		  // then we just keep his models as asking for a new
+		  // round will return the same thing.
+		}
+	    }
+
+	  // At this point, we can check whether joining is possible
+	  if (in_mask.count_range(0, no_nbs+1) == no_nbs)
+	    {
+	      if (import_state == START_UP || import_state == GETTING_NEXT)
+		{
+		  import_state = FILLING_UP;
+		  
+		  DMCS_LOG_TRACE(port << ": First time joining");
+		  
+		  for (std::size_t i = 0; i < no_nbs; ++i)
+		    {
+		      PartialBeliefStateVecPtr& bsv = (*partial_eqs)[i];
+		      (*mid_it)[i] = bsv->end();
+		    }
+		  
+		  join(partial_eqs, beg_it, mid_it);
+		}
+	      else
+		{
+		  DMCS_LOG_TRACE(port << ":  NOT a first time joining ==> do it selectively");
+		  for (std::size_t i = 0; i < no_nbs; ++i)
+		    {
+		      PartialBeliefStateVecPtr& bsv = (*partial_eqs)[i];
+		      PartialBeliefStateVec::const_iterator& mid_it_ref = (*mid_it)[i];
+		      if (mid_it_ref != bsv->end())
+			{
+			  // This neighbor has some new models.
+			  DMCS_LOG_DEBUG("Neighbor at offset " << i << " has some new models.");
+			  PartialBeliefStateVec::const_iterator& beg_it_ref = (*beg_it)[i];
+			  
+			  // This is the range of new models that we want to join.
+			  
+			  DMCS_LOG_DEBUG("mid_it = " << **mid_it_ref);
+			  
+			  beg_it_ref = mid_it_ref;
+			  mid_it_ref = bsv->end();
+			  
+			  join(partial_eqs, beg_it, mid_it);
+			  
+			  // Restart begin position, because the new models are now all in.
+			  beg_it_ref = bsv->begin();
+			}
+		    }
+		}
+	      
+	      DMCS_LOG_TRACE(port << ": pack_full.count_range == " << pack_full.count_range(0, no_nbs+1));
+	      
+	      if (pack_full.count_range(0, no_nbs+1) == no_nbs)
+		{
+		  DMCS_LOG_TRACE(port << ":  Pack full, go to get next models");
+		  import_state = GETTING_NEXT;
+		  asking_next  = true;
+		  
+		  // always ask for next models from neighbor with offset 0
+		  next_neighbor_offset = 0;
+		  (*request_size)[0] = pack_size;
+		  request_neighbor(partial_eqs.get(), 0, pack_size, ConflictNotification::NEXT);
+		}
+
+	    } // (in_mask.count_range(0, no_nbs+1) == no_nbs)
+	  
+	} // (nn.peq_cnt != 0)
+
     } // while (1)
 }
 
@@ -660,10 +909,10 @@ JoinThread::operator()(std::size_t nbs,
       for (std::size_t i = 0; i < no_nbs; ++i)
 	{
 	  (*request_size)[i] = pack_size;
-	  request_neighbor(i, pack_size, ConflictNotification::REQUEST);
+	  request_neighbor(0, i, pack_size, ConflictNotification::REQUEST);
 	}
 
-      import_and_join(request_size);
+      import_and_join(request_size, pack_size);
       
     }
 }

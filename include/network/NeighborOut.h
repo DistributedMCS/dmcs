@@ -63,7 +63,7 @@ public:
   virtual
   ~NeighborOut()
   {
-    DMCS_LOG_TRACE(port << ": Good bye.");
+    DMCS_LOG_TRACE(port << ": Terminating NeighborOut.");
   }
 
 
@@ -71,15 +71,16 @@ public:
   operator() (connection_ptr conn,
 	      ConcurrentMessageQueue* rnn,
 	      std::size_t invoker, 
-	      std::size_t nid,
-	      std::size_t pack_size)
+	      std::size_t nid)
   {
     while (1)
       {
-	DMCS_LOG_TRACE(port << ": Wait for router notification, nid = " << nid);
+	ConflictNotification* cn = wait_router(rnn, nid);
 
-	ConflictNotification* cn = wait_router(rnn);
 	std::size_t session_id = cn->session_id;
+	std::size_t pack_size = cn->pack_size;
+
+	assert (pack_size > 0);
 
 	std::string header;
 
@@ -127,7 +128,7 @@ public:
   }
 
   ConflictNotification*
-  wait_router(ConcurrentMessageQueue* router_neighbor_notif)
+  wait_router(ConcurrentMessageQueue* router_neighbor_notif, std::size_t nid)
   {
     // wait for a notification from the Router
     ConflictNotification* cn = 0;
@@ -135,7 +136,7 @@ public:
     unsigned int p    = 0;
     std::size_t recvd = 0;
     
-    DMCS_LOG_TRACE(port << ": Listen to router...");
+    DMCS_LOG_TRACE(port << ": Listen to router... nid = " << nid);
     router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
 	
     if (!ptr || !cn)

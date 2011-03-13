@@ -265,6 +265,7 @@ RelSatSolver::solve()
 	      
 	      eResult = xSATSolver->eSolve();
 	      xSATSolver->refresh();
+	      DMCS_LOG_TRACE(port << ": One SOLVE finished.");
 	    }
 	}
 
@@ -283,6 +284,11 @@ void
 RelSatSolver::receiveEOF()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+  if (is_leaf)
+    {
+      DMCS_LOG_TRACE(port << ": EOF. Send a NULL pointer to OUT_MQ to close this session.");
+      mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+    }
 }
 
 

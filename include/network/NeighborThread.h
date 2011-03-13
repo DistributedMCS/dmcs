@@ -161,8 +161,7 @@ private:
 				       conn,
 				       router_neighbor_notif,
 				       invoker,
-				       nid,
-				       pack_size);
+				       nid);
 
 
 	boost::shared_ptr<std::string> header(new std::string);

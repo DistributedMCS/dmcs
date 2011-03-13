@@ -67,6 +67,7 @@ StreamingDMCS::StreamingDMCS(const ContextPtr& c,
     join_thread(0),
     neighbor_threads(new ThreadVec),
     neighbors(new NeighborThreadVec),
+    dmcs_joiner_notif(new ConcurrentMessageQueue),
     dmcs_sat_notif(new ConcurrentMessageQueue),
     neighbors_notif(new ConcurrentMessageQueueVec),
     c2o(new HashedBiMap),
@@ -269,7 +270,7 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
 
   if (no_nbs > 0) 
     {
-      DMCS_LOG_TRACE(port << ": Intermediate context. Trigger JoinThread.");
+      DMCS_LOG_TRACE(port << ": Intermediate context. Trigger JoinThread. pack_size = " << pack_size);
       
       ConflictNotification* mess_joiner = new ConflictNotification(parent_session_id, pack_size, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
       ConflictNotification* ow_joiner = 

@@ -97,11 +97,23 @@ private:
   wait_dmcs(std::size_t& pack_size);
 
   void
-  request_neighbor(std::size_t nid, std::size_t pack_size,
+  request_neighbor(PartialBeliefStatePackage* partial_eqs,
+		   std::size_t nid, std::size_t pack_size,
 		   ConflictNotification::NotificationType nt);
 
+  bool
+  import_belief_states1(std::size_t noff,
+			std::size_t peq_cnt,
+			PartialBeliefStatePackagePtr& partial_eqs, 
+			bm::bvector<>& in_mask,
+			bm::bvector<>& end_mask,
+			PartialBeliefStateIteratorVecPtr& beg_it, 
+			PartialBeliefStateIteratorVecPtr& mid_it,
+			std::size_t& request_size,
+			ImportStates import_state);
+
   void
-  import_and_join(VecSizeTPtr request_size);
+  import_and_join(VecSizeTPtr request_size, std::size_t pack_size);
 
 private:
   std::size_t port;

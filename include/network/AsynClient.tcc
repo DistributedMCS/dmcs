@@ -250,16 +250,16 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
     {
       const ModelSessionIdListPtr& msl = result->getResult();
 
-      assert ( (msl->size() - 1) <= mess->getPackSize() );
+      assert ( msl->size() <= mess->getPackSize() );
 
-      const std::size_t next_k = mess->getPackSize() - (msl->size() - 1);
+      const std::size_t next_k = mess->getPackSize() - msl->size();
 
       if (callback)
 	{
 	  callback(*result);
 	}
 
-      DMCS_LOG_TRACE("pack_size = " << mess->getPackSize() << ", next_k = " << next_k);
+      DMCS_LOG_TRACE("pack_size = " << mess->getPackSize() << ", msl->size() = " << msl->size() << ", next_k = " << next_k);
 
       if (next_k == 0)
 	{
