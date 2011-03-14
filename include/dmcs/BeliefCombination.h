@@ -56,6 +56,10 @@ combine(const BeliefStateListPtr& cs, const BeliefStateListPtr& ct, const Belief
 void
 project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateListPtr& cu);
 
+
+void
+project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateListPtr& cu, std::size_t pos);
+
 void
 project_to(PartialBeliefState* bs, const BeliefStatePtr& V, std::size_t pos);
 

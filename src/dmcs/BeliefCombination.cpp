@@ -270,13 +270,13 @@ combine(const BeliefStateListPtr& cs, const BeliefStateListPtr& ct,
 }
 
 
-
 void
 project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateListPtr& cu)
 {
  #ifdef DEBUG
-   std::cerr << "Projecting " << std::endl << *cs << std::endl;
-   std::cerr << "to         " << std::endl << v << std::endl;
+  std::cerr << "Projecting  " << std::endl << *cs << std::endl
+	    << "to          " << std::endl << v << std::endl
+	    << "at position " << pos << std::endl;
  #endif
 
    for (BeliefStateList::const_iterator it = cs->begin(); it != cs->end(); ++it)
@@ -285,14 +285,13 @@ project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateLis
 
        BeliefStatePtr u(new BeliefState(is->size(), 0)); // create empty belief state
        BeliefState::iterator ut = u->begin();
-
        BeliefState::const_iterator vt = v->begin();
 
        for (BeliefState::const_iterator ct = is->begin();
 	    ct != is->end();
 	    ++ct, ++vt, ++ut)
  	{
- 	  *ut = *ct & *vt;
+	  *ut = *ct & *vt;
  	}
 
        cu->push_back(u);
@@ -310,6 +309,60 @@ project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateLis
        cu->unique(BeliefStateEq());
      }
 }
+
+
+
+void
+project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateListPtr& cu, std::size_t pos)
+{
+ #ifdef DEBUG
+  std::cerr << "Projecting  " << std::endl << *cs << std::endl
+	    << "to          " << std::endl << v << std::endl
+	    << "at position " << pos << std::endl;
+ #endif
+
+   for (BeliefStateList::const_iterator it = cs->begin(); it != cs->end(); ++it)
+     {
+       const BeliefStatePtr& is = *it;
+
+       BeliefStatePtr u(new BeliefState(is->size(), 0)); // create empty belief state
+       BeliefState::iterator ut = u->begin();
+       BeliefState::const_iterator vt = v->begin();
+       std::size_t i = 1;
+
+       for (BeliefState::const_iterator ct = is->begin();
+	    ct != is->end();
+	    ++ct, ++vt, ++ut, ++i)
+ 	{
+	  if (i == pos)
+	    {
+	      *ut = *ct & *vt;
+	    }
+	  else
+	    {
+	      *ut = *ct;
+	    }
+ 	}
+
+       cu->push_back(u);
+
+       ///@todo TK: we could also get rid off duplicates outside the
+       ///loop, this needs some testing
+
+       ///experiments show that projection sometime takes a lot of
+       ///time due to sort and unique.
+
+       ///@todo: use set for internal
+       ///accumulation and return a list another possibility is to use
+       ///multi-index-container
+       cu->sort(BeliefStateCmp());
+       cu->unique(BeliefStateEq());
+     }
+}
+
+
+
+
 
 
 

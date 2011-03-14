@@ -1,3 +1,11 @@
+2011-03-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/OptDMCS.cpp: Before combining, just project the local
+	theory away (keep guessing parts from the neighbors).
+
+	* include/dmcs/BeliefCombination.h: Add project to just a position.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+
 2011-03-13  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Clean up.

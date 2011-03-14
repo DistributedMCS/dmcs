@@ -110,6 +110,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
   else // some context invoked this DMCS
     {
       localV = query_plan->getInterface(c, k);
+      ///@todo: neighborV which consists of getInterface(k, i) where C_i is a neighbor of the current context C_k
     }
 
 #if 0
@@ -158,7 +159,7 @@ OptDMCS::getBeliefStates(const OptMessage& mess)
 
   //project_to(local_belief_states, globalV, temporary_belief_states);
 
-  STATS_DIFF (project_to(local_belief_states, localV, temporary_belief_states),
+  STATS_DIFF (project_to(local_belief_states, localV, temporary_belief_states, k),
 	      time_projection);
 
 #ifdef DMCS_STATS_INFO
