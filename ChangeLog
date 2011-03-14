@@ -1,5 +1,13 @@
 2011-03-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/Makefile.am: Add testcase for PartialBeliefState caching.
+	* testsuite/testBeliefStateCaching.cpp: New testcase.
+
+	* src/solver/RelSatSolver.cpp: Cache input and output.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/mcs/BeliefState.h: Add helper functions for PartialBeliefState caching.
+
 	* src/dmcs/OptDMCS.cpp: Before combining, just project the local
 	theory away (keep guessing parts from the neighbors).
 

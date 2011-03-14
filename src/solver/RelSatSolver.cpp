@@ -64,7 +64,9 @@ RelSatSolver::RelSatSolver(bool il,
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this)),
     port(p),
-    input(0)
+    input(0),
+    input_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE)),
+    output_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE))
 {
   xInstance->readTheory(theory, sig->size());
 }
@@ -151,12 +153,14 @@ RelSatSolver::prepare_input()
     mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
 
   // old input is now outdated
-  if (input)
+  /*if (input)
     {
       DMCS_LOG_TRACE(port << ": Going to delete old input");
       delete input;
       input = 0;
-    }
+      }*/
+
+  assert (!input);
 
   input = ms.m;
   std::size_t sid = ms.sid;
@@ -265,6 +269,7 @@ RelSatSolver::solve()
 	      
 	      eResult = xSATSolver->eSolve();
 	      xSATSolver->refresh();
+	      store(input, input_buffer);
 	      DMCS_LOG_TRACE(port << ": One SOLVE finished.");
 	    }
 	}
@@ -360,14 +365,19 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   DMCS_LOG_TRACE(port << ": localV  = " << *localV);
   project_to(bs, localV);
 
-  // attach parent_session_id to the output models
+  store(bs, output_buffer);
 
-  DMCS_LOG_TRACE(port << ": Going to send: " << *bs << ", with parent session id = " << parent_session_id);
-
-  // now put this PartialBeliefState to the SatOutputMessageQueue
-  mg->sendModel(bs, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
-
-  // Models should be cleaned by OutputThread
+  if (bs)
+    {
+      DMCS_LOG_TRACE(port << ": Going to send: " << *bs << ", with parent session id = " << parent_session_id);
+      // now put this PartialBeliefState to the SatOutputMessageQueue
+      mg->sendModel(bs, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
+      // Models should be cleaned by OutputThread
+    }
+  else
+    {
+      DMCS_LOG_TRACE(port << ": Model is cached. Not going to send anything.");
+    }
 }
 
 

@@ -37,7 +37,8 @@ TESTS = \
 	testMessagingGateway \
 	testBeliefState \
 	testJoinThread \
-	testInterfaceRelSat
+	testInterfaceRelSat \
+	testBeliefStateCaching
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -64,7 +65,8 @@ check_PROGRAMS = \
 	testMessagingGateway \
 	testBeliefState \
 	testJoinThread \
-	testInterfaceRelSat
+	testInterfaceRelSat \
+	testBeliefStateCaching
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -134,6 +136,8 @@ testConnection_LDADD = \
 	$(top_builddir)/src/dmcs/liblog.a
 
 testBeliefState_SOURCES = testBeliefState.cpp
+
+testBeliefStateCaching_SOURCES = testBeliefStateCaching.cpp
 
 testJoinThread_SOURCES = testJoinThread.cpp
 testJoinThread_LDADD = \

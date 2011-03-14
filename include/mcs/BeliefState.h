@@ -43,6 +43,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
+#include <boost/circular_buffer.hpp>
 
 #include <bm/bm.h>
 #include <bm/bmserial.h>
@@ -655,6 +656,91 @@ setEpsilon(PartialBeliefSet& pb)
   pb.state_bit.set(0);
   pb.value_bit.set(0); // just want to have it clean
 }
+
+
+
+inline bool
+operator== (const PartialBeliefState& pbs1, const PartialBeliefState& pbs2)
+{
+  if (pbs1.size() != pbs2.size())
+    {
+      return false;
+    }
+
+  PartialBeliefState::const_iterator it1 = pbs1.begin();
+  PartialBeliefState::const_iterator it2 = pbs2.begin();
+  
+  for (; it1 != pbs1.end(); ++it1, ++it2)
+    {
+      if ((*it1) != (*it2))
+	{
+	  return false;
+	}
+    }
+
+  return true;
+}
+
+
+
+typedef boost::circular_buffer<PartialBeliefState*> PartialBeliefStateBuf;
+typedef boost::shared_ptr<PartialBeliefStateBuf> PartialBeliefStateBufPtr;
+
+
+
+/*
+inline std::ostream&
+operator<< (std::ostream& os, const PartialBeliefStateBuf& buffer)
+{
+  for (PartialBeliefStateBuf::const_iterator it = buffer.begin(); it != buffer.end(); ++it)
+    {
+      os << **it << std::endl;
+    }
+  
+  return os;
+}*/
+
+
+inline bool
+cached(const PartialBeliefState* pbs, const PartialBeliefStateBufPtr& buffer)
+{
+  for (PartialBeliefStateBuf::const_iterator it = buffer->begin(); it != buffer->end(); ++it)
+    {
+      if (*pbs == **it)
+	{
+	  return true;
+	}
+    }
+
+  return false;
+}
+
+
+
+inline void
+store(PartialBeliefState*& pbs, PartialBeliefStateBufPtr& buffer)
+{
+  // first check whether pbs is already in buffer
+  if (cached(pbs, buffer))
+    {
+      delete pbs;
+      pbs = 0;
+      return;
+    }
+
+  // push pbs into buffer.
+  // If buffer is full then we have to carefully remove a member in it
+  if (buffer->full())
+    {
+      PartialBeliefState* temp_pbs = buffer->front();
+      buffer->pop_front();
+      delete temp_pbs;
+      temp_pbs = 0;
+    }
+
+  buffer->push_back(pbs);
+}
+
 
 // ***************************************************************************************
 typedef std::vector<std::size_t> VecSizeT;

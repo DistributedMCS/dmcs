@@ -115,6 +115,8 @@ private:
   MessagingGatewayBC*            mg;
   ConcurrentMessageQueue*        dmcs_sat_notif;   // to get notification from StreamingDMCS
   PartialBeliefState*            input;
+  PartialBeliefStateBufPtr       input_buffer;
+  PartialBeliefStateBufPtr       output_buffer;
   bool                           first_round;
 
   SATInstance*                   xInstance;
