@@ -112,6 +112,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
   void *ptr         = static_cast<void*>(&on);
   unsigned int    p = 0;
   std::size_t recvd = 0;
+  OutputNotification::NotificationType nt;
 
   DMCS_LOG_TRACE(port << ": Wait for message from Handler");
 
@@ -119,7 +120,8 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 
   if (ptr && on)
     {
-      if (on->type == OutputNotification::SHUTDOWN)
+      nt = on->type;
+      if (nt == OutputNotification::SHUTDOWN)
 	{
 	  DMCS_LOG_TRACE(port << ": Got SHUTDOWN from Handler.");
 	}
@@ -128,12 +130,12 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 	  pack_size = on->pack_size;
 	  parent_session_id = on->parent_session_id;
 
-	  assert ((on->type == OutputNotification::REQUEST) || (on->type == OutputNotification::NEXT));
+	  assert ((nt == OutputNotification::REQUEST) || (nt == OutputNotification::NEXT));
 	  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
 	}
 
-      //delete on;
-      //on = 0;
+      delete on;
+      on = 0;
     }
   else
     {
@@ -141,7 +143,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
       assert(ptr != 0 && on != 0);
     }
 
-  return on->type;
+  return nt;
 }
 
 

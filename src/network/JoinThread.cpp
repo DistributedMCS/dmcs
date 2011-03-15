@@ -559,6 +559,9 @@ JoinThread::wait_dmcs(std::size_t& pack_size)
 
     pack_size = cn->pack_size;
     DMCS_LOG_TRACE(port << ": Got a notification from dmcs. pack_size = " << pack_size);
+
+    delete cn;
+    cn = 0;
 }
 
 

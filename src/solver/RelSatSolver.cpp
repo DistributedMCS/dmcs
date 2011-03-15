@@ -236,8 +236,8 @@ RelSatSolver::solve()
     {
       parent_session_id = cn->session_id;
 
-      //delete cn;
-      //cn = 0;
+      delete cn;
+      cn = 0;
 
       // remove input part of the theory (from last solve)
 

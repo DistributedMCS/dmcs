@@ -246,8 +246,8 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
       type        = sn->type;
 
       // safe to delete sn here, pointers inside it are preserved
-      //delete sn;
-      //sn = 0;
+      delete sn;
+      sn = 0;
     }
   else
     {
@@ -281,30 +281,6 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
 	  delete ow_joiner;
 	  ow_joiner = 0;
 	}
-
-      /*
-      DMCS_LOG_TRACE(port << ": Intermediate context. Send requests to neighbors by placing a message in each of the NeighborOut's MQ");
-      
-      DMCS_LOG_TRACE(port << ": neighbors_notif.size() = " << neighbors_notif->size());
-      
-      assert (neighbors_notif->size() == no_nbs);
-      
-      for (std::size_t i = 0; i < no_nbs; ++i)
-	{
-	  DMCS_LOG_TRACE(port << ": First push to offset " << i);
-	  ConcurrentMessageQueuePtr& cmq = (*neighbors_notif)[i];
-	  
-	  ConflictNotification* cn = new ConflictNotification(my_starting_session_id, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
-	  
-	  ConflictNotification* ow_neighbor = (ConflictNotification*) overwrite_send(cmq.get(), &cn, sizeof(cn), 0);
-	  
-	  if (ow_neighbor)
-	    {
-	      delete ow_neighbor;
-	      ow_neighbor = 0;
-	    }
-	}
-      */
     }
 
   DMCS_LOG_TRACE(port << ": Wake up SAT solver.");

@@ -92,8 +92,8 @@ public:
 
 	    conn->write(header);
 
-	    //delete cn;
-	    //cn = 0;
+	    delete cn;
+	    cn = 0;
 
 	    return; // done with looping
 	  }
@@ -115,8 +115,8 @@ public:
 	    assert(false && "should not come here");
 	  }
 
-	//delete cn;
-	//cn = 0;
+	delete cn;
+	cn = 0;
 
 	conn->write(header);
 
