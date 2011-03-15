@@ -1,5 +1,7 @@
 2011-03-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* examples/run-streaming.sh: Update to have log files for different PACK parameters.
+
 	* testsuite/testBeliefStateCaching.cpp: Test stability of cache.
 
 	* src/solver/RelSatSolver.cpp: Clean buffer in destructor.

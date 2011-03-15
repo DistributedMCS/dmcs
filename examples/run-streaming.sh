@@ -4,31 +4,31 @@
 export MALLOC_CHECK_=0
 
 declare -i TIMEOUT=100
-declare -i MEMOUT=1000
+declare -i MEMOUT=70
 
 export GNUTIME="/usr/bin/time --verbose -o" # time command
 export RUN="run -s $MEMOUT -t $((TIMEOUT+20)) -k -o"
 export TIMELIMIT="timelimit -p -s 1 -t $TIMEOUT -T 20"
 export TIMEFORMAT=$'\nreal\t%3R\nuser\t%3U\nsys\t%3S' # time format
 export TESTSPATH='.' # path to lp/br/opt
-export DMCSPATH='../build/src' # path to dmcsd/dmcsc
+export DMCSPATH='../../../build/src' # path to dmcsd/dmcsc
 export LOGPATH='.' # path to output logfiles
 
-DORUN=yes # run with `run'
-DOTIMELIMIT=yes # run with `timelimit'
-VERBOSE=yes # output stuff
-LOGDAEMONS=yes # log daemon output
+DORUN=no # run with `run'
+DOTIMELIMIT=no # run with `timelimit'
+VERBOSE=no # output stuff
+LOGDAEMONS=no # log daemon output
 
 # test instance
-export TOPO=ring
-declare -i CTX=3
-declare -i SIG=10
-declare -i BRS=5
-declare -i RLS=5
-export INST=a
+export TOPO=tree
+declare -i CTX=200
+declare -i SIG=9
+declare -i BRS=4
+declare -i RLS=4
+export INST=b
 
 export MODE=streaming
-export PACK=0 # report at most $PACK many equilibria
+export PACK=5 # report at most $PACK many equilibria
 
 ################### below we don't need to touch anything
 
@@ -89,12 +89,19 @@ for (( N = 1 ; N <= $CTX ; N++ )); do
 
 done
 
-sleep 3
+sleep 40
 
-LOGTIME=$LOGPATH/$TESTNAME-$MODE-time.log
-LOGCOUT=$LOGPATH/$TESTNAME-$MODE.log
-LOGCERR=$LOGPATH/$TESTNAME-$MODE-err.log
-LOGRUN=$LOGPATH/$TESTNAME-$MODE-run.log
+if [ x$MODE = xstreaming ] ; then
+    LOGTIME=$LOGPATH/$TESTNAME-$MODE-$PACK-time.log
+    LOGCOUT=$LOGPATH/$TESTNAME-$MODE-$PACK.log
+    LOGCERR=$LOGPATH/$TESTNAME-$MODE-$PACK-err.log
+    LOGRUN=$LOGPATH/$TESTNAME-$MODE-$PACK-run.log
+else
+    LOGTIME=$LOGPATH/$TESTNAME-$MODE-time.log
+    LOGCOUT=$LOGPATH/$TESTNAME-$MODE.log
+    LOGCERR=$LOGPATH/$TESTNAME-$MODE-err.log
+    LOGRUN=$LOGPATH/$TESTNAME-$MODE-run.log
+fi
 
 DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX"
 MODEOPTS="--s=0"
