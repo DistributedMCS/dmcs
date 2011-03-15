@@ -143,7 +143,7 @@ handle_belief_state(StreamingBackwardMessage& m)
 	}
     }
 
-  handled_belief_states += result->size() - 1;
+  handled_belief_states += result->size();
 }
 
 
