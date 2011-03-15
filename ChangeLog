@@ -1,5 +1,15 @@
 2011-03-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/testBeliefStateCaching.cpp: Test stability of cache.
+
+	* src/solver/RelSatSolver.cpp: Clean buffer in destructor.
+
+	* src/network/OutputThread.cpp: Not allowed to delete output anymore.
+
+	* src/dmcs/BeliefCombination.cpp: Fix bug when compiling with DEBUG flag on.
+
+	* include/mcs/BeliefState.h: Add some assertions.
+
 	* include/network/NeighborOut.h: Fix memory leaks.
 	* src/solver/RelSatSolver.cpp: Likewise.
 	* src/network/OutputThread.cpp: Likewise.

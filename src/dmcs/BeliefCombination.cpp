@@ -275,8 +275,7 @@ project_to(const BeliefStateListPtr& cs, const BeliefStatePtr& v, BeliefStateLis
 {
  #ifdef DEBUG
   std::cerr << "Projecting  " << std::endl << *cs << std::endl
-	    << "to          " << std::endl << v << std::endl
-	    << "at position " << pos << std::endl;
+	    << "to          " << std::endl << v << std::endl;
  #endif
 
    for (BeliefStateList::const_iterator it = cs->begin(); it != cs->end(); ++it)

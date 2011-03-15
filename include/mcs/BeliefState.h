@@ -706,6 +706,8 @@ cached(const PartialBeliefState* pbs, const PartialBeliefStateBufPtr& buffer)
 {
   for (PartialBeliefStateBuf::const_iterator it = buffer->begin(); it != buffer->end(); ++it)
     {
+      assert (*it);
+
       if (*pbs == **it)
 	{
 	  return true;
@@ -720,6 +722,8 @@ cached(const PartialBeliefState* pbs, const PartialBeliefStateBufPtr& buffer)
 inline void
 store(PartialBeliefState*& pbs, PartialBeliefStateBufPtr& buffer)
 {
+  assert (pbs);
+
   // first check whether pbs is already in buffer
   if (cached(pbs, buffer))
     {

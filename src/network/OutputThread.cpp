@@ -238,18 +238,6 @@ OutputThread::write_result(connection_ptr conn,
       DMCS_LOG_TRACE(port << ": return message " << return_mess << " to port " << ep.port() << ". Number of belief states = " << res->size());
       
       conn->write(return_mess);
-
-      // clean up
-      DMCS_LOG_TRACE(port << ": Going to clean up");
-      for (ModelSessionIdList::iterator it = res->begin(); it != res->end(); ++it)
-	{
-	  if (it->partial_belief_state)
-	    {
-	      delete it->partial_belief_state;
-	      it->partial_belief_state = 0;
-	    }
-	}
-      DMCS_LOG_TRACE(port << ": Done with cleaning up");
     }
   catch (boost::system::error_code& e)
     {

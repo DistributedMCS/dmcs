@@ -76,6 +76,16 @@ RelSatSolver::~RelSatSolver()
 {
   delete xInstance;
   delete xSATSolver;
+
+  for (PartialBeliefStateBuf::const_iterator it = input_buffer->begin(); it != input_buffer->end(); ++it)
+    {
+      delete *it;
+    }
+
+  for (PartialBeliefStateBuf::const_iterator it = output_buffer->begin(); it != output_buffer->end(); ++it)
+    {
+      delete *it;
+    }
 }
 
 
@@ -151,16 +161,6 @@ RelSatSolver::prepare_input()
 
   struct MessagingGatewayBC::ModelSession ms = 
     mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
-
-  // old input is now outdated
-  /*if (input)
-    {
-      DMCS_LOG_TRACE(port << ": Going to delete old input");
-      delete input;
-      input = 0;
-      }*/
-
-  assert (!input);
 
   input = ms.m;
   std::size_t sid = ms.sid;

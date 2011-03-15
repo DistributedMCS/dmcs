@@ -47,6 +47,12 @@ BOOST_AUTO_TEST_CASE ( testBeliefStateCaching )
   BOOST_TEST_MESSAGE("pbs5 = " << *pbs5);
   std:: cerr << "pbs5 = " << pbs5 << " " << *pbs5 << std::endl;
 
+  std::istringstream iss6("{0 -1 -2 -4} {0 1 2 3 4} {} {}");
+  PartialBeliefState* pbs6 = new PartialBeliefState;
+  iss6 >> *pbs6;
+  BOOST_TEST_MESSAGE("pbs6 = " << *pbs6);
+  std:: cerr << "pbs6 = " << pbs6 << " " << *pbs6 << std::endl;
+
   store(pbs1, cache);
   store(pbs2, cache);
   store(pbs3, cache);
@@ -64,6 +70,12 @@ BOOST_AUTO_TEST_CASE ( testBeliefStateCaching )
   store(pbs5, cache);
 
   std::cerr << "CAHCE after 5 stores: " << std::endl << *cache << std::endl;
+
+  std::cerr << "Test stability of cache" << std::endl;
+  pbs2 = pbs6;
+  
+  std:: cerr << "pbs2 should change = " << pbs2 << " " << *pbs2 << std::endl;
+  std::cerr << "CAHCE should not change: " << std::endl << *cache << std::endl;
 
   // Uncomment the following lines to see the effect of deleting temp_pbs in store(). 
   // We should get an error here. Otw we are doomed because of memory leaks
