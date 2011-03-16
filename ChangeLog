@@ -1,3 +1,16 @@
+2011-03-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/OutputThread.h: Move output_buffer to OutputThread.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/mcs/BeliefState.h: Only delete the pointers when told to
+	do so. There is a bug in the ConcurrentMessageQueue that prevent
+	me from deleting the pointers in OutputThread::collecting_output().
+
+	* include/dmcs/ModelSessionId.h: Add some assertions.
+
 2011-03-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* examples/run-streaming.sh: Update to have log files for different PACK parameters.

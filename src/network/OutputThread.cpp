@@ -40,13 +40,19 @@
 namespace dmcs {
 
 OutputThread::OutputThread(std::size_t i, std::size_t p)
-  : invoker(i), port(p), eof_mode(false)
+  : invoker(i), port(p), eof_mode(false),
+    output_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE))
 { }
 
 
 OutputThread::~OutputThread()
 {
   DMCS_LOG_TRACE(port << ": Terminating OutputThread.");
+  for (PartialBeliefStateBuf::const_iterator it = output_buffer->begin(); it != output_buffer->end(); ++it)
+    {
+      delete *it;
+    }
+  output_buffer->clear();
 }
 
 
@@ -82,6 +88,8 @@ OutputThread::operator()(connection_ptr c,
 	{
 	  eof_mode = false;
 	  collect_output(mg, res, pack_size, parent_session_id);
+
+	  DMCS_LOG_TRACE(port << ": Output collected. res->size() = " << res->size());
 
 	  if (res->size() > 0)
 	    {
@@ -131,6 +139,17 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 	  parent_session_id = on->parent_session_id;
 
 	  assert ((nt == OutputNotification::REQUEST) || (nt == OutputNotification::NEXT));
+
+	  /*if (nt == OutputNotification::REQUEST)
+	    {
+	      // clean up output buffer because this is a fresh request
+	      for (PartialBeliefStateBuf::const_iterator it = output_buffer->begin(); it != output_buffer->end(); ++it)
+		{
+		  delete *it;
+		}
+		output_buffer->clear();
+		}*/
+
 	  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
 	}
 
@@ -157,7 +176,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
   // collect up to pack_size models
   for (std::size_t i = 1; i <= pack_size; ++i)
     {
-      //DMCS_LOG_TRACE(port << ":  Read from MQ");
+      DMCS_LOG_TRACE(port << ": Read from MQ. i = " << i);
       
       std::size_t prio       = 0;
       int timeout            = 200; // milisecs
@@ -165,10 +184,11 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       struct MessagingGatewayBC::ModelSession ms =
 	mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
 
+      DMCS_LOG_TRACE(port << ": Extract information from MQ");
+
       PartialBeliefState* bs = ms.m;
-      std::size_t sid = ms.sid; 
+      std::size_t sid = ms.sid;
       
-      //DMCS_LOG_TRACE(port << ":  Check result from MQ");
       if (bs == 0) // Ups, a NULL pointer
 	{
 	  //DMCS_LOG_TRACE(port << ": Got a NULL pointer. timeout == " << timeout);
@@ -208,11 +228,24 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	}
       else
 	{
-	  DMCS_LOG_TRACE(port << ":  got #" << i << ": bs = " << *bs << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
-      
-	  // Got something in a reasonable time. Continue collecting.
-	  ModelSessionId msi(bs, sid);
-	  res->push_back(msi);
+	  DMCS_LOG_TRACE(port << ": got #" << i);
+	  DMCS_LOG_TRACE(port << ": bs = " << *bs << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
+	  
+	  bool was_cached;
+	  store(bs, output_buffer, false, was_cached);
+
+	  if (!was_cached)
+	    {
+	      DMCS_LOG_TRACE(port << ": Model was NOT cached, put it into result.");
+	      // Got something in a reasonable time. Continue collecting.
+	      ModelSessionId msi(bs, sid);
+	      res->push_back(msi);
+	    }
+	  else
+	    {
+	      DMCS_LOG_TRACE(port << ": Model is cached, won't put it into result.");
+	      --i;
+	    }
 	}
     } // for
 }
@@ -224,6 +257,7 @@ OutputThread::write_result(connection_ptr conn,
 {
   try
     {
+      DMCS_LOG_TRACE(port << ": in write_result.");
       const std::string header = HEADER_ANS;
       conn->write(header);
 
@@ -235,7 +269,8 @@ OutputThread::write_result(connection_ptr conn,
   
       boost::asio::ip::tcp::socket& sock = conn->socket();
       boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
-      DMCS_LOG_TRACE(port << ": return message " << return_mess << " to port " << ep.port() << ". Number of belief states = " << res->size());
+      DMCS_LOG_TRACE(port << ": return message ");
+      DMCS_LOG_TRACE(port << ": " << return_mess << " to port " << ep.port() << ". Number of belief states = " << res->size());
       
       conn->write(return_mess);
     }

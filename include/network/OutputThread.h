@@ -76,6 +76,7 @@ private:
   std::size_t invoker;
   std::size_t port;
   bool eof_mode;
+  PartialBeliefStateBufPtr output_buffer;
 };
 
 typedef boost::shared_ptr<OutputThread> OutputThreadPtr;

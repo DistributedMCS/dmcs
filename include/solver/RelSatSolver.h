@@ -48,8 +48,6 @@
 
 namespace dmcs {
 
-const std::size_t CIRCULAR_BUF_SIZE = 100;
-
 // Wrapper for relsat
 class RelSatSolver : public BaseSolver
 {
@@ -116,7 +114,6 @@ private:
   ConcurrentMessageQueue*        dmcs_sat_notif;   // to get notification from StreamingDMCS
   PartialBeliefState*            input;
   PartialBeliefStateBufPtr       input_buffer;
-  PartialBeliefStateBufPtr       output_buffer;
   bool                           first_round;
 
   SATInstance*                   xInstance;

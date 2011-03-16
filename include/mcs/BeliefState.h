@@ -51,6 +51,8 @@
 
 namespace dmcs {
 
+const std::size_t CIRCULAR_BUF_SIZE = 128;
+
 /// a belief set
 typedef bm::bvector<> BeliefSet;
 
@@ -720,17 +722,23 @@ cached(const PartialBeliefState* pbs, const PartialBeliefStateBufPtr& buffer)
 
 
 inline void
-store(PartialBeliefState*& pbs, PartialBeliefStateBufPtr& buffer)
+store(PartialBeliefState*& pbs, PartialBeliefStateBufPtr& buffer, bool want_delete, bool& was_cached)
 {
   assert (pbs);
 
   // first check whether pbs is already in buffer
   if (cached(pbs, buffer))
     {
-      delete pbs;
-      pbs = 0;
+      was_cached = true;
+      if (want_delete)
+	{
+	  delete pbs;
+	  pbs = 0;
+	}
       return;
     }
+
+  was_cached = false;
 
   // push pbs into buffer.
   // If buffer is full then we have to carefully remove a member in it
