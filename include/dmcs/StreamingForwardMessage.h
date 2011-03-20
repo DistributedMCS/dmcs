@@ -43,7 +43,8 @@ public:
 
   // public default ctor, everything 0 for now
   StreamingForwardMessage()
-    : invoker(0),
+    : path(new History(1, 0)),
+      session_id(0),
       pack_size(0)
   { }
 
@@ -51,11 +52,11 @@ public:
   ~StreamingForwardMessage() 
   { }
 
-  StreamingForwardMessage(std::size_t sid,
-			  std::size_t i,
+  StreamingForwardMessage(History* p,
+			  std::size_t sid,
 			  std::size_t ps)
-    : session_id(sid), 
-      invoker(i),
+    : path(p),
+      session_id(sid), 
       pack_size(ps)
   { }
 
@@ -68,7 +69,15 @@ public:
   std::size_t
   getInvoker() const
   {
-    return invoker;
+    assert (path->size() > 0);
+
+    return path->back();
+  }
+
+  const History*
+  getPath() const
+  {
+    return path;
   }
 
   std::size_t
@@ -88,36 +97,37 @@ public:
   void
   serialize(Archive& ar, const unsigned int /* version */)
   {
+    ar & path;
     ar & session_id;
-    ar & invoker;
     ar & pack_size;
   }
 
 private:
-  std::size_t         session_id;   // For filtering old models
-  std::size_t         invoker;      // ID of the invoking context
-  std::size_t         pack_size;    // The number of models in a package that the invoker expects
+  History* path;        // Calling path, used for dispatching independent queries from the same parent
+  std::size_t session_id; // For filtering old models
+  std::size_t pack_size;  // The number of models in a package that the invoker expects
+
 };
 
 typedef boost::shared_ptr<StreamingForwardMessage> StreamingForwardMessagePtr;
 
-} // namespace dmcs
 
-
-namespace std {
 
 inline std::ostream&
-operator<< (std::ostream& os, const dmcs::StreamingForwardMessage& sfMess)
+operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
 {
 
-  os << sfMess.getSessionId() << ", " 
-     << sfMess.getInvoker() << ", " 
+  os << "{" << *(sfMess.getPath()) << "}, "
+     << sfMess.getSessionId() << ", " 
      << sfMess.getPackSize();
   
   return os;
 }
 
-} // namespace std
+
+
+} // namespace dmcs
+
 
 
 #endif // STREAMING_FORWARD_MESSAGE_H

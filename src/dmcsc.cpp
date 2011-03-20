@@ -366,21 +366,13 @@ Options";
 		{
 		  DMCS_LOG_DEBUG("Streaming mode.");
 
-		  // USER <--> invoker == 0
-	
-		  //ConflictVec* conflicts = new ConflictVec;
-		  //PartialBeliefState* partial_ass = new PartialBeliefState(system_size, PartialBeliefSet());
-		  //Decisionlevel* decision = new Decisionlevel();
-
 		  std::size_t k = pack_size > 0 ? pack_size : 10; // default: k is 10
 		  complete = pack_size > 0 ? false : true;		  
 
-		  // session_id = 0, invoker = 0
-		  StreamingCommandType::input_type mess(0, 0, k);
-		      
-		  //DMCS_LOG_DEBUG("Empty starting conflict:      " << *conflicts);
-		  //DMCS_LOG_DEBUG("Empty starting assignment:    " << *partial_ass);
-		  //DMCS_LOG_DEBUG("Empty starting decision level:" << *decision);
+		  // USER <--> invoker == 0
+		  // session_id = 0, path = {0}
+		  History* path = new History(1, 0);
+		  StreamingCommandType::input_type mess(path, 0, k);
 		      
 		  std::string header = HEADER_REQ_STM_DMCS;
 
