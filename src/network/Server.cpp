@@ -48,7 +48,8 @@ Server::Server(const CommandTypeFactoryPtr& c,
 	       const boost::asio::ip::tcp::endpoint& endpoint)
   : ctf(c),
     io_service(i),
-    acceptor(io_service, endpoint)
+    acceptor(io_service, endpoint),
+    invokers(new ListSizeT)
 {
   connection_ptr my_connection(new connection(io_service));
 
@@ -124,11 +125,25 @@ Server::dispatch_header(const boost::system::error_code& e,
 	}
       else if (header->find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
+
 	  typedef Handler<StreamingCommandType> StreamingHandler;
 
 	  StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
 
 	  StreamingHandler::SessionMsgPtr sesh(new StreamingHandler::SessionMsg(conn));
+
+	  const std::size_t invoker = sesh->mess.getInvoker();
+	  ListSizeT::const_iterator it = std::find(invokers->begin(), invokers->end(), invoker);
+
+	  DMCS_LOG_TRACE("Invoker = " << invoker);
+	  if (it != invokers->end())
+	    {
+	      DMCS_LOG_TRACE("WARNING: more than one connection created for invoker " << invoker);
+	    }
+	  else
+	    {
+	      invokers->push_back(invoker);
+	    }
 
 	  StreamingHandler::HandlerPtr handler(new StreamingHandler);
 

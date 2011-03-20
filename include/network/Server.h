@@ -44,13 +44,15 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <list>
 #include <string>
 
 #include <boost/shared_ptr.hpp>
 
 namespace dmcs {
 
-
+typedef std::list<std::size_t> ListSizeT;
+typedef boost::shared_ptr<ListSizeT> ListSizeTPtr;
 
 struct BaseServer
 {};
@@ -80,6 +82,7 @@ private:
   CommandTypeFactoryPtr ctf;
   boost::asio::io_service& io_service;
   boost::asio::ip::tcp::acceptor acceptor;
+  ListSizeTPtr invokers;
 };
 
 typedef boost::shared_ptr<BaseServer> ServerPtr;
