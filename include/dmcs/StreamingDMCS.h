@@ -61,7 +61,8 @@ public:
   typedef bool dmcs_return_type;
 #endif
 
-  StreamingDMCS(const ContextPtr& c, const TheoryPtr& t, 
+  StreamingDMCS(const ContextPtr& c, 
+		const TheoryPtr& t, 
 		const SignatureVecPtr& s,
 		const QueryPlanPtr& qp);
 
@@ -87,7 +88,8 @@ private:
 	     std::size_t port);
 
   void
-  start_up(std::size_t parent_session_id,
+  start_up(History* path,
+	   std::size_t parent_session_id,
 	   std::size_t pack_size,
 	   std::size_t port);
 

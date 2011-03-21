@@ -77,6 +77,9 @@ public:
       {
 	ConflictNotification* cn = wait_router(rnn, nid);
 
+	DMCS_LOG_TRACE(port << ": Got a message = " << *cn);
+
+	History* path = cn->path;
 	std::size_t session_id = cn->session_id;
 	std::size_t pack_size = cn->pack_size;
 
@@ -84,7 +87,7 @@ public:
 
 	std::string header;
 
-	if (cn->type == ConflictNotification::SHUTDOWN)
+	if (cn->type == BaseNotification::SHUTDOWN)
 	  {
 	    DMCS_LOG_TRACE(port << ": Neighbor " << nid << " received SHUTDOWN, propagating TERMINATE...");
 
@@ -97,11 +100,11 @@ public:
 
 	    return; // done with looping
 	  }
-	else if (cn->type == ConflictNotification::REQUEST)
+	else if (cn->type == BaseNotification::REQUEST)
 	  {
 	    header = HEADER_REQ_STM_DMCS;
 	  }
-	else if (cn->type == ConflictNotification::NEXT)
+	else if (cn->type == BaseNotification::NEXT)
 	  {
 	    // We should only send HEADER_NEXT
 	    boost::asio::ip::tcp::socket& sock = conn->socket();
@@ -121,6 +124,7 @@ public:
 	conn->write(header);
 
 	write_message(conn,
+		      path,
 		      invoker,
 		      pack_size,
 		      session_id);
@@ -152,14 +156,13 @@ public:
 
   void
   write_message(connection_ptr conn,
+		History* path,
 		std::size_t invoker,
 		std::size_t pack_size,
 		std::size_t session_id)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-    // dummy path
-    History* path;
     StreamingForwardMessage mess(path,
 				 session_id,
 				 pack_size);

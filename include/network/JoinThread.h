@@ -67,21 +67,6 @@ public:
     };
 
 private:
-  bool
-  import_belief_states(std::size_t noff,
-		       std::size_t peq_cnt,
-		       PartialBeliefStatePackagePtr& partial_eqs, 
-		       bm::bvector<>& in_mask,
-		       bm::bvector<>& end_mask,
-		       PartialBeliefStateIteratorVecPtr& beg_it, 
-		       PartialBeliefStateIteratorVecPtr& mid_it,
-		       ImportStates import_state);
-
-  void
-  ask_for_next(PartialBeliefStatePackagePtr& partial_eqs, 
-	       std::size_t next, 
-	       ConflictNotification::NotificationType nt);
-
   std::size_t
   join(const PartialBeliefStateIteratorVecPtr& run_it);
 
@@ -91,33 +76,34 @@ private:
        const PartialBeliefStateIteratorVecPtr& end_it);
 
   void
-  process();
-
-  void
-  wait_dmcs(std::size_t& pack_size);
+  wait_dmcs(History*& path,
+	    std::size_t& pack_size);
 
   void
   request_neighbor(PartialBeliefStatePackage* partial_eqs,
 		   std::size_t nid, std::size_t pack_size,
-		   ConflictNotification::NotificationType nt);
+		   History* path,
+		   BaseNotification::NotificationType nt);
 
   void
-  import_belief_states1(std::size_t noff,
-			std::size_t peq_cnt,
-			PartialBeliefStatePackagePtr& partial_eqs, 
-			bm::bvector<>& in_mask,
-			bm::bvector<>& end_mask,
-			PartialBeliefStateIteratorVecPtr& beg_it, 
-			PartialBeliefStateIteratorVecPtr& mid_it,
-			std::size_t& request_size,
-			ImportStates import_state);
+  import_belief_states(std::size_t noff,
+		       std::size_t peq_cnt,
+		       PartialBeliefStatePackagePtr& partial_eqs, 
+		       bm::bvector<>& in_mask,
+		       bm::bvector<>& end_mask,
+		       PartialBeliefStateIteratorVecPtr& beg_it, 
+		       PartialBeliefStateIteratorVecPtr& mid_it,
+		       std::size_t& request_size,
+		       ImportStates import_state);
 
   void
-  import_and_join(VecSizeTPtr request_size, std::size_t pack_size);
+  import_and_join(VecSizeTPtr request_size, 
+		  History* path, 
+		  std::size_t pack_size);
 
 private:
   std::size_t port;
-  std::size_t no_nbs;                  // number of neighbors 
+  std::size_t no_nbs;            // number of neighbors 
   std::size_t system_size;
   std::size_t session_id;
   std::size_t pack_size;         // the real upper-bound of number of models that we ask the neighbors

@@ -30,20 +30,16 @@
 #ifndef CONFLICT_NOTIFICATION_H
 #define CONFLICT_NOTIFICATION_H
 
+#include "dmcs/BaseNotification.h"
 #include "mcs/BeliefState.h"
 #include "solver/Conflict.h"
 
 namespace dmcs {
 
-struct ConflictNotification
-{
-  enum NotificationType
-    {
-      REQUEST = 0,
-      NEXT,
-      SHUTDOWN
-    };
 
+
+struct ConflictNotification : public BaseNotification
+{
   enum SenderIdentification
     {
       FROM_DMCS = 0,
@@ -51,30 +47,33 @@ struct ConflictNotification
       FROM_ROUTER
     };
 
-  ConflictNotification(std::size_t sid,
+  ConflictNotification(BaseNotification::NotificationType t,
+		       History* pa,
+		       std::size_t sid,
 		       std::size_t ps,
-		       SenderIdentification s,
-		       NotificationType t)
-    : session_id(sid),
+		       SenderIdentification s)
+    : BaseNotification(t, pa), 
+      session_id(sid),
       pack_size(ps),
-      sender(s),
-      type(t)
-  { 
-    assert(t == REQUEST || t == SHUTDOWN || t == NEXT);
-  }
+      sender(s)
+  { }
   
   std::size_t session_id;
   std::size_t pack_size;
   SenderIdentification sender; // identifier of the thread that sent this 
-  NotificationType type;
 };
+
 
 
 inline std::ostream&
 operator<< (std::ostream& os, const ConflictNotification& cn)
 {
-  os << "session_id = " << cn.session_id << std::endl
-     << "sender = ";
+
+  os << (BaseNotification)cn;
+
+  os << " session_id = " << cn.session_id 
+     << " pack_size = " << cn.pack_size 
+     << " sender = ";
 
   switch (cn.sender)
     {
@@ -94,8 +93,6 @@ operator<< (std::ostream& os, const ConflictNotification& cn)
 	break;
       }
     }
-  
-  os << std::endl;
 
   return os;
 }

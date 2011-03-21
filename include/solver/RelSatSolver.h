@@ -27,7 +27,7 @@
  * 
  */
 
-
+#include "dmcs/BaseTypes.h"
 #include "dmcs/Context.h"
 #include "mcs/HashedBiMap.h"
 #include "mcs/ProxySignatureByLocal.h"
@@ -101,25 +101,25 @@ private:
 		     SignatureByCtx::const_iterator up);
 
 private:
-  bool                           is_leaf;
-  std::size_t                    my_id;
-  std::size_t                    parent_session_id;
-  std::size_t                    my_session_id;
-  const TheoryPtr                theory;
-  const SignaturePtr             sig;
-  const BeliefStatePtr           localV;
-  const HashedBiMap*             c2o;
-  std::size_t                    system_size;      // this can be taken from localV
-  MessagingGatewayBC*            mg;
-  ConcurrentMessageQueue*        dmcs_sat_notif;   // to get notification from StreamingDMCS
-  PartialBeliefState*            input;
-  PartialBeliefStateBufPtr       input_buffer;
-  bool                           first_round;
-
-  SATInstance*                   xInstance;
-  SATSolver*                     xSATSolver;
-
+  bool is_leaf;
+  std::size_t my_id;
+  std::size_t parent_session_id;
+  std::size_t my_session_id;
+  History* path;
+  const TheoryPtr theory;
+  const SignaturePtr sig;
+  const BeliefStatePtr localV;
+  const HashedBiMap* c2o;
+  std::size_t system_size;                // this can be taken from localV
+  MessagingGatewayBC* mg;
+  ConcurrentMessageQueue* dmcs_sat_notif; // to get notification from StreamingDMCS
+  PartialBeliefState* input;
+  PartialBeliefStateBufPtr input_buffer;
+  bool first_round;
   std::size_t port;
+
+  SATInstance* xInstance;
+  SATSolver* xSATSolver;
 };
 
 typedef boost::shared_ptr<RelSatSolver> RelSatSolverPtr;

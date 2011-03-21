@@ -30,6 +30,7 @@
 #ifndef BASE_TYPES_H
 #define BASE_TYPES_H
 
+#include <iterator>
 #include <list>
 #include <boost/shared_ptr.hpp>
 

@@ -45,7 +45,9 @@ struct BaseNotification
 
   BaseNotification(NotificationType t, History* p)
     : type(t), path(p)
-  { }
+  {
+    assert(t == REQUEST || t == SHUTDOWN || t == NEXT); 
+  }
   
   NotificationType type;
   History* path;

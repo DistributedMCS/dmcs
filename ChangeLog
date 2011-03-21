@@ -1,4 +1,11 @@
-2011-03-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+2011-03-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: Clean up.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/dmcs/BaseTypes.h: include iterator.
+
+	* include/dmcs/BaseNotification.h: Add assertion.
 
 	* include/dmcs/StreamingDMCS.h: Adapt to having path instead of invoker.
 	* src/network/OutputThread.cpp: Likewise.
@@ -7,6 +14,9 @@
 	* include/network/NeighborOut.h: Likewise.
 	* include/network/Handler.tcc: Likewise.
 	* include/network/Handler.h: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
 
 	* include/dmcs/StreamingForwardMessage.h: Remove return const.
 

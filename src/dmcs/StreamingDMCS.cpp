@@ -111,7 +111,7 @@ StreamingDMCS::~StreamingDMCS()
   // inform all neighbors about the shutdown
   for (ConcurrentMessageQueueVec::iterator it = rbeg; it != rend; ++it)
     {
-      ConflictNotification* neighbor_mess = new ConflictNotification(0, 0, ConflictNotification::FROM_DMCS, ConflictNotification::SHUTDOWN);
+      ConflictNotification* neighbor_mess = new ConflictNotification(BaseNotification::SHUTDOWN, 0, 0, 0, ConflictNotification::FROM_DMCS);
       ConflictNotification* ow_neighbor =
 	(ConflictNotification*) overwrite_send(it->get(), &neighbor_mess, sizeof(neighbor_mess), 0);
 
@@ -259,7 +259,8 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 
 
 void
-StreamingDMCS::start_up(std::size_t parent_session_id,
+StreamingDMCS::start_up(History* path,
+			std::size_t parent_session_id,
 			std::size_t pack_size,
 			std::size_t port)
 {
@@ -271,7 +272,7 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
     {
       DMCS_LOG_TRACE(port << ": Intermediate context. Trigger JoinThread. pack_size = " << pack_size);
       
-      ConflictNotification* mess_joiner = new ConflictNotification(parent_session_id, pack_size, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
+      ConflictNotification* mess_joiner = new ConflictNotification(BaseNotification::REQUEST, path, parent_session_id, pack_size, ConflictNotification::FROM_DMCS);
       ConflictNotification* ow_joiner = 
 	(ConflictNotification*) overwrite_send(dmcs_joiner_notif.get(), &mess_joiner, sizeof(mess_joiner), 0);
       
@@ -283,7 +284,7 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
     }
 
   DMCS_LOG_TRACE(port << ": Wake up SAT solver.");
-  ConflictNotification* mess_sat = new ConflictNotification(parent_session_id, pack_size, ConflictNotification::FROM_DMCS, ConflictNotification::REQUEST);
+  ConflictNotification* mess_sat = new ConflictNotification(BaseNotification::REQUEST, path, parent_session_id, pack_size, ConflictNotification::FROM_DMCS);
   ConflictNotification* ow_sat = 
     (ConflictNotification*) overwrite_send(dmcs_sat_notif.get(), &mess_sat, sizeof(mess_sat), 0);
   
@@ -304,7 +305,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
   std::size_t pack_size = 0;
   std::size_t port = 0;
 
-  StreamingDMCSNotification::NotificationType type = StreamingDMCSNotification::REQUEST;
+  BaseNotification::NotificationType type;
 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -327,7 +328,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 	  initialize(path, parent_session_id, pack_size, port);
 	  initialized = true;
 	}
-      start_up(parent_session_id, pack_size, port);
+      start_up(path, parent_session_id, pack_size, port);
     }
 }
 

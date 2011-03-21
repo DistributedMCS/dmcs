@@ -228,6 +228,7 @@ RelSatSolver::solve()
 
   if (ptr && cn)
     {
+      path = cn->path;
       parent_session_id = cn->session_id;
 
       delete cn;
