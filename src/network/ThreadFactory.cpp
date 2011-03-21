@@ -27,6 +27,10 @@
  * 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif // HAVE_CONFIG_H
+
 #include "dmcs/Log.h"
 #include "network/ConcurrentMessageQueueHelper.h"
 #include "network/JoinThread.h"

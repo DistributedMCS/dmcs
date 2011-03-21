@@ -27,6 +27,9 @@
  * 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif // HAVE_CONFIG_H
 
 #include "generator/LogicVisitor.h"
 #include "generator/ContextGenerator.h"

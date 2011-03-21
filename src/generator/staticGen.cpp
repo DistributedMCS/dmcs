@@ -27,6 +27,10 @@
  * 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif // HAVE_CONFIG_H
+
 #include "generator/dmcsGen.h"
 #include "generator/BinaryTreeTopoGenerator.h"
 #include "generator/DiamondTopoGenerator.h"

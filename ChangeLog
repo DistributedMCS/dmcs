@@ -1,5 +1,24 @@
 2011-03-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/dmcs/QueryPlan.cpp: include config.h when HAVE_CONFIG_H is defined.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/parser/ClaspResultOnlineParser.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/generator/staticGen.cpp: Likewise.
+	* src/generator/dynGen.cpp: Likewise.
+	* src/generator/dmcsGen.cpp: Likewise.
+	* src/generator/ContextGenerator.cpp: Likewise.
+	* src/dyndmcs/Instantiator.cpp: Likewise.
+	* src/dyndmcs/DynamicConfiguration.cpp: Likewise.
+
 	* include/dmcs/BaseNotification.h: 2 possibilities for path
 	with/without DEBUG.
 	* src/solver/RelSatSolver.cpp: Likewise.

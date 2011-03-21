@@ -27,7 +27,9 @@
  * 
  */
 
-#include <boost/thread.hpp>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif // HAVE_CONFIG_H
 
 #include "dmcs/BeliefCombination.h"
 #include "dmcs/ConflictNotification.h"
@@ -37,6 +39,10 @@
 #include "relsat-20070104/SATInstance.h"
 
 #include "dmcs/Log.h"
+
+#include <boost/thread.hpp>
+
+
 
 namespace dmcs {
 
