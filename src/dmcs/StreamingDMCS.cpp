@@ -111,7 +111,12 @@ StreamingDMCS::~StreamingDMCS()
   // inform all neighbors about the shutdown
   for (ConcurrentMessageQueueVec::iterator it = rbeg; it != rend; ++it)
     {
-      ConflictNotification* neighbor_mess = new ConflictNotification(BaseNotification::SHUTDOWN, 0, 0, 0, ConflictNotification::FROM_DMCS);
+#ifdef DEBUG
+      History path(1, 0);
+#else
+      std::size_t path = 0;
+#endif
+      ConflictNotification* neighbor_mess = new ConflictNotification(BaseNotification::SHUTDOWN, path, 0, 0, ConflictNotification::FROM_DMCS);
       ConflictNotification* ow_neighbor =
 	(ConflictNotification*) overwrite_send(it->get(), &neighbor_mess, sizeof(neighbor_mess), 0);
 
@@ -167,7 +172,13 @@ StreamingDMCS::~StreamingDMCS()
 
 
 void
-StreamingDMCS::initialize(History* path,
+StreamingDMCS::initialize(
+#ifdef DEBUG
+			  History path,
+#else
+			  std::size_t path,
+#endif
+			  std::size_t invoker,
 			  std::size_t parent_session_id,
 			  std::size_t pack_size, 
 			  std::size_t port)
@@ -188,7 +199,6 @@ StreamingDMCS::initialize(History* path,
       mg = mqf.createMessagingGateway(port, no_nbs, pack_size);
     }
 
-  std::size_t invoker = path->back();
   BeliefStatePtr localV;
   if (invoker == 0)
     {
@@ -223,7 +233,12 @@ StreamingDMCS::initialize(History* path,
 void
 StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 		      BaseNotification::NotificationType& type,
-		      History*& path,
+#ifdef DEBUG
+		      History& path,
+#else
+		      std::size_t& path,
+#endif
+		      std::size_t& invoker,
 		      std::size_t& parent_session_id,
 		      std::size_t& pack_size, 
 		      std::size_t& port)
@@ -239,6 +254,7 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
   if (ptr && sdn)
     {
       path = sdn->path;
+      invoker = sdn->invoker;
       type = sdn->type;
       parent_session_id = sdn->session_id;
       pack_size = sdn->pack_size;
@@ -259,7 +275,12 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 
 
 void
-StreamingDMCS::start_up(History* path,
+StreamingDMCS::start_up(
+#ifdef DEBUG			
+			History path,
+#else
+			std::size_t path,
+#endif
 			std::size_t parent_session_id,
 			std::size_t pack_size,
 			std::size_t port)
@@ -300,7 +321,13 @@ StreamingDMCS::start_up(History* path,
 void
 StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 {
-  History* path;
+#ifdef DEBUG
+  History path;
+#else
+  std::size_t path;
+#endif
+
+  std::size_t invoker = 0;
   std::size_t parent_session_id = 0;
   std::size_t pack_size = 0;
   std::size_t port = 0;
@@ -314,6 +341,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
       listen(handler_dmcs_notif, 
 	     type,
 	     path,
+	     invoker,
 	     parent_session_id,
 	     pack_size, 
 	     port);
@@ -325,7 +353,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 
       if (!initialized)
 	{
-	  initialize(path, parent_session_id, pack_size, port);
+	  initialize(path, invoker, parent_session_id, pack_size, port);
 	  initialized = true;
 	}
       start_up(path, parent_session_id, pack_size, port);

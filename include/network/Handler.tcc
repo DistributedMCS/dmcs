@@ -225,6 +225,7 @@ Handler<StreamingCommandType>::Handler()
 }
 
 
+
 Handler<StreamingCommandType>::~Handler()
 { 
   DMCS_LOG_TRACE(port << ": Join OUTPUT thread");
@@ -263,7 +264,11 @@ Handler<StreamingCommandType>::~Handler()
 
 void
 Handler<StreamingCommandType>::notify_output_thread(BaseNotification::NotificationType t, 
-						    History* path, 
+#ifdef DEBUG
+						    History path,
+#else
+						    std::size_t path, 
+#endif
 						    std::size_t parent_session_id,
 						    std::size_t pack_size)
 {
@@ -285,12 +290,18 @@ Handler<StreamingCommandType>::notify_output_thread(BaseNotification::Notificati
 
 void
 Handler<StreamingCommandType>::notify_dmcs_thread(BaseNotification::NotificationType t, 
-						  History* path,
+#ifdef DEBUG
+						  History path,
+#else
+						  std::size_t path,
+#endif
+						  std::size_t invoker,
 						  std::size_t parent_session_id,
 						  std::size_t pack_size,
 						  std::size_t port)
 {
-  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(BaseNotification::REQUEST, path, parent_session_id, pack_size, port);
+  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(BaseNotification::REQUEST, path, invoker, 
+								       parent_session_id, pack_size, port);
 
   DMCS_LOG_TRACE(port << ": Notify DMCS" << mess_dmcs);
   
@@ -323,7 +334,12 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
       port = ep.port();
 
-      History* path = sesh->mess.getPath();
+#ifdef DEBUG
+      History path = sesh->mess.getPath();
+#else
+      std::size_t path = sesh->mess.getPath();
+#endif
+
       const std::size_t parent_session_id = sesh->mess.getSessionId();
       const std::size_t invoker = sesh->mess.getInvoker();
       const std::size_t pack_size = sesh->mess.getPackSize();
@@ -356,7 +372,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
       DMCS_LOG_TRACE(port << ": Notify my slaves of the new message");
 
-      notify_dmcs_thread(BaseNotification::REQUEST, path, parent_session_id, pack_size, port);
+      notify_dmcs_thread(BaseNotification::REQUEST, path, invoker, parent_session_id, pack_size, port);
       notify_output_thread(BaseNotification::REQUEST, path, parent_session_id, pack_size);
 
       DMCS_LOG_TRACE(port << ": Waiting for incoming message from " << invoker << " at " << port << "(first_call = " << first_call << ")");
@@ -393,7 +409,12 @@ Handler<StreamingCommandType>::do_next_batch(const boost::system::error_code& e,
 
   if (!e)
     {
-      History* path = sesh->mess.getPath();
+#ifdef DEBUG
+      History path = sesh->mess.getPath();
+#else
+      std::size_t path = sesh->mess.getPath();
+#endif
+
       const std::size_t parent_session_id = sesh->mess.getSessionId();
       const std::size_t pack_size = sesh->mess.getPackSize();
 
@@ -476,12 +497,18 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 
 	  DMCS_LOG_TRACE(port << ": Send SHUTHDOWN to Output thread");
 
-	  notify_output_thread(BaseNotification::SHUTDOWN, 0, 0, 0);
+#ifdef DEBUG
+	  History path(1, 0);
+#else
+	  std::size_t path = 0;
+#endif
+
+	  notify_output_thread(BaseNotification::SHUTDOWN, path, 0, 0);
 	  
 	  DMCS_LOG_TRACE(port << ": Send SHUTDOWN to DMCS thread");
 
 	  std::size_t session_id = sesh->mess.getSessionId();
-	  notify_dmcs_thread(BaseNotification::SHUTDOWN, 0, session_id, 0, 0);
+	  notify_dmcs_thread(BaseNotification::SHUTDOWN, path, 0, session_id, 0, 0);
 
 	  return;
 	}

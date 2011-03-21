@@ -39,7 +39,11 @@ namespace dmcs {
 struct OutputNotification : public BaseNotification
 {
   OutputNotification(NotificationType t, 
-		     History* pa,
+#ifdef DEBUG
+		     History pa,
+#else
+		     std::size_t pa,
+#endif
 		     std::size_t psid, 
 		     std::size_t ps)
     : BaseNotification(t, pa),

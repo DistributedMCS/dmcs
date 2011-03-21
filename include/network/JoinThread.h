@@ -76,13 +76,22 @@ private:
        const PartialBeliefStateIteratorVecPtr& end_it);
 
   void
-  wait_dmcs(History*& path,
+  wait_dmcs(
+#ifdef DEBUG
+	    History& path,
+#else
+	    std::size_t& path,
+#endif
 	    std::size_t& pack_size);
 
   void
   request_neighbor(PartialBeliefStatePackage* partial_eqs,
 		   std::size_t nid, std::size_t pack_size,
-		   History* path,
+#ifdef DEBUG
+		   History& path,
+#else
+		   std::size_t path,
+#endif
 		   BaseNotification::NotificationType nt);
 
   void
@@ -98,7 +107,11 @@ private:
 
   void
   import_and_join(VecSizeTPtr request_size, 
-		  History* path, 
+#ifdef DEBUG
+		  History& path, 
+#else
+		  std::size_t path,
+#endif
 		  std::size_t pack_size);
 
 private:

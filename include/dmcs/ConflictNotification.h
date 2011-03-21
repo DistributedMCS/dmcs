@@ -48,7 +48,11 @@ struct ConflictNotification : public BaseNotification
     };
 
   ConflictNotification(BaseNotification::NotificationType t,
-		       History* pa,
+#ifdef DEBUG
+		       History pa,
+#else
+     		       std::size_t pa,
+#endif
 		       std::size_t sid,
 		       std::size_t ps,
 		       SenderIdentification s)
@@ -68,7 +72,6 @@ struct ConflictNotification : public BaseNotification
 inline std::ostream&
 operator<< (std::ostream& os, const ConflictNotification& cn)
 {
-
   os << (BaseNotification)cn;
 
   os << " session_id = " << cn.session_id 

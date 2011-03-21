@@ -164,7 +164,12 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
 
 
 void
-JoinThread::wait_dmcs(History*& path,
+JoinThread::wait_dmcs(
+#ifdef DEBUG
+		      History& path,
+#else
+		      std::size_t& path,
+#endif
 		      std::size_t& pack_size)
 {
     // wait for a notification from StreamingDMCS
@@ -196,7 +201,11 @@ JoinThread::wait_dmcs(History*& path,
 void
 JoinThread::request_neighbor(PartialBeliefStatePackage* partial_eqs,
 			     std::size_t nid, std::size_t pack_size,
-			     History* path,
+#ifdef DEBUG
+			     History& path,
+#else
+			     std::size_t path,
+#endif
 			     BaseNotification::NotificationType nt)
 {
   if (partial_eqs)
@@ -312,7 +321,11 @@ JoinThread::import_belief_states(std::size_t noff,
 
 void
 JoinThread::import_and_join(VecSizeTPtr request_size, 
-			    History* path,
+#ifdef DEBUG
+			    History& path,
+#else
+			    std::size_t path,
+#endif
 			    std::size_t pack_size)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
@@ -531,7 +544,12 @@ JoinThread::operator()(std::size_t nbs,
   joiner_neighbors_notif = jv;
   no_nbs = nbs;
   system_size = s;
-  History* path;
+
+#ifdef DEBUG
+  History path;
+#else
+  std::size_t path;
+#endif
 
   VecSizeTPtr request_size(new VecSizeT(no_nbs, 0));
 

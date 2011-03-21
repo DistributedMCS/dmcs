@@ -105,7 +105,6 @@ private:
   std::size_t my_id;
   std::size_t parent_session_id;
   std::size_t my_session_id;
-  History* path;
   const TheoryPtr theory;
   const SignaturePtr sig;
   const BeliefStatePtr localV;

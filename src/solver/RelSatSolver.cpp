@@ -218,17 +218,22 @@ RelSatSolver::refresh()
 void
 RelSatSolver::solve()
 {
-  DMCS_LOG_TRACE(port << ":  Fresh solving. Wait for a message from DMCS");
-  ConflictNotification* cn;
-  void *ptr         = static_cast<void*>(&cn);
-  unsigned int p    = 0;
+  DMCS_LOG_TRACE(port << ": Fresh solving. Wait for a message from DMCS");
+  ConflictNotification* cn = 0;
+  void *ptr = static_cast<void*>(&cn);
+  unsigned int p = 0;
   std::size_t recvd = 0;
 
   dmcs_sat_notif->receive(ptr, sizeof(cn), recvd, p);
 
   if (ptr && cn)
     {
-      path = cn->path;
+#ifdef DEBUG
+      History path = cn->path;
+#else
+      std::size_t path = cn->path;
+#endif
+
       parent_session_id = cn->session_id;
 
       delete cn;

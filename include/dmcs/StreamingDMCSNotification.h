@@ -40,16 +40,23 @@ namespace dmcs {
 struct StreamingDMCSNotification : public BaseNotification
 {
   StreamingDMCSNotification(NotificationType t, 
-			    History* pa,
+#ifdef DEBUG
+			    History pa,
+#else
+			    std::size_t pa,
+#endif
+			    std::size_t i,
 			    std::size_t sid, 
 			    std::size_t ps,
 			    std::size_t p)
     : BaseNotification(t, pa),
+      invoker(i),
       session_id(sid),
       pack_size(ps),
       port(p)
   { }
 
+  std::size_t invoker;
   std::size_t session_id;
   std::size_t pack_size;
   std::size_t port;
@@ -61,6 +68,7 @@ inline std::ostream&
 operator<< (std::ostream& os, const StreamingDMCSNotification& sdn)
 {
   os << (BaseNotification)sdn
+     << " invoker = " << sdn.invoker
      << " sid = " << sdn.session_id 
      << " pack_size = " << sdn.pack_size
      << " port = " << sdn.port;

@@ -369,10 +369,13 @@ Options";
 		  std::size_t k = pack_size > 0 ? pack_size : 10; // default: k is 10
 		  complete = pack_size > 0 ? false : true;		  
 
-		  // USER <--> invoker == 0
-		  // session_id = 0, path = {0}
-		  History* path = new History(1, 0);
-		  StreamingCommandType::input_type mess(path, 0, k);
+		  // USER <--> session_id = 0, path = {0}, invoker = 0
+#ifdef DEBUG
+		  History path(1, 0);
+		  StreamingCommandType::input_type mess(path, 0, 0, k);
+#else
+		  StreamingCommandType::input_type mess(0, 0, 0, k);
+#endif
 		      
 		  std::string header = HEADER_REQ_STM_DMCS;
 

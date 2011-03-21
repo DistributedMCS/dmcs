@@ -43,14 +43,24 @@ struct BaseNotification
       SHUTDOWN
     };
 
-  BaseNotification(NotificationType t, History* p)
-    : type(t), path(p)
+  BaseNotification(NotificationType t, 
+#ifdef DEBUG
+		   History pa)
+#else
+                  std::size_t pa)
+#endif
+    : type(t), path(pa)
   {
     assert(t == REQUEST || t == SHUTDOWN || t == NEXT); 
   }
   
   NotificationType type;
-  History* path;
+
+#ifdef DEBUG
+  History path;
+#else
+  std::size_t path;
+#endif
 };
 
 
@@ -77,14 +87,7 @@ operator<< (std::ostream& os, const BaseNotification& bn)
       }
     }
 
-  if (bn.path)
-    {
-      os << " {" << *(bn.path) << "}"; 
-    }
-  else
-    {
-      os << " {NULL}"; 
-    }
+  os << " {" << bn.path << "}"; 
 
   return os;
 }

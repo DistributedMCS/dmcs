@@ -79,7 +79,12 @@ public:
 
 	DMCS_LOG_TRACE(port << ": Got a message = " << *cn);
 
-	History* path = cn->path;
+#ifdef DEBUG
+	History path = cn->path;
+#else
+	std::size_t path = cn->path;
+#endif
+
 	std::size_t session_id = cn->session_id;
 	std::size_t pack_size = cn->pack_size;
 
@@ -136,8 +141,8 @@ public:
   {
     // wait for a notification from the Router
     ConflictNotification* cn = 0;
-    void *ptr         = static_cast<void*>(&cn);
-    unsigned int p    = 0;
+    void *ptr = static_cast<void*>(&cn);
+    unsigned int p  = 0;
     std::size_t recvd = 0;
     
     DMCS_LOG_TRACE(port << ": Listen to router... nid = " << nid);
@@ -156,7 +161,11 @@ public:
 
   void
   write_message(connection_ptr conn,
-		History* path,
+#ifdef DEBUG
+		History path,
+#else
+		std::size_t path,
+#endif
 		std::size_t invoker,
 		std::size_t pack_size,
 		std::size_t session_id)
@@ -164,6 +173,7 @@ public:
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
     StreamingForwardMessage mess(path,
+				 invoker,
 				 session_id,
 				 pack_size);
 

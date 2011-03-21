@@ -76,19 +76,35 @@ private:
   void
   listen(ConcurrentMessageQueue* notif_from_handler,
 	 BaseNotification::NotificationType& type,
-	 History*& path,
+#ifdef DEBUG
+	 History& path,
+#else
+	 std::size_t& path,
+#endif
+	 std::size_t& invoker,
 	 std::size_t& parent_session_id,
 	 std::size_t& pack_size,
 	 std::size_t& port);
 
   void
-  initialize(History* path,
+  initialize(
+#ifdef DEBUG
+	     History path,
+#else
+	     std::size_t path,
+#endif
+	     std::size_t invoker,
 	     std::size_t parent_session_id,
 	     std::size_t pack_size,
 	     std::size_t port);
 
   void
-  start_up(History* path,
+  start_up(
+#ifdef DEBUG
+	   History path,
+#else
+	   std::size_t path,
+#endif
 	   std::size_t parent_session_id,
 	   std::size_t pack_size,
 	   std::size_t port);

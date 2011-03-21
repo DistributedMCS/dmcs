@@ -40,10 +40,15 @@ namespace dmcs {
 class StreamingForwardMessage : public Message
 {
 public:
-
   // public default ctor, everything 0 for now
   StreamingForwardMessage()
-    : path(new History(1, 0)),
+    :
+#ifdef DEBUG
+    path(1, 0),
+#else
+      path(0),
+#endif
+      invoker(0),
       session_id(0),
       pack_size(0)
   { }
@@ -52,10 +57,17 @@ public:
   ~StreamingForwardMessage() 
   { }
 
-  StreamingForwardMessage(History* p,
+  StreamingForwardMessage(
+#ifdef DEBUG
+			  History p,
+#else
+			  std::size_t p,
+#endif
+			  std::size_t i,
 			  std::size_t sid,
 			  std::size_t ps)
     : path(p),
+      invoker(i),
       session_id(sid), 
       pack_size(ps)
   { }
@@ -69,12 +81,14 @@ public:
   std::size_t
   getInvoker() const
   {
-    assert (path->size() > 0);
-
-    return path->back();
+    return invoker;
   }
 
-  History*
+#ifdef DEBUG
+  History
+#else
+  std::size_t
+#endif
   getPath() const
   {
     return path;
@@ -98,16 +112,28 @@ public:
   serialize(Archive& ar, const unsigned int /* version */)
   {
     ar & path;
+    ar & invoker;
     ar & session_id;
     ar & pack_size;
   }
 
 private:
-  History* path;        // Calling path, used for dispatching independent queries from the same parent
-  std::size_t session_id; // For filtering old models
-  std::size_t pack_size;  // The number of models in a package that the invoker expects
 
+#ifdef DEBUG
+  History path;           // For debugging purpose
+#else
+  std::size_t path;       // Hashed value for the calling path, used
+			  // for dispatching independent queries from
+			  // the same parent
+#endif
+
+  std::size_t invoker;
+  std::size_t session_id; // For filtering old models
+  std::size_t pack_size;  // The number of models in a package that
+			  // the invoker expects
 };
+
+
 
 typedef boost::shared_ptr<StreamingForwardMessage> StreamingForwardMessagePtr;
 
@@ -117,9 +143,10 @@ inline std::ostream&
 operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
 {
 
-  os << "{" << *(sfMess.getPath()) << "}, "
-     << sfMess.getSessionId() << ", " 
-     << sfMess.getPackSize();
+  os << "path = {" << sfMess.getPath() << "}, "
+     << "invoker = " << sfMess.getInvoker() << ", "
+     << "session_id = " << sfMess.getSessionId() << ", " 
+     << "pack_size = " << sfMess.getPackSize();
   
   return os;
 }
