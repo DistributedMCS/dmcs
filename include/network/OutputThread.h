@@ -45,7 +45,7 @@ namespace dmcs {
 class OutputThread
 {
 public:
-  OutputThread(std::size_t i, std::size_t p);
+  OutputThread(std::size_t p);
 
   virtual
   ~OutputThread();
@@ -73,7 +73,6 @@ private:
 
 
 private:
-  std::size_t invoker;
   std::size_t port;
   bool eof_mode;
   PartialBeliefStateBufPtr output_buffer;

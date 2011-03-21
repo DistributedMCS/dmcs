@@ -133,7 +133,20 @@ public:
 		     boost::shared_ptr<std::string> header,
 		     std::size_t parent_session_id);
 
+private:
+  void
+  notify_dmcs_thread(BaseNotification::NotificationType t, 
+		     History* path, 
+		     std::size_t parent_session_id,
+		     std::size_t pack_size,
+		     std::size_t port);
 
+  void
+  notify_output_thread(BaseNotification::NotificationType t, 
+		       History* path, 
+		       std::size_t parent_session_id,
+		       std::size_t pack_size);
+    
 private:
   boost::thread*                   output_thread;
   boost::thread*                   streaming_dmcs_thread;

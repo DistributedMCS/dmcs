@@ -74,15 +74,15 @@ public:
 private:
   void
   listen(ConcurrentMessageQueue* notif_from_handler,
+	 BaseNotification::NotificationType& type,
+	 History*& path,
 	 std::size_t& parent_session_id,
-	 std::size_t& invoker,
 	 std::size_t& pack_size,
-	 std::size_t& port,
-	 StreamingDMCSNotification::NotificationType& type);
+	 std::size_t& port);
 
   void
-  initialize(std::size_t parent_session_id,
-	     std::size_t invoker, 
+  initialize(History* path,
+	     std::size_t parent_session_id,
 	     std::size_t pack_size,
 	     std::size_t port);
 

@@ -18,57 +18,36 @@
  */
 
 /**
- * @file   Message.h
+ * @file   BaseTypes.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Wed Nov  18 11:53:24 2009
+ * @date   Mon Mar  21 8:16:24 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef MESSAGE_H
-#define MESSAGE_H
-
-#include "mcs/BeliefState.h"
-#include "dmcs/BaseTypes.h"
-#include "dmcs/StatsInfo.h"
-#include "dmcs/Context.h"
-//#include "ContextSubstitution.h"
+#ifndef BASE_TYPES_H
+#define BASE_TYPES_H
 
 #include <list>
 #include <boost/shared_ptr.hpp>
-#include <boost/serialization/list.hpp>
-
 
 namespace dmcs {
 
-#define HEADER_REQ_PRI_DMCS "DMCS REQ PRI_DMCS"
-#define HEADER_REQ_OPT_DMCS "DMCS REQ OPT_DMCS"
-#define HEADER_REQ_STM_DMCS "DMCS REQ STM_DMCS"
-#define HEADER_REQ_DYN_DMCS "DMCS REQ DYN_DMCS"
-#define HEADER_REQ_INSTANTIATE "DMCS REQ INSTANTIATE"
-#define HEADER_ANS "DMCS ANS"
-#define HEADER_EOF "DMCS EOF"
-#define HEADER_NEXT "DMCS NEXT"
-#define HEADER_TERMINATE "DMCS TERMINATE"
+typedef std::list<std::size_t> History;
+typedef boost::shared_ptr<History> HistoryPtr;
 
-
-class Message
+inline std::ostream&
+operator<< (std::ostream& os, const History& hist)
 {
-public:
-  virtual ~Message() 
-  {}
-
-  // templates cant be virtual
-  template<class Archive>
-  void serialize(Archive & /* ar */, const unsigned int /* version */)
-  {}
-};
+  std::copy(hist.begin(), hist.end(), std::ostream_iterator<std::size_t>(os, " "));
+  return os;
+}
 
 } // namespace dmcs
 
-#endif // MESSAGE_H
+#endif // BASE_TYPES_H
 
 // Local Variables:
 // mode: C++

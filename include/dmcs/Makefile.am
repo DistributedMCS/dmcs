@@ -3,6 +3,8 @@ AUTOMAKE_OPTIONS = gnu
 # including headers for make dist
 noinst_HEADERS =  \
 		BaseDMCS.h \
+		BaseNotification.h \
+		BaseTypes.h \
 		BeliefCombination.h \
 		Cache.h \
 		CommandType.h \

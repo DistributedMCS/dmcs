@@ -18,57 +18,78 @@
  */
 
 /**
- * @file   Message.h
- * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Wed Nov  18 11:53:24 2009
+ * @file   BaseNotification.h
+ * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
+ * @date   Wed Mar  21 8:58:24 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#ifndef BASE_NOTIFICATION_H
+#define BASE_NOTIFICATION_H
 
-#include "mcs/BeliefState.h"
 #include "dmcs/BaseTypes.h"
-#include "dmcs/StatsInfo.h"
-#include "dmcs/Context.h"
-//#include "ContextSubstitution.h"
-
-#include <list>
-#include <boost/shared_ptr.hpp>
-#include <boost/serialization/list.hpp>
-
 
 namespace dmcs {
 
-#define HEADER_REQ_PRI_DMCS "DMCS REQ PRI_DMCS"
-#define HEADER_REQ_OPT_DMCS "DMCS REQ OPT_DMCS"
-#define HEADER_REQ_STM_DMCS "DMCS REQ STM_DMCS"
-#define HEADER_REQ_DYN_DMCS "DMCS REQ DYN_DMCS"
-#define HEADER_REQ_INSTANTIATE "DMCS REQ INSTANTIATE"
-#define HEADER_ANS "DMCS ANS"
-#define HEADER_EOF "DMCS EOF"
-#define HEADER_NEXT "DMCS NEXT"
-#define HEADER_TERMINATE "DMCS TERMINATE"
-
-
-class Message
+struct BaseNotification
 {
-public:
-  virtual ~Message() 
-  {}
+  enum NotificationType
+    {
+      REQUEST = 0,
+      NEXT,
+      SHUTDOWN
+    };
 
-  // templates cant be virtual
-  template<class Archive>
-  void serialize(Archive & /* ar */, const unsigned int /* version */)
-  {}
+  BaseNotification(NotificationType t, History* p)
+    : type(t), path(p)
+  { }
+  
+  NotificationType type;
+  History* path;
 };
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const BaseNotification& bn)
+{
+  switch (bn.type)
+    {
+    case BaseNotification::REQUEST:
+      {
+	os << "REQUEST";
+	break;
+      }
+    case BaseNotification::NEXT:
+      {
+	os << "NEXT";
+	break;
+      }
+
+    case BaseNotification::SHUTDOWN:
+      {
+	os << "SHUTDOWN";
+	break;
+      }
+    }
+
+  if (bn.path)
+    {
+      os << " {" << *(bn.path) << "}"; 
+    }
+  else
+    {
+      os << " {NULL}"; 
+    }
+
+  return os;
+}
 
 } // namespace dmcs
 
-#endif // MESSAGE_H
+#endif // BASE_NOTIFICATION_H
 
 // Local Variables:
 // mode: C++

@@ -167,14 +167,14 @@ StreamingDMCS::~StreamingDMCS()
 
 
 void
-StreamingDMCS::initialize(std::size_t parent_session_id,
-			  std::size_t invoker, 
+StreamingDMCS::initialize(History* path,
+			  std::size_t parent_session_id,
 			  std::size_t pack_size, 
 			  std::size_t port)
 {
   std::size_t my_id = ctx->getContextID();
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
-  std::size_t no_nbs         = nbs->size(); 
+  std::size_t no_nbs  = nbs->size(); 
 
   DMCS_LOG_TRACE(port << ": Here create mqs and threads. no_nbs = " << no_nbs);
 
@@ -188,6 +188,7 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
       mg = mqf.createMessagingGateway(port, no_nbs, pack_size);
     }
 
+  std::size_t invoker = path->back();
   BeliefStatePtr localV;
   if (invoker == 0)
     {
@@ -206,8 +207,6 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
 		   mg.get(), dmcs_sat_notif.get(), dmcs_joiner_notif.get(),
 		   c2o.get(), port);
 
-
-
   if (no_nbs > 0)
     {
       tf.createNeighborThreads(neighbor_threads, neighbors, neighbors_notif);
@@ -223,39 +222,39 @@ StreamingDMCS::initialize(std::size_t parent_session_id,
 
 void
 StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
+		      BaseNotification::NotificationType& type,
+		      History*& path,
 		      std::size_t& parent_session_id,
-		      std::size_t& invoker, 
 		      std::size_t& pack_size, 
-		      std::size_t& port,
-		      StreamingDMCSNotification::NotificationType& type)
+		      std::size_t& port)
 {
   // wait for a signal from Handler
-  StreamingDMCSNotification* sn = 0;
-  void *ptr         = static_cast<void*>(&sn);
-  unsigned int p    = 0;
+  StreamingDMCSNotification* sdn = 0;
+  void *ptr = static_cast<void*>(&sdn);
+  unsigned int p = 0;
   std::size_t recvd = 0;
 
-  handler_dmcs_notif->receive(ptr, sizeof(sn), recvd, p);
+  handler_dmcs_notif->receive(ptr, sizeof(sdn), recvd, p);
 
-  if (ptr && sn)
+  if (ptr && sdn)
     {
-      parent_session_id = sn->session_id;
-      invoker     = sn->invoker;
-      pack_size   = sn->pack_size;
-      port        = sn->port;
-      type        = sn->type;
+      path = sdn->path;
+      type = sdn->type;
+      parent_session_id = sdn->session_id;
+      pack_size = sdn->pack_size;
+      port = sdn->port;
 
-      // safe to delete sn here, pointers inside it are preserved
-      delete sn;
-      sn = 0;
+      DMCS_LOG_TRACE(port << ": Message from Handler: " << *sdn);
+
+      // safe to delete sdn here, pointers inside it are preserved
+      delete sdn;
+      sdn = 0;
     }
   else
     {
-      DMCS_LOG_FATAL(port << ": Got null message: " << ptr << " " << sn);
-      assert(ptr != 0 && sn != 0);
+      DMCS_LOG_FATAL(port << ": Got NULL message: " << ptr << " " << sdn);
+      assert(ptr != 0 && sdn != 0);
     }
-
-  DMCS_LOG_TRACE(port << ": invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port << ", type = " << type);
 }
 
 
@@ -300,8 +299,8 @@ StreamingDMCS::start_up(std::size_t parent_session_id,
 void
 StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
 {
+  History* path;
   std::size_t parent_session_id = 0;
-  std::size_t invoker = 0;
   std::size_t pack_size = 0;
   std::size_t port = 0;
 
@@ -312,18 +311,20 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
   while (1)
     {
       listen(handler_dmcs_notif, 
+	     type,
+	     path,
 	     parent_session_id,
-	     invoker, pack_size, 
-	     port, type);
+	     pack_size, 
+	     port);
 
-      if (type == StreamingDMCSNotification::SHUTDOWN)
+      if (type == BaseNotification::SHUTDOWN)
 	{
 	  break;
 	}
 
       if (!initialized)
 	{
-	  initialize(parent_session_id, invoker, pack_size, port);
+	  initialize(path, parent_session_id, pack_size, port);
 	  initialized = true;
 	}
       start_up(parent_session_id, pack_size, port);

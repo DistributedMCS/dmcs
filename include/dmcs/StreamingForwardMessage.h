@@ -74,7 +74,7 @@ public:
     return path->back();
   }
 
-  const History*
+  History*
   getPath() const
   {
     return path;

@@ -1,3 +1,26 @@
+2011-03-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingDMCS.h: Adapt to having path instead of invoker.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Remove return const.
+
+	* include/dmcs/Message.h: Move History to BaseTypes.
+
+	* include/dmcs/OutputNotification.h: Inherit from BaseNotification and
+	adapt to having path.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+
+	* include/dmcs/BaseNotification.h: New file.
+	* include/dmcs/BaseTypes.h: Likewise.
+
+	* include/dmcs/Makefile.am: Add BaseNotification.h and BaseTypes.h
+
 2011-03-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Server.h: Check for multiple connections between

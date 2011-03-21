@@ -260,6 +260,53 @@ Handler<StreamingCommandType>::~Handler()
 }
 
 
+
+void
+Handler<StreamingCommandType>::notify_output_thread(BaseNotification::NotificationType t, 
+						    History* path, 
+						    std::size_t parent_session_id,
+						    std::size_t pack_size)
+{
+  OutputNotification* mess_output = new OutputNotification(t, path, parent_session_id, pack_size);
+  
+  DMCS_LOG_TRACE(port << ": Notify OutputThread" << *mess_output);
+  
+  OutputNotification* ow_output = 
+    (OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
+  
+  if (ow_output)
+    {
+      delete ow_output;
+      ow_output = 0;
+    }
+}
+
+
+
+void
+Handler<StreamingCommandType>::notify_dmcs_thread(BaseNotification::NotificationType t, 
+						  History* path,
+						  std::size_t parent_session_id,
+						  std::size_t pack_size,
+						  std::size_t port)
+{
+  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(BaseNotification::REQUEST, path, parent_session_id, pack_size, port);
+
+  DMCS_LOG_TRACE(port << ": Notify DMCS" << mess_dmcs);
+  
+  StreamingDMCSNotification* ow_dmcs = 
+    (StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif.get(), &mess_dmcs, sizeof(mess_dmcs), 0);
+
+  if (ow_dmcs)
+    {
+      delete ow_dmcs;
+      ow_dmcs = 0;
+    }
+}
+
+
+
+
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					    HandlerPtr hdl,
@@ -276,6 +323,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
       port = ep.port();
 
+      History* path = sesh->mess.getPath();
       const std::size_t parent_session_id = sesh->mess.getSessionId();
       const std::size_t invoker = sesh->mess.getInvoker();
       const std::size_t pack_size = sesh->mess.getPackSize();
@@ -300,7 +348,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // inform OutputThread about new incoming message (request
 	  // the next pack_size models)
 
-	  OutputThread ot(invoker, port);
+	  OutputThread ot(port);
 	  output_thread = new boost::thread(ot, sesh->conn, mg.get(), handler_output_notif.get());
 
 	  first_call = false;
@@ -308,35 +356,10 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
       DMCS_LOG_TRACE(port << ": Notify my slaves of the new message");
 
-      // notify StreamingDMCS
-      DMCS_LOG_TRACE(port << ": parent_session_id = " << parent_session_id << ", invoker = " << invoker << ", pack_size = " << pack_size << ", port = " << port);
+      notify_dmcs_thread(BaseNotification::REQUEST, path, parent_session_id, pack_size, port);
+      notify_output_thread(BaseNotification::REQUEST, path, parent_session_id, pack_size);
 
-      DMCS_LOG_TRACE(port << ": Notify DMCS");
-      StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(parent_session_id, invoker, pack_size, port, StreamingDMCSNotification::REQUEST);
-      StreamingDMCSNotification* ow_dmcs = 
-	(StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif.get(), &mess_dmcs, sizeof(mess_dmcs), 0);
-
-      if (ow_dmcs)
-	{
-	  delete ow_dmcs;
-	  ow_dmcs = 0;
-	}
-
-      // notify OutputThread
-      DMCS_LOG_TRACE(port << ": Notify OutputThread");
-      OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id, OutputNotification::REQUEST);
-      OutputNotification* ow_output = 
-	(OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
-
-      if (ow_output)
-	{
-	  delete ow_output;
-	  ow_output = 0;
-	}
-
-      // back to waiting for incoming message
-
-      DMCS_LOG_TRACE(port << ": Waiting for incoming message from " << invoker << " at " << port << "(" << first_call << ")");
+      DMCS_LOG_TRACE(port << ": Waiting for incoming message from " << invoker << " at " << port << "(first_call = " << first_call << ")");
 
       boost::shared_ptr<std::string> header(new std::string);
 
@@ -360,7 +383,6 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
 
 
-
 void
 Handler<StreamingCommandType>::do_next_batch(const boost::system::error_code& e,
 					     HandlerPtr hdl,
@@ -371,28 +393,13 @@ Handler<StreamingCommandType>::do_next_batch(const boost::system::error_code& e,
 
   if (!e)
     {
+      History* path = sesh->mess.getPath();
       const std::size_t parent_session_id = sesh->mess.getSessionId();
-      const std::size_t invoker           = sesh->mess.getInvoker();
-      const std::size_t pack_size         = sesh->mess.getPackSize();
+      const std::size_t pack_size = sesh->mess.getPackSize();
 
       assert (pack_size > 0);
 
-      // code duplication with part of do_local_job. Just leave it like this for now
-      
-      DMCS_LOG_TRACE(port << ": notify output with GET_NEXT, pack_size=" << pack_size << ", psid=" << parent_session_id);
-
-      // notify OutputThread
-      OutputNotification* mess_output = new OutputNotification(pack_size, parent_session_id, OutputNotification::NEXT);
-      OutputNotification* ow_output = 
-	(OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
-	  
-      if (ow_output)
-	{
-	  delete ow_output;
-	  ow_output = 0;
-	}
-      
-      // back to waiting for incoming message
+      notify_output_thread(BaseNotification::NEXT, path, parent_session_id, pack_size);
       
       DMCS_LOG_TRACE(port << ": Back to waiting for incoming message");
       
@@ -469,29 +476,12 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 
 	  DMCS_LOG_TRACE(port << ": Send SHUTHDOWN to Output thread");
 
-	  OutputNotification* mess_output = new OutputNotification(0, parent_session_id, OutputNotification::SHUTDOWN);
-	  OutputNotification* ow_output = 
-	    (OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
-	  
-	  if (ow_output)
-	    {
-	      delete ow_output;
-	      ow_output = 0;
-	    }
+	  notify_output_thread(BaseNotification::SHUTDOWN, 0, 0, 0);
 	  
 	  DMCS_LOG_TRACE(port << ": Send SHUTDOWN to DMCS thread");
 
 	  std::size_t session_id = sesh->mess.getSessionId();
-	  
-	  StreamingDMCSNotification* mess_dmcs = new StreamingDMCSNotification(session_id, 0, 0, 0, StreamingDMCSNotification::SHUTDOWN);
-	  StreamingDMCSNotification* ow_dmcs = 
-	    (StreamingDMCSNotification*) overwrite_send(handler_dmcs_notif.get(), &mess_dmcs, sizeof(mess_dmcs), 0);
-	  
-	  if (ow_dmcs)
-	    {
-	      delete ow_dmcs;
-	      ow_dmcs = 0;
-	    }
+	  notify_dmcs_thread(BaseNotification::SHUTDOWN, 0, session_id, 0, 0);
 
 	  return;
 	}

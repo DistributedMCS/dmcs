@@ -158,8 +158,10 @@ public:
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-    StreamingForwardMessage mess(session_id,
-				 invoker,
+    // dummy path
+    History* path;
+    StreamingForwardMessage mess(path,
+				 session_id,
 				 pack_size);
 
     conn->write(mess);

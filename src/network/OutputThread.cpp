@@ -39,8 +39,8 @@
 
 namespace dmcs {
 
-OutputThread::OutputThread(std::size_t i, std::size_t p)
-  : invoker(i), port(p), eof_mode(false),
+OutputThread::OutputThread(std::size_t p)
+  : port(p), eof_mode(false),
     output_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE))
 { }
 

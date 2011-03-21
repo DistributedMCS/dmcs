@@ -30,34 +30,45 @@
 #ifndef STREAMING_DMCS_NOTIFICATION_H
 #define STREAMING_DMCS_NOTIFICATION_H
 
+#include "dmcs/BaseNotification.h"
+#include "dmcs/BaseTypes.h"
+
 namespace dmcs {
 
-struct StreamingDMCSNotification
-{
-  enum NotificationType
-    {
-      REQUEST = 0,
-      SHUTDOWN
-    };
 
-  StreamingDMCSNotification(std::size_t sid,
-			    std::size_t i,
+
+struct StreamingDMCSNotification : public BaseNotification
+{
+  StreamingDMCSNotification(NotificationType t, 
+			    History* pa,
+			    std::size_t sid, 
 			    std::size_t ps,
-			    std::size_t p,
-			    NotificationType t)
-    : session_id(sid),
-      invoker(i), 
-      pack_size(ps), 
-      port(p),
-      type(t)
+			    std::size_t p)
+    : BaseNotification(t, pa),
+      session_id(sid),
+      pack_size(ps),
+      port(p)
   { }
-  
-  std::size_t  session_id;
-  std::size_t  invoker;
-  std::size_t  pack_size;
-  std::size_t  port;
-  NotificationType type;
+
+  std::size_t session_id;
+  std::size_t pack_size;
+  std::size_t port;
 };
+
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const StreamingDMCSNotification& sdn)
+{
+  os << (BaseNotification)sdn
+     << " sid = " << sdn.session_id 
+     << " pack_size = " << sdn.pack_size
+     << " port = " << sdn.port;
+
+  return os;
+}
+
+
 
 } // namespace dmcs
 

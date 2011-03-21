@@ -30,33 +30,40 @@
 #ifndef OUTPUT_NOTIFICATION_H
 #define OUTPUT_NOTIFICATION_H
 
-#include <boost/thread.hpp>
-#include <boost/thread/future.hpp>
-#include <boost/shared_ptr.hpp>
+#include "dmcs/BaseNotification.h"
 
 namespace dmcs {
 
-struct OutputNotification
-{
-  enum NotificationType
-    {
-      REQUEST = 0,
-      NEXT,
-      SHUTDOWN
-    };
 
-  OutputNotification(std::size_t ps, 
-		     std::size_t psid,
-		     NotificationType t)
-    : pack_size(ps),
+
+struct OutputNotification : public BaseNotification
+{
+  OutputNotification(NotificationType t, 
+		     History* pa,
+		     std::size_t psid, 
+		     std::size_t ps)
+    : BaseNotification(t, pa),
       parent_session_id(psid),
-      type(t)
+      pack_size(ps)
   { }
   
-  std::size_t pack_size;
   std::size_t parent_session_id;
-  NotificationType type;
+  std::size_t pack_size;
 };
+
+
+
+inline std::ostream&
+operator<< (std::ostream& os, const OutputNotification& on)
+{
+  os << (BaseNotification)on 
+     << " sid = " << on.parent_session_id
+     << " pack_size = " << on.pack_size;
+
+  return os;
+}
+
+
 
 } // namespace dmcs
 
