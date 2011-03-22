@@ -174,7 +174,7 @@ StreamingDMCS::~StreamingDMCS()
 void
 StreamingDMCS::initialize(
 #ifdef DEBUG
-			  History path,
+			  History& path,
 #else
 			  std::size_t path,
 #endif
@@ -277,7 +277,7 @@ StreamingDMCS::listen(ConcurrentMessageQueue* handler_dmcs_notif,
 void
 StreamingDMCS::start_up(
 #ifdef DEBUG			
-			History path,
+			History& path,
 #else
 			std::size_t path,
 #endif

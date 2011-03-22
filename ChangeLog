@@ -1,3 +1,12 @@
+2011-03-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Clean up.
+
+	* include/network/NeighborOut.h: Update path.
+
+	* include/dmcs/StreamingDMCS.h: Use references
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
 2011-03-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcs/QueryPlan.cpp: include config.h when HAVE_CONFIG_H is defined.

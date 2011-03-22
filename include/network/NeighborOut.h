@@ -38,6 +38,7 @@
 #include "solver/Conflict.h"
 #include "network/connection.hpp"
 
+#include <boost/functional/hash.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
@@ -171,6 +172,13 @@ public:
 		std::size_t session_id)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
+
+    // update path
+#ifdef DEBUG
+    path.push_back(invoker);
+#else
+    boost::hash_combine(path, invoker);
+#endif
 
     StreamingForwardMessage mess(path,
 				 invoker,

@@ -89,7 +89,7 @@ private:
   void
   initialize(
 #ifdef DEBUG
-	     History path,
+	     History& path,
 #else
 	     std::size_t path,
 #endif
@@ -101,7 +101,7 @@ private:
   void
   start_up(
 #ifdef DEBUG
-	   History path,
+	   History& path,
 #else
 	   std::size_t path,
 #endif

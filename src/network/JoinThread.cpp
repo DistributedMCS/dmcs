@@ -73,10 +73,6 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
   PartialBeliefState* first_bs = **it;
   PartialBeliefState* result = new PartialBeliefState(*first_bs);
 
-  //DMCS_LOG_TRACE(port << ": first belief state: " << *first_bs << "Initialize result: " << *result);
-
-  //DMCS_LOG_DEBUG(" Iteratively join with next belief states");
-
   for (++it; it != run_it->end(); ++it)
     {
       PartialBeliefState* next_bs = **it;
@@ -85,10 +81,6 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
 	  DMCS_LOG_TRACE(port << ": INCONSISTENT!");
 	  return 0;
 	}
-
-#if 1
-      DMCS_LOG_TRACE(port << ": Intermediate RESULT = " << *result);
-#endif //0
     }
 
   DMCS_LOG_TRACE(port << ": Final RESULT = " << *result << " ... Sending to JOIN_OUT");
@@ -112,7 +104,7 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
   assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
 
 
-#if 1
+#if 0
   DMCS_LOG_DEBUG(" Going to join the following");
   PartialBeliefStateIteratorVec::const_iterator b = beg_it->begin();
   PartialBeliefStateIteratorVec::const_iterator e = end_it->begin();
@@ -124,7 +116,7 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
 	}
       DMCS_LOG_DEBUG(" ");
       }
-#endif //0
+#endif // 0
 
   std::size_t n = partial_eqs->size();
 
@@ -271,8 +263,6 @@ JoinThread::import_belief_states(std::size_t noff,
     {
       std::size_t prio = 0;
       int timeout = 0;
-
-      //DMCS_LOG_TRACE(port << ": Read up to " << peq_cnt << " belief states");
 
       struct MessagingGatewayBC::ModelSession ms = mg->recvModel(offset, prio, timeout);
       PartialBeliefState* bs = ms.m;
@@ -556,8 +546,6 @@ JoinThread::operator()(std::size_t nbs,
 #endif
 
   VecSizeTPtr request_size(new VecSizeT(no_nbs, 0));
-
-  // process();
 
   std::size_t pack_size;
   while (1)
