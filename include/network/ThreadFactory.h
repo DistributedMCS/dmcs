@@ -54,21 +54,15 @@ public:
   ThreadFactory(const ContextPtr& c, 
 		const TheoryPtr& t,
 		const SignaturePtr& ls,
-		const BeliefStatePtr& lV,
 		const NeighborListPtr& ns,
-		std::size_t ps,
 		std::size_t sid,
 		MessagingGatewayBC* m,
-		ConcurrentMessageQueue* dsn,
-		ConcurrentMessageQueue* djn,
-		HashedBiMap* co,
-		std::size_t p);
+		HashedBiMap* co);
 
   void
   createNeighborThreads(ThreadVecPtr& neighbor_threads,
 			NeighborThreadVecPtr& neighbors,
 			ConcurrentMessageQueueVecPtr& neighbors_notif);
-
   boost::thread*
   createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif);
 
@@ -76,19 +70,15 @@ public:
   createLocalSolveThread();
 
 private:
-  const ContextPtr                context;
-  const TheoryPtr                 theory;
-  const SignaturePtr              local_sig;
-  const BeliefStatePtr            localV;
-  const NeighborListPtr           nbs;
-  std::size_t                     pack_size;
-  std::size_t                     session_id;
-  MessagingGatewayBC*             mg;
-  ConcurrentMessageQueue*         dmcs_sat_notif;
-  ConcurrentMessageQueue*         dmcs_joiner_notif;
-  HashedBiMap*                    c2o;             // hashed bimap from context id to
-			                           // the offset in the vector of
-				                   // neighbor message queue
+  const ContextPtr context;
+  const TheoryPtr theory;
+  const SignaturePtr local_sig;
+  const NeighborListPtr nbs;
+  std::size_t session_id;
+  MessagingGatewayBC* mg;
+  HashedBiMap* c2o;             // hashed bimap from context id to
+                                // the offset in the vector of
+                                // neighbor message queue
   std::size_t port;
 };
 

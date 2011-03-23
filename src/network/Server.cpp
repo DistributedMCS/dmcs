@@ -32,7 +32,10 @@
 #endif
 
 #include "dmcs/Log.h"
+
+#include "network/ConcurrentMessageQueueFactory.h"
 #include "network/Handler.h"
+#include "network/ThreadFactory.h"
 #include "network/Server.h"
 
 #include <algorithm>
@@ -43,22 +46,76 @@
 namespace dmcs {
 
 
+
 Server::Server(const CommandTypeFactoryPtr& c,
 	       boost::asio::io_service& i,
 	       const boost::asio::ip::tcp::endpoint& endpoint)
   : ctf(c),
     io_service(i),
     acceptor(io_service, endpoint),
-    invokers(new ListSizeT)
+    port(endpoint.port()),
+    invokers(new ListSizeT),
+    neighbor_threads(new ThreadVec),
+    handler_threads(new ThreadVec),
+    neighbors_notif(new ConcurrentMessageQueueVec)
 {
+  initialize();
+
   connection_ptr my_connection(new connection(io_service));
 
   acceptor.async_accept(my_connection->socket(),
 			boost::bind(&Server::handle_accept, this,
 				    boost::asio::placeholders::error,
 				    my_connection)
-			);
+				    );
 }
+
+
+
+void
+Server::initialize()
+{
+  StreamingCommandTypePtr cmd_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
+
+  const ContextPtr& ctx = ctf->getContext();
+  const TheoryPtr& theory = ctf->getTheory();
+  const QueryPlanPtr& query_plan = ctf->getQueryPlan();
+
+  const SignaturePtr& local_sig = ctx->getSignature();
+  std::size_t my_id = ctx->getContextID();
+  std::size_t mq_size = ctf->getMQSize();
+
+  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
+  std::size_t no_nbs = nbs->size();
+
+  ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
+  mg = mqf.createMessagingGateway(port, no_nbs, mq_size);
+
+  HashedBiMapPtr c2o(new HashedBiMap);
+
+  // fill up the map: ctx_id <--> offset
+  std::size_t off = 0;
+  for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it, ++off)
+    {
+      std::size_t nid = (*it)->neighbor_id;
+      c2o->insert(Int2Int(nid, off));
+    }
+
+  ThreadFactory tf(ctx, theory, local_sig, nbs, 0, mg.get(), c2o.get());
+  
+  if (no_nbs > 0)
+    {
+      DMCS_LOG_TRACE("Create Neighbor threads");
+      tf.createNeighborThreads(neighbor_threads, neighbors, neighbors_notif);
+      join_thread = tf.createJoinThread(neighbors_notif);
+    }
+
+  DMCS_LOG_TRACE("Create SAT thread");
+  sat_thread = tf.createLocalSolveThread();
+
+  DMCS_LOG_TRACE("All thread created!");
+}
+
 
 
 void
@@ -74,7 +131,7 @@ Server::handle_accept(const boost::system::error_code& e, connection_ptr conn)
 			    boost::bind(&Server::handle_accept, this,
 					boost::asio::placeholders::error,
 					new_conn)
-			    );
+					);
 
       DMCS_LOG_TRACE("Wait for header...");
 
@@ -125,12 +182,13 @@ Server::dispatch_header(const boost::system::error_code& e,
 	}
       else if (header->find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
-
 	  typedef Handler<StreamingCommandType> StreamingHandler;
 
-	  StreamingCommandTypePtr cmt_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
+	  //StreamingCommandTypePtr cmd_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
 
 	  StreamingHandler::SessionMsgPtr sesh(new StreamingHandler::SessionMsg(conn));
+
+	  StreamingHandler::HandlerPtr handler(new StreamingHandler);
 
 	  const std::size_t invoker = sesh->mess.getInvoker();
 	  ListSizeT::const_iterator it = std::find(invokers->begin(), invokers->end(), invoker);
@@ -143,11 +201,11 @@ Server::dispatch_header(const boost::system::error_code& e,
 	  else
 	    {
 	      invokers->push_back(invoker);
-	    }
+	      }
 
-	  StreamingHandler::HandlerPtr handler(new StreamingHandler);
 
-	  handler->start(handler,sesh, cmt_stm_dmcs);
+	  //boost::thread* t = new boost::thread(*handler, handler, sesh, mg.get());
+	  //handler_threads->push_back(t);
 	}
       else if (header->find(HEADER_REQ_OPT_DMCS) != std::string::npos)
 	{
@@ -191,7 +249,7 @@ Server::dispatch_header(const boost::system::error_code& e,
       // An error occurred.
       DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
       throw std::runtime_error(e.message());
-    }
+      }
 }
 
 

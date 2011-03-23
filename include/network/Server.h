@@ -31,8 +31,8 @@
 #define SERVER_H
 
 #include "network/BaseHandler.h"
-#include "network/connection.hpp"
 #include "network/Session.h"
+#include "network/connection.hpp"
 
 #include "mcs/BeliefState.h"
 #include "mcs/Rule.h"
@@ -69,6 +69,9 @@ public:
 	 boost::asio::io_service& io_service,
 	 const boost::asio::ip::tcp::endpoint& endpoint);
 
+  void
+  initialize();
+
   void 
   handle_accept(const boost::system::error_code& e, connection_ptr conn);
 
@@ -83,6 +86,14 @@ private:
   boost::asio::io_service& io_service;
   boost::asio::ip::tcp::acceptor acceptor;
   ListSizeTPtr invokers;
+  boost::thread* join_thread;
+  boost::thread* sat_thread;
+  MessagingGatewayBCPtr mg;
+  ThreadVecPtr handler_threads;
+  ThreadVecPtr neighbor_threads;
+  NeighborThreadVecPtr neighbors;
+  ConcurrentMessageQueueVecPtr neighbors_notif;
+  std::size_t port;
 };
 
 typedef boost::shared_ptr<BaseServer> ServerPtr;
