@@ -1,5 +1,8 @@
 2011-03-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/NeighborOut.h: Remove port.
+	* include/network/NeighborThread.h: Likewise.
+
 	* include/solver/RelSatSolver.h: Remove some data members.
 	* src/solver/RelSatSolver.cpp: Likewise.
 	* include/solver/SatSolverFactory.h: Likewise.

@@ -52,19 +52,15 @@ namespace dmcs {
  */
 class NeighborOut
 {
-private:
-  std::size_t port;
-
 public:
-  NeighborOut(std::size_t p)
-    : port(p)
+  NeighborOut()
   { }
 
 
   virtual
   ~NeighborOut()
   {
-    DMCS_LOG_TRACE(port << ": Terminating NeighborOut.");
+    DMCS_LOG_TRACE("Terminating NeighborOut.");
   }
 
 
@@ -78,7 +74,7 @@ public:
       {
 	ConflictNotification* cn = wait_router(rnn, nid);
 
-	DMCS_LOG_TRACE(port << ": Got a message = " << *cn);
+	DMCS_LOG_TRACE("Got a message = " << *cn);
 
 #ifdef DEBUG
 	History path = cn->path;
@@ -95,7 +91,7 @@ public:
 
 	if (cn->type == BaseNotification::SHUTDOWN)
 	  {
-	    DMCS_LOG_TRACE(port << ": Neighbor " << nid << " received SHUTDOWN, propagating TERMINATE...");
+	    DMCS_LOG_TRACE("Neighbor " << nid << " received SHUTDOWN, propagating TERMINATE...");
 
 	    header = HEADER_TERMINATE;
 
@@ -115,7 +111,7 @@ public:
 	    // We should only send HEADER_NEXT
 	    boost::asio::ip::tcp::socket& sock = conn->socket();
 	    boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
-	    DMCS_LOG_TRACE(port << ": Going to send HEADER_NEXT to port " << ep.port());
+	    DMCS_LOG_TRACE("Going to send HEADER_NEXT to port " << ep.port());
 
 	    header = HEADER_NEXT;
 	  }
@@ -146,7 +142,7 @@ public:
     unsigned int p  = 0;
     std::size_t recvd = 0;
     
-    DMCS_LOG_TRACE(port << ": Listen to router... nid = " << nid);
+    DMCS_LOG_TRACE("Listen to router... nid = " << nid);
     router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
 	
     if (!ptr || !cn)

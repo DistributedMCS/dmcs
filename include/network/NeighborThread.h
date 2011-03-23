@@ -52,17 +52,16 @@ namespace dmcs {
 class NeighborThread
 {
 public:
-  NeighborThread(std::size_t p)
+  NeighborThread()
     : nop_thread(0),
-      io_service(new boost::asio::io_service),
-      port(p)
+      io_service(new boost::asio::io_service)
   { }
 
 
   virtual
   ~NeighborThread()
   {
-    DMCS_LOG_TRACE(port << ": Terminating NeighborThread.");
+    DMCS_LOG_TRACE("Terminating NeighborThread.");
 
     if (nop_thread)
       {
@@ -73,7 +72,7 @@ public:
 	    nop_thread->join();
 	    delete nop_thread;
 	    nop_thread = 0;
-	    DMCS_LOG_TRACE(port << ": Joined NeighborOut");
+	    DMCS_LOG_TRACE("Joined NeighborOut");
 	  }
       }
 
@@ -85,17 +84,16 @@ public:
 	     MessagingGatewayBC* mg_,
 	     const Neighbor* nb_,
 	     const HashedBiMap* c2o_,
-	     const std::size_t invoker_,
-	     const std::size_t pack_size_)
+	     const std::size_t invoker_)
   {
     router_neighbor_notif = rnn;
     mg = mg_;
     nb = nb_; 
     c2o = c2o_;
     invoker = invoker_;
-    pack_size = pack_size_;
 
-    DMCS_LOG_TRACE(port << ": starting neighbor " << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
+
+    DMCS_LOG_TRACE("starting neighbor " << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
 
     boost::asio::ip::tcp::resolver resolver(*io_service);
     boost::asio::ip::tcp::resolver::query query(nb->hostname, nb->port);
@@ -112,13 +110,13 @@ public:
 				 );
 
 
-    DMCS_LOG_TRACE(port << ": starting neighbor " << nb->neighbor_id << " io_service");
+    DMCS_LOG_TRACE("starting neighbor " << nb->neighbor_id << " io_service");
 
     boost::shared_ptr<boost::thread> nip(new boost::thread(boost::bind(&boost::asio::io_service::run, io_service)));
 
     nip->join(); // waits for termination
 
-    DMCS_LOG_TRACE(port << ": io_service for neighbor " << nb->neighbor_id << " done");
+    DMCS_LOG_TRACE("io_service for neighbor " << nb->neighbor_id << " done");
   }
 
 
@@ -126,12 +124,12 @@ public:
   void
   stop()
   {
-    DMCS_LOG_TRACE(port << ": stopping io_service " << io_service);
+    DMCS_LOG_TRACE("stopping io_service " << io_service);
 
     if (io_service)
       {
 	io_service->stop(); // terminate io_service
-	DMCS_LOG_TRACE(port << ": io_service stopped");
+	DMCS_LOG_TRACE("io_service stopped");
       }
   }
 
@@ -156,7 +154,7 @@ private:
 	const std::size_t offset                = pair->second;
 	
 	
-	NeighborOut nop(port);
+	NeighborOut nop;
 	nop_thread = new boost::thread(nop,
 				       conn,
 				       router_neighbor_notif,
@@ -167,7 +165,7 @@ private:
 	boost::shared_ptr<std::string> header(new std::string);
 	
 	// read from network
-	DMCS_LOG_TRACE(port << ": Reading header from network, offset = " << offset);
+	DMCS_LOG_TRACE("Reading header from network, offset = " << offset);
 	conn->async_read(*header,
 			 boost::bind(&NeighborThread::handle_read_header, this,  
 				     boost::asio::placeholders::error,
@@ -193,7 +191,7 @@ private:
     else
       {
 	// An error occurred.
-	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << port << ": " << e.message());
+	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " <<  e.message());
 	throw std::runtime_error(e.message());
     }
   }  
@@ -214,7 +212,7 @@ private:
 	    StreamingBackwardMessagePtr mess(new StreamingBackwardMessage);
 
 	    // read some models
-	    DMCS_LOG_TRACE(port << ": Reading message from network");
+	    DMCS_LOG_TRACE("Reading message from network");
 
 	    conn->async_read(*mess,
 			     boost::bind(&NeighborThread::handle_read_message, this,
@@ -235,7 +233,7 @@ private:
 	    boost::shared_ptr<std::string> header(new std::string);
 	    
 	    // read from network
-	    DMCS_LOG_TRACE(port << ": Reading header from network, noff = " << noff);
+	    DMCS_LOG_TRACE("Reading header from network, noff = " << noff);
 	    conn->async_read(*header,
 			     boost::bind(&NeighborThread::handle_read_header, this,  
 					 boost::asio::placeholders::error,
@@ -248,7 +246,7 @@ private:
       }
     else
       {
-	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << port << ": " << e.message());
+	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " <<  e.message());
 	throw std::runtime_error(e.message());
       }
   }
@@ -263,11 +261,11 @@ private:
     if (!e)
       {
 	// extract a bunch of models from the message and then put each into NEIGHBOR_MQ
-	DMCS_LOG_TRACE(port << ": Write to MQs. noff = " << noff);
+	DMCS_LOG_TRACE("Write to MQs. noff = " << noff);
 	
 	const ModelSessionIdListPtr& msl = mess->getResult();
 	
-	DMCS_LOG_TRACE(port << ": Received " << msl->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
+	DMCS_LOG_TRACE("Received " << msl->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
 	
 	const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
@@ -285,11 +283,11 @@ private:
 
 	    if (bs != 0)
 	      {
-		DMCS_LOG_TRACE(port << ": Sending model = " << *bs << ", sid = " << sid << " from " << noff << " to " << offset);
+		DMCS_LOG_TRACE("Sending model = " << *bs << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
 	    else
 	      {
-		DMCS_LOG_TRACE(port << ": Sending model: NULL" << ", sid = " << sid << " from " << noff << " to " << offset);
+		DMCS_LOG_TRACE("Sending model: NULL" << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
 	    mg->sendModel(bs, sid, noff, offset, 0); 
 	  }
@@ -297,7 +295,7 @@ private:
 	boost::shared_ptr<std::string> header(new std::string);
 	
 	// read from network
-	DMCS_LOG_TRACE(port << ": Reading header from network, noff = " << noff);
+	DMCS_LOG_TRACE("Reading header from network, noff = " << noff);
 	conn->async_read(*header,
 			 boost::bind(&NeighborThread::handle_read_header, this,  
 				     boost::asio::placeholders::error,
@@ -309,7 +307,7 @@ private:
       }
     else
       {
-	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << port << ": " << e.message());
+	DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " <<  e.message());
 	throw std::runtime_error(e.message());
       }
   }
@@ -317,15 +315,13 @@ private:
 
 
 private:
-  ConcurrentMessageQueue*    router_neighbor_notif;
-  MessagingGatewayBC*        mg;
-  const Neighbor*            nb;
-  const HashedBiMap*         c2o;
-  std::size_t                invoker;
-  std::size_t                pack_size;
+  ConcurrentMessageQueue* router_neighbor_notif;
+  MessagingGatewayBC* mg;
+  const Neighbor* nb;
+  const HashedBiMap* c2o;
+  std::size_t invoker;
   boost::thread* nop_thread;
   boost::shared_ptr<boost::asio::io_service> io_service;
-  std::size_t port;
 };
 
 

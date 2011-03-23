@@ -96,12 +96,12 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
       ConcurrentMessageQueuePtr cmq(new ConcurrentMessageQueue);
       neighbors_notif->push_back(cmq);
 
-      NeighborThread* nt = new NeighborThread(port);
+      NeighborThread* nt = new NeighborThread();
       neighbors->push_back(nt);
 
       const NeighborPtr nb = *it;
       
-      boost::thread* nit = new boost::thread(*nt, cmq.get(), mg, nb.get(), c2o, ctx_id, pack_size);
+      boost::thread* nit = new boost::thread(*nt, cmq.get(), mg, nb.get(), c2o, ctx_id);
       neighbor_input_threads->push_back(nit);
 
       DMCS_LOG_TRACE("Created neighbor thread " << i << " for " << port);
