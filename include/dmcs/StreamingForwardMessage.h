@@ -57,6 +57,14 @@ public:
   ~StreamingForwardMessage() 
   { }
 
+  StreamingForwardMessage(const StreamingForwardMessage& sfMess)
+  {
+    path = sfMess.path;
+    invoker = sfMess.invoker;
+    session_id = sfMess.session_id;
+    pack_size = sfMess.session_id;
+  }
+
   StreamingForwardMessage(
 #ifdef DEBUG
 			  History p,

@@ -1,5 +1,7 @@
 2011-03-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/dmcs/StreamingForwardMessage.h: Add copy constructor.
+
 	* include/network/ConcurrentMessageDispatcher.h: Add send/recv
 	methods for incoming messages from Handler to Joiner.
 	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
