@@ -1,5 +1,10 @@
 2011-03-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/solver/RelSatSolver.h: Remove some data members.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
 	* include/dmcs/StreamingForwardMessage.h: Add copy constructor.
 
 	* include/network/ConcurrentMessageDispatcher.h: Add send/recv

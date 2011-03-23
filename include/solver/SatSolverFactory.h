@@ -41,27 +41,21 @@ class SatSolverFactory
 {
 public:
   SatSolverFactory(bool il,
-		   std::size_t my_id_,
+		   std::size_t mid,
 		   std::size_t sid,
-		   const TheoryPtr& theory_,
-		   const SignaturePtr& local_sig_,
-		   const BeliefStatePtr& localV_,
+		   const TheoryPtr& t,
+		   const SignaturePtr& ls,
 		   const HashedBiMap* co,
-		   std::size_t system_size_,
-		   MessagingGatewayBC* mg_,
-		   ConcurrentMessageQueue* dsn,
-		   std::size_t p)
+		   std::size_t ss,
+		   MessagingGatewayBC* m)
     : is_leaf(il),
-      my_id(my_id_),
+      my_id(mid),
       session_id(sid),
-      theory(theory_),
-      local_sig(local_sig_),
-      localV(localV_),
+      theory(t),
+      local_sig(ls),
       c2o(co),
-      system_size(system_size_),
-      mg(mg_), 
-      dmcs_sat_notif(dsn), 
-      port(p)
+      system_size(ss),
+      mg(m)
   { }
 
   template<typename aSatSolverTypePtr>
@@ -74,12 +68,9 @@ private:
   std::size_t                    session_id;
   const TheoryPtr                theory;
   const SignaturePtr             local_sig;
-  const BeliefStatePtr           localV;
   const HashedBiMap*             c2o;
   std::size_t                    system_size;
   MessagingGatewayBC*            mg;
-  ConcurrentMessageQueue*        dmcs_sat_notif;
-  std::size_t port;
 };
 
 
@@ -90,10 +81,8 @@ SatSolverFactory::create<RelSatSolverPtr>()
   RelSatSolverPtr relsatsolver(new RelSatSolver(is_leaf,
 						my_id, session_id,
 						theory, local_sig, 
-						localV,
 						c2o, system_size, 
-						mg, dmcs_sat_notif, 
-						port));
+						mg));
 
   return relsatsolver;
 }

@@ -53,16 +53,13 @@ class RelSatSolver : public BaseSolver
 {
 public:
   RelSatSolver(bool il,
-	       std::size_t my_id_,
-	       std::size_t my_sid,
-	       const TheoryPtr& theory_,
-	       const SignaturePtr& local_sig_,
-	       const BeliefStatePtr& localV_,
+	       std::size_t mid,
+	       std::size_t msid,
+	       const TheoryPtr& t,
+	       const SignaturePtr& ls,
 	       const HashedBiMap* co,
-	       std::size_t system_size_,
-	       MessagingGatewayBC* mg_,
-	       ConcurrentMessageQueue* dsn,
-	       std::size_t p);
+	       std::size_t ss,
+	       MessagingGatewayBC* m);
 
   virtual
   ~RelSatSolver();
@@ -107,15 +104,12 @@ private:
   std::size_t my_session_id;
   const TheoryPtr theory;
   const SignaturePtr sig;
-  const BeliefStatePtr localV;
   const HashedBiMap* c2o;
   std::size_t system_size;                // this can be taken from localV
   MessagingGatewayBC* mg;
-  ConcurrentMessageQueue* dmcs_sat_notif; // to get notification from StreamingDMCS
   PartialBeliefState* input;
   PartialBeliefStateBufPtr input_buffer;
   bool first_round;
-  std::size_t port;
 
   SATInstance* xInstance;
   SATSolver* xSATSolver;

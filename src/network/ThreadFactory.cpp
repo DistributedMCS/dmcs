@@ -134,7 +134,7 @@ ThreadFactory::createLocalSolveThread()
   const std::size_t system_size = context->getSystemSize();
 
   SatSolverFactory ssf(is_leaf, my_id, session_id, theory, local_sig, 
-		       localV, c2o, system_size, mg, dmcs_sat_notif, port);
+		       c2o, system_size, mg);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

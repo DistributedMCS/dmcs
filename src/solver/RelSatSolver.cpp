@@ -47,29 +47,23 @@
 namespace dmcs {
 
 RelSatSolver::RelSatSolver(bool il,
-			   std::size_t my_id_,
-			   std::size_t my_sid,
-			   const TheoryPtr& theory_, 
-			   const SignaturePtr& sig_,
-			   const BeliefStatePtr& localV_,
+			   std::size_t mid,
+			   std::size_t msid,
+			   const TheoryPtr& t, 
+			   const SignaturePtr& ls,
 			   const HashedBiMap* co,
-			   std::size_t system_size_,
-			   MessagingGatewayBC* mg_,
-			   ConcurrentMessageQueue* dsn,
-			   std::size_t p)
+			   std::size_t ss,
+			   MessagingGatewayBC* m)
   : is_leaf(il),
-    my_id(my_id_),
-    my_session_id(my_sid),
-    theory(theory_), 
-    sig(sig_),
-    localV(localV_),
+    my_id(mid),
+    my_session_id(msid),
+    theory(t), 
+    sig(ls),
     c2o(co),
-    system_size(system_size_),
-    mg(mg_),
-    dmcs_sat_notif(dsn),
+    system_size(ss),
+    mg(m),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this)),
-    port(p),
     input(0),
     input_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE))
 {
@@ -157,7 +151,7 @@ RelSatSolver::prepare_input()
   std::size_t prio = 0;
   int timeout      = 0;
 
-  DMCS_LOG_TRACE(port << ": Waiting at JOIN_OUT_MQ for the next input!");
+  DMCS_LOG_TRACE("Waiting at JOIN_OUT_MQ for the next input!");
 
   struct MessagingGatewayBC::ModelSession ms = 
     mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
@@ -173,11 +167,11 @@ RelSatSolver::prepare_input()
   if (sid != my_session_id)
     {
       assert (sid < my_session_id);
-      DMCS_LOG_TRACE(port << ": Receive old joined input from sid = " << sid << ", while my current session id = " << my_session_id);
+      DMCS_LOG_TRACE("Receive old joined input from sid = " << sid << ", while my current session id = " << my_session_id);
       return false;
     }
 
-  DMCS_LOG_TRACE(port << ": input received!");
+  DMCS_LOG_TRACE("input received!");
 
   xInstance->setSizeWPartialAss(xInstance->iClauseCount());
   
@@ -190,7 +184,7 @@ RelSatSolver::prepare_input()
   SignatureByCtx::const_iterator low = local_sig.lower_bound(my_id);
   SignatureByCtx::const_iterator up  = local_sig.upper_bound(my_id);
 
-  //DMCS_LOG_TRACE(port << ":  Updating input from bridge signature...");
+  //DMCS_LOG_TRACE(" Updating input from bridge signature...");
 
   for (SignatureByCtx::const_iterator it = local_sig.begin(); it != low; ++it)
     {
@@ -224,13 +218,13 @@ RelSatSolver::refresh()
 void
 RelSatSolver::solve()
 {
-  DMCS_LOG_TRACE(port << ": Fresh solving. Wait for a message from DMCS");
+  DMCS_LOG_TRACE("Fresh solving. Wait for a message from DMCS");
   ConflictNotification* cn = 0;
   void *ptr = static_cast<void*>(&cn);
   unsigned int p = 0;
   std::size_t recvd = 0;
 
-  dmcs_sat_notif->receive(ptr, sizeof(cn), recvd, p);
+  //  dmcs_sat_notif->receive(ptr, sizeof(cn), recvd, p);
 
   if (ptr && cn)
     {
@@ -251,33 +245,33 @@ RelSatSolver::solve()
 
       if (is_leaf)
 	{
-	  DMCS_LOG_TRACE(port << ": Leaf case. Solve now.");
+	  DMCS_LOG_TRACE("Leaf case. Solve now.");
 	  eResult = xSATSolver->eSolve();
 	  xSATSolver->refresh();
 	}
       else
 	{
-	  DMCS_LOG_TRACE(port << ": Intermediate case.");
+	  DMCS_LOG_TRACE("Intermediate case.");
 
 	  while (1)
 	    {
-	      DMCS_LOG_TRACE(port << ": Prepare input before solving.");
-	      DMCS_LOG_TRACE(port << ": xIntance.size() before removing input = " << xInstance->iClauseCount());
+	      DMCS_LOG_TRACE("Prepare input before solving.");
+	      DMCS_LOG_TRACE("xIntance.size() before removing input = " << xInstance->iClauseCount());
 	      xInstance->removeInput();
-	      DMCS_LOG_TRACE(port << ": xIntance.size() after removing input = " << xInstance->iClauseCount());
+	      DMCS_LOG_TRACE("xIntance.size() after removing input = " << xInstance->iClauseCount());
 	      if (!prepare_input())
 		{
-		  DMCS_LOG_TRACE(port << ": Got NULL input from JOIN_OUT_MQ. Send a NULL model to OUT_MQ to inform OutputThread");
+		  DMCS_LOG_TRACE("Got NULL input from JOIN_OUT_MQ. Send a NULL model to OUT_MQ to inform OutputThread");
 		  mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
 		  break;
 		}
-	      DMCS_LOG_TRACE(port << ": A fresh solving. input = " << *input);
+	      DMCS_LOG_TRACE("A fresh solving. input = " << *input);
 	      
 	      eResult = xSATSolver->eSolve();
 	      xSATSolver->refresh();
 	      bool was_cached;
 	      store(input, input_buffer, true, was_cached);
-	      DMCS_LOG_TRACE(port << ": One SOLVE finished.");
+	      DMCS_LOG_TRACE("One SOLVE finished.");
 	    }
 	}
 
@@ -298,7 +292,7 @@ RelSatSolver::receiveEOF()
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   if (is_leaf)
     {
-      DMCS_LOG_TRACE(port << ": EOF. Send a NULL pointer to OUT_MQ to close this session.");
+      DMCS_LOG_TRACE("EOF. Send a NULL pointer to OUT_MQ to close this session.");
       mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
 }
@@ -312,7 +306,7 @@ RelSatSolver::receiveUNSAT(ClauseList& learned_clauses)
 
   if (is_leaf)
     {
-      DMCS_LOG_TRACE(port << ": UNSAT. Send a NULL pointer to OUT_MQ to close this session.");
+      DMCS_LOG_TRACE("UNSAT. Send a NULL pointer to OUT_MQ to close this session.");
       mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
     }
 }
@@ -362,17 +356,14 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 	}
       else
 	{
-	  setBeliefSet(neighbor_belief, loc_it->origId, PartialBeliefSet::DMCS_FALSE);
-	}
-    }
+	  setBeliefSet(neighbor_belief, loc_it->origId, PartialBeliefSet::DMCS_
 
-  DMCS_LOG_TRACE(port << ": MODEL from SAT: bs = " << *bs);
+  DMCS_LOG_TRACE("MODEL from SAT: bs = " << *bs);
 
   // project to my output interface
-  DMCS_LOG_TRACE(port << ": localV  = " << *localV);
-  project_to(bs, localV);
+  //  project_to(bs, localV);
 
-  DMCS_LOG_TRACE(port << ": Going to send: " << *bs << ", with parent session id = " << parent_session_id);
+  DMCS_LOG_TRACE("Going to send: " << *bs << ", with parent session id = " << parent_session_id);
   // now put this PartialBeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
   // Models should be cleaned by OutputThread
