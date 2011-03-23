@@ -1,5 +1,37 @@
 2011-03-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/Server.h: Create threads at start up time.
+	* src/network/Server.cpp: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/ThreadFactory.h: Likewise.
+
+	* include/network/Handler.h: Be less powerful, give power of
+	controlling to Server.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/BaseHandler.h: Adapt to this.
+
+	* include/dmcs/StreamingDMCS.h: Comment out content for testing.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Remove dmcs.
+	* include/dmcs/CommandTypeFactory.h: Likewise.
+
+	* include/network/StreamingDMCSThread.h: Remove port and change
+	interface of operator()().
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+
+	* include/network/JoinThread.h: Remove notification from dmcs.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* src/dmcsd.cpp: Add another command line option for size
+	of MessageQueue.
+	* include/dmcs/ProgramOptions.h: Likewise.
+	* include/dmcs/CommandTypeFactory.h: Likewise.
+
+
+	* include/dmcs/CommandTypeFactory.h: Add methods to return some of
+	the data members.
+
 	* include/network/NeighborOut.h: Remove port.
 	* include/network/NeighborThread.h: Likewise.
 
