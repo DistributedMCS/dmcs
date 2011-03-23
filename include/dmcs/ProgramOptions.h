@@ -59,6 +59,7 @@ namespace dmcs {
 #define HEURISTICS       "h"
 #define STREAMING        "s"
 #define PACK_SIZE        "k"
+#define MQ_SIZE          "mq_size"
 #define CONFLICTS_DRIVEN "cd"
 
 

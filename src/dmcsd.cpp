@@ -233,6 +233,7 @@ main(int argc, char* argv[])
       std::size_t limit_answers = 0;
       std::size_t limit_bind_rules = 0;
       std::size_t heuristics = 0;
+      std::size_t mq_size = 0;
       bool dynamic = false;
       bool conflicts_driven = false;
       std::string logging;
@@ -275,6 +276,7 @@ Options";
 	(HEURISTICS, boost::program_options::value<std::size_t>(&heuristics)->default_value(1), "choose heuristics")
 	(LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
 	(DAEMONIZE, "start dmcsd in the background")
+	(MQ_SIZE, boost::program_options::value<std::size_t>(&mq_size)->default_value(50), "set size of message queues")
 	(CONFLICTS_DRIVEN, boost::program_options::value<bool>(&conflicts_driven)->default_value(false), "choose using conflicts driven")
 	;
       
@@ -654,7 +656,7 @@ Options";
 						       mt, sba_count, limit_answers, 
 						       limit_bind_rules, heuristics, 
 						       prefix, global_sigs, orig_sigs_size,
-						       sig, query_plan, loopFormula));
+						       sig, query_plan, loopFormula, mq_size));
       
       // Server can deal with different kinds of messages
       ServerPtr server(new Server(ctf, io_service, endpoint));
