@@ -177,17 +177,18 @@ CommandTypeFactory::create<OptCommandTypePtr>()
 }
 
 
-/*
+
 template<>
 inline StreamingCommandTypePtr
 CommandTypeFactory::create<StreamingCommandTypePtr>()
 {
-  StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, query_plan));
-  StreamingCommandTypePtr stm_opt_dmcs(new StreamingCommandType(stm_dmcs));
+  //StreamingDMCSPtr stm_dmcs(new StreamingDMCS(ctx, loopFormula, global_sigs, query_plan));
+  //StreamingCommandTypePtr stm_opt_dmcs(new StreamingCommandType(stm_dmcs));
+  StreamingCommandTypePtr stm_opt_dmcs(new StreamingCommandType);
 
   return stm_opt_dmcs;
 }
-*/
+
 
 
 template<>
