@@ -30,7 +30,6 @@ noinst_HEADERS =  \
 		SessionNotification.h \
 		StatsInfo.h \
 		StreamingCommandType.h \
-		StreamingDMCS.h \
 		StreamingDMCSNotification.h \
 		StreamingForwardMessage.h \
 		StreamingBackwardMessage.h \

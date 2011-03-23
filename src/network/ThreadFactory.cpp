@@ -42,39 +42,24 @@
 
 namespace dmcs {
 
+
+
 ThreadFactory::ThreadFactory(const ContextPtr& c, 
 			     const TheoryPtr& t,
 			     const SignaturePtr& ls,
-			     const BeliefStatePtr& lV,
 			     const NeighborListPtr& ns,
-			     std::size_t ps,
 			     std::size_t sid,
 			     MessagingGatewayBC* m,
-			     ConcurrentMessageQueue* dsn,
-			     ConcurrentMessageQueue* djn,
-			     HashedBiMap* co,
-			     std::size_t p)
+			     HashedBiMap* co)
   : context(c),
     theory(t), 
     local_sig(ls),
-    localV(lV),
     nbs(ns),
-    pack_size(ps),
     session_id(sid),
     mg(m),
-    dmcs_sat_notif(dsn), 
-    dmcs_joiner_notif(djn), 
-    c2o(co),
-    port(p)
+    c2o(co)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  // fill up the map: ctx_id <--> offset
-  std::size_t off = 0;
-  for (NeighborList::const_iterator it = nbs->begin(); it != nbs->end(); ++it, ++off)
-    {
-      std::size_t nid = (*it)->neighbor_id;
-      c2o->insert(Int2Int(nid, off));
-    }
 }
 
 
@@ -84,7 +69,7 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
 				     NeighborThreadVecPtr& neighbors,
 				     ConcurrentMessageQueueVecPtr& neighbors_notif)
 {
-  const std::size_t ctx_id      = context->getContextID();
+  const std::size_t ctx_id = context->getContextID();
 
   DMCS_LOG_TRACE("Going to create " << nbs->size() << " neighbor threads.");
 
@@ -103,8 +88,6 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
       
       boost::thread* nit = new boost::thread(*nt, cmq.get(), mg, nb.get(), c2o, ctx_id);
       neighbor_input_threads->push_back(nit);
-
-      DMCS_LOG_TRACE("Created neighbor thread " << i << " for " << port);
     }
 }
 
@@ -118,7 +101,7 @@ ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif)
   const std::size_t no_nbs   = nbs->size();
 
   JoinThread jt(port, session_id);
-  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, dmcs_joiner_notif, neighbors_notif.get());
+  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, neighbors_notif.get());
 
   return t;
 }
@@ -143,6 +126,7 @@ ThreadFactory::createLocalSolveThread()
 
   return t;
 }
+
 
 
 } // namespace dmcs
