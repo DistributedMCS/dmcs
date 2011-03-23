@@ -356,7 +356,9 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 	}
       else
 	{
-	  setBeliefSet(neighbor_belief, loc_it->origId, PartialBeliefSet::DMCS_
+	  setBeliefSet(neighbor_belief, loc_it->origId, PartialBeliefSet::DMCS_FALSE);
+	}
+    }
 
   DMCS_LOG_TRACE("MODEL from SAT: bs = " << *bs);
 
