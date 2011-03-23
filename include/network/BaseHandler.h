@@ -66,12 +66,13 @@ public:
   }
 
 
-  virtual void
+  /*  virtual */void
   do_local_job(const boost::system::error_code& e,
 	       HandlerPtr hdl,
 	       SessionMsgPtr sesh,
 	       CmdTypePtr cmd,
-	       bool first_call) = 0;
+	       bool first_call)
+  { }
 	       
 
 };

@@ -109,41 +109,27 @@ public:
   virtual
   ~Handler();
 
-  void 
-  do_next_batch(const boost::system::error_code& e,
-		BaseHandler<StreamingCommandType>::HandlerPtr hdl,
-		BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
-		BaseHandler<StreamingCommandType>::CmdTypePtr cmd);
-
+  void
+  operator()(HandlerPtr hdl, 
+	     SessionMsgPtr sesh, 
+	     MessagingGatewayBC* mg);
 
   void 
   do_local_job(const boost::system::error_code& e,
 	       BaseHandler<StreamingCommandType>::HandlerPtr hdl,
 	       BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
-	       BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
+	       MessagingGatewayBC* mg,
 	       bool first_call);
 
   void
   handle_read_header(const boost::system::error_code& e,
 		     BaseHandler<StreamingCommandType>::HandlerPtr hdl,
 		     BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
-		     BaseHandler<StreamingCommandType>::CmdTypePtr cmd,
+		     MessagingGatewayBC* mg,
 		     boost::shared_ptr<std::string> header,
 		     std::size_t parent_session_id);
 
 private:
-  void
-  notify_dmcs_thread(BaseNotification::NotificationType t, 
-#ifdef DEBUG
-		     History path,
-#else
-		     std::size_t path, 
-#endif
-		     std::size_t invoker,
-		     std::size_t parent_session_id,
-		     std::size_t pack_size,
-		     std::size_t port);
-
   void
   notify_output_thread(BaseNotification::NotificationType t, 
 #ifdef DEBUG
@@ -156,13 +142,7 @@ private:
     
 private:
   boost::thread* output_thread;
-  boost::thread* streaming_dmcs_thread;
-
-  ConcurrentMessageQueuePtr handler_dmcs_notif;
   ConcurrentMessageQueuePtr handler_output_notif;
-
-  MessagingGatewayBCPtr mg;
-
   std::size_t port;
 };
 
