@@ -175,7 +175,7 @@ JoinThread::wait_dmcs(
     std::size_t recvd = 0;
     
     DMCS_LOG_TRACE(port << ": Listen to dmcs...");
-    dmcs_joiner_notif->receive(ptr, sizeof(cn), recvd, p);
+    //    dmcs_joiner_notif->receive(ptr, sizeof(cn), recvd, p);
 	
     if (!ptr || !cn)
       {
@@ -528,13 +528,11 @@ void
 JoinThread::operator()(std::size_t nbs,
 		       std::size_t s,
 		       MessagingGatewayBC* m,
-		       ConcurrentMessageQueue* djn,
 		       ConcurrentMessageQueueVec* jv)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   mg = m;
-  dmcs_joiner_notif = djn;
   joiner_neighbors_notif = jv;
   no_nbs = nbs;
   system_size = s;

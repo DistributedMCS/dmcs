@@ -55,7 +55,6 @@ public:
   operator()(std::size_t no_nbs,
 	     std::size_t system_size,
 	     MessagingGatewayBC* mg,
-	     ConcurrentMessageQueue* dmcs_joiner_notif,
 	     ConcurrentMessageQueueVec* joiner_neighbors_notif);
 
 
@@ -122,7 +121,6 @@ private:
   std::size_t pack_size;         // the real upper-bound of number of models that we ask the neighbors
 
   MessagingGatewayBC*        mg;
-  ConcurrentMessageQueue*    dmcs_joiner_notif;
   ConcurrentMessageQueueVec* joiner_neighbors_notif;
 };
 
