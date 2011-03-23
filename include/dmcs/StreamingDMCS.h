@@ -46,7 +46,7 @@
 #include "solver/Conflict.h"
 
 namespace dmcs {
-
+  /*
 class StreamingDMCS : public BaseDMCS
 {
 public:
@@ -70,11 +70,11 @@ public:
   ~StreamingDMCS();
 
   void
-  loop(ConcurrentMessageQueue* notif_from_handler);
+  loop(MessagingGatewayBC* mg);
 
 private:
   void
-  listen(ConcurrentMessageQueue* notif_from_handler,
+  listen(MessagingGatewayBC* mg,
 	 BaseNotification::NotificationType& type,
 #ifdef DEBUG
 	 History& path,
@@ -128,6 +128,7 @@ private:
 };
 
 typedef boost::shared_ptr<StreamingDMCS> StreamingDMCSPtr;
+  */
 
 } // namespace dmcs
 

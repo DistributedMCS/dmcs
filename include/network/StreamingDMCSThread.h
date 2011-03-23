@@ -41,17 +41,15 @@ namespace dmcs {
 
 class StreamingDMCSThread
 {
-protected:
-  std::size_t port;
-
 public:
-  StreamingDMCSThread(std::size_t p);
+  StreamingDMCSThread();
 
   virtual
   ~StreamingDMCSThread();
 
   void
-  operator()(StreamingCommandType* scmt, ConcurrentMessageQueue* nfh);
+  operator()(StreamingCommandType* scmt, MessagingGatewayBC* mg, 
+	     ConcurrentMessageQueueVec* neighbors_notif);
 
 };
 

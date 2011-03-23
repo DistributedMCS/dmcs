@@ -36,8 +36,7 @@
 
 namespace dmcs {
 
-  StreamingDMCSThread::StreamingDMCSThread(std::size_t p)
-    : port(p)
+  StreamingDMCSThread::StreamingDMCSThread()
   { }
 
 
@@ -48,10 +47,11 @@ StreamingDMCSThread::~StreamingDMCSThread()
 
 
 void
-StreamingDMCSThread::operator()(StreamingCommandType* scmt, ConcurrentMessageQueue* nfh)
+StreamingDMCSThread::operator()(StreamingCommandType* scmt, MessagingGatewayBC* mg,
+				ConcurrentMessageQueueVec* neighbors_notif)
 {
   //  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  scmt->execute(nfh);
+  scmt->execute(mg, neighbors_notif);
 }
 
 } // namespace dmcs

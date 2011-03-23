@@ -53,6 +53,8 @@
 #include <boost/thread.hpp>
 
 namespace dmcs {
+
+  /*
   
 StreamingDMCS::StreamingDMCS(const ContextPtr& c, 
 			     const TheoryPtr& t, 
@@ -359,7 +361,7 @@ StreamingDMCS::loop(ConcurrentMessageQueue* handler_dmcs_notif)
       start_up(path, parent_session_id, pack_size, port);
     }
 }
-
+*/
 
 } // namespace dmcs
 

@@ -44,9 +44,9 @@ public:
   typedef StreamingForwardMessage input_type;
   //typedef StreamingDMCS::dmcs_value_type value_type;
 
-  StreamingCommandType(StreamingDMCSPtr& sdmcs_)
-    : sdmcs(sdmcs_)
-  { }
+  /*StreamingCommandType(StreamingDMCSPtr& s)
+    : sdmcs(s)
+    { }*/
 
   // return true/false indicating whether the execution was successful
   // while sending local models to message queue.
@@ -57,10 +57,10 @@ public:
   }
 
   void
-  execute(ConcurrentMessageQueue* notif_from_handler)
+  execute(MessagingGatewayBC* mg, ConcurrentMessageQueueVec* neighbors_notif)
   {
     //DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-    sdmcs->loop(notif_from_handler);
+    //sdmcs->loop(mg, neighbors_notif);
   }
 
   bool
@@ -69,8 +69,8 @@ public:
     return false;
   }
 
-private:
-  StreamingDMCSPtr sdmcs;
+  //private:
+  //  StreamingDMCSPtr sdmcs;
 };
 
 typedef boost::shared_ptr<StreamingCommandType> StreamingCommandTypePtr;

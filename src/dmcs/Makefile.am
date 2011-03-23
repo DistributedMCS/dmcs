@@ -43,5 +43,5 @@ libdmcs_a_SOURCES = \
                 QueryPlan.cpp \
                 BeliefCombination.cpp \
 		PrimitiveDMCS.cpp \
-		OptDMCS.cpp \
-		StreamingDMCS.cpp
+		OptDMCS.cpp 
+#		StreamingDMCS.cpp
