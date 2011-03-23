@@ -71,6 +71,7 @@ public:
 		     SignaturePtr& sig_,
 		     QueryPlanPtr& query_plan_,
 		     TheoryPtr& loopFormula_,
+		     std::size_t mqs,
 		     std::size_t buf_count_ = 100)
     : ctx_id(ctx_id_),
       system_size(system_size_),
@@ -89,6 +90,7 @@ public:
       sig(sig_),
       query_plan(query_plan_),
       loopFormula(loopFormula_),
+      mq_size(mqs),
       ctx(new Context(ctx_id_, system_size_, sig_, local_kb_, bridge_rules_, neighbor_list_)),
       buf_count(buf_count_)
   { }
@@ -96,6 +98,30 @@ public:
   template<typename aCommandTypePtr>
   aCommandTypePtr
   create();
+
+  ContextPtr
+  getContext()
+  {
+    return ctx;
+  }
+
+  TheoryPtr
+  getTheory()
+  {
+    return loopFormula;
+  }
+
+  QueryPlanPtr
+  getQueryPlan()
+  {
+    return query_plan;
+  }
+
+  std::size_t
+  getMQSize()
+  {
+    return mq_size;
+  }
 
 private:
   std::size_t ctx_id;
@@ -116,6 +142,7 @@ private:
   QueryPlanPtr query_plan;
   TheoryPtr loopFormula;
   ContextPtr ctx;
+  std::size_t mq_size;
   std::size_t buf_count;                    // the number of BeliefState(s) that we
 					    // are willing to store in a buffer. This is a
 					    // middle solution between having exponential space 
@@ -150,7 +177,7 @@ CommandTypeFactory::create<OptCommandTypePtr>()
 }
 
 
-
+/*
 template<>
 inline StreamingCommandTypePtr
 CommandTypeFactory::create<StreamingCommandTypePtr>()
@@ -160,7 +187,7 @@ CommandTypeFactory::create<StreamingCommandTypePtr>()
 
   return stm_opt_dmcs;
 }
-
+*/
 
 
 template<>
