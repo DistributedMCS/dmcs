@@ -149,16 +149,22 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 1 (JOIN_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
 
-  mq = createMessageQueue(uid, no_nbs, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelSession));
+  mq = createMessageQueue(uid, no_nbs, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::ModelSession));
   md->registerMQ(mq, JOIN_OUT_MQ);
 
   // create message queue 2 (JOIN_IN_MQ)
   // join input MQ, announces pairs of (neighbor_id, partial belief states)
 
-  mq = createMessageQueue(uid, no_nbs, JOIN_IN_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::JoinIn));
+  mq = createMessageQueue(uid, no_nbs, JOIN_IN_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::JoinIn));
   md->registerMQ(mq, JOIN_IN_MQ);
 
-  // create message queues 3 to 3 + (no_nbs - 1)
+  // create message queue 3 (REQUEST_MQ)
+  // request MQ, announces requests from Handlers
+
+  mq = createMessageQueue(uid, no_nbs, REQUEST_MQ, k, sizeof(StreamingForwardMessage));
+  md->registerMQ(mq, REQUEST_MQ);
+
+  // create message queues 4 to 4 + (no_nbs - 1)
   // NEIGHBOR_MQ --> NEIGHBOR_MQ + (no_nbs - 1)
 
   for (std::size_t i = NEIGHBOR_MQ; i < NEIGHBOR_MQ + no_nbs; ++i)
@@ -194,8 +200,14 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 1 (JOIN_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
   
-  mq = createMessageQueue(uid, 0, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelSession));
+  mq = createMessageQueue(uid, 0, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::ModelSession));
   md->registerMQ(mq, JOIN_OUT_MQ);
+
+  // create message queue 3 (REQUEST_MQ)
+  // request MQ, announces requests from Handlers
+
+  mq = createMessageQueue(uid, 0, REQUEST_MQ, k, sizeof(StreamingForwardMessage));
+  md->registerMQ(mq, REQUEST_MQ);
 
   return md;
 }

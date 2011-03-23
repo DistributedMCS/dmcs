@@ -31,13 +31,12 @@
 #ifndef _CONCURRENT_MESSAGE_QUEUE_FACTORY_H
 #define _CONCURRENT_MESSAGE_QUEUE_FACTORY_H
 
-
+#include "dmcs/StreamingForwardMessage.h"
 #include "network/MessagingGateway.h"
 #include "network/ConcurrentMessageQueue.h"
 
 #include "mcs/BeliefState.h"
 #include "solver/Conflict.h"
-
 
 #include <boost/utility.hpp>
 #include <boost/thread/once.hpp>
@@ -45,7 +44,7 @@
 
 namespace dmcs {
 
-typedef MessagingGateway<PartialBeliefState, Decisionlevel, Conflict> MessagingGatewayBC;
+typedef MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage> MessagingGatewayBC;
 typedef boost::shared_ptr<MessagingGatewayBC> MessagingGatewayBCPtr;
 
 const std::size_t DEFAULT_PACK_SIZE = 20;
@@ -78,9 +77,10 @@ public:
   /// MQ offsets
   enum MQIDs
     {
-      OUT_MQ = 0,      // solver created belief state
+      OUT_MQ = 0,  // solver created belief state
       JOIN_OUT_MQ, // joiner created belief state
       JOIN_IN_MQ,  // pairs of (neighbor_id, partial equilibria)
+      REQUEST_MQ,  // requests from Handlers
       NEIGHBOR_MQ
     };
   

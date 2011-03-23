@@ -32,10 +32,10 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
-#include "mcs/BeliefState.h"
-#include "solver/Conflict.h"
-#include "network/ConcurrentMessageDispatcher.h"
 #include "dmcs/Log.h"
+#include "mcs/BeliefState.h"
+#include "network/ConcurrentMessageDispatcher.h"
+#include "solver/Conflict.h"
 
 using namespace dmcs;
 
@@ -66,6 +66,58 @@ ConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr& mq, std::size
   mqids.push_back(id); // maybe not needed
 }
 
+
+bool
+ConcurrentMessageDispatcher::sendIncomingMessage(StreamingForwardMessage* m,
+						 std::size_t /* from */,
+						 std::size_t to,
+						 std::size_t /* prio */,
+ 						 int msecs)
+{
+  ///@todo TK: from and prio are not used
+  assert(mqs.size() > to);
+
+  bool ret = true;
+
+  if (msecs > 0)
+    {
+      ret = mqs[to]->timed_send(&m, sizeof(m), 0, boost::posix_time::milliseconds(msecs));
+      if (m)
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << m << ", " << *m << "}, " << msecs << ") = " << ret);
+	}
+      else
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << m << ", NULL}, " << msecs << ") = " << ret);
+	}
+    }
+  else if (msecs < 0)
+    {
+      ret = mqs[to]->try_send(m, sizeof(m), 0);
+      if (m)
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << m << ", " << *m << "}, " << msecs << ") = " << ret);
+	}
+      else
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << m << ", NULL}, " << msecs << ") = " << ret);
+	}
+    }
+  else
+    {
+      mqs[to]->send(&m, sizeof(m), 0);
+      if (m)
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": send({" << m << ", " << *m << "}, " << msecs << ") = " << ret);
+	}
+      else
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": send({" << m << ", NULL}, " << msecs << ") = " << ret);
+	}
+    }
+
+  return ret;
+}
 
 bool
 ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
@@ -219,7 +271,59 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
 }
 
 
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::ModelSession
+StreamingForwardMessage*
+ConcurrentMessageDispatcher::recvIncomingMessage(std::size_t from,
+						 std::size_t& /* prio */,
+						 int& msecs)
+{
+  ///@todo TK: prio is not used
+  assert(mqs.size() > from);
+
+  StreamingForwardMessage* m = 0;
+  std::size_t recvd = 0;
+  unsigned int p = 0;
+  void *ptr = static_cast<void*>(&m);
+
+  if (msecs > 0)
+    {
+      if (!mqs[from]->timed_receive(ptr, sizeof(m), recvd, p, boost::posix_time::milliseconds(msecs)))
+	{
+	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << m << "}, " << msecs << ") = false, setting m and msecs 0 now.");
+
+	  msecs = 0;
+	  m = 0;
+	  return m;
+	}
+
+      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << m << "}, " << msecs << ") = true");
+    }
+  else if (msecs < 0)
+    {
+      if (!mqs[from]->try_receive(ptr, sizeof(m), recvd, p))
+	{
+	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << m << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
+
+	  msecs = 0;
+	  m = 0;
+	  return m;
+	}
+
+      DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << m << "}, " << msecs << ") = true");
+    }
+  else
+    {
+      mqs[from]->receive(ptr, sizeof(m), recvd, p);
+
+      DMCS_LOG_TRACE("mq #" << from << ": receive({" << m << "}, " << msecs << ") = true");
+    }
+
+  assert(sizeof(m) == recvd);
+
+  return m;
+}
+
+
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::ModelSession
 ConcurrentMessageDispatcher::recvModel(std::size_t from,
 				       std::size_t& /* prio */,
 				       int& msecs)
@@ -358,7 +462,7 @@ ConcurrentMessageDispatcher::recvModelDecisionlevel(std::size_t from,
 #endif//0
 
 
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>::JoinIn
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::JoinIn
 ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 					std::size_t& /* prio */,
 					int& msecs)

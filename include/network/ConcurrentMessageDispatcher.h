@@ -32,6 +32,7 @@
 #ifndef _CONCURRENT_MESSAGE_DISPATCHER_H
 #define _CONCURRENT_MESSAGE_DISPATCHER_H
 
+#include "dmcs/StreamingForwardMessage.h"
 #include "network/MessagingGateway.h"
 #include "network/ConcurrentMessageQueue.h"
 #include "mcs/BeliefState.h"
@@ -46,7 +47,7 @@ namespace dmcs {
   /**
    * @brief a dispatcher for concurrent message queues
    */
-  class ConcurrentMessageDispatcher : public MessagingGateway<PartialBeliefState, Decisionlevel, Conflict>
+  class ConcurrentMessageDispatcher : public MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>
   {
   private:
     /// here we pile up all MQ's that receive messages
@@ -73,6 +74,9 @@ namespace dmcs {
     registerMQ(ConcurrentMessageQueuePtr& mq, std::size_t id);
 
     virtual bool
+    sendIncomingMessage(StreamingForwardMessage* sfMess, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+
+    virtual bool
     sendModel(PartialBeliefState* b, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
 #if 0
@@ -85,6 +89,9 @@ namespace dmcs {
 
     virtual bool
     sendJoinIn(std::size_t k, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+
+    virtual StreamingForwardMessage*
+    recvIncomingMessage(std::size_t from, std::size_t& prio, int& msecs);
 
     virtual struct ModelSession
     recvModel(std::size_t from, std::size_t& prio, int& msecs);
