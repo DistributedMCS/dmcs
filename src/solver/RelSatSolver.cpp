@@ -32,7 +32,7 @@
 #endif // HAVE_CONFIG_H
 
 #include "dmcs/BeliefCombination.h"
-#include "dmcs/ConflictNotification.h"
+#include "dmcs/AskNextNotification.h"
 #include "network/ConcurrentMessageQueueHelper.h"
 #include "solver/RelSatSolver.h"
 #include "relsat-20070104/RelSatHelper.h"
@@ -221,25 +221,22 @@ void
 RelSatSolver::solve()
 {
   DMCS_LOG_TRACE("Fresh solving. Wait for a message from DMCS");
-  ConflictNotification* cn = 0;
-  void *ptr = static_cast<void*>(&cn);
+  AskNextNotification* ann = 0;
+  void *ptr = static_cast<void*>(&ann);
   unsigned int p = 0;
   std::size_t recvd = 0;
 
-  //  dmcs_sat_notif->receive(ptr, sizeof(cn), recvd, p);
+  joiner_sat_notif->receive(ptr, sizeof(ann), recvd, p);
 
-  if (ptr && cn)
+  if (ptr && ann)
     {
-#ifdef DEBUG
-      History path = cn->path;
-#else
-      std::size_t path = cn->path;
-#endif
+      path = ann->path;
+      parent_session_id = ann->session_id;
+      k1 = ann->k1;
+      k2 = ann->k2;
 
-      parent_session_id = cn->session_id;
-
-      delete cn;
-      cn = 0;
+      delete ann;
+      ann = 0;
 
       // remove input part of the theory (from last solve)
 
@@ -281,8 +278,8 @@ RelSatSolver::solve()
     }
   else
     {
-      DMCS_LOG_FATAL("Got null message: " << ptr << " " << cn);
-      assert(ptr != 0 && cn != 0);
+      DMCS_LOG_FATAL("Got null message: " << ptr << " " << ann);
+      assert(ptr != 0 && ann != 0);
     }
 }
 

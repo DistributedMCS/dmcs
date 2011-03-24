@@ -103,6 +103,8 @@ private:
   std::size_t my_id;
   std::size_t parent_session_id;
   std::size_t my_session_id;
+  std::size_t k1;
+  std::size_t k2;
   const TheoryPtr theory;
   const SignaturePtr sig;
   const HashedBiMap* c2o;
@@ -112,6 +114,11 @@ private:
   PartialBeliefState* input;
   PartialBeliefStateBufPtr input_buffer;
   bool first_round;
+#ifdef DEBUG
+  History path;
+#else
+  std::size_t path;
+#endif
 
   SATInstance* xInstance;
   SATSolver* xSATSolver;

@@ -547,21 +547,37 @@ JoinThread::operator()(std::size_t nbs,
   joiner_neighbors_notif = jv;
   no_nbs = nbs;
 
-  std::size_t prio = 0;
-  int timeout = 0;
-
   while (1)
     {
+      std::size_t prio = 0;
+      int timeout = 0;
       StreamingForwardMessage* sfMess = mg->recvIncomingMessage(ConcurrentMessageQueueFactory::REQUEST_MQ, prio, timeout);
+
       assert (sfMess);
 
-      if (no_nbs > 0)
+#ifdef DEBUG
+      History path;
+#else
+      std::size_t path;
+#endif
+      
+      path = sfMess->getPath();
+      session_id = sfMess->getSessionId();
+      std::size_t k1 = sfMess->getK1();
+      std::size_t k2 = sfMess->getK2();
+
+      // tell SAT to start
+      AskNextNotification* ann = new AskNextNotification(BaseNotification::REQUEST, path, session_id, k1, k2);
+
+      AskNextNotification* anw_neighbor = (AskNextNotification*) overwrite_send(joiner_sat_notif, &ann, sizeof(ann), 0);
+
+      if (anw_neighbor)
 	{
-	  process(sfMess);
+	  delete anw_neighbor;
+	  anw_neighbor = 0;
 	}
-      else
-	{
-	}
+
+      process(sfMess);
     }
 
   /*
