@@ -268,11 +268,10 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
 	}
       else
 	{
-	  DMCS_LOG_TRACE("requesting next batch: " << next_k);
+	  mess->setK1(mess->getK1() + msl->size());
+	  DMCS_LOG_TRACE("requesting next batch: " << next_k << " from " << mess->getK1() << " to " << mess->getK2());
 
 	  *my_header = HEADER_NEXT;
-
-	  mess->setPackSize(next_k);
 
 	  boost::system::error_code e;
 	  boost::asio::ip::tcp::resolver::iterator it;

@@ -1,5 +1,11 @@
 2011-03-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/dmcs/StreamingForwardMessage.h: Specify range of models
+	requested.
+	* src/dmcsc.cpp: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+
 	* src/network/Server.cpp: Create HandlerThread upon Streaming
 	requests.
 

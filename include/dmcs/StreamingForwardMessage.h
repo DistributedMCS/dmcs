@@ -46,11 +46,12 @@ public:
 #ifdef DEBUG
     path(1, 0),
 #else
-      path(0),
+    path(0),
 #endif
-      invoker(0),
-      session_id(0),
-      pack_size(0)
+    invoker(0),
+    session_id(0),
+    k1(1),
+    k2(1)
   { }
 
   virtual
@@ -62,7 +63,8 @@ public:
     path = sfMess.path;
     invoker = sfMess.invoker;
     session_id = sfMess.session_id;
-    pack_size = sfMess.session_id;
+    k1 = sfMess.k1;
+    k2 = sfMess.k2;
   }
 
   StreamingForwardMessage(
@@ -73,11 +75,13 @@ public:
 #endif
 			  std::size_t i,
 			  std::size_t sid,
-			  std::size_t ps)
+			  std::size_t k_one,
+			  std::size_t k_two)
     : path(p),
       invoker(i),
       session_id(sid), 
-      pack_size(ps)
+      k1(k_one),
+      k2(k_two)
   { }
 
   std::size_t
@@ -105,13 +109,34 @@ public:
   std::size_t
   getPackSize() const
   {
-    return pack_size;
+    return k2 - k1 + 1;
+  }
+
+  std::size_t
+  getK1() const
+  {
+    return k1;
   }
 
   void
-  setPackSize(std::size_t k)
+  setK1(std::size_t k_one)
   {
-    pack_size = k;
+    k1 = k_one;
+  }
+
+  std::size_t
+  getK2() const
+  {
+    return k2;
+  }
+
+  void
+  setPackRequest(std::size_t k_one, std::size_t k_two)
+  {
+    assert (k_one <= k_two);
+
+    k1 = k_one;
+    k2 = k_two;
   }
 
 public:
@@ -122,7 +147,8 @@ public:
     ar & path;
     ar & invoker;
     ar & session_id;
-    ar & pack_size;
+    ar & k1;
+    ar & k2;
   }
 
 private:
@@ -137,8 +163,9 @@ private:
 
   std::size_t invoker;
   std::size_t session_id; // For filtering old models
-  std::size_t pack_size;  // The number of models in a package that
-			  // the invoker expects
+  std::size_t k1;         // The invoker wants models from k1 to k2
+  std::size_t k2;
+
 };
 
 
@@ -154,7 +181,8 @@ operator<< (std::ostream& os, const StreamingForwardMessage& sfMess)
   os << "path = {" << sfMess.getPath() << "}, "
      << "invoker = " << sfMess.getInvoker() << ", "
      << "session_id = " << sfMess.getSessionId() << ", " 
-     << "pack_size = " << sfMess.getPackSize();
+     << "k1 = " << sfMess.getK1() << ", " 
+     << "k2 = " << sfMess.getK2();
   
   return os;
 }

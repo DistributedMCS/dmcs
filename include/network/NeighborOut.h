@@ -179,7 +179,8 @@ public:
     StreamingForwardMessage mess(path,
 				 invoker,
 				 session_id,
-				 pack_size);
+				 1,
+				 pack_size); // fix me k1-->k2
 
     conn->write(mess);
   }

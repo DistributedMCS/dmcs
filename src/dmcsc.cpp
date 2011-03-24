@@ -372,9 +372,9 @@ Options";
 		  // USER <--> session_id = 0, path = {0}, invoker = 0
 #ifdef DEBUG
 		  History path(1, 0);
-		  StreamingCommandType::input_type mess(path, 0, 0, k);
+		  StreamingCommandType::input_type mess(path, 0, 0, 1, k);
 #else
-		  StreamingCommandType::input_type mess(0, 0, 0, k);
+		  StreamingCommandType::input_type mess(0, 0, 0, 1, k);
 #endif
 		      
 		  std::string header = HEADER_REQ_STM_DMCS;
@@ -434,14 +434,20 @@ Options";
 			    {
 			      DMCS_LOG_TRACE("Got " << diff_count << " partial belief states, getting next batch of size " << k);
 
-			      mess.setPackSize(k);
+			      std::size_t next_k1 = (next_count - 1) * k + 1;
+			      std::size_t next_k2 = next_k1 + k;
+			      
+			      mess.setPackRequest(next_k1, next_k2);
 			      c.next(mess);
 			    }
 			  else if (pack_size == 0 && model_count > last_model_count)
 			    {
 			      DMCS_LOG_TRACE("fixpoint not reached yet, get next " << k << " belief states");
 
-			      mess.setPackSize(k);
+			      std::size_t next_k1 = (next_count - 1) * k + 1;
+			      std::size_t next_k2 = next_k1 + k;
+			      
+			      mess.setPackRequest(next_k1, next_k2);
 			      c.next(mess);
 			    }
 			  else // fixpoint reached, last round
