@@ -182,13 +182,13 @@ Server::dispatch_header(const boost::system::error_code& e,
 	}
       else if (header->find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
-	  typedef Handler<StreamingCommandType> StreamingHandler;
+	  //typedef Handler<StreamingCommandType> StreamingHandler;
 
 	  //StreamingCommandTypePtr cmd_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
 
-	  StreamingHandler::SessionMsgPtr sesh(new StreamingHandler::SessionMsg(conn));
+	  StreamingSessionMsgPtr sesh(new StreamingSessionMsg(conn));
 
-	  StreamingHandler::HandlerPtr handler(new StreamingHandler);
+	  StreamingHandlerPtr handler(new StreamingHandler);
 
 	  const std::size_t invoker = sesh->mess.getInvoker();
 	  ListSizeT::const_iterator it = std::find(invokers->begin(), invokers->end(), invoker);
@@ -204,8 +204,8 @@ Server::dispatch_header(const boost::system::error_code& e,
 	      }
 
 
-	  //boost::thread* t = new boost::thread(*handler, handler, sesh, mg.get());
-	  //handler_threads->push_back(t);
+	  boost::thread* t = new boost::thread(*handler, handler, sesh, mg.get());
+	  handler_threads->push_back(t);
 	}
       else if (header->find(HEADER_REQ_OPT_DMCS) != std::string::npos)
 	{

@@ -100,8 +100,17 @@ public:
 
 // **********************************************************************************************************************
 // Specialized handler for streaming dmcs
+
 template<>
-class Handler<StreamingCommandType> : public BaseHandler<StreamingCommandType>
+class Handler<StreamingCommandType>;
+
+typedef Handler<StreamingCommandType> StreamingHandler;
+typedef boost::shared_ptr<StreamingHandler > StreamingHandlerPtr;
+typedef Session<StreamingCommandType::input_type > StreamingSessionMsg;
+typedef boost::shared_ptr<StreamingSessionMsg > StreamingSessionMsgPtr;
+
+template<>
+class Handler<StreamingCommandType> //: public BaseHandler<StreamingCommandType>
 {
 public:
   Handler();
@@ -110,21 +119,21 @@ public:
   ~Handler();
 
   void
-  operator()(HandlerPtr hdl, 
-	     SessionMsgPtr sesh, 
+  operator()(StreamingHandlerPtr hdl, 
+	     StreamingSessionMsgPtr sesh, 
 	     MessagingGatewayBC* mg);
 
   void 
   do_local_job(const boost::system::error_code& e,
-	       BaseHandler<StreamingCommandType>::HandlerPtr hdl,
-	       BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
+	       StreamingHandlerPtr hdl,
+	       StreamingSessionMsgPtr sesh,
 	       MessagingGatewayBC* mg,
 	       bool first_call);
 
   void
   handle_read_header(const boost::system::error_code& e,
-		     BaseHandler<StreamingCommandType>::HandlerPtr hdl,
-		     BaseHandler<StreamingCommandType>::SessionMsgPtr sesh,
+		     StreamingHandlerPtr hdl,
+		     StreamingSessionMsgPtr sesh,
 		     MessagingGatewayBC* mg,
 		     boost::shared_ptr<std::string> header,
 		     std::size_t parent_session_id);

@@ -1,3 +1,13 @@
+2011-03-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/Server.cpp: Create HandlerThread upon Streaming
+	requests.
+
+	* include/network/Handler.h: Make Handler<StreamingCommandType>
+	independent from BaseHandler.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/BaseHandler.h: Likewise.
+
 2011-03-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Server.h: Create threads at start up time.

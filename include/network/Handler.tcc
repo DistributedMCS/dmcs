@@ -248,12 +248,14 @@ Handler<StreamingCommandType>::~Handler()
 
 
 void
-Handler<StreamingCommandType>::operator()(HandlerPtr hdl, SessionMsgPtr sesh, MessagingGatewayBC* mg)
+Handler<StreamingCommandType>::operator()(StreamingHandlerPtr hdl, 
+					  StreamingSessionMsgPtr sesh, 
+					  MessagingGatewayBC* mg)
 {
   assert(hdl.get() == this);
 
   sesh->conn->async_read(sesh->mess,
-			 boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
+			 boost::bind(&StreamingHandler::do_local_job, this,
 				     boost::asio::placeholders::error,
 				     hdl,
 				     sesh,
@@ -292,8 +294,8 @@ Handler<StreamingCommandType>::notify_output_thread(BaseNotification::Notificati
 
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
-					    HandlerPtr hdl,
-					    SessionMsgPtr sesh,
+					    StreamingHandlerPtr hdl,
+					    StreamingSessionMsgPtr sesh,
 					    MessagingGatewayBC* mg,
 					    bool first_call)
 {
@@ -346,7 +348,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       boost::shared_ptr<std::string> header(new std::string);
 
       sesh->conn->async_read(*header,
-			     boost::bind(&Handler<StreamingCommandType>::handle_read_header, this,
+			     boost::bind(&StreamingHandler::handle_read_header, this,
 					 boost::asio::placeholders::error,
 					 hdl,
 					 sesh, 
@@ -368,8 +370,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
 void
 Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e,
-						  HandlerPtr hdl,
-						  SessionMsgPtr sesh,
+						  StreamingHandlerPtr hdl,
+						  StreamingSessionMsgPtr sesh,
 						  MessagingGatewayBC* mg,
 						  boost::shared_ptr<std::string> header,
 						  std::size_t parent_session_id)
@@ -387,7 +389,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 
 	  // Read the message 
 	  sesh->conn->async_read(sesh->mess,
-				 boost::bind(&Handler<StreamingCommandType>::do_local_job, this,
+				 boost::bind(&StreamingHandler::do_local_job, this,
 					     boost::asio::placeholders::error,
 					     hdl,
 					     sesh,
