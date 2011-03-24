@@ -32,10 +32,9 @@
 #ifndef NEIGHBOR_OUT_H
 #define NEIGHBOR_OUT_H
 
-#include "dmcs/ConflictNotification.h"
+#include "dmcs/AskNextNotification.h"
 #include "dmcs/Log.h"
 #include "dmcs/StreamingForwardMessage.h"
-#include "solver/Conflict.h"
 #include "network/connection.hpp"
 
 #include <boost/functional/hash.hpp>
@@ -57,11 +56,13 @@ public:
   { }
 
 
+
   virtual
   ~NeighborOut()
   {
     DMCS_LOG_TRACE("Terminating NeighborOut.");
   }
+
 
 
   void
@@ -72,24 +73,26 @@ public:
   {
     while (1)
       {
-	ConflictNotification* cn = wait_router(rnn, nid);
+	AskNextNotification* ann = wait_next_request(rnn, nid);
 
-	DMCS_LOG_TRACE("Got a message = " << *cn);
+	DMCS_LOG_TRACE("Got a message = " << *ann);
 
 #ifdef DEBUG
-	History path = cn->path;
+	History path = ann->path;
 #else
-	std::size_t path = cn->path;
+	std::size_t path = ann->path;
 #endif
 
-	std::size_t session_id = cn->session_id;
-	std::size_t pack_size = cn->pack_size;
+	std::size_t session_id = ann->session_id;
+	
+	std::size_t k1 = ann->k1;
+	std::size_t k2 = ann->k2;
 
-	assert (pack_size > 0);
+	assert (k1 <= k2);
 
 	std::string header;
 
-	if (cn->type == BaseNotification::SHUTDOWN)
+	if (ann->type == BaseNotification::SHUTDOWN)
 	  {
 	    DMCS_LOG_TRACE("Neighbor " << nid << " received SHUTDOWN, propagating TERMINATE...");
 
@@ -97,16 +100,16 @@ public:
 
 	    conn->write(header);
 
-	    delete cn;
-	    cn = 0;
+	    delete ann;
+	    ann = 0;
 
 	    return; // done with looping
 	  }
-	else if (cn->type == BaseNotification::REQUEST)
+	else if (ann->type == BaseNotification::REQUEST)
 	  {
 	    header = HEADER_REQ_STM_DMCS;
 	  }
-	else if (cn->type == BaseNotification::NEXT)
+	else if (ann->type == BaseNotification::NEXT)
 	  {
 	    // We should only send HEADER_NEXT
 	    boost::asio::ip::tcp::socket& sock = conn->socket();
@@ -120,38 +123,38 @@ public:
 	    assert(false && "should not come here");
 	  }
 
-	delete cn;
-	cn = 0;
+	delete ann;
+	ann = 0;
 
 	conn->write(header);
 
 	write_message(conn,
 		      path,
 		      invoker,
-		      pack_size,
+		      k1,
+		      k2,
 		      session_id);
       }
   }
 
-  ConflictNotification*
-  wait_router(ConcurrentMessageQueue* router_neighbor_notif, std::size_t nid)
+  AskNextNotification*
+  wait_next_request(ConcurrentMessageQueue* neighbor_notif, std::size_t nid)
   {
-    // wait for a notification from the Router
-    ConflictNotification* cn = 0;
-    void *ptr = static_cast<void*>(&cn);
+    AskNextNotification* ann = 0;
+    void *ptr = static_cast<void*>(&ann);
     unsigned int p  = 0;
     std::size_t recvd = 0;
     
-    DMCS_LOG_TRACE("Listen to router... nid = " << nid);
-    router_neighbor_notif->receive(ptr, sizeof(cn), recvd, p);
+    DMCS_LOG_TRACE("Listen to Joiner... nid = " << nid);
+    neighbor_notif->receive(ptr, sizeof(ann), recvd, p);
 	
-    if (!ptr || !cn)
+    if (!ptr || !ann)
       {
-	DMCS_LOG_FATAL("Got null message: " << ptr << " " << cn);
-	assert(ptr != 0 && cn != 0);
+	DMCS_LOG_FATAL("Got null message: " << ptr << " " << ann);
+	assert(ptr != 0 && ann != 0);
       }
 
-    return cn;
+    return ann;
   }
 
   
@@ -164,7 +167,8 @@ public:
 		std::size_t path,
 #endif
 		std::size_t invoker,
-		std::size_t pack_size,
+		std::size_t k1,
+		std::size_t k2,
 		std::size_t session_id)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
@@ -179,8 +183,8 @@ public:
     StreamingForwardMessage mess(path,
 				 invoker,
 				 session_id,
-				 1,
-				 pack_size); // fix me k1-->k2
+				 k1,
+				 k2);
 
     conn->write(mess);
   }
