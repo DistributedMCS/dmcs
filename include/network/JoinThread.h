@@ -113,6 +113,42 @@ private:
 #endif
 		  std::size_t pack_size);
 
+
+  void
+  cleanup_partial_belief_states(PartialBeliefStatePackage* partial_eqs, 
+				std::size_t nid);
+
+
+  bool
+  ask_neighbor(PartialBeliefStatePackage* partial_eqs,
+	       std::size_t nid, 
+	       std::size_t k1, 
+	       std::size_t k2,
+#ifdef DEBUG
+	       History& path, 
+#else
+	       std::size_t path,
+#endif
+	       BaseNotification::NotificationType nt);
+
+  bool
+  ask_first_packs(PartialBeliefStatePackage* partial_eqs,
+#ifdef DEBUG
+		  History& path, 
+#else
+		  std::size_t path,
+#endif
+		  std::size_t from_neighbor, 
+		  std::size_t to_neighbor);
+
+
+  void
+  do_join(PartialBeliefStatePackagePtr& partial_eqs);
+
+  void
+  process(StreamingForwardMessage* sfMess);
+
+
 private:
   std::size_t port;
   std::size_t no_nbs;            // number of neighbors 
@@ -120,7 +156,7 @@ private:
   std::size_t session_id;
   std::size_t pack_size;         // the real upper-bound of number of models that we ask the neighbors
 
-  MessagingGatewayBC*        mg;
+  MessagingGatewayBC* mg;
   ConcurrentMessageQueueVec* joiner_neighbors_notif;
 };
 

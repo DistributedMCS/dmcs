@@ -2,6 +2,7 @@ AUTOMAKE_OPTIONS = gnu
 
 # including headers for make dist
 noinst_HEADERS =  \
+		AskNextNotification.h \
 		BaseDMCS.h \
 		BaseNotification.h \
 		BaseTypes.h \

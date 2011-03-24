@@ -18,43 +18,69 @@
  */
 
 /**
- * @file   StreamingDMCSThread.cpp
+ * @file   AskNextNotification.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Wed Jan  12 16:48:59 2011
+ * @date   Thu Mar  24 12:12:24 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif // HAVE_CONFIG_H
+#ifndef ASK_NEXT_NOTIFICATION_H
+#define ASK_NEXT_NOTIFICATION_H
 
-#include "dmcs/Log.h"
-#include "network/StreamingDMCSThread.h"
+
+
+#include "dmcs/BaseNotification.h"
+
+
 
 namespace dmcs {
 
-  StreamingDMCSThread::StreamingDMCSThread()
+
+
+struct AskNextNotification : public BaseNotification
+{
+  AskNextNotification(BaseNotification::NotificationType t,
+#ifdef DEBUG
+		      History pa,
+#else
+		      std::size_t pa,
+#endif
+		      std::size_t sid,
+		      std::size_t k_one,
+		      std::size_t k_two)
+    : BaseNotification(t, pa), 
+      session_id(sid),
+      k1(k_one),
+      k2(k_two)
   { }
+  
+  std::size_t session_id;
+  std::size_t k1;
+  std::size_t k2;
+};
 
 
-StreamingDMCSThread::~StreamingDMCSThread()
+
+inline std::ostream&
+operator<< (std::ostream& os, const AskNextNotification& ann)
 {
-  DMCS_LOG_TRACE("Gone with the wind.");
+  os << (BaseNotification)ann;
+
+  os << " session_id = " << ann.session_id 
+     << " k1 = " << ann.k1
+     << " k2 = " << ann.k2;
+
+  return os;
 }
 
 
-void
-StreamingDMCSThread::operator()(StreamingCommandType* scmt, MessagingGatewayBC* mg,
-				ConcurrentMessageQueueVec* neighbors_notif)
-{
-  //  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  scmt->execute(mg, neighbors_notif);
-}
 
 } // namespace dmcs
+
+#endif // ASK_NEXT_NOTIFICATION_H
 
 // Local Variables:
 // mode: C++

@@ -341,7 +341,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       DMCS_LOG_TRACE(port << ": Notify Joiner of the new message by placing it into REQUEST_MQ");
       StreamingForwardMessage* sfMess = new StreamingForwardMessage();
       *sfMess = sesh->mess;
-      //      mg->sendIncomingMessage(sfMess, 0, ConcurrentMessageQueueFactory::REQUEST_MQ, 0);
+      mg->sendIncomingMessage(sfMess, 0, ConcurrentMessageQueueFactory::REQUEST_MQ, 0);
 
       DMCS_LOG_TRACE(port << ": Waiting for incoming message from " << invoker << " at " << port << " (first_call = " << first_call << ")");
 

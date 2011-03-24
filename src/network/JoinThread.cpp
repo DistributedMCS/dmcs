@@ -31,6 +31,9 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
+#include <algorithm>
+
+#include "dmcs/AskNextNotification.h"
 #include "dmcs/BeliefCombination.h"
 #include "dmcs/SessionNotification.h"
 #include "network/ConcurrentMessageQueueHelper.h"
@@ -38,13 +41,18 @@
 
 #include "dmcs/Log.h"
 
+
+
 namespace dmcs {
+
+
 
 JoinThread::JoinThread(std::size_t p,
 		       std::size_t sid)
   : port(p),
     session_id(sid)
 { }
+
 
 
 JoinThread::~JoinThread()
@@ -524,6 +532,7 @@ JoinThread::import_and_join(VecSizeTPtr request_size,
 
 
 
+// remove parameter s
 void
 JoinThread::operator()(std::size_t nbs,
 		       std::size_t s,
@@ -535,8 +544,20 @@ JoinThread::operator()(std::size_t nbs,
   mg = m;
   joiner_neighbors_notif = jv;
   no_nbs = nbs;
-  system_size = s;
 
+  std::size_t prio = 0;
+  int timeout = 0;
+
+  while (1)
+    {
+      StreamingForwardMessage* sfMess = mg->recvIncomingMessage(ConcurrentMessageQueueFactory::REQUEST_MQ, prio, timeout);
+      if (sfMess)
+	{
+	  process(sfMess);
+	}
+    }
+
+  /*
 #ifdef DEBUG
   History path;
 #else
@@ -559,8 +580,241 @@ JoinThread::operator()(std::size_t nbs,
 	}
 
       import_and_join(request_size, path, pack_size);
-    }
+      }*/
 }
+
+
+
+void
+JoinThread::cleanup_partial_belief_states(PartialBeliefStatePackage* partial_eqs, std::size_t nid)
+{
+  PartialBeliefStateVecPtr& bsv = (*partial_eqs)[nid];
+  for (PartialBeliefStateVec::iterator it = bsv->begin(); it != bsv->end(); ++it)
+    {
+      assert (*it);
+      delete *it;
+      *it = 0;
+    }
+  
+  bsv->clear();
+}
+
+
+
+bool
+JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
+			 std::size_t nid, 
+			 std::size_t k1, 
+			 std::size_t k2,
+#ifdef DEBUG
+			 History& path,
+#else
+			 std::size_t path,
+#endif
+			 BaseNotification::NotificationType nt)
+{
+  assert (k1 <= k2);
+
+  // clean up if necessary =====================================================================================
+  if (partial_eqs)
+    {
+      // empty our local storage for the sake of non-exponential space
+      cleanup_partial_belief_states(partial_eqs, nid);
+    }
+  
+  // now send the request =======================================================================================
+  AskNextNotification* ann = new AskNextNotification(nt, path, session_id, k1, k2);
+
+  ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[nid];
+  
+  AskNextNotification* anw_neighbor = (AskNextNotification*) overwrite_send(cmq.get(), &ann, sizeof(ann), 0);
+  
+  if (anw_neighbor)
+    {
+      delete anw_neighbor;
+      anw_neighbor = 0;
+    }
+
+  // and wait for result (as we now allow only one path to be active at a time)
+  std::size_t prio = 0;
+  int timeout = 0;
+
+  MessagingGatewayBC::JoinIn nn = 
+    mg->recvJoinIn(ConcurrentMessageQueueFactory::JOIN_IN_MQ, prio, timeout);
+	  
+  DMCS_LOG_TRACE(port << ": Received from offset " << nn.ctx_offset << ", " << nn.peq_cnt << " peqs to pick up.");
+  
+  if (nn.peq_cnt == 0)
+    {
+      // EOF
+      return false;
+    }
+  else
+    {
+      // import nn.peq_cnt models ===============================================================================
+      PartialBeliefStateVecPtr& bsv = (*partial_eqs)[nid];
+      const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + nid;
+
+      for (std::size_t i = 0; i < nn.peq_cnt; ++i)
+	{
+	  std::size_t prio = 0;
+	  int timeout = 0;
+	  
+	  struct MessagingGatewayBC::ModelSession ms = mg->recvModel(offset, prio, timeout);
+	  PartialBeliefState* bs = ms.m;
+	  std::size_t sid = ms.sid;
+	  
+	  assert (bs);
+	  
+	  DMCS_LOG_TRACE("Got bs = " << *bs << ". sid = " << sid);
+
+	  if (sid == session_id)
+	    {
+	      DMCS_LOG_TRACE("Storing belief state " << i << " from " << noff);
+	      bsv->push_back(bs);
+	    }
+	  else
+	    {
+	      DMCS_LOG_TRACE("Ignore this belief state because it belongs to an old session");
+	    }
+	}
+    }
+
+  return true;
+}
+
+
+
+bool
+JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
+#ifdef DEBUG
+			    History& path, 
+#else
+			    std::size_t path,
+#endif
+			    std::size_t from_neighbor, 
+			    std::size_t to_neighbor)
+{
+  assert (0 < from_neighbor && from_neighbor <= to_neighbor && to_neighbor <= no_nbs);
+
+  for (std::size_t i = from_neighbor; i <= to_neighbor; ++i)
+    {
+      if (!ask_neighbor(partial_eqs, i, 1, pack_size, path, BaseNotification::REQUEST))
+	{
+	  // clean up
+	  for (std::size_t j = from_neighbor; j <= i; ++j)
+	    {
+	      cleanup_partial_belief_states(partial_eqs, j);
+	    }
+
+	  return false;
+	}
+    }
+  return true;
+}
+
+
+
+void
+JoinThread::do_join(PartialBeliefStatePackagePtr& partial_eqs)
+{
+  const PartialBeliefStateIteratorVecPtr beg_it(new PartialBeliefStateIteratorVec);
+  const PartialBeliefStateIteratorVecPtr end_it(new PartialBeliefStateIteratorVec);
+
+  for (PartialBeliefStatePackage::const_iterator it = partial_eqs->begin();
+       it != partial_eqs->end(); ++it)
+    {
+      const PartialBeliefStateVecPtr& bsv = *it;
+      beg_it->push_back(bsv->begin());
+      end_it->push_back(bsv->end());
+    }
+
+  join(partial_eqs, beg_it, end_it);
+}
+
+
+
+void
+JoinThread::process(StreamingForwardMessage* sfMess)
+{
+  // set up a package of empty BeliefStates
+  PartialBeliefStatePackagePtr partial_eqs(new PartialBeliefStatePackage);
+  for (std::size_t i = 0; i < no_nbs; ++i)
+    {
+      PartialBeliefStateVecPtr bsv(new PartialBeliefStateVec);
+      partial_eqs->push_back(bsv);
+    }
+
+#ifdef DEBUG
+  History path;
+#else
+  std::size_t path;
+#endif
+
+  path = sfMess->getPath();
+  
+  // Warming up round =======================================================================
+  if (!ask_first_packs(partial_eqs.get(), path, 1, no_nbs))
+    {
+      DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");
+      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+
+      delete sfMess;
+      sfMess = 0;  
+
+      return;
+    }
+
+  do_join(partial_eqs);
+
+  // now really going to the loop of asking next =============================================
+  bool asking_next = false;
+  std::size_t next_neighbor_offset = 1;
+  VecSizeTPtr pack_count(new VecSizeT(no_nbs, 1));
+
+  while (1)
+    {
+      if (next_neighbor_offset == no_nbs + 1)
+	{
+	  DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to JOIN_OUT_MQ");
+	  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+	  break;
+	}
+
+      std::size_t& pc = (*pack_count)[next_neighbor_offset];
+      pc++;
+      std::size_t k1 = pc * pack_size + 1;
+      std::size_t k2 = pc * (pack_size + 1);
+
+      if (ask_neighbor(partial_eqs.get(), next_neighbor_offset, k1, k2, path, BaseNotification::NEXT))
+	{
+	  if (asking_next)
+	    {
+	      assert (next_neighbor_offset > from_neighbor);
+
+	      // again, ask for first packs from each neighbor
+	      ask_first_packs(partial_eqs.get(), path, 1, next_neighbor_offset - 1);
+
+	      // reset counter
+	      std::fill(pack_count->begin(), pack_count->begin() + next_neighbor_offset - 1, 1);
+	    }
+	  
+	  do_join(partial_eqs);
+	  next_neighbor_offset = 1;
+	  asking_next = false;	  
+	}
+      else
+	{
+	  next_neighbor_offset++;
+	  asking_next = true;
+	}
+    }
+
+  delete sfMess;
+  sfMess = 0;
+}
+
+
 
 } // namespace dmcs
 

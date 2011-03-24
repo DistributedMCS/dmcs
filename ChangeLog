@@ -1,5 +1,15 @@
 2011-03-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/StreamingDMCSThread.cpp: Remove port.
+
+	* include/network/JoinThread.h: Implement single-path join.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/network/Handler.tcc: Forward message to JoinThread.
+
+	* include/network/Makefile.am: Add AsknextNotification.h
+	* include/network/AskNextNotification.h: New file.
+
 	* include/dmcs/StreamingForwardMessage.h: Specify range of models
 	requested.
 	* src/dmcsc.cpp: Likewise.
