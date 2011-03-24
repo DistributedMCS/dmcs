@@ -92,6 +92,7 @@ private:
   ThreadVecPtr handler_threads;
   ThreadVecPtr neighbor_threads;
   NeighborThreadVecPtr neighbors;
+  ConcurrentMessageQueue* joiner_sat_notif;
   ConcurrentMessageQueueVecPtr neighbors_notif;
   std::size_t port;
 };

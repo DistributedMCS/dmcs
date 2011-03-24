@@ -1,5 +1,16 @@
 2011-03-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/JoinThread.h: Set up connection from JoinThread
+	to RelSatSolver.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/Server.h: Likewise.
+
 	* src/network/StreamingDMCSThread.cpp: Remove port.
 
 	* include/network/JoinThread.h: Implement single-path join.

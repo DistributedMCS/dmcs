@@ -49,6 +49,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
 			     const SignaturePtr& ls,
 			     const NeighborListPtr& ns,
 			     std::size_t sid,
+			     ConcurrentMessageQueue* jsn,
 			     MessagingGatewayBC* m,
 			     HashedBiMap* co)
   : context(c),
@@ -56,6 +57,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
     local_sig(ls),
     nbs(ns),
     session_id(sid),
+    joiner_sat_notif(jsn),
     mg(m),
     c2o(co)
 {
@@ -101,7 +103,7 @@ ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif)
   const std::size_t no_nbs   = nbs->size();
 
   JoinThread jt(port, session_id);
-  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, neighbors_notif.get());
+  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, joiner_sat_notif, neighbors_notif.get());
 
   return t;
 }
@@ -117,7 +119,7 @@ ThreadFactory::createLocalSolveThread()
   const std::size_t system_size = context->getSystemSize();
 
   SatSolverFactory ssf(is_leaf, my_id, session_id, theory, local_sig, 
-		       c2o, system_size, mg);
+		       c2o, system_size, joiner_sat_notif, mg);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

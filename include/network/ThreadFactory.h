@@ -56,6 +56,7 @@ public:
 		const SignaturePtr& ls,
 		const NeighborListPtr& ns,
 		std::size_t sid,
+		ConcurrentMessageQueue* jsn,
 		MessagingGatewayBC* m,
 		HashedBiMap* co);
 
@@ -75,6 +76,7 @@ private:
   const SignaturePtr local_sig;
   const NeighborListPtr nbs;
   std::size_t session_id;
+  ConcurrentMessageQueue* joiner_sat_notif;
   MessagingGatewayBC* mg;
   HashedBiMap* c2o;             // hashed bimap from context id to
                                 // the offset in the vector of

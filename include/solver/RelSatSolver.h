@@ -59,6 +59,7 @@ public:
 	       const SignaturePtr& ls,
 	       const HashedBiMap* co,
 	       std::size_t ss,
+	       ConcurrentMessageQueue* jsn,
 	       MessagingGatewayBC* m);
 
   virtual
@@ -105,7 +106,8 @@ private:
   const TheoryPtr theory;
   const SignaturePtr sig;
   const HashedBiMap* c2o;
-  std::size_t system_size;                // this can be taken from localV
+  std::size_t system_size;
+  ConcurrentMessageQueue* joiner_sat_notif;
   MessagingGatewayBC* mg;
   PartialBeliefState* input;
   PartialBeliefStateBufPtr input_buffer;

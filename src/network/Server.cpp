@@ -57,6 +57,7 @@ Server::Server(const CommandTypeFactoryPtr& c,
     invokers(new ListSizeT),
     neighbor_threads(new ThreadVec),
     handler_threads(new ThreadVec),
+    joiner_sat_notif(new ConcurrentMessageQueue),
     neighbors_notif(new ConcurrentMessageQueueVec)
 {
   initialize();
@@ -101,7 +102,7 @@ Server::initialize()
       c2o->insert(Int2Int(nid, off));
     }
 
-  ThreadFactory tf(ctx, theory, local_sig, nbs, 0, mg.get(), c2o.get());
+  ThreadFactory tf(ctx, theory, local_sig, nbs, 0, joiner_sat_notif, mg.get(), c2o.get());
   
   if (no_nbs > 0)
     {
@@ -201,7 +202,7 @@ Server::dispatch_header(const boost::system::error_code& e,
 	  else
 	    {
 	      invokers->push_back(invoker);
-	      }
+	    }
 
 
 	  boost::thread* t = new boost::thread(*handler, handler, sesh, mg.get());

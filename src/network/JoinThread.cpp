@@ -537,11 +537,13 @@ void
 JoinThread::operator()(std::size_t nbs,
 		       std::size_t s,
 		       MessagingGatewayBC* m,
+		       ConcurrentMessageQueue* jsn,
 		       ConcurrentMessageQueueVec* jv)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   mg = m;
+  joiner_sat_notif = jsn;
   joiner_neighbors_notif = jv;
   no_nbs = nbs;
 
@@ -551,9 +553,14 @@ JoinThread::operator()(std::size_t nbs,
   while (1)
     {
       StreamingForwardMessage* sfMess = mg->recvIncomingMessage(ConcurrentMessageQueueFactory::REQUEST_MQ, prio, timeout);
-      if (sfMess)
+      assert (sfMess);
+
+      if (no_nbs > 0)
 	{
 	  process(sfMess);
+	}
+      else
+	{
 	}
     }
 
