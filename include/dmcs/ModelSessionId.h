@@ -42,13 +42,18 @@ namespace dmcs {
 struct ModelSessionId
 {
   PartialBeliefState* partial_belief_state;
+  PathList path;
   std::size_t session_id;
 
   ModelSessionId()
   { }
 
-  ModelSessionId(PartialBeliefState* p, std::size_t sid)
-    : partial_belief_state(p), session_id(sid)
+  ModelSessionId(PartialBeliefState* p, 
+		 PathList pa,
+		 std::size_t sid)
+    : partial_belief_state(p), 
+      path(pa),
+      session_id(sid)
   { }
 
   template <typename Archive>
@@ -56,6 +61,7 @@ struct ModelSessionId
   serialize(Archive& ar, const unsigned int /* version */)
   {
     ar & partial_belief_state;
+    ar & path;
     ar & session_id;
   }
 };

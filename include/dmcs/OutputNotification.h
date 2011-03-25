@@ -45,14 +45,17 @@ struct OutputNotification : public BaseNotification
 		     std::size_t pa,
 #endif
 		     std::size_t psid, 
-		     std::size_t ps)
+		     std::size_t k_one,
+		     std::size_t k_two)
     : BaseNotification(t, pa),
       parent_session_id(psid),
-      pack_size(ps)
+      k1(k_one),
+      k2(k_two)
   { }
   
   std::size_t parent_session_id;
-  std::size_t pack_size;
+  std::size_t k1;
+  std::size_t k2;
 };
 
 
@@ -62,7 +65,8 @@ operator<< (std::ostream& os, const OutputNotification& on)
 {
   os << (BaseNotification)on 
      << " sid = " << on.parent_session_id
-     << " pack_size = " << on.pack_size;
+     << " k1 = " << on.k1
+     << " k2 = " << on.k2;
 
   return os;
 }

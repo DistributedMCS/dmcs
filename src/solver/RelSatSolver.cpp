@@ -73,6 +73,7 @@ RelSatSolver::RelSatSolver(bool il,
 }
 
 
+
 RelSatSolver::~RelSatSolver()
 {
   delete xInstance;
@@ -144,6 +145,7 @@ RelSatSolver::update_local_input(PartialBeliefSet& my_belief_set,
 }
 
 
+
 // return false when there is no more input to read
 bool
 RelSatSolver::prepare_input()
@@ -208,11 +210,26 @@ RelSatSolver::prepare_input()
 }
 
 
+
 void
 RelSatSolver::refresh()
 {
   //xInstance->removePartialAss();
   xSATSolver->refresh();
+}
+
+
+
+void
+RelSatSolver::send_empty_model()
+{
+#ifdef DEBUG
+  History path(1, 0);
+#else
+  std::size_t path = 0;
+#endif  
+
+  mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
 }
 
 
@@ -261,7 +278,7 @@ RelSatSolver::solve()
 	      if (!prepare_input())
 		{
 		  DMCS_LOG_TRACE("Got NULL input from JOIN_OUT_MQ. Send a NULL model to OUT_MQ to inform OutputThread");
-		  mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
+
 		  break;
 		}
 	      DMCS_LOG_TRACE("A fresh solving. input = " << *input);
@@ -292,7 +309,7 @@ RelSatSolver::receiveEOF()
   if (is_leaf)
     {
       DMCS_LOG_TRACE("EOF. Send a NULL pointer to OUT_MQ to close this session.");
-      mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+      send_empty_model();
     }
 }
 
@@ -306,7 +323,7 @@ RelSatSolver::receiveUNSAT(ClauseList& learned_clauses)
   if (is_leaf)
     {
       DMCS_LOG_TRACE("UNSAT. Send a NULL pointer to OUT_MQ to close this session.");
-      mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+      send_empty_model();
     }
 }
 
@@ -366,7 +383,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 
   DMCS_LOG_TRACE("Going to send: " << *bs << ", with parent session id = " << parent_session_id);
   // now put this PartialBeliefState to the SatOutputMessageQueue
-  mg->sendModel(bs, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
+  mg->sendModel(bs, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
   // Models should be cleaned by OutputThread
 }
 

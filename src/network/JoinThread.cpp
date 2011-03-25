@@ -95,7 +95,7 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
 
   // Joining succeeded. Now send this input to SAT solver via JOIN_OUT_MQ
   // be careful that we are blocked here. Use timeout sending instead?
-  mg->sendModel(result, session_id, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+  mg->sendModel(result, path, session_id, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
 
   return 1;
 }
@@ -378,7 +378,8 @@ JoinThread::import_and_join(VecSizeTPtr request_size,
 		  // Inform the SAT solver about this by sending him a
 		  // NULL model.
 		  DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0. Send a NULL model to JOIN_OUT_MQ");
-		  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+
+		  send_empty_model();
 		  
 		  ///@todo: Also tell the neighbors (via NeighborOut) to stop
 		  /// returning models.
@@ -403,7 +404,7 @@ JoinThread::import_and_join(VecSizeTPtr request_size,
 	      if (next_neighbor_offset == no_nbs)
 		{
 		  DMCS_LOG_TRACE(port << ": Send a NULL model to JOIN_OUT_MQ");
-		  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+		  send_empty_model();
 		  return;
 		}
 	      else
@@ -758,6 +759,19 @@ JoinThread::do_join(PartialBeliefStatePackagePtr& partial_eqs)
 
 
 void
+JoinThread::send_empty_model()
+{
+#ifdef DEBUG
+  History empty_path(1, 0);
+  mg->sendModel(0, empty_path, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+#else
+  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+#endif
+}
+
+
+
+void
 JoinThread::process(StreamingForwardMessage* sfMess)
 {
   // set up a package of empty BeliefStates
@@ -780,7 +794,8 @@ JoinThread::process(StreamingForwardMessage* sfMess)
   if (!ask_first_packs(partial_eqs.get(), path, 1, no_nbs))
     {
       DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");
-      mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+
+      send_empty_model();
 
       delete sfMess;
       sfMess = 0;  
@@ -800,7 +815,7 @@ JoinThread::process(StreamingForwardMessage* sfMess)
       if (next_neighbor_offset == no_nbs + 1)
 	{
 	  DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to JOIN_OUT_MQ");
-	  mg->sendModel(0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+	  send_empty_model();
 	  break;
 	}
 

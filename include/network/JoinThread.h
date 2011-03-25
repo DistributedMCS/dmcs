@@ -149,6 +149,9 @@ private:
   void
   process(StreamingForwardMessage* sfMess);
 
+private:
+  void
+  send_empty_model();
 
 private:
   std::size_t port;
@@ -156,6 +159,7 @@ private:
   std::size_t system_size;
   std::size_t session_id;
   std::size_t pack_size;         // the real upper-bound of number of models that we ask the neighbors
+  PathList path;
 
   MessagingGatewayBC* mg;
   ConcurrentMessageQueue* joiner_sat_notif;

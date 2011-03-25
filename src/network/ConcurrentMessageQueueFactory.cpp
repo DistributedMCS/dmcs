@@ -149,13 +149,13 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 1 (JOIN_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
 
-  mq = createMessageQueue(uid, no_nbs, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::ModelSession));
+  mq = createMessageQueue(uid, no_nbs, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, PathList>::ModelSession));
   md->registerMQ(mq, JOIN_OUT_MQ);
 
   // create message queue 2 (JOIN_IN_MQ)
   // join input MQ, announces pairs of (neighbor_id, partial belief states)
 
-  mq = createMessageQueue(uid, no_nbs, JOIN_IN_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::JoinIn));
+  mq = createMessageQueue(uid, no_nbs, JOIN_IN_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, PathList>::JoinIn));
   md->registerMQ(mq, JOIN_IN_MQ);
 
   // create message queue 3 (REQUEST_MQ)
@@ -200,7 +200,8 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 1 (JOIN_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
   
-  mq = createMessageQueue(uid, 0, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::ModelSession));
+  mq = createMessageQueue(uid, 0, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, PathList>::ModelSession));
+
   md->registerMQ(mq, JOIN_OUT_MQ);
 
   // create message queue 3 (REQUEST_MQ)

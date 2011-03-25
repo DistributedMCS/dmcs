@@ -147,7 +147,8 @@ private:
 		       std::size_t path, 
 #endif
 		       std::size_t parent_session_id,
-		       std::size_t pack_size);
+		       std::size_t k1,
+		       std::size_t k2);
     
 private:
   boost::thread* output_thread;

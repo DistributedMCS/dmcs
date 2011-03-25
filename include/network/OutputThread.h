@@ -42,10 +42,11 @@
 namespace dmcs {
 
 
+
 class OutputThread
 {
 public:
-  OutputThread(std::size_t p);
+  OutputThread(std::size_t p, PathList pa);
 
   virtual
   ~OutputThread();
@@ -56,29 +57,38 @@ public:
 	     ConcurrentMessageQueue* hon);
 
 private:
-  OutputNotification::NotificationType
+  BaseNotification::NotificationType
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
-		   std::size_t& pack_size,
+		   PathList& path,
+		   std::size_t& k1,
+		   std::size_t& k2,
 		   std::size_t& parent_session_id);
+
+  void
+  send_empty_model(MessagingGatewayBC* mg);
 
   void
   collect_output(MessagingGatewayBC* mg, 
 		 ModelSessionIdListPtr& res,
-		 std::size_t pack_size,
+		 std::size_t k1,
+		 std::size_t k2,
 		 std::size_t parent_session_id);
 
   void
   write_result(connection_ptr conn,
 	       ModelSessionIdListPtr& res);
 
-
 private:
   std::size_t port;
-  bool eof_mode;
   PartialBeliefStateBufPtr output_buffer;
+  PathList path;
 };
 
+
+
 typedef boost::shared_ptr<OutputThread> OutputThreadPtr;
+
+
 
 } // namespace dmcs
 

@@ -274,9 +274,10 @@ Handler<StreamingCommandType>::notify_output_thread(BaseNotification::Notificati
 						    std::size_t path, 
 #endif
 						    std::size_t parent_session_id,
-						    std::size_t pack_size)
+						    std::size_t k1,
+						    std::size_t k2)
 {
-  OutputNotification* mess_output = new OutputNotification(t, path, parent_session_id, pack_size);
+  OutputNotification* mess_output = new OutputNotification(t, path, parent_session_id, k1, k2);
   
   DMCS_LOG_TRACE(port << ": Notify OutputThread" << *mess_output);
   
@@ -303,15 +304,13 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
   if (!e)
     {
-#ifdef DEBUG
-      History path = sesh->mess.getPath();
-#else
-      std::size_t path = sesh->mess.getPath();
-#endif
+      PathList path = sesh->mess.getPath();
 
       const std::size_t parent_session_id = sesh->mess.getSessionId();
       const std::size_t invoker = sesh->mess.getInvoker();
       const std::size_t pack_size = sesh->mess.getPackSize();
+      const std::size_t k1 = sesh->mess.getK1();
+      const std::size_t k2 = sesh->mess.getK2();
 
       assert (pack_size > 0);
 
@@ -328,14 +327,14 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // inform OutputThread about new incoming message (request
 	  // the next pack_size models)
 
-	  OutputThread ot(port);
+	  OutputThread ot(port, path);
 	  output_thread = new boost::thread(ot, sesh->conn, mg, handler_output_notif.get());
 
 	  first_call = false;
 	} // if (first_call)
 
       DMCS_LOG_TRACE(port << ": Notify OutputThread of the new message");
-      notify_output_thread(BaseNotification::REQUEST, path, parent_session_id, pack_size);
+      notify_output_thread(BaseNotification::REQUEST, path, parent_session_id, k1, k2);
 
 
       DMCS_LOG_TRACE(port << ": Notify Joiner of the new message by placing it into REQUEST_MQ");
@@ -409,7 +408,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 #else
 	  std::size_t path = 0;
 #endif
-	  notify_output_thread(BaseNotification::SHUTDOWN, path, 0, 0);
+	  notify_output_thread(BaseNotification::SHUTDOWN, path, 0, 0, 0);
 	  
 	  DMCS_LOG_TRACE(port << ": Send SHUTDOWN to DMCS thread");
 

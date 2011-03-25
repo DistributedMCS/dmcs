@@ -98,6 +98,9 @@ private:
 		     SignatureByCtx::const_iterator low, 
 		     SignatureByCtx::const_iterator up);
 
+  void
+  send_empty_model();
+
 private:
   bool is_leaf;
   std::size_t my_id;
@@ -114,11 +117,7 @@ private:
   PartialBeliefState* input;
   PartialBeliefStateBufPtr input_buffer;
   bool first_round;
-#ifdef DEBUG
-  History path;
-#else
-  std::size_t path;
-#endif
+  PathList path;
 
   SATInstance* xInstance;
   SATSolver* xSATSolver;

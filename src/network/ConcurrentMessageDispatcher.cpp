@@ -58,6 +58,7 @@ ConcurrentMessageDispatcher::~ConcurrentMessageDispatcher()
 }
 
 
+
 void
 ConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr& mq, std::size_t id)
 {
@@ -65,6 +66,7 @@ ConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr& mq, std::size
   mqs.push_back(mq);
   mqids.push_back(id); // maybe not needed
 }
+
 
 
 bool
@@ -121,6 +123,7 @@ ConcurrentMessageDispatcher::sendIncomingMessage(StreamingForwardMessage* m,
 
 bool
 ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
+				       PathList path,
 				       std::size_t sid,
 				       std::size_t /* from */,
 				       std::size_t to,
@@ -322,8 +325,7 @@ ConcurrentMessageDispatcher::recvIncomingMessage(std::size_t from,
   return m;
 }
 
-
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::ModelSession
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, PathList>::ModelSession
 ConcurrentMessageDispatcher::recvModel(std::size_t from,
 				       std::size_t& /* prio */,
 				       int& msecs)
@@ -462,7 +464,8 @@ ConcurrentMessageDispatcher::recvModelDecisionlevel(std::size_t from,
 #endif//0
 
 
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::JoinIn
+
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, PathList>::JoinIn
 ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 					std::size_t& /* prio */,
 					int& msecs)

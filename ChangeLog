@@ -1,3 +1,25 @@
+2011-03-25  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/OutputNotification.h: Replace pack_size by k1, k2.
+	* include/network/Handler.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/ModelSessionId.h: Add path.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/BaseTypes.h: Use PathList to simplify definition of path.
+
 2011-03-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/JoinThread.h: Set up connection from JoinThread

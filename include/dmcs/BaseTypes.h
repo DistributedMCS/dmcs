@@ -46,6 +46,12 @@ operator<< (std::ostream& os, const History& hist)
   return os;
 }
 
+#ifdef DEBUG
+  typedef History PathList;
+#else
+  typedef std::size_t PathList;
+#endif
+
 } // namespace dmcs
 
 #endif // BASE_TYPES_H

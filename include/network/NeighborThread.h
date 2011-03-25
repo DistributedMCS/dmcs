@@ -280,6 +280,7 @@ private:
 	  {
 	    PartialBeliefState* bs = it->partial_belief_state;
 	    std::size_t sid = it->session_id;
+	    PathList path = it->path;
 
 	    if (bs != 0)
 	      {
@@ -289,7 +290,7 @@ private:
 	      {
 		DMCS_LOG_TRACE("Sending model: NULL" << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
-	    mg->sendModel(bs, sid, noff, offset, 0); 
+	    mg->sendModel(bs, path, sid, noff, offset, 0); 
 	  }
 	
 	boost::shared_ptr<std::string> header(new std::string);

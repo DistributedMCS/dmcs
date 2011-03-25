@@ -41,10 +41,12 @@
 #include <boost/thread.hpp>
 
 
+
 namespace dmcs {
 
-OutputThread::OutputThread(std::size_t p)
-  : port(p), eof_mode(false),
+OutputThread::OutputThread(std::size_t p, PathList pa)
+  : port(p), 
+    path(pa),
     output_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE))
 { }
 
@@ -69,7 +71,9 @@ OutputThread::operator()(connection_ptr c,
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  std::size_t pack_size;
+  PathList path;
+  std::size_t k1;
+  std::size_t k2;
   std::size_t parent_session_id;
   ModelSessionIdListPtr res(new ModelSessionIdList);
   
@@ -77,22 +81,17 @@ OutputThread::operator()(connection_ptr c,
     {
       res->clear();
 
-      OutputNotification::NotificationType nt = wait_for_trigger(hon, pack_size, parent_session_id);
+      BaseNotification::NotificationType nt = wait_for_trigger(hon, path, k1, k2, parent_session_id);
 
-      if (nt == OutputNotification::SHUTDOWN)
+      if (nt == BaseNotification::SHUTDOWN)
 	{
 	  return; // shutdown received
 	}
-      else if (nt == OutputNotification::NEXT && eof_mode)
+      else 
 	{
-	  DMCS_LOG_TRACE(port << ": in EOF mode. Send EOF");
-	  const std::string header_eof = HEADER_EOF;
-	  c->write(header_eof);	  
-	}
-      else
-	{
-	  eof_mode = false;
-	  collect_output(mg, res, pack_size, parent_session_id);
+	  assert (nt == BaseNotification::REQUEST || nt == BaseNotification::NEXT);
+
+	  collect_output(mg, res, k1, k2, parent_session_id);
 
 	  DMCS_LOG_TRACE(port << ": Output collected. res->size() = " << res->size());
 
@@ -102,7 +101,6 @@ OutputThread::operator()(connection_ptr c,
 	    }
 	  else
 	    {
-	      eof_mode = true;
 	      DMCS_LOG_TRACE(port << ": No more answer to send. Send EOF");
 	      const std::string header_eof = HEADER_EOF;
 	      c->write(header_eof);
@@ -113,9 +111,11 @@ OutputThread::operator()(connection_ptr c,
 
 
 
-OutputNotification::NotificationType
+BaseNotification::NotificationType
 OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
-			       std::size_t& pack_size,
+			       PathList& path,
+			       std::size_t& k1,
+			       std::size_t& k2,
 			       std::size_t& parent_session_id)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
@@ -125,7 +125,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
   void *ptr         = static_cast<void*>(&on);
   unsigned int    p = 0;
   std::size_t recvd = 0;
-  OutputNotification::NotificationType nt;
+  BaseNotification::NotificationType nt;
 
   DMCS_LOG_TRACE(port << ": Wait for message from Handler");
 
@@ -140,8 +140,12 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 	}
       else
 	{
-	  pack_size = on->pack_size;
+	  path = on->path;
+	  k1 = on->k1;
+	  k2 = on->k2;
 	  parent_session_id = on->parent_session_id;
+
+	  assert (k1 <= k2);
 
 	  assert ((nt == OutputNotification::REQUEST) || (nt == OutputNotification::NEXT));
 
@@ -155,7 +159,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 		output_buffer->clear();
 		}*/
 
-	  DMCS_LOG_TRACE(port << ": Got a message from Handler. pack_size = " << pack_size << ". parent_session_id = " << parent_session_id);
+	  DMCS_LOG_TRACE(port << ": Got a message from Handler. on = " << *on);
 	}
 
       delete on;
@@ -173,13 +177,29 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 
 
 void
+OutputThread::send_empty_model(MessagingGatewayBC* mg)
+{
+#ifdef DEBUG
+  History path(1, 0);
+#else
+  std::size_t path = 0;
+#endif
+  mg->sendModel(0, path, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+}
+
+
+
+void
 OutputThread::collect_output(MessagingGatewayBC* mg,
 			     ModelSessionIdListPtr& res,
-			     std::size_t pack_size,
+			     std::size_t k1,
+			     std::size_t k2,
 			     std::size_t parent_session_id)
 {
   // collect up to pack_size models
-  for (std::size_t i = 1; i <= pack_size; ++i)
+
+
+  for (std::size_t i = 1; i <= k1; ++i)
     {
       DMCS_LOG_TRACE(port << ": Read from MQ. i = " << i);
       
@@ -200,20 +220,8 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  if (timeout == 0)
 	    {
 	      DMCS_LOG_TRACE(port << ": TIME OUT");
-
-	      if (res->size() > 0)
-		{
-		  DMCS_LOG_TRACE(port << ": Going to send whatever I got so far to the parent");
-		  break;
-		}
-	      else
-		{
-		  //DMCS_LOG_TRACE(port << ": Timeout after 200msecs, continuing with " << i-1 << "th bs.");
-
-		  // decrease counter because we gained nothing so far.
-		  --i;
-		  continue;
-		}
+	      --i;
+	      continue;
 	    }
 	  else 
 	    {
@@ -226,7 +234,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	      else
 		{
 		  DMCS_LOG_TRACE(port << ": push back this NULL pointer to the message queue so that we will read it the next time");
-		  mg->sendModel(0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
+		  send_empty_model(mg);
 		  return;
 		}
 	    }
@@ -243,7 +251,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	    {
 	      DMCS_LOG_TRACE(port << ": Model was NOT cached, put it into result.");
 	      // Got something in a reasonable time. Continue collecting.
-	      ModelSessionId msi(bs, sid);
+	      ModelSessionId msi(bs, path, sid);
 	      res->push_back(msi);
 	    }
 	  else
@@ -253,6 +261,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	    }
 	}
     } // for
+
 }
 
 

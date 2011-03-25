@@ -32,6 +32,7 @@
 #ifndef _CONCURRENT_MESSAGE_DISPATCHER_H
 #define _CONCURRENT_MESSAGE_DISPATCHER_H
 
+#include "dmcs/BaseTypes.h"
 #include "dmcs/StreamingForwardMessage.h"
 #include "network/MessagingGateway.h"
 #include "network/ConcurrentMessageQueue.h"
@@ -47,7 +48,11 @@ namespace dmcs {
   /**
    * @brief a dispatcher for concurrent message queues
    */
-  class ConcurrentMessageDispatcher : public MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>
+  class ConcurrentMessageDispatcher : public MessagingGateway<PartialBeliefState, 
+							      Decisionlevel, 
+							      Conflict, 
+							      StreamingForwardMessage, 
+							      PathList>
   {
   private:
     /// here we pile up all MQ's that receive messages
@@ -77,7 +82,7 @@ namespace dmcs {
     sendIncomingMessage(StreamingForwardMessage* sfMess, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
-    sendModel(PartialBeliefState* b, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+    sendModel(PartialBeliefState* b, PathList path, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
 #if 0
     virtual bool
