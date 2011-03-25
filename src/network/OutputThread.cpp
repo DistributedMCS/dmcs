@@ -51,13 +51,16 @@ OutputThread::OutputThread(std::size_t p, PathList pa)
 { }
 
 
+
 OutputThread::~OutputThread()
 {
   DMCS_LOG_TRACE(port << ": Terminating OutputThread.");
-  for (PartialBeliefStateBuf::const_iterator it = output_buffer->begin(); 
+  for (PartialBeliefStateBuf::iterator it = output_buffer->begin(); 
        it != output_buffer->end(); ++it)
     {
+      assert (*it);
       delete *it;
+      *it = 0;
     }
   output_buffer->clear();
 }
@@ -196,15 +199,18 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 			     std::size_t k2,
 			     std::size_t parent_session_id)
 {
+  // TOO BAD we cannot cache here!!!
   // collect up to pack_size models
+  bool reached_k1 = true;
+  res->clear();
 
-
-  for (std::size_t i = 1; i <= k1; ++i)
+  // throw away models up to k1-1 ============================================================================
+  for (std::size_t i = 1; i < k1; ++i)
     {
       DMCS_LOG_TRACE(port << ": Read from MQ. i = " << i);
       
-      std::size_t prio       = 0;
-      int timeout            = 200; // milisecs
+      std::size_t prio = 0;
+      int timeout = 0;
 
       struct MessagingGatewayBC::ModelSession ms =
 	mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
@@ -212,56 +218,61 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       DMCS_LOG_TRACE(port << ": Extract information from MQ");
 
       PartialBeliefState* bs = ms.m;
+      PathList pa = ms.path;
       std::size_t sid = ms.sid;
       
-      if (bs == 0) // Ups, a NULL pointer
+      DMCS_LOG_TRACE(port << ": Check this assertion");
+      assert (pa == path);
+
+      if (bs == 0) // EOF
 	{
-	  //DMCS_LOG_TRACE(port << ": Got a NULL pointer. timeout == " << timeout);
-	  if (timeout == 0)
-	    {
-	      DMCS_LOG_TRACE(port << ": TIME OUT");
-	      --i;
-	      continue;
-	    }
-	  else 
-	    {
-	      // timeout != 0 ==> either UNSAT or EOF
-	      if (i == 1)
-		{
-		  DMCS_LOG_TRACE(port << ": TIME OUT at i == 1. RETURN NOW!");
-		  return;
-		}
-	      else
-		{
-		  DMCS_LOG_TRACE(port << ": push back this NULL pointer to the message queue so that we will read it the next time");
-		  send_empty_model(mg);
-		  return;
-		}
-	    }
+	  DMCS_LOG_TRACE(port << ": Got EOF before reaching " << k1 << " models. Bailing out...");
+	  reached_k1 = false;
+	  break;
 	}
       else
 	{
 	  DMCS_LOG_TRACE(port << ": got #" << i);
 	  DMCS_LOG_TRACE(port << ": bs = " << *bs << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
-	  
-	  bool was_cached;
-	  store(bs, output_buffer, false, was_cached);
-
-	  if (!was_cached)
-	    {
-	      DMCS_LOG_TRACE(port << ": Model was NOT cached, put it into result.");
-	      // Got something in a reasonable time. Continue collecting.
-	      ModelSessionId msi(bs, path, sid);
-	      res->push_back(msi);
-	    }
-	  else
-	    {
-	      DMCS_LOG_TRACE(port << ": Model is cached, won't put it into result.");
-	      --i;
-	    }
+	  delete bs;
 	}
     } // for
 
+  if (!reached_k1)
+    {
+      return;
+    }
+
+  // now collect up to k2-k1+1 unique models to return ========================================================
+  for (std::size_t i = k1; i <= k2; ++i)
+    {
+      std::size_t prio = 0;
+      int timeout = 0;
+
+      struct MessagingGatewayBC::ModelSession ms =
+	mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+
+      DMCS_LOG_TRACE(port << ": Extract information from MQ");
+
+      PartialBeliefState* bs = ms.m;
+      PathList pa = ms.path;
+      std::size_t sid = ms.sid;
+      
+      DMCS_LOG_TRACE(port << ": Check this assertion");
+      assert (pa == path);
+
+      if (bs == 0) // EOF
+	{
+	  break;
+	}
+      else
+	{
+	  DMCS_LOG_TRACE(port << ": got #" << i);
+	  DMCS_LOG_TRACE(port << ": bs = " << *bs << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
+	  ModelSessionId msi(bs, path, sid);
+	  res->push_back(msi);
+	}
+    }
 }
 
 

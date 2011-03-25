@@ -1,5 +1,8 @@
 2011-03-25  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/OutputThread.cpp: Read and ignore the first k1
+	models, and then read and store the next until k2.
+
 	* include/dmcs/OutputNotification.h: Replace pack_size by k1, k2.
 	* include/network/Handler.h: Likewise.
 	* include/network/Handler.tcc: Likewise.
