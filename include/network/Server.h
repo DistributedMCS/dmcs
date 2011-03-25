@@ -31,6 +31,7 @@
 #define SERVER_H
 
 #include "network/BaseHandler.h"
+#include "network/HandlerThread.h"
 #include "network/Session.h"
 #include "network/connection.hpp"
 
@@ -92,9 +93,11 @@ private:
   ThreadVecPtr handler_threads;
   ThreadVecPtr neighbor_threads;
   NeighborThreadVecPtr neighbors;
+  HandlerThreadVecPtr handlers;
   ConcurrentMessageQueue* joiner_sat_notif;
   ConcurrentMessageQueueVecPtr neighbors_notif;
   std::size_t port;
+  bool first_round;
 };
 
 typedef boost::shared_ptr<BaseServer> ServerPtr;

@@ -37,7 +37,6 @@
 #include "network/Session.h"
 #include "network/OutputThread.h"
 #include "network/ThreadFactory.h"
-#include "network/Server.h"
 #include "network/StreamingDMCSThread.h"
 #include "dmcs/CommandType.h"
 #include "dmcs/StreamingCommandType.h"
@@ -115,13 +114,12 @@ class Handler<StreamingCommandType> //: public BaseHandler<StreamingCommandType>
 public:
   Handler();
 
-  virtual
   ~Handler();
 
   void
-  operator()(StreamingHandlerPtr hdl, 
-	     StreamingSessionMsgPtr sesh, 
-	     MessagingGatewayBC* mg);
+  startup(StreamingHandlerPtr hdl, 
+	  StreamingSessionMsgPtr sesh, 
+	  MessagingGatewayBC* mg);
 
   void 
   do_local_job(const boost::system::error_code& e,

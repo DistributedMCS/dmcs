@@ -33,10 +33,11 @@
 
 #include "dmcs/Log.h"
 
+#include "network/Server.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/Handler.h"
 #include "network/ThreadFactory.h"
-#include "network/Server.h"
+
 
 #include <algorithm>
 #include <iostream>
@@ -45,6 +46,13 @@
 
 namespace dmcs {
 
+  void
+  HandlerThread::operator()(StreamingHandlerPtr handler,
+			    StreamingSessionMsgPtr sesh,
+			    MessagingGatewayBC* mg)
+  {
+    handler->startup(handler, sesh, mg);
+  }
 
 
 Server::Server(const CommandTypeFactoryPtr& c,
@@ -55,13 +63,14 @@ Server::Server(const CommandTypeFactoryPtr& c,
     acceptor(io_service, endpoint),
     port(endpoint.port()),
     invokers(new ListSizeT),
+    neighbors(new NeighborThreadVec),
+    handlers(new HandlerThreadVec),
     neighbor_threads(new ThreadVec),
     handler_threads(new ThreadVec),
     joiner_sat_notif(new ConcurrentMessageQueue),
-    neighbors_notif(new ConcurrentMessageQueueVec)
+    neighbors_notif(new ConcurrentMessageQueueVec),
+    first_round(true)
 {
-  initialize();
-
   connection_ptr my_connection(new connection(io_service));
 
   acceptor.async_accept(my_connection->socket(),
@@ -183,9 +192,17 @@ Server::dispatch_header(const boost::system::error_code& e,
 	}
       else if (header->find(HEADER_REQ_STM_DMCS) != std::string::npos)
 	{
+	  if (first_round)
+	    {
+	      initialize();
+	      first_round = false;
+	    }
+
 	  //typedef Handler<StreamingCommandType> StreamingHandler;
 
 	  //StreamingCommandTypePtr cmd_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
+
+	  DMCS_LOG_TRACE("Going to create StreamingHandler");
 
 	  StreamingSessionMsgPtr sesh(new StreamingSessionMsg(conn));
 
@@ -204,8 +221,11 @@ Server::dispatch_header(const boost::system::error_code& e,
 	      invokers->push_back(invoker);
 	    }
 
-	  boost::thread* t = new boost::thread(*handler, handler, sesh, mg.get());
-	  handler_threads->push_back(t);
+	  DMCS_LOG_TRACE(handler.get());
+	  HandlerThread* handler_thread = new HandlerThread(invoker);
+	  boost::thread* ht = new boost::thread(*handler_thread, handler, sesh, mg.get());
+	  handler_threads->push_back(ht);
+	  handlers->push_back(handler_thread);
 	  ///@todo: delete threads in destructor of Server
 	}
       else if (header->find(HEADER_REQ_OPT_DMCS) != std::string::npos)

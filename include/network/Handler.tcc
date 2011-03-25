@@ -248,10 +248,12 @@ Handler<StreamingCommandType>::~Handler()
 
 
 void
-Handler<StreamingCommandType>::operator()(StreamingHandlerPtr hdl, 
-					  StreamingSessionMsgPtr sesh, 
-					  MessagingGatewayBC* mg)
+Handler<StreamingCommandType>::startup(StreamingHandlerPtr hdl, 
+				       StreamingSessionMsgPtr sesh, 
+				       MessagingGatewayBC* mg)
 {
+  DMCS_LOG_TRACE(hdl.get());
+  DMCS_LOG_TRACE(this);
   assert(hdl.get() == this);
 
   sesh->conn->async_read(sesh->mess,

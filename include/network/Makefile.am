@@ -13,6 +13,7 @@ noinst_HEADERS =  \
 		ConcurrentMessageQueueHelper.h \
 		Handler.h \
 		Handler.tcc \
+		HandlerThread.h \
 		JoinThread.h \
 		MessagingGateway.h \
 		NeighborOut.h \

@@ -1,5 +1,17 @@
 2011-03-25  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+
+
+	* include/network/Makefile.am: Add HandlerThread.h
+	* include/network/HandlerThread.h: New file. (Interesting
+	technique: forward declaration of templates)
+
+	* include/network/Handler.h: Let the thread starts at
+	HandlerThread.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Server.h: Likewise.
+	* src/network/Server.cpp: Likewise.
+
 	* src/network/OutputThread.cpp: Read and ignore the first k1
 	models, and then read and store the next until k2.
 
