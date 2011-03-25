@@ -1,4 +1,4 @@
-/* DMCS -- Distributed Nonmonotonic Multi-Context Systems.
+/* DMC -- Distributed Nonmonotonic Multi-Context Systems.
  * Copyright (C) 2009, 2010 Minh Dao-Tran, Thomas Krennwallner
  * 
  * This file is part of DMCS.
@@ -44,6 +44,7 @@
 #include <boost/serialization/string.hpp>
 
 
+
 namespace dmcs {
 
 /**
@@ -75,16 +76,10 @@ public:
       {
 	AskNextNotification* ann = wait_next_request(rnn, nid);
 
-	DMCS_LOG_TRACE("Got a message = " << *ann);
+	DMCS_LOG_TRACE("N[" << nid << "] Got a message = " << *ann);
 
-#ifdef DEBUG
-	History path = ann->path;
-#else
-	std::size_t path = ann->path;
-#endif
-
+	PathList path = ann->path;
 	std::size_t session_id = ann->session_id;
-	
 	std::size_t k1 = ann->k1;
 	std::size_t k2 = ann->k2;
 
@@ -94,7 +89,7 @@ public:
 
 	if (ann->type == BaseNotification::SHUTDOWN)
 	  {
-	    DMCS_LOG_TRACE("Neighbor " << nid << " received SHUTDOWN, propagating TERMINATE...");
+	    DMCS_LOG_TRACE("N[" << nid << "] Received SHUTDOWN, propagating TERMINATE...");
 
 	    header = HEADER_TERMINATE;
 
@@ -114,7 +109,7 @@ public:
 	    // We should only send HEADER_NEXT
 	    boost::asio::ip::tcp::socket& sock = conn->socket();
 	    boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
-	    DMCS_LOG_TRACE("Going to send HEADER_NEXT to port " << ep.port());
+	    DMCS_LOG_TRACE("N[" << nid << "] Going to send HEADER_NEXT to port " << ep.port());
 
 	    header = HEADER_NEXT;
 	  }
@@ -145,12 +140,12 @@ public:
     unsigned int p  = 0;
     std::size_t recvd = 0;
     
-    DMCS_LOG_TRACE("Listen to Joiner... nid = " << nid);
+    DMCS_LOG_TRACE("N[" << nid << "] Listen to Joiner");
     neighbor_notif->receive(ptr, sizeof(ann), recvd, p);
 	
     if (!ptr || !ann)
       {
-	DMCS_LOG_FATAL("Got null message: " << ptr << " " << ann);
+	DMCS_LOG_FATAL("N[" << nid << "] Got null message: " << ptr << " " << ann);
 	assert(ptr != 0 && ann != 0);
       }
 
@@ -161,11 +156,7 @@ public:
 
   void
   write_message(connection_ptr conn,
-#ifdef DEBUG
-		History path,
-#else
-		std::size_t path,
-#endif
+		PathList path,
 		std::size_t invoker,
 		std::size_t k1,
 		std::size_t k2,

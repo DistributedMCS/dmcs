@@ -61,7 +61,7 @@ public:
   virtual
   ~NeighborThread()
   {
-    DMCS_LOG_TRACE("Terminating NeighborThread.");
+    DMCS_LOG_TRACE("N[" << nid << "] Terminating NeighborThread.");
 
     if (nop_thread)
       {
@@ -72,7 +72,7 @@ public:
 	    nop_thread->join();
 	    delete nop_thread;
 	    nop_thread = 0;
-	    DMCS_LOG_TRACE("Joined NeighborOut");
+	    DMCS_LOG_TRACE("N[" << nid << "] Joined NeighborOut");
 	  }
       }
 
@@ -91,9 +91,10 @@ public:
     nb = nb_; 
     c2o = c2o_;
     invoker = invoker_;
+    nid = nb->neighbor_id;
 
 
-    DMCS_LOG_TRACE("starting neighbor " << nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
+    DMCS_LOG_TRACE("N[" << nid << "] Starting neighbor: " << nb->port << "@" << nb->hostname);
 
     boost::asio::ip::tcp::resolver resolver(*io_service);
     boost::asio::ip::tcp::resolver::query query(nb->hostname, nb->port);
@@ -109,14 +110,9 @@ public:
 					     ++res_it)
 				 );
 
-
-    DMCS_LOG_TRACE("starting neighbor " << nb->neighbor_id << " io_service");
-
     boost::shared_ptr<boost::thread> nip(new boost::thread(boost::bind(&boost::asio::io_service::run, io_service)));
 
     nip->join(); // waits for termination
-
-    DMCS_LOG_TRACE("io_service for neighbor " << nb->neighbor_id << " done");
   }
 
 
@@ -124,12 +120,12 @@ public:
   void
   stop()
   {
-    DMCS_LOG_TRACE("stopping io_service " << io_service);
+    DMCS_LOG_TRACE("N[" << nid << "] Stopping io_service " << io_service);
 
     if (io_service)
       {
 	io_service->stop(); // terminate io_service
-	DMCS_LOG_TRACE("io_service stopped");
+	DMCS_LOG_TRACE("N[" << nid << "] io_service stopped");
       }
   }
 
@@ -144,14 +140,11 @@ private:
   {
     if (!e)
       {
-	//DMCS_LOG_TRACE("neighbor: ");
-	//DMCS_LOG_TRACE(nb->neighbor_id << ": " << nb->port << "@" << nb->hostname);
-	
 	// get the offset of the neighbor
-	const std::size_t nid                   = nb->neighbor_id;
+	nid = nb->neighbor_id;
 	const HashedBiMapByFirst& from_context  = boost::get<Tag::First>(*c2o);
 	HashedBiMapByFirst::const_iterator pair = from_context.find(nid);
-	const std::size_t offset                = pair->second;
+	const std::size_t offset = pair->second;
 	
 	
 	NeighborOut nop;
@@ -165,7 +158,7 @@ private:
 	boost::shared_ptr<std::string> header(new std::string);
 	
 	// read from network
-	DMCS_LOG_TRACE("Reading header from network, offset = " << offset);
+	DMCS_LOG_TRACE("N[" << nid << "] Reading header from network, offset = " << offset);
 	conn->async_read(*header,
 			 boost::bind(&NeighborThread::handle_read_header, this,  
 				     boost::asio::placeholders::error,
@@ -212,7 +205,7 @@ private:
 	    StreamingBackwardMessagePtr mess(new StreamingBackwardMessage);
 
 	    // read some models
-	    DMCS_LOG_TRACE("Reading message from network");
+	    DMCS_LOG_TRACE("N[" << nid << "] Reading message from network");
 
 	    conn->async_read(*mess,
 			     boost::bind(&NeighborThread::handle_read_message, this,
@@ -227,13 +220,13 @@ private:
 	  {
 	    // no message to read, inform the Joiner with (ctx_offset, 0)
 	    assert (header->find(HEADER_EOF) != std::string::npos);
-	    //mg->sendJoinIn(0, 0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0); ///@todo FIXME
+
 	    mg->sendJoinIn(0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0, 0);
 
 	    boost::shared_ptr<std::string> header(new std::string);
 	    
 	    // read from network
-	    DMCS_LOG_TRACE("Reading header from network, noff = " << noff);
+	    DMCS_LOG_TRACE("N[" << nid << "] Reading header from network, noff = " << noff);
 	    conn->async_read(*header,
 			     boost::bind(&NeighborThread::handle_read_header, this,  
 					 boost::asio::placeholders::error,
@@ -261,11 +254,11 @@ private:
     if (!e)
       {
 	// extract a bunch of models from the message and then put each into NEIGHBOR_MQ
-	DMCS_LOG_TRACE("Write to MQs. noff = " << noff);
+	DMCS_LOG_TRACE("N[" << nid << "] Write to MQs. noff = " << noff);
 	
 	const ModelSessionIdListPtr& msl = mess->getResult();
 	
-	DMCS_LOG_TRACE("Received " << msl->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
+	DMCS_LOG_TRACE("N[" << nid << "] Received " << msl->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
 	
 	const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
 
@@ -284,11 +277,11 @@ private:
 
 	    if (bs != 0)
 	      {
-		DMCS_LOG_TRACE("Sending model = " << *bs << ", sid = " << sid << " from " << noff << " to " << offset);
+		DMCS_LOG_TRACE("N[" << nid << "] Sending model = " << *bs << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
 	    else
 	      {
-		DMCS_LOG_TRACE("Sending model: NULL" << ", sid = " << sid << " from " << noff << " to " << offset);
+		DMCS_LOG_TRACE("N[" << nid << "] Sending model: NULL" << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
 	    mg->sendModel(bs, path, sid, noff, offset, 0); 
 	  }
@@ -296,7 +289,7 @@ private:
 	boost::shared_ptr<std::string> header(new std::string);
 	
 	// read from network
-	DMCS_LOG_TRACE("Reading header from network, noff = " << noff);
+	DMCS_LOG_TRACE("N[" << nid << "] Reading header from network, noff = " << noff);
 	conn->async_read(*header,
 			 boost::bind(&NeighborThread::handle_read_header, this,  
 				     boost::asio::placeholders::error,
@@ -321,6 +314,7 @@ private:
   const Neighbor* nb;
   const HashedBiMap* c2o;
   std::size_t invoker;
+  std::size_t nid;
   boost::thread* nop_thread;
   boost::shared_ptr<boost::asio::io_service> io_service;
 };

@@ -388,6 +388,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 }
 
 
+
 void
 RelSatSolver::print_local_theory()
 {

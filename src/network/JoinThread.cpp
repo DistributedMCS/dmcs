@@ -168,12 +168,7 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
 
 
 void
-JoinThread::wait_dmcs(
-#ifdef DEBUG
-		      History& path,
-#else
-		      std::size_t& path,
-#endif
+JoinThread::wait_dmcs(PathList& path,
 		      std::size_t& pack_size)
 {
     // wait for a notification from StreamingDMCS
@@ -205,11 +200,7 @@ JoinThread::wait_dmcs(
 void
 JoinThread::request_neighbor(PartialBeliefStatePackage* partial_eqs,
 			     std::size_t nid, std::size_t pack_size,
-#ifdef DEBUG
-			     History& path,
-#else
-			     std::size_t path,
-#endif
+			     PathList& path,
 			     BaseNotification::NotificationType nt)
 {
   if (partial_eqs)
@@ -323,11 +314,7 @@ JoinThread::import_belief_states(std::size_t noff,
 
 void
 JoinThread::import_and_join(VecSizeTPtr request_size, 
-#ifdef DEBUG
-			    History& path,
-#else
-			    std::size_t path,
-#endif
+			    PathList& path,
 			    std::size_t pack_size)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
@@ -556,13 +543,7 @@ JoinThread::operator()(std::size_t nbs,
 
       assert (sfMess);
 
-#ifdef DEBUG
-      History path;
-#else
-      std::size_t path;
-#endif
-      
-      path = sfMess->getPath();
+      PathList path = sfMess->getPath();
       session_id = sfMess->getSessionId();
       std::size_t k1 = sfMess->getK1();
       std::size_t k2 = sfMess->getK2();
@@ -630,11 +611,7 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 			 std::size_t nid, 
 			 std::size_t k1, 
 			 std::size_t k2,
-#ifdef DEBUG
-			 History& path,
-#else
-			 std::size_t path,
-#endif
+			 PathList& path,
 			 BaseNotification::NotificationType nt)
 {
   assert (k1 <= k2);
@@ -694,7 +671,7 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 
 	  if (sid == session_id)
 	    {
-	      DMCS_LOG_TRACE("Storing belief state " << i << " from " << noff);
+	      DMCS_LOG_TRACE("Storing belief state " << i << " from " << nid);
 	      bsv->push_back(bs);
 	    }
 	  else
@@ -711,11 +688,7 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 
 bool
 JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
-#ifdef DEBUG
-			    History& path, 
-#else
-			    std::size_t path,
-#endif
+			    PathList& path, 
 			    std::size_t from_neighbor, 
 			    std::size_t to_neighbor)
 {
@@ -763,10 +736,11 @@ JoinThread::send_empty_model()
 {
 #ifdef DEBUG
   History empty_path(1, 0);
-  mg->sendModel(0, empty_path, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
 #else
-  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+  std::size_t empty_path = 0;
 #endif
+
+  mg->sendModel(0, empty_path, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
 }
 
 
@@ -782,13 +756,7 @@ JoinThread::process(StreamingForwardMessage* sfMess)
       partial_eqs->push_back(bsv);
     }
 
-#ifdef DEBUG
-  History path;
-#else
-  std::size_t path;
-#endif
-
-  path = sfMess->getPath();
+  PathList path = sfMess->getPath();
   
   // Warming up round =======================================================================
   if (!ask_first_packs(partial_eqs.get(), path, 1, no_nbs))
@@ -828,7 +796,7 @@ JoinThread::process(StreamingForwardMessage* sfMess)
 	{
 	  if (asking_next)
 	    {
-	      assert (next_neighbor_offset > from_neighbor);
+	      assert (next_neighbor_offset > 1);
 
 	      // again, ask for first packs from each neighbor
 	      ask_first_packs(partial_eqs.get(), path, 1, next_neighbor_offset - 1);

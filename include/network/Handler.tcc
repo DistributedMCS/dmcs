@@ -268,11 +268,7 @@ Handler<StreamingCommandType>::operator()(StreamingHandlerPtr hdl,
 
 void
 Handler<StreamingCommandType>::notify_output_thread(BaseNotification::NotificationType t, 
-#ifdef DEBUG
-						    History path,
-#else
-						    std::size_t path, 
-#endif
+						    PathList path,
 						    std::size_t parent_session_id,
 						    std::size_t k1,
 						    std::size_t k2)
@@ -305,7 +301,6 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
   if (!e)
     {
       PathList path = sesh->mess.getPath();
-
       const std::size_t parent_session_id = sesh->mess.getSessionId();
       const std::size_t invoker = sesh->mess.getInvoker();
       const std::size_t pack_size = sesh->mess.getPackSize();
@@ -321,7 +316,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
 	  port = ep.port();
 
-	  DMCS_LOG_TRACE(port << ": creating output thread, pack_size = " << pack_size);
+	  DMCS_LOG_TRACE(port << ": Creating output thread");
 
 	  // create MessageQueue between Handler and OutputThread to
 	  // inform OutputThread about new incoming message (request

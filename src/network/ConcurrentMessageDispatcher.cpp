@@ -133,7 +133,7 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
   ///@todo TK: from and prio are not used
   assert(mqs.size() > to);
 
-  struct ModelSession ms = { b, sid };
+  struct ModelSession ms = { b, path, sid };
 
   bool ret = true;
 
@@ -333,7 +333,13 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
   ///@todo TK: prio is not used
   assert(mqs.size() > from);
 
-  struct ModelSession ms = {0,0};
+#ifdef DEBUG
+  History path(1, 0);
+#else
+  std::size_t path = 0;
+#endif
+
+  struct ModelSession ms = {0, path, 0};
   std::size_t recvd = 0;
   unsigned int p = 0;
   void *ptr = static_cast<void*>(&ms);

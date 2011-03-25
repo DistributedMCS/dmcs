@@ -204,9 +204,9 @@ Server::dispatch_header(const boost::system::error_code& e,
 	      invokers->push_back(invoker);
 	    }
 
-
 	  boost::thread* t = new boost::thread(*handler, handler, sesh, mg.get());
 	  handler_threads->push_back(t);
+	  ///@todo: delete threads in destructor of Server
 	}
       else if (header->find(HEADER_REQ_OPT_DMCS) != std::string::npos)
 	{
@@ -250,7 +250,7 @@ Server::dispatch_header(const boost::system::error_code& e,
       // An error occurred.
       DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
       throw std::runtime_error(e.message());
-      }
+    }
 }
 
 
