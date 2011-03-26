@@ -60,8 +60,10 @@ public:
   { }
 
   void
-  operator()(StreamingHandlerPtr handler,
+  operator()(bool is_leaf,
+	     StreamingHandlerPtr handler,
 	     StreamingSessionMsgPtr sesh,
+	     ConcurrentMessageQueue* sat_notif,
 	     MessagingGatewayBC* mg);
 
 private:

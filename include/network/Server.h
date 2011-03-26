@@ -96,6 +96,7 @@ private:
   HandlerThreadVecPtr handlers;
   ConcurrentMessageQueue* joiner_sat_notif;
   ConcurrentMessageQueueVecPtr neighbors_notif;
+  HashedBiMapPtr c2o;
   std::size_t port;
   bool first_round;
 };

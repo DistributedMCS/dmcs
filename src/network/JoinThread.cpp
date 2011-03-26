@@ -547,6 +547,7 @@ JoinThread::operator()(std::size_t nbs,
       session_id = sfMess->getSessionId();
       std::size_t k1 = sfMess->getK1();
       std::size_t k2 = sfMess->getK2();
+      
 
       // tell SAT to start
       AskNextNotification* ann = new AskNextNotification(BaseNotification::REQUEST, path, session_id, k1, k2);
@@ -615,6 +616,8 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 			 BaseNotification::NotificationType nt)
 {
   assert (k1 <= k2);
+
+  DMCS_LOG_TRACE("Send to neighbor: nid = " << nid << ", path = " << path << ", k1 = " << k1 << ", k2 = " << k2);
 
   // clean up if necessary =====================================================================================
   if (partial_eqs)
@@ -757,8 +760,9 @@ JoinThread::process(StreamingForwardMessage* sfMess)
     }
 
   PathList path = sfMess->getPath();
+  pack_size = sfMess->getK2() - sfMess->getK1() + 1;
   
-  // Warming up round =======================================================================
+  // Warming up round ======================================================================= 
   if (!ask_first_packs(partial_eqs.get(), path, 1, no_nbs))
     {
       DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");

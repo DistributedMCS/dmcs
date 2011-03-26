@@ -117,21 +117,27 @@ public:
   ~Handler();
 
   void
-  startup(StreamingHandlerPtr hdl, 
+  startup(bool is_leaf,
+	  StreamingHandlerPtr hdl, 
 	  StreamingSessionMsgPtr sesh, 
+	  ConcurrentMessageQueue* sat_notif,
 	  MessagingGatewayBC* mg);
 
   void 
   do_local_job(const boost::system::error_code& e,
+	       bool is_leaf,
 	       StreamingHandlerPtr hdl,
 	       StreamingSessionMsgPtr sesh,
+	       ConcurrentMessageQueue* sat_notif,
 	       MessagingGatewayBC* mg,
 	       bool first_call);
 
   void
   handle_read_header(const boost::system::error_code& e,
+		     bool is_leaf,
 		     StreamingHandlerPtr hdl,
 		     StreamingSessionMsgPtr sesh,
+		     ConcurrentMessageQueue* sat_notif,
 		     MessagingGatewayBC* mg,
 		     boost::shared_ptr<std::string> header,
 		     std::size_t parent_session_id);

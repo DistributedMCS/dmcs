@@ -47,11 +47,13 @@
 namespace dmcs {
 
   void
-  HandlerThread::operator()(StreamingHandlerPtr handler,
+  HandlerThread::operator()(bool is_leaf,
+			    StreamingHandlerPtr handler,
 			    StreamingSessionMsgPtr sesh,
+			    ConcurrentMessageQueue* sat_notif,
 			    MessagingGatewayBC* mg)
   {
-    handler->startup(handler, sesh, mg);
+    handler->startup(is_leaf, handler, sesh, sat_notif, mg);
   }
 
 
@@ -69,6 +71,7 @@ Server::Server(const CommandTypeFactoryPtr& c,
     handler_threads(new ThreadVec),
     joiner_sat_notif(new ConcurrentMessageQueue),
     neighbors_notif(new ConcurrentMessageQueueVec),
+    c2o(new HashedBiMap),
     first_round(true)
 {
   connection_ptr my_connection(new connection(io_service));
@@ -100,8 +103,6 @@ Server::initialize()
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
   mg = mqf.createMessagingGateway(port, no_nbs, mq_size);
-
-  HashedBiMapPtr c2o(new HashedBiMap);
 
   // fill up the map: ctx_id <--> offset
   std::size_t off = 0;
@@ -221,9 +222,17 @@ Server::dispatch_header(const boost::system::error_code& e,
 	      invokers->push_back(invoker);
 	    }
 
+	  StreamingCommandTypePtr cmd_stm_dmcs = ctf->create<StreamingCommandTypePtr>();
+	  const QueryPlanPtr& query_plan = ctf->getQueryPlan();
+	  const ContextPtr& ctx = ctf->getContext();
+	  std::size_t my_id = ctx->getContextID();
+	  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
+	  bool is_leaf = (nbs->size() == 0);
+
+
 	  DMCS_LOG_TRACE(handler.get());
 	  HandlerThread* handler_thread = new HandlerThread(invoker);
-	  boost::thread* ht = new boost::thread(*handler_thread, handler, sesh, mg.get());
+	  boost::thread* ht = new boost::thread(*handler_thread, is_leaf, handler, sesh, joiner_sat_notif, mg.get());
 	  handler_threads->push_back(ht);
 	  handlers->push_back(handler_thread);
 	  ///@todo: delete threads in destructor of Server

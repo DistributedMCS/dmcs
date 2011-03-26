@@ -248,8 +248,10 @@ Handler<StreamingCommandType>::~Handler()
 
 
 void
-Handler<StreamingCommandType>::startup(StreamingHandlerPtr hdl, 
+Handler<StreamingCommandType>::startup(bool is_leaf,
+				       StreamingHandlerPtr hdl, 
 				       StreamingSessionMsgPtr sesh, 
+				       ConcurrentMessageQueue* sat_notif,
 				       MessagingGatewayBC* mg)
 {
   DMCS_LOG_TRACE(hdl.get());
@@ -259,8 +261,10 @@ Handler<StreamingCommandType>::startup(StreamingHandlerPtr hdl,
   sesh->conn->async_read(sesh->mess,
 			 boost::bind(&StreamingHandler::do_local_job, this,
 				     boost::asio::placeholders::error,
+				     is_leaf,
 				     hdl,
 				     sesh,
+				     sat_notif,
 				     mg,
 				     true) // first request
 			   );
@@ -293,8 +297,10 @@ Handler<StreamingCommandType>::notify_output_thread(BaseNotification::Notificati
 
 void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
+					    bool is_leaf,
 					    StreamingHandlerPtr hdl,
 					    StreamingSessionMsgPtr sesh,
+					    ConcurrentMessageQueue* sat_notif,
 					    MessagingGatewayBC* mg,
 					    bool first_call)
 {
@@ -334,10 +340,26 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       notify_output_thread(BaseNotification::REQUEST, path, parent_session_id, k1, k2);
 
 
-      DMCS_LOG_TRACE(port << ": Notify Joiner of the new message by placing it into REQUEST_MQ");
-      StreamingForwardMessage* sfMess = new StreamingForwardMessage();
-      *sfMess = sesh->mess;
-      mg->sendIncomingMessage(sfMess, 0, ConcurrentMessageQueueFactory::REQUEST_MQ, 0);
+      if (is_leaf)
+	{
+	  // tell SAT to start
+	  AskNextNotification* ann = new AskNextNotification(BaseNotification::REQUEST, path, parent_session_id, k1, k2);
+
+	  AskNextNotification* anw_neighbor = (AskNextNotification*) overwrite_send(sat_notif, &ann, sizeof(ann), 0);
+
+	  if (anw_neighbor)
+	    {
+	      delete anw_neighbor;
+	      anw_neighbor = 0;
+	    }
+	}
+      else
+	{
+	  DMCS_LOG_TRACE(port << ": Notify Joiner of the new message by placing it into REQUEST_MQ");
+	  StreamingForwardMessage* sfMess = new StreamingForwardMessage();
+	  *sfMess = sesh->mess;
+	  mg->sendIncomingMessage(sfMess, 0, ConcurrentMessageQueueFactory::REQUEST_MQ, 0);
+	}
 
       DMCS_LOG_TRACE(port << ": Waiting for incoming message from " << invoker << " at " << port << " (first_call = " << first_call << ")");
 
@@ -346,8 +368,10 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       sesh->conn->async_read(*header,
 			     boost::bind(&StreamingHandler::handle_read_header, this,
 					 boost::asio::placeholders::error,
+					 is_leaf,
 					 hdl,
 					 sesh, 
+					 sat_notif,
 					 mg,
 					 header,
 					 parent_session_id)
@@ -366,8 +390,10 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
 void
 Handler<StreamingCommandType>::handle_read_header(const boost::system::error_code& e,
+						  bool is_leaf,
 						  StreamingHandlerPtr hdl,
 						  StreamingSessionMsgPtr sesh,
+						  ConcurrentMessageQueue* sat_notif,
 						  MessagingGatewayBC* mg,
 						  boost::shared_ptr<std::string> header,
 						  std::size_t parent_session_id)
@@ -387,8 +413,10 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  sesh->conn->async_read(sesh->mess,
 				 boost::bind(&StreamingHandler::do_local_job, this,
 					     boost::asio::placeholders::error,
+					     is_leaf,
 					     hdl,
 					     sesh,
+					     sat_notif,
 					     mg,
 					     false) // subsequent call to local job
 				 );

@@ -1,6 +1,16 @@
+2011-03-26  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Initialize pack_size.
+
+	* include/network/Handler.h: Handler notifies SAT to start in case
+	of leaf nodes.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/HandlerThread.h: Likewise.
+
+	* include/network/Server.h: Fix a segfault.
+	* src/network/Server.cpp: Likewise.
+
 2011-03-25  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-
 
 	* include/network/Makefile.am: Add HandlerThread.h
 	* include/network/HandlerThread.h: New file. (Interesting
