@@ -1,3 +1,25 @@
+2011-03-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Fix offset passing.
+
+	* include/network/HandlerThread.h: Add debugging information for
+	HandlerThread's destructor.
+
+	* include/dmcs/AskNextNotification.h: Simplify path to
+	std::size_t.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+	* include/dmcs/OutputNotification.h: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/dmcs/BaseTypes.h: Likewise.
+	* include/dmcs/BaseNotification.h: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
 2011-03-26  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/JoinThread.cpp: Initialize pack_size.

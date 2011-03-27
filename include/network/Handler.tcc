@@ -254,8 +254,6 @@ Handler<StreamingCommandType>::startup(bool is_leaf,
 				       ConcurrentMessageQueue* sat_notif,
 				       MessagingGatewayBC* mg)
 {
-  DMCS_LOG_TRACE(hdl.get());
-  DMCS_LOG_TRACE(this);
   assert(hdl.get() == this);
 
   sesh->conn->async_read(sesh->mess,
@@ -428,11 +426,11 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  DMCS_LOG_TRACE(port << ": Closing session with context " << sesh->mess.getInvoker());
 	  DMCS_LOG_TRACE(port << ": Send SHUTHDOWN to Output thread");
 
-#ifdef DEBUG
-	  History path(1, 0);
-#else
+	  //#ifdef DEBUG
+	  //	  History path(1, 0);
+	  //#else
 	  std::size_t path = 0;
-#endif
+	  //#endif
 	  notify_output_thread(BaseNotification::SHUTDOWN, path, 0, 0, 0);
 	  
 	  DMCS_LOG_TRACE(port << ": Send SHUTDOWN to DMCS thread");

@@ -46,11 +46,11 @@ operator<< (std::ostream& os, const History& hist)
   return os;
 }
 
-#ifdef DEBUG
-  typedef History PathList;
-#else
+  //#ifdef DEBUG
+  //  typedef History PathList;
+  //#else
   typedef std::size_t PathList;
-#endif
+  //#endif
 
 } // namespace dmcs
 

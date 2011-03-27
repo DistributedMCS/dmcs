@@ -695,7 +695,7 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
 			    std::size_t from_neighbor, 
 			    std::size_t to_neighbor)
 {
-  assert (0 < from_neighbor && from_neighbor <= to_neighbor && to_neighbor <= no_nbs);
+  assert (0 <= from_neighbor && from_neighbor <= to_neighbor && to_neighbor < no_nbs);
 
   for (std::size_t i = from_neighbor; i <= to_neighbor; ++i)
     {
@@ -737,11 +737,11 @@ JoinThread::do_join(PartialBeliefStatePackagePtr& partial_eqs)
 void
 JoinThread::send_empty_model()
 {
-#ifdef DEBUG
-  History empty_path(1, 0);
-#else
+  //#ifdef DEBUG
+  //  History empty_path(1, 0);
+  //#else
   std::size_t empty_path = 0;
-#endif
+  //#endif
 
   mg->sendModel(0, empty_path, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
 }
@@ -763,7 +763,7 @@ JoinThread::process(StreamingForwardMessage* sfMess)
   pack_size = sfMess->getK2() - sfMess->getK1() + 1;
   
   // Warming up round ======================================================================= 
-  if (!ask_first_packs(partial_eqs.get(), path, 1, no_nbs))
+  if (!ask_first_packs(partial_eqs.get(), path, 0, no_nbs-1))
     {
       DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");
 
@@ -779,12 +779,12 @@ JoinThread::process(StreamingForwardMessage* sfMess)
 
   // now really going to the loop of asking next =============================================
   bool asking_next = false;
-  std::size_t next_neighbor_offset = 1;
+  std::size_t next_neighbor_offset = 0;
   VecSizeTPtr pack_count(new VecSizeT(no_nbs, 1));
 
   while (1)
     {
-      if (next_neighbor_offset == no_nbs + 1)
+      if (next_neighbor_offset == no_nbs)
 	{
 	  DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to JOIN_OUT_MQ");
 	  send_empty_model();
@@ -800,17 +800,17 @@ JoinThread::process(StreamingForwardMessage* sfMess)
 	{
 	  if (asking_next)
 	    {
-	      assert (next_neighbor_offset > 1);
+	      assert (next_neighbor_offset > 0);
 
 	      // again, ask for first packs from each neighbor
-	      ask_first_packs(partial_eqs.get(), path, 1, next_neighbor_offset - 1);
+	      ask_first_packs(partial_eqs.get(), path, 0, next_neighbor_offset - 1);
 
 	      // reset counter
 	      std::fill(pack_count->begin(), pack_count->begin() + next_neighbor_offset - 1, 1);
 	    }
 	  
 	  do_join(partial_eqs);
-	  next_neighbor_offset = 1;
+	  next_neighbor_offset = 0;
 	  asking_next = false;	  
 	}
       else

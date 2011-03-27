@@ -223,11 +223,11 @@ RelSatSolver::refresh()
 void
 RelSatSolver::send_empty_model()
 {
-#ifdef DEBUG
-  History path(1, 0);
-#else
+  //#ifdef DEBUG
+  //  History path(1, 0);
+  //#else
   std::size_t path = 0;
-#endif  
+  //#endif  
 
   mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
 }
@@ -237,7 +237,7 @@ RelSatSolver::send_empty_model()
 void
 RelSatSolver::solve()
 {
-  DMCS_LOG_TRACE("Fresh solving. Wait for a message from DMCS");
+  DMCS_LOG_TRACE("Fresh solving. Wait for a message from Handler");
   AskNextNotification* ann = 0;
   void *ptr = static_cast<void*>(&ann);
   unsigned int p = 0;
@@ -264,6 +264,7 @@ RelSatSolver::solve()
 	  DMCS_LOG_TRACE("Leaf case. Solve now.");
 	  eResult = xSATSolver->eSolve();
 	  xSATSolver->refresh();
+	  DMCS_LOG_TRACE("Solving at leaf done.");
 	}
       else
 	{
@@ -376,12 +377,12 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 	}
     }
 
-  DMCS_LOG_TRACE("MODEL from SAT: bs = " << *bs);
+  //DMCS_LOG_TRACE("MODEL from SAT: bs = " << *bs);
 
   // project to my output interface
   //  project_to(bs, localV);
 
-  DMCS_LOG_TRACE("Going to send: " << *bs << ", with parent session id = " << parent_session_id);
+  DMCS_LOG_TRACE("Going to send: " << *bs << ", with path = " << path << ", parent session id = " << parent_session_id);
   // now put this PartialBeliefState to the SatOutputMessageQueue
   mg->sendModel(bs, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
   // Models should be cleaned by OutputThread

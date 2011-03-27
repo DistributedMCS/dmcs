@@ -133,6 +133,8 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
   ///@todo TK: from and prio are not used
   assert(mqs.size() > to);
 
+  //  DMCS_LOG_TRACE("path = " << path);
+
   struct ModelSession ms = { b, path, sid };
 
   bool ret = true;
@@ -142,11 +144,11 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
       ret = mqs[to]->timed_send(&ms, sizeof(ms), 0, boost::posix_time::milliseconds(msecs));
       if (ms.m)
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ms.m << ", " << *ms.m << "," << ms.sid << "}, " << msecs << ") = " << ret);
+	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ms.m << ", " << *ms.m << "," << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
 	}
       else
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ms.m << ", NULL, " << ms.sid << "}, " << msecs << ") = " << ret);
+	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ms.m << ", NULL, " << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
 	}
     }
   else if (msecs < 0)
@@ -154,11 +156,11 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
       ret = mqs[to]->try_send(&ms, sizeof(ms), 0);
       if (ms.m)
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ms.m << ", " << *ms.m << ", " << ms.sid << "}, " << msecs << ") = " << ret);
+	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ms.m << ", " << *ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
 	}
       else
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ms.m << ", NULL, " << ms.sid << "}, " << msecs << ") = " << ret);
+	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ms.m << ", NULL, " << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
 	}
     }
   else
@@ -166,14 +168,15 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
       mqs[to]->send(&ms, sizeof(ms), 0);
       if (ms.m)
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": send({" << ms.m << ", " << *ms.m << "," << ms.sid << "}, " << msecs << ") = " << ret);
+	  DMCS_LOG_TRACE("mq #" << to << ": send({" << ms.m << ", " << *ms.m << "," << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
 	}
       else
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": send({" << ms.m << ", NULL," << ms.sid << "}, " << msecs << ") = " << ret);
+	  DMCS_LOG_TRACE("mq #" << to << ": send({" << ms.m << ", NULL," << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
 	}
     }
 
+  //DMCS_LOG_TRACE("Finished sendModel");
   return ret;
 }
 
@@ -333,11 +336,11 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
   ///@todo TK: prio is not used
   assert(mqs.size() > from);
 
-#ifdef DEBUG
-  History path(1, 0);
-#else
+  //#ifdef DEBUG
+  //  History path;
+  //#else
   std::size_t path = 0;
-#endif
+  //#endif
 
   struct ModelSession ms = {0, path, 0};
   std::size_t recvd = 0;
@@ -348,7 +351,7 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(ms), recvd, p, boost::posix_time::milliseconds(msecs)))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << ", " << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
+	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
 
 	  msecs = 0;
 	  ms.m = 0;
@@ -356,13 +359,13 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
 	  return ms;
 	}
 
-      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << "," << ms.sid << "}, " << msecs << ") = true");
+      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << "," << path << ", " << ms.sid << "}, " << msecs << ") = true");
     }
   else if (msecs < 0)
     {
       if (!mqs[from]->try_receive(ptr, sizeof(ms), recvd, p))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ms.m << ", " << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
+	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
 
 	  msecs = 0;
 	  ms.m = 0;
@@ -376,11 +379,19 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
     {
       mqs[from]->receive(ptr, sizeof(ms), recvd, p);
 
-      DMCS_LOG_TRACE("mq #" << from << ": receive({" << ms.m << ", " << ms.sid << "}, " << msecs << ") = true");
+      if (ms.m)
+	{
+	  DMCS_LOG_TRACE("mq #" << from << ": receive({" << ms.m << ", " << *ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = true");
+	}
+      else
+	{
+	  DMCS_LOG_TRACE("mq #" << from << ": receive({" << ms.m << ", NULL, " << path << ", " << ms.sid << "}, " << msecs << ") = true");
+	}
     }
 
   assert(sizeof(ms) == recvd);
 
+  //DMCS_LOG_TRACE("Finished recvModel");
   //prio = p;
   return ms;
 }

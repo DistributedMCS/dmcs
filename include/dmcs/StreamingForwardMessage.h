@@ -43,11 +43,11 @@ public:
   // public default ctor, everything 0 for now
   StreamingForwardMessage()
     :
-#ifdef DEBUG
-    path(1, 0),
-#else
+    //#ifdef DEBUG
+    //    path(1, 0),
+    //#else
     path(0),
-#endif
+    //#endif
     invoker(0),
     session_id(0),
     k1(1),
@@ -67,12 +67,7 @@ public:
     k2 = sfMess.k2;
   }
 
-  StreamingForwardMessage(
-#ifdef DEBUG
-			  History p,
-#else
-			  std::size_t p,
-#endif
+  StreamingForwardMessage(PathList p,
 			  std::size_t i,
 			  std::size_t sid,
 			  std::size_t k_one,
@@ -96,11 +91,7 @@ public:
     return invoker;
   }
 
-#ifdef DEBUG
-  History
-#else
-  std::size_t
-#endif
+  PathList
   getPath() const
   {
     return path;
@@ -152,15 +143,7 @@ public:
   }
 
 private:
-
-#ifdef DEBUG
-  History path;           // For debugging purpose
-#else
-  std::size_t path;       // Hashed value for the calling path, used
-			  // for dispatching independent queries from
-			  // the same parent
-#endif
-
+  PathList path;
   std::size_t invoker;
   std::size_t session_id; // For filtering old models
   std::size_t k1;         // The invoker wants models from k1 to k2

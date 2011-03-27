@@ -44,23 +44,14 @@ struct BaseNotification
     };
 
   BaseNotification(NotificationType t, 
-#ifdef DEBUG
-		   History pa)
-#else
-                  std::size_t pa)
-#endif
+		   PathList pa)
     : type(t), path(pa)
   {
     assert(t == REQUEST || t == SHUTDOWN || t == NEXT); 
   }
   
   NotificationType type;
-
-#ifdef DEBUG
-  History path;
-#else
-  std::size_t path;
-#endif
+  PathList path;
 };
 
 

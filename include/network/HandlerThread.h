@@ -31,6 +31,7 @@
 #define HANDLER_THREAD_H
 
 //#include "network/Handler.h"
+#include "dmcs/Log.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 
 #include <boost/thread.hpp>
@@ -58,6 +59,11 @@ public:
   HandlerThread(std::size_t i)
     : invoker(i)
   { }
+
+  ~HandlerThread()
+  {
+    DMCS_LOG_TRACE("Terminating HandlerThread.");
+  }
 
   void
   operator()(bool is_leaf,

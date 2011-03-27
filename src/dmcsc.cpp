@@ -370,12 +370,12 @@ Options";
 		  complete = pack_size > 0 ? false : true;		  
 
 		  // USER <--> session_id = 0, path = {0}, invoker = 0
-#ifdef DEBUG
-		  History path(1, 0);
-		  StreamingCommandType::input_type mess(path, 0, 0, 1, k);
-#else
+		  //#ifdef DEBUG
+		  //History path(1, 0);
+		  //StreamingCommandType::input_type mess(path, 0, 0, 1, k);
+		  //#else
 		  StreamingCommandType::input_type mess(0, 0, 0, 1, k);
-#endif
+		  //#endif
 		      
 		  std::string header = HEADER_REQ_STM_DMCS;
 

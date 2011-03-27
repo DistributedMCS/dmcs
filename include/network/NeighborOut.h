@@ -165,11 +165,11 @@ public:
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
     // update path
-#ifdef DEBUG
-    path.push_back(invoker);
-#else
+    //#ifdef DEBUG
+    //    path.push_back(invoker);
+    //#else
     boost::hash_combine(path, invoker);
-#endif
+    //#endif
 
     StreamingForwardMessage mess(path,
 				 invoker,
