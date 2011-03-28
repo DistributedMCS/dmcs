@@ -145,7 +145,7 @@ public:
 private:
   void
   notify_output_thread(BaseNotification::NotificationType t, 
-		       PathList path,
+		       std::size_t path,
 		       std::size_t parent_session_id,
 		       std::size_t k1,
 		       std::size_t k2);

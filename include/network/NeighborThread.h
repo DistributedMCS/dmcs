@@ -273,7 +273,7 @@ private:
 	  {
 	    PartialBeliefState* bs = it->partial_belief_state;
 	    std::size_t sid = it->session_id;
-	    PathList path = it->path;
+	    std::size_t path = it->path;
 
 	    if (bs != 0)
 	      {

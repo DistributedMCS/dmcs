@@ -48,7 +48,7 @@ struct ConflictNotification : public BaseNotification
     };
 
   ConflictNotification(BaseNotification::NotificationType t,
-		       PathList pa,
+		       std::size_t pa,
 		       std::size_t sid,
 		       std::size_t ps,
 		       SenderIdentification s)

@@ -42,14 +42,14 @@ namespace dmcs {
 struct ModelSessionId
 {
   PartialBeliefState* partial_belief_state;
-  PathList path;
+  std::size_t path;
   std::size_t session_id;
 
   ModelSessionId()
   { }
 
   ModelSessionId(PartialBeliefState* p, 
-		 PathList pa,
+		 std::size_t pa,
 		 std::size_t sid)
     : partial_belief_state(p), 
       path(pa),

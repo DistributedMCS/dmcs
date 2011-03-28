@@ -78,7 +78,7 @@ public:
 
 	DMCS_LOG_TRACE("N[" << nid << "] Got a message = " << *ann);
 
-	PathList path = ann->path;
+	std::size_t path = ann->path;
 	std::size_t session_id = ann->session_id;
 	std::size_t k1 = ann->k1;
 	std::size_t k2 = ann->k2;
@@ -156,7 +156,7 @@ public:
 
   void
   write_message(connection_ptr conn,
-		PathList path,
+		std::size_t path,
 		std::size_t invoker,
 		std::size_t k1,
 		std::size_t k2,
@@ -164,12 +164,7 @@ public:
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-    // update path
-    //#ifdef DEBUG
-    //    path.push_back(invoker);
-    //#else
     boost::hash_combine(path, invoker);
-    //#endif
 
     StreamingForwardMessage mess(path,
 				 invoker,

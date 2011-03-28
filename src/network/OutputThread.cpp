@@ -44,7 +44,7 @@
 
 namespace dmcs {
 
-OutputThread::OutputThread(std::size_t p, PathList pa)
+OutputThread::OutputThread(std::size_t p, std::size_t pa)
   : port(p), 
     path(pa),
     output_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE))
@@ -74,7 +74,7 @@ OutputThread::operator()(connection_ptr c,
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  PathList path;
+  std::size_t path;
   std::size_t k1;
   std::size_t k2;
   std::size_t parent_session_id;
@@ -117,7 +117,7 @@ OutputThread::operator()(connection_ptr c,
 
 BaseNotification::NotificationType
 OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
-			       PathList& path,
+			       std::size_t& path,
 			       std::size_t& k1,
 			       std::size_t& k2,
 			       std::size_t& parent_session_id)
@@ -181,19 +181,6 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 
 
 void
-OutputThread::send_empty_model(MessagingGatewayBC* mg)
-{
-  //#ifdef DEBUG
-  //  History path(1, 0);
-  //#else
-  std::size_t path = 0;
-  //#endif
-  mg->sendModel(0, path, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, 0);
-}
-
-
-
-void
 OutputThread::collect_output(MessagingGatewayBC* mg,
 			     ModelSessionIdListPtr& res,
 			     std::size_t k1,
@@ -229,7 +216,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	{
 	  DMCS_LOG_TRACE(port << ": Extract information from MQ");
 
-	  PathList pa = ms.path;
+	  std::size_t pa = ms.path;
 	  std::size_t sid = ms.sid;
 	  
 	  assert (pa == path);
@@ -268,7 +255,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	{
 	  DMCS_LOG_TRACE(port << ": Extract information from MQ");
 
-	  PathList pa = ms.path;
+	  std::size_t pa = ms.path;
 	  std::size_t sid = ms.sid;
 	  
 	  assert (pa == path);

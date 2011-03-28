@@ -76,13 +76,13 @@ private:
        const PartialBeliefStateIteratorVecPtr& end_it);
 
   void
-  wait_dmcs(PathList& path,
+  wait_dmcs(std::size_t& path,
 	    std::size_t& pack_size);
 
   void
   request_neighbor(PartialBeliefStatePackage* partial_eqs,
 		   std::size_t nid, std::size_t pack_size,
-		   PathList& path,
+		   std::size_t& path,
 		   BaseNotification::NotificationType nt);
 
   void
@@ -98,7 +98,7 @@ private:
 
   void
   import_and_join(VecSizeTPtr request_size, 
-		  PathList& path, 
+		  std::size_t& path, 
 		  std::size_t pack_size);
 
 
@@ -112,12 +112,12 @@ private:
 	       std::size_t nid, 
 	       std::size_t k1, 
 	       std::size_t k2,
-	       PathList& path, 
+	       std::size_t& path, 
 	       BaseNotification::NotificationType nt);
 
   bool
   ask_first_packs(PartialBeliefStatePackage* partial_eqs,
-		  PathList& path, 
+		  std::size_t& path, 
 		  std::size_t from_neighbor, 
 		  std::size_t to_neighbor);
 
@@ -129,16 +129,12 @@ private:
   process(StreamingForwardMessage* sfMess);
 
 private:
-  void
-  send_empty_model();
-
-private:
   std::size_t port;
   std::size_t no_nbs;            // number of neighbors 
   std::size_t system_size;
   std::size_t session_id;
   std::size_t pack_size;         // the real upper-bound of number of models that we ask the neighbors
-  PathList path;
+  std::size_t path;
 
   MessagingGatewayBC* mg;
   ConcurrentMessageQueue* joiner_sat_notif;

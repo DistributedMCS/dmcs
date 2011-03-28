@@ -272,7 +272,7 @@ Handler<StreamingCommandType>::startup(bool is_leaf,
 
 void
 Handler<StreamingCommandType>::notify_output_thread(BaseNotification::NotificationType t, 
-						    PathList path,
+						    std::size_t path,
 						    std::size_t parent_session_id,
 						    std::size_t k1,
 						    std::size_t k2)
@@ -306,7 +306,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
   if (!e)
     {
-      PathList path = sesh->mess.getPath();
+      std::size_t path = sesh->mess.getPath();
       const std::size_t parent_session_id = sesh->mess.getSessionId();
       const std::size_t invoker = sesh->mess.getInvoker();
       const std::size_t pack_size = sesh->mess.getPackSize();

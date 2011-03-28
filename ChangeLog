@@ -1,5 +1,28 @@
 2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/dmcs/AskNextNotification.h: Only use integers for path now.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+	* include/dmcs/OutputNotification.h: Likewise.
+	* include/dmcs/ModelSessionId.h: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/dmcs/BaseTypes.h: Likewise.
+	* include/dmcs/BaseNotification.h: Likewise.
+
 	* src/solver/RelSatSolver.cpp: Solve with limit of solutions.
 
 	* src/network/OutputThread.cpp: Break once get a NULL pointer.

@@ -39,7 +39,7 @@ namespace dmcs {
 struct OutputNotification : public BaseNotification
 {
   OutputNotification(NotificationType t, 
-		     PathList pa,
+		     std::size_t pa,
 		     std::size_t psid, 
 		     std::size_t k_one,
 		     std::size_t k_two)

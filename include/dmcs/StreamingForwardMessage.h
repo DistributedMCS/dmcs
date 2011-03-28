@@ -67,7 +67,7 @@ public:
     k2 = sfMess.k2;
   }
 
-  StreamingForwardMessage(PathList p,
+  StreamingForwardMessage(std::size_t p,
 			  std::size_t i,
 			  std::size_t sid,
 			  std::size_t k_one,
@@ -91,7 +91,7 @@ public:
     return invoker;
   }
 
-  PathList
+  std::size_t
   getPath() const
   {
     return path;
@@ -143,7 +143,7 @@ public:
   }
 
 private:
-  PathList path;
+  std::size_t path;
   std::size_t invoker;
   std::size_t session_id; // For filtering old models
   std::size_t k1;         // The invoker wants models from k1 to k2

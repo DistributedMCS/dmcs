@@ -44,14 +44,14 @@ struct BaseNotification
     };
 
   BaseNotification(NotificationType t, 
-		   PathList pa)
+		   std::size_t pa)
     : type(t), path(pa)
   {
     assert(t == REQUEST || t == SHUTDOWN || t == NEXT); 
   }
   
   NotificationType type;
-  PathList path;
+  std::size_t path;
 };
 
 

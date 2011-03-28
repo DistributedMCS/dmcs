@@ -46,7 +46,7 @@ namespace dmcs {
 class OutputThread
 {
 public:
-  OutputThread(std::size_t p, PathList pa);
+  OutputThread(std::size_t p, std::size_t pa);
 
   virtual
   ~OutputThread();
@@ -59,7 +59,7 @@ public:
 private:
   BaseNotification::NotificationType
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
-		   PathList& path,
+		   std::size_t& path,
 		   std::size_t& k1,
 		   std::size_t& k2,
 		   std::size_t& parent_session_id);
@@ -81,7 +81,7 @@ private:
 private:
   std::size_t port;
   PartialBeliefStateBufPtr output_buffer;
-  PathList path;
+  std::size_t path;
 };
 
 

@@ -51,8 +51,7 @@ namespace dmcs {
   class ConcurrentMessageDispatcher : public MessagingGateway<PartialBeliefState, 
 							      Decisionlevel, 
 							      Conflict, 
-							      StreamingForwardMessage, 
-							      PathList>
+							      StreamingForwardMessage>
   {
   private:
     /// here we pile up all MQ's that receive messages
@@ -82,7 +81,7 @@ namespace dmcs {
     sendIncomingMessage(StreamingForwardMessage* sfMess, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
-    sendModel(PartialBeliefState* b, PathList path, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+    sendModel(PartialBeliefState* b, std::size_t path, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
 #if 0
     virtual bool

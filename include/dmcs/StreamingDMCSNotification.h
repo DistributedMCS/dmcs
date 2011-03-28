@@ -40,7 +40,7 @@ namespace dmcs {
 struct StreamingDMCSNotification : public BaseNotification
 {
   StreamingDMCSNotification(NotificationType t, 
-			    PathList pa,
+			    std::size_t pa,
 			    std::size_t i,
 			    std::size_t sid, 
 			    std::size_t ps,

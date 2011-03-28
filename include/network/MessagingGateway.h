@@ -40,7 +40,7 @@ namespace dmcs {
    * @brief Base class for sending and receiving models and conflicts
    * within a dmcsd.
    */
-  template <typename MODEL, typename DECISIONLEVEL, typename CONFLICT, typename MESSAGE, typename PATHLIST>
+  template <typename MODEL, typename DECISIONLEVEL, typename CONFLICT, typename MESSAGE>
   class MessagingGateway
   {
   public:
@@ -76,7 +76,7 @@ namespace dmcs {
     struct ModelSession
     {
       MODEL* m;
-      PATHLIST path;
+      std::size_t path; // the hash value of the path
       std::size_t sid;
     };
 
@@ -106,7 +106,7 @@ namespace dmcs {
      * @return true if sending failed
      */
     virtual bool
-    sendModel(MODEL* m, PATHLIST path, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
+    sendModel(MODEL* m, std::size_t path, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
 
 
 #if 0

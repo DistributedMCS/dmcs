@@ -168,7 +168,7 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
 
 
 void
-JoinThread::wait_dmcs(PathList& path,
+JoinThread::wait_dmcs(size_t& path,
 		      std::size_t& pack_size)
 {
     // wait for a notification from StreamingDMCS
@@ -200,7 +200,7 @@ JoinThread::wait_dmcs(PathList& path,
 void
 JoinThread::request_neighbor(PartialBeliefStatePackage* partial_eqs,
 			     std::size_t nid, std::size_t pack_size,
-			     PathList& path,
+			     std::size_t& path,
 			     BaseNotification::NotificationType nt)
 {
   if (partial_eqs)
@@ -314,7 +314,7 @@ JoinThread::import_belief_states(std::size_t noff,
 
 void
 JoinThread::import_and_join(VecSizeTPtr request_size, 
-			    PathList& path,
+			    std::size_t& path,
 			    std::size_t pack_size)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
@@ -366,7 +366,7 @@ JoinThread::import_and_join(VecSizeTPtr request_size,
 		  // NULL model.
 		  DMCS_LOG_TRACE(port << ": import_state is STARTUP and peq=0. Send a NULL model to JOIN_OUT_MQ");
 
-		  send_empty_model();
+		  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
 		  
 		  ///@todo: Also tell the neighbors (via NeighborOut) to stop
 		  /// returning models.
@@ -391,7 +391,7 @@ JoinThread::import_and_join(VecSizeTPtr request_size,
 	      if (next_neighbor_offset == no_nbs)
 		{
 		  DMCS_LOG_TRACE(port << ": Send a NULL model to JOIN_OUT_MQ");
-		  send_empty_model();
+		  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
 		  return;
 		}
 	      else
@@ -543,7 +543,7 @@ JoinThread::operator()(std::size_t nbs,
 
       assert (sfMess);
 
-      PathList path = sfMess->getPath();
+      std::size_t path = sfMess->getPath();
       session_id = sfMess->getSessionId();
       std::size_t k1 = sfMess->getK1();
       std::size_t k2 = sfMess->getK2();
@@ -612,7 +612,7 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 			 std::size_t nid, 
 			 std::size_t k1, 
 			 std::size_t k2,
-			 PathList& path,
+			 std::size_t& path,
 			 BaseNotification::NotificationType nt)
 {
   assert (k1 <= k2);
@@ -691,7 +691,7 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 
 bool
 JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
-			    PathList& path, 
+			    std::size_t& path, 
 			    std::size_t from_neighbor, 
 			    std::size_t to_neighbor)
 {
@@ -735,20 +735,6 @@ JoinThread::do_join(PartialBeliefStatePackagePtr& partial_eqs)
 
 
 void
-JoinThread::send_empty_model()
-{
-  //#ifdef DEBUG
-  //  History empty_path(1, 0);
-  //#else
-  std::size_t empty_path = 0;
-  //#endif
-
-  mg->sendModel(0, empty_path, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
-}
-
-
-
-void
 JoinThread::process(StreamingForwardMessage* sfMess)
 {
   // set up a package of empty BeliefStates
@@ -759,7 +745,7 @@ JoinThread::process(StreamingForwardMessage* sfMess)
       partial_eqs->push_back(bsv);
     }
 
-  PathList path = sfMess->getPath();
+  std::size_t path = sfMess->getPath();
   pack_size = sfMess->getK2() - sfMess->getK1() + 1;
   
   // Warming up round ======================================================================= 
@@ -767,7 +753,7 @@ JoinThread::process(StreamingForwardMessage* sfMess)
     {
       DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");
 
-      send_empty_model();
+      mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
 
       delete sfMess;
       sfMess = 0;  
@@ -787,7 +773,8 @@ JoinThread::process(StreamingForwardMessage* sfMess)
       if (next_neighbor_offset == no_nbs)
 	{
 	  DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to JOIN_OUT_MQ");
-	  send_empty_model();
+
+	  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
 	  break;
 	}
 

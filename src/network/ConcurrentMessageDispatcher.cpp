@@ -123,7 +123,7 @@ ConcurrentMessageDispatcher::sendIncomingMessage(StreamingForwardMessage* m,
 
 bool
 ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
-				       PathList path,
+				       std::size_t path,
 				       std::size_t sid,
 				       std::size_t /* from */,
 				       std::size_t to,
@@ -132,8 +132,6 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
 {
   ///@todo TK: from and prio are not used
   assert(mqs.size() > to);
-
-  //  DMCS_LOG_TRACE("path = " << path);
 
   struct ModelSession ms = { b, path, sid };
 
@@ -328,7 +326,7 @@ ConcurrentMessageDispatcher::recvIncomingMessage(std::size_t from,
   return m;
 }
 
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, PathList>::ModelSession
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::ModelSession
 ConcurrentMessageDispatcher::recvModel(std::size_t from,
 				       std::size_t& /* prio */,
 				       int& msecs)
@@ -482,7 +480,7 @@ ConcurrentMessageDispatcher::recvModelDecisionlevel(std::size_t from,
 
 
 
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, PathList>::JoinIn
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::JoinIn
 ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 					std::size_t& /* prio */,
 					int& msecs)

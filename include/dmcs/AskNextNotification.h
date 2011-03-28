@@ -43,7 +43,7 @@ namespace dmcs {
 struct AskNextNotification : public BaseNotification
 {
   AskNextNotification(BaseNotification::NotificationType t,
-		      PathList pa,
+		      std::size_t pa,
 		      std::size_t sid,
 		      std::size_t k_one,
 		      std::size_t k_two)

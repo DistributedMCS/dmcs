@@ -117,7 +117,7 @@ private:
   PartialBeliefState* input;
   PartialBeliefStateBufPtr input_buffer;
   bool first_round;
-  PathList path;
+  std::size_t path;
 
   SATInstance* xInstance;
   SATSolver* xSATSolver;
