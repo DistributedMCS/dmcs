@@ -104,7 +104,7 @@ public:
   void vIncorporateLearnedClauses();
   void vOutputWarnings();
   void vOutputStatusUpdateInterval();
-  relsat_enum eSolve(long int solutions_limit, std::size_t& solutions_sofar);
+  relsat_enum eSolve(long int solutions_limit);
 
   unsigned long iBranchSelections() {return _iBranchSelections;}
   unsigned long iVariablesLabeled() {return _iVariablesLabeled;}
@@ -134,6 +134,12 @@ public:
   getLearnedClauses()
   {
     return _xLearnedClauses;
+  }
+
+  std::size_t
+  SolutionCount()
+  {
+    return (std::size_t)_iSolutionCount;
   }
 
 private:

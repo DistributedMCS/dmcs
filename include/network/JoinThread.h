@@ -32,10 +32,11 @@
 
 #include <bm/bm.h>
 
+#include "dmcs/ConflictNotification.h"
+#include "dmcs/ModelSessionId.h"
 #include "mcs/BeliefState.h"
 #include "mcs/HashedBiMap.h"
 #include "network/ConcurrentMessageQueueFactory.h"
-#include "dmcs/ConflictNotification.h"
 
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
@@ -126,7 +127,14 @@ private:
   do_join(PartialBeliefStatePackagePtr& partial_eqs);
 
   void
-  process(StreamingForwardMessage* sfMess);
+  process(std::size_t path, 
+	  std::size_t session_id,
+	  std::size_t k1, 
+	  std::size_t k2,
+	  bool first_round,
+	  bool& asking_next,
+	  std::size_t& neighbor_offset,
+	  VecSizeTPtr& pack_count);
 
 private:
   std::size_t port;
@@ -135,6 +143,8 @@ private:
   std::size_t session_id;
   std::size_t pack_size;         // the real upper-bound of number of models that we ask the neighbors
   std::size_t path;
+  bool first_result;
+  ModelSessionIdListPtr joined_results;
 
   MessagingGatewayBC* mg;
   ConcurrentMessageQueue* joiner_sat_notif;

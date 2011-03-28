@@ -32,7 +32,7 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
-#include "dmcs/BaseNotification.h"
+#include "dmcs/AskNextNotification.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/ConcurrentMessageDispatcher.h"
 #include "network/ConcurrentMessageQueue.h"
@@ -152,13 +152,13 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 1 (JOIN_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
 
-  mq = createMessageQueue(uid, no_nbs, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, BaseNotification>::ModelSession));
+  mq = createMessageQueue(uid, no_nbs, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, AskNextNotification>::ModelSession));
   md->registerMQ(mq, JOIN_OUT_MQ);
 
   // create message queue 2 (JOIN_IN_MQ)
   // join input MQ, announces pairs of (neighbor_id, partial belief states)
 
-  mq = createMessageQueue(uid, no_nbs, JOIN_IN_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, BaseNotification>::JoinIn));
+  mq = createMessageQueue(uid, no_nbs, JOIN_IN_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, AskNextNotification>::JoinIn));
   md->registerMQ(mq, JOIN_IN_MQ);
 
   // create message queue 3 (REQUEST_MQ)
@@ -170,7 +170,7 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 4 (SAT_JOINER_MQ)
   // sat to joiner MQ, for SAT to send feedback to Joiner
 
-  mq = createMessageQueue(uid, no_nbs, SAT_JOINER_MQ, k, sizeof(BaseNotification));
+  mq = createMessageQueue(uid, no_nbs, SAT_JOINER_MQ, k, sizeof(AskNextNotification));
   md->registerMQ(mq, SAT_JOINER_MQ);
 
   // create message queues 5 to 5 + (no_nbs - 1)
@@ -209,7 +209,7 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 1 (JOIN_OUT_MQ)
   // join output MQ, announces joined belief states from the neighbors
   
-  mq = createMessageQueue(uid, 0, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, BaseNotification>::ModelSession));
+  mq = createMessageQueue(uid, 0, JOIN_OUT_MQ, k, sizeof(MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, AskNextNotification>::ModelSession));
 
   md->registerMQ(mq, JOIN_OUT_MQ);
 
@@ -222,7 +222,7 @@ ConcurrentMessageQueueFactory::createMessagingGateway(std::size_t uid, std::size
   // create message queue 4 (SAT_JOINER_MQ)
   // sat to joiner MQ, for SAT to send feedback to Joiner
 
-  mq = createMessageQueue(uid, 0, SAT_JOINER_MQ, k, sizeof(BaseNotification));
+  mq = createMessageQueue(uid, 0, SAT_JOINER_MQ, k, sizeof(AskNextNotification));
   md->registerMQ(mq, SAT_JOINER_MQ);
 
   return md;

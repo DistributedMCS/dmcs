@@ -1,3 +1,15 @@
+2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: SAT has control over Joiner.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/ConcurrentMessageDispatcher.h: Change to
+	send/receive AskNextNotification between SAT and Joiner.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+
 2011-03-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/JoinThread.cpp: Wait for message from SAT and will compute just 1 join at a time.

@@ -124,7 +124,7 @@ ConcurrentMessageDispatcher::sendIncomingMessage(StreamingForwardMessage* m,
 
 
 bool
-ConcurrentMessageDispatcher::sendNotification(BaseNotification* notif,
+ConcurrentMessageDispatcher::sendNotification(AskNextNotification* notif,
 					      std::size_t /* from */,
 					      std::size_t to,
 					      std::size_t /* prio */,
@@ -332,7 +332,7 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
 
 
 
-BaseNotification*
+AskNextNotification*
 ConcurrentMessageDispatcher::recvNotification(std::size_t from,
 					      std::size_t& /* prio */,
 					      int& msecs)
@@ -340,7 +340,7 @@ ConcurrentMessageDispatcher::recvNotification(std::size_t from,
   ///@todo TK: prio is not used
   assert(mqs.size() > from);
 
-  BaseNotification* notif = 0;
+  AskNextNotification* notif = 0;
   std::size_t recvd = 0;
   unsigned int p = 0;
   void *ptr = static_cast<void*>(&notif);
@@ -436,7 +436,7 @@ ConcurrentMessageDispatcher::recvIncomingMessage(std::size_t from,
   return m;
 }
 
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, BaseNotification>::ModelSession
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, AskNextNotification>::ModelSession
 ConcurrentMessageDispatcher::recvModel(std::size_t from,
 				       std::size_t& /* prio */,
 				       int& msecs)
@@ -590,7 +590,7 @@ ConcurrentMessageDispatcher::recvModelDecisionlevel(std::size_t from,
 
 
 
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, BaseNotification>::JoinIn
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, AskNextNotification>::JoinIn
 ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 					std::size_t& /* prio */,
 					int& msecs)

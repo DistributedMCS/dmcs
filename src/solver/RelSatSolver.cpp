@@ -239,15 +239,13 @@ RelSatSolver::solve(std::size_t path, std::size_t session_id, std::size_t k1, st
 {
   parent_session_id = session_id;
 
-
-
   relsat_enum eResult;
   std::size_t models_sofar = 0;
 
   if (is_leaf)
     {
       DMCS_LOG_TRACE("Leaf case. Solve now. k2 = " << k2);
-      eResult = xSATSolver->eSolve((long int)k2, models_sofar);
+      eResult = xSATSolver->eSolve((long int)k2);
       xSATSolver->refresh();
     }
   else
@@ -265,13 +263,13 @@ RelSatSolver::solve(std::size_t path, std::size_t session_id, std::size_t k1, st
 	  if (left_to_request == 0)
 	    {
 	      DMCS_LOG_TRACE("Reached " << k2 << "models. Tell Joiner to shut up and get out");
-	      BaseNotification* notif = new BaseNotification(BaseNotification::SHUTUP, path);
+	      AskNextNotification* notif = new AskNextNotification(BaseNotification::SHUTUP, path, 0, 0, 0);
 	      mg->sendNotification(notif, 0, ConcurrentMessageQueueFactory::SAT_JOINER_MQ, 0);
 	      break;
 	    }
 
 	  DMCS_LOG_TRACE("Request another input from Joiner");
-	  BaseNotification* notif = new BaseNotification(BaseNotification::NEXT, path);
+	  AskNextNotification* notif = new AskNextNotification(BaseNotification::NEXT, path, session_id, k1, k2);
 	  mg->sendNotification(notif, 0, ConcurrentMessageQueueFactory::SAT_JOINER_MQ, 0);
 
 	  DMCS_LOG_TRACE("Prepare input before solving.");
@@ -286,7 +284,9 @@ RelSatSolver::solve(std::size_t path, std::size_t session_id, std::size_t k1, st
 	    }
 	  DMCS_LOG_TRACE("A fresh solving. input = " << *input);
 	  
-	  eResult = xSATSolver->eSolve((long int)left_to_request, models_sofar);
+	  eResult = xSATSolver->eSolve((long int)left_to_request);
+	  models_sofar = xSATSolver->SolutionCount();
+	  DMCS_LOG_TRACE("One limited solve finished. Number of solutions = " << models_sofar);
 	  xSATSolver->refresh();
 	  
 	  bool was_cached;

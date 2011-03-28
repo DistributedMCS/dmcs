@@ -1,3 +1,8 @@
+2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.cpp: Get solutions_sofar via _iSolutionCount.
+	* SATSolver.h: Likewise.
+
 2011-03-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.cpp: Solve and return the number of models.

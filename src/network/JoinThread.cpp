@@ -50,7 +50,9 @@ namespace dmcs {
 JoinThread::JoinThread(std::size_t p,
 		       std::size_t sid)
   : port(p),
-    session_id(sid)
+    session_id(sid),
+    first_result(true),
+    joined_results(new ModelSessionIdList)
 { }
 
 
@@ -95,7 +97,14 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
 
   // Joining succeeded. Now send this input to SAT solver via JOIN_OUT_MQ
   // be careful that we are blocked here. Use timeout sending instead?
-  mg->sendModel(result, path, session_id, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+  if (first_result)
+    {
+      mg->sendModel(result, path, session_id, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+      first_result = false;
+    }
+  else
+    {
+    }
 
   return 1;
 }
@@ -534,24 +543,35 @@ JoinThread::operator()(std::size_t nbs,
   joiner_sat_notif = jsn;
   joiner_neighbors_notif = jv;
   no_nbs = nbs;
+  bool first_round = true;
+  bool asking_next = false;
+  std::size_t next_neighbor_offset = 0;
+  VecSizeTPtr pack_count(new VecSizeT(no_nbs, 1));
 
   while (1)
     {
-
+      // Wait for a trigger from SAT
+      std::size_t prio = 0;
+      int timeout = 0;
+      AskNextNotification* sat_trigger = mg->recvNotification(ConcurrentMessageQueueFactory::SAT_JOINER_MQ, prio, timeout);
       
-      /*
-      // tell SAT to start
-      AskNextNotification* ann = new AskNextNotification(BaseNotification::REQUEST, path, session_id, k1, k2);
-
-      AskNextNotification* anw_neighbor = (AskNextNotification*) overwrite_send(joiner_sat_notif, &ann, sizeof(ann), 0);
-
-      if (anw_neighbor)
+      if (sat_trigger->type == BaseNotification::NEXT)
 	{
-	  delete anw_neighbor;
-	  anw_neighbor = 0;
+	  std::size_t path = sat_trigger->path;
+	  std::size_t session_id = sat_trigger->session_id;
+	  std::size_t k1 = sat_trigger->k1;
+	  std::size_t k2 = sat_trigger->k2;
+	  process(path, session_id, k1, k2, first_round, asking_next, next_neighbor_offset, pack_count);
+	  first_round = false;
 	}
-
-	process(sfMess);*/
+      else
+	{
+	  // reset for the next fresh request
+	  first_round = true;
+	  asking_next = false;
+	  next_neighbor_offset = 0;
+	  std::fill(pack_count->begin(), pack_count->end(), 1);
+	}
     }
 
   /*
@@ -726,7 +746,14 @@ JoinThread::do_join(PartialBeliefStatePackagePtr& partial_eqs)
 
 
 void
-JoinThread::process(StreamingForwardMessage* sfMess)
+JoinThread::process(std::size_t path, 
+		    std::size_t session_id,
+		    std::size_t k_one, 
+		    std::size_t k_two,
+		    bool first_round,
+		    bool& asking_next,
+		    std::size_t& next_neighbor_offset,
+		    VecSizeTPtr& pack_count)
 {
   // set up a package of empty BeliefStates
   PartialBeliefStatePackagePtr partial_eqs(new PartialBeliefStatePackage);
@@ -736,53 +763,47 @@ JoinThread::process(StreamingForwardMessage* sfMess)
       partial_eqs->push_back(bsv);
     }
 
-  std::size_t path = sfMess->getPath();
-  pack_size = sfMess->getK2() - sfMess->getK1() + 1;
+  pack_size = k_two - k_one + 1;
   
-  // Warming up round ======================================================================= 
-  if (!ask_first_packs(partial_eqs.get(), path, 0, no_nbs-1))
+  if (first_round)
     {
-      DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");
+      // Warming up round ======================================================================= 
+      if (!ask_first_packs(partial_eqs.get(), path, 0, no_nbs-1))
+	{
+	  DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");
+	  
+	  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+	  	  
+	  return;
+	}
 
-      mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
-
-      delete sfMess;
-      sfMess = 0;  
-
-      return;
+      do_join(partial_eqs);
     }
-
-  do_join(partial_eqs);
-
-  // now really going to the loop of asking next =============================================
-  bool asking_next = false;
-  std::size_t next_neighbor_offset = 0;
-  VecSizeTPtr pack_count(new VecSizeT(no_nbs, 1));
-
-  while (1)
+  else
     {
+      // now really going to the loop of asking next =============================================
       if (next_neighbor_offset == no_nbs)
 	{
 	  DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to JOIN_OUT_MQ");
-
+	  
 	  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
-	  break;
+	  return;
 	}
-
+      
       std::size_t& pc = (*pack_count)[next_neighbor_offset];
       pc++;
       std::size_t k1 = pc * pack_size + 1;
       std::size_t k2 = pc * (pack_size + 1);
-
+      
       if (ask_neighbor(partial_eqs.get(), next_neighbor_offset, k1, k2, path, BaseNotification::NEXT))
 	{
 	  if (asking_next)
 	    {
 	      assert (next_neighbor_offset > 0);
-
+	      
 	      // again, ask for first packs from each neighbor
 	      ask_first_packs(partial_eqs.get(), path, 0, next_neighbor_offset - 1);
-
+	      
 	      // reset counter
 	      std::fill(pack_count->begin(), pack_count->begin() + next_neighbor_offset - 1, 1);
 	    }
@@ -797,9 +818,6 @@ JoinThread::process(StreamingForwardMessage* sfMess)
 	  asking_next = true;
 	}
     }
-
-  delete sfMess;
-  sfMess = 0;
 }
 
 
