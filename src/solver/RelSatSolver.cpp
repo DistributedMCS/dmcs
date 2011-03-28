@@ -261,10 +261,9 @@ RelSatSolver::solve()
 
       if (is_leaf)
 	{
-	  DMCS_LOG_TRACE("Leaf case. Solve now.");
-	  eResult = xSATSolver->eSolve();
+	  DMCS_LOG_TRACE("Leaf case. Solve now. k2 = " << k2);
+	  eResult = xSATSolver->eSolve((long int)k2);
 	  xSATSolver->refresh();
-	  DMCS_LOG_TRACE("Solving at leaf done.");
 	}
       else
 	{
@@ -283,9 +282,10 @@ RelSatSolver::solve()
 		  break;
 		}
 	      DMCS_LOG_TRACE("A fresh solving. input = " << *input);
-	      
-	      eResult = xSATSolver->eSolve();
+
+	      eResult = xSATSolver->eSolve((long int)k2);
 	      xSATSolver->refresh();
+
 	      bool was_cached;
 	      store(input, input_buffer, true, was_cached);
 	      DMCS_LOG_TRACE("One SOLVE finished.");

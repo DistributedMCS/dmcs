@@ -1,3 +1,9 @@
+2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Solve with limit of solutions.
+
+	* src/network/OutputThread.cpp: Break once get a NULL pointer.
+
 2011-03-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/JoinThread.cpp: Fix offset passing.

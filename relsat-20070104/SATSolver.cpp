@@ -80,8 +80,10 @@ SATSolver::~SATSolver()
   delete _pPrimaryVariables;
 }
 
-relsat_enum SATSolver::eSolve()
+relsat_enum SATSolver::eSolve(long int solutions_limit)
 {
+  _iMaxSolutions = solutions_limit;
+
   time(&_iElapsedTime);
   _iLastCheckTime = _iElapsedTime;
   relsat_enum eReturn;
@@ -127,8 +129,8 @@ relsat_enum SATSolver::eSolve()
 	eReturn = UNSAT;
 
 	//std::cerr <<"UNSAT after Loop." << std::endl;
-      //std::cerr <<"Number of learned clauses = " << _xLearnedClauses.iClauseCount() << std::endl;
-      //std::cerr <<"Learned Clauses: " << _xLearnedClauses << std::endl;
+	//std::cerr <<"Number of learned clauses = " << _xLearnedClauses.iClauseCount() << std::endl;
+	//std::cerr <<"Learned Clauses: " << _xLearnedClauses << std::endl;
 	wrapper->receiveUNSAT(_xLearnedClauses);
       }
     }

@@ -104,7 +104,7 @@ public:
   void vIncorporateLearnedClauses();
   void vOutputWarnings();
   void vOutputStatusUpdateInterval();
-  relsat_enum eSolve();
+  relsat_enum eSolve(long int solutions_limit);
 
   unsigned long iBranchSelections() {return _iBranchSelections;}
   unsigned long iVariablesLabeled() {return _iVariablesLabeled;}

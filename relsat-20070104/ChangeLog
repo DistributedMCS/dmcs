@@ -1,3 +1,8 @@
+2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.cpp: Solve with limit of solutions.
+	* SATSolver.h: Likewise.
+
 2011-02-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.cpp: Add some more debug info.

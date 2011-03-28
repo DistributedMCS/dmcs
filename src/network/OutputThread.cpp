@@ -262,7 +262,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       if (bs == 0) // EOF
 	{
 	  DMCS_LOG_TRACE(port << ": Got a NULL pointer");
-	  //break;
+	  break;
 	}
       else
 	{
