@@ -40,7 +40,7 @@ namespace dmcs {
    * @brief Base class for sending and receiving models and conflicts
    * within a dmcsd.
    */
-  template <typename MODEL, typename DECISIONLEVEL, typename CONFLICT, typename MESSAGE>
+  template <typename MODEL, typename DECISIONLEVEL, typename CONFLICT, typename MESSAGE, typename NOTIFICATION>
   class MessagingGateway
   {
   public:
@@ -92,6 +92,9 @@ namespace dmcs {
 
     virtual bool
     sendIncomingMessage(MESSAGE* m, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
+
+    virtual bool
+    sendNotification(NOTIFICATION* m, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0) = 0;
 
     /** 
      * Send @a m w.r.t. @a sid originating from @a from to @a to with priority @a prio. May block.
@@ -159,6 +162,9 @@ namespace dmcs {
 
     virtual MESSAGE*
     recvIncomingMessage(std::size_t from, std::size_t& prio, int& msecs) = 0;
+
+    virtual NOTIFICATION*
+    recvNotification(std::size_t from, std::size_t& prio, int& msecs) = 0;
 
     /** 
      * Receive a ModelSession message from @a from. May block.

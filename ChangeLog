@@ -1,3 +1,16 @@
+2011-03-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueueFactory.h: Add MQ for SAT to notify Joiner.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageDispatcher.h: Add methods for
+	sending/receiving BaseNotification.
+	* src/network/ConcurrentMessageDispaicher.cpp: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+
+	* include/dmcs/BaseNotification.h: Add SHUTUP type.
+
 2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/dmcs/AskNextNotification.h: Only use integers for path now.

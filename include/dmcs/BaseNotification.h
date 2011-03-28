@@ -40,7 +40,8 @@ struct BaseNotification
     {
       REQUEST = 0,
       NEXT,
-      SHUTDOWN
+      SHUTDOWN,
+      SHUTUP
     };
 
   BaseNotification(NotificationType t, 

@@ -32,7 +32,7 @@
 #ifndef _CONCURRENT_MESSAGE_DISPATCHER_H
 #define _CONCURRENT_MESSAGE_DISPATCHER_H
 
-#include "dmcs/BaseTypes.h"
+#include "dmcs/BaseNotification.h"
 #include "dmcs/StreamingForwardMessage.h"
 #include "network/MessagingGateway.h"
 #include "network/ConcurrentMessageQueue.h"
@@ -51,7 +51,8 @@ namespace dmcs {
   class ConcurrentMessageDispatcher : public MessagingGateway<PartialBeliefState, 
 							      Decisionlevel, 
 							      Conflict, 
-							      StreamingForwardMessage>
+							      StreamingForwardMessage,
+							      BaseNotification>
   {
   private:
     /// here we pile up all MQ's that receive messages
@@ -81,6 +82,9 @@ namespace dmcs {
     sendIncomingMessage(StreamingForwardMessage* sfMess, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
     virtual bool
+    sendNotification(BaseNotification* notif, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
+
+    virtual bool
     sendModel(PartialBeliefState* b, std::size_t path, std::size_t sid, std::size_t from, std::size_t to, std::size_t prio, int msecs = 0);
 
 #if 0
@@ -96,6 +100,9 @@ namespace dmcs {
 
     virtual StreamingForwardMessage*
     recvIncomingMessage(std::size_t from, std::size_t& prio, int& msecs);
+
+    virtual BaseNotification*
+    recvNotification(std::size_t from, std::size_t& prio, int& msecs);
 
     virtual struct ModelSession
     recvModel(std::size_t from, std::size_t& prio, int& msecs);

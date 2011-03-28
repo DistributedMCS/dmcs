@@ -121,6 +121,62 @@ ConcurrentMessageDispatcher::sendIncomingMessage(StreamingForwardMessage* m,
   return ret;
 }
 
+
+
+bool
+ConcurrentMessageDispatcher::sendNotification(BaseNotification* notif,
+					      std::size_t /* from */,
+					      std::size_t to,
+					      std::size_t /* prio */,
+					      int msecs)
+{
+  ///@todo TK: from and prio are not used
+  assert(mqs.size() > to);
+
+  bool ret = true;
+
+  if (msecs > 0)
+    {
+      ret = mqs[to]->timed_send(&notif, sizeof(notif), 0, boost::posix_time::milliseconds(msecs));
+      if (notif)
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << notif << ", " << *notif << "}, " << msecs << ") = " << ret);
+	}
+      else
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << notif << ", NULL}, " << msecs << ") = " << ret);
+	}
+    }
+  else if (msecs < 0)
+    {
+      ret = mqs[to]->try_send(notif, sizeof(notif), 0);
+      if (notif)
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << notif << ", " << *notif << "}, " << msecs << ") = " << ret);
+	}
+      else
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << notif << ", NULL}, " << msecs << ") = " << ret);
+	}
+    }
+  else
+    {
+      mqs[to]->send(&notif, sizeof(notif), 0);
+      if (notif)
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": send({" << notif << ", " << *notif << "}, " << msecs << ") = " << ret);
+	}
+      else
+	{
+	  DMCS_LOG_TRACE("mq #" << to << ": send({" << notif << ", NULL}, " << msecs << ") = " << ret);
+	}
+    }
+
+  return ret;
+}
+
+
+
 bool
 ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
 				       std::size_t path,
@@ -275,6 +331,60 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
 }
 
 
+
+BaseNotification*
+ConcurrentMessageDispatcher::recvNotification(std::size_t from,
+					      std::size_t& /* prio */,
+					      int& msecs)
+{
+  ///@todo TK: prio is not used
+  assert(mqs.size() > from);
+
+  BaseNotification* notif = 0;
+  std::size_t recvd = 0;
+  unsigned int p = 0;
+  void *ptr = static_cast<void*>(&notif);
+
+  if (msecs > 0)
+    {
+      if (!mqs[from]->timed_receive(ptr, sizeof(notif), recvd, p, boost::posix_time::milliseconds(msecs)))
+	{
+	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << notif << "}, " << msecs << ") = false, setting notif and msecs 0 now.");
+
+	  msecs = 0;
+	  notif = 0;
+	  return notif;
+	}
+
+      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << notif << "}, " << msecs << ") = true");
+    }
+  else if (msecs < 0)
+    {
+      if (!mqs[from]->try_receive(ptr, sizeof(notif), recvd, p))
+	{
+	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << notif << "}, " << msecs << ") = false, setting notig and msecs 0 now.");
+
+	  msecs = 0;
+	  notif = 0;
+	  return notif;
+	}
+
+      DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << notif << "}, " << msecs << ") = true");
+    }
+  else
+    {
+      mqs[from]->receive(ptr, sizeof(notif), recvd, p);
+
+      DMCS_LOG_TRACE("mq #" << from << ": receive({" << notif << "}, " << msecs << ") = true");
+    }
+
+  assert(sizeof(notif) == recvd);
+
+  return notif;
+}
+
+
+
 StreamingForwardMessage*
 ConcurrentMessageDispatcher::recvIncomingMessage(std::size_t from,
 						 std::size_t& /* prio */,
@@ -326,7 +436,7 @@ ConcurrentMessageDispatcher::recvIncomingMessage(std::size_t from,
   return m;
 }
 
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::ModelSession
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, BaseNotification>::ModelSession
 ConcurrentMessageDispatcher::recvModel(std::size_t from,
 				       std::size_t& /* prio */,
 				       int& msecs)
@@ -480,7 +590,7 @@ ConcurrentMessageDispatcher::recvModelDecisionlevel(std::size_t from,
 
 
 
-struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage>::JoinIn
+struct MessagingGateway<PartialBeliefState, Decisionlevel, Conflict, StreamingForwardMessage, BaseNotification>::JoinIn
 ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
 					std::size_t& /* prio */,
 					int& msecs)
