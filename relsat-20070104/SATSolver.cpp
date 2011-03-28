@@ -80,7 +80,7 @@ SATSolver::~SATSolver()
   delete _pPrimaryVariables;
 }
 
-relsat_enum SATSolver::eSolve(long int solutions_limit)
+relsat_enum SATSolver::eSolve(long int solutions_limit, std::size_t& solutions_sofar)
 {
   _iMaxSolutions = solutions_limit;
 

@@ -124,7 +124,7 @@ ThreadFactory::createLocalSolveThread()
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
   RelSatSolverThread rsst(relsatsolver);
-  boost::thread* t = new boost::thread(rsst);
+  boost::thread* t = new boost::thread(rsst, mg);
 
   return t;
 }

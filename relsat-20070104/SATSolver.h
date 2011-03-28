@@ -104,7 +104,7 @@ public:
   void vIncorporateLearnedClauses();
   void vOutputWarnings();
   void vOutputStatusUpdateInterval();
-  relsat_enum eSolve(long int solutions_limit);
+  relsat_enum eSolve(long int solutions_limit, std::size_t& solutions_sofar);
 
   unsigned long iBranchSelections() {return _iBranchSelections;}
   unsigned long iVariablesLabeled() {return _iVariablesLabeled;}

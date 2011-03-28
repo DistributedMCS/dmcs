@@ -69,7 +69,10 @@ public:
   solve(const TheoryPtr& theory, std::size_t sig_size);
 
   void
-  solve();
+  solve(std::size_t path,
+	std::size_t session_id,
+	std::size_t k1,
+	std::size_t k2);
 
   void
   receiveEOF();

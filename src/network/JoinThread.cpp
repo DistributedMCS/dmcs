@@ -537,18 +537,9 @@ JoinThread::operator()(std::size_t nbs,
 
   while (1)
     {
-      std::size_t prio = 0;
-      int timeout = 0;
-      StreamingForwardMessage* sfMess = mg->recvIncomingMessage(ConcurrentMessageQueueFactory::REQUEST_MQ, prio, timeout);
 
-      assert (sfMess);
-
-      std::size_t path = sfMess->getPath();
-      session_id = sfMess->getSessionId();
-      std::size_t k1 = sfMess->getK1();
-      std::size_t k2 = sfMess->getK2();
       
-
+      /*
       // tell SAT to start
       AskNextNotification* ann = new AskNextNotification(BaseNotification::REQUEST, path, session_id, k1, k2);
 
@@ -560,7 +551,7 @@ JoinThread::operator()(std::size_t nbs,
 	  anw_neighbor = 0;
 	}
 
-      process(sfMess);
+	process(sfMess);*/
     }
 
   /*

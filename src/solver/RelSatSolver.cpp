@@ -235,70 +235,67 @@ RelSatSolver::send_empty_model()
 
 
 void
-RelSatSolver::solve()
+RelSatSolver::solve(std::size_t path, std::size_t session_id, std::size_t k1, std::size_t k2)
 {
-  DMCS_LOG_TRACE("Fresh solving. Wait for a message from Handler");
-  AskNextNotification* ann = 0;
-  void *ptr = static_cast<void*>(&ann);
-  unsigned int p = 0;
-  std::size_t recvd = 0;
+  parent_session_id = session_id;
 
-  joiner_sat_notif->receive(ptr, sizeof(ann), recvd, p);
 
-  if (ptr && ann)
+
+  relsat_enum eResult;
+  std::size_t models_sofar = 0;
+
+  if (is_leaf)
     {
-      path = ann->path;
-      parent_session_id = ann->session_id;
-      k1 = ann->k1;
-      k2 = ann->k2;
-
-      delete ann;
-      ann = 0;
-
-      // remove input part of the theory (from last solve)
-
-      relsat_enum eResult;
-
-      if (is_leaf)
-	{
-	  DMCS_LOG_TRACE("Leaf case. Solve now. k2 = " << k2);
-	  eResult = xSATSolver->eSolve((long int)k2);
-	  xSATSolver->refresh();
-	}
-      else
-	{
-	  DMCS_LOG_TRACE("Intermediate case.");
-
-	  while (1)
-	    {
-	      DMCS_LOG_TRACE("Prepare input before solving.");
-	      DMCS_LOG_TRACE("xIntance.size() before removing input = " << xInstance->iClauseCount());
-	      xInstance->removeInput();
-	      DMCS_LOG_TRACE("xIntance.size() after removing input = " << xInstance->iClauseCount());
-	      if (!prepare_input())
-		{
-		  DMCS_LOG_TRACE("Got NULL input from JOIN_OUT_MQ. Send a NULL model to OUT_MQ to inform OutputThread");
-
-		  break;
-		}
-	      DMCS_LOG_TRACE("A fresh solving. input = " << *input);
-
-	      eResult = xSATSolver->eSolve((long int)k2);
-	      xSATSolver->refresh();
-
-	      bool was_cached;
-	      store(input, input_buffer, true, was_cached);
-	      DMCS_LOG_TRACE("One SOLVE finished.");
-	    }
-	}
-
-      ///@todo what todo with eResult?
+      DMCS_LOG_TRACE("Leaf case. Solve now. k2 = " << k2);
+      eResult = xSATSolver->eSolve((long int)k2, models_sofar);
+      xSATSolver->refresh();
     }
   else
     {
-      DMCS_LOG_FATAL("Got null message: " << ptr << " " << ann);
-      assert(ptr != 0 && ann != 0);
+      DMCS_LOG_TRACE("Intermediate case.");
+
+      std::size_t left_to_request = k2;
+      
+      while (1)
+	{
+	  assert (left_to_request >= models_sofar);
+
+	  left_to_request -= models_sofar;
+
+	  if (left_to_request == 0)
+	    {
+	      DMCS_LOG_TRACE("Reached " << k2 << "models. Tell Joiner to shut up and get out");
+	      BaseNotification* notif = new BaseNotification(BaseNotification::SHUTUP, path);
+	      mg->sendNotification(notif, 0, ConcurrentMessageQueueFactory::SAT_JOINER_MQ, 0);
+	      break;
+	    }
+
+	  DMCS_LOG_TRACE("Request another input from Joiner");
+	  BaseNotification* notif = new BaseNotification(BaseNotification::NEXT, path);
+	  mg->sendNotification(notif, 0, ConcurrentMessageQueueFactory::SAT_JOINER_MQ, 0);
+
+	  DMCS_LOG_TRACE("Prepare input before solving.");
+	  //DMCS_LOG_TRACE("xIntance.size() before removing input = " << xInstance->iClauseCount());
+	  xInstance->removeInput();
+	  //DMCS_LOG_TRACE("xIntance.size() after removing input = " << xInstance->iClauseCount());
+	  if (!prepare_input())
+	    {
+	      DMCS_LOG_TRACE("Got NULL input from JOIN_OUT_MQ. Bailing out...");
+	      
+	      break;
+	    }
+	  DMCS_LOG_TRACE("A fresh solving. input = " << *input);
+	  
+	  eResult = xSATSolver->eSolve((long int)left_to_request, models_sofar);
+	  xSATSolver->refresh();
+	  
+	  bool was_cached;
+	  store(input, input_buffer, true, was_cached);
+	  DMCS_LOG_TRACE("One SOLVE finished.");
+	}
     }
+  
+  ///@todo what todo with eResult?
 }
 
 

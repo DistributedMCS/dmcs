@@ -43,7 +43,7 @@ RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& rss)
 }
 
 void
-RelSatSolverThread::operator()()
+RelSatSolverThread::operator()(MessagingGatewayBC* mg)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -51,7 +51,21 @@ RelSatSolverThread::operator()()
     {
       try 
 	{
-	  relsatsolver->solve();
+	  std::size_t prio = 0;
+	  int timeout = 0;
+	  StreamingForwardMessage* sfMess = mg->recvIncomingMessage(ConcurrentMessageQueueFactory::REQUEST_MQ, prio, timeout);
+
+	  assert (sfMess);
+
+	  std::size_t path = sfMess->getPath();
+	  std::size_t session_id = sfMess->getSessionId();
+	  std::size_t k1 = sfMess->getK1();
+	  std::size_t k2 = sfMess->getK2();
+
+	  delete sfMess;
+	  sfMess = 0;
+
+	  relsatsolver->solve(path, session_id, k1, k2);
 	}
       catch(const boost::thread_interrupted& ex)
 	{

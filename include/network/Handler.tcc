@@ -337,27 +337,10 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       DMCS_LOG_TRACE(port << ": Notify OutputThread of the new message");
       notify_output_thread(BaseNotification::REQUEST, path, parent_session_id, k1, k2);
 
-
-      if (is_leaf)
-	{
-	  // tell SAT to start
-	  AskNextNotification* ann = new AskNextNotification(BaseNotification::REQUEST, path, parent_session_id, k1, k2);
-
-	  AskNextNotification* anw_neighbor = (AskNextNotification*) overwrite_send(sat_notif, &ann, sizeof(ann), 0);
-
-	  if (anw_neighbor)
-	    {
-	      delete anw_neighbor;
-	      anw_neighbor = 0;
-	    }
-	}
-      else
-	{
-	  DMCS_LOG_TRACE(port << ": Notify Joiner of the new message by placing it into REQUEST_MQ");
-	  StreamingForwardMessage* sfMess = new StreamingForwardMessage();
-	  *sfMess = sesh->mess;
-	  mg->sendIncomingMessage(sfMess, 0, ConcurrentMessageQueueFactory::REQUEST_MQ, 0);
-	}
+      DMCS_LOG_TRACE(port << ": Notify SAT of the new message by placing it into REQUEST_MQ");
+      StreamingForwardMessage* sfMess = new StreamingForwardMessage();
+      *sfMess = sesh->mess;
+      mg->sendIncomingMessage(sfMess, 0, ConcurrentMessageQueueFactory::REQUEST_MQ, 0);
 
       DMCS_LOG_TRACE(port << ": Waiting for incoming message from " << invoker << " at " << port << " (first_call = " << first_call << ")");
 

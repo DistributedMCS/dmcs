@@ -1,5 +1,16 @@
 2011-03-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/JoinThread.cpp: Wait for message from SAT and will compute just 1 join at a time.
+
+	* include/solver/RelSatSolver.h: Solve based on parameters from RelSatSolverThread.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/RelSatSolverThread.h: Take care of the message from Handler.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/Handler.tcc: Notify SAT instead of Joiner about the up coming message.
+
 	* include/network/ConcurrentMessageQueueFactory.h: Add MQ for SAT to notify Joiner.
 	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
 

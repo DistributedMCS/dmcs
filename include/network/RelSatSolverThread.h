@@ -31,6 +31,7 @@
 #define RELSATSOLVER_THREAD_H
 
 #include "solver/RelSatSolver.h"
+#include "network/ConcurrentMessageQueueFactory.h"
 
 namespace dmcs {
 
@@ -40,7 +41,7 @@ public:
   RelSatSolverThread(const RelSatSolverPtr& rss);
 
   void
-  operator()();
+  operator()(MessagingGatewayBC* mg);
 
 private:
   RelSatSolverPtr relsatsolver;
