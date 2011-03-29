@@ -49,6 +49,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
 			     const SignaturePtr& ls,
 			     const NeighborListPtr& ns,
 			     std::size_t sid,
+			     QueryPlan* qp,
 			     ConcurrentMessageQueue* jsn,
 			     MessagingGatewayBC* m,
 			     HashedBiMap* co)
@@ -57,6 +58,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
     local_sig(ls),
     nbs(ns),
     session_id(sid),
+    query_plan(qp),
     joiner_sat_notif(jsn),
     mg(m),
     c2o(co)
@@ -119,7 +121,7 @@ ThreadFactory::createLocalSolveThread()
   const std::size_t system_size = context->getSystemSize();
 
   SatSolverFactory ssf(is_leaf, my_id, session_id, theory, local_sig, 
-		       c2o, system_size, joiner_sat_notif, mg);
+		       c2o, system_size, query_plan, joiner_sat_notif, mg);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 

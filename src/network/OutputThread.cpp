@@ -235,7 +235,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
   DMCS_LOG_TRACE(port << ": Collecting, k1 = " << k1 << ",  k2 = " << k2);
   // now collect up to k2-k1+1 unique models to return ========================================================
-  for (std::size_t i = k1; i <= k2; ++i)
+  for (std::size_t i = k1; i <= k2+1; ++i)
     {
       DMCS_LOG_TRACE(port << ": Collecting, i = " << i);
       std::size_t prio = 0;
@@ -245,6 +245,12 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
 
       PartialBeliefState* bs = ms.m;
+
+      if (i == k2+1)
+	{
+	  assert (bs == 0);
+	  DMCS_LOG_TRACE(port << ": Good. I got a NULL pointer which identifies end of k2 = " << k2 << ". i = " << i);
+	}
 
       if (bs == 0) // EOF
 	{

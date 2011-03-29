@@ -1,5 +1,18 @@
 2011-03-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/OutputThread.cpp: Read up to k2+1 from OUT_MQ and
+	expect NULL at the end.
+
+	* include/network/ThreadFactory.h: Quick and dirty hack: pass
+	query_plan to RelSatSolver so that it can get localV easily as
+	invoker is already passed there via StreamingForwardMessage.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
 	* src/solver/RelSatSolver.cpp: Pass models_sofar as reference to
 	SATSolver to get its value directly.
 

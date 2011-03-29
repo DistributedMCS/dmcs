@@ -57,6 +57,7 @@ RelSatSolverThread::operator()(MessagingGatewayBC* mg)
 
 	  assert (sfMess);
 
+	  std::size_t invoker = sfMess->getInvoker();
 	  std::size_t path = sfMess->getPath();
 	  std::size_t session_id = sfMess->getSessionId();
 	  std::size_t k1 = sfMess->getK1();
@@ -65,7 +66,7 @@ RelSatSolverThread::operator()(MessagingGatewayBC* mg)
 	  delete sfMess;
 	  sfMess = 0;
 
-	  relsatsolver->solve(path, session_id, k1, k2);
+	  relsatsolver->solve(invoker, path, session_id, k1, k2);
 	}
       catch(const boost::thread_interrupted& ex)
 	{

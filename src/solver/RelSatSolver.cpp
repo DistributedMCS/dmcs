@@ -53,6 +53,7 @@ RelSatSolver::RelSatSolver(bool il,
 			   const SignaturePtr& ls,
 			   const HashedBiMap* co,
 			   std::size_t ss,
+			   QueryPlan* qp,
 			   ConcurrentMessageQueue* jsn,
 			   MessagingGatewayBC* m)
   : is_leaf(il),
@@ -62,6 +63,7 @@ RelSatSolver::RelSatSolver(bool il,
     sig(ls),
     c2o(co),
     system_size(ss),
+    query_plan(qp),
     joiner_sat_notif(jsn),
     mg(m),
     xInstance(new SATInstance(std::cerr)),
@@ -221,22 +223,9 @@ RelSatSolver::refresh()
 
 
 void
-RelSatSolver::send_empty_model()
+RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std::size_t k1, std::size_t k2)
 {
-  //#ifdef DEBUG
-  //  History path(1, 0);
-  //#else
-  std::size_t path = 0;
-  //#endif  
-
-  mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
-}
-
-
-
-void
-RelSatSolver::solve(std::size_t pa, std::size_t session_id, std::size_t k1, std::size_t k2)
-{
+  invoker = iv;
   parent_session_id = session_id;
 
   relsat_enum eResult;
@@ -307,11 +296,11 @@ void
 RelSatSolver::receiveEOF()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  if (is_leaf)
-    {
+  //  if (is_leaf)
+  //    {
       DMCS_LOG_TRACE("EOF. Send a NULL pointer to OUT_MQ to close this session.");
-      send_empty_model();
-    }
+      mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
+  //    }
 }
 
 
@@ -324,7 +313,7 @@ RelSatSolver::receiveUNSAT(ClauseList& learned_clauses)
   if (is_leaf)
     {
       DMCS_LOG_TRACE("UNSAT. Send a NULL pointer to OUT_MQ to close this session.");
-      send_empty_model();
+      mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
     }
 }
 
@@ -380,7 +369,17 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
   //DMCS_LOG_TRACE("MODEL from SAT: bs = " << *bs);
 
   // project to my output interface
-  //  project_to(bs, localV);
+  BeliefStatePtr localV;
+  if (invoker == 0)
+    {
+      localV = query_plan->getGlobalV();
+    }
+  else
+    {
+      localV = query_plan->getInterface(invoker, my_id);
+    }
+
+  project_to(bs, localV);
 
   DMCS_LOG_TRACE("Going to send: " << *bs << ", with path = " << path << ", parent session id = " << parent_session_id);
   // now put this PartialBeliefState to the SatOutputMessageQueue

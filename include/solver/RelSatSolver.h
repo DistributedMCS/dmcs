@@ -29,6 +29,7 @@
 
 #include "dmcs/BaseTypes.h"
 #include "dmcs/Context.h"
+#include "dmcs/QueryPlan.h"
 #include "mcs/HashedBiMap.h"
 #include "mcs/ProxySignatureByLocal.h"
 #include "network/ConcurrentMessageQueueFactory.h"
@@ -59,6 +60,7 @@ public:
 	       const SignaturePtr& ls,
 	       const HashedBiMap* co,
 	       std::size_t ss,
+	       QueryPlan* qp,
 	       ConcurrentMessageQueue* jsn,
 	       MessagingGatewayBC* m);
 
@@ -69,7 +71,8 @@ public:
   solve(const TheoryPtr& theory, std::size_t sig_size);
 
   void
-  solve(std::size_t path,
+  solve(std::size_t invoker,
+	std::size_t path,
 	std::size_t session_id,
 	std::size_t k1,
 	std::size_t k2);
@@ -101,11 +104,9 @@ private:
 		     SignatureByCtx::const_iterator low, 
 		     SignatureByCtx::const_iterator up);
 
-  void
-  send_empty_model();
-
 private:
   bool is_leaf;
+  std::size_t invoker;
   std::size_t my_id;
   std::size_t parent_session_id;
   std::size_t my_session_id;
@@ -118,6 +119,7 @@ private:
   ConcurrentMessageQueue* joiner_sat_notif;
   MessagingGatewayBC* mg;
   PartialBeliefState* input;
+  QueryPlan* query_plan;
   PartialBeliefStateBufPtr input_buffer;
   bool first_round;
   std::size_t path;

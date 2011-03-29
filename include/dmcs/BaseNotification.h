@@ -77,6 +77,12 @@ operator<< (std::ostream& os, const BaseNotification& bn)
 	os << "SHUTDOWN";
 	break;
       }
+
+    case BaseNotification::SHUTUP:
+      {
+	os << "SHUTUP";
+	break;
+      }
     }
 
   os << " {" << bn.path << "}"; 

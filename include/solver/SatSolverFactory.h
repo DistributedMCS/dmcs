@@ -47,6 +47,7 @@ public:
 		   const SignaturePtr& ls,
 		   const HashedBiMap* co,
 		   std::size_t ss,
+		   QueryPlan* qp,
 		   ConcurrentMessageQueue* jsn,
 		   MessagingGatewayBC* m)
     : is_leaf(il),
@@ -56,6 +57,7 @@ public:
       local_sig(ls),
       c2o(co),
       system_size(ss),
+      query_plan(qp),
       joiner_sat_notif(jsn),
       mg(m)
   { }
@@ -72,6 +74,7 @@ private:
   const SignaturePtr local_sig;
   const HashedBiMap* c2o;
   std::size_t system_size;
+  QueryPlan* query_plan;
   ConcurrentMessageQueue* joiner_sat_notif;
   MessagingGatewayBC* mg;
 };
@@ -85,6 +88,7 @@ SatSolverFactory::create<RelSatSolverPtr>()
 						my_id, session_id,
 						theory, local_sig, 
 						c2o, system_size, 
+						query_plan,
 						joiner_sat_notif, mg));
 
   return relsatsolver;

@@ -112,7 +112,7 @@ Server::initialize()
       c2o->insert(Int2Int(nid, off));
     }
 
-  ThreadFactory tf(ctx, theory, local_sig, nbs, 0, joiner_sat_notif, mg.get(), c2o.get());
+  ThreadFactory tf(ctx, theory, local_sig, nbs, 0, query_plan.get(), joiner_sat_notif, mg.get(), c2o.get());
   
   if (no_nbs > 0)
     {
