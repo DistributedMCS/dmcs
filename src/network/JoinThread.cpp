@@ -577,6 +577,7 @@ JoinThread::operator()(std::size_t nbs,
 	  else
 	    {
 	      DMCS_LOG_TRACE("joined_results is empty, call process() now.");
+	      first_result = true;
 	      std::size_t path = sat_trigger->path;
 	      std::size_t session_id = sat_trigger->session_id;
 	      std::size_t k1 = sat_trigger->k1;
