@@ -567,7 +567,7 @@ JoinThread::operator()(std::size_t nbs,
       int timeout = 0;
       AskNextNotification* sat_trigger = mg->recvNotification(ConcurrentMessageQueueFactory::SAT_JOINER_MQ, prio, timeout);
 
-      DMCS_LOG_TRACE("Got a trigger from SAT");
+      DMCS_LOG_TRACE("Got a trigger from SAT. AskNextNotification = " << *sat_trigger);
       
       if (sat_trigger->type == BaseNotification::NEXT)
 	{
@@ -597,13 +597,20 @@ JoinThread::operator()(std::size_t nbs,
       else
 	{
 	  assert (sat_trigger->type == BaseNotification::SHUTUP);
-
+	  DMCS_LOG_TRACE("In SHUTUP mode, reset all data members");
 	  // reset for the next fresh request
 	  first_round = true;
 	  asking_next = false;
 	  first_result = true;
 	  next_neighbor_offset = 0;
 	  joined_results->clear();
+
+	  for (std::size_t i = 0; i < no_nbs; ++i)
+	    {
+	      cleanup_partial_belief_states(partial_eqs.get(), i);
+	    }
+
+	  std::fill(pack_count->begin(), pack_count->end(), 0);
 	}
     }
 
@@ -847,6 +854,7 @@ JoinThread::process(std::size_t path,
 	  std::size_t k1 = pc * pack_size + 1;
 	  std::size_t k2 = (pc+1) * pack_size;
 	  DMCS_LOG_TRACE("New k1 = " << k1 << ", new k2 = " << k2);
+	  
 
 #if 1
       DMCS_LOG_DEBUG(" partial_eqs before ask_next");
@@ -876,7 +884,7 @@ JoinThread::process(std::size_t path,
 		  ask_first_packs(partial_eqs.get(), path, 0, next_neighbor_offset - 1);
 		  
 		  // reset counter
-		  std::fill(pack_count->begin(), pack_count->begin() + next_neighbor_offset - 1, 0);
+		  std::fill(pack_count->begin(), pack_count->begin() + next_neighbor_offset, 0);
 		}
 
 #if 1

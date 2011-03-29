@@ -1,3 +1,7 @@
+2011-03-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Fix resetting Joiner.
+
 2011-03-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/JoinThread.h: Move partial_eqs out of process.
