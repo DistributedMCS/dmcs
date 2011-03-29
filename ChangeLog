@@ -1,3 +1,14 @@
+2011-03-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Pass models_sofar as reference to
+	SATSolver to get its value directly.
+
+	* src/network/JoinThread.cpp: Collect joined result into a list
+	and return from there (except for the first time).
+
+	* include/dmcs/BaseNotification.h: Adapt to the SHUPUP type of
+	messages.
+
 2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/JoinThread.h: SAT has control over Joiner.

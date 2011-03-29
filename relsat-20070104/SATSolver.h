@@ -104,7 +104,7 @@ public:
   void vIncorporateLearnedClauses();
   void vOutputWarnings();
   void vOutputStatusUpdateInterval();
-  relsat_enum eSolve(long int solutions_limit);
+  relsat_enum eSolve(long int solutions_limit, std::size_t& models_sofar);
 
   unsigned long iBranchSelections() {return _iBranchSelections;}
   unsigned long iVariablesLabeled() {return _iVariablesLabeled;}
@@ -136,12 +136,6 @@ public:
     return _xLearnedClauses;
   }
 
-  std::size_t
-  SolutionCount()
-  {
-    return (std::size_t)_iSolutionCount;
-  }
-
 private:
   boolean _bVerifySolution();
   boolean _bOutputSolution();
@@ -157,7 +151,7 @@ private:
   VariableID _eFindContradiction(boolean& bZeroFirst_, VariableID eID_);
   int _iScoreClauseList(Clause** pStart_, Clause** const pEnd_);
   inline double _iCombineScores(double i1_, double i2_);
-  boolean _bLoop(boolean&);
+  boolean _bLoop(boolean&, std::size_t&);
   boolean _bRestartLoop(boolean&);
 
   boolean _bFastUnitPropagate(VariableID eWhich_, DomainValue iAssignment_, int& iScore_);

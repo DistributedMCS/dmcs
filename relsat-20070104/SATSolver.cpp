@@ -80,7 +80,7 @@ SATSolver::~SATSolver()
   delete _pPrimaryVariables;
 }
 
-relsat_enum SATSolver::eSolve(long int solutions_limit)
+relsat_enum SATSolver::eSolve(long int solutions_limit, std::size_t& models_sofar)
 {
   _iMaxSolutions = solutions_limit;
 
@@ -116,7 +116,7 @@ relsat_enum SATSolver::eSolve(long int solutions_limit)
 	bReturn = _bRestartLoop(bFailed_);
       }
       else {
-	bReturn = _bLoop(bFailed_);
+	bReturn = _bLoop(bFailed_, models_sofar);
       }
       if (bFailed_) {
 	eReturn = TIMEOUT;
@@ -220,7 +220,7 @@ void SATSolver::vOutputWarnings()
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Private Methods
 
-boolean SATSolver::_bLoop(boolean& bFailed_)
+boolean SATSolver::_bLoop(boolean& bFailed_, std::size_t& models_sofar)
 {
   bFailed_ = 0;
   boolean bReturnValue = 0;
@@ -247,13 +247,15 @@ boolean SATSolver::_bLoop(boolean& bFailed_)
       bReturnValue = 1;
       if (_iCurrentVariable == _iVariableCount) {
         if (_bOutputSolution()) {
-	  xOutputStream << "c   Solution limit reached. " << endl;
+	  xOutputStream << "c   Solution limit reached. Number of solutions = " << _iSolutionCount << endl;
+	  models_sofar = (std::size_t)_iSolutionCount;
 	  wrapper->receiveEOF();
 	  return bReturnValue;
 	}
       }
       if (_bSpecialBackup()) {
 	xOutputStream << "c   All solutions found. Number of solutions = " << _iSolutionCount << endl;
+	models_sofar = (std::size_t)_iSolutionCount;
 	wrapper->receiveEOF();
 	return bReturnValue;
       }

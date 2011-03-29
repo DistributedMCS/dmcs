@@ -48,7 +48,7 @@ struct BaseNotification
 		   std::size_t pa)
     : type(t), path(pa)
   {
-    assert(t == REQUEST || t == SHUTDOWN || t == NEXT); 
+    assert(t == REQUEST || t == SHUTDOWN || t == NEXT || t == SHUTUP); 
   }
   
   NotificationType type;

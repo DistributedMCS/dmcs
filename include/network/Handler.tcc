@@ -334,12 +334,12 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  first_call = false;
 	} // if (first_call)
 
-      DMCS_LOG_TRACE(port << ": Notify OutputThread of the new message");
+      DMCS_LOG_TRACE(port << ": Notify OutputThread of the new message. sesh->mess = " << sesh->mess);
       notify_output_thread(BaseNotification::REQUEST, path, parent_session_id, k1, k2);
 
-      DMCS_LOG_TRACE(port << ": Notify SAT of the new message by placing it into REQUEST_MQ");
       StreamingForwardMessage* sfMess = new StreamingForwardMessage();
       *sfMess = sesh->mess;
+      DMCS_LOG_TRACE(port << ": Notify SAT of the new message by placing it into REQUEST_MQ. sfMess = " << *sfMess);
       mg->sendIncomingMessage(sfMess, 0, ConcurrentMessageQueueFactory::REQUEST_MQ, 0);
 
       DMCS_LOG_TRACE(port << ": Waiting for incoming message from " << invoker << " at " << port << " (first_call = " << first_call << ")");

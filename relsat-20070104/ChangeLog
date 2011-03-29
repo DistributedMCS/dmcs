@@ -1,3 +1,10 @@
+2011-03-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.cpp: Pass models_sofar as reference. RelSat somehow
+	resets or does something with its internal data members that I
+	could not simply get some data member via get methods.
+	* SATSolver.h: Likewise.
+
 2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.cpp: Get solutions_sofar via _iSolutionCount.

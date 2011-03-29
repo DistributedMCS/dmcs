@@ -235,17 +235,18 @@ RelSatSolver::send_empty_model()
 
 
 void
-RelSatSolver::solve(std::size_t path, std::size_t session_id, std::size_t k1, std::size_t k2)
+RelSatSolver::solve(std::size_t pa, std::size_t session_id, std::size_t k1, std::size_t k2)
 {
   parent_session_id = session_id;
 
   relsat_enum eResult;
   std::size_t models_sofar = 0;
+  path = pa;
 
   if (is_leaf)
     {
       DMCS_LOG_TRACE("Leaf case. Solve now. k2 = " << k2);
-      eResult = xSATSolver->eSolve((long int)k2);
+      eResult = xSATSolver->eSolve((long int)k2, models_sofar);
       xSATSolver->refresh();
     }
   else
@@ -256,6 +257,9 @@ RelSatSolver::solve(std::size_t path, std::size_t session_id, std::size_t k1, st
       
       while (1)
 	{
+	  DMCS_LOG_TRACE("left_to_request = " << left_to_request);
+	  DMCS_LOG_TRACE("models_sofar = " << models_sofar);
+
 	  assert (left_to_request >= models_sofar);
 
 	  left_to_request -= models_sofar;
@@ -284,8 +288,7 @@ RelSatSolver::solve(std::size_t path, std::size_t session_id, std::size_t k1, st
 	    }
 	  DMCS_LOG_TRACE("A fresh solving. input = " << *input);
 	  
-	  eResult = xSATSolver->eSolve((long int)left_to_request);
-	  models_sofar = xSATSolver->SolutionCount();
+	  eResult = xSATSolver->eSolve((long int)left_to_request, models_sofar);
 	  DMCS_LOG_TRACE("One limited solve finished. Number of solutions = " << models_sofar);
 	  xSATSolver->refresh();
 	  

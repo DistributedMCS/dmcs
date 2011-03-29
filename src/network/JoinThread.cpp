@@ -104,6 +104,8 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
     }
   else
     {
+      ModelSessionId ms(result, path, session_id);
+      joined_results->push_back(ms);
     }
 
   return 1;
@@ -557,20 +559,34 @@ JoinThread::operator()(std::size_t nbs,
       
       if (sat_trigger->type == BaseNotification::NEXT)
 	{
-	  std::size_t path = sat_trigger->path;
-	  std::size_t session_id = sat_trigger->session_id;
-	  std::size_t k1 = sat_trigger->k1;
-	  std::size_t k2 = sat_trigger->k2;
-	  process(path, session_id, k1, k2, first_round, asking_next, next_neighbor_offset, pack_count);
-	  first_round = false;
+	  if (joined_results->size() > 0)
+	    {
+	      ModelSessionId ms = *(joined_results->begin());
+	      joined_results->pop_front();
+	      PartialBeliefState* result = ms.partial_belief_state;
+	      std::size_t pa = ms.path;
+	      std::size_t sid = ms.session_id;
+
+	      mg->sendModel(result, pa, sid, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+	    }
+	  else
+	    {
+	      std::size_t path = sat_trigger->path;
+	      std::size_t session_id = sat_trigger->session_id;
+	      std::size_t k1 = sat_trigger->k1;
+	      std::size_t k2 = sat_trigger->k2;
+	      process(path, session_id, k1, k2, first_round, asking_next, next_neighbor_offset, pack_count);
+	      first_round = false;
+	    }
 	}
       else
 	{
 	  // reset for the next fresh request
 	  first_round = true;
 	  asking_next = false;
+	  first_result = true;
 	  next_neighbor_offset = 0;
-	  std::fill(pack_count->begin(), pack_count->end(), 1);
+	  joined_results->clear();
 	}
     }
 

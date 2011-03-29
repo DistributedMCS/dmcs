@@ -444,11 +444,7 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
   ///@todo TK: prio is not used
   assert(mqs.size() > from);
 
-  //#ifdef DEBUG
-  //  History path;
-  //#else
-  std::size_t path = 0;
-  //#endif
+  std::size_t path;
 
   struct ModelSession ms = {0, path, 0};
   std::size_t recvd = 0;
