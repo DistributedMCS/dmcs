@@ -1,5 +1,9 @@
 2011-03-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/JoinThread.cpp: Fix asking next strategy.
+
+	* src/solver/RelSatSolver.cpp: Send NULL pointer at the right place.
+
 	* src/network/OutputThread.cpp: Read up to k2+1 from OUT_MQ and
 	expect NULL at the end.
 
