@@ -444,8 +444,8 @@ Options";
 			    {
 			      DMCS_LOG_TRACE("fixpoint not reached yet, get next " << k << " belief states");
 
-			      std::size_t next_k1 = (next_count - 1) * k + 1;
-			      std::size_t next_k2 = next_k1 + k;
+			      std::size_t next_k1 = next_count * k + 1;
+			      std::size_t next_k2 = next_k1 + k - 1;
 			      
 			      mess.setPackRequest(next_k1, next_k2);
 			      c.next(mess);
