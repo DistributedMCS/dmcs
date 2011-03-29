@@ -125,7 +125,7 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
   assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
 
 
-#if 0
+#if 1
   DMCS_LOG_DEBUG(" Going to join the following");
   PartialBeliefStateIteratorVec::const_iterator b = beg_it->begin();
   PartialBeliefStateIteratorVec::const_iterator e = end_it->begin();
@@ -552,6 +552,14 @@ JoinThread::operator()(std::size_t nbs,
   std::size_t next_neighbor_offset = 0;
   VecSizeTPtr pack_count(new VecSizeT(no_nbs, 0));
 
+  // set up a package of empty BeliefStates
+  PartialBeliefStatePackagePtr partial_eqs(new PartialBeliefStatePackage);
+  for (std::size_t i = 0; i < no_nbs; ++i)
+    {
+      PartialBeliefStateVecPtr bsv(new PartialBeliefStateVec);
+      partial_eqs->push_back(bsv);
+    }
+
   while (1)
     {
       // Wait for a trigger from SAT
@@ -582,7 +590,7 @@ JoinThread::operator()(std::size_t nbs,
 	      std::size_t session_id = sat_trigger->session_id;
 	      std::size_t k1 = sat_trigger->k1;
 	      std::size_t k2 = sat_trigger->k2;
-	      process(path, session_id, k1, k2, first_round, asking_next, next_neighbor_offset, pack_count);
+	      process(path, session_id, k1, k2, first_round, asking_next, next_neighbor_offset, pack_count, partial_eqs);
 	      first_round = false;
 	    }
 	}
@@ -630,6 +638,7 @@ JoinThread::operator()(std::size_t nbs,
 void
 JoinThread::cleanup_partial_belief_states(PartialBeliefStatePackage* partial_eqs, std::size_t nid)
 {
+  DMCS_LOG_TRACE("Clean up PartialBeliefStates at nid = " << nid);
   PartialBeliefStateVecPtr& bsv = (*partial_eqs)[nid];
   for (PartialBeliefStateVec::iterator it = bsv->begin(); it != bsv->end(); ++it)
     {
@@ -738,6 +747,7 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
     {
       if (!ask_neighbor(partial_eqs, i, 1, pack_size, path, BaseNotification::REQUEST))
 	{
+	  DMCS_LOG_TRACE("A neighbor is inconsistent. Going to clean up everything readd so far.");
 	  // clean up
 	  for (std::size_t j = from_neighbor; j <= i; ++j)
 	    {
@@ -762,6 +772,10 @@ JoinThread::do_join(PartialBeliefStatePackagePtr& partial_eqs)
        it != partial_eqs->end(); ++it)
     {
       const PartialBeliefStateVecPtr& bsv = *it;
+      
+      assert (bsv);
+      assert (bsv->begin() != bsv->end());
+
       beg_it->push_back(bsv->begin());
       end_it->push_back(bsv->end());
     }
@@ -779,16 +793,9 @@ JoinThread::process(std::size_t path,
 		    bool first_round,
 		    bool& asking_next,
 		    std::size_t& next_neighbor_offset,
-		    VecSizeTPtr& pack_count)
+		    VecSizeTPtr& pack_count,
+		    PartialBeliefStatePackagePtr& partial_eqs)
 {
-  // set up a package of empty BeliefStates
-  PartialBeliefStatePackagePtr partial_eqs(new PartialBeliefStatePackage);
-  for (std::size_t i = 0; i < no_nbs; ++i)
-    {
-      PartialBeliefStateVecPtr bsv(new PartialBeliefStateVec);
-      partial_eqs->push_back(bsv);
-    }
-
   pack_size = k_two - k_one + 1;
   
   if (first_round)
@@ -804,6 +811,23 @@ JoinThread::process(std::size_t path,
 	}
 
       do_join(partial_eqs);
+
+#if 1
+      DMCS_LOG_DEBUG(" partial_eqs after do_join");
+      
+      PartialBeliefStatePackage::const_iterator pit = partial_eqs->begin();
+      for (; pit != partial_eqs->end(); ++pit)
+	{
+	  const PartialBeliefStateVecPtr& pbsv = *pit;
+	  PartialBeliefStateVec::const_iterator bit = pbsv->begin();
+	  for (; bit != pbsv->end(); ++bit)
+	    {
+	      DMCS_LOG_TRACE(" " << **bit);
+	    }
+	  DMCS_LOG_TRACE("...");
+	}
+#endif // 0
+
     }
   else
     {
@@ -823,19 +847,53 @@ JoinThread::process(std::size_t path,
 	  std::size_t k1 = pc * pack_size + 1;
 	  std::size_t k2 = (pc+1) * pack_size;
 	  DMCS_LOG_TRACE("New k1 = " << k1 << ", new k2 = " << k2);
+
+#if 1
+      DMCS_LOG_DEBUG(" partial_eqs before ask_next");
+      
+      PartialBeliefStatePackage::const_iterator pit = partial_eqs->begin();
+      for (; pit != partial_eqs->end(); ++pit)
+	{
+	  const PartialBeliefStateVecPtr& pbsv = *pit;
+	  PartialBeliefStateVec::const_iterator bit = pbsv->begin();
+	  for (; bit != pbsv->end(); ++bit)
+	    {
+	      DMCS_LOG_TRACE(" " << **bit);
+	    }
+	  DMCS_LOG_TRACE("...");
+	}
+#endif // 0
 	  
+	  DMCS_LOG_TRACE("Ask next at neighbor_offset = " << next_neighbor_offset);
 	  if (ask_neighbor(partial_eqs.get(), next_neighbor_offset, k1, k2, path, BaseNotification::NEXT))
 	    {
 	      if (asking_next)
 		{
 		  assert (next_neighbor_offset > 0);
 		  
+		  DMCS_LOG_TRACE("Ask first packs before neighbor_offset = " << next_neighbor_offset);
 		  // again, ask for first packs from each neighbor
 		  ask_first_packs(partial_eqs.get(), path, 0, next_neighbor_offset - 1);
 		  
 		  // reset counter
 		  std::fill(pack_count->begin(), pack_count->begin() + next_neighbor_offset - 1, 0);
 		}
+
+#if 1
+      DMCS_LOG_DEBUG(" partial_eqs beforeafter ask_next");
+      
+      PartialBeliefStatePackage::const_iterator pit = partial_eqs->begin();
+      for (; pit != partial_eqs->end(); ++pit)
+	{
+	  const PartialBeliefStateVecPtr& pbsv = *pit;
+	  PartialBeliefStateVec::const_iterator bit = pbsv->begin();
+	  for (; bit != pbsv->end(); ++bit)
+	    {
+	      DMCS_LOG_TRACE(" " << **bit);
+	    }
+	  DMCS_LOG_TRACE("...");
+	}
+#endif // 0
 	      
 	      do_join(partial_eqs);
 	      next_neighbor_offset = 0;

@@ -134,7 +134,8 @@ private:
 	  bool first_round,
 	  bool& asking_next,
 	  std::size_t& neighbor_offset,
-	  VecSizeTPtr& pack_count);
+	  VecSizeTPtr& pack_count,
+	  PartialBeliefStatePackagePtr& partial_eqs);
 
 private:
   std::size_t port;
