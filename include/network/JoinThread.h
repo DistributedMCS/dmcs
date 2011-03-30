@@ -68,10 +68,10 @@ public:
     };
 
 private:
-  std::size_t
+  bool
   join(const PartialBeliefStateIteratorVecPtr& run_it);
 
-  void
+  bool
   join(const PartialBeliefStatePackagePtr& partial_eqs, 
        const PartialBeliefStateIteratorVecPtr& beg_it, 
        const PartialBeliefStateIteratorVecPtr& end_it);
@@ -123,7 +123,7 @@ private:
 		  std::size_t to_neighbor);
 
 
-  void
+  bool
   do_join(PartialBeliefStatePackagePtr& partial_eqs);
 
   void

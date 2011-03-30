@@ -1,5 +1,9 @@
 2011-03-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/JoinThread.h: Fix corner case: all joins are
+	inconsistent wrt one pack.
+	* src/network/JoinThread.cpp: Likewise.
+
 	* include/network/OutputThread.h: Fix path.
 	* src/network/Output.cpp: Likewise.
 

@@ -65,7 +65,8 @@ JoinThread::~JoinThread()
 
 
 // one-shot joining
-std::size_t 
+// return true if joining is successful
+bool
 JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
 {
 #if 1
@@ -89,7 +90,7 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
       if (!combine(*result, *next_bs))
 	{
 	  DMCS_LOG_TRACE(port << ": INCONSISTENT!");
-	  return 0;
+	  return false;
 	}
     }
 
@@ -110,20 +111,21 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
       joined_results->push_back(ms);
     }
 
-  return 1;
+  return true;
 }
 
 
 
 // join in which the range is determined by beg_it to end_it
-void
+// return true if there is at least one successful join
+bool
 JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs, 
 		 const PartialBeliefStateIteratorVecPtr& beg_it, 
 		 const PartialBeliefStateIteratorVecPtr& end_it)
 {
   // initialization
   assert ((partial_eqs->size() == beg_it->size()) && (beg_it->size() == end_it->size()));
-
+  bool ret = false;
 
 #if 1
   DMCS_LOG_DEBUG(" Going to join the following");
@@ -152,7 +154,11 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
   int inc = n-1;
   while (inc >= 0)
     {
-      join(run_it);
+      if (join(run_it))
+	{
+	  ret = true;
+	}
+
       inc = n-1;
 
       // find the last index whose running iterator incrementable to a non-end()
@@ -176,6 +182,8 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
 	  (*run_it)[i] = (*beg_it)[i];
 	}
     }
+
+  return ret;
 }
 
 
@@ -791,7 +799,8 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
 
 
 
-void
+// return true if at least one join is successful
+bool
 JoinThread::do_join(PartialBeliefStatePackagePtr& partial_eqs)
 {
   const PartialBeliefStateIteratorVecPtr beg_it(new PartialBeliefStateIteratorVec);
@@ -809,11 +818,12 @@ JoinThread::do_join(PartialBeliefStatePackagePtr& partial_eqs)
       end_it->push_back(bsv->end());
     }
 
-  join(partial_eqs, beg_it, end_it);
+  return join(partial_eqs, beg_it, end_it);
 }
 
 
 
+// return true if something (either models of NULL) is sent to SAT
 void
 JoinThread::process(std::size_t path, 
 		    std::size_t session_id,
@@ -852,22 +862,6 @@ JoinThread::process(std::size_t path,
 
       do_join(partial_eqs);
 
-#if 1
-      DMCS_LOG_DEBUG(" partial_eqs after do_join");
-      
-      PartialBeliefStatePackage::const_iterator pit = partial_eqs->begin();
-      for (; pit != partial_eqs->end(); ++pit)
-	{
-	  const PartialBeliefStateVecPtr& pbsv = *pit;
-	  PartialBeliefStateVec::const_iterator bit = pbsv->begin();
-	  for (; bit != pbsv->end(); ++bit)
-	    {
-	      DMCS_LOG_TRACE(" " << **bit);
-	    }
-	  DMCS_LOG_TRACE("...");
-	}
-#endif // 0
-
     }
   else
     {
@@ -894,25 +888,9 @@ JoinThread::process(std::size_t path,
 	  std::size_t k1 = pc * pack_size + 1;
 	  std::size_t k2 = (pc+1) * pack_size;
 	  DMCS_LOG_TRACE("New k1 = " << k1 << ", new k2 = " << k2);
-	  DMCS_LOG_TRACE("Pack count: ");
-	  std::copy(pack_count->begin(), pack_count->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
-	  std::cerr << std::endl;
-
-#if 1
-      DMCS_LOG_DEBUG(" partial_eqs before ask_next");
-      
-      PartialBeliefStatePackage::const_iterator pit = partial_eqs->begin();
-      for (; pit != partial_eqs->end(); ++pit)
-	{
-	  const PartialBeliefStateVecPtr& pbsv = *pit;
-	  PartialBeliefStateVec::const_iterator bit = pbsv->begin();
-	  for (; bit != pbsv->end(); ++bit)
-	    {
-	      DMCS_LOG_TRACE(" " << **bit);
-	    }
-	  DMCS_LOG_TRACE("...");
-	}
-#endif // 0
+	  //DMCS_LOG_TRACE("Pack count: ");
+	  //std::copy(pack_count->begin(), pack_count->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
+	  //std::cerr << std::endl;
 	  
 	  DMCS_LOG_TRACE("Ask next at neighbor_offset = " << next_neighbor_offset);
 	  if (ask_neighbor(partial_eqs.get(), next_neighbor_offset, k1, k2, path, BaseNotification::NEXT))
@@ -930,27 +908,15 @@ JoinThread::process(std::size_t path,
 		  // reset counter
 		  std::fill(pack_count->begin(), pack_count->begin() + next_neighbor_offset, 0);
 		}
-
-#if 1
-      DMCS_LOG_DEBUG(" partial_eqs beforeafter ask_next");
-      
-      PartialBeliefStatePackage::const_iterator pit = partial_eqs->begin();
-      for (; pit != partial_eqs->end(); ++pit)
-	{
-	  const PartialBeliefStateVecPtr& pbsv = *pit;
-	  PartialBeliefStateVec::const_iterator bit = pbsv->begin();
-	  for (; bit != pbsv->end(); ++bit)
-	    {
-	      DMCS_LOG_TRACE(" " << **bit);
-	    }
-	  DMCS_LOG_TRACE("...");
-	}
-#endif // 0
 	      
-	      do_join(partial_eqs);
+	      bool send_something = do_join(partial_eqs);
+
 	      next_neighbor_offset = 0;
 	      asking_next = false;
-	      break;
+	      if (send_something)
+		{
+		  break;
+		}
 	    }
 	  else
 	    {
