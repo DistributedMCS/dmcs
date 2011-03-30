@@ -1,13 +1,19 @@
-2011-03-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+2011-03-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
-	* src/network/JoinThread.cpp: Fix resetting Joiner.
+	* include/network/JoinThread.h: Fix reset.
+	* src/network/JoinThread.cpp: Liekwise.
+
+	* src/dmcsc.cpp: Fix setting next packs.
+
+	* src/network/OutputThread.cpp: Send duplicated models back.
+	* include/network/NeighborThread.h: Remove duplication here.
 
 2011-03-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/JoinThread.cpp: Fix resetting Joiner.
+
 	* include/network/JoinThread.h: Move partial_eqs out of process.
 	* src/network/JoinThread.cpp: Likewise.
-
-2011-03-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/JoinThread.cpp: Fix asking next strategy.
 
