@@ -430,12 +430,16 @@ Options";
 			{
 			  io_service->reset(); // ready for the next round
 			  
+			  DMCS_LOG_TRACE("diff_count = " << diff_count << ", next_count = " << next_count);
+
 			  if (diff_count > 0 && diff_count < k) // setup next k here
 			    {
 			      DMCS_LOG_TRACE("Got " << diff_count << " partial belief states, getting next batch of size " << k);
 
-			      std::size_t next_k1 = (next_count - 1) * k + 1;
-			      std::size_t next_k2 = next_k1 + k;
+			      std::size_t next_k1 = next_count * k + 1;
+			      std::size_t next_k2 = next_k1 + k - 1;
+
+			      DMCS_LOG_TRACE("next_k1 = " << next_k1 << ", next_k2 = " << next_k2);
 			      
 			      mess.setPackRequest(next_k1, next_k2);
 			      c.next(mess);
@@ -446,6 +450,8 @@ Options";
 
 			      std::size_t next_k1 = next_count * k + 1;
 			      std::size_t next_k2 = next_k1 + k - 1;
+
+			      DMCS_LOG_TRACE("next_k1 = " << next_k1 << ", next_k2 = " << next_k2);
 			      
 			      mess.setPackRequest(next_k1, next_k2);
 			      c.next(mess);
