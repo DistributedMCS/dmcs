@@ -1,5 +1,8 @@
 2011-03-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/ConcurrentMessageDispatcher.cpp: Remove debugging
+	information that potentially causes segfault!
+
 	* include/network/JoinThread.h: Fix reset.
 	* src/network/JoinThread.cpp: Liekwise.
 
