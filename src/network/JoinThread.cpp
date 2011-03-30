@@ -556,6 +556,16 @@ JoinThread::reset(bool& first_round,
   asking_next = false;
   first_result = true;
   next_neighbor_offset = 0;
+
+  for (ModelSessionIdList::const_iterator it = joined_results->begin(); 
+       it != joined_results->end(); ++it)
+    {
+      ModelSessionId ms = *it;
+      PartialBeliefState* result = ms.partial_belief_state;
+      delete result;
+      result = 0;
+    }
+
   joined_results->clear();
   
   for (std::size_t i = 0; i < no_nbs; ++i)
