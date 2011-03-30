@@ -1,5 +1,8 @@
 2011-03-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/OutputThread.h: Fix path.
+	* src/network/Output.cpp: Likewise.
+
 	* src/network/ConcurrentMessageDispatcher.cpp: Remove debugging
 	information that potentially causes segfault!
 

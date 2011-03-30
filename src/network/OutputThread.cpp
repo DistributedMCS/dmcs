@@ -74,7 +74,7 @@ OutputThread::operator()(connection_ptr c,
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  std::size_t path;
+  //  std::size_t path;
   std::size_t k1;
   std::size_t k2;
   std::size_t parent_session_id;
@@ -84,7 +84,8 @@ OutputThread::operator()(connection_ptr c,
     {
       res->clear();
 
-      BaseNotification::NotificationType nt = wait_for_trigger(hon, path, k1, k2, parent_session_id);
+      //BaseNotification::NotificationType nt = wait_for_trigger(hon, path, k1, k2, parent_session_id);
+      BaseNotification::NotificationType nt = wait_for_trigger(hon, k1, k2, parent_session_id);
 
       if (nt == BaseNotification::SHUTDOWN)
 	{
@@ -117,7 +118,6 @@ OutputThread::operator()(connection_ptr c,
 
 BaseNotification::NotificationType
 OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
-			       std::size_t& path,
 			       std::size_t& k1,
 			       std::size_t& k2,
 			       std::size_t& parent_session_id)
@@ -263,6 +263,8 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
 	  std::size_t pa = ms.path;
 	  std::size_t sid = ms.sid;
+	  
+	  DMCS_LOG_TRACE("My path = " << path << ", path from MQ pa = " << pa);
 	  
 	  assert (pa == path);
 

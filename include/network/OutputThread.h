@@ -59,7 +59,6 @@ public:
 private:
   BaseNotification::NotificationType
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
-		   std::size_t& path,
 		   std::size_t& k1,
 		   std::size_t& k2,
 		   std::size_t& parent_session_id);
