@@ -289,8 +289,8 @@ OutputThread::write_result(connection_ptr conn,
       conn->write(header);
 
       // now write the result
-      res->sort(my_compare);
-      res->unique();
+      //res->sort(my_compare);
+      //res->unique();
 
       StreamingBackwardMessage return_mess(res);
   

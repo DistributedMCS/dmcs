@@ -257,6 +257,8 @@ private:
 	DMCS_LOG_TRACE("N[" << nid << "] Write to MQs. noff = " << noff);
 	
 	const ModelSessionIdListPtr& msl = mess->getResult();
+	msl->sort(my_compare);
+	msl->unique();
 	
 	DMCS_LOG_TRACE("N[" << nid << "] Received " << msl->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
 	
