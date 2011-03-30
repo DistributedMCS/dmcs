@@ -131,11 +131,18 @@ private:
 	  std::size_t session_id,
 	  std::size_t k1, 
 	  std::size_t k2,
-	  bool first_round,
+	  bool& first_round,
 	  bool& asking_next,
 	  std::size_t& neighbor_offset,
 	  VecSizeTPtr& pack_count,
 	  PartialBeliefStatePackagePtr& partial_eqs);
+
+  void
+  reset(bool& first_round,
+	bool& asking_next,
+	std::size_t next_neighbor_offset,
+	PartialBeliefStatePackagePtr& partial_eqs,
+	VecSizeTPtr& pack_count);
 
 private:
   std::size_t port;
