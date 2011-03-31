@@ -77,6 +77,28 @@ private:
        const PartialBeliefStateIteratorVecPtr& end_it);
 
   void
+  first_join(std::size_t path, 
+	     std::size_t session_id,
+	     std::size_t k_one, 
+	     std::size_t k_two,
+	     bool& first_round,
+	     bool& asking_next,
+	     std::size_t& next_neighbor_offset,
+	     VecSizeTPtr& pack_count,
+	     PartialBeliefStatePackagePtr& partial_eqs);
+
+  void
+  next_join(std::size_t path, 
+	    std::size_t session_id,
+	    std::size_t k_one, 
+	    std::size_t k_two,
+	    bool& first_round,
+	    bool& asking_next,
+	    std::size_t& next_neighbor_offset,
+	    VecSizeTPtr& pack_count,
+	    PartialBeliefStatePackagePtr& partial_eqs);
+
+  void
   cleanup_partial_belief_states(PartialBeliefStatePackage* partial_eqs, 
 				std::size_t nid);
 

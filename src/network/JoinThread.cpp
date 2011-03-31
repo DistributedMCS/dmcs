@@ -255,7 +255,7 @@ JoinThread::operator()(std::size_t nbs,
 
   while (1)
     {
-      DMCS_LOG_TRACE("New round in while loop. first_round = " << first_round);
+      DMCS_LOG_TRACE("New round in while loop. first_round = " << first_round << ". Wait for SAT TRIGGER");
       // Wait for a trigger from SAT
       std::size_t prio = 0;
       int timeout = 0;
@@ -461,6 +461,133 @@ JoinThread::do_join(PartialBeliefStatePackagePtr& partial_eqs)
 
 
 
+void
+JoinThread::first_join(std::size_t path, 
+		       std::size_t session_id,
+		       std::size_t k_one, 
+		       std::size_t k_two,
+		       bool& first_round,
+		       bool& asking_next,
+		       std::size_t& next_neighbor_offset,
+		       VecSizeTPtr& pack_count,
+		       PartialBeliefStatePackagePtr& partial_eqs)
+{
+  pack_size = k_two - k_one + 1;
+
+  // Warming up round ======================================================================= 
+  DMCS_LOG_TRACE("Set first_round to FALSE");
+  first_round = false;
+  if (!ask_first_packs(partial_eqs.get(), path, 0, no_nbs-1))
+    {
+      DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");
+      
+      reset(first_round, asking_next,
+	    next_neighbor_offset,
+	    partial_eqs,
+	    pack_count);
+      
+      DMCS_LOG_TRACE("After reset. first_round = " << first_round);
+      
+      mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+      
+      DMCS_LOG_TRACE("Bailing out...");
+      
+      return;
+    }
+  
+  bool send_something = do_join(partial_eqs);
+  next_neighbor_offset = 0;
+  asking_next = false;
+
+
+  if (!send_something)
+    {
+      next_join(path, session_id, k_one, k_two,
+		first_round, asking_next, 
+		next_neighbor_offset,
+		pack_count, partial_eqs);
+    }
+}
+
+
+
+void
+JoinThread::next_join(std::size_t path, 
+		      std::size_t session_id,
+		      std::size_t k_one, 
+		      std::size_t k_two,
+		      bool& first_round,
+		      bool& asking_next,
+		      std::size_t& next_neighbor_offset,
+		      VecSizeTPtr& pack_count,
+		      PartialBeliefStatePackagePtr& partial_eqs)
+{
+  pack_size = k_two - k_one + 1;
+
+  // now really going to the loop of asking next =============================================
+  while (1)
+    {
+      if (next_neighbor_offset == no_nbs)
+	{
+	  DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to JOIN_OUT_MQ");
+	  
+	  reset(first_round, asking_next,
+		next_neighbor_offset,
+		partial_eqs,
+		pack_count);
+	  
+	  DMCS_LOG_TRACE("After reset. first_round = " << first_round);
+	  
+	  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+	  return;
+	}
+      
+      std::size_t& pc = (*pack_count)[next_neighbor_offset];
+      pc++;
+      std::size_t k1 = pc * pack_size + 1;
+      std::size_t k2 = (pc+1) * pack_size;
+      DMCS_LOG_TRACE("New k1 = " << k1 << ", new k2 = " << k2);
+      //DMCS_LOG_TRACE("Pack count: ");
+      //std::copy(pack_count->begin(), pack_count->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
+      //std::cerr << std::endl;
+      
+      DMCS_LOG_TRACE("Ask next at neighbor_offset = " << next_neighbor_offset);
+      if (ask_neighbor(partial_eqs.get(), next_neighbor_offset, k1, k2, path, BaseNotification::NEXT))
+	{
+	  if (asking_next)
+	    {
+	      assert (next_neighbor_offset > 0);
+	      
+	      DMCS_LOG_TRACE("Ask first packs before neighbor_offset = " << next_neighbor_offset);
+	      // again, ask for first packs from each neighbor
+	      bool ret = ask_first_packs(partial_eqs.get(), path, 0, next_neighbor_offset - 1);
+	      
+	      assert (ret == true);
+	      
+	      // reset counter
+	      std::fill(pack_count->begin(), pack_count->begin() + next_neighbor_offset, 0);
+	    }
+	  
+	  bool send_something = do_join(partial_eqs);
+	  
+	  next_neighbor_offset = 0;
+	  asking_next = false;
+	  if (send_something)
+	    {
+	      break;
+	    }
+	}
+      else
+	{
+	  next_neighbor_offset++;
+	  DMCS_LOG_TRACE("Try next neighbor " << next_neighbor_offset);
+	  asking_next = true;
+	}
+    }
+}
+
+
+
 // return true if something (either models of NULL) is sent to SAT
 void
 JoinThread::process(std::size_t path, 
@@ -473,96 +600,21 @@ JoinThread::process(std::size_t path,
 		    VecSizeTPtr& pack_count,
 		    PartialBeliefStatePackagePtr& partial_eqs)
 {
-  pack_size = k_two - k_one + 1;
+
   
   if (first_round)
     {
-      // Warming up round ======================================================================= 
-      DMCS_LOG_TRACE("Set first_round to FALSE");
-      first_round = false;
-      if (!ask_first_packs(partial_eqs.get(), path, 0, no_nbs-1))
-	{
-	  DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");
-
-	  reset(first_round, asking_next,
-		next_neighbor_offset,
-		partial_eqs,
-		pack_count);
-
-	  DMCS_LOG_TRACE("After reset. first_round = " << first_round);
-	  
-	  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
-
-	  DMCS_LOG_TRACE("Bailing out...");
-	  	  
-	  return;
-	}
-
-      do_join(partial_eqs);
-
+      first_join(path, session_id, k_one, k_two,
+		 first_round, asking_next, 
+		 next_neighbor_offset,
+		 pack_count, partial_eqs);
     }
   else
     {
-      // now really going to the loop of asking next =============================================
-      while (1)
-	{
-	  if (next_neighbor_offset == no_nbs)
-	    {
-	      DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to JOIN_OUT_MQ");
-
-	      reset(first_round, asking_next,
-		    next_neighbor_offset,
-		    partial_eqs,
-		    pack_count);
-	      
-	      DMCS_LOG_TRACE("After reset. first_round = " << first_round);
-	      
-	      mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
-	      return;
-	    }
-	  
-	  std::size_t& pc = (*pack_count)[next_neighbor_offset];
-	  pc++;
-	  std::size_t k1 = pc * pack_size + 1;
-	  std::size_t k2 = (pc+1) * pack_size;
-	  DMCS_LOG_TRACE("New k1 = " << k1 << ", new k2 = " << k2);
-	  //DMCS_LOG_TRACE("Pack count: ");
-	  //std::copy(pack_count->begin(), pack_count->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
-	  //std::cerr << std::endl;
-	  
-	  DMCS_LOG_TRACE("Ask next at neighbor_offset = " << next_neighbor_offset);
-	  if (ask_neighbor(partial_eqs.get(), next_neighbor_offset, k1, k2, path, BaseNotification::NEXT))
-	    {
-	      if (asking_next)
-		{
-		  assert (next_neighbor_offset > 0);
-		  
-		  DMCS_LOG_TRACE("Ask first packs before neighbor_offset = " << next_neighbor_offset);
-		  // again, ask for first packs from each neighbor
-		  bool ret = ask_first_packs(partial_eqs.get(), path, 0, next_neighbor_offset - 1);
-
-		  assert (ret == true);
-		  
-		  // reset counter
-		  std::fill(pack_count->begin(), pack_count->begin() + next_neighbor_offset, 0);
-		}
-	      
-	      bool send_something = do_join(partial_eqs);
-
-	      next_neighbor_offset = 0;
-	      asking_next = false;
-	      if (send_something)
-		{
-		  break;
-		}
-	    }
-	  else
-	    {
-	      next_neighbor_offset++;
-	      DMCS_LOG_TRACE("Try next neighbor " << next_neighbor_offset);
-	      asking_next = true;
-	    }
-	}
+      next_join(path, session_id, k_one, k_two,
+		first_round, asking_next, 
+		next_neighbor_offset,
+		pack_count, partial_eqs);
     }
 }
 
