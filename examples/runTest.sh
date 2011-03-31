@@ -254,7 +254,7 @@ for CTOPO in diamond ; do
 		    LOGCERR=./$TESTNAME-$MODE-k$PACK-err.log
 		    LOGRUN=./$TESTNAME-$MODE-k$PACK-run.log
 		    
-		    DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX --s=0"
+		    DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX --s=1 --k=$PACK"
 		    
 		    DMCSCRUN="$DMCSC $DMCSCOPTS "
 		    
