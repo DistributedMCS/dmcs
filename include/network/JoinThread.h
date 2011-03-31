@@ -77,33 +77,6 @@ private:
        const PartialBeliefStateIteratorVecPtr& end_it);
 
   void
-  wait_dmcs(std::size_t& path,
-	    std::size_t& pack_size);
-
-  void
-  request_neighbor(PartialBeliefStatePackage* partial_eqs,
-		   std::size_t nid, std::size_t pack_size,
-		   std::size_t& path,
-		   BaseNotification::NotificationType nt);
-
-  void
-  import_belief_states(std::size_t noff,
-		       std::size_t peq_cnt,
-		       PartialBeliefStatePackagePtr& partial_eqs, 
-		       bm::bvector<>& in_mask,
-		       bm::bvector<>& end_mask,
-		       PartialBeliefStateIteratorVecPtr& beg_it, 
-		       PartialBeliefStateIteratorVecPtr& mid_it,
-		       std::size_t& request_size,
-		       ImportStates import_state);
-
-  void
-  import_and_join(VecSizeTPtr request_size, 
-		  std::size_t& path, 
-		  std::size_t pack_size);
-
-
-  void
   cleanup_partial_belief_states(PartialBeliefStatePackage* partial_eqs, 
 				std::size_t nid);
 

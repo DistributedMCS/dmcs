@@ -149,7 +149,6 @@ ConcurrentMessageDispatcher::sendNotification(AskNextNotification* notif,
     {
       mqs[to]->send(&notif, sizeof(notif), 0);
       DMCS_LOG_TRACE("mq #" << to << ": send(" << notif << ", " << msecs << ") = " << ret);
-
     }
 
   return ret;
