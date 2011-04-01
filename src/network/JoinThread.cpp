@@ -420,7 +420,16 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
 
   for (std::size_t i = from_neighbor; i <= to_neighbor; ++i)
     {
-      if (!ask_neighbor(partial_eqs, i, 1, pack_size, path, BaseNotification::REQUEST))
+      std::size_t k1 = 0;
+      std::size_t k2 = 0;
+
+      if (pack_size > 0)
+	{
+	  k1 = 1;
+	  k2 = pack_size;
+	}
+
+      if (!ask_neighbor(partial_eqs, i, k1, k2, path, BaseNotification::REQUEST))
 	{
 	  DMCS_LOG_TRACE("A neighbor is inconsistent. Going to clean up everything readd so far.");
 	  // clean up
@@ -472,7 +481,14 @@ JoinThread::first_join(std::size_t path,
 		       VecSizeTPtr& pack_count,
 		       PartialBeliefStatePackagePtr& partial_eqs)
 {
-  pack_size = k_two - k_one + 1;
+  if (k_two == 0)
+    {
+      pack_size = 0;
+    }
+  else
+    {
+      pack_size = k_two - k_one + 1;
+    }
 
   // Warming up round ======================================================================= 
   DMCS_LOG_TRACE("Set first_round to FALSE");
@@ -500,7 +516,7 @@ JoinThread::first_join(std::size_t path,
   asking_next = false;
 
 
-  if (!send_something)
+  if (!send_something && k_two > 0)
     {
       next_join(path, session_id, k_one, k_two,
 		first_round, asking_next, 
@@ -522,7 +538,14 @@ JoinThread::next_join(std::size_t path,
 		      VecSizeTPtr& pack_count,
 		      PartialBeliefStatePackagePtr& partial_eqs)
 {
-  pack_size = k_two - k_one + 1;
+  if (k_two == 0)
+    {
+      pack_size = 0;
+    }
+  else
+    {
+      pack_size = k_two - k_one + 1;
+    }
 
   // now really going to the loop of asking next =============================================
   while (1)
@@ -609,12 +632,16 @@ JoinThread::process(std::size_t path,
 		 next_neighbor_offset,
 		 pack_count, partial_eqs);
     }
-  else
+  else if (k_two > 0)
     {
       next_join(path, session_id, k_one, k_two,
 		first_round, asking_next, 
 		next_neighbor_offset,
 		pack_count, partial_eqs);
+    }
+  else
+    {
+      mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
     }
 }
 

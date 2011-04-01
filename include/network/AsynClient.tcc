@@ -57,7 +57,7 @@ AsynClient<ForwardMessType, BackwardMessType>::AsynClient(boost::asio::io_servic
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   
-  assert(fm.getPackSize() > 0);
+  //assert(fm.getPackSize() > 0);
 
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 
@@ -249,10 +249,19 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
   if (!e)
     {
       const ModelSessionIdListPtr& msl = result->getResult();
+      std::size_t next_k;
 
-      assert ( msl->size() <= mess->getPackSize() );
+      std::cerr << mess->getPackSize() << std::endl;
+      if (mess->getPackSize() > 0)
+	{
+	  assert ( msl->size() <= mess->getPackSize() );
 
-      const std::size_t next_k = mess->getPackSize() - msl->size();
+	  next_k = mess->getPackSize() - msl->size();
+	}
+      else
+	{
+	  next_k = 0;
+	}
 
       if (callback)
 	{
@@ -295,7 +304,7 @@ AsynClient<ForwardMessType, BackwardMessType>::next(ForwardMessType& m)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  assert (m.getPackSize() > 0);
+  //assert (m.getPackSize() > 0);
 
   // setup next k messages...
 

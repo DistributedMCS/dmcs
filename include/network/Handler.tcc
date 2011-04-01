@@ -313,7 +313,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       const std::size_t k1 = sesh->mess.getK1();
       const std::size_t k2 = sesh->mess.getK2();
 
-      assert (pack_size > 0);
+      //      assert (pack_size > 0);
 
       if (first_call)
 	{

@@ -43,11 +43,7 @@ public:
   // public default ctor, everything 0 for now
   StreamingForwardMessage()
     :
-    //#ifdef DEBUG
-    //    path(1, 0),
-    //#else
     path(0),
-    //#endif
     invoker(0),
     session_id(0),
     k1(1),
@@ -100,6 +96,11 @@ public:
   std::size_t
   getPackSize() const
   {
+    if (k2 == 0)
+      {
+	return 0;
+      }
+
     return k2 - k1 + 1;
   }
 
