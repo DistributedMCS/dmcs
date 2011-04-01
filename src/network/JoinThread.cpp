@@ -642,6 +642,10 @@ JoinThread::process(std::size_t path,
   else
     {
       mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+      reset(first_round, asking_next,
+	    next_neighbor_offset,
+	    partial_eqs,
+	    pack_count);
     }
 }
 
