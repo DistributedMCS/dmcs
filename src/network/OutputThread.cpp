@@ -235,43 +235,84 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 
   DMCS_LOG_TRACE(port << ": Collecting, k1 = " << k1 << ",  k2 = " << k2);
   // now collect up to k2-k1+1 unique models to return ========================================================
-  for (std::size_t i = k1; i <= k2+1; ++i)
+  if (k2 > 0)
     {
-      DMCS_LOG_TRACE(port << ": Collecting, i = " << i);
-      std::size_t prio = 0;
-      int timeout = 0;
-
-      struct MessagingGatewayBC::ModelSession ms =
-	mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
-
-      PartialBeliefState* bs = ms.m;
-
-      if (i == k2+1)
+      for (std::size_t i = k1; i <= k2+1; ++i)
 	{
-	  assert (bs == 0);
-	  DMCS_LOG_TRACE(port << ": Good. I got a NULL pointer which identifies end of k2 = " << k2 << ". i = " << i);
-	}
-
-      if (bs == 0) // EOF
-	{
-	  DMCS_LOG_TRACE(port << ": Got a NULL pointer");
-	  break;
-	}
-      else
-	{
-	  DMCS_LOG_TRACE(port << ": Extract information from MQ");
-
-	  std::size_t pa = ms.path;
-	  std::size_t sid = ms.sid;
+	  DMCS_LOG_TRACE(port << ": Collecting, i = " << i);
+	  std::size_t prio = 0;
+	  int timeout = 0;
 	  
-	  DMCS_LOG_TRACE("My path = " << path << ", path from MQ pa = " << pa);
+	  struct MessagingGatewayBC::ModelSession ms =
+	    mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
 	  
-	  assert (pa == path);
+	  PartialBeliefState* bs = ms.m;
+	  
+	  if (i == k2+1)
+	    {
+	      assert (bs == 0);
+	      DMCS_LOG_TRACE(port << ": Good. I got a NULL pointer which identifies end of k2 = " << k2 << ". i = " << i);
+	    }
+	  
+	  if (bs == 0) // EOF
+	    {
+	      DMCS_LOG_TRACE(port << ": Got a NULL pointer");
+	      break;
+	    }
+	  else
+	    {
+	      DMCS_LOG_TRACE(port << ": Extract information from MQ");
+	      
+	      std::size_t pa = ms.path;
+	      std::size_t sid = ms.sid;
+	      
+	      DMCS_LOG_TRACE("My path = " << path << ", path from MQ pa = " << pa);
+	      
+	      assert (pa == path);
+	      
+	      DMCS_LOG_TRACE(port << ": got #" << i);
+	      DMCS_LOG_TRACE(port << ": bs = " << *bs << ", path = " << path << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
+	      ModelSessionId msi(bs, path, sid);
+	      res->push_back(msi);
+	    }
+	}
+    }
+  else // k2 = 0
+    {
+      std::size_t i = 0;
+      // collect until get a NULL pointers ======================================================================
+      while (1)
+	{
+	  DMCS_LOG_TRACE(port << ": Collecting, i = " << ++i);
+	  std::size_t prio = 0;
+	  int timeout = 0;
 
-	  DMCS_LOG_TRACE(port << ": got #" << i);
-	  DMCS_LOG_TRACE(port << ": bs = " << *bs << ", path = " << path << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
-	  ModelSessionId msi(bs, path, sid);
-	  res->push_back(msi);
+	  struct MessagingGatewayBC::ModelSession ms =
+	    mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+	  
+	  PartialBeliefState* bs = ms.m;
+
+	  if (bs == 0)
+	    {
+	      DMCS_LOG_TRACE(port << ": Got a NULL pointer indicating EOF. Bailing out");
+	      break;
+	    }
+	  else
+	    {
+	      DMCS_LOG_TRACE(port << ": Extract information from MQ");
+	      
+	      std::size_t pa = ms.path;
+	      std::size_t sid = ms.sid;
+	      
+	      DMCS_LOG_TRACE("My path = " << path << ", path from MQ pa = " << pa);
+	      
+	      assert (pa == path);
+	      
+	      DMCS_LOG_TRACE(port << ": got #" << i);
+	      DMCS_LOG_TRACE(port << ": bs = " << *bs << ", path = " << path << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
+	      ModelSessionId msi(bs, path, sid);
+	      res->push_back(msi);
+	    }
 	}
     }
 

@@ -1,3 +1,9 @@
+2011-04-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: On fixing semantics of k=0.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
 2011-03-31  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/JoinThread.h: Clean up and fix memory leaks.

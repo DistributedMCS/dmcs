@@ -246,14 +246,17 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
       
       while (1)
 	{
-	  DMCS_LOG_TRACE("left_to_request = " << left_to_request);
-	  DMCS_LOG_TRACE("models_sofar = " << models_sofar);
+	  if (k2 > 0)
+	    {
+	      DMCS_LOG_TRACE("left_to_request = " << left_to_request);
+	      DMCS_LOG_TRACE("models_sofar = " << models_sofar);
+	      
+	      assert (left_to_request >= models_sofar);
+	      
+	      left_to_request -= models_sofar;
+	    }
 
-	  assert (left_to_request >= models_sofar);
-
-	  left_to_request -= models_sofar;
-
-	  if (left_to_request == 0)
+	  if (k2 > 0 && left_to_request == 0)
 	    {
 	      DMCS_LOG_TRACE("Reached " << k2 << " models. Tell Joiner to shut up and get out. Also send OutputThread a NULL pointer.");
 

@@ -366,6 +366,24 @@ Options";
 		{
 		  DMCS_LOG_DEBUG("Streaming mode.");
 
+		  StreamingCommandType::input_type mess(0, 0, 0, 1, pack_size);
+		  
+		  if (pack_size == 0)
+		    {
+		      mess.setPackRequest(0, 0);
+		    }
+
+		  std::string header = HEADER_REQ_STM_DMCS;
+
+		  AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
+
+		  c.setCallback(&handle_belief_state);
+
+		  io_service->run(); // wait for one round
+
+		  no_beliefstates = final_result.size();
+
+#if 0
 		  std::size_t k = pack_size > 0 ? pack_size : 10; // default: k is 10
 		  complete = pack_size > 0 ? false : true;		  
 
@@ -480,6 +498,7 @@ Options";
 		    {
 		      sampler_thread.join();
 		    }
+#endif // 0
 		}
 	      else // opt mode
 		{
