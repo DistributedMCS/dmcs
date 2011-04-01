@@ -1,3 +1,10 @@
+2011-04-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingForwardMessage.h: Fix semantics of k=0.
+	* src/network/JoinThread.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+
 2011-04-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: On fixing semantics of k=0.
