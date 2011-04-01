@@ -42,8 +42,8 @@ declare -i currentTopoNum=0
 
 cd experiments
 
-#for CTOPO in diamond tree ring zig-zag ; do 
-for CTOPO in diamond ; do 
+for CTOPO in tree ring zig-zag ; do 
+#for CTOPO in diamond ; do 
     
     declare -i currentTopoNum=${topoNum[$i]}
 
