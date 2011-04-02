@@ -380,7 +380,8 @@ Options";
 		  c.setCallback(&handle_belief_state);
 
 		  io_service->run(); // wait for one round
-
+		  c.terminate();
+		  
 		  no_beliefstates = final_result.size();
 
 #if 0
