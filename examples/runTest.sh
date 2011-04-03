@@ -10,15 +10,17 @@ export GNUTIME="/usr/bin/time --verbose -o" # time command
 export RUN="run -s $MEMOUT -t $((TIMEOUT+20)) -k -o"
 export TIMELIMIT="timelimit -p -s 1 -t $TIMEOUT -T 20"
 export TIMEFORMAT=$'\nreal\t%3R\nuser\t%3U\nsys\t%3S' # time format
-#export TESTSPATH='./experiments' # path to lp/br/opt
-export DMCSPATH='../build/src' # path to dmcsd/dmcsc
-#export LOGPATH='./experiments' # path to output logfiles (should be fixed)
+export TESTSPATH='./experiments' # path to lp/br/opt
+export DMCSPATH='../../../../../build/src' # path to dmcsd/dmcsc relative to test instances
+export LOGPATH='.' # path to output logfiles relative to test instances
 
 DORUN=yes # run with `run'
 DOTIMELIMIT=yes # run with `timelimit'
 VERBOSE=yes # output stuff
 LOGDAEMONS=yes # log daemon output
 
+export TOPOLOGIES="diamond tree ring zig-zag"
+export INSTANCES=a..e
 
 declare -a sizes=(7 7 100 7 100 7 100)
 
@@ -30,6 +32,13 @@ declare -a bridges=(5 20 20 50)
 declare -a rels=(5 20 20 50)
 
 declare -a packages=(10 100 0)
+
+################### below we don't need to touch anything
+
+export DMCSD="$DMCSPATH/dmcsd"
+export DMCSC="$DMCSPATH/dmcsc"
+
+declare -i MINPORT=5000
 
 declare -i i=0
 declare -i j=0
@@ -71,9 +80,9 @@ function runTest()
 	TIMELOGN=/dev/null
 
 	if [ x$LOGDAEMONS = xyes ] ; then
-	    LOGN=./$TESTNAME-$MODE-$N.log
-	    RUNLOGN=./$TESTNAME-$MODE-run-$N.log
-	    TIMELOGN=./$TESTNAME-$MODE-time-$N.log
+	    LOGN=$LOGPATH/$TESTNAME-$MODE-$N.log
+	    RUNLOGN=$LOGPATH/$TESTNAME-$MODE-run-$N.log
+	    TIMELOGN=$LOGPATH/$TESTNAME-$MODE-time-$N.log
 	fi
 
 	DMCSDOPTS="--context=$N --port=$((MINPORT+N)) --kb=$INPUTN.lp --br=$INPUTN.br --topology=$INPUT.opt"
@@ -87,12 +96,16 @@ function runTest()
 	if [ x$DOTIMELIMIT = xyes ] ; then
 	    DMCSDRUN="$TIMELIMIT $DMCSDRUN"
 	fi
+
+	if [ x$LOGDAEMONS = xyes ] ; then
+	    DMCSDRUN="$GNUTIME $TIMELOGN $DMCSDRUN"
+	fi
 	
 	if [ x$VERBOSE = xyes ] ; then
 	    set -x
 	fi
 	
-	$GNUTIME $TIMELOGN $DMCSDRUN > $LOGN 2>&1 &
+	$DMCSDRUN > $LOGN 2>&1 &
 	
 	set +x
 	
@@ -103,10 +116,10 @@ function runTest()
     echo "Sleep for 40 secs for the Server to start..."
     sleep 40
     
-    LOGTIME=./$TESTNAME-$MODE-time.log
-    LOGCOUT=./$TESTNAME-$MODE.log
-    LOGCERR=./$TESTNAME-$MODE-err.log
-    LOGRUN=./$TESTNAME-$MODE-run.log
+    LOGTIME=$LOGPATH/$TESTNAME-$MODE-time.log
+    LOGCOUT=$LOGPATH/$TESTNAME-$MODE.log
+    LOGCERR=$LOGPATH/$TESTNAME-$MODE-err.log
+    LOGRUN=$LOGPATH/$TESTNAME-$MODE-run.log
 
     if [ $1 = streaming ] ; then 
 	DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX --s=1 --k=$2"
@@ -142,11 +155,11 @@ function runTest()
     if [ $DMCSCRET = 0 ]; then
 	echo PASS: $TESTNAME-$MODE >> $STATSLOG
 	echo "cat $TESTNAME-$MODE.log | head -1" >> $RESULT
-	echo "New test $TEMPLATE-$MODE finished: **$RESULT**" | mail -s "New test FINISHED" dao@kr.tuwien.ac.at
+	echo "New test $TESTNAME-$MODE finished: **$RESULT**" | mail -s "New test FINISHED" dao@kr.tuwien.ac.at
     else
 	egrep -H "status" $LOGPATH/$TESTNAME-$MODE-run*.log >> $STATSLOG
 	echo FAILED: $TESTNAME-$MODE >> $STATSLOG
-	echo "New test $TEMPLATE-$MODE " | mail -s "New test FAILED" dao@kr.tuwien.ac.at
+	echo "New test $TESTNAME-$MODE " | mail -s "New test FAILED" dao@kr.tuwien.ac.at
     fi
     
     echo >> $STATSLOG
@@ -160,15 +173,15 @@ function runTest()
 
 ########## check GNUTIME ##########
 
-#$GNUTIME /dev/null ls > /dev/null 2>&1
-#if [ $? != 0 ]; then
-#    echo I need GNU time, please setup GNUTIME properly. Bailing out.
-#    exit 1
-#fi
+$GNUTIME /dev/null ls > /dev/null 2>&1
+if [ $? != 0 ]; then
+    echo I need GNU time, please setup GNUTIME properly. Bailing out.
+    exit 1
+fi
 
-cd experiments
+cd $TESTSPATH
 
-for TOPO in diamond tree ring zig-zag ; do 
+for TOPO in $TOPOLOGIES ; do 
     
     cd $TOPO
     #export TOPO=$CTOPO
@@ -200,27 +213,20 @@ for TOPO in diamond tree ring zig-zag ; do
 	    cd $CTX-$SIG-$BRS-$RLS
 	    
 	    # go for instances #########################
-	    for x in {a..e} ; do
-		export INST=$x
+	    for INST in $(eval echo {$INSTANCES}) ; do
 		
-		TEMPLATE=$TOPO-$CTX-$SIG-$BRS-$RLS-$INST
-		
-		cd $TEMPLATE
-
-		declare -i MINPORT=5000
-
-		export DMCSD="../../../../$DMCSPATH/dmcsd"
-		export DMCSC="../../../../$DMCSPATH/dmcsc"
 		export TESTNAME=$TOPO-$CTX-$SIG-$BRS-$RLS-$INST
-		declare -i MINPORT=5000
+		
+		cd $TESTNAME
 
 		runTest opt
 
 		for (( p=0; p < 3; ++p )); do
 		    runTest streaming ${packages[$p]}
 		done
+
 		cd ..
-	    done # for x in {a..j}
+	    done # for INST
 	    cd ..	    
 	done # for k = 0...
     done # for j = $start_now...$end_now
