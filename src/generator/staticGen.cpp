@@ -69,7 +69,8 @@ using namespace dmcs::generator;
 
 #define DMCSD "dmcsd"
 #define DMCSC "dmcsc"
-#define TESTSDIR "tests"
+#define TESTSDIR "."
+#define DMCSPATH "../../../../../build/src"
 #define STR_LOCALHOST "localhost"
 #define LP_EXT  ".lp"
 #define BR_EXT  ".br"
@@ -80,6 +81,7 @@ using namespace dmcs::generator;
 #define SH_CMD_EXT "_command_line.sh"
 #define OPT_CMD_EXT "_command_line_opt.txt"
 #define OPT_SH_CMD_EXT "_command_line_opt.sh"
+#define STREAMING_SH_CMD_EXT "_command_line_streaming.sh"
 #define DLV_EXT ".dlv"
 #define DLV_CMD_EXT "_dlv.txt"
 #define OPT_DLV_CMD_EXT "_dlv_opt.txt"
@@ -129,6 +131,7 @@ std::ofstream file_command_line;
 std::ofstream file_command_line_sh;
 std::ofstream file_command_line_opt;
 std::ofstream file_command_line_opt_sh;
+std::ofstream file_command_line_streaming_sh;
 std::ofstream file_dlv;
 std::ofstream file_command_line_dlv;
 std::ofstream file_command_line_dlv_opt;
@@ -608,22 +611,33 @@ print_opt_command_lines()
 {
   std::string filename_command_line_opt    = prefix + OPT_CMD_EXT;
   std::string filename_command_line_opt_sh = prefix + OPT_SH_CMD_EXT;
+  std::string filename_command_line_streaming_sh = prefix + STREAMING_SH_CMD_EXT;
 
   file_command_line_opt.open(filename_command_line_opt.c_str());
   file_command_line_opt_sh.open(filename_command_line_opt_sh.c_str());
+  file_command_line_streaming_sh.open(filename_command_line_streaming_sh.c_str());
 
   // Initialization for shell scripts
   file_command_line_opt_sh << "#!/bin/bash" << std::endl
 			   << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
-    //			   << "export TESTSPATH='" TESTSDIR "'" << std::endl
 			   << "export TESTSPATH='.'" << std::endl
-			   << "export DMCSPATH='../../../build-dbg/src'" << std::endl;
+			   << "export DMCSPATH=" << DMCSPATH << std::endl;
+
+  file_command_line_streaming_sh << "#!/bin/bash" << std::endl
+				 << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
+				 << "export TESTSPATH='.'" << std::endl
+				 << "export DMCSPATH=" << DMCSPATH << std::endl;
+
 
   // dmcsd commands
   // ./dmcsd <id> <hostname> <port> <filename_lp> <filename_br> <filename_topo> 
 
   std::string command_line_opt_sh;
+  std::string command_line_streaming_sh;
   std::string command_line_opt;
+
+  file_command_line_opt_sh << "killall dmcsd" << std::endl;
+  file_command_line_streaming_sh << "killall dmcsd" << std::endl;
 
   for (std::size_t i = 1; i <= no_contexts; ++i)
     {
@@ -643,12 +657,13 @@ print_opt_command_lines()
 	" --" BR "=$TESTSPATH/" + prefix + "-" + index.str() + BR_EXT +
 	" --"TOPOLOGY "=$TESTSPATH/" + prefix + OPT_EXT;
 
-      command_line_opt = "./" DMCSD " " + out.str() + 
+      command_line_opt = DMCSPATH "/" DMCSD " " + out.str() + 
 	" --" KB "=" TESTSDIR "/" + prefix + "-" + index.str() + LP_EXT +
 	" --" BR "=" TESTSDIR "/" + prefix + "-" + index.str() + BR_EXT +
 	" --" TOPOLOGY "=" TESTSDIR "/" + prefix + OPT_EXT;
 
       file_command_line_opt_sh << command_line_opt_sh << " >/dev/null 2>&1 &" << std::endl;
+      file_command_line_streaming_sh << command_line_opt_sh << " >/dev/null 2>&1 &" << std::endl;
       file_command_line_opt << command_line_opt << std::endl;
     }
 
@@ -662,20 +677,30 @@ print_opt_command_lines()
   system_size << no_contexts;
   globalV << minV;
 
-  command_line_opt_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcsopt-time.log $DMCSPATH/"  DMCSC
+  command_line_opt_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcs-opt-time.log $DMCSPATH/"  DMCSC
     " --" HOSTNAME "=localhost" 
     " --" PORT "=" + port1.str() +
-    " --" SYSTEM_SIZE "=" + system_size.str() + " > "+ prefix +"-dmcsopt.log 2> " + prefix +"-dmcsopt-err.log";
+    " --" STREAMING "=0"
+    " --" SYSTEM_SIZE "=" + system_size.str() + " > "+ prefix +"-dmcs-opt.log 2> " + prefix +"-dmcsopt-err.log";
+
+  command_line_streaming_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcs-streaming-time.log $DMCSPATH/"  DMCSC
+    " --" HOSTNAME "=localhost" 
+    " --" PORT "=" + port1.str() +
+    " --" STREAMING "=1"
+    " --" PACK_SIZE "=100"
+    " --" SYSTEM_SIZE "=" + system_size.str() + " > "+ prefix +"-dmcs-streaming.log 2> " + prefix +"-dmcs-streaming-err.log";
   
   command_line_opt = "time ./"  DMCSC 
     " --" HOSTNAME "=localhost"
     " --" PORT "=" + port1.str() +
     " --" SYSTEM_SIZE "=" + system_size.str();
   
-  file_command_line_opt_sh << "sleep 5\n" << command_line_opt_sh << std::endl << "killall " DMCSD << std::endl;
+  file_command_line_opt_sh << "sleep 20\n" << command_line_opt_sh << std::endl << "killall " DMCSD << std::endl;
+  file_command_line_streaming_sh << "sleep 20\n" << command_line_streaming_sh << std::endl << "killall " DMCSD << std::endl;
   file_command_line_opt << command_line_opt << std::endl;
 
   file_command_line_opt_sh.close();
+  file_command_line_streaming_sh.close();
   file_command_line_opt.close();
 }
 
