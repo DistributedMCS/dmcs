@@ -23,7 +23,7 @@ LOGDAEMONS=yes # log daemon output
 #each topology has 3 sizes that we test
 declare -a sizes=(7 7 7 7 100 100 7 7 100 100 7 7 100 100)
 
-declare -a topoNum=(3 4 6 1)
+declare -a topoNum=(1 6 4 3)
 
 declare -a start=(0 2 6 10)
 declare -a length=(2 4 4 4)
@@ -47,12 +47,12 @@ if [ DMCS_EXPR_DIR != 0 ] ; then
     cd experiments
 fi
 
-for CTOPO in diamond tree ring zig-zag ; do 
+for TOPO in diamond tree ring zig-zag ; do 
     
     declare -i currentTopoNum=${topoNum[$i]}
 
-    mkdir $CTOPO
-    cd $CTOPO
+    mkdir $TOPO
+    cd $TOPO
 
     declare -i start_now=${start[$i]}
 
@@ -60,7 +60,6 @@ for CTOPO in diamond tree ring zig-zag ; do
     let "end_now += ${length[$i]}"
 
     for (( j=$start_now; j < $end_now; ++j )); do
-	export TOPO=$CTOPO	
 	declare -i CTX=${sizes[$j]}
 
 	for (( k = 0; k < 2; ++k )); do
