@@ -19,25 +19,24 @@ DOTIMELIMIT=yes # run with `timelimit'
 VERBOSE=yes # output stuff
 LOGDAEMONS=yes # log daemon output
 
-
-#each topology has 3 sizes that we test
-declare -a sizes=(7 7 7 7 100 100 7 7 100 100 7 7 100 100)
-
+#                   D T R Z
 declare -a topoNum=(1 6 4 3)
 
-declare -a start=(0 2 6 10)
-declare -a length=(2 4 4 4)
+#                 D        T               R               Z
+declare -a sizes=(10 28 34 10 28 34 50 100 10 28 34 50 100 10 28 34 50 100)
 
-declare -a sigs=(10 40 40 100)
-declare -a bridges=(5 20 20 50)
-declare -a rels=(5 20 20 50)
+declare -a start=(0 3 8 13 18)
+declare -a length=(3 5 5 5)
+
+declare -a sigs=(10 40)
+declare -a bridges=(5 20)
+declare -a rels=(5 20)
 
 declare -i i=0
 declare -i j=0
 declare -i k=0
 declare -i currentTopoNum=0
 
-#for each topo
 cd experiments
 
 DMCS_EXPR_DIR=$?
@@ -64,16 +63,9 @@ for TOPO in diamond tree ring zig-zag ; do
 
 	for (( k = 0; k < 2; ++k )); do
 
-	    declare -i l=${k}
-	    let "l *= 2"
-
-	    if [ $CTX = 100 ] ; then
-		let "l += 1"
-	    fi
-
-	    declare -i SIG=${sigs[$l]}
-	    declare -i BRS=${bridges[$l]}
-	    declare -i RLS=${rels[$l]}
+	    declare -i SIG=${sigs[$k]}
+	    declare -i BRS=${bridges[$k]}
+	    declare -i RLS=${rels[$k]}
 
 	    mkdir $CTX-$SIG-$BRS-$RLS
 	    cd $CTX-$SIG-$BRS-$RLS

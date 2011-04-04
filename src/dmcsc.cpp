@@ -387,6 +387,7 @@ Options";
 		      c.terminate();
 		      
 		      no_beliefstates = final_result.size();
+		      std::cout << "Total Number of Equilibria: " << no_beliefstates;
 		    }
 		  else
 		    {
@@ -491,6 +492,7 @@ Options";
 			}
 		      
 		      no_beliefstates = final_result.size();
+		      std::cout << "Total Number of Equilibria: " << no_beliefstates;
 		      
 		      //std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
 		      //std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));

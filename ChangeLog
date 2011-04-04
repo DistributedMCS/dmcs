@@ -1,6 +1,11 @@
 2011-04-04  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* examples/runTest.sh: ulimit to the rescure.
+
+	* examples/genTest.sh: New setting.
+
 	* src/dmcsc.cpp: Fix semantics of --k=0.
+	Print total number of equilibria.
 
 	* src/generator/staticGen.cpp: Fix DMCSPATH.
 
