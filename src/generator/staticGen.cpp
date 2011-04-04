@@ -70,7 +70,7 @@ using namespace dmcs::generator;
 #define DMCSD "dmcsd"
 #define DMCSC "dmcsc"
 #define TESTSDIR "."
-#define DMCSPATH "../../../../../build/src"
+#define DMCSPATH "../../../../../build-dbg/src"
 #define STR_LOCALHOST "localhost"
 #define LP_EXT  ".lp"
 #define BR_EXT  ".br"
@@ -681,7 +681,7 @@ print_opt_command_lines()
     " --" HOSTNAME "=localhost" 
     " --" PORT "=" + port1.str() +
     " --" STREAMING "=0"
-    " --" SYSTEM_SIZE "=" + system_size.str() + " > "+ prefix +"-dmcs-opt.log 2> " + prefix +"-dmcsopt-err.log";
+    " --" SYSTEM_SIZE "=" + system_size.str() + " > "+ prefix +"-dmcs-opt.log 2> " + prefix +"-dmcs-opt-err.log";
 
   command_line_streaming_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcs-streaming-time.log $DMCSPATH/"  DMCSC
     " --" HOSTNAME "=localhost" 
@@ -690,7 +690,7 @@ print_opt_command_lines()
     " --" PACK_SIZE "=100"
     " --" SYSTEM_SIZE "=" + system_size.str() + " > "+ prefix +"-dmcs-streaming.log 2> " + prefix +"-dmcs-streaming-err.log";
   
-  command_line_opt = "time ./"  DMCSC 
+  command_line_opt = "time " DMCSPATH "/" DMCSC 
     " --" HOSTNAME "=localhost"
     " --" PORT "=" + port1.str() +
     " --" SYSTEM_SIZE "=" + system_size.str();

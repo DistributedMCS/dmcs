@@ -1,3 +1,11 @@
+2011-04-04  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Fix semantics of --k=0.
+
+	* src/generator/staticGen.cpp: Fix DMCSPATH.
+
+	* include/generator/DiamondOptTopoGenerator.h: Clean up.
+
 2011-04-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/generator/staticGen.cpp: Add streaming script.

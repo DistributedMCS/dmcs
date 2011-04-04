@@ -366,140 +366,145 @@ Options";
 		{
 		  DMCS_LOG_DEBUG("Streaming mode.");
 
-		  StreamingCommandType::input_type mess(0, 0, 0, 1, pack_size);
-		  
 		  if (pack_size == 0)
 		    {
-		      mess.setPackRequest(0, 0);
-		    }
-
-		  std::string header = HEADER_REQ_STM_DMCS;
-
-		  AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
-
-		  c.setCallback(&handle_belief_state);
-
-		  io_service->run(); // wait for one round
-		  c.terminate();
-		  
-		  no_beliefstates = final_result.size();
-
-#if 0
-		  std::size_t k = pack_size > 0 ? pack_size : 10; // default: k is 10
-		  complete = pack_size > 0 ? false : true;		  
-
-		  // USER <--> session_id = 0, path = {0}, invoker = 0
-		  //#ifdef DEBUG
-		  //History path(1, 0);
-		  //StreamingCommandType::input_type mess(path, 0, 0, 1, k);
-		  //#else
-		  StreamingCommandType::input_type mess(0, 0, 0, 1, k);
-		  //#endif
+		      //StreamingCommandType::input_type mess(0, 0, 0, 1, pack_size);
 		      
-		  std::string header = HEADER_REQ_STM_DMCS;
+		      //if (pack_size == 0)
+		      //{
+		      // mess.setPackRequest(0, 0);
+		      //}
 
-		  AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
-
-		  c.setCallback(&handle_belief_state);
-
-
-		  // catch Ctrl-C and interrupts
-		  sig_t s = signal(SIGINT, handle_signal);
-		  if (s == SIG_ERR)
-		    {
-		      perror("signal");
-		      exit(1);
-		    }
-
-
-		  bool keep_running = true;
-		  bool last_round = false;
-		  std::size_t next_count = 0;
-		  std::size_t model_count = 0;
-		  std::size_t last_model_count = 0;
-		  std::size_t diff_count = 0;
-
-		  SamplingThread sampler;
-
-		  // start iterating
-		  start_time = boost::posix_time::microsec_clock::local_time();
-
-		  boost::thread sampler_thread(sampler, 1000);
-		  
-		  while (keep_running)
-		    {
-		      DMCS_LOG_DEBUG("Entering round " << next_count);
+		      StreamingCommandType::input_type mess(0, 0, 0, 0, 0);
+		      
+		      std::string header = HEADER_REQ_STM_DMCS;
+		      
+		      AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
+		      
+		      c.setCallback(&handle_belief_state);
 		      
 		      io_service->run(); // wait for one round
+		      c.terminate();
 		      
-		      // model number accounting
-		      last_model_count = model_count;
-		      model_count = handled_belief_states;
-		      diff_count = final_result.size() - diff_count;
-		      next_count++;
-
-
-		      // decide what to do next
-		      
-		      if (last_round)
-			{
-			  keep_running = false;
-			}
-		      else
-			{
-			  io_service->reset(); // ready for the next round
-			  
-			  DMCS_LOG_TRACE("diff_count = " << diff_count << ", next_count = " << next_count);
-
-			  if (diff_count > 0 && diff_count < k) // setup next k here
-			    {
-			      DMCS_LOG_TRACE("Got " << diff_count << " partial belief states, getting next batch of size " << k);
-
-			      std::size_t next_k1 = next_count * k + 1;
-			      std::size_t next_k2 = next_k1 + k - 1;
-
-			      DMCS_LOG_TRACE("next_k1 = " << next_k1 << ", next_k2 = " << next_k2);
-			      
-			      mess.setPackRequest(next_k1, next_k2);
-			      c.next(mess);
-			    }
-			  else if (pack_size == 0 && model_count > last_model_count)
-			    {
-			      DMCS_LOG_TRACE("fixpoint not reached yet, get next " << k << " belief states");
-
-			      std::size_t next_k1 = next_count * k + 1;
-			      std::size_t next_k2 = next_k1 + k - 1;
-
-			      DMCS_LOG_TRACE("next_k1 = " << next_k1 << ", next_k2 = " << next_k2);
-			      
-			      mess.setPackRequest(next_k1, next_k2);
-			      c.next(mess);
-			    }
-			  else // fixpoint reached, last round
-			    {
-			      DMCS_LOG_TRACE("fixpoint reached: model_count = " << model_count << ", final_result: " << final_result.size());
-
-			      c.terminate();
-			      last_round = true;
-			    }
-			}
+		      no_beliefstates = final_result.size();
 		    }
-		  
-		  no_beliefstates = final_result.size();
-
-		  //std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
-		  //std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
-
-		  //delete conflicts;
-		  //delete partial_ass;
-		  //delete decision;
-
-		  sampler_thread.interrupt();
-		  if (sampler_thread.joinable())
+		  else
 		    {
-		      sampler_thread.join();
-		    }
-#endif // 0
+		      std::size_t k = pack_size > 0 ? pack_size : 10; // default: k is 10
+		      complete = pack_size > 0 ? false : true;		  
+		      
+		      // USER <--> session_id = 0, path = {0}, invoker = 0
+		      //#ifdef DEBUG
+		      //History path(1, 0);
+		      //StreamingCommandType::input_type mess(path, 0, 0, 1, k);
+		      //#else
+		      StreamingCommandType::input_type mess(0, 0, 0, 1, k);
+		      //#endif
+		      
+		      std::string header = HEADER_REQ_STM_DMCS;
+		      
+		      AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
+		      
+		      c.setCallback(&handle_belief_state);
+		      
+		      
+		      // catch Ctrl-C and interrupts
+		      sig_t s = signal(SIGINT, handle_signal);
+		      if (s == SIG_ERR)
+			{
+			  perror("signal");
+			  exit(1);
+			}
+		      
+		      
+		      bool keep_running = true;
+		      bool last_round = false;
+		      std::size_t next_count = 0;
+		      std::size_t model_count = 0;
+		      std::size_t last_model_count = 0;
+		      std::size_t diff_count = 0;
+		      
+		      SamplingThread sampler;
+		      
+		      // start iterating
+		      start_time = boost::posix_time::microsec_clock::local_time();
+		      
+		      boost::thread sampler_thread(sampler, 1000);
+		      
+		      while (keep_running)
+			{
+			  DMCS_LOG_DEBUG("Entering round " << next_count);
+			  
+			  io_service->run(); // wait for one round
+			  
+			  // model number accounting
+			  last_model_count = model_count;
+			  model_count = handled_belief_states;
+			  diff_count = final_result.size() - diff_count;
+			  next_count++;
+			  
+			  
+			  // decide what to do next
+			  
+			  if (last_round)
+			    {
+			      keep_running = false;
+			    }
+			  else
+			    {
+			      io_service->reset(); // ready for the next round
+			      
+			      DMCS_LOG_TRACE("diff_count = " << diff_count << ", next_count = " << next_count);
+			      
+			      if (diff_count > 0 && diff_count < k) // setup next k here
+				{
+				  DMCS_LOG_TRACE("Got " << diff_count << " partial belief states, getting next batch of size " << k);
+
+				  std::size_t next_k1 = next_count * k + 1;
+				  std::size_t next_k2 = next_k1 + k - 1;
+
+				  DMCS_LOG_TRACE("next_k1 = " << next_k1 << ", next_k2 = " << next_k2);
+				  
+				  mess.setPackRequest(next_k1, next_k2);
+				  c.next(mess);
+				}
+			      else if (pack_size == 0 && model_count > last_model_count)
+				{
+				  DMCS_LOG_TRACE("fixpoint not reached yet, get next " << k << " belief states");
+				  
+				  std::size_t next_k1 = next_count * k + 1;
+				  std::size_t next_k2 = next_k1 + k - 1;
+				  
+				  DMCS_LOG_TRACE("next_k1 = " << next_k1 << ", next_k2 = " << next_k2);
+				  
+				  mess.setPackRequest(next_k1, next_k2);
+				  c.next(mess);
+				}
+			      else // fixpoint reached, last round
+				{
+				  DMCS_LOG_TRACE("fixpoint reached: model_count = " << model_count << ", final_result: " << final_result.size());
+				  
+				  c.terminate();
+				  last_round = true;
+				}
+			    }
+			}
+		      
+		      no_beliefstates = final_result.size();
+		      
+		      //std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
+		      //std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
+		      
+		      //delete conflicts;
+		      //delete partial_ass;
+		      //delete decision;
+		      
+		      sampler_thread.interrupt();
+		      if (sampler_thread.joinable())
+			{
+			  sampler_thread.join();
+			}
+		    } // pack_sizee > 0
 		}
 	      else // opt mode
 		{

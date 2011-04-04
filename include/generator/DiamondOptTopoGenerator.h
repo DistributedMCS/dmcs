@@ -45,7 +45,6 @@ public:
   void
   create_opt_interface(std::size_t id)
   {
-    std::cerr << "system_size = " << system_size << std::endl;
     if (id == system_size)
       {
 	return;
