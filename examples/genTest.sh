@@ -19,6 +19,8 @@ DOTIMELIMIT=yes # run with `timelimit'
 VERBOSE=yes # output stuff
 LOGDAEMONS=yes # log daemon output
 
+TESTCASES=testcases.txt
+
 #                   D T R Z
 declare -a topoNum=(1 6 4 3)
 
@@ -74,6 +76,8 @@ for TOPO in diamond tree ring zig-zag ; do
 		export INST=$x
 		
 		TEMPLATE=$TOPO-$CTX-$SIG-$BRS-$RLS-$INST
+
+		echo $TEMPLATE >> ../../../$TESTCASES
 		
 		mkdir $TEMPLATE 
 		cd $TEMPLATE
@@ -88,6 +92,8 @@ for TOPO in diamond tree ring zig-zag ; do
 		$DMCSGENRUN
 		cd ..
 	    done
+
+	    echo "end" >> ../../../$TESTCASES
 	    cd ..	    
 	done
     done
