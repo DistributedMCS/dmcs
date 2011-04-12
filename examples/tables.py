@@ -6,9 +6,8 @@ import string
 
 
 
+# Check whether the test got PASS or FAILED
 def check_status(log_status):
-
-    #print "Check status from: " + log_status
     with open(log_status, 'r') as s:
         lines = s.readlines()
         status = lines[2][0:4]
@@ -19,14 +18,12 @@ def check_status(log_status):
 
 
 def get_no_answer(log_answer):
-    #print "Get number of equilibria from " + log_answer
     no_answer = '---'
 
     with open(log_answer, 'r') as a:
         lines = a.readlines()
         for i in range(len(lines)):
             line = lines[i]
-            #print line
             answer_signal = line.find("Total Number of Equilibria:")
             if answer_signal != -1:
                 colon = line.rfind(':')
@@ -41,8 +38,6 @@ def get_no_answer(log_answer):
 
 
 def get_running_time(log_time):
-    #print "Process log file: " + log_time
-
     # Watchout: we only expect time of the form MM:SS.SS
     with open(log_time, 'r') as l:
         lines = l.readlines()
@@ -76,16 +71,18 @@ def getPosition(mode, package):
     elif package == '100':
         package_index = 2
 
-    position = 1 + mode_index*3 + package_index
+    position = 2 + mode_index*3 + package_index
 
     return position
 
 
-def copy_tex(tex_output, tex_template):
-    with open(tex_template, 'r') as t:
+
+# For the header, footer of the table, we just copy from some template file outside
+def copy_text(output_file, template_file):
+    with open(template_file, 'r') as t:
         lines = t.readlines()
         for i in range(len(lines)):
-            tex_output.write(lines[i])
+            output_file.write(lines[i])
     t.closed
 
 
@@ -93,28 +90,42 @@ def copy_tex(tex_output, tex_template):
 def main(argv):
 
     parser = optparse.OptionParser()
-
-    # mode: tex or html
-    # filename: 
     parser.add_option('-f', '--file', dest="filename")
 
     (options, args) = parser.parse_args()
 
     # copy header
     tex_output = open('./table.tex', 'w')
-    copy_tex(tex_output, './tex_header.tpl')
+    copy_text(tex_output, 'template/tex_header.tpl')
+
+    html_output = open('./table.html', 'w')
+    copy_text(html_output, 'template/html_header.tpl')
 
     # read row template
-    with open('./tex_row.tpl', 'r') as t:
-        row_template = t.read()
+    with open('template/tex_row.tpl', 'r') as t:
+        tex_row_template = t.read()
     t.closed
 
-    # copy row separation
-    with open('./tex_row_separation.tpl', 'r') as rs:
+    with open('template/html_first_row.tpl', 'r') as h1:
+        html_first_row_template = h1.read()
+    h1.closed
+
+    with open('template/html_row.tpl', 'r') as h2:
+        html_row_template = h2.read()
+    h2.closed
+
+    with open('template/html_row_odd.tpl', 'r') as h3:
+        html_row_odd_template = h3.read()
+    h3.closed
+
+    # read row separation template
+    with open('template/tex_row_separation.tpl', 'r') as rs:
         row_sep = rs.readlines()
     rs.closed
 
     topo_abbreviation = {'tree' : 'T', 'diamond' : 'D', 'zig-zag' : 'Z', 'ring' : 'R'}
+
+    vals = []
 
     # read test cases and process
     count = 0
@@ -124,11 +135,26 @@ def main(argv):
             testname = testname[:len(testname)-1]
 
             if testname == 'end':
-                count = 0
                 for i in range(len(row_sep)):
                    tex_output.write(row_sep[i])
                 tex_output.write("")
 
+                # for HTML tables, we want to group all results belonging to one parameter setting
+                html_output.write(html_first_row_template.format(testname, toponame, count, 
+                                                                 context, signature, interface, bridge_rules, 
+                                                                 vals[0][0], vals[0][1], vals[0][2], vals[0][3], 
+                                                                 vals[0][4], vals[0][5], vals[0][6], vals[0][7]))
+
+                for i in range(1, len(vals)):
+                    if i % 2 == 1:
+                        html_output.write(html_row_template.format(vals[i][0], vals[i][1], vals[i][2], vals[i][3],
+                                                                   vals[i][4], vals[i][5], vals[i][6], vals[i][7]))
+                    else:
+                        html_output.write(html_row_odd_template.format(vals[i][0], vals[i][1], vals[i][2], vals[i][3],
+                                                                       vals[i][4], vals[i][5], vals[i][6], vals[i][7]))
+
+                vals = []
+                count = 0
                 continue
 
             count += 1
@@ -154,7 +180,7 @@ def main(argv):
             tableline = ''
             no_answer = '---'
 
-            times = [''] * 7
+            times = [''] * 8
 
             for mode in testmodes:
                 if mode == 'opt':
@@ -164,9 +190,9 @@ def main(argv):
                         log_time = testpath + '/' + testname + '-opt-time.' + log_tail
                         log_answer = testpath + '/' + testname + '-opt.' + log_tail
                         no_answer = get_no_answer(log_answer)
-                        times[0] = get_running_time(log_time)
+                        times[1] = get_running_time(log_time)
                     else:
-                        times[0] = '---'            
+                        times[1] = '---'            
                 else:
                     for package in testpackage:
                         pos = getPosition(mode, package)
@@ -188,13 +214,20 @@ def main(argv):
                         else:
                             times[pos] = '---'
 
-            tex_output.write(row_template.format(testname, topo_abbreviation[toponame], count, 
-                                                 context, signature, interface, bridge_rules, no_answer,
-                                                 times[0], times[1], times[2], times[3], times[4], times[5], times[6]))
+            times[0] = no_answer
+            vals.append(times)
 
-    copy_tex(tex_output, './tex_footer.tpl')
+            tex_output.write(tex_row_template.format(testname, topo_abbreviation[toponame], count, 
+                                                     context, signature, interface, bridge_rules, times[0],
+                                                     times[1], times[2], times[3], times[4], times[5], times[6], times[7]))
+
+
+    copy_text(tex_output, 'template/tex_footer.tpl')
+    copy_text(html_output, 'template/html_footer.tpl')
     tex_output.close
+    html_output.close
     f.closed
+
 
 
 if __name__ == "__main__":
