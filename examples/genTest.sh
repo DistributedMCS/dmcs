@@ -39,6 +39,8 @@ declare -i j=0
 declare -i k=0
 declare -i currentTopoNum=0
 
+rm $TESTCASES
+
 cd experiments
 
 DMCS_EXPR_DIR=$?
