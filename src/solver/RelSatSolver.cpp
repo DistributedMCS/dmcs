@@ -79,7 +79,13 @@ RelSatSolver::RelSatSolver(bool il,
 RelSatSolver::~RelSatSolver()
 {
   delete xInstance;
+  xInstance = 0;
+
   delete xSATSolver;
+  xSatSolver = 0;
+
+  delete input;
+  input = 0;
 
   for (PartialBeliefStateBuf::const_iterator it = input_buffer->begin(); it != input_buffer->end(); ++it)
     {

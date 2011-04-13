@@ -70,6 +70,9 @@ public:
 	 boost::asio::io_service& io_service,
 	 const boost::asio::ip::tcp::endpoint& endpoint);
 
+  virtual
+  ~Server();
+
   void
   initialize();
 
@@ -90,10 +93,10 @@ private:
   boost::thread* join_thread;
   boost::thread* sat_thread;
   MessagingGatewayBCPtr mg;
-  ThreadVecPtr handler_threads;
+  ThreadVecPtr boost_handler_threads;
   ThreadVecPtr neighbor_threads;
   NeighborThreadVecPtr neighbors;
-  HandlerThreadVecPtr handlers;
+  HandlerThreadVecPtr handler_threads;
   ConcurrentMessageQueue* joiner_sat_notif;
   ConcurrentMessageQueueVecPtr neighbors_notif;
   HashedBiMapPtr c2o;

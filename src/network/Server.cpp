@@ -66,13 +66,15 @@ Server::Server(const CommandTypeFactoryPtr& c,
     port(endpoint.port()),
     invokers(new ListSizeT),
     neighbors(new NeighborThreadVec),
-    handlers(new HandlerThreadVec),
+    handler_threads(new HandlerThreadVec),
     neighbor_threads(new ThreadVec),
-    handler_threads(new ThreadVec),
+    boost_handler_threads(new ThreadVec),
     joiner_sat_notif(new ConcurrentMessageQueue),
     neighbors_notif(new ConcurrentMessageQueueVec),
     c2o(new HashedBiMap),
-    first_round(true)
+    first_round(true),
+    join_thread(0),
+    sat_thread(0)
 {
   connection_ptr my_connection(new connection(io_service));
 
@@ -84,6 +86,67 @@ Server::Server(const CommandTypeFactoryPtr& c,
 }
 
 
+
+Server::~Server()
+{
+  // clean up handlers related threads
+  for (ThreadVec::iterator it = boost_handler_threads->begin();
+       it != boost_handler_threads->end(); ++it)
+    {
+      boost::thread* bht = *it;
+      assert (bht);
+      if (bht->joinable())
+	{
+	  bht->interrupt();
+	  bht->join();
+	  delete bht;
+	  bht = 0;
+	}
+      else
+	{
+	  DMCS_LOG_ERROR("Handler thread not joinable!");
+	}
+    }
+
+  for (HandlerThreadVec::iterator it = handler_threads->begin();
+       it != handler_threads->end(); ++it)
+    {
+      HandlerThread* ht = *it;
+      assert (ht);
+      delete ht;
+      ht = 0;
+    }
+
+  if (join_thread && join_thread->joinable())
+    {
+      join_thread->interrupt();
+      join_thread->join();
+      delete join_thread;
+      join_thread = 0;
+    }
+  else
+    {
+      DMCS_LOG_ERROR("Join thread not joinable!");
+    }
+
+  if (sat_thread && sat_thread->joinable())
+    {
+      sat_thread->interrupt();
+      sat_thread->join();
+      delete sat_thread;
+      sat_thread = 0;
+    }
+  else
+    {
+      DMCS_LOG_ERROR("Sat thread not satable!");
+    }
+
+  if (joiner_sat_notif)
+    {
+      delete joiner_sat_notif;
+      joiner_sat_notif = 0;
+    }
+}
 
 void
 Server::initialize()
@@ -229,12 +292,10 @@ Server::dispatch_header(const boost::system::error_code& e,
 	  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
 	  bool is_leaf = (nbs->size() == 0);
 
-
-	  DMCS_LOG_TRACE(handler.get());
 	  HandlerThread* handler_thread = new HandlerThread(invoker);
-	  boost::thread* ht = new boost::thread(*handler_thread, is_leaf, handler, sesh, joiner_sat_notif, mg.get());
-	  handler_threads->push_back(ht);
-	  handlers->push_back(handler_thread);
+	  boost::thread* boost_handler_thread = new boost::thread(*handler_thread, is_leaf, handler, sesh, joiner_sat_notif, mg.get());
+	  boost_handler_threads->push_back(boost_handler_thread);
+	  handler_threads->push_back(handler_thread);
 	  ///@todo: delete threads in destructor of Server
 	}
       else if (header->find(HEADER_REQ_OPT_DMCS) != std::string::npos)

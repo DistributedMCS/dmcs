@@ -126,8 +126,8 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 
   // wait for Handler to tell me to return some models
   OutputNotification* on = 0;
-  void *ptr         = static_cast<void*>(&on);
-  unsigned int    p = 0;
+  void *ptr = static_cast<void*>(&on);
+  unsigned int p = 0;
   std::size_t recvd = 0;
   BaseNotification::NotificationType nt;
 

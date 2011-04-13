@@ -57,8 +57,8 @@ namespace dmcs {
 #define LIMIT_ANSWERS    "n"
 #define LIMIT_BIND_RULES "b"
 #define HEURISTICS       "h"
-#define STREAMING        "s"
-#define PACK_SIZE        "k"
+#define STREAMING        "streaming"
+#define PACK_SIZE        "packsize"
 #define MQ_SIZE          "mq_size"
 #define CONFLICTS_DRIVEN "cd"
 

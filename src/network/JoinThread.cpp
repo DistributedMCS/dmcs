@@ -401,6 +401,8 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 	  else
 	    {
 	      DMCS_LOG_TRACE("Ignore this belief state because it belongs to an old session");
+	      delete bs;
+	      bs = 0;
 	    }
 	}
     }

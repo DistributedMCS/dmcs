@@ -242,7 +242,7 @@ Handler<StreamingCommandType>::~Handler()
 
   if (output_thread) { delete output_thread; output_thread = 0; }
 
-  DMCS_LOG_TRACE(port << ": So long, and thanks for all the fish.");
+  DMCS_LOG_TRACE(port << ": End of Handler.");
 }
 
 
@@ -312,8 +312,6 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       const std::size_t pack_size = sesh->mess.getPackSize();
       const std::size_t k1 = sesh->mess.getK1();
       const std::size_t k2 = sesh->mess.getK2();
-
-      //      assert (pack_size > 0);
 
       if (first_call)
 	{
@@ -409,12 +407,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  DMCS_LOG_TRACE(port << ": Closing session with context " << sesh->mess.getInvoker());
 	  DMCS_LOG_TRACE(port << ": Send SHUTHDOWN to Output thread");
 
-	  //#ifdef DEBUG
-	  //	  History path(1, 0);
-	  //#else
-	  std::size_t path = 0;
-	  //#endif
-	  notify_output_thread(BaseNotification::SHUTDOWN, path, 0, 0, 0);
+	  notify_output_thread(BaseNotification::SHUTDOWN, 0, 0, 0, 0);
 	  
 	  DMCS_LOG_TRACE(port << ": Send SHUTDOWN to DMCS thread");
 
