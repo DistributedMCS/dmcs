@@ -82,7 +82,7 @@ RelSatSolver::~RelSatSolver()
   xInstance = 0;
 
   delete xSATSolver;
-  xSatSolver = 0;
+  xSATSolver = 0;
 
   delete input;
   input = 0;
