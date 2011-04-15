@@ -90,6 +90,9 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
       if (!combine(*result, *next_bs))
 	{
 	  DMCS_LOG_TRACE(port << ": INCONSISTENT!");
+	  delete result;
+	  result = 0;
+
 	  return false;
 	}
     }

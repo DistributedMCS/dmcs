@@ -242,7 +242,7 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
     {
       DMCS_LOG_TRACE("Leaf case. Solve now. k2 = " << k2);
       eResult = xSATSolver->eSolve((long int)k2, models_sofar);
-      xSATSolver->refresh();
+      //xSATSolver->refresh();
     }
   else
     {
@@ -290,7 +290,7 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
 	  
 	  eResult = xSATSolver->eSolve((long int)left_to_request, models_sofar);
 	  DMCS_LOG_TRACE("One limited solve finished. Number of solutions = " << models_sofar);
-	  xSATSolver->refresh();
+	  //xSATSolver->refresh();
 	  
 	  bool was_cached;
 	  store(input, input_buffer, true, was_cached);
