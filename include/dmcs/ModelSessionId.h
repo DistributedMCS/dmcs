@@ -34,6 +34,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/serialization/list.hpp>
 
+#include "dmcs/Log.h"
 
 namespace dmcs {
 
@@ -56,14 +57,18 @@ struct ModelSessionId
       session_id(sid)
   { }
 
-  template <typename Archive>
+
+  /*  template <typename Archive>
   void
-  serialize(Archive& ar, const unsigned int /* version */)
-  {
+  serialize(Archive& ar, const unsigned int /* version *//*)
+{
     ar & partial_belief_state;
     ar & path;
     ar & session_id;
-  }
+
+    delete partial_belief_state;
+    partial_belief_state = 0;
+  }*/
 };
 
 
@@ -139,6 +144,55 @@ operator== (const ModelSessionId& ms1, const ModelSessionId& ms2)
 
 
 } // namespace dmcs
+
+
+
+
+namespace boost {
+
+namespace serialization {
+
+template<class Archive>
+inline void save(Archive& ar, const dmcs::ModelSessionId& msi, const unsigned int file_version)
+{
+  ar & msi.partial_belief_state;
+  ar & msi.path;
+  ar & msi.session_id;
+
+  
+}
+
+
+
+template<class Archive>
+inline void load(Archive& ar, dmcs::ModelSessionId& msi, const unsigned int file_version)
+{
+  ar & msi.partial_belief_state;
+  ar & msi.path;
+  ar & msi.session_id;
+
+  DMCS_LOG_TRACE("Loading. pointer = " << msi.partial_belief_state);
+
+  /*DMCS_LOG_TRACE("Going to delete partial_belief_state. pointer = " << msi.partial_belief_state);
+
+  delete msi.partial_belief_state;
+
+  DMCS_LOG_TRACE("Done with deleting partial_belief_state");*/
+}
+
+
+
+template<class Archive>
+inline void serialize(Archive& ar, dmcs::ModelSessionId& msi, const unsigned int file_version)
+{
+  split_free(ar, msi, file_version);
+}
+
+
+
+} // namespace serialization
+
+} // namespace boost
 
 #endif // MODEL_SESSION_ID_H
 
