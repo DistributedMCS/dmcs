@@ -38,7 +38,8 @@ TESTS = \
 	testBeliefState \
 	testJoinThread \
 	testInterfaceRelSat \
-	testBeliefStateCaching
+	testBeliefStateCaching \
+	testRemoveDuplication 
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -66,7 +67,8 @@ check_PROGRAMS = \
 	testBeliefState \
 	testJoinThread \
 	testInterfaceRelSat \
-	testBeliefStateCaching
+	testBeliefStateCaching \
+	testRemoveDuplication
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -153,3 +155,6 @@ testInterfaceRelSat_LDADD = \
 	$(top_builddir)/relsat-20070104/librelsat.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a
+
+testRemoveDuplication_SOURCES = testRemoveDuplication.cpp
+testVariable_LDADD = $(top_builddir)/src/dmcs/libdmcs.a

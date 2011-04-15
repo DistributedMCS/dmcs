@@ -1,3 +1,14 @@
+2011-04-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+
+
+	* include/dmcs/ModelSessionId.h: Remove duplication and delete
+	unused pointers.
+	* include/network/NeighborThread.h: Likewise.
+
+	* testsuite/Makefile.am: Add new test case.
+	* testsuite/testRemoveDuplication.cpp: Likewise.
+
 2011-04-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/dmcs/ModelSessionId.h: Split serialization to load and save.

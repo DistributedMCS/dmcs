@@ -58,17 +58,16 @@ struct ModelSessionId
   { }
 
 
-  /*  template <typename Archive>
+  
+
+  template <typename Archive>
   void
-  serialize(Archive& ar, const unsigned int /* version *//*)
-{
+  serialize(Archive& ar, const unsigned int /* version */)
+  {
     ar & partial_belief_state;
     ar & path;
     ar & session_id;
-
-    delete partial_belief_state;
-    partial_belief_state = 0;
-  }*/
+  }
 };
 
 
@@ -143,56 +142,44 @@ operator== (const ModelSessionId& ms1, const ModelSessionId& ms2)
 
 
 
+// remove duplication and delete pointers in the removed ModelSessionId
+inline void
+remove_duplication(ModelSessionIdListPtr& msl)
+{
+  ModelSessionIdList::iterator first = msl->begin();
+  ModelSessionIdList::iterator last = msl->end();
+
+  ModelSessionIdList::iterator mid = first;
+  ModelSessionIdList::iterator beg_remove = first;
+  beg_remove++;
+
+  while (++first != last)
+  {
+    if (!(*mid == *first))
+      {
+	for (ModelSessionIdList::iterator it = beg_remove; it != first; ++it)
+	  {
+	    std::cerr << "Going to realse: " << *it << std::endl;
+	    ModelSessionId& ms = *it;
+	    PartialBeliefState*& pbs = ms.partial_belief_state;
+	    delete pbs;
+	    pbs = 0;
+	  }
+
+	*(++mid) = *first;
+	beg_remove = first;
+	beg_remove++;
+      }
+  }
+
+  std::size_t d = std::distance(msl->begin(), mid);
+  msl->resize(d+1);
+}
+
+
 } // namespace dmcs
 
 
-
-
-namespace boost {
-
-namespace serialization {
-
-template<class Archive>
-inline void save(Archive& ar, const dmcs::ModelSessionId& msi, const unsigned int file_version)
-{
-  ar & msi.partial_belief_state;
-  ar & msi.path;
-  ar & msi.session_id;
-
-  
-}
-
-
-
-template<class Archive>
-inline void load(Archive& ar, dmcs::ModelSessionId& msi, const unsigned int file_version)
-{
-  ar & msi.partial_belief_state;
-  ar & msi.path;
-  ar & msi.session_id;
-
-  DMCS_LOG_TRACE("Loading. pointer = " << msi.partial_belief_state);
-
-  /*DMCS_LOG_TRACE("Going to delete partial_belief_state. pointer = " << msi.partial_belief_state);
-
-  delete msi.partial_belief_state;
-
-  DMCS_LOG_TRACE("Done with deleting partial_belief_state");*/
-}
-
-
-
-template<class Archive>
-inline void serialize(Archive& ar, dmcs::ModelSessionId& msi, const unsigned int file_version)
-{
-  split_free(ar, msi, file_version);
-}
-
-
-
-} // namespace serialization
-
-} // namespace boost
 
 #endif // MODEL_SESSION_ID_H
 

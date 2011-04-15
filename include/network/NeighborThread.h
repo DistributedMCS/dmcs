@@ -256,9 +256,10 @@ private:
 	// extract a bunch of models from the message and then put each into NEIGHBOR_MQ
 	DMCS_LOG_TRACE("N[" << nid << "] Write to MQs. noff = " << noff);
 	
-	const ModelSessionIdListPtr& msl = mess->getResult();
+	ModelSessionIdListPtr msl = mess->getResult();
 	msl->sort(my_compare);
-	msl->unique();
+	remove_duplication(msl);
+	//msl->unique();
 	
 	DMCS_LOG_TRACE("N[" << nid << "] Received " << msl->size() << " partial belief states from noff = " << noff << ": \n" << *mess);
 	
@@ -269,9 +270,7 @@ private:
 
 	mg->sendJoinIn(bsv_size, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0, 0);
 
-	ModelSessionIdList::const_iterator it = msl->begin();	
-
-	for (; it != msl->end(); ++it)
+	for (ModelSessionIdList::const_iterator it = msl->begin(); it != msl->end(); ++it)
 	  {
 	    PartialBeliefState* bs = it->partial_belief_state;
 	    std::size_t sid = it->session_id;
