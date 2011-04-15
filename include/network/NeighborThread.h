@@ -272,9 +272,10 @@ private:
 
 	for (ModelSessionIdList::const_iterator it = msl->begin(); it != msl->end(); ++it)
 	  {
-	    PartialBeliefState* bs = it->partial_belief_state;
+	    PartialBeliefState* bs = new PartialBeliefState(*(it->partial_belief_state));
 	    std::size_t sid = it->session_id;
 	    std::size_t path = it->path;
+	    delete it->partial_belief_state;
 
 	    if (bs != 0)
 	      {

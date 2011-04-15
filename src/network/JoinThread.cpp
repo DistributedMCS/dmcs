@@ -389,8 +389,10 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 	  int timeout = 0;
 	  
 	  struct MessagingGatewayBC::ModelSession ms = mg->recvModel(offset, prio, timeout);
-	  PartialBeliefState* bs = ms.m;
+	  PartialBeliefState* bs = new PartialBeliefState(*ms.m);
 	  std::size_t sid = ms.sid;
+	  delete ms.m;
+	  ms.m = 0;
 	  
 	  assert (bs);
 	  
@@ -616,7 +618,6 @@ JoinThread::next_join(std::size_t path,
 
 
 
-// return true if something (either models of NULL) is sent to SAT
 void
 JoinThread::process(std::size_t path, 
 		    std::size_t session_id,
