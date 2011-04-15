@@ -1,3 +1,10 @@
+2011-04-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/ModelSessionId.h: Split serialization to load and save.
+
+	* src/network/JoinThread.cpp: Fix memory leaks.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
 2011-04-13  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Handler.tcc: Clean up.
