@@ -64,6 +64,21 @@ BOOST_AUTO_TEST_CASE ( testRemoveDuplication )
   msl->push_back(m5);
   msl->push_back(m6);
 
+  std::cerr << "bs1: " << bs1 << std::endl;
+  std::cerr << "bs2: " << bs2 << std::endl;
+  std::cerr << "bs3: " << bs3 << std::endl;
+  std::cerr << "bs4: " << bs4 << std::endl;
+  std::cerr << "bs5: " << bs5 << std::endl;
+  std::cerr << "bs6: " << bs6 << std::endl;
+
+  std::cerr << "After pushing in to the list:" << std::endl;
+  for (ModelSessionIdList::iterator it = msl->begin(); it != msl->end(); ++it)
+    {
+      std::cerr << "it->partial_belief_state: " << it->partial_belief_state << std::endl;
+    }
+
+  PartialBeliefState pbs8 = *bs2;
+
   std::cerr << "Before removing duplication:" << std::endl
 	    << *msl << std::endl;
 
@@ -71,6 +86,14 @@ BOOST_AUTO_TEST_CASE ( testRemoveDuplication )
 
   std::cerr << "After removing duplication:" << std::endl
 	    << *msl << std::endl;
+
+  std::cerr << "Old bs2 = " << pbs8 << std::endl;
+
+  PartialBeliefState* bs8 = new PartialBeliefState(pbs8);
+
+  std::cerr << "Real Old bs2 = " << bs2 << " " << *bs2 << std::endl;
+  
+  delete bs8;
 
   BOOST_CHECK_EQUAL(msl->size(), 3);
   

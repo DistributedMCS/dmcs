@@ -277,10 +277,10 @@ JoinThread::operator()(std::size_t nbs,
       
       if (nt == BaseNotification::NEXT)
 	{
-	  if (joined_results->size() > 0)
+	  if (!joined_results->empty())
 	    {
 	      DMCS_LOG_TRACE("Still have some joined input left, return now.");
-	      ModelSessionId ms = *(joined_results->begin());
+	      ModelSessionId ms = joined_results->front();
 	      joined_results->pop_front();
 	      PartialBeliefState* result = ms.partial_belief_state;
 	      std::size_t pa = ms.path;
@@ -389,13 +389,11 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 	  int timeout = 0;
 	  
 	  struct MessagingGatewayBC::ModelSession ms = mg->recvModel(offset, prio, timeout);
-	  PartialBeliefState* bs = new PartialBeliefState(*ms.m);
+	  PartialBeliefState* bs = ms.m;
 	  std::size_t sid = ms.sid;
-	  delete ms.m;
-	  ms.m = 0;
-	  
+
 	  assert (bs);
-	  
+
 	  DMCS_LOG_TRACE("Got bs = " << *bs << ". sid = " << sid);
 
 	  if (sid == session_id)
@@ -406,8 +404,8 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 	  else
 	    {
 	      DMCS_LOG_TRACE("Ignore this belief state because it belongs to an old session");
-	      delete bs;
-	      bs = 0;
+	      delete ms.m;
+	      ms.m = 0;
 	    }
 	}
     }

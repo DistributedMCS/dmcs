@@ -161,7 +161,7 @@ remove_duplication(ModelSessionIdListPtr& msl)
 	  {
 	    std::cerr << "Going to realse: " << *it << std::endl;
 	    ModelSessionId& ms = *it;
-	    PartialBeliefState*& pbs = ms.partial_belief_state;
+	    PartialBeliefState* pbs = ms.partial_belief_state;
 	    delete pbs;
 	    pbs = 0;
 	  }
