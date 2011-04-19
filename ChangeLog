@@ -1,6 +1,11 @@
+2011-04-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Add some debugging infor.
+
+	* testsuite/Makefile.am: Add testJoinLeak.
+	* testsuite/testJoinLeak.cpp: Likewise.
+
 2011-04-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
-
-
 
 	* include/dmcs/ModelSessionId.h: Remove duplication and delete
 	unused pointers.

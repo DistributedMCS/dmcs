@@ -37,6 +37,7 @@ TESTS = \
 	testMessagingGateway \
 	testBeliefState \
 	testJoinThread \
+	testJoinLeak \
 	testInterfaceRelSat \
 	testBeliefStateCaching \
 	testRemoveDuplication 
@@ -66,6 +67,7 @@ check_PROGRAMS = \
 	testMessagingGateway \
 	testBeliefState \
 	testJoinThread \
+	testJoinLeak \
 	testInterfaceRelSat \
 	testBeliefStateCaching \
 	testRemoveDuplication
@@ -147,6 +149,12 @@ testJoinThread_LDADD = \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a
 
+testJoinLeak_SOURCES = testJoinLeak.cpp
+testJoinLeak_LDADD = \
+	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/dmcs/liblog.a
+
 testInterfaceRelSat_SOURCES = testInterfaceRelSat.cpp
 testInterfaceRelSat_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
@@ -157,4 +165,4 @@ testInterfaceRelSat_LDADD = \
 	$(top_builddir)/src/dmcs/liblog.a
 
 testRemoveDuplication_SOURCES = testRemoveDuplication.cpp
-testVariable_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+testRemoveDuplication_LDADD = $(top_builddir)/src/dmcs/libdmcs.a

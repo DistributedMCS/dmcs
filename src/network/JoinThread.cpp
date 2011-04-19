@@ -279,6 +279,7 @@ JoinThread::operator()(std::size_t nbs,
 	{
 	  if (!joined_results->empty())
 	    {
+	      DMCS_LOG_TRACE("joined_results->size() = " << joined_results->size());
 	      DMCS_LOG_TRACE("Still have some joined input left, return now.");
 	      ModelSessionId ms = joined_results->front();
 	      joined_results->pop_front();
