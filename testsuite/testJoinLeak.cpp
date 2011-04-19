@@ -16,7 +16,7 @@ using namespace dmcs;
 
 
 
-void send_trigger(std::size_t k1, std::size_t k2)
+void send_trigger(MessagingGatewayBCPtr mg, std::size_t k1, std::size_t k2)
 {
   AskNextNotification* notif = new AskNextNotification(BaseNotification::NEXT, 0, 0, k1, k2);
   mg->sendNotification(notif, 0, ConcurrentMessageQueueFactory::SAT_JOINER_MQ, 0);
@@ -174,15 +174,24 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
   // simulate incoming messages by putting partial equilibria into JOIN_IN_MQs
   // sleep 1 sec before each round
 
+  send_trigger(mg, 1, 3);
+
   send_first_pack_21(mg, noff_2, offset_2);
   send_first_pack_31(mg, noff_3, offset_3);
   send_first_pack_41(mg, noff_4, offset_4);
+
+  for (std::size_t i = 0; i < 3; ++i)
+    {
+      send_trigger(mg, 1, 3);
+    }
 
   // **************************************
   sleep(1);
   send_second_pack_21(mg, noff_2, offset_2);
 
   // **************************************
+
+  send_trigger(mg, 1, 3);
   sleep(1);
   send_eop(mg, noff_2);
 
@@ -211,21 +220,25 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
 
   std::size_t join_count = 0;
   
-  /*
   while (1)
     {
       std::size_t prio = 0;
-      int timeout       = 0;
+      int timeout = 0;
 
       struct MessagingGatewayBC::ModelSession ms = mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
 
-      if (!ms.m == 0)
+      if (ms.m == 0)
 	{
 	  break;
 	}
       
+      delete ms.m;
+      ms.m = 0;
+
       join_count++;
-      }*/
+    }
+
+  std::cerr << "join_count = " << join_count << std::endl;
 
   //  BOOST_CHECK_EQUAL(join_count, 4);
 

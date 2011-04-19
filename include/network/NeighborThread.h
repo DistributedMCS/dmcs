@@ -257,7 +257,16 @@ private:
 	DMCS_LOG_TRACE("N[" << nid << "] Write to MQs. noff = " << noff);
 	
 	ModelSessionIdListPtr msl = mess->getResult();
+
+	DMCS_LOG_TRACE("N[" << nid << "] Original model session id received from the network:");
+	for (ModelSessionIdList::const_iterator it = msl->begin(); it != msl->end(); ++it)
+	  {
+	    PartialBeliefState* bs = it->partial_belief_state;
+	    DMCS_LOG_TRACE("N[" << nid << "] bs = " << bs << ": " << *bs)
+	  }
+
 	msl->sort(my_compare);
+	DMCS_LOG_TRACE("N[" << nid << "] Will call remove_duplication");
 	remove_duplication(msl);
 	//msl->unique();
 	
@@ -272,15 +281,15 @@ private:
 
 	for (ModelSessionIdList::const_iterator it = msl->begin(); it != msl->end(); ++it)
 	  {
-	    //PartialBeliefState* bs = new PartialBeliefState(*(it->partial_belief_state));
 	    PartialBeliefState* bs = it->partial_belief_state;
 	    std::size_t sid = it->session_id;
 	    std::size_t path = it->path;
-	    //delete it->partial_belief_state;
+
+	    DMCS_LOG_TRACE("N[" << nid << "] Got bs = " << bs << ": " << *bs)
 
 	    if (bs != 0)
 	      {
-		DMCS_LOG_TRACE("N[" << nid << "] Sending model = " << *bs << ", sid = " << sid << " from " << noff << " to " << offset);
+		DMCS_LOG_TRACE("N[" << nid << "] Sending model = " << bs << ": " << *bs << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
 	    else
 	      {

@@ -153,15 +153,17 @@ remove_duplication(ModelSessionIdListPtr& msl)
   ModelSessionIdList::iterator beg_remove = first;
   beg_remove++;
 
+  
+
   while (++first != last)
   {
     if (!(*mid == *first))
       {
 	for (ModelSessionIdList::iterator it = beg_remove; it != first; ++it)
 	  {
-	    std::cerr << "Going to realse: " << *it << std::endl;
 	    ModelSessionId& ms = *it;
 	    PartialBeliefState* pbs = ms.partial_belief_state;
+	    std::cerr << "Remove Duplication: Going to delete: " << pbs << ": " << *pbs << std::endl;
 	    delete pbs;
 	    pbs = 0;
 	  }
@@ -171,6 +173,15 @@ remove_duplication(ModelSessionIdListPtr& msl)
 	beg_remove++;
       }
   }
+
+  for (ModelSessionIdList::iterator it = beg_remove; it != last; ++it)
+    {
+      ModelSessionId& ms = *it;
+      PartialBeliefState* pbs = ms.partial_belief_state;
+      std::cerr << "Remove Duplication: Going to delete: " << pbs << ": " << *pbs << std::endl;
+      delete pbs;
+      pbs = 0;      
+    }
 
   std::size_t d = std::distance(msl->begin(), mid);
   msl->resize(d+1);

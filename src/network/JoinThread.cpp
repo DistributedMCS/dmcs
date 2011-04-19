@@ -103,13 +103,13 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
   // be careful that we are blocked here. Use timeout sending instead?
   if (first_result)
     {
-      DMCS_LOG_TRACE(port << ": Final RESULT = " << *result << " ... Sending to JOIN_OUT");
+      DMCS_LOG_TRACE(port << ": Final RESULT = " << result << ":" << *result << " ... Sending to JOIN_OUT");
       mg->sendModel(result, path, session_id, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
       first_result = false;
     }
   else
     {
-      DMCS_LOG_TRACE(port << ": Final RESULT = " << *result << " ... push into joined_results");
+      DMCS_LOG_TRACE(port << ": Final RESULT = " << result << ":" << *result << " ... push into joined_results");
       ModelSessionId ms(result, path, session_id);
       joined_results->push_back(ms);
     }
@@ -138,7 +138,7 @@ JoinThread::join(const PartialBeliefStatePackagePtr& partial_eqs,
     {
       for (PartialBeliefStateVec::const_iterator it = *b; it != *e; ++it)
 	{
-	  DMCS_LOG_DEBUG(" " << **it);
+	  DMCS_LOG_DEBUG(" " << *it << ": " << **it);
 	}
       DMCS_LOG_DEBUG(" ");
       }
@@ -319,9 +319,13 @@ JoinThread::cleanup_partial_belief_states(PartialBeliefStatePackage* partial_eqs
 {
   DMCS_LOG_TRACE("Clean up PartialBeliefStates at nid = " << nid);
   PartialBeliefStateVecPtr& bsv = (*partial_eqs)[nid];
+  DMCS_LOG_TRACE("Number of PartialBeliefStates to clean up = " << bsv->size());
   for (PartialBeliefStateVec::iterator it = bsv->begin(); it != bsv->end(); ++it)
     {
       assert (*it);
+
+      DMCS_LOG_TRACE("Will delete it = " << *it << ": " << **it);
+
       delete *it;
       *it = 0;
     }
@@ -395,7 +399,7 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 
 	  assert (bs);
 
-	  DMCS_LOG_TRACE("Got bs = " << *bs << ". sid = " << sid);
+	  DMCS_LOG_TRACE("Got bs = " << bs << ": " << *bs << ". sid = " << sid);
 
 	  if (sid == session_id)
 	    {

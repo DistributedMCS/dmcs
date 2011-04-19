@@ -1,6 +1,11 @@
-2011-04-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+2011-04-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+
+
+	* include/dmcs/ModelSessionId.h: Fix a corner case that causes memory leak.
 
 	* src/network/JoinThread.cpp: Add some debugging infor.
+	* include/network/NeighborThread.h: Likewise.
 
 	* testsuite/Makefile.am: Add testJoinLeak.
 	* testsuite/testJoinLeak.cpp: Likewise.
