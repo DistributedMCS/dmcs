@@ -368,13 +368,6 @@ Options";
 
 		  if (pack_size == 0)
 		    {
-		      //StreamingCommandType::input_type mess(0, 0, 0, 1, pack_size);
-		      
-		      //if (pack_size == 0)
-		      //{
-		      // mess.setPackRequest(0, 0);
-		      //}
-
 		      StreamingCommandType::input_type mess(0, 0, 0, 0, 0);
 		      
 		      std::string header = HEADER_REQ_STM_DMCS;
@@ -387,27 +380,16 @@ Options";
 		      c.terminate();
 		      
 		      no_beliefstates = final_result.size();
-		      std::cout << "Total Number of Equilibria: " << no_beliefstates;
 		    }
 		  else
 		    {
-		      std::size_t k = pack_size > 0 ? pack_size : 10; // default: k is 10
-		      complete = pack_size > 0 ? false : true;		  
-		      
-		      // USER <--> session_id = 0, path = {0}, invoker = 0
-		      //#ifdef DEBUG
-		      //History path(1, 0);
-		      //StreamingCommandType::input_type mess(path, 0, 0, 1, k);
-		      //#else
-		      StreamingCommandType::input_type mess(0, 0, 0, 1, k);
-		      //#endif
-		      
+		      StreamingCommandType::input_type mess(0, 0, 0, 1, pack_size);
+
 		      std::string header = HEADER_REQ_STM_DMCS;
 		      
 		      AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
 		      
 		      c.setCallback(&handle_belief_state);
-		      
 		      
 		      // catch Ctrl-C and interrupts
 		      sig_t s = signal(SIGINT, handle_signal);
@@ -441,8 +423,13 @@ Options";
 			  // model number accounting
 			  last_model_count = model_count;
 			  model_count = handled_belief_states;
+
+			  DMCS_LOG_TRACE("last_model_count = " << last_model_count << ", model_count = " << model_count << ", diff_count = " << diff_count << ", final_result.size() = " << final_result.size());
+
 			  diff_count = final_result.size() - diff_count;
 			  next_count++;
+
+			  DMCS_LOG_TRACE("new diff_count = " << diff_count);
 			  
 			  
 			  // decide what to do next
@@ -454,28 +441,22 @@ Options";
 			  else
 			    {
 			      io_service->reset(); // ready for the next round
-			      
-			      DMCS_LOG_TRACE("diff_count = " << diff_count << ", next_count = " << next_count);
-			      
-			      if (diff_count > 0 && diff_count < k) // setup next k here
+
+			      std::size_t left_to_request = 0;
+			      if (pack_size > final_result.size())
 				{
-				  DMCS_LOG_TRACE("Got " << diff_count << " partial belief states, getting next batch of size " << k);
-
-				  std::size_t next_k1 = next_count * k + 1;
-				  std::size_t next_k2 = next_k1 + k - 1;
-
-				  DMCS_LOG_TRACE("next_k1 = " << next_k1 << ", next_k2 = " << next_k2);
-				  
-				  mess.setPackRequest(next_k1, next_k2);
-				  c.next(mess);
+				  left_to_request = pack_size - final_result.size();
 				}
-			      else if (pack_size == 0 && model_count > last_model_count)
+			      
+			      DMCS_LOG_TRACE("diff_count = " << diff_count << ", left to request = " << left_to_request << ", next_count = " << next_count);
+			      
+			      if (diff_count > 0 && pack_size > final_result.size()) // setup next k here
 				{
-				  DMCS_LOG_TRACE("fixpoint not reached yet, get next " << k << " belief states");
-				  
-				  std::size_t next_k1 = next_count * k + 1;
-				  std::size_t next_k2 = next_k1 + k - 1;
-				  
+				  DMCS_LOG_TRACE("Got " << diff_count << " partial belief states, getting next batch of size " << pack_size);
+
+				  std::size_t next_k1 = next_count * pack_size + 1;
+				  std::size_t next_k2 = next_k1 + pack_size - 1;
+
 				  DMCS_LOG_TRACE("next_k1 = " << next_k1 << ", next_k2 = " << next_k2);
 				  
 				  mess.setPackRequest(next_k1, next_k2);

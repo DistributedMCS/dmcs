@@ -1,6 +1,6 @@
 2011-04-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
-
+	* src/dmcsc.cpp: Fix looping to get k unique models.
 
 	* include/dmcs/ModelSessionId.h: Fix a corner case that causes memory leak.
 
