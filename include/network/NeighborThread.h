@@ -262,7 +262,7 @@ private:
 	for (ModelSessionIdList::const_iterator it = msl->begin(); it != msl->end(); ++it)
 	  {
 	    PartialBeliefState* bs = it->partial_belief_state;
-	    DMCS_LOG_TRACE("N[" << nid << "] bs = " << bs << ": " << *bs)
+	    DMCS_LOG_TRACE("N[" << nid << "] bs = " << bs << ": " << *bs);
 	  }
 
 	msl->sort(my_compare);
@@ -285,7 +285,7 @@ private:
 	    std::size_t sid = it->session_id;
 	    std::size_t path = it->path;
 
-	    DMCS_LOG_TRACE("N[" << nid << "] Got bs = " << bs << ": " << *bs)
+	    DMCS_LOG_TRACE("N[" << nid << "] Got bs = " << bs << ": " << *bs);
 
 	    if (bs != 0)
 	      {
