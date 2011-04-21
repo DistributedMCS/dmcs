@@ -19,36 +19,43 @@ def check_status(log_status):
 
 def why_failed(testpath, testname, context, testmode, log_tail):
     no_context = string.atoi(context)
-    str_mem_record = './' + testname + '-' + testmode + '-memory' + log_tail
+    str_mem_record = './' + testname + '-' + testmode + '-memory.' + log_tail
 
     mem_record = open(str_mem_record, 'w')
-    failed_reason = 'TIMEOUT'
+    failed_reason = 'UNKNOWN'
 
     for i in range(1, no_context+1):
         # record memory used
-        log_run = testpath + '/' + testname + '-' + testmode + '-run-' + str(i) + log_tail
+        log_run = testpath + '/' + testname + '-' + testmode + '-run-' + str(i) + '.' + log_tail
+        print "Checking " + log_run
+        space_used = ' No information\n'
         with open(log_run, 'r') as r:
             lines = r.readlines()
 
             # a reverse 'for' loop to find the space consumtion faster
-            for j in range(len(lines) - 1, -1, 0):
+            for j in range(len(lines) - 1, 0, -1):
                 line = lines[j]
-                space_sign = line.find('space')
+                space_sign = line.find('space:')
                 if (space_sign != -1):
+                    print line
                     space_used = line[space_sign+6:]
-                    mem_record.write(str_i + ":" + space_used)
                     break
-            r.closed
 
-         # find whether it was MEMOUT
-         log_context = testpath + '/' + testname + '-' + testmode + '-' + str(i) + log_tail
-         with open(log_context, 'r') as c:
-             for line in c:
-                 memout_sign = line.find('std::bad_alloc')
-                 if memout_sign != -1:
-                     failed_reason = 'MEMOUT'
-                     break
-         c.closed
+        mem_record.write(str(i) + ":" + space_used)
+        r.closed
+
+        if space_used != ' No information\n':
+            failed_reason = 'TIMEOUT'
+
+        # find whether it was MEMOUT
+        log_context = testpath + '/' + testname + '-' + testmode + '-' + str(i) + '.' + log_tail
+        with open(log_context, 'r') as c:
+            for line in c:
+                memout_sign = line.find('std::bad_alloc')
+                if memout_sign != -1:
+                    failed_reason = 'MEMOUT'
+                    break
+        c.closed
 
     mem_record.close
     return failed_reason
@@ -66,8 +73,8 @@ def get_no_answer(log_answer):
                 plus = line.rfind('+')
                 if plus == -1:
                     plus = len(line)
-            no_answer = line[colon+2 : plus]
-            break
+                no_answer = line[colon+2 : plus]
+                break
     a.closed
     return no_answer
 
@@ -201,6 +208,14 @@ def main(argv):
             fifth_dash = testname.find('-', fourth_dash+1)
 
             toponame = testname[: first_dash]
+            if toponame == 'zig':
+                toponame = 'zig-zag'
+                first_dash = second_dash
+                second_dash = third_dash
+                third_dash = fourth_dash
+                fourth_dash = fifth_dash
+                fifth_dash = testname.find('-', fifth_dash+1)
+
             context = testname[first_dash+1 : second_dash]
             signature = testname[second_dash+1 : third_dash]
             interface = testname[third_dash+1 : fourth_dash]
@@ -210,7 +225,8 @@ def main(argv):
 
             testpath = 'experiments/' + toponame + '/' + parameter_setting + '/' + testname
 
-            testmodes = ['opt', 'streaming', 'parallel']
+            #testmodes = ['opt', 'streaming', 'parallel']
+            testmodes = ['opt', 'streaming']
             testpackage = ['0', '10', '100']
             log_tail = 'log'
             tableline = ''
@@ -229,11 +245,13 @@ def main(argv):
                         times[1] = get_running_time(log_time)
                     else:
                         # find the reason for FAILING, which is either TIMEOUT or MEMOUT
-                        fail_reason = why_failed(testpath, testname, context, 'opt', log_tail)
+                        failed_reason = why_failed(testpath, testname, context, mode, log_tail)
                         if failed_reason == 'TIMEOUT':
                             times[1] = '---'
-                        else:
+                        elif failed_reason == 'MEMOUT':
                             times[1] = 'M'
+                        else:
+                            times[1] = 'U'
                 else:
                     for package in testpackage:
                         pos = getPosition(mode, package)
@@ -253,7 +271,14 @@ def main(argv):
                                     no_answer = '---'
 
                         else:
-                            times[pos] = '---'
+                            # find the reason for FAILING, which is either TIMEOUT or MEMOUT
+                            failed_reason = why_failed(testpath, testname, context, mode + '-k' + package, log_tail)
+                            if failed_reason == 'TIMEOUT':
+                                times[pos] = '---'
+                            elif failed_reason == 'MEMOUT':
+                                times[pos] = 'M'
+                            else:
+                                times[pos] = 'U'
 
             times[0] = no_answer
             vals.append(times)
