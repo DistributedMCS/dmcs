@@ -1,3 +1,7 @@
+2011-04-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* examples/tables.py: Update script to extract memory usage.
+
 2011-04-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/dmcsc.cpp: Fix looping to get k unique models.

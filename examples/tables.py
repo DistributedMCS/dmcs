@@ -9,15 +9,36 @@ import string
 # Check whether the test got PASS or FAILED
 def check_status(log_status):
     with open(log_status, 'r') as s:
-        lines = s.readlines()
-        status = lines[2][0:4]
+        for line in s:
+            status_sign = line.find('PASS')
+            if status_sign != -1:
+                s.closed
+                return 'PASS'
+            else:
+                status_sign = line.find('FAILED')
+                if status_sign != -1:
+                    s.closed
+                    return 'FAILED'
     s.closed
+    return 'UNKNOWN'
 
-    return status
 
+
+# Check 'out of time' in status file
+def check_timeout_status(log_status):
+    with open(log_status, 'r') as s:
+        for line in s:
+            status_sign = line.find('out of time')
+            if status_sign != -1:
+                s.closed
+                return 'TIMEOUT'
+
+    s.closed
+    return 'UNKNOWN'
 
 
 def why_failed(testpath, testname, context, testmode, log_tail):
+
     no_context = string.atoi(context)
     str_mem_record = './' + testname + '-' + testmode + '-memory.' + log_tail
 
@@ -44,8 +65,6 @@ def why_failed(testpath, testname, context, testmode, log_tail):
         mem_record.write(str(i) + ":" + space_used)
         r.closed
 
-        if space_used != ' No information\n':
-            failed_reason = 'TIMEOUT'
 
         # find whether it was MEMOUT
         log_context = testpath + '/' + testname + '-' + testmode + '-' + str(i) + '.' + log_tail
@@ -58,6 +77,23 @@ def why_failed(testpath, testname, context, testmode, log_tail):
         c.closed
 
     mem_record.close
+
+    # find whether it was TIMEOUT
+    if failed_reason == 'UNKNOWN':
+        log_time = testpath + '/' + testname + '-' + testmode + '-time.' + log_tail
+        print log_time
+        str_running_time = get_running_time(log_time);
+        running_time = float(str_running_time)
+        if running_time >= 180:
+            failed_reason = 'TIMEOUT'
+
+    # check whether it was TIMEOUT by looking into status file
+    # This information is returned to us by runlim
+    # It's weird that runlim says 'out of time' while measured running time is less than 180 secs. Need to check this.
+    if failed_reason == 'UNKNOWN':
+        log_status = testpath + '/' + testname + '-' + testmode + '-status.' + log_tail
+        failed_reason = check_timeout_status(log_status)
+
     return failed_reason
 
 def get_no_answer(log_answer):
@@ -82,21 +118,33 @@ def get_no_answer(log_answer):
 
 def get_running_time(log_time):
     # Watchout: we only expect time of the form MM:SS.SS
+    str_time = 'Notime'
+    print "checking " + log_time
     with open(log_time, 'r') as l:
-        lines = l.readlines()
-        timeline = lines[4]
-        last_colon = timeline.rfind(':')
-        last_dot = timeline.rfind('.')
+        print 'File opened'
+        for timeline in l:
+            print timeline
+            time_sign = timeline.find('Elapsed (wall clock) time')
+            if time_sign != -1:
+                print 'Found time'
+                last_colon = timeline.rfind(':')
+                last_dot = timeline.rfind('.')
 
-        str_minutes = timeline[last_colon-2 : last_colon]
-        str_secs = timeline[last_colon+1 : last_dot]
-        str_psecs = timeline[last_dot+1 : len(timeline)-1]
+                str_minutes = timeline[last_colon-2 : last_colon]
+                str_secs = timeline[last_colon+1 : last_dot]
+                str_psecs = timeline[last_dot+1 : len(timeline)-1]
 
-        minutes = string.atoi(str_minutes)
-        secs = string.atoi(str_secs)
+                print timeline
+                print log_time
+                print str_minutes
 
-        secs += 60*minutes
-        str_time = str(secs) + '.' + str_psecs
+                minutes = string.atoi(str_minutes)
+                secs = string.atoi(str_secs)
+
+                secs += 60*minutes
+                str_time = str(secs) + '.' + str_psecs
+
+                break
     l.closed
 
     return str_time
