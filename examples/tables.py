@@ -17,6 +17,42 @@ def check_status(log_status):
 
 
 
+def why_failed(testpath, testname, context, testmode, log_tail):
+    no_context = string.atoi(context)
+    str_mem_record = './' + testname + '-' + testmode + '-memory' + log_tail
+
+    mem_record = open(str_mem_record, 'w')
+    failed_reason = 'TIMEOUT'
+
+    for i in range(1, no_context+1):
+        # record memory used
+        log_run = testpath + '/' + testname + '-' + testmode + '-run-' + str(i) + log_tail
+        with open(log_run, 'r') as r:
+            lines = r.readlines()
+
+            # a reverse 'for' loop to find the space consumtion faster
+            for j in range(len(lines) - 1, -1, 0):
+                line = lines[j]
+                space_sign = line.find('space')
+                if (space_sign != -1):
+                    space_used = line[space_sign+6:]
+                    mem_record.write(str_i + ":" + space_used)
+                    break
+            r.closed
+
+         # find whether it was MEMOUT
+         log_context = testpath + '/' + testname + '-' + testmode + '-' + str(i) + log_tail
+         with open(log_context, 'r') as c:
+             for line in c:
+                 memout_sign = line.find('std::bad_alloc')
+                 if memout_sign != -1:
+                     failed_reason = 'MEMOUT'
+                     break
+         c.closed
+
+    mem_record.close
+    return failed_reason
+
 def get_no_answer(log_answer):
     no_answer = '---'
 
@@ -192,7 +228,12 @@ def main(argv):
                         no_answer = get_no_answer(log_answer)
                         times[1] = get_running_time(log_time)
                     else:
-                        times[1] = '---'            
+                        # find the reason for FAILING, which is either TIMEOUT or MEMOUT
+                        fail_reason = why_failed(testpath, testname, context, 'opt', log_tail)
+                        if failed_reason == 'TIMEOUT':
+                            times[1] = '---'
+                        else:
+                            times[1] = 'M'
                 else:
                     for package in testpackage:
                         pos = getPosition(mode, package)
