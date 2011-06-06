@@ -199,7 +199,7 @@ for ctx in contexts.itervalues():
         (ctx['idx1'],cidx1,thisdeps))
 
 ###########################
-# do output
+# do output of .top file
 ###########################
 topfile = "%s.top" % (outputname,)
 if os.path.exists(topfile):
@@ -217,5 +217,27 @@ for (depfrom,depdict) in dependencies.iteritems():
     print >>ftop, '%d->%d [interface="%s"];' % \
       (depfrom,depto,"".join(map(lambda x: "%d " % (x,),depmasks.itervalues())))
 print >>ftop, '}'
-
 ftop.close()
+
+###########################
+# do output of .sh file
+###########################
+shfile = "%s.sh" % (outputname,)
+if os.path.exists(shfile):
+  die("output file %s already exists!" % (shfile,))
+
+fsh = open(shfile,"w+")
+# context daemons
+for ctx in contexts.itervalues():
+  print >>fsh, '$DMCSPATH/dmcsd --context=%d --port=%d --kb=%s --br=%s --topology=%s >ctx%d.log 2>&1 &' % \
+    (ctx['idx1'], FIRSTPORT+ctx['idx0'], ctx['lpfile'], ctx['brfile'], topfile, ctx['idx1'])
+# wait for startup
+print >>fsh, 'sleep 5'
+# display daemon outputs
+print >>fsh, 'tail -f ctx*.log &'
+# querying client
+print >>fsh, 'time $DMCSPATH/dmcsc --hostname=localhost --port=%d --system-size=%d --query-variables="%s"' % \
+  (FIRSTPORT+QUERYCTX-1, len(contexts), querymask)
+# kill daemons (TODO improve this!)
+print >>fsh, 'killall dmcsd'
+fsh.close()
