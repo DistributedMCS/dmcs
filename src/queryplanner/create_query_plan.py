@@ -2,6 +2,14 @@
 
 # convert dmcs .lp and .br files into query plan: .top and .sh file
 
+# some assumptions/configuration:
+
+# QUERYCTX: 1-based index of context where we want to see all beliefs = where we query
+QUERYCTX=1
+
+# FIRSTPORT: network port where we want the first context to operate, other contexts use ports above
+FIRSTPORT=5001
+
 import sys
 import os.path
 import re
@@ -118,7 +126,7 @@ debug("number of contexts = %d" % (len(contexts),))
 for ctx in contexts.itervalues():
   debug("context %d: %s" % (ctx['idx1'],ctx))
   ctx['beliefs'] = {}
-  idx = 0
+  idx = 1
   for belief in ctx['lpbeliefs']:
     ctx['beliefs'][idx] = belief
     idx+= 1
@@ -126,9 +134,64 @@ for ctx in contexts.itervalues():
     ctx['beliefs'][idx] = belief
     idx+= 1
   debug("indexed beliefs of context %d: %s" % (ctx['idx1'],ctx['beliefs']))
+  # reverse dict to get lookup of belief indices
+  ctx['beliefidx'] = {}
+  for (idx,bel) in ctx['beliefs'].iteritems():
+    ctx['beliefidx'][bel] = idx
 
 ###########################
-# start output
+# calculate query mask
+###########################
+querymask = []
+for ctxidx1 in range(1,len(contexts)+1):
+  mask = 0
+  if ctxidx1 == QUERYCTX:
+    # take all beliefs
+    for beliefidx in contexts[ctxidx1]['beliefs'].iterkeys():
+      mask |= 1 << beliefidx
+  for belief in contexts[ctxidx1]['exportedbeliefs']:
+    mask |= 1 << (contexts[ctxidx1]['beliefidx'][belief])
+  if mask != 0:
+    mask |= 1 # epsilon bit
+  debug("created mask 0x%x = %dd for ctx %d" % (mask, mask, ctxidx1))
+  querymask.append(mask)
+querymask = " ".join(map(str,querymask)) + " "
+
+###########################
+# calculate signatures
+###########################
+for ctx in contexts.itervalues():
+  ctx['sigma'] = ",".join(map(\
+      lambda x: "(%s %d %s %s)" % (x[1],ctx['idx1'],x[0],x[0]), \
+    ctx['beliefs'].iteritems()))
+  debug("sigma for ctx %d = '%s'" % (ctx['idx1'],ctx['sigma']))
+
+###########################
+# calculate dependencies
+# first level of keys are contexts containing bridge rules
+# second level of keys are contexts in body atoms
+###########################
+dependencies = {}
+for ctx in contexts.itervalues():
+  if len(ctx['importedbeliefs']) > 0:
+    dependencies[ctx['idx0']] = {}
+    for (cidx1,beliefs) in ctx['importedbeliefs'].iteritems():
+      debug("processing dependency from ctx %d to ctx %d and beliefs %s" % (ctx['idx0'],cidx1-1,beliefs))
+      thisdeps = {}
+      dependencies[ctx['idx0']][cidx1] = thisdeps
+      # preset
+      for i in range(0,len(contexts)):
+        thisdeps[i] = 0
+      # epsilon bit
+      thisdeps[cidx1-1] |= 1
+      for belief in beliefs:
+        # belief bit
+        thisdeps[cidx1-1] |= 1 << (contexts[cidx1]['beliefidx'][belief])
+      debug("dependencies for ctx %d -> ctx %d = '%s'" % \
+        (ctx['idx1'],cidx1-1,thisdeps))
+
+###########################
+# do output
 ###########################
 topfile = "%s.top" % (outputname,)
 if os.path.exists(topfile):
@@ -136,7 +199,15 @@ if os.path.exists(topfile):
 
 ftop = open(topfile,"w+")
 print >>ftop, 'digraph G {'
-print >>ftop, 'graph [name="%s"]'
+print >>ftop, 'graph [name="%s"]' % (querymask,)
+for ctx in contexts.itervalues():
+  print >>ftop, '%d [hostname="localhost", port="%d", sigma="%s"];' % \
+    (ctx['idx0'],FIRSTPORT+ctx['idx0'],ctx['sigma'])
+for (depfrom,depdict) in dependencies.iteritems():
+  for (depto,depmasks) in depdict.iteritems():
+    #debug(depmasks)
+    print >>ftop, '%d->%d [interface="%s"];' % \
+      (depfrom,depto,"".join(map(lambda x: "%d " % (x,),depmasks.itervalues())))
 print >>ftop, '}'
 
 ftop.close()
