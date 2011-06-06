@@ -79,11 +79,13 @@ for ctx in contexts.itervalues():
   ctx['lpbeliefs'] = readContextFile(ctx['idx1'], ctx['lpfile'])
 
 ###########################
-# parse bridge rule file and get (context-indexed) beliefs as set
+# parse bridge rule file and get tuple of beliefs as sets:
+# (set(brhead1,brhead2), { ctx : set(bratom1,...), ctx : ... }
 ###########################
 def readBridgeRuleFile(ctxidx1, brfile):
   debug("processing bridge rule file %s for ctx %d" % (brfile,ctxidx1))
   brf = open(brfile,"r")
+  outputset = set()
   outputdict = {}
   for line in brf:
     line = line.strip(". \n\r\t")
@@ -92,14 +94,14 @@ def readBridgeRuleFile(ctxidx1, brfile):
     debug("finding all bridge rule atoms in '%s' yielded heads %s and bodies %s" % (line, heads, bodies))
     if len(heads) != 1:
       raise RuntimeError("unexpected bridge rule encountered: '%s'" % (line,))
-    bodies.append( (str(ctxidx1),heads[0]) )
+    outputset.update(set(heads))
     for (idx1,belief) in bodies:
       iidx1 = int(idx1)
       debug("adding (%d:%s)" % (iidx1,belief))
       if iidx1 not in outputdict:
         outputdict[iidx1] = set()
       outputdict[iidx1].add(belief)
-  return outputdict
+  return (outputset, outputdict)
 
 # prepare all contexts
 for ctx in contexts.itervalues():
@@ -110,12 +112,15 @@ for ctx in contexts.itervalues():
 
 # collect all beliefs we use in bridge rules
 for ctx in contexts.itervalues():
-  brbeliefs = readBridgeRuleFile(ctx['idx1'], ctx['brfile'])
+  (brheads,brbeliefs) = readBridgeRuleFile(ctx['idx1'], ctx['brfile'])
+
+  # those are the beliefs added by bridge rules of this context
+  ctx['injectedbeliefs'] = brheads
+
   ibeliefs = contexts[ctx['idx1']]['importedbeliefs']
   for (cidx,beliefs) in brbeliefs.iteritems():
-    #debug("got br items ctx %d => %s" % (cidx, beliefs))
-    ebeliefs = contexts[cidx]['exportedbeliefs']
-    ebeliefs.update(beliefs)
+    debug("ctx %d got br items ctx %d => %s" % (ctx['idx1'], cidx, beliefs))
+    contexts[cidx]['exportedbeliefs'].update(beliefs)
     ibeliefs[cidx] = beliefs
 
 debug("number of contexts = %d" % (len(contexts),))
@@ -130,7 +135,10 @@ for ctx in contexts.itervalues():
   for belief in ctx['lpbeliefs']:
     ctx['beliefs'][idx] = belief
     idx+= 1
-  for belief in ctx['exportedbeliefs'] - ctx['lpbeliefs']:
+  for belief in ctx['injectedbeliefs'] - ctx['lpbeliefs']:
+    ctx['beliefs'][idx] = belief
+    idx+= 1
+  for belief in ctx['exportedbeliefs'] - ctx['injectedbeliefs'] - ctx['lpbeliefs']:
     ctx['beliefs'][idx] = belief
     idx+= 1
   debug("indexed beliefs of context %d: %s" % (ctx['idx1'],ctx['beliefs']))
@@ -178,7 +186,7 @@ for ctx in contexts.itervalues():
     for (cidx1,beliefs) in ctx['importedbeliefs'].iteritems():
       debug("processing dependency from ctx %d to ctx %d and beliefs %s" % (ctx['idx0'],cidx1-1,beliefs))
       thisdeps = {}
-      dependencies[ctx['idx0']][cidx1] = thisdeps
+      dependencies[ctx['idx0']][cidx1-1] = thisdeps
       # preset
       for i in range(0,len(contexts)):
         thisdeps[i] = 0
@@ -188,7 +196,7 @@ for ctx in contexts.itervalues():
         # belief bit
         thisdeps[cidx1-1] |= 1 << (contexts[cidx1]['beliefidx'][belief])
       debug("dependencies for ctx %d -> ctx %d = '%s'" % \
-        (ctx['idx1'],cidx1-1,thisdeps))
+        (ctx['idx1'],cidx1,thisdeps))
 
 ###########################
 # do output
