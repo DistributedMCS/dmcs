@@ -152,17 +152,18 @@ for ctx in contexts.itervalues():
 ###########################
 querymask = []
 for ctxidx1 in range(1,len(contexts)+1):
-  mask = 0
+  beliefs = []
   if ctxidx1 == QUERYCTX:
-    # take all beliefs
-    for beliefidx in contexts[ctxidx1]['beliefs'].iterkeys():
-      mask |= 1 << beliefidx
-  for belief in contexts[ctxidx1]['exportedbeliefs']:
-    mask |= 1 << (contexts[ctxidx1]['beliefidx'][belief])
-  if mask != 0:
-    mask |= 1 # epsilon bit
-  debug("created mask 0x%x = %dd for ctx %d" % (mask, mask, ctxidx1))
-  querymask.append(mask)
+    # take all belief indices
+    beliefs = list(contexts[ctxidx1]['beliefs'].iterkeys())
+  else:
+    for belief in contexts[ctxidx1]['exportedbeliefs']:
+      beliefs.append( contexts[ctxidx1]['beliefidx'][belief] )
+  if len(beliefs) != 0:
+    beliefs.append(0) # epsilon 'bit'
+  debug("beliefs for ctx %d: '%s'" % (ctxidx1,beliefs))
+  querymask.append("{%s}" % (" ".join(map(str,beliefs)),))
+
 querymask = " ".join(map(str,querymask)) + " "
 
 ###########################
@@ -178,25 +179,42 @@ for ctx in contexts.itervalues():
 # calculate dependencies
 # first level of keys are contexts containing bridge rules
 # second level of keys are contexts in body atoms
+# values are again another level
 ###########################
 dependencies = {}
 for ctx in contexts.itervalues():
   if len(ctx['importedbeliefs']) > 0:
-    dependencies[ctx['idx0']] = {}
+    ctxdeps = {}
+    dependencies[ctx['idx0']] = ctxdeps
     for (cidx1,beliefs) in ctx['importedbeliefs'].iteritems():
       debug("processing dependency from ctx %d to ctx %d and beliefs %s" % (ctx['idx0'],cidx1-1,beliefs))
       thisdeps = {}
-      dependencies[ctx['idx0']][cidx1-1] = thisdeps
       # preset
       for i in range(0,len(contexts)):
-        thisdeps[i] = 0
-      # epsilon bit
-      thisdeps[cidx1-1] |= 1
+        thisdeps[i] = []
+      # beliefs
       for belief in beliefs:
-        # belief bit
-        thisdeps[cidx1-1] |= 1 << (contexts[cidx1]['beliefidx'][belief])
-      debug("dependencies for ctx %d -> ctx %d = '%s'" % \
-        (ctx['idx1'],cidx1,thisdeps))
+        thisdeps[cidx1-1].append(contexts[cidx1]['beliefidx'][belief])
+      # epsilon bit(s)
+      for dep in thisdeps.itervalues():
+        if len(dep) != 0:
+          dep.append(0) # epsilon 'bit'
+      debug("converted dependencies for ctx %d to %d = '%s'" % \
+        (ctx['idx1'],cidx1,ctxdeps))
+      # map lists of ints to "{i1 i2 i3}" format
+      keys = thisdeps.keys()
+      keys.sort
+      sorteddeps = []
+      for idx in keys:
+        singledep = thisdeps[idx]
+        debug("singledep %s (should be a list)" % (singledep,))
+        sorteddeps.append("{%s}" % (" ".join(map(str,singledep)),))
+      # map hash of third level into single string
+      ctxdeps[cidx1-1] = " ".join(sorteddeps)
+      debug("final dependencies for ctx %d to %d = '%s'" % \
+        (ctx['idx1'],cidx1,ctxdeps[cidx1-1]))
+    debug("dependencies for ctx %d = '%s'" % \
+      (ctx['idx1'],ctxdeps))
 
 ###########################
 # do output of .top file
@@ -212,10 +230,9 @@ for ctx in contexts.itervalues():
   print >>ftop, '%d [hostname="localhost", port="%d", sigma="%s"];' % \
     (ctx['idx0'],FIRSTPORT+ctx['idx0'],ctx['sigma'])
 for (depfrom,depdict) in dependencies.iteritems():
-  for (depto,depmasks) in depdict.iteritems():
-    #debug(depmasks)
-    print >>ftop, '%d->%d [interface="%s"];' % \
-      (depfrom,depto,"".join(map(lambda x: "%d " % (x,),depmasks.itervalues())))
+  for (depto,deps) in depdict.iteritems():
+    debug("from %s to %s dep %s" % (depfrom, depto, deps))
+    print >>ftop, '%d->%d [interface="%s"];' % (depfrom,depto,deps)
 print >>ftop, '}'
 ftop.close()
 
@@ -227,17 +244,21 @@ if os.path.exists(shfile):
   die("output file %s already exists!" % (shfile,))
 
 fsh = open(shfile,"w+")
+# reset logfiles
+print >>fsh, 'rm ctx*.log'
 # context daemons
 for ctx in contexts.itervalues():
   print >>fsh, '$DMCSPATH/dmcsd --context=%d --port=%d --kb=%s --br=%s --topology=%s >ctx%d.log 2>&1 &' % \
     (ctx['idx1'], FIRSTPORT+ctx['idx0'], ctx['lpfile'], ctx['brfile'], topfile, ctx['idx1'])
 # wait for startup
-print >>fsh, 'sleep 5'
+print >>fsh, 'sleep 1'
 # display daemon outputs
 print >>fsh, 'tail -f ctx*.log &'
+# wait for tail-f startup
+print >>fsh, 'sleep 1'
 # querying client
 print >>fsh, 'time $DMCSPATH/dmcsc --hostname=localhost --port=%d --system-size=%d --query-variables="%s"' % \
   (FIRSTPORT+QUERYCTX-1, len(contexts), querymask)
-# kill daemons (TODO improve this!)
-print >>fsh, 'killall dmcsd'
+# kill all backgrounded jobs
+print >>fsh, 'jobs -p |xargs kill'
 fsh.close()
