@@ -10,6 +10,9 @@ QUERYCTX=1
 # FIRSTPORT: network port where we want the first context to operate, other contexts use ports above
 FIRSTPORT=5001
 
+# CREATE_TREE_OPT: create .opt output (this only works if the underlying MCS is tree-shaped!
+CREATE_TREE_OPT=True
+
 import sys
 import os.path
 import re
@@ -182,6 +185,8 @@ for ctx in contexts.itervalues():
 # values are again another level
 ###########################
 dependencies = {}
+if CREATE_TREE_OPT:
+  tree_opt_dependencies = {}
 for ctx in contexts.itervalues():
   if len(ctx['importedbeliefs']) > 0:
     ctxdeps = {}
@@ -237,28 +242,76 @@ print >>ftop, '}'
 ftop.close()
 
 ###########################
-# do output of .sh file
+# do output of .top.sh file
 ###########################
-shfile = "%s.sh" % (outputname,)
-if os.path.exists(shfile):
-  die("output file %s already exists!" % (shfile,))
+topshfile = "%s.top.sh" % (outputname,)
+if os.path.exists(topshfile):
+  die("output file %s already exists!" % (topshfile,))
 
-fsh = open(shfile,"w+")
+ftopsh = open(topshfile,"w+")
 # reset logfiles
-print >>fsh, 'rm ctx*.log'
+print >>ftopsh, 'rm ctx*.log'
 # context daemons
 for ctx in contexts.itervalues():
-  print >>fsh, '$DMCSPATH/dmcsd --context=%d --port=%d --kb=%s --br=%s --topology=%s >ctx%d.log 2>&1 &' % \
+  print >>ftopsh, '$DMCSPATH/dmcsd --context=%d --port=%d --kb=%s --br=%s --topology=%s >ctx%d.log 2>&1 &' % \
     (ctx['idx1'], FIRSTPORT+ctx['idx0'], ctx['lpfile'], ctx['brfile'], topfile, ctx['idx1'])
 # wait for startup
-print >>fsh, 'sleep 1'
+print >>ftopsh, 'sleep 1'
 # display daemon outputs
-print >>fsh, 'tail -f ctx*.log &'
+print >>ftopsh, 'tail -f ctx*.log &'
 # wait for tail-f startup
-print >>fsh, 'sleep 1'
+print >>ftopsh, 'sleep 1'
 # querying client
-print >>fsh, 'time $DMCSPATH/dmcsc --hostname=localhost --port=%d --system-size=%d --query-variables="%s"' % \
+print >>ftopsh, 'time $DMCSPATH/dmcsc --hostname=localhost --port=%d --system-size=%d --streaming=0 --query-variables="%s"' % \
   (FIRSTPORT+QUERYCTX-1, len(contexts), querymask)
 # kill all backgrounded jobs
-print >>fsh, 'jobs -p |xargs kill'
-fsh.close()
+print >>ftopsh, 'jobs -p |xargs kill'
+ftopsh.close()
+
+if CREATE_TREE_OPT:
+  ###########################
+  # do output of .opt file
+  ###########################
+  optfile = "%s.opt" % (outputname,)
+  if os.path.exists(optfile):
+    die("output file %s already exists!" % (optfile,))
+
+  fopt = open(optfile,"w+")
+  print >>fopt, 'digraph G {'
+  print >>fopt, 'graph [name="%s"]' % (querymask,)
+  for ctx in contexts.itervalues():
+    print >>fopt, '%d [hostname="localhost", port="%d", sigma="%s"];' % \
+      (ctx['idx0'],FIRSTPORT+ctx['idx0'],ctx['sigma'])
+  for (depfrom,depdict) in dependencies.iteritems():
+    for (depto,deps) in depdict.iteritems():
+      debug("from %s to %s dep %s" % (depfrom, depto, deps))
+      print >>fopt, '%d->%d [interface="%s"];' % (depfrom,depto,deps)
+  print >>fopt, '}'
+  fopt.close()
+
+  ###########################
+  # do output of .opt.sh file
+  ###########################
+  optshfile = "%s.opt.sh" % (outputname,)
+  if os.path.exists(optshfile):
+    die("output file %s already exists!" % (optshfile,))
+
+  foptsh = open(optshfile,"w+")
+  # reset logfiles
+  print >>foptsh, 'rm ctx*.log'
+  # context daemons
+  for ctx in contexts.itervalues():
+    print >>foptsh, '$DMCSPATH/dmcsd --context=%d --port=%d --kb=%s --br=%s --topology=%s >ctx%d.log 2>&1 &' % \
+      (ctx['idx1'], FIRSTPORT+ctx['idx0'], ctx['lpfile'], ctx['brfile'], optfile, ctx['idx1'])
+  # wait for startup
+  print >>foptsh, 'sleep 1'
+  # display daemon outputs
+  print >>foptsh, 'tail -f ctx*.log &'
+  # wait for tail-f startup
+  print >>foptsh, 'sleep 1'
+  # querying client
+  print >>foptsh, 'time $DMCSPATH/dmcsc --hostname=localhost --port=%d --system-size=%d --streaming=1 --packsize=100' % \
+    (FIRSTPORT+QUERYCTX-1, len(contexts))
+  # kill all backgrounded jobs
+  print >>foptsh, 'jobs -p |xargs kill'
+  foptsh.close()
