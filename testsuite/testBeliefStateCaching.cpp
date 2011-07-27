@@ -53,13 +53,16 @@ BOOST_AUTO_TEST_CASE ( testBeliefStateCaching )
   BOOST_TEST_MESSAGE("pbs6 = " << *pbs6);
   std:: cerr << "pbs6 = " << pbs6 << " " << *pbs6 << std::endl;
 
-  store(pbs1, cache);
-  store(pbs2, cache);
-  store(pbs3, cache);
+  bool want_delete = true;
+  bool was_cached;
+
+  store(pbs1, cache, want_delete, was_cached);
+  store(pbs2, cache, want_delete, was_cached);
+  store(pbs3, cache, want_delete, was_cached);
 
   std::cerr << "CAHCE after 3 stores: " << std::endl << *cache << std::endl;
 
-  store(pbs4, cache);
+  store(pbs4, cache, want_delete, was_cached);
 
   std::cerr << "CAHCE after 4 stores: " << std::endl << *cache << std::endl;
 
@@ -67,7 +70,7 @@ BOOST_AUTO_TEST_CASE ( testBeliefStateCaching )
 
   BOOST_CHECK_EQUAL(null_pbs4, true);
 
-  store(pbs5, cache);
+  store(pbs5, cache, want_delete, was_cached);
 
   std::cerr << "CAHCE after 5 stores: " << std::endl << *cache << std::endl;
 

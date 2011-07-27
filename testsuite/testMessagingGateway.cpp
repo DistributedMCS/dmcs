@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( testMessagingGateway )
   int timeout = 0;
 
   BOOST_TEST_MESSAGE("send model...");
-  mg2->sendModel(b1, 42, 0, ConcurrentMessageQueueFactory::OUT_MQ, prio);
+  mg2->sendModel(b1, 42, 1, 0, ConcurrentMessageQueueFactory::OUT_MQ, prio);
 
   BOOST_TEST_MESSAGE("recv model...");
   ms2 = mg2->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
@@ -69,15 +69,15 @@ BOOST_AUTO_TEST_CASE( testMessagingGateway )
 
   // now fill up the queue
   ///@todo we assumed that queue has size 5
-  mg2->sendModel(b1, 0, 0, ConcurrentMessageQueueFactory::OUT_MQ, prio);
-  mg2->sendModel(b1, 0, 1, ConcurrentMessageQueueFactory::OUT_MQ, prio);
-  mg2->sendModel(b1, 0, 2, ConcurrentMessageQueueFactory::OUT_MQ, prio);
-  mg2->sendModel(b1, 0, 3, ConcurrentMessageQueueFactory::OUT_MQ, prio);
-  mg2->sendModel(b1, 0, 4, ConcurrentMessageQueueFactory::OUT_MQ, prio);
+  mg2->sendModel(b1, 0, 1, 0, ConcurrentMessageQueueFactory::OUT_MQ, prio);
+  mg2->sendModel(b1, 0, 1, 1, ConcurrentMessageQueueFactory::OUT_MQ, prio);
+  mg2->sendModel(b1, 0, 1, 2, ConcurrentMessageQueueFactory::OUT_MQ, prio);
+  mg2->sendModel(b1, 0, 1, 3, ConcurrentMessageQueueFactory::OUT_MQ, prio);
+  mg2->sendModel(b1, 0, 1, 4, ConcurrentMessageQueueFactory::OUT_MQ, prio);
 
   BOOST_TEST_MESSAGE("send blocks for 1 sec and eventually fails");
 
-  bool ret = mg2->sendModel(b1, 0, 5, ConcurrentMessageQueueFactory::OUT_MQ, prio, 1000);
+  bool ret = mg2->sendModel(b1, 0, 1, 5, ConcurrentMessageQueueFactory::OUT_MQ, prio, 1000);
 
   BOOST_CHECK_EQUAL(ret, false);
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( testMessagingGateway )
        
   BOOST_TEST_MESSAGE("waiting for worker thread to read queue...");
 
-  mg2->sendModel(b1, 0, 6, ConcurrentMessageQueueFactory::OUT_MQ, prio);
+  mg2->sendModel(b1, 0, 1, 6, ConcurrentMessageQueueFactory::OUT_MQ, prio);
 
   BOOST_TEST_MESSAGE("waiting for worker thread to send me a future value...");
 
