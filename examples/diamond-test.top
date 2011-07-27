@@ -1,0 +1,11 @@
+digraph G {
+graph [name = "{0 1 2 3 4 5 6 7 8} {0 1} {0 1 3} {0 1 2 3 7} "] 
+0 [hostname="localhost", port="5001", sigma="(c1a1 1 1 1),(c1a2 1 2 2),(c1a3 1 3 3),(c1a4 1 4 4),(c1a5 1 5 5),(c1a6 1 6 6),(c1a7 1 7 7),(c1a8 1 8 8)"];
+1 [hostname="localhost", port="5002", sigma="(c2a1 2 1 1),(c2a2 2 2 2),(c2a3 2 3 3),(c2a4 2 4 4),(c2a5 2 5 5),(c2a6 2 6 6),(c2a7 2 7 7),(c2a8 2 8 8)"];
+2 [hostname="localhost", port="5003", sigma="(c3a1 3 1 1),(c3a2 3 2 2),(c3a3 3 3 3),(c3a4 3 4 4),(c3a5 3 5 5),(c3a6 3 6 6),(c3a7 3 7 7),(c3a8 3 8 8)"];
+3 [hostname="localhost", port="5004", sigma="(c4a1 4 1 1),(c4a2 4 2 2),(c4a3 4 3 3),(c4a4 4 4 4),(c4a5 4 5 5),(c4a6 4 6 6),(c4a7 4 7 7),(c4a8 4 8 8)"];
+0->1 [interface="{} {0 1} {} {} "];
+0->2 [interface="{} {} {0 1 3} {} "];
+1->3 [interface="{} {} {} {0 7} "];
+2->3 [interface="{} {} {} {0 1 2 3 7} "];
+}

@@ -1,0 +1,5 @@
+../build-dbg/src/dmcsd --context=1 --port=5001 --kb=./diamond-test-1.lp --br=./diamond-test-1.br --topology=./diamond-test.opt
+../build-dbg/src/dmcsd --context=2 --port=5002 --kb=./diamond-test-2.lp --br=./diamond-test-2.br --topology=./diamond-test.opt
+../build-dbg/src/dmcsd --context=3 --port=5003 --kb=./diamond-test-3.lp --br=./diamond-test-3.br --topology=./diamond-test.opt
+../build-dbg/src/dmcsd --context=4 --port=5004 --kb=./diamond-test-4.lp --br=./diamond-test-4.br --topology=./diamond-test.opt
+time ../build-dbg/src/dmcsc --hostname=localhost --port=5001 --system-size=4
