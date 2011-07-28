@@ -171,6 +171,10 @@ RelSatSolver::prepare_input()
   input = ms.m;
   std::size_t sid = ms.sid;
 
+  // later attach path to the output so that OutputDispatcher can dispatch 
+  // to the right OutputThread
+  //std::size_t path = ms.path;
+
   if (input == 0)
     {
       return false;
