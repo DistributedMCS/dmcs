@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( testMessagingGateway )
   int timeout = 0;
 
   BOOST_TEST_MESSAGE("send model...");
-  mg2->sendModel(b1, 42, 1, 0, ConcurrentMessageQueueFactory::OUT_MQ, prio);
+  mg2->sendModel(b1, 1, 42, 0, ConcurrentMessageQueueFactory::OUT_MQ, prio);
 
   BOOST_TEST_MESSAGE("recv model...");
   ms2 = mg2->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);

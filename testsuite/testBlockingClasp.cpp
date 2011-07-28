@@ -70,15 +70,15 @@ BOOST_AUTO_TEST_CASE ( testBlockingClasp )
 
       if (belief_state != boost::shared_ptr<BeliefState>())
 	{
+	  count++;
+
 	  BOOST_TEST_MESSAGE("read " << belief_state);
 	  BOOST_TEST_MESSAGE("count: " << count);
-
-	  count++;
 
 	  boost::posix_time::milliseconds n(500);
 	  boost::this_thread::sleep(n);
 
-	  BOOST_TEST_MESSAGE("slept 500msecs");
+	  BOOST_TEST_MESSAGE("slept 500 msecs");
 	}
     }
   while (belief_state != boost::shared_ptr<BeliefState>() &&
