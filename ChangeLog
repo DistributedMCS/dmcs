@@ -1,3 +1,9 @@
+2011-07-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/parser/ClaspResultOnlineParser.h: Allow parsing models returned
+	in more than 1 line.
+	* include/parser/ClaspResultOnlineParser.tcc: Likewise.
+
 2011-04-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* examples/tables.py: Update script to extract memory usage.
