@@ -13,7 +13,11 @@
 void Random::vInitRandom(int iSeed_)
 {
   assert(iSeed_ > 0);
-  xRandGen.sgenrand(iSeed_);
+
+  int rigid_seed = 1000;
+  xRandGen.sgenrand(rigid_seed);
+
+  //xRandGen.sgenrand(iSeed_);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

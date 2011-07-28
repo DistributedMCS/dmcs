@@ -293,13 +293,14 @@ def main(argv):
                         times[1] = get_running_time(log_time)
                     else:
                         # find the reason for FAILING, which is either TIMEOUT or MEMOUT
-                        failed_reason = why_failed(testpath, testname, context, mode, log_tail)
-                        if failed_reason == 'TIMEOUT':
-                            times[1] = '---'
-                        elif failed_reason == 'MEMOUT':
-                            times[1] = 'M'
-                        else:
-                            times[1] = 'U'
+                        #failed_reason = why_failed(testpath, testname, context, mode, log_tail)
+                        #if failed_reason == 'TIMEOUT':
+                        #    times[1] = '---'
+                        #elif failed_reason == 'MEMOUT':
+                        #    times[1] = 'M'
+                        #else:
+                        #    times[1] = 'U'
+                        times[1] = '---'
                 else:
                     for package in testpackage:
                         pos = getPosition(mode, package)
@@ -320,13 +321,14 @@ def main(argv):
 
                         else:
                             # find the reason for FAILING, which is either TIMEOUT or MEMOUT
-                            failed_reason = why_failed(testpath, testname, context, mode + '-k' + package, log_tail)
-                            if failed_reason == 'TIMEOUT':
-                                times[pos] = '---'
-                            elif failed_reason == 'MEMOUT':
-                                times[pos] = 'M'
-                            else:
-                                times[pos] = 'U'
+                            #failed_reason = why_failed(testpath, testname, context, mode + '-k' + package, log_tail)
+                            #if failed_reason == 'TIMEOUT':
+                            #    times[pos] = '---'
+                            #elif failed_reason == 'MEMOUT':
+                            #    times[pos] = 'M'
+                            #else:
+                            #    times[pos] = 'U'
+                            times[pos] = '---'
 
             times[0] = no_answer
             vals.append(times)

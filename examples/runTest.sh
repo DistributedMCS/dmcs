@@ -4,18 +4,19 @@
 export MALLOC_CHECK_=0
 
 declare -i TIMEOUT=180
-declare -i MEMOUT=1000
+declare -i MEMOUT=500
 
 export GNUTIME="/usr/bin/time --verbose -o" # time command
-export RUN="run -s $MEMOUT -t $((TIMEOUT+20)) -k -o"
+export RUN="runlim -s $MEMOUT -t $((TIMEOUT+20)) -k -o"
 export TIMELIMIT="timelimit -p -s 1 -t $TIMEOUT -T 20"
 export TIMEFORMAT=$'\nreal\t%3R\nuser\t%3U\nsys\t%3S' # time format
 export TESTSPATH='./experiments' # path to lp/br/opt
-export DMCSPATH='../../../../../build/src' # path to dmcsd/dmcsc relative to test instances
+export DMCSPATH='../../../../../build-dbg/src' # path to dmcsd/dmcsc relative to test instances
 export DMCS_PARALLEL_PATH='../../../../../../dmcs-parallel/build/src' # path to parallel dmcsd/dmcsc relative to test instances
 export LOGPATH='.' # path to output logfiles relative to test instances
 
 export EMAIL=dao@kr.tuwien.ac.at
+export TESTCASES=tests.txt
 
 DORUN=no # run with `run'
 DOTIMELIMIT=yes # run with `timelimit'
@@ -24,13 +25,25 @@ LOGDAEMONS=no # log daemon output
 ULIMIT=yes # use ulimit
 
 export TOPOLOGIES="diamond tree ring zig-zag"
-#export TOPOLOGIES="tree ring zig-zag"
 export INSTANCES=a..e
 
 #                 D        T               R               Z
 declare -a sizes=(10 28 34 10 28 34 50 100 10 28 34 50 100 10 28 34 50 100)
+
 declare -a start=(0 3 8 13 18)
 declare -a length=(3 5 5 5)
+
+#                 T         R         Z
+#declare -a sizes=(10 50 100 10 50 100 10 50 100)
+#declare -a start=(0 3 6)
+#declare -a length=(3 3 3)
+
+#declare -a sizes=(10 28 34 10 28 34 50 100 10 28 34 50 100 10 28 34 50 100)
+#declare -a start=(1 4 9 14 19)
+#declare -a length=(2 4 4 4)
+
+#declare -a start=(0 3 8 13 18)
+#declare -a length=(3 5 5 5)
 
 declare -a sigs=(10 40)
 declare -a bridges=(5 20)
@@ -49,7 +62,7 @@ export DMCSC_PARALLEL="$DMCS_PARALLEL_PATH/dmcsc"
 
 declare -i MINPORT=5000
 
-declare -i i=1
+declare -i i=0
 declare -i j=0
 declare -i k=0
 declare -i p=0
@@ -74,8 +87,8 @@ function runTest()
     echo $TESTNAME-$MODE
 
     if [ `netstat -anlt | grep TIME_WAIT | wc -l` -gt 1 ]; then # kludge
-	echo "Sleeping for 70 secs..."
-	sleep 70 
+	echo "Sleeping for 30 secs..."
+	sleep 30 
     fi
 
 
@@ -144,9 +157,9 @@ function runTest()
     LOGRUN=$LOGPATH/$TESTNAME-$MODE-run.log
 
     if [ $1 = streaming -o $1 = parallel ] ; then 
-	DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX --s=1 --k=$2"
+	DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX --streaming=1 --packsize=$2"
     else
-	DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX --s=0"
+	DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX --streaming=0"
     fi
 
     if [ $1 = parallel ] ; then
@@ -186,11 +199,11 @@ function runTest()
     
     if [ $DMCSCRET = 0 ]; then
 	echo "PASS: $TESTNAME-$MODE" >> $STATSLOG
-	(echo "New test $TESTNAME-$MODE finished" ; echo ; cat $TESTNAME-$MODE.log ; echo ; cat $TESTNAME-$MODE-time.log) | mail -s "New test on lion FINISHED" $EMAIL
+	(echo "New test $TESTNAME-$MODE finished" ; echo ; cat $TESTNAME-$MODE.log ; echo ; cat $TESTNAME-$MODE-time.log) | mail -s "New test on lion with ulimit FINISHED" $EMAIL
     else
 	egrep -H "status" $LOGPATH/$TESTNAME-$MODE-run*.log >> $STATSLOG
 	echo "FAILED: $TESTNAME-$MODE" >> $STATSLOG
-	(echo "New test $TESTNAME-$MODE failed" ; echo ; cat $TESTNAME-$MODE.log ; echo ; cat $TESTNAME-$MODE-time.log) | mail -s "New test on lion FAILED" $EMAIL
+	(echo "New test $TESTNAME-$MODE failed" ; echo ; cat $TESTNAME-$MODE.log ; echo ; cat $TESTNAME-$MODE-time.log) | mail -s "New test on lion with ulimit FAILED" $EMAIL
     fi
     
     echo >> $STATSLOG
@@ -210,26 +223,28 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
+rm $TESTCASES
+
 cd $TESTSPATH
 
 for TOPO in $TOPOLOGIES ; do 
     
     cd $TOPO
 
+    # identify range of system size to test ############
     declare -i start_now=${start[$i]}
 
     declare -i end_now=$start_now
-    #let "end_now += 1"
     let "end_now += ${length[$i]}"
 
-    # go for system size ########################
+    # go for system size ###############################
     for (( j=$start_now; j < $end_now; ++j )); do 
 
 	declare -i CTX=${sizes[$j]}
 
-	# go for parameters setting #############
+	# go for parameters setting ####################
 	for (( k = 0; k < 2; ++k )); do
-	#for (( k = 0; k < 1; ++k )); do
+	#for (( k = 0; k < 2; ++k )); do
 
 	    declare -i SIG=${sigs[$k]}
 	    declare -i BRS=${bridges[$k]}
@@ -241,6 +256,8 @@ for TOPO in $TOPOLOGIES ; do
 	    for INST in $(eval echo {$INSTANCES}) ; do
 		
 		export TESTNAME=$TOPO-$CTX-$SIG-$BRS-$RLS-$INST
+
+		echo $TESTNAME >> ../../../$TESTCASES
 		
 		cd $TESTNAME
 
@@ -249,11 +266,14 @@ for TOPO in $TOPOLOGIES ; do
 		for (( p=0; p < 3; ++p )); do
 		    runTest streaming ${packages[$p]}
 
-		    runTest parallel ${packages[$p]}
+		    #runTest parallel ${packages[$p]}
 		done
 
 		cd ..
 	    done # for INST
+
+	    echo "end" >> ../../../$TESTCASES
+
 	    cd ..	    
 	done # for k = 0...
     done # for j = $start_now...$end_now

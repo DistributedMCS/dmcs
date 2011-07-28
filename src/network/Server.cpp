@@ -296,7 +296,6 @@ Server::dispatch_header(const boost::system::error_code& e,
 	  boost::thread* boost_handler_thread = new boost::thread(*handler_thread, is_leaf, handler, sesh, joiner_sat_notif, mg.get());
 	  boost_handler_threads->push_back(boost_handler_thread);
 	  handler_threads->push_back(handler_thread);
-	  ///@todo: delete threads in destructor of Server
 	}
       else if (header->find(HEADER_REQ_OPT_DMCS) != std::string::npos)
 	{
