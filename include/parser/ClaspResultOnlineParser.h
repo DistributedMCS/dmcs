@@ -51,6 +51,7 @@ struct ClaspResultOnlineGrammar : public qi::grammar<Iterator, ascii::space_type
   qi::rule<Iterator, ascii::space_type > sentinel;
   qi::rule<Iterator, int(), ascii::space_type > literal;
   qi::rule<Iterator, ascii::space_type > partial_model;
+  qi::rule<Iterator, ascii::space_type > finalize_model;
   qi::rule<Iterator, ascii::space_type > solution;
   qi::rule<Iterator, ascii::space_type > comment;
   qi::rule<Iterator, ascii::space_type > start;

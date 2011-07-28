@@ -105,6 +105,11 @@ ClaspResultOnlineGrammar<Iterator>::ClaspResultOnlineGrammar(const ProxySignatur
   // turn got_answer to true
   partial_model = qi::char_('v') >> +literal[handle_int(belief_state, mixed_sig)] 
 				 >> -(sentinel[handle_model(got_answer)]);
+
+  finalize_model = qi::char_('v') >> *literal[handle_int(belief_state, mixed_sig)] 
+				  >> sentinel[handle_model(got_answer)];
+
+  
   
   solution = qi::char_('s') >> (qi::string("SATISFIABLE") |
 				qi::string("UNSATISFIABLE") | 
@@ -112,7 +117,7 @@ ClaspResultOnlineGrammar<Iterator>::ClaspResultOnlineGrammar(const ProxySignatur
   
   comment = qi::char_('c') >> *(qi::char_ - qi::eol);
   
-  start = partial_model | comment | solution;
+  start = partial_model | finalize_model | comment | solution;
 }
 
 
