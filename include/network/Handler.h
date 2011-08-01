@@ -142,7 +142,6 @@ public:
 		     StreamingSessionMsgPtr sesh,
 		     ConcurrentMessageQueue* sat_notif,
 		     MessagingGatewayBC* mg,
-		     OutputDispatcher* od,
 		     boost::shared_ptr<std::string> header,
 		     std::size_t parent_session_id);
 

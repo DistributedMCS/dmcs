@@ -330,6 +330,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // the next pack_size models)
 
 	  OutputThread ot(port, path);
+
 	  output_thread = new boost::thread(ot, sesh->conn, mg, handler_output_notif.get(), od);
 
 	  first_call = false;
@@ -347,6 +348,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
       boost::shared_ptr<std::string> header(new std::string);
 
+      OutputDispatcherPtr mg1;
+
       sesh->conn->async_read(*header,
 			     boost::bind(&StreamingHandler::handle_read_header, this,
 					 boost::asio::placeholders::error,
@@ -355,7 +358,6 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					 sesh, 
 					 sat_notif,
 					 mg,
-					 od,
 					 header,
 					 parent_session_id)
 			     );
@@ -378,9 +380,9 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 						  StreamingSessionMsgPtr sesh,
 						  ConcurrentMessageQueue* sat_notif,
 						  MessagingGatewayBC* mg,
-						  OutputDispatcher* od,
 						  boost::shared_ptr<std::string> header,
-						  std::size_t parent_session_id)
+						  std::size_t parent_session_id
+						  )
 {
   assert(this == hdl.get());
 
@@ -393,6 +395,8 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	{
 	  DMCS_LOG_TRACE(port << ": Got a STREAMING/NEXT request. Will inform my slaves about this.");
 
+	  OutputDispatcher* null_pointer = 0;
+
 	  // Read the message 
 	  sesh->conn->async_read(sesh->mess,
 				 boost::bind(&StreamingHandler::do_local_job, this,
@@ -402,7 +406,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 					     sesh,
 					     sat_notif,
 					     mg,
-					     od,
+					     null_pointer,
 					     false) // subsequent call to local job
 				 );
 	}

@@ -34,6 +34,7 @@
 #include "dmcs/OutputNotification.h"
 #include "mcs/BeliefState.h"
 #include "network/ConcurrentMessageQueueFactory.h"
+#include "network/OutputDispatcher.h"
 #include "network/connection.hpp"
 
 #include <boost/asio.hpp>

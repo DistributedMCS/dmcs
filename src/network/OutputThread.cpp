@@ -82,7 +82,7 @@ OutputThread::operator()(connection_ptr c,
   std::size_t parent_session_id;
   ModelSessionIdListPtr res(new ModelSessionIdList);
 
-  od->registerOutputThread(path, cmq.get());
+  //od->registerOutputThread(path, cmq.get());
   
   while (1)
     {
