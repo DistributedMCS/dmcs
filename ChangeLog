@@ -1,5 +1,15 @@
 2011-08-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/OutputDispatcher.h: Add OutputDispatcherPtr.
+
+	* include/network/Handler.h: Make use of OutputDispatcher.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/HandlerThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/Server.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+
 	* testsuite/Makefile.am: Add new testcase for OutputDispatcher.
 
 	* include/network/Makefile.am: Add OutputDispatcher.h.

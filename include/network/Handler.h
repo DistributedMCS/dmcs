@@ -36,6 +36,7 @@
 #include "network/ConcurrentMessageQueueHelper.h"
 #include "network/Session.h"
 #include "network/OutputThread.h"
+#include "network/OutputDispatcher.h"
 #include "network/ThreadFactory.h"
 #include "network/StreamingDMCSThread.h"
 #include "dmcs/CommandType.h"
@@ -121,7 +122,8 @@ public:
 	  StreamingHandlerPtr hdl, 
 	  StreamingSessionMsgPtr sesh, 
 	  ConcurrentMessageQueue* sat_notif,
-	  MessagingGatewayBC* mg);
+	  MessagingGatewayBC* mg,
+	  OutputDispatcher* od);
 
   void 
   do_local_job(const boost::system::error_code& e,
@@ -130,6 +132,7 @@ public:
 	       StreamingSessionMsgPtr sesh,
 	       ConcurrentMessageQueue* sat_notif,
 	       MessagingGatewayBC* mg,
+	       OutputDispatcher* od,
 	       bool first_call);
 
   void
@@ -139,6 +142,7 @@ public:
 		     StreamingSessionMsgPtr sesh,
 		     ConcurrentMessageQueue* sat_notif,
 		     MessagingGatewayBC* mg,
+		     OutputDispatcher* od,
 		     boost::shared_ptr<std::string> header,
 		     std::size_t parent_session_id);
 

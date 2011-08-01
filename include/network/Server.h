@@ -32,6 +32,7 @@
 
 #include "network/BaseHandler.h"
 #include "network/HandlerThread.h"
+#include "network/OutputDispatcher.h"
 #include "network/Session.h"
 #include "network/connection.hpp"
 
@@ -92,7 +93,9 @@ private:
   ListSizeTPtr invokers;
   boost::thread* join_thread;
   boost::thread* sat_thread;
+  boost::thread* output_dispatcher_thread;
   MessagingGatewayBCPtr mg;
+  OutputDispatcherPtr output_dispatcher;
   ThreadVecPtr boost_handler_threads;
   ThreadVecPtr neighbor_threads;
   NeighborThreadVecPtr neighbors;

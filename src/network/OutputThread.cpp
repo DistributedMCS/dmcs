@@ -47,7 +47,8 @@ namespace dmcs {
 OutputThread::OutputThread(std::size_t p, std::size_t pa)
   : port(p), 
     path(pa),
-    output_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE))
+    output_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE)),
+    cmq(new ConcurrentMessageQueue())
 { }
 
 
@@ -70,7 +71,8 @@ OutputThread::~OutputThread()
 void
 OutputThread::operator()(connection_ptr c,
 			 MessagingGatewayBC* mg,
-			 ConcurrentMessageQueue* hon)
+			 ConcurrentMessageQueue* hon,
+			 OutputDispatcher* od)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -79,6 +81,8 @@ OutputThread::operator()(connection_ptr c,
   std::size_t k2;
   std::size_t parent_session_id;
   ModelSessionIdListPtr res(new ModelSessionIdList);
+
+  od->registerOutputThread(path, cmq.get());
   
   while (1)
     {

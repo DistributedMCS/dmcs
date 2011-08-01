@@ -51,9 +51,10 @@ namespace dmcs {
 			    StreamingHandlerPtr handler,
 			    StreamingSessionMsgPtr sesh,
 			    ConcurrentMessageQueue* sat_notif,
-			    MessagingGatewayBC* mg)
+			    MessagingGatewayBC* mg,
+			    OutputDispatcher* od)
   {
-    handler->startup(is_leaf, handler, sesh, sat_notif, mg);
+    handler->startup(is_leaf, handler, sesh, sat_notif, mg, od);
   }
 
 
@@ -138,7 +139,19 @@ Server::~Server()
     }
   else
     {
-      DMCS_LOG_ERROR("Sat thread not satable!");
+      DMCS_LOG_ERROR("Sat thread not joinable!");
+    }
+
+  if (output_dispatcher_thread && output_dispatcher_thread->joinable())
+    {
+      output_dispatcher_thread->interrupt();
+      output_dispatcher_thread->join();
+      delete output_dispatcher_thread;
+      output_dispatcher_thread = 0;
+    }
+  else
+    {
+      DMCS_LOG_ERROR("OutputDispatcher thread not joinable");
     }
 
   if (joiner_sat_notif)
@@ -292,8 +305,11 @@ Server::dispatch_header(const boost::system::error_code& e,
 	  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
 	  bool is_leaf = (nbs->size() == 0);
 
+	  output_dispatcher = OutputDispatcherPtr(new OutputDispatcher());
+	  output_dispatcher_thread = new boost::thread(*output_dispatcher, mg.get());
+
 	  HandlerThread* handler_thread = new HandlerThread(invoker);
-	  boost::thread* boost_handler_thread = new boost::thread(*handler_thread, is_leaf, handler, sesh, joiner_sat_notif, mg.get());
+	  boost::thread* boost_handler_thread = new boost::thread(*handler_thread, is_leaf, handler, sesh, joiner_sat_notif, mg.get(), output_dispatcher.get());
 	  boost_handler_threads->push_back(boost_handler_thread);
 	  handler_threads->push_back(handler_thread);
 	}

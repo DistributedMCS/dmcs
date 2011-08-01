@@ -252,7 +252,8 @@ Handler<StreamingCommandType>::startup(bool is_leaf,
 				       StreamingHandlerPtr hdl, 
 				       StreamingSessionMsgPtr sesh, 
 				       ConcurrentMessageQueue* sat_notif,
-				       MessagingGatewayBC* mg)
+				       MessagingGatewayBC* mg,
+				       OutputDispatcher* od)
 {
   assert(hdl.get() == this);
 
@@ -264,6 +265,7 @@ Handler<StreamingCommandType>::startup(bool is_leaf,
 				     sesh,
 				     sat_notif,
 				     mg,
+				     od,
 				     true) // first request
 			   );
 }
@@ -300,6 +302,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					    StreamingSessionMsgPtr sesh,
 					    ConcurrentMessageQueue* sat_notif,
 					    MessagingGatewayBC* mg,
+					    OutputDispatcher* od,
 					    bool first_call)
 {
   assert(this == hdl.get());
@@ -327,7 +330,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // the next pack_size models)
 
 	  OutputThread ot(port, path);
-	  output_thread = new boost::thread(ot, sesh->conn, mg, handler_output_notif.get());
+	  output_thread = new boost::thread(ot, sesh->conn, mg, handler_output_notif.get(), od);
 
 	  first_call = false;
 	} // if (first_call)
@@ -352,6 +355,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					 sesh, 
 					 sat_notif,
 					 mg,
+					 od,
 					 header,
 					 parent_session_id)
 			     );
@@ -374,6 +378,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 						  StreamingSessionMsgPtr sesh,
 						  ConcurrentMessageQueue* sat_notif,
 						  MessagingGatewayBC* mg,
+						  OutputDispatcher* od,
 						  boost::shared_ptr<std::string> header,
 						  std::size_t parent_session_id)
 {
@@ -397,6 +402,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 					     sesh,
 					     sat_notif,
 					     mg,
+					     od,
 					     false) // subsequent call to local job
 				 );
 	}

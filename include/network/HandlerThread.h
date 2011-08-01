@@ -33,6 +33,7 @@
 //#include "network/Handler.h"
 #include "dmcs/Log.h"
 #include "network/ConcurrentMessageQueueFactory.h"
+#include "network/OutputDispatcher.h"
 
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
@@ -70,7 +71,8 @@ public:
 	     StreamingHandlerPtr handler,
 	     StreamingSessionMsgPtr sesh,
 	     ConcurrentMessageQueue* sat_notif,
-	     MessagingGatewayBC* mg);
+	     MessagingGatewayBC* mg,
+	     OutputDispatcher* od);
 
 private:
   std::size_t invoker;

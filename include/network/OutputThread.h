@@ -54,7 +54,8 @@ public:
   void
   operator()(connection_ptr c,
 	     MessagingGatewayBC* m,
-	     ConcurrentMessageQueue* hon);
+	     ConcurrentMessageQueue* hon,
+	     OutputDispatcher* od);
 
 private:
   BaseNotification::NotificationType
@@ -80,6 +81,7 @@ private:
 private:
   std::size_t port;
   PartialBeliefStateBufPtr output_buffer;
+  ConcurrentMessageQueuePtr cmq;
   std::size_t path;
 };
 

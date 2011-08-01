@@ -33,6 +33,8 @@
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/MessagingGateway.h"
 
+#include <boost/shared_ptr.hpp>
+
 namespace dmcs {
 
 class OutputDispatcher
@@ -49,6 +51,8 @@ public:
 private:
   CMQMapPtr output_thread_map;
 };
+
+typedef boost::shared_ptr<OutputDispatcher> OutputDispatcherPtr;
 
 }
 
