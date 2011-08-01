@@ -40,7 +40,8 @@ TESTS = \
 	testJoinLeak \
 	testInterfaceRelSat \
 	testBeliefStateCaching \
-	testRemoveDuplication 
+	testRemoveDuplication \
+	testOutputDispatcher
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -70,7 +71,8 @@ check_PROGRAMS = \
 	testJoinLeak \
 	testInterfaceRelSat \
 	testBeliefStateCaching \
-	testRemoveDuplication
+	testRemoveDuplication \
+	testOutputDispatcher
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -166,3 +168,7 @@ testInterfaceRelSat_LDADD = \
 
 testRemoveDuplication_SOURCES = testRemoveDuplication.cpp
 testRemoveDuplication_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+
+testOutputDispatcher_SOURCES = testOutputDispatcher.cpp
+testOutputDispatcher_LDADD = $(top_builddir)/src/network/libthreads.a \
+			     $(top_builddir)/src/dmcs/liblog.a

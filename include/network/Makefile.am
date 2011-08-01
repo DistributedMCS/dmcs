@@ -19,6 +19,7 @@ noinst_HEADERS =  \
 		NeighborOut.h \
 		NeighborThread.h \
 		OutputThread.h \
+		OutputDispatcher.h \
 		Server.h \
 		Session.h \
 		StreamingDMCSThread.h \

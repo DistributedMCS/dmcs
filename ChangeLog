@@ -1,3 +1,14 @@
+2011-08-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Add new testcase for OutputDispatcher.
+
+	* include/network/Makefile.am: Add OutputDispatcher.h.
+	* src/network/Makefile.am: Add OutputDispatcher.cpp.
+
+	* include/network/OutputDispatcher.h: New file.
+	* src/network/OutputDispatcher.cpp: Likewise.
+	* testsuite/testOutputDispatcher.cpp: Likewise.
+
 2011-07-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/parser/ClaspResultOnlineParser.h: Allow parsing models returned
