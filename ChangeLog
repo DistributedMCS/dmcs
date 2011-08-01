@@ -3,6 +3,8 @@
 	* include/network/OutputDispatcher.h: Add OutputDispatcherPtr.
 
 	* include/network/Handler.h: Make use of OutputDispatcher.
+	Got around a stupid bug from boost bind. It's strange that
+	adding one more parameter to handle_read_header makes compilation fail.
 	* include/network/Handler.tcc: Likewise.
 	* include/network/HandlerThread.h: Likewise.
 	* include/network/OutputThread.h: Likewise.
