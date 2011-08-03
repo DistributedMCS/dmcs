@@ -270,7 +270,7 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
 	    {
 	      DMCS_LOG_TRACE("Reached " << k2 << " models. Tell Joiner to shut up and get out. Also send OutputThread a NULL pointer.");
 
-	      mg->sendModel(0, 0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
+	      mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
 	      AskNextNotification* notif = new AskNextNotification(BaseNotification::SHUTUP, path, 0, 0, 0);
 	      mg->sendNotification(notif, 0, ConcurrentMessageQueueFactory::SAT_JOINER_MQ, 0);
 	      break;
@@ -287,7 +287,7 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
 	  if (!prepare_input())
 	    {
 	      DMCS_LOG_TRACE("Got NULL input from JOIN_OUT_MQ. Bailing out...");
-	      mg->sendModel(0, 0, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
+	      mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 	      break;
 	    }
 	  DMCS_LOG_TRACE("A fresh solving. input = " << *input);

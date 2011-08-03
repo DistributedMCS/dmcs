@@ -33,6 +33,7 @@
 
 #include "dmcs/Log.h"
 #include "network/ConcurrentMessageQueue.h"
+#include "network/ConcurrentMessageQueueFactory.h"
 
 namespace dmcs {
 
@@ -59,6 +60,20 @@ overwrite_send(ConcurrentMessageQueue* cmq,
     }
 
   return tmp_buf;
+}
+
+
+
+inline MessagingGatewayBC::ModelSession
+receive_model(ConcurrentMessageQueue* cmq)
+{
+  struct MessagingGatewayBC::ModelSession ms = {0, 0, 0};
+  std::size_t recvd = 0;
+  unsigned int p = 0;
+  void* ptr = static_cast<void*>(&ms);
+  cmq->receive(ptr, sizeof(ms), recvd, p);
+
+  return ms;
 }
 
 

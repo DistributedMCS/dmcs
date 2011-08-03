@@ -27,14 +27,14 @@
  * 
  */
 
-
+#include "dmcs/Log.h"
 #include "network/OutputDispatcher.h"
 
 namespace dmcs {
 
 OutputDispatcher::OutputDispatcher()
   : output_thread_map(new CMQMap)
-{ }
+{ } 
 
 
 
@@ -67,11 +67,11 @@ OutputDispatcher::operator()(MessagingGatewayBC* mg)
       std::size_t sid = ms.sid;
       if (bs == 0)
 	{
-	  std::cerr << "Received: NULL" << std::endl;
+	  DMCS_LOG_TRACE("Received: NULL");
 	}
       else
 	{
-	  std::cerr << "Received: " << *bs << " " << path << " " << sid << std::endl;
+	  DMCS_LOG_TRACE("Received: " << *bs << " " << path << " " << sid);
 	}
 
       // find the corresponding output thread
@@ -82,10 +82,9 @@ OutputDispatcher::operator()(MessagingGatewayBC* mg)
 
       ConcurrentMessageQueue* cmq = it->second;
 
-      std::cerr << "Sending to the right output thread" << std::endl;
+      DMCS_LOG_TRACE("Send to the right output thread");
       // now send the model to the right output thread (dispatching step)
       cmq->send(&ms, sizeof(ms), 0);
-      std::cerr << "Sent" << std::endl;
     }
 }
 

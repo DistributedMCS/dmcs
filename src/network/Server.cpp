@@ -72,6 +72,7 @@ Server::Server(const CommandTypeFactoryPtr& c,
     boost_handler_threads(new ThreadVec),
     joiner_sat_notif(new ConcurrentMessageQueue),
     neighbors_notif(new ConcurrentMessageQueueVec),
+    output_dispatcher(new OutputDispatcher),
     c2o(new HashedBiMap),
     first_round(true),
     join_thread(0),
@@ -305,7 +306,6 @@ Server::dispatch_header(const boost::system::error_code& e,
 	  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
 	  bool is_leaf = (nbs->size() == 0);
 
-	  output_dispatcher = OutputDispatcherPtr(new OutputDispatcher());
 	  output_dispatcher_thread = new boost::thread(*output_dispatcher, mg.get());
 
 	  HandlerThread* handler_thread = new HandlerThread(invoker);

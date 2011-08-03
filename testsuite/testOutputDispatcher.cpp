@@ -25,8 +25,6 @@ receive_models(ConcurrentMessageQueue* cmq)
       unsigned int p = 0;
       void* ptr = static_cast<void*>(&ms);
 
-      BOOST_TEST_MESSAGE("Reading...");
-
       cmq->receive(ptr, sizeof(ms), recvd, p);
       PartialBeliefState* bs = ms.m;
       BOOST_TEST_MESSAGE("bs = " << bs);

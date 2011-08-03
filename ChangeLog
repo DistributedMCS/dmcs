@@ -1,3 +1,19 @@
+2011-08-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueueHelper.h: Add a helper method for
+	receiving models.
+
+	* include/network/Handler.tcc: Clean up.
+	* testsuite/testOutputDispatcher.cpp: Likewise.
+
+	* src/network/OutputDispatcher.cpp: Fix debugging information.
+
+	* src/network/OutputThread.cpp: Receive models from output_dispatcher.
+
+	* src/network/Server.cpp: Fix bug: multiple output_dispatcher.
+
+	* src/solver/RelSatSolver.cpp: Send path even with null models.
+
 2011-08-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/OutputDispatcher.h: Add OutputDispatcherPtr.

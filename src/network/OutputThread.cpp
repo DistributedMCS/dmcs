@@ -33,6 +33,7 @@
 
 #include "dmcs/StreamingForwardMessage.h"
 #include "dmcs/StreamingBackwardMessage.h"
+#include "network/ConcurrentMessageQueueHelper.h"
 #include "network/OutputThread.h"
 
 #include "dmcs/Log.h"
@@ -76,13 +77,12 @@ OutputThread::operator()(connection_ptr c,
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  //  std::size_t path;
   std::size_t k1;
   std::size_t k2;
   std::size_t parent_session_id;
   ModelSessionIdListPtr res(new ModelSessionIdList);
 
-  //od->registerOutputThread(path, cmq.get());
+  od->registerOutputThread(path, cmq.get());
   
   while (1)
     {
@@ -205,8 +205,8 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       std::size_t prio = 0;
       int timeout = 0;
 
-      struct MessagingGatewayBC::ModelSession ms =
-	mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+      // receive models from cmq
+      MessagingGatewayBC::ModelSession ms = receive_model(cmq.get());
 
       PartialBeliefState* bs = ms.m;
 
@@ -244,11 +244,12 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
       for (std::size_t i = k1; i <= k2+1; ++i)
 	{
 	  DMCS_LOG_TRACE(port << ": Collecting, i = " << i);
-	  std::size_t prio = 0;
-	  int timeout = 0;
+	  //std::size_t prio = 0;
+	  //int timeout = 0;
 	  
-	  struct MessagingGatewayBC::ModelSession ms =
-	    mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+	  //struct MessagingGatewayBC::ModelSession ms =
+	  //  mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+	  MessagingGatewayBC::ModelSession ms = receive_model(cmq.get());
 	  
 	  PartialBeliefState* bs = ms.m;
 	  
@@ -291,9 +292,10 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  std::size_t prio = 0;
 	  int timeout = 0;
 
-	  struct MessagingGatewayBC::ModelSession ms =
-	    mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
-	  
+	  //struct MessagingGatewayBC::ModelSession ms =
+	  //  mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
+
+	  MessagingGatewayBC::ModelSession ms = receive_model(cmq.get());	  
 	  PartialBeliefState* bs = ms.m;
 
 	  if (bs == 0)

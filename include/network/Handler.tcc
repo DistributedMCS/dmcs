@@ -348,8 +348,6 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
       boost::shared_ptr<std::string> header(new std::string);
 
-      OutputDispatcherPtr mg1;
-
       sesh->conn->async_read(*header,
 			     boost::bind(&StreamingHandler::handle_read_header, this,
 					 boost::asio::placeholders::error,
