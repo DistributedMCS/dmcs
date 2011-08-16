@@ -45,9 +45,8 @@
 
 namespace dmcs {
 
-OutputThread::OutputThread(std::size_t p, std::size_t pa)
+OutputThread::OutputThread(std::size_t p)
   : port(p), 
-    path(pa),
     output_buffer(new PartialBeliefStateBuf(CIRCULAR_BUF_SIZE)),
     cmq(new ConcurrentMessageQueue())
 { }
@@ -82,14 +81,14 @@ OutputThread::operator()(connection_ptr c,
   std::size_t parent_session_id;
   ModelSessionIdListPtr res(new ModelSessionIdList);
 
-  od->registerOutputThread(path, cmq.get());
+  //od->registerThread(path, cmq.get());
   
   while (1)
     {
       res->clear();
 
       //BaseNotification::NotificationType nt = wait_for_trigger(hon, path, k1, k2, parent_session_id);
-      BaseNotification::NotificationType nt = wait_for_trigger(hon, k1, k2, parent_session_id);
+      BaseNotification::NotificationType nt = wait_for_trigger(hon, k1, k2, parent_session_id, od);
 
       if (nt == BaseNotification::SHUTDOWN)
 	{
@@ -124,7 +123,8 @@ BaseNotification::NotificationType
 OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 			       std::size_t& k1,
 			       std::size_t& k2,
-			       std::size_t& parent_session_id)
+			       std::size_t& parent_session_id,
+			       OutputDispatcher* od)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -148,7 +148,7 @@ OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 	}
       else
 	{
-	  path = on->path;
+	  od->registerThread(on->path, cmq.get());
 	  k1 = on->k1;
 	  k2 = on->k2;
 	  parent_session_id = on->parent_session_id;
@@ -223,7 +223,7 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	  std::size_t pa = ms.path;
 	  std::size_t sid = ms.sid;
 	  
-	  assert (pa == path);
+	  //assert (pa == path);
 
 	  DMCS_LOG_TRACE(port << ": got #" << i);
 	  DMCS_LOG_TRACE(port << ": bs = " << *bs << "path = " << pa << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
@@ -271,13 +271,11 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	      std::size_t pa = ms.path;
 	      std::size_t sid = ms.sid;
 	      
-	      DMCS_LOG_TRACE("My path = " << path << ", path from MQ pa = " << pa);
-	      
-	      assert (pa == path);
+	      //assert (pa == path);
 	      
 	      DMCS_LOG_TRACE(port << ": got #" << i);
-	      DMCS_LOG_TRACE(port << ": bs = " << *bs << ", path = " << path << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
-	      ModelSessionId msi(bs, path, sid);
+	      DMCS_LOG_TRACE(port << ": bs = " << *bs << ", path = " << pa << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
+	      ModelSessionId msi(bs, pa, sid);
 	      res->push_back(msi);
 	    }
 	}
@@ -310,13 +308,11 @@ OutputThread::collect_output(MessagingGatewayBC* mg,
 	      std::size_t pa = ms.path;
 	      std::size_t sid = ms.sid;
 	      
-	      DMCS_LOG_TRACE("My path = " << path << ", path from MQ pa = " << pa);
-	      
-	      assert (pa == path);
+	      //assert (pa == path);
 	      
 	      DMCS_LOG_TRACE(port << ": got #" << i);
-	      DMCS_LOG_TRACE(port << ": bs = " << *bs << ", path = " << path << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
-	      ModelSessionId msi(bs, path, sid);
+	      DMCS_LOG_TRACE(port << ": bs = " << *bs << ", path = " << pa << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
+	      ModelSessionId msi(bs, pa, sid);
 	      res->push_back(msi);
 	    }
 	}

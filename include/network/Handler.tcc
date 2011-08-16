@@ -329,7 +329,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // inform OutputThread about new incoming message (request
 	  // the next pack_size models)
 
-	  OutputThread ot(port, path);
+	  OutputThread ot(port);
 
 	  output_thread = new boost::thread(ot, sesh->conn, mg, handler_output_notif.get(), od);
 

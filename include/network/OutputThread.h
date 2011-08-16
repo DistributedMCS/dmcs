@@ -47,7 +47,7 @@ namespace dmcs {
 class OutputThread
 {
 public:
-  OutputThread(std::size_t p, std::size_t pa);
+  OutputThread(std::size_t p);
 
   virtual
   ~OutputThread();
@@ -63,7 +63,8 @@ private:
   wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
 		   std::size_t& k1,
 		   std::size_t& k2,
-		   std::size_t& parent_session_id);
+		   std::size_t& parent_session_id,
+		   OutputDispatcher* od);
 
   void
   send_empty_model(MessagingGatewayBC* mg);
@@ -83,7 +84,6 @@ private:
   std::size_t port;
   PartialBeliefStateBufPtr output_buffer;
   ConcurrentMessageQueuePtr cmq;
-  std::size_t path;
 };
 
 
