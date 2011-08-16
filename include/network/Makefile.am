@@ -4,6 +4,7 @@ AUTOMAKE_OPTIONS = gnu
 noinst_HEADERS =  \
 		AsynClient.h \
 		BaseClient.h \
+		BaseDispatcher.h \
 		BaseHandler.h \
 		Client.h \
 		Client.tcc \

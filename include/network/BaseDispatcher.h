@@ -18,38 +18,61 @@
  */
 
 /**
- * @file   OutputDispatcher.h
+ * @file   BaseDispatcher.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Thu Jul  28 17:18:24 2011
+ * @date   Thu Aug  16 10:00:24 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef OUTPUT_DISPATCHER_H
-#define OUTPUT_DISPATCHER_H
+#ifndef BASE_DISPATCHER_H
+#define BASE_DISPATCHER_H
 
-#include "network/BaseDispatcher.h"
-
-#include <boost/shared_ptr.hpp>
+#include "network/ConcurrentMessageQueueFactory.h"
+#include "network/MessagingGateway.h"
 
 namespace dmcs {
 
-class OutputDispatcher : public BaseDispatcher
+class BaseDispatcher
 {
 public:
-  OutputDispatcher();
+  BaseDispatcher()
+    : thread_map(new CMQMap) 
+  { }
+
+  ~BaseDispatcher()
+  { }
 
   void
-  operator()(MessagingGatewayBC* m);
+  registerThread(std::size_t path, ConcurrentMessageQueue* cmq)
+  {
+    // make sure that if this thread was registered then it must be cmq
+    CMQMap::const_iterator it = thread_map->find(path);
+    if (it != thread_map->end())
+      {
+	assert (cmq == it->secon);
+      }
+    else
+      // register the new thread
+      {
+	std::pair<std::size_t, ConcurrentMessageQueue*> t(path, cmq);
+	thread_map->insert(t);
+      }
+  }
+
+  virtual void
+  operator()(MessagingGatewayBC* mg) = 0;
+  
+protected:
+  CMQMapPtr thread_map;
 };
 
-typedef boost::shared_ptr<OutputDispatcher> OutputDispatcherPtr;
 
-}
+} // namespace dmcs
 
-#endif // OUTPUT_DISPATCHER_H
+#endif // BASE_DISPATCHER_H
 
 // Local Variables:
 // mode: C++

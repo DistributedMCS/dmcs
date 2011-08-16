@@ -33,21 +33,8 @@
 namespace dmcs {
 
 OutputDispatcher::OutputDispatcher()
-  : output_thread_map(new CMQMap)
+  : BaseDispatcher()
 { } 
-
-
-
-void
-OutputDispatcher::registerOutputThread(std::size_t path, ConcurrentMessageQueue* cmq)
-{
-  // make sure that this output thread has never been register
-  CMQMap::const_iterator it = output_thread_map->find(path);
-  assert (it == output_thread_map->end());
-  
-  std::pair<std::size_t, ConcurrentMessageQueue*> ot(path, cmq);
-  output_thread_map->insert(ot);
-}
 
 
 
@@ -75,10 +62,10 @@ OutputDispatcher::operator()(MessagingGatewayBC* mg)
 	}
 
       // find the corresponding output thread
-      CMQMap::const_iterator it = output_thread_map->find(path);
+      CMQMap::const_iterator it = thread_map->find(path);
 
       // which must be in the registration list
-      assert (it != output_thread_map->end());
+      assert (it != thread_map->end());
 
       ConcurrentMessageQueue* cmq = it->second;
 
@@ -88,7 +75,7 @@ OutputDispatcher::operator()(MessagingGatewayBC* mg)
     }
 }
 
-}
+} // namespace dmcs
 
 
 // Local Variables:
