@@ -41,7 +41,7 @@ TESTS = \
 	testInterfaceRelSat \
 	testBeliefStateCaching \
 	testRemoveDuplication \
-	testOutputDispatcher \
+	testDispatcher \
 	testBlockingAsio
 
 TESTS_ENVIRONMENT = \
@@ -73,7 +73,7 @@ check_PROGRAMS = \
 	testInterfaceRelSat \
 	testBeliefStateCaching \
 	testRemoveDuplication \
-	testOutputDispatcher \
+	testDispatcher \
 	testBlockingAsio
 
 testClasp_SOURCES = testClasp.cpp 
@@ -171,8 +171,8 @@ testInterfaceRelSat_LDADD = \
 testRemoveDuplication_SOURCES = testRemoveDuplication.cpp
 testRemoveDuplication_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-testOutputDispatcher_SOURCES = testOutputDispatcher.cpp
-testOutputDispatcher_LDADD = $(top_builddir)/src/network/libthreads.a \
+testDispatcher_SOURCES = testDispatcher.cpp
+testDispatcher_LDADD = $(top_builddir)/src/network/libthreads.a \
 			     $(top_builddir)/src/dmcs/liblog.a
 
 testBlockingAsio_SOURCES = SimpleClient.cpp \

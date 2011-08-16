@@ -1,7 +1,8 @@
 #include "network/OutputDispatcher.h"
+#include "network/JoinerDispatcher.h"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "testOutputDispatcher"
+#define BOOST_TEST_MODULE "testDispatcher"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>
@@ -70,11 +71,9 @@ BOOST_AUTO_TEST_CASE( testOutputDispatcher )
 
   struct MessagingGatewayBC::ModelSession ms = {pbs, 1, 1};
 
-  od.registerOutputThread(1, cmq1);
-  od.registerOutputThread(2, cmq2);
-  od.registerOutputThread(3, cmq3);
-
-
+  od.registerThread(1, cmq1);
+  od.registerThread(2, cmq2);
+  od.registerThread(3, cmq3);
 
   std::size_t prio = 0;
   // belief_state, path, session_id, from, to, prio
@@ -103,3 +102,25 @@ BOOST_AUTO_TEST_CASE( testOutputDispatcher )
   output_dispatcher_thread->join();
 }
 
+
+
+BOOST_AUTO_TEST_CASE ( testJoinerDispatcher )
+{
+  ConcurrentMessageQueueFactory& f = ConcurrentMessageQueueFactory::instance();
+  std::size_t port = 5000;
+  std::size_t no_nbs = 2;
+  std::size_t mq_size = 20;
+
+  MessagingGatewayBCPtr mg = f.createMessagingGateway(port, no_nbs, mq_size);
+
+  JoinerDispatcher jd;
+  boost::thread* joiner_dispatcher_thread;
+
+  joiner_dispatcher_thread = new boost::thread(jd, mg.get());
+
+  ConcurrentMessageQueue* cmq1 = new ConcurrentMessageQueue();
+  ConcurrentMessageQueue* cmq2 = new ConcurrentMessageQueue();
+  ConcurrentMessageQueue* cmq3 = new ConcurrentMessageQueue();
+
+  
+}
