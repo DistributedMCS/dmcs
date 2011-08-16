@@ -1,3 +1,25 @@
+2011-08-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: Has its own input_queue and read from that.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/solver/RelSatSolver.h: Responsible for ignoring up to k1 models,
+	only returns models from k1 to k2.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/BaseDispatcher.h: New file.
+	* include/network/Makefile.am: Add BaseDispatcher.h
+	* include/network/OutputDispatcher.h: Inherit from BaseDispatcher.
+
+	* testsuite/testOutputDispatcher.cpp: Remove.
+	* testsuite/testDispatcher.cpp: Add.
+	* testsuite/Makefile.am: Likewise.
+
+	* include/network/OutputThread.h: Remove fixed path from OutputThread.
+	Register to OutputDispatcher after getting notification from Handler.
+	* src/network/OutputThread.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
 2011-08-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testBlockingAsio.cpp: Add new test case.
