@@ -105,7 +105,7 @@ private:
 
   bool
   ask_neighbor(PartialBeliefStatePackage* partial_eqs,
-	       std::size_t nid, 
+	       std::size_t noff, 
 	       std::size_t k1, 
 	       std::size_t k2,
 	       std::size_t& path, 
@@ -152,6 +152,7 @@ private:
   MessagingGatewayBC* mg;
   ConcurrentMessageQueue* joiner_sat_notif;
   ConcurrentMessageQueueVec* joiner_neighbors_notif;
+  ConcurrentMessageQueuePtr input_queue;
 };
 
 } // namespace dmcs
