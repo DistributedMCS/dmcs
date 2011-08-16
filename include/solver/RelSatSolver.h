@@ -112,6 +112,7 @@ private:
   std::size_t my_session_id;
   std::size_t k1;
   std::size_t k2;
+  std::size_t count_models;
   const TheoryPtr theory;
   const SignaturePtr sig;
   const HashedBiMap* c2o;

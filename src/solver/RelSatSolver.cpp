@@ -233,8 +233,12 @@ RelSatSolver::refresh()
 
 
 void
-RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std::size_t k1, std::size_t k2)
+RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std::size_t k_one, std::size_t k_two)
 {
+  k1 = k_one;
+  k2 = k_two;
+  count_models = 0;
+
   invoker = iv;
   parent_session_id = session_id;
 
@@ -337,69 +341,75 @@ RelSatSolver::receiveUNSAT(ClauseList& learned_clauses)
 void
 RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
 {
-  PartialBeliefState* bs;
-  // copy input
-  if (is_leaf)
+  count_models++;
+
+  // if count_models < k1, that means this model is in the "ignored" range, we just do nothing
+  if (count_models >= k1)
     {
-      bs = new PartialBeliefState(system_size, PartialBeliefSet());
-    }
-  else
-    {
-      bs = new PartialBeliefState(*input);
-    }
-
-  // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
-  PartialBeliefSet& belief = (*bs)[my_id-1];
-  setEpsilon(belief);                
-
-  ///@todo: MD: just need to look at real local atoms
-  for (int i = 0; i < _iVariableCount; i++) 
-    {
-      assert(_aAssignment[i] != NON_VALUE);
-
-      const SignatureByLocal& local_sig = boost::get<Tag::Local>(*sig);
-      dmcs::SignatureByLocal::const_iterator loc_it = local_sig.find(i+1);
-      
-      // it must show up in the signature
-      assert (loc_it != local_sig.end());
-
-      std::size_t cid = loc_it->ctxId - 1;
-
-      // just to be safe
-      assert (cid < system_size);
-      
-      PartialBeliefSet& neighbor_belief = (*bs)[cid];
-      setEpsilon(neighbor_belief);
-
-      if (_aAssignment[i]) 
+      PartialBeliefState* bs;
+      // copy input
+      if (is_leaf)
 	{
-	  setBeliefSet(neighbor_belief, loc_it->origId);
+	  bs = new PartialBeliefState(system_size, PartialBeliefSet());
 	}
       else
 	{
-	  setBeliefSet(neighbor_belief, loc_it->origId, PartialBeliefSet::DMCS_FALSE);
+	  bs = new PartialBeliefState(*input);
 	}
+
+      // set epsilon bit of my position so that the invoker knows this is SATISFIABLE
+      PartialBeliefSet& belief = (*bs)[my_id-1];
+      setEpsilon(belief);                
+      
+      ///@todo: MD: just need to look at real local atoms
+      for (int i = 0; i < _iVariableCount; i++) 
+	{
+	  assert(_aAssignment[i] != NON_VALUE);
+	  
+	  const SignatureByLocal& local_sig = boost::get<Tag::Local>(*sig);
+	  dmcs::SignatureByLocal::const_iterator loc_it = local_sig.find(i+1);
+	  
+	  // it must show up in the signature
+	  assert (loc_it != local_sig.end());
+	  
+	  std::size_t cid = loc_it->ctxId - 1;
+	  
+	  // just to be safe
+	  assert (cid < system_size);
+	  
+	  PartialBeliefSet& neighbor_belief = (*bs)[cid];
+	  setEpsilon(neighbor_belief);
+	  
+	  if (_aAssignment[i]) 
+	    {
+	      setBeliefSet(neighbor_belief, loc_it->origId);
+	    }
+	  else
+	    {
+	      setBeliefSet(neighbor_belief, loc_it->origId, PartialBeliefSet::DMCS_FALSE);
+	    }
+	}
+      
+      //DMCS_LOG_TRACE("MODEL from SAT: bs = " << *bs);
+      
+      // project to my output interface
+      BeliefStatePtr localV;
+      if (invoker == 0)
+	{
+	  localV = query_plan->getGlobalV();
+	}
+      else
+	{
+	  localV = query_plan->getInterface(invoker, my_id);
+	}
+      
+      project_to(bs, localV);
+      
+      DMCS_LOG_TRACE("Going to send: " << *bs << ", with path = " << path << ", parent session id = " << parent_session_id);
+      // now put this PartialBeliefState to the SatOutputMessageQueue
+      mg->sendModel(bs, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
+      // Models should be cleaned by OutputThread
     }
-
-  //DMCS_LOG_TRACE("MODEL from SAT: bs = " << *bs);
-
-  // project to my output interface
-  BeliefStatePtr localV;
-  if (invoker == 0)
-    {
-      localV = query_plan->getGlobalV();
-    }
-  else
-    {
-      localV = query_plan->getInterface(invoker, my_id);
-    }
-
-  project_to(bs, localV);
-
-  DMCS_LOG_TRACE("Going to send: " << *bs << ", with path = " << path << ", parent session id = " << parent_session_id);
-  // now put this PartialBeliefState to the SatOutputMessageQueue
-  mg->sendModel(bs, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
-  // Models should be cleaned by OutputThread
 }
 
 
