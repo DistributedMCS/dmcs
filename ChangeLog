@@ -1,3 +1,15 @@
+2011-08-17  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.h: Register OutputThread to OutputDispatcher.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/OutputThread.h: Don't care about k1, k2.
+	Just read from my cmq untill reaching MAX_READ or a NULL model,
+	then send the result back.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/BaseDispatcher.h: Typo.
+
 2011-08-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/JoinThread.h: Has its own input_queue and read from that.
