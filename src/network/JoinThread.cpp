@@ -701,6 +701,12 @@ JoinThread::process(std::size_t path,
 
 
 
+ConcurrentMessageQueue*
+JoinThread::getCMQ()
+{
+  return input_queue.get();
+}
+
 } // namespace dmcs
 
 // Local Variables:

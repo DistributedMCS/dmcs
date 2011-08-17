@@ -1,5 +1,15 @@
 2011-08-17  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/Makefile.am: Add JoinerDispatcher.cpp.
+
+	* testsuite/testJoinLeak.cpp: Adapt to JoinerDispatcher.
+
+	* testsuite/testDispatcher.cpp: Remove testJoinerDispatcher because it's included
+	in testJoinLeak.
+
+	* src/network/JoinThread.cpp: Return input_queue to register to JoinerDispatcher.
+	* include/network/JoinThread.h: Likewise.
+
 	* include/network/Handler.h: Register OutputThread to OutputDispatcher.
 	* include/network/Handler.tcc: Likewise.
 

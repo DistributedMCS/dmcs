@@ -1,5 +1,6 @@
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/JoinThread.h"
+#include "network/JoinerDispatcher.h"
 #include "dmcs/Log.h"
 
 #define BOOST_TEST_DYN_LINK
@@ -34,6 +35,11 @@ void send_model(MessagingGatewayBCPtr mg, std::size_t noff, std::size_t offset, 
 }
 
 
+void send_null(MessagingGatewayBCPtr mg, std::size_t noff, std::size_t offset)
+{
+  mg->sendModel(0, 0, 0, noff, offset, 0);
+}
+
 
 void send_first_pack_21(MessagingGatewayBCPtr mg, std::size_t noff_2, std::size_t offset_2)
 {
@@ -45,8 +51,9 @@ void send_first_pack_21(MessagingGatewayBCPtr mg, std::size_t noff_2, std::size_
   send_model(mg, noff_2, offset_2, input_21_1);
   send_model(mg, noff_2, offset_2, input_21_2);
   send_model(mg, noff_2, offset_2, input_21_3);
+  send_null(mg, noff_2, offset_2);
 
-  mg->sendJoinIn(3, noff_2, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+  mg->sendJoinIn(4, noff_2, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
 }
 
 
@@ -60,8 +67,9 @@ void send_second_pack_21(MessagingGatewayBCPtr mg, std::size_t noff_2, std::size
   send_model(mg, noff_2, offset_2, input_21_4);
   send_model(mg, noff_2, offset_2, input_21_5);
   send_model(mg, noff_2, offset_2, input_21_6);
+  send_null(mg, noff_2, offset_2);
 
-  mg->sendJoinIn(3, noff_2, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+  mg->sendJoinIn(4, noff_2, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
 }
 
 
@@ -75,8 +83,9 @@ void send_first_pack_31(MessagingGatewayBCPtr mg, std::size_t noff_3, std::size_
   send_model(mg, noff_3, offset_3, input_31_1);
   send_model(mg, noff_3, offset_3, input_31_2);
   send_model(mg, noff_3, offset_3, input_31_3);
+  send_null(mg, noff_3, offset_3);
 
-  mg->sendJoinIn(3, noff_3, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+  mg->sendJoinIn(4, noff_3, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
 }
 
 
@@ -90,8 +99,9 @@ void send_second_pack_31(MessagingGatewayBCPtr mg, std::size_t noff_3, std::size
   send_model(mg, noff_3, offset_3, input_31_4);
   send_model(mg, noff_3, offset_3, input_31_5);
   send_model(mg, noff_3, offset_3, input_31_6);
+  send_null(mg, noff_3, offset_3);
 
-  mg->sendJoinIn(3, noff_3, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+  mg->sendJoinIn(4, noff_3, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
 }
 
 
@@ -105,16 +115,18 @@ void send_first_pack_41(MessagingGatewayBCPtr mg, std::size_t noff_4, std::size_
   send_model(mg, noff_4, offset_4, input_41_1);
   send_model(mg, noff_4, offset_4, input_41_2);
   send_model(mg, noff_4, offset_4, input_41_3);
+  send_null(mg, noff_4, offset_4);
 
-  mg->sendJoinIn(3, noff_4, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+  mg->sendJoinIn(4, noff_4, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
 }
 
 
 
 // End Of Pack
-void send_eop(MessagingGatewayBCPtr mg, std::size_t noff)
+void send_eop(MessagingGatewayBCPtr mg, std::size_t noff, std::size_t offset)
 {
-  mg->sendJoinIn(0, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
+  send_null(mg, noff, offset);
+  mg->sendJoinIn(1, noff, ConcurrentMessageQueueFactory::JOIN_IN_MQ, 0);
 }
 
 
@@ -141,7 +153,7 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
   */
 
   ConcurrentMessageQueueFactory& mqf = ConcurrentMessageQueueFactory::instance();
-  MessagingGatewayBCPtr mg = mqf.createMessagingGateway(port, no_nbs, 5);
+  MessagingGatewayBCPtr mg = mqf.createMessagingGateway(port, no_nbs, 20);
 
   ConcurrentMessageQueueVecPtr jnn(new ConcurrentMessageQueueVec);
   ConcurrentMessageQueuePtr    n0 (new ConcurrentMessageQueue);
@@ -167,9 +179,11 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
 
   // path = 0, sid = 0
   JoinThread jt(0, 0);
-  boost::thread t(jt, no_nbs, system_size, mg.get(), jsn.get(), jnn.get());
+  boost::thread join_thread(jt, no_nbs, system_size, mg.get(), jsn.get(), jnn.get());
 
-
+  JoinerDispatcher jd;
+  jd.registerThread(0, jt.getCMQ());
+  boost::thread join_dispatcher_thread(jd, mg.get());
   
   // simulate incoming messages by putting partial equilibria into JOIN_IN_MQs
   // sleep 1 sec before each round
@@ -193,7 +207,7 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
 
   send_trigger(mg, 1, 3);
   sleep(1);
-  send_eop(mg, noff_2);
+  send_eop(mg, noff_2, offset_2);
 
   // **************************************
   sleep(1);
@@ -208,17 +222,19 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
 
   // **************************************
   sleep(1);
-  send_eop(mg, noff_2);
+  send_eop(mg, noff_2, offset_2);
 
   // **************************************
   sleep(1);
-  send_eop(mg, noff_3);
+  send_eop(mg, noff_3, offset_3);
 
   // **************************************
   sleep(1);
-  send_eop(mg, noff_4);
+  send_eop(mg, noff_4, offset_4);
 
   std::size_t join_count = 0;
+
+  std::cerr << "Finished sending" << std::endl;
   
   while (1)
     {
@@ -243,6 +259,8 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
   //  BOOST_CHECK_EQUAL(join_count, 4);
 
 
-  t.interrupt();
-  t.join();
+  join_thread.interrupt();
+  join_thread.join();
+  join_dispatcher_thread.interrupt();
+  join_dispatcher_thread.join();
 }

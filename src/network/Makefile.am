@@ -41,7 +41,8 @@ libthreads_a_SOURCES = \
 		StreamingDMCSThread.cpp \
 		ThreadFactory.cpp \
 		RelSatSolverThread.cpp \
-		OutputDispatcher.cpp
+		OutputDispatcher.cpp \
+		JoinerDispatcher.cpp
 
 
 # don't compile boost::message_queue for now

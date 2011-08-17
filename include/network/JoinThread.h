@@ -67,6 +67,9 @@ public:
       GETTING_NEXT    // next round, meaning that we reached PACK_FULL before and now want to ask a neighbor for its next models
     };
 
+  ConcurrentMessageQueue*
+  getCMQ();
+
 private:
   bool
   join(const PartialBeliefStateIteratorVecPtr& run_it);

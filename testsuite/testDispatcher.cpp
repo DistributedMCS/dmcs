@@ -101,26 +101,3 @@ BOOST_AUTO_TEST_CASE( testOutputDispatcher )
   output_dispatcher_thread->interrupt();
   output_dispatcher_thread->join();
 }
-
-
-
-BOOST_AUTO_TEST_CASE ( testJoinerDispatcher )
-{
-  ConcurrentMessageQueueFactory& f = ConcurrentMessageQueueFactory::instance();
-  std::size_t port = 5000;
-  std::size_t no_nbs = 2;
-  std::size_t mq_size = 20;
-
-  MessagingGatewayBCPtr mg = f.createMessagingGateway(port, no_nbs, mq_size);
-
-  JoinerDispatcher jd;
-  boost::thread* joiner_dispatcher_thread;
-
-  joiner_dispatcher_thread = new boost::thread(jd, mg.get());
-
-  ConcurrentMessageQueue* cmq1 = new ConcurrentMessageQueue();
-  ConcurrentMessageQueue* cmq2 = new ConcurrentMessageQueue();
-  ConcurrentMessageQueue* cmq3 = new ConcurrentMessageQueue();
-
-  
-}
