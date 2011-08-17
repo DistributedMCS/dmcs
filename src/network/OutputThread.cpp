@@ -69,256 +69,41 @@ OutputThread::~OutputThread()
 
 
 void
-OutputThread::operator()(connection_ptr c,
-			 MessagingGatewayBC* mg,
-			 ConcurrentMessageQueue* hon,
-			 OutputDispatcher* od)
+OutputThread::operator()(connection_ptr c)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-  std::size_t k1;
-  std::size_t k2;
+  std::size_t max_read = 0;
   std::size_t parent_session_id;
   ModelSessionIdListPtr res(new ModelSessionIdList);
 
-  //od->registerThread(path, cmq.get());
-  
   while (1)
     {
       res->clear();
 
-      //BaseNotification::NotificationType nt = wait_for_trigger(hon, path, k1, k2, parent_session_id);
-      BaseNotification::NotificationType nt = wait_for_trigger(hon, k1, k2, parent_session_id, od);
-
-      if (nt == BaseNotification::SHUTDOWN)
+      // read up to MAX_READ models or a NULL model
+      std::size_t count_models = 0;
+      while (count_models < MAX_READ)
 	{
-	  return; // shutdown received
-	}
-      else 
-	{
-	  assert (nt == BaseNotification::REQUEST || nt == BaseNotification::NEXT);
-
-	  collect_output(mg, res, k1, k2, parent_session_id);
-
-	  DMCS_LOG_TRACE(port << ": Output collected. ");
-	  DMCS_LOG_TRACE(port << ": res->size() = " << res->size());
-
-	  if (res->size() > 0)
-	    {
-	      write_result(c, res);
-	    }
-	  else
-	    {
-	      DMCS_LOG_TRACE(port << ": No more answer to send. Send EOF");
-	      const std::string header_eof = HEADER_EOF;
-	      c->write(header_eof);
-	    }
-	}
-    }
-}
-
-
-
-BaseNotification::NotificationType
-OutputThread::wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
-			       std::size_t& k1,
-			       std::size_t& k2,
-			       std::size_t& parent_session_id,
-			       OutputDispatcher* od)
-{
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-
-  // wait for Handler to tell me to return some models
-  OutputNotification* on = 0;
-  void *ptr = static_cast<void*>(&on);
-  unsigned int p = 0;
-  std::size_t recvd = 0;
-  BaseNotification::NotificationType nt;
-
-  DMCS_LOG_TRACE(port << ": Wait for message from Handler");
-
-  handler_output_notif->receive(ptr, sizeof(on), recvd, p);
-
-  if (ptr && on)
-    {
-      nt = on->type;
-      if (nt == OutputNotification::SHUTDOWN)
-	{
-	  DMCS_LOG_TRACE(port << ": Got SHUTDOWN from Handler.");
-	}
-      else
-	{
-	  od->registerThread(on->path, cmq.get());
-	  k1 = on->k1;
-	  k2 = on->k2;
-	  parent_session_id = on->parent_session_id;
-
-	  assert (k1 <= k2);
-
-	  assert ((nt == OutputNotification::REQUEST) || (nt == OutputNotification::NEXT));
-
-	  /*if (nt == OutputNotification::REQUEST)
-	    {
-	      // clean up output buffer because this is a fresh request
-	      for (PartialBeliefStateBuf::const_iterator it = output_buffer->begin(); it != output_buffer->end(); ++it)
-		{
-		  delete *it;
-		}
-		output_buffer->clear();
-		}*/
-
-	  DMCS_LOG_TRACE(port << ": Got a message from Handler. on = " << *on);
-	}
-
-      delete on;
-      on = 0;
-    }
-  else
-    {
-      DMCS_LOG_FATAL("Got null message: " << ptr << " " << on);
-      assert(ptr != 0 && on != 0);
-    }
-
-  return nt;
-}
-
-
-
-void
-OutputThread::collect_output(MessagingGatewayBC* mg,
-			     ModelSessionIdListPtr& res,
-			     std::size_t k1,
-			     std::size_t k2,
-			     std::size_t parent_session_id)
-{
-  // TOO BAD we cannot cache here!!!
-  DMCS_LOG_TRACE(port << ": Going to collect output. k1 = " << k1 << ", k2 = " << k2);
-
-  bool reached_k1 = true;
-  res->clear();
-
-  // throw away models up to k1-1 ============================================================================
-  for (std::size_t i = 1; i < k1; ++i)
-    {
-      DMCS_LOG_TRACE(port << ": Read from MQ. i = " << i);
-      
-      std::size_t prio = 0;
-      int timeout = 0;
-
-      // receive models from cmq
-      MessagingGatewayBC::ModelSession ms = receive_model(cmq.get());
-
-      PartialBeliefState* bs = ms.m;
-
-      if (bs == 0) // EOF
-	{
-	  DMCS_LOG_TRACE(port << ": Got EOF before reaching " << k1 << " models. Bailing out...");
-	  reached_k1 = false;
-	  break;
-	}
-      else
-	{
-	  DMCS_LOG_TRACE(port << ": Extract information from MQ");
-
-	  std::size_t pa = ms.path;
-	  std::size_t sid = ms.sid;
-	  
-	  //assert (pa == path);
-
-	  DMCS_LOG_TRACE(port << ": got #" << i);
-	  DMCS_LOG_TRACE(port << ": bs = " << *bs << "path = " << pa << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
-	  delete bs;
-	  bs = 0;
-	}
-    } // for
-
-  if (!reached_k1)
-    {
-      return;
-    }
-
-  DMCS_LOG_TRACE(port << ": Collecting, k1 = " << k1 << ",  k2 = " << k2);
-  // now collect up to k2-k1+1 unique models to return ========================================================
-  if (k2 > 0)
-    {
-      for (std::size_t i = k1; i <= k2+1; ++i)
-	{
-	  DMCS_LOG_TRACE(port << ": Collecting, i = " << i);
-	  //std::size_t prio = 0;
-	  //int timeout = 0;
-	  
-	  //struct MessagingGatewayBC::ModelSession ms =
-	  //  mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
 	  MessagingGatewayBC::ModelSession ms = receive_model(cmq.get());
-	  
+
+	  // This is a stupid copy over! But let's keep it like this for now. 
+	  // Unify the two types ModelSession and ModelSessionId later.
+	  ModelSessionId msi(ms.m, ms.path, ms.sid);
+	  res->push_back(msi);
+
 	  PartialBeliefState* bs = ms.m;
-	  
-	  if (i == k2+1)
-	    {
-	      assert (bs == 0);
-	      DMCS_LOG_TRACE(port << ": Good. I got a NULL pointer which identifies end of k2 = " << k2 << ". i = " << i);
-	    }
-	  
-	  if (bs == 0) // EOF
-	    {
-	      DMCS_LOG_TRACE(port << ": Got a NULL pointer");
-	      break;
-	    }
-	  else
-	    {
-	      DMCS_LOG_TRACE(port << ": Extract information from MQ");
-	      
-	      std::size_t pa = ms.path;
-	      std::size_t sid = ms.sid;
-	      
-	      //assert (pa == path);
-	      
-	      DMCS_LOG_TRACE(port << ": got #" << i);
-	      DMCS_LOG_TRACE(port << ": bs = " << *bs << ", path = " << pa << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
-	      ModelSessionId msi(bs, pa, sid);
-	      res->push_back(msi);
-	    }
-	}
-    }
-  else // k2 = 0
-    {
-      std::size_t i = 0;
-      // collect until get a NULL pointers ======================================================================
-      while (1)
-	{
-	  DMCS_LOG_TRACE(port << ": Collecting, i = " << ++i);
-	  std::size_t prio = 0;
-	  int timeout = 0;
-
-	  //struct MessagingGatewayBC::ModelSession ms =
-	  //  mg->recvModel(ConcurrentMessageQueueFactory::OUT_MQ, prio, timeout);
-
-	  MessagingGatewayBC::ModelSession ms = receive_model(cmq.get());	  
-	  PartialBeliefState* bs = ms.m;
-
 	  if (bs == 0)
 	    {
-	      DMCS_LOG_TRACE(port << ": Got a NULL pointer indicating EOF. Bailing out");
 	      break;
 	    }
-	  else
-	    {
-	      DMCS_LOG_TRACE(port << ": Extract information from MQ");
-	      
-	      std::size_t pa = ms.path;
-	      std::size_t sid = ms.sid;
-	      
-	      //assert (pa == path);
-	      
-	      DMCS_LOG_TRACE(port << ": got #" << i);
-	      DMCS_LOG_TRACE(port << ": bs = " << *bs << ", path = " << pa << ", sid = " << sid << ". Notice: parent_session_id = " << parent_session_id);
-	      ModelSessionId msi(bs, pa, sid);
-	      res->push_back(msi);
-	    }
-	}
-    }
 
-  DMCS_LOG_TRACE(port << ": DONE with the whole collect output");
+	  count_models++;
+	}
+      
+      assert (res->size() > 0);
+      write_result(c, res);
+    }
 }
 
 
@@ -361,6 +146,22 @@ OutputThread::write_result(connection_ptr conn,
       DMCS_LOG_ERROR(__PRETTY_FUNCTION__ << ": " << e.message());
       throw std::runtime_error(e.message());
     }
+}
+
+
+
+ConcurrentMessageQueue*
+OutputThread::getCMQ()
+{
+  return cmq.get();
+}
+
+
+
+void
+OutputThread::setPort(std::size_t p)
+{
+  port = p;
 }
 
 

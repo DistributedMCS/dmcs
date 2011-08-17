@@ -40,6 +40,10 @@
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 
+#define MAX_READ 100 // maximal number of models that OutputThread wants to read in a round 
+                     // When this boundary is reached, or when encountering a NULL model, 
+                     // it sends the models back.
+
 namespace dmcs {
 
 
@@ -53,29 +57,15 @@ public:
   ~OutputThread();
 
   void
-  operator()(connection_ptr c,
-	     MessagingGatewayBC* m,
-	     ConcurrentMessageQueue* hon,
-	     OutputDispatcher* od);
+  operator()(connection_ptr c);
+
+  ConcurrentMessageQueue*
+  getCMQ();
+
+  void
+  setPort(std::size_t p);
 
 private:
-  BaseNotification::NotificationType
-  wait_for_trigger(ConcurrentMessageQueue* handler_output_notif,
-		   std::size_t& k1,
-		   std::size_t& k2,
-		   std::size_t& parent_session_id,
-		   OutputDispatcher* od);
-
-  void
-  send_empty_model(MessagingGatewayBC* mg);
-
-  void
-  collect_output(MessagingGatewayBC* mg, 
-		 ModelSessionIdListPtr& res,
-		 std::size_t k1,
-		 std::size_t k2,
-		 std::size_t parent_session_id);
-
   void
   write_result(connection_ptr conn,
 	       ModelSessionIdListPtr& res);

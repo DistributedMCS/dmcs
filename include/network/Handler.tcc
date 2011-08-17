@@ -215,9 +215,8 @@ Handler<CmdType>::handle_finalize(const boost::system::error_code& e,
 // *********************************************************************************************************************
 // Specialized methods for streaming dmcs
 Handler<StreamingCommandType>::Handler()
-     : output_thread(0),
-       handler_output_notif(new ConcurrentMessageQueue)
-
+  : output_thread(0),
+    ot(new OutputThread(0))
 { 
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 }
@@ -241,6 +240,8 @@ Handler<StreamingCommandType>::~Handler()
   DMCS_LOG_TRACE(port << ": Cleanup threads");
 
   if (output_thread) { delete output_thread; output_thread = 0; }
+
+  delete ot;
 
   DMCS_LOG_TRACE(port << ": End of Handler.");
 }
@@ -273,29 +274,6 @@ Handler<StreamingCommandType>::startup(bool is_leaf,
 
 
 void
-Handler<StreamingCommandType>::notify_output_thread(BaseNotification::NotificationType t, 
-						    std::size_t path,
-						    std::size_t parent_session_id,
-						    std::size_t k1,
-						    std::size_t k2)
-{
-  OutputNotification* mess_output = new OutputNotification(t, path, parent_session_id, k1, k2);
-  
-  DMCS_LOG_TRACE(port << ": Notify OutputThread" << *mess_output);
-  
-  OutputNotification* ow_output = 
-    (OutputNotification*) overwrite_send(handler_output_notif.get(), &mess_output, sizeof(mess_output), 0);
-  
-  if (ow_output)
-    {
-      delete ow_output;
-      ow_output = 0;
-    }
-}
-
-
-
-void
 Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					    bool is_leaf,
 					    StreamingHandlerPtr hdl,
@@ -310,7 +288,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
   if (!e)
     {
       std::size_t path = sesh->mess.getPath();
-      const std::size_t parent_session_id = sesh->mess.getSessionId();
+      //const std::size_t parent_session_id = sesh->mess.getSessionId();
       const std::size_t invoker = sesh->mess.getInvoker();
       const std::size_t pack_size = sesh->mess.getPackSize();
       const std::size_t k1 = sesh->mess.getK1();
@@ -318,7 +296,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
       if (first_call)
 	{
-	  // get the unique ID from the port of the connection for more detailed debugging information
+	  // get the unique ID from the port of the connection 
+	  // for more detailed debugging information
 	  boost::asio::ip::tcp::socket& sock = sesh->conn->socket();
 	  boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
 	  port = ep.port();
@@ -329,15 +308,14 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  // inform OutputThread about new incoming message (request
 	  // the next pack_size models)
 
-	  OutputThread ot(port);
+	  ot->setPort(port);
 
-	  output_thread = new boost::thread(ot, sesh->conn, mg, handler_output_notif.get(), od);
+	  output_thread = new boost::thread(*ot, sesh->conn);
 
 	  first_call = false;
 	} // if (first_call)
 
-      DMCS_LOG_TRACE(port << ": Notify OutputThread of the new message. sesh->mess = " << sesh->mess);
-      notify_output_thread(BaseNotification::REQUEST, path, parent_session_id, k1, k2);
+      od->registerThread(path, ot->getCMQ());
 
       StreamingForwardMessage* sfMess = new StreamingForwardMessage();
       *sfMess = sesh->mess;
@@ -357,7 +335,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					 sat_notif,
 					 mg,
 					 header,
-					 parent_session_id)
+					 od)
 			     );
     }
   else
@@ -379,8 +357,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 						  ConcurrentMessageQueue* sat_notif,
 						  MessagingGatewayBC* mg,
 						  boost::shared_ptr<std::string> header,
-						  std::size_t parent_session_id
-						  )
+						  OutputDispatcher* od)
 {
   assert(this == hdl.get());
 
@@ -393,8 +370,6 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	{
 	  DMCS_LOG_TRACE(port << ": Got a STREAMING/NEXT request. Will inform my slaves about this.");
 
-	  OutputDispatcher* null_pointer = 0;
-
 	  // Read the message 
 	  sesh->conn->async_read(sesh->mess,
 				 boost::bind(&StreamingHandler::do_local_job, this,
@@ -404,7 +379,7 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 					     sesh,
 					     sat_notif,
 					     mg,
-					     null_pointer,
+					     od,
 					     false) // subsequent call to local job
 				 );
 	}
@@ -413,11 +388,8 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 	  // don't do anything, session will disappear
 
 	  DMCS_LOG_TRACE(port << ": Closing session with context " << sesh->mess.getInvoker());
-	  DMCS_LOG_TRACE(port << ": Send SHUTHDOWN to Output thread");
-
-	  notify_output_thread(BaseNotification::SHUTDOWN, 0, 0, 0, 0);
-	  
-	  DMCS_LOG_TRACE(port << ": Send SHUTDOWN to DMCS thread");
+	  //DMCS_LOG_TRACE(port << ": Send SHUTHDOWN to Output thread");
+	  //DMCS_LOG_TRACE(port << ": Send SHUTDOWN to DMCS thread");
 
 	  return;
 	}

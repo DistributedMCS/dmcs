@@ -143,19 +143,11 @@ public:
 		     ConcurrentMessageQueue* sat_notif,
 		     MessagingGatewayBC* mg,
 		     boost::shared_ptr<std::string> header,
-		     std::size_t parent_session_id);
-
-private:
-  void
-  notify_output_thread(BaseNotification::NotificationType t, 
-		       std::size_t path,
-		       std::size_t parent_session_id,
-		       std::size_t k1,
-		       std::size_t k2);
+		     OutputDispatcher* od);
     
 private:
   boost::thread* output_thread;
-  ConcurrentMessageQueuePtr handler_output_notif;
+  OutputThread* ot;
   std::size_t port;
 };
 

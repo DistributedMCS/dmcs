@@ -52,7 +52,7 @@ public:
     CMQMap::const_iterator it = thread_map->find(path);
     if (it != thread_map->end())
       {
-	assert (cmq == it->secon);
+	assert (cmq == it->second);
       }
     else
       // register the new thread
