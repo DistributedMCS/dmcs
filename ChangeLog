@@ -1,3 +1,19 @@
+2011-08-18  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Server.h: Add joiner_dispatcher to Server.
+	* src/network/Server.cpp: Likewise.
+
+	* include/solver/RelSatSolver.h: Add SatStatus.
+
+	* include/mcs/ResourceManager.h: New file.
+	* src/mcs/ResourceManager.cpp: Likewise.
+
+	* include/mcs/Makefile.am: Add ResourceManager.h.
+
+	* configure.ac: Add new subdir src/mcs.
+	* src/Makefile.am: Likewise.
+	* include/Makefile.am: Likewise.
+
 2011-08-17  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/Makefile.am: Add JoinerDispatcher.cpp.
