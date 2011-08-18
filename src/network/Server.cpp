@@ -73,6 +73,7 @@ Server::Server(const CommandTypeFactoryPtr& c,
     joiner_sat_notif(new ConcurrentMessageQueue),
     neighbors_notif(new ConcurrentMessageQueueVec),
     output_dispatcher(new OutputDispatcher),
+    joiner_dispatcher(new JoinerDispatcher),
     c2o(new HashedBiMap),
     first_round(true),
     join_thread(0),
@@ -307,6 +308,7 @@ Server::dispatch_header(const boost::system::error_code& e,
 	  bool is_leaf = (nbs->size() == 0);
 
 	  output_dispatcher_thread = new boost::thread(*output_dispatcher, mg.get());
+	  joiner_dispatcher_thread = new boost::thread(*joiner_dispatcher, mg.get());
 
 	  HandlerThread* handler_thread = new HandlerThread(invoker);
 	  boost::thread* boost_handler_thread = new boost::thread(*handler_thread, is_leaf, handler, sesh, joiner_sat_notif, mg.get(), output_dispatcher.get());
