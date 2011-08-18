@@ -131,6 +131,23 @@ private:
 
 typedef boost::shared_ptr<RelSatSolver> RelSatSolverPtr;
 
+
+
+struct SatStatus
+{
+  SatStatus()
+    : busy(false), k1(0), k2(0)
+  { }
+
+  ConcurrentMessageQueue* cmq;
+  bool busy;
+  std::size_t k1;
+  std::size_t k2;
+};
+
+typedef std::vector<SatStatus> SatStatusVec;
+typedef boost::shared_ptr<SatStatusVec> SatStatusVecPtr;
+
 } // namespace dmcs
 
 #endif // REL_SAT_SOLVER_H

@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = dmcs dyndmcs generator network loopformula parser process solver
+SUBDIRS = dmcs dyndmcs generator network loopformula parser process solver mcs
 
 # global preprocessor flags
 AM_CPPFLAGS = \
@@ -49,6 +49,7 @@ dmcsd_LDADD = \
 	$(top_builddir)/src/loopformula/libtranslation.a \
 	$(top_builddir)/src/dyndmcs/libdyndmcs.a \
 	$(top_builddir)/src/solver/libsolver.a \
+	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/relsat-20070104/librelsat.a
 
 

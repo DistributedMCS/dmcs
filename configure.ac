@@ -185,6 +185,7 @@ AC_CONFIG_FILES([
            src/dyndmcs/Makefile
            src/generator/Makefile
            src/loopformula/Makefile
+           src/mcs/Makefile
            src/network/Makefile
            src/parser/Makefile
 	   src/process/Makefile

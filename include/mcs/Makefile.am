@@ -5,6 +5,7 @@ noinst_HEADERS =  \
 		BeliefState.h \
 		HashedBiMap.h \
 		ProxySignatureByLocal.h \
+		ResourceManager.h \
 		Rule.h \
 		Signature.h \
 		Theory.h
