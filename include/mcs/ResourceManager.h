@@ -34,23 +34,18 @@
 #include "network/JoinerDispatcher.h"
 #include "network/JoinThread.h"
 #include "network/RelSatSolverThread.h"
+#include "network/ThreadFactory.h"
 #include "solver/RelSatSolver.h"
+
+#include <boost/thread/mutex.hpp>
 
 namespace dmcs {
 
 class ResourceManager
 {
 public:
-  ResourceManager(std::size_t mr);
-
-  // + create a pair of SatSolver-Joiner,
-  // + give SatSolver an index in the vector of status (workers)
-  // + connect SatSolver and Joiner
-  // + start RelSatSolverThread
-  // + and return the message queue of SatSolver so that any one who receives this 
-  // can trigger the solver by sending a request to the message queue
-  ConcurrentMessageQueue*
-  createWorker();
+  ResourceManager(std::size_t mr,
+		  ThreadFactory* tf);
 
   // Handler can request a worker via this method.
   // Depends on the availability of workers (non-busy) 
@@ -59,16 +54,29 @@ public:
   // to return, or wait (then Handler will be blocked and 
   // the block will be pushed back automatically)
   ConcurrentMessageQueue*
-  requestWorker();
+  requestWorker(std::size_t path);
 
   // let SatSolver update its status via this method
   void
   updateStatus(std::size_t index, 
 	       ConcurrentMessageQueue* sat_cmq,
 	       bool bs, std::size_t k_one, std::size_t k_two);
+
 private:
-  SatStatusVecPtr workers;
+  // + create a pair of SatSolver-Joiner,
+  // + give SatSolver an index in the vector of status (workers)
+  // + connect SatSolver and Joiner
+  // + start RelSatSolverThread
+  // + and return the message queue of SatSolver so that any one who receives this 
+  // can trigger the solver by sending a request to the message queue
+  ConcurrentMessageQueue*
+  createWorker(std::size_t path);
+
+private:
   std::size_t max_resource;
+  ThreadFactory* thread_factory;
+  WorkerVecPtr workers;
+  boost::mutex mtx;
 };
 
 } // namespace dmcs

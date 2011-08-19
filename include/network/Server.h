@@ -35,9 +35,11 @@
 #include "network/OutputDispatcher.h"
 #include "network/JoinerDispatcher.h"
 #include "network/Session.h"
+#include "network/ThreadFactory.h"
 #include "network/connection.hpp"
 
 #include "mcs/BeliefState.h"
+#include "mcs/ResourceManager.h"
 #include "mcs/Rule.h"
 #include "mcs/Theory.h"
 #include "dmcs/Context.h"
@@ -99,12 +101,10 @@ private:
   MessagingGatewayBCPtr mg;
   OutputDispatcherPtr output_dispatcher;
   JoinerDispatcherPtr joiner_dispatcher;
+  ThreadFactory* thread_factory;
+  ResourceManager* resource_manager;
   ThreadVecPtr boost_handler_threads;
-  ThreadVecPtr neighbor_threads;
-  NeighborThreadVecPtr neighbors;
   HandlerThreadVecPtr handler_threads;
-  ConcurrentMessageQueue* joiner_sat_notif;
-  ConcurrentMessageQueueVecPtr neighbors_notif;
   HashedBiMapPtr c2o;
   std::size_t port;
   bool first_round;

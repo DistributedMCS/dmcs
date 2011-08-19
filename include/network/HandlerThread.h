@@ -35,6 +35,8 @@
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/OutputDispatcher.h"
 
+#include "mcs/ResourceManager.h"
+
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -70,9 +72,9 @@ public:
   operator()(bool is_leaf,
 	     StreamingHandlerPtr handler,
 	     StreamingSessionMsgPtr sesh,
-	     ConcurrentMessageQueue* sat_notif,
 	     MessagingGatewayBC* mg,
-	     OutputDispatcher* od);
+	     OutputDispatcher* od,
+	     ResourceManager* rm);
 
 private:
   std::size_t invoker;

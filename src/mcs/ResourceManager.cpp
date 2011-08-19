@@ -35,39 +35,53 @@
 
 namespace dmcs {
 
-ResourceManager::ResourceManager(std::size_t mr)
-  : max_resource(mr)
+ResourceManager::ResourceManager(std::size_t mr,
+				 ThreadFactory* tf)
+  : max_resource(mr),
+    thread_factory(tf),
+    workers(new WorkerVec)
 { }
 
 
 
 ConcurrentMessageQueue*
-ResourceManager::createWorker()
+ResourceManager::createWorker(std::size_t path)
 {
+  WorkerPtr wk = thread_factory->createWorkerThreads(path);
+  wk->busy = true;
+  
+  workers->push_back(wk);
+
+  return wk->request_mq;
 }
 
 
 
 ConcurrentMessageQueue*
-ResourceManager::requestWorker()
+ResourceManager::requestWorker(std::size_t path)
 {
+  boost::mutex::scoped_lock lock(mtx);
 }
 
 
 
 void
 ResourceManager::updateStatus(std::size_t index, 
-			      ConcurrentMessageQueue* sat_cmq,
-			      bool bs, std::size_t k_one, std::size_t k_two)
+			      ConcurrentMessageQueue* request_mq,
+			      bool bs, 
+			      std::size_t k_one, 
+			      std::size_t k_two)
 {
   assert (workers->size() > index);
-  SatStatusVec::iterator it = workers->begin();
+  WorkerVec::iterator it = workers->begin();
   std::advance(it, index);
 
-  assert (sat_cmq == it->cmq);
-  it->busy = bs;
-  it->k1 = k_one;
-  it->k2 = k_two;
+  WorkerPtr wk = *it;
+
+  assert (request_mq == wk->request_mq);
+  wk->busy = bs;
+  wk->k1 = k_one;
+  wk->k2 = k_two;
 }
 
 

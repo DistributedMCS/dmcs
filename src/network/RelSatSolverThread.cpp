@@ -32,18 +32,29 @@
 #endif // HAVE_CONFIG_H
 
 #include "dmcs/Log.h"
+#include "network/ConcurrentMessageQueueHelper.h"
 #include "network/RelSatSolverThread.h"
 
 namespace dmcs {
 
 RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& rss)
-  : relsatsolver(rss)
+  : relsatsolver(rss),
+    request_mq(new ConcurrentMessageQueue)
 { 
   DMCS_LOG_TRACE("Destructor.");
 }
 
+
+
+RelSatSolverThread::~RelSatSolverThread()
+{
+  delete request_mq;
+  request_mq = 0;
+}
+
+
 void
-RelSatSolverThread::operator()(MessagingGatewayBC* mg)
+RelSatSolverThread::operator()()
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
@@ -51,9 +62,10 @@ RelSatSolverThread::operator()(MessagingGatewayBC* mg)
     {
       try 
 	{
+	  // wait for request from request_mq
 	  std::size_t prio = 0;
 	  int timeout = 0;
-	  StreamingForwardMessage* sfMess = mg->recvIncomingMessage(ConcurrentMessageQueueFactory::REQUEST_MQ, prio, timeout);
+	  StreamingForwardMessage* sfMess = receive_incoming_message(request_mq);
 
 	  assert (sfMess);
 
@@ -76,6 +88,14 @@ RelSatSolverThread::operator()(MessagingGatewayBC* mg)
 	  relsatsolver->refresh(); // including remove_input
 	}
     }
+}
+
+
+
+ConcurrentMessageQueue*
+RelSatSolverThread::getRequestMQ()
+{
+  return request_mq;
 }
 
 } // namespace dmcs

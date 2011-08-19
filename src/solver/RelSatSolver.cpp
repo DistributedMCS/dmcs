@@ -91,6 +91,12 @@ RelSatSolver::~RelSatSolver()
     {
       delete *it;
     }
+
+  if (joiner_sat_notif)
+    {
+      delete joiner_sat_notif;
+      joiner_sat_notif = 0;
+    }
 }
 
 

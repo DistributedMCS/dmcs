@@ -1,3 +1,31 @@
+2011-08-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: joiner_sat_notif is deleted by ThreadFactory.
+
+	* include/solver/RelSatSolver.h: Remove SatStatus as Worker already takes
+	care of this.
+
+	* include/network/ThreadFactory.h: Create sat and join threads as pairs.
+	Return Worker as status infor.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/Server.h: Remove lots of threads, now ThreadFactory owns them.
+	* src/network/Server.cpp: Likewise.
+
+	* include/network/RelSatSolverThread.h: Receive request through request_mq
+	rather than mg.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+	* include/network/Handler.h: Make use of ResourceManager.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/HandlerThread.h: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Add helper function
+	for RelSatSolverThread to receive incoming message.
+
+	* include/mcs/ResourceManager.h: Create workers by thread_factory. Set mutex lock.
+	* src/mcs/ResourceManager.cpp: Likewise.
+
 2011-08-18  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Server.h: Add joiner_dispatcher to Server.

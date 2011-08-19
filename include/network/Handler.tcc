@@ -252,9 +252,9 @@ void
 Handler<StreamingCommandType>::startup(bool is_leaf,
 				       StreamingHandlerPtr hdl, 
 				       StreamingSessionMsgPtr sesh, 
-				       ConcurrentMessageQueue* sat_notif,
 				       MessagingGatewayBC* mg,
-				       OutputDispatcher* od)
+				       OutputDispatcher* od,
+				       ResourceManager* rm)
 {
   assert(hdl.get() == this);
 
@@ -264,9 +264,9 @@ Handler<StreamingCommandType>::startup(bool is_leaf,
 				     is_leaf,
 				     hdl,
 				     sesh,
-				     sat_notif,
 				     mg,
 				     od,
+				     rm,
 				     true) // first request
 			   );
 }
@@ -278,9 +278,9 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					    bool is_leaf,
 					    StreamingHandlerPtr hdl,
 					    StreamingSessionMsgPtr sesh,
-					    ConcurrentMessageQueue* sat_notif,
 					    MessagingGatewayBC* mg,
 					    OutputDispatcher* od,
+					    ResourceManager* rm,
 					    bool first_call)
 {
   assert(this == hdl.get());
@@ -319,8 +319,15 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 
       StreamingForwardMessage* sfMess = new StreamingForwardMessage();
       *sfMess = sesh->mess;
-      DMCS_LOG_TRACE(port << ": Notify SAT of the new message by placing it into REQUEST_MQ. sfMess = " << *sfMess);
-      mg->sendIncomingMessage(sfMess, 0, ConcurrentMessageQueueFactory::REQUEST_MQ, 0);
+
+      //DMCS_LOG_TRACE(port << ": Notify SAT of the new message by placing it into REQUEST_MQ. sfMess = " << *sfMess);
+      //mg->sendIncomingMessage(sfMess, 0, ConcurrentMessageQueueFactory::REQUEST_MQ, 0);
+
+      // Request for resource. If no resource is available 
+      // then we are blocked here and it blocks the whole 
+      // branch upwards will also be automatically blocked.
+      ConcurrentMessageQueue* request_mq = rm->requestWorker(path);
+      request_mq->send(&sfMess, sizeof(sfMess), 0);
 
       DMCS_LOG_TRACE(port << ": Waiting for incoming message from " << invoker << " at " << port << " (first_call = " << first_call << ")");
 
@@ -332,10 +339,10 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 					 is_leaf,
 					 hdl,
 					 sesh, 
-					 sat_notif,
 					 mg,
 					 header,
-					 od)
+					 od,
+					 rm)
 			     );
     }
   else
@@ -354,10 +361,10 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 						  bool is_leaf,
 						  StreamingHandlerPtr hdl,
 						  StreamingSessionMsgPtr sesh,
-						  ConcurrentMessageQueue* sat_notif,
 						  MessagingGatewayBC* mg,
 						  boost::shared_ptr<std::string> header,
-						  OutputDispatcher* od)
+						  OutputDispatcher* od,
+						  ResourceManager* rm)
 {
   assert(this == hdl.get());
 
@@ -377,9 +384,9 @@ Handler<StreamingCommandType>::handle_read_header(const boost::system::error_cod
 					     is_leaf,
 					     hdl,
 					     sesh,
-					     sat_notif,
 					     mg,
 					     od,
+					     rm,
 					     false) // subsequent call to local job
 				 );
 	}

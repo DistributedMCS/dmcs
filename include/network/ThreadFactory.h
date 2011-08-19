@@ -35,6 +35,7 @@
 #include "mcs/ProxySignatureByLocal.h"
 #include "mcs/Theory.h"
 #include "network/BaseClient.h"
+#include "network/JoinerDispatcher.h"
 #include "network/NeighborThread.h"
 #include "network/connection.hpp"
 #include "solver/RelSatSolver.h"
@@ -48,6 +49,48 @@ namespace dmcs {
 typedef std::vector<boost::thread*> ThreadVec;
 typedef boost::shared_ptr<ThreadVec> ThreadVecPtr;
 
+
+struct Worker
+{
+  Worker()
+    : sat_thread(0), join_thread(0), 
+      request_mq(0), busy(false), 
+      k1(0), k2(0)
+  { }
+
+
+  ~Worker()
+  {
+    if (sat_thread)
+      {
+	delete sat_thread;
+	sat_thread = 0;
+      }
+
+    if (join_thread)
+      {
+	delete join_thread;
+	join_thread = 0;
+      }
+  }
+
+
+  boost::thread* sat_thread;
+  boost::thread* join_thread;
+  ConcurrentMessageQueue* request_mq;
+
+  // status information
+  bool busy;
+  std::size_t k1;
+  std::size_t k2;
+};
+
+
+typedef boost::shared_ptr<Worker> WorkerPtr;
+typedef std::vector<WorkerPtr> WorkerVec;
+typedef boost::shared_ptr<WorkerVec> WorkerVecPtr;
+
+
 class ThreadFactory
 {
 public:
@@ -57,34 +100,35 @@ public:
 		const NeighborListPtr& ns,
 		std::size_t sid,
 		QueryPlan* qp,
-		ConcurrentMessageQueue* jsn,
 		MessagingGatewayBC* m,
-		HashedBiMap* co);
+		HashedBiMap* co,
+		JoinerDispatcher* jd);
 
   void
-  createNeighborThreads(ThreadVecPtr& neighbor_threads,
-			NeighborThreadVecPtr& neighbors,
-			ConcurrentMessageQueueVecPtr& neighbors_notif);
-  boost::thread*
-  createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif);
+  createNeighborThreads();
 
-  boost::thread*
-  createLocalSolveThread();
+  WorkerPtr
+  createWorkerThreads(std::size_t path);
 
 private:
   const ContextPtr context;
   const TheoryPtr theory;
   const SignaturePtr local_sig;
   const NeighborListPtr nbs;
+  ThreadVecPtr neighbor_threads;
+  NeighborThreadVecPtr neighbors;
+  ConcurrentMessageQueueVecPtr neighbors_notif;
   std::size_t session_id;
   QueryPlan* query_plan;
-  ConcurrentMessageQueue* joiner_sat_notif;
   MessagingGatewayBC* mg;
   HashedBiMap* c2o;             // hashed bimap from context id to
                                 // the offset in the vector of
                                 // neighbor message queue
+  JoinerDispatcher* joiner_dispatcher;
   std::size_t port;
 };
+
+typedef boost::shared_ptr<ThreadFactory> ThreadFactoryPtr;
 
 
 } // namespace dmcs

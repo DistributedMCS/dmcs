@@ -40,11 +40,17 @@ class RelSatSolverThread
 public:
   RelSatSolverThread(const RelSatSolverPtr& rss);
 
+  ~RelSatSolverThread();
+
   void
-  operator()(MessagingGatewayBC* mg);
+  operator()();
+
+  ConcurrentMessageQueue*
+  getRequestMQ();
 
 private:
   RelSatSolverPtr relsatsolver;
+  ConcurrentMessageQueue* request_mq;
 };
 
 } // namespace dmcs

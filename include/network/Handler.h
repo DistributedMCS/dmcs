@@ -43,6 +43,7 @@
 #include "dmcs/StreamingCommandType.h"
 #include "dyndmcs/InstantiatorCommandType.h"
 #include "solver/Conflict.h"
+#include "mcs/ResourceManager.h"
 
 #include "relsat-20070104/SATInstance.h"
 #include "relsat-20070104/SATSolver.h"
@@ -121,18 +122,18 @@ public:
   startup(bool is_leaf,
 	  StreamingHandlerPtr hdl, 
 	  StreamingSessionMsgPtr sesh, 
-	  ConcurrentMessageQueue* sat_notif,
 	  MessagingGatewayBC* mg,
-	  OutputDispatcher* od);
+	  OutputDispatcher* od,
+	  ResourceManager* rm);
 
   void 
   do_local_job(const boost::system::error_code& e,
 	       bool is_leaf,
 	       StreamingHandlerPtr hdl,
 	       StreamingSessionMsgPtr sesh,
-	       ConcurrentMessageQueue* sat_notif,
 	       MessagingGatewayBC* mg,
 	       OutputDispatcher* od,
+	       ResourceManager* rm,
 	       bool first_call);
 
   void
@@ -140,10 +141,10 @@ public:
 		     bool is_leaf,
 		     StreamingHandlerPtr hdl,
 		     StreamingSessionMsgPtr sesh,
-		     ConcurrentMessageQueue* sat_notif,
 		     MessagingGatewayBC* mg,
 		     boost::shared_ptr<std::string> header,
-		     OutputDispatcher* od);
+		     OutputDispatcher* od,
+		     ResourceManager* rm);
     
 private:
   boost::thread* output_thread;

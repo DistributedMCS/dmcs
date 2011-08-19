@@ -36,7 +36,7 @@
 #include "network/Server.h"
 #include "network/ConcurrentMessageQueueFactory.h"
 #include "network/Handler.h"
-#include "network/ThreadFactory.h"
+
 
 
 #include <algorithm>
@@ -50,11 +50,11 @@ namespace dmcs {
   HandlerThread::operator()(bool is_leaf,
 			    StreamingHandlerPtr handler,
 			    StreamingSessionMsgPtr sesh,
-			    ConcurrentMessageQueue* sat_notif,
 			    MessagingGatewayBC* mg,
-			    OutputDispatcher* od)
+			    OutputDispatcher* od,
+			    ResourceManager* rm)
   {
-    handler->startup(is_leaf, handler, sesh, sat_notif, mg, od);
+    handler->startup(is_leaf, handler, sesh, mg, od, rm);
   }
 
 
@@ -66,12 +66,8 @@ Server::Server(const CommandTypeFactoryPtr& c,
     acceptor(io_service, endpoint),
     port(endpoint.port()),
     invokers(new ListSizeT),
-    neighbors(new NeighborThreadVec),
     handler_threads(new HandlerThreadVec),
-    neighbor_threads(new ThreadVec),
     boost_handler_threads(new ThreadVec),
-    joiner_sat_notif(new ConcurrentMessageQueue),
-    neighbors_notif(new ConcurrentMessageQueueVec),
     output_dispatcher(new OutputDispatcher),
     joiner_dispatcher(new JoinerDispatcher),
     c2o(new HashedBiMap),
@@ -156,10 +152,10 @@ Server::~Server()
       DMCS_LOG_ERROR("OutputDispatcher thread not joinable");
     }
 
-  if (joiner_sat_notif)
+  if (thread_factory)
     {
-      delete joiner_sat_notif;
-      joiner_sat_notif = 0;
+      delete thread_factory;
+      thread_factory = 0;
     }
 }
 
@@ -190,19 +186,19 @@ Server::initialize()
       c2o->insert(Int2Int(nid, off));
     }
 
-  ThreadFactory tf(ctx, theory, local_sig, nbs, 0, query_plan.get(), joiner_sat_notif, mg.get(), c2o.get());
+  thread_factory = new ThreadFactory(ctx, theory, local_sig, 
+				     nbs, 0, query_plan.get(), 
+				     mg.get(), c2o.get(), 
+				     joiner_dispatcher.get());
+
+  ///@todo: parameterize max_resource
+  resource_manager = new ResourceManager(10, thread_factory);
   
   if (no_nbs > 0)
     {
       DMCS_LOG_TRACE("Create Neighbor threads");
-      tf.createNeighborThreads(neighbor_threads, neighbors, neighbors_notif);
-      join_thread = tf.createJoinThread(neighbors_notif);
+      thread_factory->createNeighborThreads();
     }
-
-  DMCS_LOG_TRACE("Create SAT thread");
-  sat_thread = tf.createLocalSolveThread();
-
-  DMCS_LOG_TRACE("All thread created!");
 }
 
 
@@ -311,7 +307,11 @@ Server::dispatch_header(const boost::system::error_code& e,
 	  joiner_dispatcher_thread = new boost::thread(*joiner_dispatcher, mg.get());
 
 	  HandlerThread* handler_thread = new HandlerThread(invoker);
-	  boost::thread* boost_handler_thread = new boost::thread(*handler_thread, is_leaf, handler, sesh, joiner_sat_notif, mg.get(), output_dispatcher.get());
+	  boost::thread* boost_handler_thread = new boost::thread(*handler_thread, is_leaf, 
+								  handler, sesh, mg.get(), 
+								  output_dispatcher.get(),
+								  resource_manager);
+
 	  boost_handler_threads->push_back(boost_handler_thread);
 	  handler_threads->push_back(handler_thread);
 	}

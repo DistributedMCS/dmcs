@@ -50,18 +50,21 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
 			     const NeighborListPtr& ns,
 			     std::size_t sid,
 			     QueryPlan* qp,
-			     ConcurrentMessageQueue* jsn,
 			     MessagingGatewayBC* m,
-			     HashedBiMap* co)
+			     HashedBiMap* co,
+			     JoinerDispatcher* jd)
   : context(c),
     theory(t), 
     local_sig(ls),
     nbs(ns),
+    neighbor_threads(new ThreadVec),
+    neighbors(new NeighborThreadVec),
+    neighbors_notif(new ConcurrentMessageQueueVec),
     session_id(sid),
     query_plan(qp),
-    joiner_sat_notif(jsn),
     mg(m),
-    c2o(co)
+    c2o(co),
+    joiner_dispatcher(jd)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 }
@@ -69,9 +72,7 @@ ThreadFactory::ThreadFactory(const ContextPtr& c,
 
 
 void
-ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
-				     NeighborThreadVecPtr& neighbors,
-				     ConcurrentMessageQueueVecPtr& neighbors_notif)
+ThreadFactory::createNeighborThreads()
 {
   const std::size_t ctx_id = context->getContextID();
 
@@ -91,34 +92,35 @@ ThreadFactory::createNeighborThreads(ThreadVecPtr& neighbor_input_threads,
       const NeighborPtr nb = *it;
       
       boost::thread* nit = new boost::thread(*nt, cmq.get(), mg, nb.get(), c2o, ctx_id);
-      neighbor_input_threads->push_back(nit);
+      neighbor_threads->push_back(nit);
     }
 }
 
 
 
-boost::thread*
-ThreadFactory::createJoinThread(ConcurrentMessageQueueVecPtr& neighbors_notif)
+WorkerPtr
+ThreadFactory::createWorkerThreads(std::size_t path)
 {
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  const std::size_t system_size = context->getSystemSize();
-  const std::size_t no_nbs   = nbs->size();
+  // the placer holder of threads
+  WorkerPtr worker(new Worker);
 
+  ConcurrentMessageQueue* joiner_sat_notif = new ConcurrentMessageQueue;
+
+  // create join thread
+  const std::size_t system_size = context->getSystemSize();
+  const std::size_t no_nbs = nbs->size();
+
+  // create the joiner and register its input queue to joiner_dispatcher
   JoinThread jt(port, session_id);
-  boost::thread* t = new boost::thread(jt, no_nbs, system_size, mg, joiner_sat_notif, neighbors_notif.get());
+  joiner_dispatcher->registerThread(path, jt.getCMQ());
+  
+  worker->join_thread = new boost::thread(jt, no_nbs, system_size, 
+					  mg, joiner_sat_notif, neighbors_notif.get());
 
-  return t;
-}
 
-
-
-boost::thread*
-ThreadFactory::createLocalSolveThread()
-{
-  DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
-  bool is_leaf                  = (nbs->size() == 0);
-  const std::size_t my_id       = context->getContextID();
-  const std::size_t system_size = context->getSystemSize();
+  // create solver thread
+  bool is_leaf  = (no_nbs == 0);
+  const std::size_t my_id = context->getContextID();
 
   SatSolverFactory ssf(is_leaf, my_id, session_id, theory, local_sig, 
 		       c2o, system_size, query_plan, joiner_sat_notif, mg);
@@ -126,11 +128,12 @@ ThreadFactory::createLocalSolveThread()
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
   RelSatSolverThread rsst(relsatsolver);
-  boost::thread* t = new boost::thread(rsst, mg);
+  worker->sat_thread = new boost::thread(rsst);
 
-  return t;
+  worker->request_mq = rsst.getRequestMQ();
+
+  return worker;
 }
-
 
 
 } // namespace dmcs

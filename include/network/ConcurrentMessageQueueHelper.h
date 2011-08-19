@@ -77,6 +77,23 @@ receive_model(ConcurrentMessageQueue* cmq)
 }
 
 
+
+inline StreamingForwardMessage*
+receive_incoming_message(ConcurrentMessageQueue* cmq)
+{
+  StreamingForwardMessage* m = 0;
+  std::size_t recvd = 0;
+  unsigned int p = 0;
+  void *ptr = static_cast<void*>(&m);
+
+  cmq->receive(ptr, sizeof(m), recvd, p);
+
+  assert(sizeof(m) == recvd);
+
+  return m;
+}
+
+
 } // namespace dmcs
 
 
