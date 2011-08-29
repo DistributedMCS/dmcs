@@ -99,7 +99,8 @@ ThreadFactory::createNeighborThreads()
 
 
 WorkerPtr
-ThreadFactory::createWorkerThreads(std::size_t path)
+ThreadFactory::createWorkerThreads(std::size_t path, ResourceManager* rm,
+				   std::size_t worker_index)
 {
   // the placer holder of threads
   WorkerPtr worker(new Worker);
@@ -123,11 +124,12 @@ ThreadFactory::createWorkerThreads(std::size_t path)
   const std::size_t my_id = context->getContextID();
 
   SatSolverFactory ssf(is_leaf, my_id, session_id, theory, local_sig, 
-		       c2o, system_size, query_plan, joiner_sat_notif, mg);
+		       c2o, system_size, query_plan, joiner_sat_notif, 
+		       mg);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
-  RelSatSolverThread rsst(relsatsolver);
+  RelSatSolverThread rsst(relsatsolver, rm, worker_index);
   worker->sat_thread = new boost::thread(rsst);
 
   worker->request_mq = rsst.getRequestMQ();

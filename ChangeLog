@@ -1,3 +1,25 @@
+2011-08-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Server.h: Remove join_thread and sat_thread
+	* src/network/Server.cpp: Likewise.
+
+	* include/network/ThreadFactory.h: Pass resource_manager and worker_index
+	to create worker threads.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/RelSatSolverThread.h: Use resource_manager and worker_index
+	to update status of solver once it finishes computing.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+	* include/network/Worker.h: Newfile.
+	* include/network/Makefile.am: Add Worker.h.
+
+	* include/network/Handler.tcc: Pass k1, k2 to requestWorker.
+
+	* include/mcs/ResourceManager.h: Use mutex lock and condition variable
+	to manage requesting and updating status of resources.
+	* src/mcs/ResourceManager.cpp: Likewise.
+
 2011-08-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/solver/RelSatSolver.cpp: joiner_sat_notif is deleted by ThreadFactory.

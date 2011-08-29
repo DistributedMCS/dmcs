@@ -35,11 +35,13 @@
 #include "network/JoinThread.h"
 #include "network/RelSatSolverThread.h"
 #include "network/ThreadFactory.h"
-#include "solver/RelSatSolver.h"
+#include "network/Worker.h"
 
 #include <boost/thread/mutex.hpp>
 
 namespace dmcs {
+
+class ThreadFactory;
 
 class ResourceManager
 {
@@ -54,7 +56,7 @@ public:
   // to return, or wait (then Handler will be blocked and 
   // the block will be pushed back automatically)
   ConcurrentMessageQueue*
-  requestWorker(std::size_t path);
+  requestWorker(std::size_t path, std::size_t k1, std::size_t k2);
 
   // let SatSolver update its status via this method
   void
@@ -73,10 +75,13 @@ private:
   createWorker(std::size_t path);
 
 private:
+  std::size_t free_resource;
   std::size_t max_resource;
   ThreadFactory* thread_factory;
   WorkerVecPtr workers;
+  boost::mutex request_mtx;
   boost::mutex mtx;
+  boost::condition_variable cond;
 };
 
 } // namespace dmcs

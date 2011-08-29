@@ -33,10 +33,12 @@
 #include "dmcs/Context.h"
 #include "mcs/HashedBiMap.h"
 #include "mcs/ProxySignatureByLocal.h"
+#include "mcs/ResourceManager.h"
 #include "mcs/Theory.h"
 #include "network/BaseClient.h"
 #include "network/JoinerDispatcher.h"
 #include "network/NeighborThread.h"
+#include "network/Worker.h"
 #include "network/connection.hpp"
 #include "solver/RelSatSolver.h"
 
@@ -49,47 +51,7 @@ namespace dmcs {
 typedef std::vector<boost::thread*> ThreadVec;
 typedef boost::shared_ptr<ThreadVec> ThreadVecPtr;
 
-
-struct Worker
-{
-  Worker()
-    : sat_thread(0), join_thread(0), 
-      request_mq(0), busy(false), 
-      k1(0), k2(0)
-  { }
-
-
-  ~Worker()
-  {
-    if (sat_thread)
-      {
-	delete sat_thread;
-	sat_thread = 0;
-      }
-
-    if (join_thread)
-      {
-	delete join_thread;
-	join_thread = 0;
-      }
-  }
-
-
-  boost::thread* sat_thread;
-  boost::thread* join_thread;
-  ConcurrentMessageQueue* request_mq;
-
-  // status information
-  bool busy;
-  std::size_t k1;
-  std::size_t k2;
-};
-
-
-typedef boost::shared_ptr<Worker> WorkerPtr;
-typedef std::vector<WorkerPtr> WorkerVec;
-typedef boost::shared_ptr<WorkerVec> WorkerVecPtr;
-
+class ResourceManager;
 
 class ThreadFactory
 {
@@ -108,7 +70,8 @@ public:
   createNeighborThreads();
 
   WorkerPtr
-  createWorkerThreads(std::size_t path);
+  createWorkerThreads(std::size_t path, ResourceManager* rm,
+		      std::size_t worker_index);
 
 private:
   const ContextPtr context;

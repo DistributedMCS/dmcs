@@ -94,8 +94,6 @@ private:
   boost::asio::io_service& io_service;
   boost::asio::ip::tcp::acceptor acceptor;
   ListSizeTPtr invokers;
-  boost::thread* join_thread;
-  boost::thread* sat_thread;
   boost::thread* output_dispatcher_thread;
   boost::thread* joiner_dispatcher_thread;
   MessagingGatewayBCPtr mg;

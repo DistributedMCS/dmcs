@@ -26,6 +26,7 @@ noinst_HEADERS =  \
 		StreamingDMCSThread.h \
 		ThreadFactory.h \
 		RelSatSolverThread.h \
+		Worker.h \
 		connection.hpp
 
 

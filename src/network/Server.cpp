@@ -68,12 +68,12 @@ Server::Server(const CommandTypeFactoryPtr& c,
     invokers(new ListSizeT),
     handler_threads(new HandlerThreadVec),
     boost_handler_threads(new ThreadVec),
+    output_dispatcher_thread(0),
+    joiner_dispatcher_thread(0),
     output_dispatcher(new OutputDispatcher),
     joiner_dispatcher(new JoinerDispatcher),
     c2o(new HashedBiMap),
-    first_round(true),
-    join_thread(0),
-    sat_thread(0)
+    first_round(true)
 {
   connection_ptr my_connection(new connection(io_service));
 
@@ -116,30 +116,6 @@ Server::~Server()
       ht = 0;
     }
 
-  if (join_thread && join_thread->joinable())
-    {
-      join_thread->interrupt();
-      join_thread->join();
-      delete join_thread;
-      join_thread = 0;
-    }
-  else
-    {
-      DMCS_LOG_ERROR("Join thread not joinable!");
-    }
-
-  if (sat_thread && sat_thread->joinable())
-    {
-      sat_thread->interrupt();
-      sat_thread->join();
-      delete sat_thread;
-      sat_thread = 0;
-    }
-  else
-    {
-      DMCS_LOG_ERROR("Sat thread not joinable!");
-    }
-
   if (output_dispatcher_thread && output_dispatcher_thread->joinable())
     {
       output_dispatcher_thread->interrupt();
@@ -150,6 +126,18 @@ Server::~Server()
   else
     {
       DMCS_LOG_ERROR("OutputDispatcher thread not joinable");
+    }
+
+  if (joiner_dispatcher_thread && joiner_dispatcher_thread->joinable())
+    {
+      joiner_dispatcher_thread->interrupt();
+      joiner_dispatcher_thread->join();
+      delete joiner_dispatcher_thread;
+      joiner_dispatcher_thread = 0;
+    }
+  else
+    {
+      DMCS_LOG_ERROR("JoinerDispatcher thread not joinable");
     }
 
   if (thread_factory)
@@ -190,6 +178,9 @@ Server::initialize()
 				     nbs, 0, query_plan.get(), 
 				     mg.get(), c2o.get(), 
 				     joiner_dispatcher.get());
+
+  output_dispatcher_thread = new boost::thread(*output_dispatcher, mg.get());
+  joiner_dispatcher_thread = new boost::thread(*joiner_dispatcher, mg.get());
 
   ///@todo: parameterize max_resource
   resource_manager = new ResourceManager(10, thread_factory);
@@ -302,9 +293,6 @@ Server::dispatch_header(const boost::system::error_code& e,
 	  std::size_t my_id = ctx->getContextID();
 	  const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
 	  bool is_leaf = (nbs->size() == 0);
-
-	  output_dispatcher_thread = new boost::thread(*output_dispatcher, mg.get());
-	  joiner_dispatcher_thread = new boost::thread(*joiner_dispatcher, mg.get());
 
 	  HandlerThread* handler_thread = new HandlerThread(invoker);
 	  boost::thread* boost_handler_thread = new boost::thread(*handler_thread, is_leaf, 

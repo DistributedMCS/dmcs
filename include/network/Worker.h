@@ -18,49 +18,66 @@
  */
 
 /**
- * @file   RelSatSolverThread.h
+ * @file   Worker.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Jan  11 9:14:21 2011
+ * @date   Mon Aug  29 17:51:21 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef RELSATSOLVER_THREAD_H
-#define RELSATSOLVER_THREAD_H
+#ifndef WORKER_H
+#define WORKER_H
 
-#include "solver/RelSatSolver.h"
-#include "network/ConcurrentMessageQueueFactory.h"
-#include "mcs/ResourceManager.h"
+#include "network/ConcurrentMessageQueue.h"
+#include <boost/thread.hpp>
 
 namespace dmcs {
 
-class RelSatSolverThread
+struct Worker
 {
-public:
-  RelSatSolverThread(const RelSatSolverPtr& rss, ResourceManager* r,
-		     std::size_t wkid);
+  Worker()
+    : sat_thread(0), join_thread(0), 
+      request_mq(0), busy(false), 
+      k1(0), k2(0)
+  { }
 
-  ~RelSatSolverThread();
 
-  void
-  operator()();
+  ~Worker()
+  {
+    if (sat_thread)
+      {
+	delete sat_thread;
+	sat_thread = 0;
+      }
 
-  ConcurrentMessageQueue*
-  getRequestMQ();
+    if (join_thread)
+      {
+	delete join_thread;
+	join_thread = 0;
+      }
+  }
 
-private:
-  RelSatSolverPtr relsatsolver;
+
+  boost::thread* sat_thread;
+  boost::thread* join_thread;
   ConcurrentMessageQueue* request_mq;
-  ResourceManager* rm;
-  std::size_t worker_index; // index in the status vector of ResourceManager
+
+  // status information
+  bool busy;
+  std::size_t k1;
+  std::size_t k2;
 };
+
+
+typedef boost::shared_ptr<Worker> WorkerPtr;
+typedef std::vector<WorkerPtr> WorkerVec;
+typedef boost::shared_ptr<WorkerVec> WorkerVecPtr;
 
 } // namespace dmcs
 
-
-#endif // RELSATSOLVER_THREAD_H
+#endif // WORKER_H
 
 // Local Variables:
 // mode: C++

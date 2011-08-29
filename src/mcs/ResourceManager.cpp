@@ -37,7 +37,8 @@ namespace dmcs {
 
 ResourceManager::ResourceManager(std::size_t mr,
 				 ThreadFactory* tf)
-  : max_resource(mr),
+  : free_resource(0),
+    max_resource(mr),
     thread_factory(tf),
     workers(new WorkerVec)
 { }
@@ -47,10 +48,11 @@ ResourceManager::ResourceManager(std::size_t mr,
 ConcurrentMessageQueue*
 ResourceManager::createWorker(std::size_t path)
 {
-  WorkerPtr wk = thread_factory->createWorkerThreads(path);
-  wk->busy = true;
+  WorkerPtr wk = thread_factory->createWorkerThreads(path, this, workers->size());
   
   workers->push_back(wk);
+  wk->busy = true;
+  
 
   return wk->request_mq;
 }
@@ -58,9 +60,63 @@ ResourceManager::createWorker(std::size_t path)
 
 
 ConcurrentMessageQueue*
-ResourceManager::requestWorker(std::size_t path)
+ResourceManager::requestWorker(std::size_t path, std::size_t k1, std::size_t k2)
 {
-  boost::mutex::scoped_lock lock(mtx);
+  // make sure that only 1 requestWorer() is called at a time
+  boost::mutex::scoped_lock lock(request_mtx);
+
+  // if there is a worker that caches models from k1 to k2 then returns it
+  for (WorkerVec::const_iterator it = workers->begin(); it != workers->end(); ++it)
+    {
+      WorkerPtr wk = *it;
+      if ((!wk->busy) && (wk->k1 == k1) && (wk->k2 == k2))
+	{
+	  wk->busy = true;
+
+	  {
+	    boost::mutex::scoped_lock lock(mtx);
+	    assert (free_resource > 0);
+	    free_resource--;
+	  }
+
+	  return wk->request_mq;
+	}
+    }
+
+  if (workers->size() < max_resource)
+    {
+      return createWorker(path);
+    }
+
+  // wait until there is a free resource
+  {
+    boost::mutex::scoped_lock lock(mtx);
+    while (free_resource == 0)
+      {
+	cond.wait(lock);
+      }
+  }
+  
+  // find the free resource and return the corresponding ConcurrentMessageQueue
+  WorkerVec::const_iterator it;
+  for (it = workers->begin(); it != workers->end(); ++it)
+    {
+      if (!(*it)->busy)
+	{
+	  break;
+	}
+    }
+
+  assert (it != workers->end());
+  (*it)->busy = true;
+
+  {
+    boost::mutex::scoped_lock lock(mtx);
+    assert (free_resource > 0);
+    free_resource--;
+  }
+
+  return (*it)->request_mq;
 }
 
 
@@ -78,10 +134,20 @@ ResourceManager::updateStatus(std::size_t index,
 
   WorkerPtr wk = *it;
 
+  // it's never the case that a worker's status is updated 
+  // here and in requestWorker() simultaneously, hence we don't
+  // need a mutex lock for this operation
   assert (request_mq == wk->request_mq);
   wk->busy = bs;
   wk->k1 = k_one;
   wk->k2 = k_two;
+
+  if (bs == false)
+    {
+      boost::mutex::scoped_lock lock(mtx);
+      free_resource++;
+      cond.notify_one();
+    }
 }
 
 

@@ -37,19 +37,24 @@
 
 namespace dmcs {
 
-RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& rss)
+RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& rss,
+				       ResourceManager* r,
+				       std::size_t wkid)
   : relsatsolver(rss),
-    request_mq(new ConcurrentMessageQueue)
-{ 
-  DMCS_LOG_TRACE("Destructor.");
-}
+    request_mq(new ConcurrentMessageQueue),
+    rm(r),
+    worker_index(wkid)
+{ }
 
 
 
 RelSatSolverThread::~RelSatSolverThread()
 {
-  delete request_mq;
-  request_mq = 0;
+  if (request_mq)
+    {
+      delete request_mq;
+      request_mq = 0;
+    }
 }
 
 
@@ -79,6 +84,9 @@ RelSatSolverThread::operator()()
 	  sfMess = 0;
 
 	  relsatsolver->solve(invoker, path, session_id, k1, k2);
+
+	  // inform ResourceManager about my status
+	  rm->updateStatus(worker_index, request_mq, false, k1, k2);	  
 	}
       catch(const boost::thread_interrupted& ex)
 	{

@@ -326,7 +326,7 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
       // Request for resource. If no resource is available 
       // then we are blocked here and it blocks the whole 
       // branch upwards will also be automatically blocked.
-      ConcurrentMessageQueue* request_mq = rm->requestWorker(path);
+      ConcurrentMessageQueue* request_mq = rm->requestWorker(path, sfMess->getK1(), sfMess->getK2());
       request_mq->send(&sfMess, sizeof(sfMess), 0);
 
       DMCS_LOG_TRACE(port << ": Waiting for incoming message from " << invoker << " at " << port << " (first_call = " << first_call << ")");
