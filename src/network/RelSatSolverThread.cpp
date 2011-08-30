@@ -44,17 +44,15 @@ RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& rss,
     request_mq(new ConcurrentMessageQueue),
     rm(r),
     worker_index(wkid)
-{ }
+{
+  DMCS_LOG_TRACE("RelSatSolverThread constructor, request_mq = " << request_mq);
+}
 
 
 
 RelSatSolverThread::~RelSatSolverThread()
 {
-  if (request_mq)
-    {
-      delete request_mq;
-      request_mq = 0;
-    }
+  DMCS_LOG_TRACE("Terminating RelSatSolverThread");
 }
 
 

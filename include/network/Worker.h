@@ -57,6 +57,12 @@ struct Worker
 	delete join_thread;
 	join_thread = 0;
       }
+
+    if (request_mq)
+      {
+	delete request_mq;
+	request_mq = 0;
+      }
   }
 
 

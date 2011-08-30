@@ -33,6 +33,8 @@
 
 #include <algorithm>
 
+#include <boost/functional/hash.hpp>
+
 #include "dmcs/AskNextNotification.h"
 #include "dmcs/BeliefCombination.h"
 #include "dmcs/SessionNotification.h"
@@ -48,9 +50,13 @@ namespace dmcs {
 
 
 JoinThread::JoinThread(std::size_t p,
-		       std::size_t sid)
+		       std::size_t cid,
+		       std::size_t sid,
+		       JoinerDispatcher* jd)
   : port(p),
+    ctx_id(cid),
     session_id(sid),
+    joiner_dispatcher(jd),
     first_result(true),
     joined_results(new ModelSessionIdList),
     input_queue(new ConcurrentMessageQueue)
@@ -100,12 +106,15 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
 
 
 
-  // Joining succeeded. Now send this input to SAT solver via JOIN_OUT_MQ
+  // Joining succeeded. Now send this input to SAT solver via joiner_sat_notif
   // be careful that we are blocked here. Use timeout sending instead?
   if (first_result)
     {
-      DMCS_LOG_TRACE(port << ": Final RESULT = " << result << ":" << *result << " ... Sending to JOIN_OUT");
-      mg->sendModel(result, path, session_id, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+      DMCS_LOG_TRACE(port << ": Final RESULT = " << result << ":" << *result << " ... Sending to joiner_sat_notif");
+
+      struct MessagingGatewayBC::ModelSession ms = {result, path, session_id};
+      joiner_sat_notif->send(&ms, sizeof(ms), 0);
+
       first_result = false;
     }
   else
@@ -236,12 +245,14 @@ JoinThread::operator()(std::size_t nbs,
 		       std::size_t s,
 		       MessagingGatewayBC* m,
 		       ConcurrentMessageQueue* jsn,
+		       ConcurrentMessageQueue* sjn,
 		       ConcurrentMessageQueueVec* jv)
 {
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
   mg = m;
   joiner_sat_notif = jsn;
+  sat_joiner_notif = sjn;
   joiner_neighbors_notif = jv;
   no_nbs = nbs;
   bool first_round = true;
@@ -263,7 +274,7 @@ JoinThread::operator()(std::size_t nbs,
       // Wait for a trigger from SAT
       std::size_t prio = 0;
       int timeout = 0;
-      AskNextNotification* sat_trigger = mg->recvNotification(ConcurrentMessageQueueFactory::SAT_JOINER_MQ, prio, timeout);
+      AskNextNotification* sat_trigger = receive_notification(sat_joiner_notif);
 
       DMCS_LOG_TRACE("Got a trigger from SAT. AskNextNotification = " << *sat_trigger);
 
@@ -288,7 +299,9 @@ JoinThread::operator()(std::size_t nbs,
 	      std::size_t pa = ms.path;
 	      std::size_t sid = ms.session_id;
 
-	      mg->sendModel(result, pa, sid, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+	      ///@todo: Fix ModelSession v.s. ModelSessionId duplication
+	      struct MessagingGatewayBC::ModelSession ms1 = { result, pa, sid };
+	      joiner_sat_notif->send(&ms1, sizeof(ms1), 0);
 	    }
 	  else
 	    {
@@ -356,7 +369,10 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
     }
   
   // now send the request =======================================================================================
-  AskNextNotification* ann = new AskNextNotification(nt, path, session_id, k1, k2);
+  std::size_t new_path = path;
+  boost::hash_combine(path, ctx_id);
+  joiner_dispatcher->registerThread(new_path, input_queue.get());
+  AskNextNotification* ann = new AskNextNotification(nt, new_path, session_id, k1, k2);
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[noff];
   
@@ -369,6 +385,7 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
     }
 
   // and wait for result (as we now allow only one path to be active at a time)
+  // change here to allow parallelism
   std::size_t prio = 0;
   int timeout = 0;
 
@@ -405,6 +422,9 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 	  break;
 	}
     }
+
+  // now unregister from JoinerDispatcher
+  joiner_dispatcher->unRegisterThread(new_path);
 
   if (count_models_read == 0)
     {
@@ -546,7 +566,7 @@ JoinThread::first_join(std::size_t path,
   first_round = false;
   if (!ask_first_packs(partial_eqs.get(), path, 0, no_nbs-1))
     {
-      DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to JOIN_OUT_MQ");
+      DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to joiner_sat_notif");
       
       reset(first_round, asking_next,
 	    next_neighbor_offset,
@@ -554,8 +574,9 @@ JoinThread::first_join(std::size_t path,
 	    pack_count);
       
       DMCS_LOG_TRACE("After reset. first_round = " << first_round);
-      
-      mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+
+      struct MessagingGatewayBC::ModelSession ms = { 0, 0, 0 };
+      joiner_sat_notif->send(&ms, sizeof(ms), 0);
       
       DMCS_LOG_TRACE("Bailing out...");
       
@@ -603,7 +624,7 @@ JoinThread::next_join(std::size_t path,
     {
       if (next_neighbor_offset == no_nbs)
 	{
-	  DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to JOIN_OUT_MQ");
+	  DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to joiner_sat_notif");
 	  
 	  reset(first_round, asking_next,
 		next_neighbor_offset,
@@ -611,8 +632,10 @@ JoinThread::next_join(std::size_t path,
 		pack_count);
 	  
 	  DMCS_LOG_TRACE("After reset. first_round = " << first_round);
-	  
-	  mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);		  
+
+	  struct MessagingGatewayBC::ModelSession ms = { 0, 0, 0 };
+	  joiner_sat_notif->send(&ms, sizeof(ms), 0);
+
 	  return;
 	}
       
@@ -673,8 +696,6 @@ JoinThread::process(std::size_t path,
 		    VecSizeTPtr& pack_count,
 		    PartialBeliefStatePackagePtr& partial_eqs)
 {
-
-  
   if (first_round)
     {
       first_join(path, session_id, k_one, k_two,
@@ -691,7 +712,9 @@ JoinThread::process(std::size_t path,
     }
   else
     {
-      mg->sendModel(0, 0, 0, 0, ConcurrentMessageQueueFactory::JOIN_OUT_MQ, 0);
+      struct MessagingGatewayBC::ModelSession ms = { 0, 0, 0 };
+      joiner_sat_notif->send(&ms, sizeof(ms), 0);
+
       reset(first_round, asking_next,
 	    next_neighbor_offset,
 	    partial_eqs,

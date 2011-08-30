@@ -49,6 +49,7 @@ public:
 		   std::size_t ss,
 		   QueryPlan* qp,
 		   ConcurrentMessageQueue* jsn,
+		   ConcurrentMessageQueue* sjn,
 		   MessagingGatewayBC* m)
     : is_leaf(il),
       my_id(mid),
@@ -59,6 +60,7 @@ public:
       system_size(ss),
       query_plan(qp),
       joiner_sat_notif(jsn),
+      sat_joiner_notif(sjn),
       mg(m)
   { }
 
@@ -76,6 +78,7 @@ private:
   std::size_t system_size;
   QueryPlan* query_plan;
   ConcurrentMessageQueue* joiner_sat_notif;
+  ConcurrentMessageQueue* sat_joiner_notif;
   MessagingGatewayBC* mg;
 };
 
@@ -89,7 +92,8 @@ SatSolverFactory::create<RelSatSolverPtr>()
 						theory, local_sig, 
 						c2o, system_size, 
 						query_plan,
-						joiner_sat_notif, mg));
+						joiner_sat_notif, 
+						sat_joiner_notif, mg));
 
   return relsatsolver;
 }

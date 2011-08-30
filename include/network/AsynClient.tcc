@@ -249,12 +249,21 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
   if (!e)
     {
       const ModelSessionIdListPtr& msl = result->getResult();
+
+      // remove the last NULL model if it's there
+      ModelSessionId& msi = msl->back();
+      
+      if (!msi.partial_belief_state)
+	{
+	  msl->pop_back();
+	}
+
       std::size_t next_k;
 
-      std::cerr << mess->getPackSize() << std::endl;
+      DMCS_LOG_TRACE("mess->getPackSize() = " << mess->getPackSize() << ". msl->size() = " << msl->size());
       if (mess->getPackSize() > 0)
 	{
-	  assert ( msl->size() <= mess->getPackSize() );
+	  assert ( msl->size() <= mess->getPackSize());
 
 	  next_k = mess->getPackSize() - msl->size();
 	}

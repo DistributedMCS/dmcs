@@ -36,6 +36,8 @@
 
 namespace dmcs {
 
+class ResourceManager;
+
 class RelSatSolverThread
 {
 public:

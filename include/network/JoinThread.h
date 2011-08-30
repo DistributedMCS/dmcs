@@ -37,6 +37,7 @@
 #include "mcs/BeliefState.h"
 #include "mcs/HashedBiMap.h"
 #include "network/ConcurrentMessageQueueFactory.h"
+#include "network/JoinerDispatcher.h"
 
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
@@ -47,7 +48,9 @@ class JoinThread
 {
 public:
   JoinThread(std::size_t p,
-	     std::size_t sid);
+	     std::size_t cid,
+	     std::size_t sid,
+	     JoinerDispatcher* jd);
 
   virtual
   ~JoinThread();
@@ -57,6 +60,7 @@ public:
 	     std::size_t system_size,
 	     MessagingGatewayBC* mg,
 	     ConcurrentMessageQueue* jsn,
+	     ConcurrentMessageQueue* sjn,
 	     ConcurrentMessageQueueVec* joiner_neighbors_notif);
 
 
@@ -149,12 +153,15 @@ private:
   std::size_t session_id;
   std::size_t pack_size;         // the real upper-bound of number of models that we ask the neighbors
   std::size_t path;
+  std::size_t ctx_id;
   bool first_result;
   ModelSessionIdListPtr joined_results;
 
   MessagingGatewayBC* mg;
-  ConcurrentMessageQueue* joiner_sat_notif;
+  ConcurrentMessageQueue* joiner_sat_notif; // to notify SAT of joined results
+  ConcurrentMessageQueue* sat_joiner_notif; // to get notifications from SAT regarding next request
   ConcurrentMessageQueueVec* joiner_neighbors_notif;
+  JoinerDispatcher* joiner_dispatcher;
   ConcurrentMessageQueuePtr input_queue;
 };
 

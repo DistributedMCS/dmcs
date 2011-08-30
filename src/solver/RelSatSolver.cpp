@@ -55,6 +55,7 @@ RelSatSolver::RelSatSolver(bool il,
 			   std::size_t ss,
 			   QueryPlan* qp,
 			   ConcurrentMessageQueue* jsn,
+			   ConcurrentMessageQueue* sjn,
 			   MessagingGatewayBC* m)
   : is_leaf(il),
     my_id(mid),
@@ -65,6 +66,7 @@ RelSatSolver::RelSatSolver(bool il,
     system_size(ss),
     query_plan(qp),
     joiner_sat_notif(jsn),
+    sat_joiner_notif(sjn),
     mg(m),
     xInstance(new SATInstance(std::cerr)),
     xSATSolver(new SATSolver(xInstance, std::cerr, this)),
@@ -169,10 +171,9 @@ RelSatSolver::prepare_input()
   std::size_t prio = 0;
   int timeout      = 0;
 
-  DMCS_LOG_TRACE("Waiting at JOIN_OUT_MQ for the next input!");
+  DMCS_LOG_TRACE("Waiting at joiner_sat_notif for the next input!");
 
-  struct MessagingGatewayBC::ModelSession ms = 
-    mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
+  struct MessagingGatewayBC::ModelSession ms = receive_model(joiner_sat_notif);
 
   input = ms.m;
   std::size_t sid = ms.sid;
@@ -252,6 +253,8 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
   std::size_t models_sofar = 0;
   path = pa;
 
+  DMCS_LOG_TRACE("solve() with path = " << path);
+
   if (is_leaf)
     {
       DMCS_LOG_TRACE("Leaf case. Solve now. k2 = " << k2);
@@ -282,13 +285,13 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
 
 	      mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
 	      AskNextNotification* notif = new AskNextNotification(BaseNotification::SHUTUP, path, 0, 0, 0);
-	      mg->sendNotification(notif, 0, ConcurrentMessageQueueFactory::SAT_JOINER_MQ, 0);
+	      sat_joiner_notif->send(&notif, sizeof(notif), 0);
 	      break;
 	    }
 
 	  DMCS_LOG_TRACE("Request another input from Joiner");
 	  AskNextNotification* notif = new AskNextNotification(BaseNotification::NEXT, path, session_id, k1, k2);
-	  mg->sendNotification(notif, 0, ConcurrentMessageQueueFactory::SAT_JOINER_MQ, 0);
+	  sat_joiner_notif->send(&notif, sizeof(notif), 0);
 
 	  DMCS_LOG_TRACE("Prepare input before solving.");
 	  //DMCS_LOG_TRACE("xIntance.size() before removing input = " << xInstance->iClauseCount());
@@ -296,7 +299,7 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
 	  //DMCS_LOG_TRACE("xIntance.size() after removing input = " << xInstance->iClauseCount());
 	  if (!prepare_input())
 	    {
-	      DMCS_LOG_TRACE("Got NULL input from JOIN_OUT_MQ. Bailing out...");
+	      DMCS_LOG_TRACE("Got NULL input from joiner_sat_notif. Bailing out...");
 	      mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 	      break;
 	    }

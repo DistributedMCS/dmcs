@@ -62,6 +62,14 @@ public:
       }
   }
 
+  void
+  unRegisterThread(std::size_t path)
+  {
+    CMQMap::iterator it = thread_map->find(path);
+    assert (it != thread_map->end());
+    thread_map->erase(it);
+  }
+
   virtual void
   operator()(MessagingGatewayBC* mg) = 0;
   

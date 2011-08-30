@@ -83,6 +83,8 @@ public:
 	std::size_t k1 = ann->k1;
 	std::size_t k2 = ann->k2;
 
+	DMCS_LOG_TRACE("N[" << nid << "]: path from JoinThread = " << path);
+
 	assert (k1 <= k2);
 
 	std::string header;
@@ -128,7 +130,8 @@ public:
 		      invoker,
 		      k1,
 		      k2,
-		      session_id);
+		      session_id,
+		      nid);
       }
   }
 
@@ -160,11 +163,12 @@ public:
 		std::size_t invoker,
 		std::size_t k1,
 		std::size_t k2,
-		std::size_t session_id)
+		std::size_t session_id,
+		std::size_t nid)
   {
     DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
 
-    boost::hash_combine(path, invoker);
+    DMCS_LOG_TRACE("N[" << nid << "] path to neighbor = " << path);
 
     StreamingForwardMessage mess(path,
 				 invoker,

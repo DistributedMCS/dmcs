@@ -62,6 +62,7 @@ public:
 	       std::size_t ss,
 	       QueryPlan* qp,
 	       ConcurrentMessageQueue* jsn,
+	       ConcurrentMessageQueue* sjn,
 	       MessagingGatewayBC* m);
 
   virtual
@@ -118,6 +119,7 @@ private:
   const HashedBiMap* c2o;
   std::size_t system_size;
   ConcurrentMessageQueue* joiner_sat_notif;
+  ConcurrentMessageQueue* sat_joiner_notif;
   MessagingGatewayBC* mg;
   PartialBeliefState* input;
   QueryPlan* query_plan;

@@ -77,6 +77,21 @@ receive_model(ConcurrentMessageQueue* cmq)
 }
 
 
+inline AskNextNotification*
+receive_notification(ConcurrentMessageQueue* cmq)
+{
+  AskNextNotification* notif = 0;
+  std::size_t recvd = 0;
+  unsigned int p = 0;
+  void *ptr = static_cast<void*>(&notif);
+
+  cmq->receive(ptr, sizeof(notif), recvd, p);
+
+  assert(sizeof(notif) == recvd);
+
+  return notif;
+}
+
 
 inline StreamingForwardMessage*
 receive_incoming_message(ConcurrentMessageQueue* cmq)

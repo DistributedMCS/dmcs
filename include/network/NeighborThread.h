@@ -262,7 +262,14 @@ private:
 	for (ModelSessionIdList::const_iterator it = msl->begin(); it != msl->end(); ++it)
 	  {
 	    PartialBeliefState* bs = it->partial_belief_state;
-	    DMCS_LOG_TRACE("N[" << nid << "] bs = " << bs << ": " << *bs);
+	    if (bs)
+	      {
+		DMCS_LOG_TRACE("N[" << nid << "] bs = " << bs << ": " << *bs);
+	      }
+	    else
+	      {
+		DMCS_LOG_TRACE("N[" << nid << "] bs = " << bs << ": NULL");
+	      }
 	  }
 
 	msl->sort(my_compare);
@@ -285,14 +292,14 @@ private:
 	    std::size_t sid = it->session_id;
 	    std::size_t path = it->path;
 
-	    DMCS_LOG_TRACE("N[" << nid << "] Got bs = " << bs << ": " << *bs);
-
 	    if (bs != 0)
 	      {
+		DMCS_LOG_TRACE("N[" << nid << "] Got bs = " << bs << ": " << *bs);
 		DMCS_LOG_TRACE("N[" << nid << "] Sending model = " << bs << ": " << *bs << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
 	    else
 	      {
+		DMCS_LOG_TRACE("N[" << nid << "] Got bs = " << bs << ": NULL");
 		DMCS_LOG_TRACE("N[" << nid << "] Sending model: NULL" << ", sid = " << sid << " from " << noff << " to " << offset);
 	      }
 	    mg->sendModel(bs, path, sid, noff, offset, 0); 

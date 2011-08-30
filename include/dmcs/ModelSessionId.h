@@ -113,7 +113,15 @@ operator<< (std::ostream& os, const ModelSessionIdList& msl)
 inline bool
 my_compare(const ModelSessionId& ms1, const ModelSessionId& ms2)
 {
-  assert (ms1.partial_belief_state && ms2.partial_belief_state);
+  if (!ms1.partial_belief_state)
+    {
+      return false;
+    }
+
+  if (!ms2.partial_belief_state)
+    {
+      return true;
+    }
 
   if (*(ms1.partial_belief_state) < *(ms2.partial_belief_state))
     {
@@ -135,7 +143,15 @@ my_compare(const ModelSessionId& ms1, const ModelSessionId& ms2)
 inline bool
 operator== (const ModelSessionId& ms1, const ModelSessionId& ms2)
 {
-  assert (ms1.partial_belief_state && ms2.partial_belief_state);
+  if (!ms1.partial_belief_state && !ms2.partial_belief_state)
+    {
+      return true;
+    }
+
+  if (!ms1.partial_belief_state || !ms2.partial_belief_state)
+    {
+      return false;
+    }
 
   return (*(ms1.partial_belief_state) == *(ms2.partial_belief_state));
 }

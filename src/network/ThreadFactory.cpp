@@ -106,17 +106,19 @@ ThreadFactory::createWorkerThreads(std::size_t path, ResourceManager* rm,
   WorkerPtr worker(new Worker);
 
   ConcurrentMessageQueue* joiner_sat_notif = new ConcurrentMessageQueue;
+  ConcurrentMessageQueue* sat_joiner_notif = new ConcurrentMessageQueue;
 
   // create join thread
   const std::size_t system_size = context->getSystemSize();
   const std::size_t no_nbs = nbs->size();
+  const std::size_t ctx_id = context->getContextID();
 
   // create the joiner and register its input queue to joiner_dispatcher
-  JoinThread jt(port, session_id);
-  joiner_dispatcher->registerThread(path, jt.getCMQ());
+  JoinThread jt(port, ctx_id, session_id, joiner_dispatcher);
   
   worker->join_thread = new boost::thread(jt, no_nbs, system_size, 
-					  mg, joiner_sat_notif, neighbors_notif.get());
+					  mg, joiner_sat_notif, sat_joiner_notif,
+					  neighbors_notif.get());
 
 
   // create solver thread
@@ -125,7 +127,7 @@ ThreadFactory::createWorkerThreads(std::size_t path, ResourceManager* rm,
 
   SatSolverFactory ssf(is_leaf, my_id, session_id, theory, local_sig, 
 		       c2o, system_size, query_plan, joiner_sat_notif, 
-		       mg);
+		       sat_joiner_notif, mg);
 
   RelSatSolverPtr relsatsolver = ssf.create<RelSatSolverPtr>();
 
