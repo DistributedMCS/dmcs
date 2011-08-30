@@ -80,6 +80,15 @@ namespace dmcs {
       std::size_t sid;
     };
 
+
+    struct ModelSessionOffset
+    {
+      MODEL* m;
+      std::size_t path;
+      std::size_t sid;
+      std::size_t noff;
+    };
+
     /** 
      * Used to announce that context @a ctx_id has sent @a peq_cnt
      * partial equilibria for session @a sid.

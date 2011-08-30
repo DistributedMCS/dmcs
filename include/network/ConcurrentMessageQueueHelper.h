@@ -77,6 +77,19 @@ receive_model(ConcurrentMessageQueue* cmq)
 }
 
 
+inline MessagingGatewayBC::ModelSessionOffset
+receive_model_offset(ConcurrentMessageQueue* cmq)
+{
+  struct MessagingGatewayBC::ModelSessionOffset mso = {0, 0, 0, 0};
+  std::size_t recvd = 0;
+  unsigned int p = 0;
+  void* ptr = static_cast<void*>(&mso);
+  cmq->receive(ptr, sizeof(mso), recvd, p);
+
+  return mso;
+}
+
+
 inline AskNextNotification*
 receive_notification(ConcurrentMessageQueue* cmq)
 {

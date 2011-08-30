@@ -1,5 +1,11 @@
 2011-08-30  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/network/MessagingGateway.h: Add ModelSessionOffset.
+
+	* include/network/JoinThread.h: Split asking neighbors into 2 types: with
+	and without receiving models afterwards.
+	* src/network/JoinThread.cpp: Likewise.
+
 	* include/network/NeighborOut.h: Don't update path here.
 
 	* src/network/RelSatSolverThread.cpp: Remove deleting request_mq due to
@@ -18,7 +24,8 @@
 	* include/solver/SatSolverFactory.h: Likewise.
 	* src/network/ThreadFactory.cpp: Likewise.
 
-	* include/network/ConcurrentMessageQueueHelper.h: Add receive_notification().
+	* include/network/ConcurrentMessageQueueHelper.h: Add receive_notification(),
+	receive_model_offset().
 
 	* include/network/BaseDispatcher.h: Add unRegisterThread(path).
 

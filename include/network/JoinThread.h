@@ -110,13 +110,23 @@ private:
 				std::size_t nid);
 
 
-  bool
+  // only ask and let other methods take care of the receiving
+  void
   ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 	       std::size_t noff, 
 	       std::size_t k1, 
 	       std::size_t k2,
 	       std::size_t& path, 
 	       BaseNotification::NotificationType nt);
+
+  // ask and then wait for the neighbor to return the models
+  bool
+  ask_neighbor_and_receive(PartialBeliefStatePackage* partial_eqs,
+			   std::size_t noff, 
+			   std::size_t k1, 
+			   std::size_t k2,
+			   std::size_t& path, 
+			   BaseNotification::NotificationType nt);
 
   bool
   ask_first_packs(PartialBeliefStatePackage* partial_eqs,

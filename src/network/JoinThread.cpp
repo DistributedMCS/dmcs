@@ -349,7 +349,8 @@ JoinThread::cleanup_partial_belief_states(PartialBeliefStatePackage* partial_eqs
 
 
 
-bool
+// only ask and let other methods take care of the receiving
+void
 JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 			 std::size_t noff, 
 			 std::size_t k1, 
@@ -383,9 +384,22 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
       delete anw_neighbor;
       anw_neighbor = 0;
     }
+}
 
-  // and wait for result (as we now allow only one path to be active at a time)
-  // change here to allow parallelism
+
+// ask and then wait for the neighbor to return the models
+bool
+JoinThread::ask_neighbor_and_receive(PartialBeliefStatePackage* partial_eqs,
+				     std::size_t noff, 
+				     std::size_t k1, 
+				     std::size_t k2,
+				     std::size_t& path,
+				     BaseNotification::NotificationType nt)
+{
+  ask_neighbor(partial_eqs, noff, k1, k2, path, nt);
+  std::size_t new_path = path;
+  boost::hash_combine(path, ctx_id);
+
   std::size_t prio = 0;
   int timeout = 0;
 
@@ -394,27 +408,30 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 
   std::size_t count_models_read = 0;
 
-  PartialBeliefStateVecPtr& bsv = (*partial_eqs)[noff];
+  PartialBeliefStateVecPtr& bsv = (*partial_eqs)[noff]; 
   while (1)
     {
-      struct MessagingGatewayBC::ModelSession ms = receive_model(input_queue.get());
-      PartialBeliefState* bs = ms.m;
-      std::size_t sid = ms.sid;
+      struct MessagingGatewayBC::ModelSessionOffset mso = receive_model_offset(input_queue.get());
+      PartialBeliefState* bs = mso.m;
+      std::size_t sid = mso.sid;
+      
+      std::size_t offset = mso.noff;
+      assert (noff == offset);
+
       if (bs)
 	{
-	  count_models_read++;
 	  DMCS_LOG_TRACE("Got bs = " << bs << ": " << *bs << ". sid = " << sid);
 
 	  if (sid == session_id)
 	    {
-	      DMCS_LOG_TRACE("Storing belief state " << count_models_read << " from " << noff);
+	      DMCS_LOG_TRACE("Storing belief state " << ++count_models_read << " from " << noff);
 	      bsv->push_back(bs);
 	    }
 	  else
 	    {
 	      DMCS_LOG_TRACE("Ignore this belief state because it belongs to an old session");
-	      delete ms.m;
-	      ms.m = 0;
+	      delete mso.m;
+	      mso.m = 0;
 	    }
 	}
       else
@@ -430,51 +447,6 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
     {
       return false;
     }
-
-  /*
-  MessagingGatewayBC::JoinIn nn = receive_join_in(input_queue.get());
-	  
-  DMCS_LOG_TRACE(port << ": Received from offset " << nn.ctx_offset << ", " << nn.peq_cnt << " peqs to pick up.");
-  
-  if (nn.peq_cnt == 0)
-    {
-      // EOF
-      DMCS_LOG_TRACE(port << ": Bailing out.");
-      return false;
-    }
-  else
-    {
-      // import nn.peq_cnt models ===============================================================================
-      PartialBeliefStateVecPtr& bsv = (*partial_eqs)[noff];
-      const std::size_t offset = ConcurrentMessageQueueFactory::NEIGHBOR_MQ + noff;
-
-      for (std::size_t i = 0; i < nn.peq_cnt; ++i)
-	{
-	  std::size_t prio = 0;
-	  int timeout = 0;
-	  
-	  //struct MessagingGatewayBC::ModelSession ms = mg->recvModel(offset, prio, timeout);
-	  struct MessagingGatewayBC::ModelSession ms = receive_model(input_queue.get());
-	  PartialBeliefState* bs = ms.m;
-	  std::size_t sid = ms.sid;
-
-	  assert (bs);
-
-	  DMCS_LOG_TRACE("Got bs = " << bs << ": " << *bs << ". sid = " << sid);
-
-	  if (sid == session_id)
-	    {
-	      DMCS_LOG_TRACE("Storing belief state " << i << " from " << noff);
-	      bsv->push_back(bs);
-	    }
-	  else
-	    {
-	      DMCS_LOG_TRACE("Ignore this belief state because it belongs to an old session");
-	      delete ms.m;
-	      ms.m = 0;
-	    }
-	}
-	}*/
 
   return true;
 }
@@ -500,7 +472,10 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
 	  k2 = pack_size;
 	}
 
-      if (!ask_neighbor(partial_eqs, i, k1, k2, path, BaseNotification::REQUEST))
+      ask_neighbor(partial_eqs, i, k1, k2, path, BaseNotification::REQUEST);
+      
+      /*
+      if (!ask_neighbor_and_receive(partial_eqs, i, k1, k2, path, BaseNotification::REQUEST))
 	{
 	  DMCS_LOG_TRACE("A neighbor is inconsistent. Going to clean up everything readd so far.");
 	  // clean up
@@ -511,7 +486,59 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
 
 	  return false;
 	}
+      */
     }
+
+  // now wait for the models from neighbors (might be returned in a mess)
+  
+  // mask which neighbor has returned enough models by bits in an integer
+  // We don't expect more than 64 neighbors per context, hence this should be enough.
+
+  // turn on bits from (from_neighbor) to (to_neighbor)
+  std::size_t all_neighbors_returned = 0;
+  all_neighbors_returned = (std::size_t)1 << (to_neighbor - from_neighbor + 1);
+  all_neighbors_returned--;
+  all_neighbors_returned << from_neighbor;
+
+  std::size_t marking_neighbors = 0;
+  std::vector<std::size_t> count_models_read(to_neighbor+1, 0);
+
+  while (marking_neighbors != all_neighbors_returned)
+    {
+      struct MessagingGatewayBC::ModelSessionOffset mso = receive_model_offset(input_queue.get());
+      PartialBeliefState* bs = mso.m;
+      std::size_t sid  = mso.sid;
+      std::size_t noff = mso.noff;
+
+      if (bs)
+	{
+	  PartialBeliefStateVecPtr& bsv = (*partial_eqs)[noff];
+	  DMCS_LOG_TRACE("Got bs = " << bs << ": " << *bs << ". sid = " << sid);
+
+	  if (sid == session_id)
+	    {
+	      DMCS_LOG_TRACE("Storing belief state " << ++count_models_read[noff] << " from " << noff);
+	      bsv->push_back(bs);
+	    }
+	  else
+	    {
+	      DMCS_LOG_TRACE("Ignore this belief state because it belongs to an old session");
+	      delete mso.m;
+	      mso.m = 0;
+	    }
+	}
+      else
+	{
+	  if (count_models_read[noff] == 0)
+	    {
+	      return false;
+	    }
+
+	  // turn on the corresponding bit at noff
+	  marking_neighbors |= (std::size_t)1 << noff;
+	}      
+    }
+
   return true;
 }
 
@@ -649,7 +676,7 @@ JoinThread::next_join(std::size_t path,
       //std::cerr << std::endl;
       
       DMCS_LOG_TRACE("Ask next at neighbor_offset = " << next_neighbor_offset);
-      if (ask_neighbor(partial_eqs.get(), next_neighbor_offset, k1, k2, path, BaseNotification::NEXT))
+      if (ask_neighbor_and_receive(partial_eqs.get(), next_neighbor_offset, k1, k2, path, BaseNotification::NEXT))
 	{
 	  if (asking_next)
 	    {
