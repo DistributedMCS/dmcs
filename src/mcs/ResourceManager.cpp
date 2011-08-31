@@ -31,6 +31,7 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
+#include "dmcs/Log.h"
 #include "mcs/ResourceManager.h"
 
 namespace dmcs {
@@ -53,7 +54,7 @@ ResourceManager::createWorker(std::size_t path)
   workers->push_back(wk);
   wk->busy = true;
   
-
+  DMCS_LOG_TRACE("Worker created, return request_mq = " << wk->request_mq);
   return wk->request_mq;
 }
 
@@ -62,6 +63,7 @@ ResourceManager::createWorker(std::size_t path)
 ConcurrentMessageQueue*
 ResourceManager::requestWorker(std::size_t path, std::size_t k1, std::size_t k2)
 {
+  DMCS_LOG_TRACE("Got a request for worker");
   // make sure that only 1 requestWorer() is called at a time
   boost::mutex::scoped_lock lock(request_mtx);
 
@@ -79,16 +81,18 @@ ResourceManager::requestWorker(std::size_t path, std::size_t k1, std::size_t k2)
 	    free_resource--;
 	  }
 
+	  DMCS_LOG_TRACE("Found a free worker. Return request_mq = " << wk->request_mq);
 	  return wk->request_mq;
 	}
     }
 
   if (workers->size() < max_resource)
     {
+      DMCS_LOG_TRACE("Still have some resource left, going to create a new worker. path = " << path);
       return createWorker(path);
     }
 
-  // wait until there is a free resource
+  DMCS_LOG_TRACE("Wait until there is a free resource");
   {
     boost::mutex::scoped_lock lock(mtx);
     while (free_resource == 0)
@@ -116,6 +120,7 @@ ResourceManager::requestWorker(std::size_t path, std::size_t k1, std::size_t k2)
     free_resource--;
   }
 
+  DMCS_LOG_TRACE("Going to return request_mq = " << (*it)->request_mq);
   return (*it)->request_mq;
 }
 

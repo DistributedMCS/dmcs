@@ -360,8 +360,6 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
 {
   assert (k1 <= k2);
 
-  DMCS_LOG_TRACE("Send to neighbor: noff = " << noff << ", path = " << path << ", k1 = " << k1 << ", k2 = " << k2);
-
   // clean up if necessary =====================================================================================
   if (partial_eqs)
     {
@@ -371,7 +369,10 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
   
   // now send the request =======================================================================================
   std::size_t new_path = path;
-  boost::hash_combine(path, ctx_id);
+  boost::hash_combine(new_path, ctx_id);
+
+  DMCS_LOG_TRACE("Send to neighbor: noff = " << noff << ", new_path = " << new_path << ", k1 = " << k1 << ", k2 = " << k2);
+
   joiner_dispatcher->registerThread(new_path, input_queue.get());
   AskNextNotification* ann = new AskNextNotification(nt, new_path, session_id, k1, k2);
 
@@ -397,8 +398,6 @@ JoinThread::ask_neighbor_and_receive(PartialBeliefStatePackage* partial_eqs,
 				     BaseNotification::NotificationType nt)
 {
   ask_neighbor(partial_eqs, noff, k1, k2, path, nt);
-  std::size_t new_path = path;
-  boost::hash_combine(path, ctx_id);
 
   std::size_t prio = 0;
   int timeout = 0;
@@ -441,6 +440,8 @@ JoinThread::ask_neighbor_and_receive(PartialBeliefStatePackage* partial_eqs,
     }
 
   // now unregister from JoinerDispatcher
+  std::size_t new_path = path;
+  boost::hash_combine(new_path, ctx_id);
   joiner_dispatcher->unRegisterThread(new_path);
 
   if (count_models_read == 0)
@@ -538,6 +539,11 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
 	  marking_neighbors |= (std::size_t)1 << noff;
 	}      
     }
+
+  // unregister to JoinerDispatcher
+  std::size_t new_path = path;
+  boost::hash_combine(new_path, ctx_id);
+  joiner_dispatcher->unRegisterThread(new_path);
 
   return true;
 }

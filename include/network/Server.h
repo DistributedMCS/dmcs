@@ -53,6 +53,7 @@
 #include <string>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace dmcs {
 
@@ -106,6 +107,7 @@ private:
   HashedBiMapPtr c2o;
   std::size_t port;
   bool first_round;
+  boost::mutex mtx;
 };
 
 typedef boost::shared_ptr<BaseServer> ServerPtr;

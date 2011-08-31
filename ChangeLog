@@ -1,3 +1,12 @@
+2011-08-31  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Send updated path to NeighborOut.
+
+	* src/mcs/ResourceManager.cpp: Add debugging information.
+
+	* include/network/Server.h: Use mutex lock to protect 1st round initialization.
+	* src/network/Server.cpp: Likewise.
+
 2011-08-30  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/MessagingGateway.h: Add ModelSessionOffset.

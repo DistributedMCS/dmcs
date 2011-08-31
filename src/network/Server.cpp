@@ -179,11 +179,13 @@ Server::initialize()
 				     mg.get(), c2o.get(), 
 				     joiner_dispatcher.get());
 
+  DMCS_LOG_TRACE("mg = " << mg);
+
   output_dispatcher_thread = new boost::thread(*output_dispatcher, mg.get());
   joiner_dispatcher_thread = new boost::thread(*joiner_dispatcher, mg.get());
 
   ///@todo: parameterize max_resource
-  resource_manager = new ResourceManager(10, thread_factory);
+  resource_manager = new ResourceManager(1, thread_factory);
   
   if (no_nbs > 0)
     {
@@ -239,6 +241,8 @@ Server::dispatch_header(const boost::system::error_code& e,
 			connection_ptr conn,
 			boost::shared_ptr<std::string> header)
 {
+  boost::mutex::scoped_lock lock(mtx);
+  
   if (!e)
     {
       DMCS_LOG_TRACE("Header = " << *header);
@@ -260,8 +264,8 @@ Server::dispatch_header(const boost::system::error_code& e,
 	{
 	  if (first_round)
 	    {
-	      initialize();
 	      first_round = false;
+	      initialize();
 	    }
 
 	  //typedef Handler<StreamingCommandType> StreamingHandler;
