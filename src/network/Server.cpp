@@ -159,6 +159,7 @@ Server::initialize()
   const SignaturePtr& local_sig = ctx->getSignature();
   std::size_t my_id = ctx->getContextID();
   std::size_t mq_size = ctf->getMQSize();
+  std::size_t max_resources = ctf->getMaxResources();
 
   const NeighborListPtr& nbs = query_plan->getNeighbors(my_id);
   std::size_t no_nbs = nbs->size();
@@ -184,8 +185,7 @@ Server::initialize()
   output_dispatcher_thread = new boost::thread(*output_dispatcher, mg.get());
   joiner_dispatcher_thread = new boost::thread(*joiner_dispatcher, mg.get());
 
-  ///@todo: parameterize max_resource
-  resource_manager = new ResourceManager(1, thread_factory);
+  resource_manager = new ResourceManager(max_resources, thread_factory);
   
   if (no_nbs > 0)
     {

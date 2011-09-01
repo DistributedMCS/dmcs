@@ -315,7 +315,8 @@ Handler<StreamingCommandType>::do_local_job(const boost::system::error_code& e,
 	  first_call = false;
 	} // if (first_call)
 
-      od->registerThread(path, ot->getCMQ());
+      std::string from = "OutputThread";
+      od->registerThread(path, ot->getCMQ(), from);
 
       StreamingForwardMessage* sfMess = new StreamingForwardMessage();
       *sfMess = sesh->mess;

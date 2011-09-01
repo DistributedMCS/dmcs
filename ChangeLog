@@ -1,3 +1,17 @@
+2011-09-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Unregister in case of inconsistent join.
+
+	* include/network/BaseDispatcher.h: Add some debugging info.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* src/mcs/ResourceManager.cpp: Likewise.
+
+	* include/dmcs/CommandTypeFactory.h: Parameterize max resource.
+	* include/dmcs/ProgramOptions.h: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+
 2011-08-31  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/JoinThread.cpp: Send updated path to NeighborOut.

@@ -61,6 +61,7 @@ namespace dmcs {
 #define PACK_SIZE        "packsize"
 #define MQ_SIZE          "mq_size"
 #define CONFLICTS_DRIVEN "cd"
+#define MAX_RESOURCES    "reso"
 
 
 } // namespace dmcs

@@ -72,6 +72,7 @@ public:
 		     QueryPlanPtr& query_plan_,
 		     TheoryPtr& loopFormula_,
 		     std::size_t mqs,
+		     std::size_t mr,
 		     std::size_t buf_count_ = 100)
     : ctx_id(ctx_id_),
       system_size(system_size_),
@@ -92,6 +93,7 @@ public:
       loopFormula(loopFormula_),
       mq_size(mqs),
       ctx(new Context(ctx_id_, system_size_, sig_, local_kb_, bridge_rules_, neighbor_list_)),
+      max_resources(mr),
       buf_count(buf_count_)
   { }
 
@@ -123,6 +125,12 @@ public:
     return mq_size;
   }
 
+  std::size_t
+  getMaxResources()
+  {
+    return max_resources;
+  }
+
 private:
   std::size_t ctx_id;
   std::size_t system_size;
@@ -147,6 +155,7 @@ private:
 					    // are willing to store in a buffer. This is a
 					    // middle solution between having exponential space 
                                             // and total recomputation.
+  std::size_t max_resources;
 };
 
 

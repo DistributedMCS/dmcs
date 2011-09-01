@@ -11,43 +11,32 @@ export RUN="runlim -s $MEMOUT -t $((TIMEOUT+20)) -k -o"
 export TIMELIMIT="timelimit -p -s 1 -t $TIMEOUT -T 20"
 export TIMEFORMAT=$'\nreal\t%3R\nuser\t%3U\nsys\t%3S' # time format
 export TESTSPATH='./experiments' # path to lp/br/opt
-export DMCSPATH='../../../../../build-dbg/src' # path to dmcsd/dmcsc relative to test instances
-export DMCS_PARALLEL_PATH='../../../../../../dmcs-parallel/build/src' # path to parallel dmcsd/dmcsc relative to test instances
+export DMCSPATH='../build-dbg/src' # path to dmcsd/dmcsc relative to test instances
 export LOGPATH='.' # path to output logfiles relative to test instances
 
 export EMAIL=dao@kr.tuwien.ac.at
-export TESTCASES=tests.txt
+#export TESTCASES=tests.txt
 
 DORUN=no # run with `run'
-DOTIMELIMIT=yes # run with `timelimit'
+DOTIMELIMIT=no # run with `timelimit'
 VERBOSE=yes # output stuff
-LOGDAEMONS=no # log daemon output
-ULIMIT=yes # use ulimit
+LOGDAEMONS=yes # log daemon output
+ULIMIT=no # use ulimit
 
-export TOPOLOGIES="diamond tree ring zig-zag"
+export TOPOLOGIES="diamond"
 export INSTANCES=a..e
 
 #                 D        T               R               Z
-declare -a sizes=(10 28 34 10 28 34 50 100 10 28 34 50 100 10 28 34 50 100)
-
-declare -a start=(0 3 8 13 18)
-declare -a length=(3 5 5 5)
-
-#                 T         R         Z
-#declare -a sizes=(10 50 100 10 50 100 10 50 100)
-#declare -a start=(0 3 6)
-#declare -a length=(3 3 3)
-
 #declare -a sizes=(10 28 34 10 28 34 50 100 10 28 34 50 100 10 28 34 50 100)
-#declare -a start=(1 4 9 14 19)
-#declare -a length=(2 4 4 4)
+declare -a resources=(8 4 2 1)
+declare -a sizes=(10)
 
-#declare -a start=(0 3 8 13 18)
-#declare -a length=(3 5 5 5)
+declare -a start=(0)
+declare -a length=(1)
 
-declare -a sigs=(10 40)
-declare -a bridges=(5 20)
-declare -a rels=(5 20)
+declare -a sigs=(40)
+declare -a bridges=(20)
+declare -a rels=(20)
 
 declare -a packages=(10 100 0)
 
@@ -55,9 +44,6 @@ declare -a packages=(10 100 0)
 
 export DMCSD="$DMCSPATH/dmcsd"
 export DMCSC="$DMCSPATH/dmcsc"
-
-export DMCSD_PARALLEL="$DMCS_PARALLEL_PATH/dmcsd"
-export DMCSC_PARALLEL="$DMCS_PARALLEL_PATH/dmcsc"
 
 
 declare -i MINPORT=5000
@@ -73,6 +59,7 @@ declare -i p=0
 #
 # $1: MODE: opt or streaming
 # $2: PACK: when $1=streaming 
+# $3: MAX_RESOURCES: when $1=streaming
 #
 ##########################################################################
 
@@ -80,8 +67,8 @@ function runTest()
 {
     MODE=$1
 
-    if [ $MODE = streaming -o $MODE = parallel ] ; then
-	MODE=$MODE-k$2
+    if [ $MODE = streaming ] ; then
+	MODE=$MODE-k$2-r$3
     fi
 
     echo $TESTNAME-$MODE
@@ -111,13 +98,9 @@ function runTest()
 	    TIMELOGN=$LOGPATH/$TESTNAME-$MODE-time-$N.log
 	fi
 
-	DMCSDOPTS="--context=$N --port=$((MINPORT+N)) --kb=$INPUTN.lp --br=$INPUTN.br --topology=$INPUT.opt"
+	DMCSDOPTS="--context=$N --port=$((MINPORT+N)) --kb=$INPUTN.lp --br=$INPUTN.br --topology=$INPUT.opt --reso=$3"
 
-	if [ $1 = parallel ] ; then
-	    DMCSDRUN="$DMCSD_PARALLEL $DMCSDOPTS"
-	else
-	    DMCSDRUN="$DMCSD $DMCSDOPTS"
-	fi
+	DMCSDRUN="$DMCSD $DMCSDOPTS"
 	
 	if [ x$DORUN = xyes ] ; then
 	    DMCSDRUN="$RUN $RUNLOGN $DMCSDRUN"
@@ -158,6 +141,7 @@ function runTest()
 
     if [ $1 = streaming -o $1 = parallel ] ; then 
 	DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX --streaming=1 --packsize=$2"
+	#--reso=$3"
     else
 	DMCSCOPTS="--hostname=localhost --port=$((MINPORT+1)) --system-size=$CTX --streaming=0"
     fi
@@ -223,13 +207,13 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-rm $TESTCASES
+#rm $TESTCASES
 
-cd $TESTSPATH
+#cd $TESTSPATH
 
 for TOPO in $TOPOLOGIES ; do 
     
-    cd $TOPO
+#    cd $TOPO
 
     # identify range of system size to test ############
     declare -i start_now=${start[$i]}
@@ -243,40 +227,40 @@ for TOPO in $TOPOLOGIES ; do
 	declare -i CTX=${sizes[$j]}
 
 	# go for parameters setting ####################
-	for (( k = 0; k < 2; ++k )); do
-	#for (( k = 0; k < 2; ++k )); do
+	for (( k = 0; k < 1; ++k )); do
 
 	    declare -i SIG=${sigs[$k]}
 	    declare -i BRS=${bridges[$k]}
 	    declare -i RLS=${rels[$k]}
 
-	    cd $CTX-$SIG-$BRS-$RLS
+	    #cd $CTX-$SIG-$BRS-$RLS
 	    
 	    # go for instances #########################
-	    for INST in $(eval echo {$INSTANCES}) ; do
+	    #for INST in $(eval echo {$INSTANCES}) ; do
 		
-		export TESTNAME=$TOPO-$CTX-$SIG-$BRS-$RLS-$INST
+		#export TESTNAME=$TOPO-$CTX-$SIG-$BRS-$RLS-$INST
+	    export TESTNAME=$TOPO$CTX-$SIG-$BRS-$RLS
 
-		echo $TESTNAME >> ../../../$TESTCASES
-		
-		cd $TESTNAME
-
-		runTest opt
-
-		for (( p=0; p < 3; ++p )); do
-		    runTest streaming ${packages[$p]}
-
-		    #runTest parallel ${packages[$p]}
+	    #echo $TESTNAME >> ../../../$TESTCASES
+	    
+	    #cd $TESTNAME
+	    
+	    #runTest opt
+	    
+	    for (( p=0; p < 3; ++p )); do
+		for (( r=0; r < 4; ++r )); do
+		    runTest streaming ${packages[$p]} ${resources[$r]}
 		done
+	    done
+	    
+	    #cd ..
+	    #done # for INST
 
-		cd ..
-	    done # for INST
+	    #echo "end" >> ../../../$TESTCASES
 
-	    echo "end" >> ../../../$TESTCASES
-
-	    cd ..	    
+	    #cd ..	    
 	done # for k = 0...
     done # for j = $start_now...$end_now
-    cd ..
+    #cd ..
     let "i += 1"
 done # for TOPO

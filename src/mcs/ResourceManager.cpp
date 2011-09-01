@@ -133,6 +133,7 @@ ResourceManager::updateStatus(std::size_t index,
 			      std::size_t k_one, 
 			      std::size_t k_two)
 {
+  DMCS_LOG_TRACE("Going to update status for worker[" << index << "]. busy = " << bs);
   assert (workers->size() > index);
   WorkerVec::iterator it = workers->begin();
   std::advance(it, index);

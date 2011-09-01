@@ -46,12 +46,14 @@ public:
   { }
 
   void
-  registerThread(std::size_t path, ConcurrentMessageQueue* cmq)
+  registerThread(std::size_t path, ConcurrentMessageQueue* cmq, std::string from)
   {
+    DMCS_LOG_TRACE("Register path = " << path << ", cmq = " << cmq << ", from " << from);
     // make sure that if this thread was registered then it must be cmq
     CMQMap::const_iterator it = thread_map->find(path);
     if (it != thread_map->end())
       {
+	DMCS_LOG_TRACE("path = " << path << " exists, cmq = " << cmq << ", it->second = " << it->second);
 	assert (cmq == it->second);
       }
     else
@@ -63,10 +65,11 @@ public:
   }
 
   void
-  unRegisterThread(std::size_t path)
+  unRegisterThread(std::size_t path, std::string from)
   {
     CMQMap::iterator it = thread_map->find(path);
     assert (it != thread_map->end());
+    DMCS_LOG_TRACE("Unregister path = " << path << ", cmq = " << it->second << ", from = " << from);
     thread_map->erase(it);
   }
 

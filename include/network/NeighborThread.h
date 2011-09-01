@@ -262,13 +262,14 @@ private:
 	for (ModelSessionIdList::const_iterator it = msl->begin(); it != msl->end(); ++it)
 	  {
 	    PartialBeliefState* bs = it->partial_belief_state;
+	    std::size_t path_from_neighbor = it->path;
 	    if (bs)
 	      {
-		DMCS_LOG_TRACE("N[" << nid << "] bs = " << bs << ": " << *bs);
+		DMCS_LOG_TRACE("N[" << nid << "] path = " << path_from_neighbor << "bs = " << bs << ": " << *bs);
 	      }
 	    else
 	      {
-		DMCS_LOG_TRACE("N[" << nid << "] bs = " << bs << ": NULL");
+		DMCS_LOG_TRACE("N[" << nid << "] path = " << path_from_neighbor << " bs = " << bs << ": NULL");
 	      }
 	  }
 

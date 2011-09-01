@@ -371,9 +371,10 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
   std::size_t new_path = path;
   boost::hash_combine(new_path, ctx_id);
 
-  DMCS_LOG_TRACE("Send to neighbor: noff = " << noff << ", new_path = " << new_path << ", k1 = " << k1 << ", k2 = " << k2);
+  DMCS_LOG_TRACE("Send to neighbor: noff = " << noff << "old_path = " << path << ", new_path = " << new_path << ", k1 = " << k1 << ", k2 = " << k2);
 
-  joiner_dispatcher->registerThread(new_path, input_queue.get());
+  std::string from = "Joiner";
+  joiner_dispatcher->registerThread(new_path, input_queue.get(), from);
   AskNextNotification* ann = new AskNextNotification(nt, new_path, session_id, k1, k2);
 
   ConcurrentMessageQueuePtr& cmq = (*joiner_neighbors_notif)[noff];
@@ -442,7 +443,8 @@ JoinThread::ask_neighbor_and_receive(PartialBeliefStatePackage* partial_eqs,
   // now unregister from JoinerDispatcher
   std::size_t new_path = path;
   boost::hash_combine(new_path, ctx_id);
-  joiner_dispatcher->unRegisterThread(new_path);
+  std::string from = "Joiner";
+  joiner_dispatcher->unRegisterThread(new_path, from);
 
   if (count_models_read == 0)
     {
@@ -514,7 +516,7 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
       if (bs)
 	{
 	  PartialBeliefStateVecPtr& bsv = (*partial_eqs)[noff];
-	  DMCS_LOG_TRACE("Got bs = " << bs << ": " << *bs << ". sid = " << sid);
+	  DMCS_LOG_TRACE("Got bs = " << bs << ": " << *bs << ". sid = " << sid << ". noff = " << noff);
 
 	  if (sid == session_id)
 	    {
@@ -532,6 +534,12 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
 	{
 	  if (count_models_read[noff] == 0)
 	    {
+	      std::size_t new_path = path;
+	      boost::hash_combine(new_path, ctx_id);
+	      std::string from = "Joiner";
+	      joiner_dispatcher->unRegisterThread(new_path, from);
+
+	      DMCS_LOG_TRACE("Return FALSE because count_models_read[" << noff << "] = 0. from_neighbor = " << from_neighbor << ", to_neighbor = " << to_neighbor);
 	      return false;
 	    }
 
@@ -543,7 +551,8 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
   // unregister to JoinerDispatcher
   std::size_t new_path = path;
   boost::hash_combine(new_path, ctx_id);
-  joiner_dispatcher->unRegisterThread(new_path);
+  std::string from = "Joiner";
+  joiner_dispatcher->unRegisterThread(new_path, from);
 
   return true;
 }
