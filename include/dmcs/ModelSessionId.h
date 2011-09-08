@@ -82,11 +82,11 @@ operator<< (std::ostream& os, const ModelSessionId& ms)
 {
   if (ms.partial_belief_state)
     {
-      os << "(" << *(ms.partial_belief_state) << ", " << ms.session_id << ")";
+      os << "(" << *(ms.partial_belief_state) << ", path = " << ms.path << ", sid = " << ms.session_id << ")";
     }
   else
     {
-      os << "(NULL, " << ms.session_id << ")";
+      os << "(NULL, path = " << ms.path << ", sid = " << ms.session_id << ")";
     }
 
 
@@ -129,7 +129,11 @@ my_compare(const ModelSessionId& ms1, const ModelSessionId& ms2)
     }
   else if (*(ms1.partial_belief_state) == *(ms2.partial_belief_state))
     {
-      if (ms1.session_id > ms2.session_id)
+      if (ms1.path < ms2.path)
+	{
+	  return true;
+	}
+      else if (ms1.path == ms2.path && ms1.session_id > ms2.session_id)
 	{
 	  return true;
 	}
@@ -153,7 +157,9 @@ operator== (const ModelSessionId& ms1, const ModelSessionId& ms2)
       return false;
     }
 
-  return (*(ms1.partial_belief_state) == *(ms2.partial_belief_state));
+  return ((*(ms1.partial_belief_state) == *(ms2.partial_belief_state)) 
+	  && (ms1.path == ms2.path)
+	  && (ms1.session_id == ms2.session_id));
 }
 
 
@@ -179,7 +185,7 @@ remove_duplication(ModelSessionIdListPtr& msl)
 	  {
 	    ModelSessionId& ms = *it;
 	    PartialBeliefState* pbs = ms.partial_belief_state;
-	    std::cerr << "Remove Duplication: Going to delete: " << pbs << ": " << *pbs << std::endl;
+	    //std::cerr << "Remove Duplication: Going to delete: " << pbs << ": " << *pbs << std::endl;
 	    delete pbs;
 	    pbs = 0;
 	  }
@@ -194,7 +200,7 @@ remove_duplication(ModelSessionIdListPtr& msl)
     {
       ModelSessionId& ms = *it;
       PartialBeliefState* pbs = ms.partial_belief_state;
-      std::cerr << "Remove Duplication: Going to delete: " << pbs << ": " << *pbs << std::endl;
+      //std::cerr << "Remove Duplication: Going to delete: " << pbs << ": " << *pbs << std::endl;
       delete pbs;
       pbs = 0;      
     }
