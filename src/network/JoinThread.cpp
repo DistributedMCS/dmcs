@@ -59,14 +59,15 @@ JoinThread::JoinThread(std::size_t p,
     joiner_dispatcher(jd),
     first_result(true),
     joined_results(new ModelSessionIdList),
-    input_queue(new ConcurrentMessageQueue)
+    input_queue(new ConcurrentMessageQueue),
+    path(0)
 { }
 
 
 
 JoinThread::~JoinThread()
 {
-  DMCS_LOG_TRACE(port << ": Terminating JoinThread.");
+  //DMCS_LOG_TRACE(port << ": Terminating JoinThread.");
 }
 
 
@@ -77,11 +78,11 @@ bool
 JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
 {
 #if 1
-  DMCS_LOG_TRACE(port << ": Join guided by run_it:");
+  DMCS_LOG_TRACE(path << ": Join guided by run_it:");
   for (PartialBeliefStateIteratorVec::const_iterator it = run_it->begin();
        it != run_it->end(); ++it)
     {
-      DMCS_LOG_DEBUG(" " << ***it);
+      DMCS_LOG_DEBUG(path << ": " << ***it);
     }
 #endif //0
 
@@ -96,7 +97,7 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
       PartialBeliefState* next_bs = **it;
       if (!combine(*result, *next_bs))
 	{
-	  DMCS_LOG_TRACE(port << ": INCONSISTENT!");
+	  //DMCS_LOG_TRACE(path << ": INCONSISTENT!");
 	  delete result;
 	  result = 0;
 
@@ -110,7 +111,7 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
   // be careful that we are blocked here. Use timeout sending instead?
   if (first_result)
     {
-      DMCS_LOG_TRACE(port << ": Final RESULT = " << result << ":" << *result << " ... Sending to joiner_sat_notif");
+      DMCS_LOG_TRACE(path << ": Final RESULT = " << result << ":" << *result << " ... Sending to joiner_sat_notif");
 
       struct MessagingGatewayBC::ModelSession ms = {result, path, session_id};
       joiner_sat_notif->send(&ms, sizeof(ms), 0);
@@ -119,7 +120,7 @@ JoinThread::join(const PartialBeliefStateIteratorVecPtr& run_it)
     }
   else
     {
-      DMCS_LOG_TRACE(port << ": Final RESULT = " << result << ":" << *result << " ... push into joined_results");
+      DMCS_LOG_TRACE(path << ": Final RESULT = " << result << ":" << *result << " ... push into joined_results");
       ModelSessionId ms(result, path, session_id);
       joined_results->push_back(ms);
     }
@@ -209,8 +210,6 @@ JoinThread::reset(bool& first_round,
 		  PartialBeliefStatePackagePtr& partial_eqs,
 		  VecSizeTPtr& pack_count)
 {
-  DMCS_LOG_TRACE("Reset Joiner");
-
   // reset for the next fresh request
   first_round = true;
   asking_next = false;
@@ -234,7 +233,7 @@ JoinThread::reset(bool& first_round,
     }
   
   std::fill(pack_count->begin(), pack_count->end(), 0);
-  DMCS_LOG_TRACE("Reset Joiner. first_round = " << first_round);
+  DMCS_LOG_TRACE(path << ": Reset Joiner. first_round = " << first_round);
 }
 
 
@@ -270,16 +269,16 @@ JoinThread::operator()(std::size_t nbs,
 
   while (1)
     {
-      DMCS_LOG_TRACE("New round in while loop. first_round = " << first_round << ". Wait for SAT TRIGGER");
+      DMCS_LOG_TRACE(path << ": New round in while loop. first_round = " << first_round << ". Wait for SAT TRIGGER");
       // Wait for a trigger from SAT
       std::size_t prio = 0;
       int timeout = 0;
       AskNextNotification* sat_trigger = receive_notification(sat_joiner_notif);
 
-      DMCS_LOG_TRACE("Got a trigger from SAT. AskNextNotification = " << *sat_trigger);
+      DMCS_LOG_TRACE(path << ": Got a trigger from SAT. AskNextNotification = " << *sat_trigger);
 
       BaseNotification::NotificationType nt = sat_trigger->type;
-      std::size_t path = sat_trigger->path;
+      path = sat_trigger->path;
       std::size_t session_id = sat_trigger->session_id;
       std::size_t k1 = sat_trigger->k1;
       std::size_t k2 = sat_trigger->k2;
@@ -291,8 +290,7 @@ JoinThread::operator()(std::size_t nbs,
 	{
 	  if (!joined_results->empty())
 	    {
-	      DMCS_LOG_TRACE("joined_results->size() = " << joined_results->size());
-	      DMCS_LOG_TRACE("Still have some joined input left, return now.");
+	      DMCS_LOG_TRACE(path << ": joined_results->size() = " << joined_results->size() << "Still have joined input left, return now.");
 	      ModelSessionId ms = joined_results->front();
 	      joined_results->pop_front();
 	      PartialBeliefState* result = ms.partial_belief_state;
@@ -305,7 +303,7 @@ JoinThread::operator()(std::size_t nbs,
 	    }
 	  else
 	    {
-	      DMCS_LOG_TRACE("joined_results is empty, call process() now. first_round = " << first_round);
+	      DMCS_LOG_TRACE(path << ": joined_results is empty, call process() now. first_round = " << first_round);
 	      first_result = true;
 
 	      process(path, session_id, k1, k2, first_round, asking_next, next_neighbor_offset, pack_count, partial_eqs);
@@ -314,14 +312,14 @@ JoinThread::operator()(std::size_t nbs,
       else
 	{
 	  assert (nt == BaseNotification::SHUTUP);
-	  DMCS_LOG_TRACE("In SHUTUP mode, reset all data members");
+	  DMCS_LOG_TRACE(path << ": In SHUTUP mode, reset all data members");
 
 	  reset(first_round, asking_next,
 		next_neighbor_offset,
 		partial_eqs,
 		pack_count);
 
-	  DMCS_LOG_TRACE("After reset. first_round = " << first_round);
+	  DMCS_LOG_TRACE(path << ": After reset. first_round = " << first_round);
 	}
     }
 }
@@ -331,14 +329,14 @@ JoinThread::operator()(std::size_t nbs,
 void
 JoinThread::cleanup_partial_belief_states(PartialBeliefStatePackage* partial_eqs, std::size_t noff)
 {
-  DMCS_LOG_TRACE("Clean up PartialBeliefStates at nid = " << noff);
+  DMCS_LOG_TRACE(path << ": Clean up PartialBeliefStates at nid = " << noff);
   PartialBeliefStateVecPtr& bsv = (*partial_eqs)[noff];
-  DMCS_LOG_TRACE("Number of PartialBeliefStates to clean up = " << bsv->size());
+  //DMCS_LOG_TRACE(path << ": Number of PartialBeliefStates to clean up = " << bsv->size());
   for (PartialBeliefStateVec::iterator it = bsv->begin(); it != bsv->end(); ++it)
     {
       assert (*it);
 
-      DMCS_LOG_TRACE("Will delete it = " << *it << ": " << **it);
+      //DMCS_LOG_TRACE("Will delete it = " << *it << ": " << **it);
 
       delete *it;
       *it = 0;
@@ -371,7 +369,7 @@ JoinThread::ask_neighbor(PartialBeliefStatePackage* partial_eqs,
   std::size_t new_path = path;
   boost::hash_combine(new_path, ctx_id);
 
-  DMCS_LOG_TRACE("Send to neighbor: noff = " << noff << "old_path = " << path << ", new_path = " << new_path << ", k1 = " << k1 << ", k2 = " << k2);
+  DMCS_LOG_TRACE(path << ": Send to neighbor: noff = " << noff << "old_path = " << path << ", new_path = " << new_path << ", k1 = " << k1 << ", k2 = " << k2);
 
   std::string from = "Joiner";
   joiner_dispatcher->registerThread(new_path, input_queue.get(), from);
@@ -420,16 +418,16 @@ JoinThread::ask_neighbor_and_receive(PartialBeliefStatePackage* partial_eqs,
 
       if (bs)
 	{
-	  DMCS_LOG_TRACE("Got bs = " << bs << ": " << *bs << ". sid = " << sid);
+	  DMCS_LOG_TRACE(path << ": Got bs = " << bs << ": " << *bs << ". sid = " << sid);
 
 	  if (sid == session_id)
 	    {
-	      DMCS_LOG_TRACE("Storing belief state " << ++count_models_read << " from " << noff);
+	      DMCS_LOG_TRACE(path << ": Storing belief state " << ++count_models_read << " from " << noff);
 	      bsv->push_back(bs);
 	    }
 	  else
 	    {
-	      DMCS_LOG_TRACE("Ignore this belief state because it belongs to an old session");
+	      DMCS_LOG_TRACE(path << ": Ignore this belief state because it belongs to an old session");
 	      delete mso.m;
 	      mso.m = 0;
 	    }
@@ -516,16 +514,16 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
       if (bs)
 	{
 	  PartialBeliefStateVecPtr& bsv = (*partial_eqs)[noff];
-	  DMCS_LOG_TRACE("Got bs = " << bs << ": " << *bs << ". sid = " << sid << ". noff = " << noff);
+	  DMCS_LOG_TRACE(path << ": Got bs = " << bs << ": " << *bs << ". sid = " << sid << ". noff = " << noff);
 
 	  if (sid == session_id)
 	    {
-	      DMCS_LOG_TRACE("Storing belief state " << ++count_models_read[noff] << " from " << noff);
+	      DMCS_LOG_TRACE(path << ": Storing belief state " << ++count_models_read[noff] << " from " << noff);
 	      bsv->push_back(bs);
 	    }
 	  else
 	    {
-	      DMCS_LOG_TRACE("Ignore this belief state because it belongs to an old session");
+	      DMCS_LOG_TRACE(path << ": Ignore this belief state because it belongs to an old session");
 	      delete mso.m;
 	      mso.m = 0;
 	    }
@@ -539,7 +537,7 @@ JoinThread::ask_first_packs(PartialBeliefStatePackage* partial_eqs,
 	      std::string from = "Joiner";
 	      joiner_dispatcher->unRegisterThread(new_path, from);
 
-	      DMCS_LOG_TRACE("Return FALSE because count_models_read[" << noff << "] = 0. from_neighbor = " << from_neighbor << ", to_neighbor = " << to_neighbor);
+	      DMCS_LOG_TRACE(path << ": Return FALSE because count_models_read[" << noff << "] = 0. from_neighbor = " << from_neighbor << ", to_neighbor = " << to_neighbor);
 	      return false;
 	    }
 
@@ -604,23 +602,23 @@ JoinThread::first_join(std::size_t path,
     }
 
   // Warming up round ======================================================================= 
-  DMCS_LOG_TRACE("Set first_round to FALSE");
+  DMCS_LOG_TRACE(path << ": Set first_round to FALSE");
   first_round = false;
   if (!ask_first_packs(partial_eqs.get(), path, 0, no_nbs-1))
     {
-      DMCS_LOG_TRACE("A neighbor is inconsistent. Send a NULL model to joiner_sat_notif");
+      DMCS_LOG_TRACE(path << ": A neighbor is inconsistent. Send a NULL model to joiner_sat_notif");
       
       reset(first_round, asking_next,
 	    next_neighbor_offset,
 	    partial_eqs,
 	    pack_count);
       
-      DMCS_LOG_TRACE("After reset. first_round = " << first_round);
+      DMCS_LOG_TRACE(path << ": After reset. first_round = " << first_round);
 
       struct MessagingGatewayBC::ModelSession ms = { 0, 0, 0 };
       joiner_sat_notif->send(&ms, sizeof(ms), 0);
       
-      DMCS_LOG_TRACE("Bailing out...");
+      DMCS_LOG_TRACE(path << ": Bailing out...");
       
       return;
     }
@@ -666,14 +664,14 @@ JoinThread::next_join(std::size_t path,
     {
       if (next_neighbor_offset == no_nbs)
 	{
-	  DMCS_LOG_TRACE("No more models from my neighbors. Send a NULL model to joiner_sat_notif");
+	  DMCS_LOG_TRACE(path << ": No more models from my neighbors. Send a NULL model to joiner_sat_notif");
 	  
 	  reset(first_round, asking_next,
 		next_neighbor_offset,
 		partial_eqs,
 		pack_count);
 	  
-	  DMCS_LOG_TRACE("After reset. first_round = " << first_round);
+	  //DMCS_LOG_TRACE("After reset. first_round = " << first_round);
 
 	  struct MessagingGatewayBC::ModelSession ms = { 0, 0, 0 };
 	  joiner_sat_notif->send(&ms, sizeof(ms), 0);
@@ -685,19 +683,19 @@ JoinThread::next_join(std::size_t path,
       pc++;
       std::size_t k1 = pc * pack_size + 1;
       std::size_t k2 = (pc+1) * pack_size;
-      DMCS_LOG_TRACE("New k1 = " << k1 << ", new k2 = " << k2);
+      DMCS_LOG_TRACE(path << ": New k1 = " << k1 << ", new k2 = " << k2);
       //DMCS_LOG_TRACE("Pack count: ");
       //std::copy(pack_count->begin(), pack_count->end(), std::ostream_iterator<std::size_t>(std::cerr, " "));
       //std::cerr << std::endl;
       
-      DMCS_LOG_TRACE("Ask next at neighbor_offset = " << next_neighbor_offset);
+      DMCS_LOG_TRACE(path << ": Ask next at neighbor_offset = " << next_neighbor_offset);
       if (ask_neighbor_and_receive(partial_eqs.get(), next_neighbor_offset, k1, k2, path, BaseNotification::NEXT))
 	{
 	  if (asking_next)
 	    {
 	      assert (next_neighbor_offset > 0);
 	      
-	      DMCS_LOG_TRACE("Ask first packs before neighbor_offset = " << next_neighbor_offset);
+	      DMCS_LOG_TRACE(path << ": Ask first packs before neighbor_offset = " << next_neighbor_offset);
 	      // again, ask for first packs from each neighbor
 	      bool ret = ask_first_packs(partial_eqs.get(), path, 0, next_neighbor_offset - 1);
 	      
@@ -719,7 +717,7 @@ JoinThread::next_join(std::size_t path,
       else
 	{
 	  next_neighbor_offset++;
-	  DMCS_LOG_TRACE("Try next neighbor " << next_neighbor_offset);
+	  DMCS_LOG_TRACE(path << ": Try next neighbor " << next_neighbor_offset);
 	  asking_next = true;
 	}
     }

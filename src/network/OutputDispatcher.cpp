@@ -58,7 +58,7 @@ OutputDispatcher::operator()(MessagingGatewayBC* mg)
 	}
       else
 	{
-	  DMCS_LOG_TRACE("Received: " << *bs << " " << path << " " << sid);
+	  DMCS_LOG_TRACE("Received: " << *bs << ".path = " << path << ".sid = " << sid);
 	}
 
       // find the corresponding output thread
@@ -69,7 +69,14 @@ OutputDispatcher::operator()(MessagingGatewayBC* mg)
 
       ConcurrentMessageQueue* cmq = it->second;
 
-      DMCS_LOG_TRACE("Send to the right output thread");
+      if (bs)
+	{
+	  DMCS_LOG_TRACE("Send " << *bs << " to " << cmq << ". path = " << path);
+	}
+      else
+	{
+	  DMCS_LOG_TRACE("Send NULL to " << cmq << ". path = " << path);
+	}
       // now send the model to the right output thread (dispatching step)
       cmq->send(&ms, sizeof(ms), 0);
     }

@@ -171,7 +171,7 @@ RelSatSolver::prepare_input()
   std::size_t prio = 0;
   int timeout      = 0;
 
-  DMCS_LOG_TRACE("Waiting at joiner_sat_notif for the next input!");
+  DMCS_LOG_TRACE(path << ": Waiting at joiner_sat_notif for the next input!");
 
   struct MessagingGatewayBC::ModelSession ms = receive_model(joiner_sat_notif);
 
@@ -190,11 +190,11 @@ RelSatSolver::prepare_input()
   if (sid != my_session_id)
     {
       assert (sid < my_session_id);
-      DMCS_LOG_TRACE("Receive old joined input from sid = " << sid << ", while my current session id = " << my_session_id);
+      DMCS_LOG_TRACE(path << ": Receive old joined input from sid = " << sid << ", while my current session id = " << my_session_id);
       return false;
     }
 
-  DMCS_LOG_TRACE("input received!");
+  DMCS_LOG_TRACE(path << ": input received!");
 
   xInstance->setSizeWPartialAss(xInstance->iClauseCount());
   
@@ -253,17 +253,17 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
   std::size_t models_sofar = 0;
   path = pa;
 
-  DMCS_LOG_TRACE("solve() with path = " << path);
+  DMCS_LOG_TRACE(path << ": solve() now");
 
   if (is_leaf)
     {
-      DMCS_LOG_TRACE("Leaf case. Solve now. k2 = " << k2);
+      DMCS_LOG_TRACE(path << ": Leaf case. Solve now. k2 = " << k2);
       eResult = xSATSolver->eSolve((long int)k2, models_sofar);
       //xSATSolver->refresh();
     }
   else
     {
-      DMCS_LOG_TRACE("Intermediate case.");
+      DMCS_LOG_TRACE(path << ": Intermediate case.");
 
       std::size_t left_to_request = k2;
       
@@ -271,8 +271,8 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
 	{
 	  if (k2 > 0)
 	    {
-	      DMCS_LOG_TRACE("left_to_request = " << left_to_request);
-	      DMCS_LOG_TRACE("models_sofar = " << models_sofar);
+	      DMCS_LOG_TRACE(path << ": left_to_request = " << left_to_request);
+	      DMCS_LOG_TRACE(path << ": models_sofar = " << models_sofar);
 	      
 	      assert (left_to_request >= models_sofar);
 	      
@@ -281,7 +281,7 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
 
 	  if (k2 > 0 && left_to_request == 0)
 	    {
-	      DMCS_LOG_TRACE("Reached " << k2 << " models. Tell Joiner to shut up and get out. Also send OutputThread a NULL pointer.");
+	      DMCS_LOG_TRACE(path << ": Reached " << k2 << " models. Tell Joiner to shut up and get out. Also send OutputThread a NULL pointer.");
 
 	      mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
 	      AskNextNotification* notif = new AskNextNotification(BaseNotification::SHUTUP, path, 0, 0, 0);
@@ -289,29 +289,29 @@ RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std:
 	      break;
 	    }
 
-	  DMCS_LOG_TRACE("Request another input from Joiner");
+	  DMCS_LOG_TRACE(path << ": Request another input from Joiner");
 	  AskNextNotification* notif = new AskNextNotification(BaseNotification::NEXT, path, session_id, k1, k2);
 	  sat_joiner_notif->send(&notif, sizeof(notif), 0);
 
-	  DMCS_LOG_TRACE("Prepare input before solving.");
+	  DMCS_LOG_TRACE(path << ": Prepare input before solving.");
 	  //DMCS_LOG_TRACE("xIntance.size() before removing input = " << xInstance->iClauseCount());
 	  xInstance->removeInput();
 	  //DMCS_LOG_TRACE("xIntance.size() after removing input = " << xInstance->iClauseCount());
 	  if (!prepare_input())
 	    {
-	      DMCS_LOG_TRACE("Got NULL input from joiner_sat_notif. Bailing out...");
+	      DMCS_LOG_TRACE(path << ": Got NULL input from joiner_sat_notif. Bailing out...");
 	      mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
 	      break;
 	    }
-	  DMCS_LOG_TRACE("A fresh solving. input = " << *input);
+	  DMCS_LOG_TRACE(path << ": A fresh solving. input = " << *input);
 	  
 	  eResult = xSATSolver->eSolve((long int)left_to_request, models_sofar);
-	  DMCS_LOG_TRACE("One limited solve finished. Number of solutions = " << models_sofar);
+	  DMCS_LOG_TRACE(path << ": One limited solve finished. Number of solutions = " << models_sofar);
 	  //xSATSolver->refresh();
 	  
 	  bool was_cached;
 	  store(input, input_buffer, true, was_cached);
-	  DMCS_LOG_TRACE("One SOLVE finished.");
+	  //DMCS_LOG_TRACE("One SOLVE finished.");
 	}
     }
   
@@ -326,7 +326,7 @@ RelSatSolver::receiveEOF()
   DMCS_LOG_DEBUG(__PRETTY_FUNCTION__);
   if (is_leaf)
     {
-      DMCS_LOG_TRACE("EOF. Leaf case --> Send a NULL pointer to OUT_MQ to close this session.");
+      DMCS_LOG_TRACE(path << ": EOF. Leaf case --> Send a NULL pointer to OUT_MQ to close this session.");
       mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
     }
 }
@@ -340,7 +340,7 @@ RelSatSolver::receiveUNSAT(ClauseList& learned_clauses)
 
   if (is_leaf)
     {
-      DMCS_LOG_TRACE("UNSAT. Send a NULL pointer to OUT_MQ to close this session.");
+      DMCS_LOG_TRACE(path << ": UNSAT. Send a NULL pointer to OUT_MQ to close this session.");
       mg->sendModel(0, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0); 
     }
 }
@@ -414,7 +414,7 @@ RelSatSolver::receiveSolution(DomainValue* _aAssignment, int _iVariableCount)
       
       project_to(bs, localV);
       
-      DMCS_LOG_TRACE("Going to send: " << *bs << ", with path = " << path << ", parent session id = " << parent_session_id);
+      DMCS_LOG_TRACE(path << ": Going to send: " << *bs << ", with path = " << path << ", parent session id = " << parent_session_id);
       // now put this PartialBeliefState to the SatOutputMessageQueue
       mg->sendModel(bs, path, parent_session_id, 0, ConcurrentMessageQueueFactory::OUT_MQ ,0);
       // Models should be cleaned by OutputThread
