@@ -1,5 +1,19 @@
 2011-09-08  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/JoinThread.cpp: Put path in debugging information.
+	* src/network/OutputDispatcher.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/HandlerThread.h: Turn off some debugging information.
+	* include/network/NeighborThread.h: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+	* include/network/AsynClient.tcc: Get out when receive no answer.
+
+	* include/dmcs/ModelSessionId.h: Fix comparison.
+
 	* testsuite/testDispatcher.cpp: Fix make check.
 	* testsuite/testJoinLeak.cpp: Likewise.
 
