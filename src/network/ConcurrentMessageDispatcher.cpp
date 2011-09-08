@@ -86,11 +86,11 @@ ConcurrentMessageDispatcher::sendIncomingMessage(StreamingForwardMessage* m,
       ret = mqs[to]->timed_send(&m, sizeof(m), 0, boost::posix_time::milliseconds(msecs));
       if (m)
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << m << ", " << *m << "}, " << msecs << ") = " << ret);
+	  //DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << m << ", " << *m << "}, " << msecs << ") = " << ret);
 	}
       else
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << m << ", NULL}, " << msecs << ") = " << ret);
+	  //DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << m << ", NULL}, " << msecs << ") = " << ret);
 	}
     }
   else if (msecs < 0)
@@ -98,11 +98,11 @@ ConcurrentMessageDispatcher::sendIncomingMessage(StreamingForwardMessage* m,
       ret = mqs[to]->try_send(m, sizeof(m), 0);
       if (m)
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << m << ", " << *m << "}, " << msecs << ") = " << ret);
+	  //DMCS_LOG_TRACE("mq #" << to << ": try_send({" << m << ", " << *m << "}, " << msecs << ") = " << ret);
 	}
       else
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": try_send({" << m << ", NULL}, " << msecs << ") = " << ret);
+	  //DMCS_LOG_TRACE("mq #" << to << ": try_send({" << m << ", NULL}, " << msecs << ") = " << ret);
 	}
     }
   else
@@ -110,11 +110,11 @@ ConcurrentMessageDispatcher::sendIncomingMessage(StreamingForwardMessage* m,
       mqs[to]->send(&m, sizeof(m), 0);
       if (m)
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": send({" << m << ", " << *m << "}, " << msecs << ") = " << ret);
+	  //DMCS_LOG_TRACE("mq #" << to << ": send({" << m << ", " << *m << "}, " << msecs << ") = " << ret);
 	}
       else
 	{
-	  DMCS_LOG_TRACE("mq #" << to << ": send({" << m << ", NULL}, " << msecs << ") = " << ret);
+	  //DMCS_LOG_TRACE("mq #" << to << ": send({" << m << ", NULL}, " << msecs << ") = " << ret);
 	}
     }
 
@@ -138,17 +138,17 @@ ConcurrentMessageDispatcher::sendNotification(AskNextNotification* notif,
   if (msecs > 0)
     {
       ret = mqs[to]->timed_send(&notif, sizeof(notif), 0, boost::posix_time::milliseconds(msecs));
-      DMCS_LOG_TRACE("mq #" << to << ": timed_send(" << notif << ", " << msecs << ") = " << ret);
+      //DMCS_LOG_TRACE("mq #" << to << ": timed_send(" << notif << ", " << msecs << ") = " << ret);
     }
   else if (msecs < 0)
     {
       ret = mqs[to]->try_send(notif, sizeof(notif), 0);
-      DMCS_LOG_TRACE("mq #" << to << ": try_send(" << notif << ", " << msecs << ") = " << ret);
+      //DMCS_LOG_TRACE("mq #" << to << ": try_send(" << notif << ", " << msecs << ") = " << ret);
     }
   else
     {
       mqs[to]->send(&notif, sizeof(notif), 0);
-      DMCS_LOG_TRACE("mq #" << to << ": send(" << notif << ", " << msecs << ") = " << ret);
+      //DMCS_LOG_TRACE("mq #" << to << ": send(" << notif << ", " << msecs << ") = " << ret);
     }
 
   return ret;
@@ -175,17 +175,17 @@ ConcurrentMessageDispatcher::sendModel(PartialBeliefState* b,
   if (msecs > 0)
     {
       ret = mqs[to]->timed_send(&ms, sizeof(ms), 0, boost::posix_time::milliseconds(msecs));
-      DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
+      //DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
     }
   else if (msecs < 0)
     {
       ret = mqs[to]->try_send(&ms, sizeof(ms), 0);
-      DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
+      //DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
     }
   else
     {
       mqs[to]->send(&ms, sizeof(ms), 0);
-      DMCS_LOG_TRACE("mq #" << to << ": send({" << ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
+      //DMCS_LOG_TRACE("mq #" << to << ": send({" << ms.m << ", " << path << ", " << ms.sid << "}, " << msecs << ") = " << ret);
     }
 
   return ret;
@@ -271,17 +271,17 @@ ConcurrentMessageDispatcher::sendJoinIn(std::size_t k,
   if (msecs > 0)
     {
       ret = mqs[to]->timed_send(&ji, sizeof(ji), 0, boost::posix_time::milliseconds(msecs));
-      DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = " << ret);
+      //DMCS_LOG_TRACE("mq #" << to << ": timed_send({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = " << ret);
     }
   else if (msecs < 0)
     {
       ret = mqs[to]->try_send(&ji, sizeof(ji), 0);
-      DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = " << ret);
+      //DMCS_LOG_TRACE("mq #" << to << ": try_send({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = " << ret);
     }
   else
     {
       mqs[to]->send(&ji, sizeof(ji), 0);
-      DMCS_LOG_TRACE("mq #" << to << ": send({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = " << ret);
+      //DMCS_LOG_TRACE("mq #" << to << ": send({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = " << ret);
     }
 
   return ret;
@@ -306,33 +306,33 @@ ConcurrentMessageDispatcher::recvNotification(std::size_t from,
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(notif), recvd, p, boost::posix_time::milliseconds(msecs)))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << notif << "}, " << msecs << ") = false, setting notif and msecs 0 now.");
+	  //DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << notif << "}, " << msecs << ") = false, setting notif and msecs 0 now.");
 
 	  msecs = 0;
 	  notif = 0;
 	  return notif;
 	}
 
-      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << notif << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << notif << "}, " << msecs << ") = true");
     }
   else if (msecs < 0)
     {
       if (!mqs[from]->try_receive(ptr, sizeof(notif), recvd, p))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << notif << "}, " << msecs << ") = false, setting notig and msecs 0 now.");
+	  //DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << notif << "}, " << msecs << ") = false, setting notig and msecs 0 now.");
 
 	  msecs = 0;
 	  notif = 0;
 	  return notif;
 	}
 
-      DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << notif << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << notif << "}, " << msecs << ") = true");
     }
   else
     {
       mqs[from]->receive(ptr, sizeof(notif), recvd, p);
 
-      DMCS_LOG_TRACE("mq #" << from << ": receive({" << notif << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": receive({" << notif << "}, " << msecs << ") = true");
     }
 
   assert(sizeof(notif) == recvd);
@@ -359,33 +359,33 @@ ConcurrentMessageDispatcher::recvIncomingMessage(std::size_t from,
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(m), recvd, p, boost::posix_time::milliseconds(msecs)))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << m << "}, " << msecs << ") = false, setting m and msecs 0 now.");
+	  //DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << m << "}, " << msecs << ") = false, setting m and msecs 0 now.");
 
 	  msecs = 0;
 	  m = 0;
 	  return m;
 	}
 
-      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << m << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << m << "}, " << msecs << ") = true");
     }
   else if (msecs < 0)
     {
       if (!mqs[from]->try_receive(ptr, sizeof(m), recvd, p))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << m << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
+	  //DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << m << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
 
 	  msecs = 0;
 	  m = 0;
 	  return m;
 	}
 
-      DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << m << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << m << "}, " << msecs << ") = true");
     }
   else
     {
       mqs[from]->receive(ptr, sizeof(m), recvd, p);
 
-      DMCS_LOG_TRACE("mq #" << from << ": receive({" << m << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": receive({" << m << "}, " << msecs << ") = true");
     }
 
   assert(sizeof(m) == recvd);
@@ -410,7 +410,7 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(ms), recvd, p, boost::posix_time::milliseconds(msecs)))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << ", " << ms.path << ", " << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
+	  //DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << ", " << ms.path << ", " << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
 
 	  msecs = 0;
 	  ms.m = 0;
@@ -418,13 +418,13 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
 	  return ms;
 	}
 
-      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << "," << ms.path << ", " << ms.sid << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ms.m << "," << ms.path << ", " << ms.sid << "}, " << msecs << ") = true");
     }
   else if (msecs < 0)
     {
       if (!mqs[from]->try_receive(ptr, sizeof(ms), recvd, p))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ms.m << ", " << ms.path << ", " << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
+	  //DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ms.m << ", " << ms.path << ", " << ms.sid << "}, " << msecs << ") = false, setting ms and msecs 0 now.");
 
 	  msecs = 0;
 	  ms.m = 0;
@@ -432,18 +432,18 @@ ConcurrentMessageDispatcher::recvModel(std::size_t from,
 	  return ms;
 	}
 
-      DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ms.m << ", " << ms.sid << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ms.m << ", " << ms.sid << "}, " << msecs << ") = true");
     }
   else
     {
       mqs[from]->receive(ptr, sizeof(ms), recvd, p);
 
-      DMCS_LOG_TRACE("mq #" << from << ": receive({" << ms.m << ", " << ms.path << ", " << ms.sid << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": receive({" << ms.m << ", " << ms.path << ", " << ms.sid << "}, " << msecs << ") = true");
     }
 
   assert(sizeof(ms) == recvd);
 
-  //DMCS_LOG_TRACE("Finished recvModel");
+  ////DMCS_LOG_TRACE("Finished recvModel");
   //prio = p;
   return ms;
 }
@@ -550,26 +550,26 @@ ConcurrentMessageDispatcher::recvJoinIn(std::size_t from,
     {
       if (!mqs[from]->timed_receive(ptr, sizeof(ji), recvd, p, boost::posix_time::milliseconds(msecs)))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = false, setting everything 0 now.");
+	  //DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = false, setting everything 0 now.");
 	  msecs = 0;
 	  return ji;
 	}
-      DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": timed_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = true");
     }
   else if (msecs < 0)
     {
       if (!mqs[from]->try_receive(ptr, sizeof(ji), recvd, p))
 	{
-	  DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = false, setting everything 0 now.");
+	  //DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = false, setting everything 0 now.");
 	  msecs = 0;
 	  return ji;
 	}
-      DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": try_receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = true");
     }
   else
     {
       mqs[from]->receive(ptr, sizeof(ji), recvd, p);
-      DMCS_LOG_TRACE("mq #" << from << ": receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = true");
+      //DMCS_LOG_TRACE("mq #" << from << ": receive({" << ji.ctx_offset << "," << ji.peq_cnt << "}, " << msecs << ") = true");
     }
 
   assert(sizeof(ji) == recvd);

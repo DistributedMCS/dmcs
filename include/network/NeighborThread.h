@@ -61,7 +61,7 @@ public:
   virtual
   ~NeighborThread()
   {
-    DMCS_LOG_TRACE("N[" << nid << "] Terminating NeighborThread.");
+    //DMCS_LOG_TRACE("N[" << nid << "] Terminating NeighborThread.");
 
     if (nop_thread)
       {
@@ -274,8 +274,9 @@ private:
 	  }
 
 	msl->sort(my_compare);
-	DMCS_LOG_TRACE("N[" << nid << "] Will call remove_duplication");
+	DMCS_LOG_TRACE("N[" << nid << "] Will call remove_duplication. msl->size() = " << msl->size());
 	remove_duplication(msl);
+	DMCS_LOG_TRACE("N[" << nid << "] Removing done. msl->size() = " << msl->size());
 	//msl->unique();
 	
 	DMCS_LOG_TRACE("N[" << nid << "] Received " << msl->size() << " partial belief states from noff = " << noff << ": \n" << *mess);

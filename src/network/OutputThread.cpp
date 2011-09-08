@@ -55,7 +55,7 @@ OutputThread::OutputThread(std::size_t p)
 
 OutputThread::~OutputThread()
 {
-  DMCS_LOG_TRACE(port << ": Terminating OutputThread.");
+  //DMCS_LOG_TRACE(port << ": Terminating OutputThread.");
   for (PartialBeliefStateBuf::iterator it = output_buffer->begin(); 
        it != output_buffer->end(); ++it)
     {

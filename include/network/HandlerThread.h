@@ -65,7 +65,7 @@ public:
 
   ~HandlerThread()
   {
-    DMCS_LOG_TRACE("Terminating HandlerThread.");
+    //DMCS_LOG_TRACE("Terminating HandlerThread.");
   }
 
   void

@@ -52,7 +52,7 @@ RelSatSolverThread::RelSatSolverThread(const RelSatSolverPtr& rss,
 
 RelSatSolverThread::~RelSatSolverThread()
 {
-  DMCS_LOG_TRACE("Terminating RelSatSolverThread");
+  //DMCS_LOG_TRACE("Terminating RelSatSolverThread");
 }
 
 
