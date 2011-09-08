@@ -1,4 +1,5 @@
 #include "network/ConcurrentMessageQueueFactory.h"
+#include "network/ConcurrentMessageQueueHelper.h"
 #include "network/JoinThread.h"
 #include "network/JoinerDispatcher.h"
 #include "dmcs/Log.h"
@@ -17,10 +18,10 @@ using namespace dmcs;
 
 
 
-void send_trigger(MessagingGatewayBCPtr mg, std::size_t k1, std::size_t k2)
+void send_trigger(ConcurrentMessageQueue* sjn, std::size_t k1, std::size_t k2)
 {
   AskNextNotification* notif = new AskNextNotification(BaseNotification::NEXT, 0, 0, k1, k2);
-  mg->sendNotification(notif, 0, ConcurrentMessageQueueFactory::SAT_JOINER_MQ, 0);
+  sjn->send(&notif, sizeof(notif), 0);
 }
 
 
@@ -159,7 +160,8 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
   ConcurrentMessageQueuePtr    n0 (new ConcurrentMessageQueue);
   ConcurrentMessageQueuePtr    n1 (new ConcurrentMessageQueue);
   ConcurrentMessageQueuePtr    n2 (new ConcurrentMessageQueue);
-  ConcurrentMessageQueuePtr    jsn (new ConcurrentMessageQueue);
+  ConcurrentMessageQueuePtr    jsn (new ConcurrentMessageQueue(5));
+  ConcurrentMessageQueuePtr    sjn (new ConcurrentMessageQueue(5));
   ConflictVecPtr    cs (new ConflictVec);
 
   jnn->push_back(n0);
@@ -177,18 +179,21 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
   PartialBeliefState pa;
   PartialBeliefState d;
 
-  // path = 0, sid = 0
-  JoinThread jt(0, 0);
-  boost::thread join_thread(jt, no_nbs, system_size, mg.get(), jsn.get(), jnn.get());
-
   JoinerDispatcher jd;
-  jd.registerThread(0, jt.getCMQ());
+
+  // path = 0, cid = 1, sid = 0
+  JoinThread jt(0, 1, 0, &jd);
+  boost::thread join_thread(jt, no_nbs, system_size, mg.get(), jsn.get(), sjn.get(), jnn.get());
+
+
+  std::string from = "Joiner";
+  jd.registerThread(0, jt.getCMQ(), from);
   boost::thread join_dispatcher_thread(jd, mg.get());
   
   // simulate incoming messages by putting partial equilibria into JOIN_IN_MQs
   // sleep 1 sec before each round
 
-  send_trigger(mg, 1, 3);
+  send_trigger(sjn.get(), 1, 3);
 
   send_first_pack_21(mg, noff_2, offset_2);
   send_first_pack_31(mg, noff_3, offset_3);
@@ -196,8 +201,11 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
 
   for (std::size_t i = 0; i < 3; ++i)
     {
-      send_trigger(mg, 1, 3);
+      std::cerr << "I AM HERE. SENDING TRIGGER NUMBER " << i << std::endl;
+      send_trigger(sjn.get(), 1, 3);
     }
+  std::cerr << "CONTINUE " << std::endl;
+
 
   // **************************************
   sleep(1);
@@ -205,7 +213,7 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
 
   // **************************************
 
-  send_trigger(mg, 1, 3);
+  send_trigger(sjn.get(), 1, 3);
   sleep(1);
   send_eop(mg, noff_2, offset_2);
 
@@ -241,7 +249,7 @@ BOOST_AUTO_TEST_CASE ( testJoinLeak )
       std::size_t prio = 0;
       int timeout = 0;
 
-      struct MessagingGatewayBC::ModelSession ms = mg->recvModel(ConcurrentMessageQueueFactory::JOIN_OUT_MQ, prio, timeout);
+      struct MessagingGatewayBC::ModelSession ms = receive_model(jsn.get());
 
       if (ms.m == 0)
 	{

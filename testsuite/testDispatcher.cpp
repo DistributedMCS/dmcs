@@ -71,9 +71,10 @@ BOOST_AUTO_TEST_CASE( testOutputDispatcher )
 
   struct MessagingGatewayBC::ModelSession ms = {pbs, 1, 1};
 
-  od.registerThread(1, cmq1);
-  od.registerThread(2, cmq2);
-  od.registerThread(3, cmq3);
+  std::string from = "OutputThread";
+  od.registerThread(1, cmq1, from);
+  od.registerThread(2, cmq2, from);
+  od.registerThread(3, cmq3, from);
 
   std::size_t prio = 0;
   // belief_state, path, session_id, from, to, prio
