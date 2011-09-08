@@ -42,7 +42,8 @@ TESTS = \
 	testBeliefStateCaching \
 	testRemoveDuplication \
 	testDispatcher \
-	testBlockingAsio
+	testBlockingAsio \
+	testSATModelOrder
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -74,7 +75,8 @@ check_PROGRAMS = \
 	testBeliefStateCaching \
 	testRemoveDuplication \
 	testDispatcher \
-	testBlockingAsio
+	testBlockingAsio \
+	testSATModelOrder
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -178,3 +180,12 @@ testDispatcher_LDADD = $(top_builddir)/src/network/libthreads.a \
 testBlockingAsio_SOURCES = SimpleClient.cpp \
 			   SimpleServer.cpp \
 			   testBlockingAsio.cpp
+
+testSATModelOrder_SOURCES = testSATModelOrder.cpp
+testSATModelOrder_LDADD = \
+	$(top_builddir)/src/network/libnetwork.a \
+	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/relsat-20070104/librelsat.a \
+	$(top_builddir)/src/solver/libsolver.a \
+	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/dmcs/liblog.a
