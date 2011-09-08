@@ -260,6 +260,12 @@ AsynClient<ForwardMessType, BackwardMessType>::handle_read_answer(const boost::s
 
       std::size_t next_k;
 
+      if (msl->size() == 0)
+	{
+	  DMCS_LOG_TRACE("no more result, let's get back");
+	  return;
+	}
+
       DMCS_LOG_TRACE("mess->getPackSize() = " << mess->getPackSize() << ". msl->size() = " << msl->size());
       if (mess->getPackSize() > 0)
 	{
