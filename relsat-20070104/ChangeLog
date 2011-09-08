@@ -1,3 +1,10 @@
+2011-09-08  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* SATSolver.cpp: Disable some debugging output. Send result to
+	xOutputStream when wrapper is NULL.
+
+	* Random.h: Disable random functions to get fixed ordering of results.
+
 2011-03-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* SATSolver.cpp: Pass models_sofar as reference. RelSat somehow

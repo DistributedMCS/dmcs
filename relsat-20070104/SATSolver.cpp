@@ -90,7 +90,10 @@ relsat_enum SATSolver::eSolve(long int solutions_limit, std::size_t& models_sofa
   _iBranchSelections = _iVariablesLabeled = _iContradictions = 0;
   if (!_bInitialize()) {
     eReturn = UNSAT;
-    wrapper->receiveUNSAT(_xLearnedClauses);
+    if (wrapper)
+      {
+	wrapper->receiveUNSAT(_xLearnedClauses);
+      }
   }
   else {
     // Here we do an initial unit propagation to handle base unit clauses.
@@ -104,7 +107,10 @@ relsat_enum SATSolver::eSolve(long int solutions_limit, std::size_t& models_sofa
       //std::cerr <<" Number of learned clauses = " << _xLearnedClauses.iClauseCount() << std::endl;
       //std::cerr << " Learned Clauses: " << _xLearnedClauses << std::endl;
 
-      wrapper->receiveUNSAT(_xLearnedClauses);
+      if (wrapper)
+	{
+	  wrapper->receiveUNSAT(_xLearnedClauses);
+	}
     }
     else {
       //DMCS_LOG_TRACE(" _bUnitPropagate and no UNSAT found");
@@ -131,7 +137,10 @@ relsat_enum SATSolver::eSolve(long int solutions_limit, std::size_t& models_sofa
 	//std::cerr <<"UNSAT after Loop." << std::endl;
 	//std::cerr <<"Number of learned clauses = " << _xLearnedClauses.iClauseCount() << std::endl;
 	//std::cerr <<"Learned Clauses: " << _xLearnedClauses << std::endl;
-	wrapper->receiveUNSAT(_xLearnedClauses);
+	if (wrapper)
+	  {
+	    wrapper->receiveUNSAT(_xLearnedClauses);
+	  }
       }
     }
   }
@@ -249,14 +258,20 @@ boolean SATSolver::_bLoop(boolean& bFailed_, std::size_t& models_sofar)
         if (_bOutputSolution()) {
 	  xOutputStream << "c   Solution limit reached. Number of solutions = " << _iSolutionCount << endl;
 	  models_sofar = (std::size_t)_iSolutionCount;
-	  wrapper->receiveEOF();
+	  if (wrapper)
+	    {
+	      wrapper->receiveEOF();
+	    }
 	  return bReturnValue;
 	}
       }
       if (_bSpecialBackup()) {
 	xOutputStream << "c   All solutions found. Number of solutions = " << _iSolutionCount << endl;
 	models_sofar = (std::size_t)_iSolutionCount;
-	wrapper->receiveEOF();
+	if (wrapper)
+	  {
+	    wrapper->receiveEOF();
+	  }
 	return bReturnValue;
       }
     }
@@ -291,16 +306,20 @@ boolean SATSolver::_bOutputSolution()
     //    std::cerr << "Output solution." << std::endl;
     //std::cerr << "Number of learned clauses = " << _xLearnedClauses.iClauseCount() << std::endl;
     //std::cerr << "Learned Clauses: " << _xLearnedClauses << std::endl;
-    wrapper->receiveSolution(_aAssignment, _iVariableCount);
-
-    /*
-    for (int i=0; i<_iVariableCount; i++) {
-      assert(_aAssignment[i] != NON_VALUE);
-      if (_aAssignment[i]) {
-	xOutputStream << i+1 << " ";
+    if (wrapper)
+      {
+	wrapper->receiveSolution(_aAssignment, _iVariableCount);
       }
-    }
-    xOutputStream << endl;*/
+    else
+      {
+	for (int i=0; i<_iVariableCount; i++) {
+	  assert(_aAssignment[i] != NON_VALUE);
+	  if (_aAssignment[i]) {
+	    xOutputStream << i+1 << " ";
+	  }
+	}
+	xOutputStream << endl;
+      }
   }
 
 #ifndef NDEBUG
@@ -572,13 +591,16 @@ VariableID SATSolver::_eGiveMeTheBest(boolean& bZeroFirst, boolean bFavorPrimary
     }
     goto try_with_non_primary;
   }
+  // Fix the order of picking and assigning the next atom 
+  // to achieve fixed ordering of result
   VariableID eReturn = _pUnitList->iVariable(xRandom.iRandom(_pUnitList->iCount()));
+
   _pUnitList->vClear();
-  bZeroFirst = xRandom.iRandom(2);
-  /*bZeroFirst =
+  //bZeroFirst = xRandom.iRandom(2);
+  bZeroFirst =
     _aBinaryCount1[eReturn] >
     _aBinaryCount0[eReturn] ?
-    0 : 1;*/
+    0 : 1;
   memcpy(_aScore0, _aBinaryCount0, _iVariableCount * sizeof(*_aScore1));
   memcpy(_aScore1, _aBinaryCount1, _iVariableCount * sizeof(*_aScore0));
   //cout << "Returning branch: " << (eReturn+1) << " for loc. " << _iCurrentVariable << endl;
@@ -1703,24 +1725,24 @@ void SATSolver::_vPrintStack()
       iBranchDepth++;
     }
   }
-  xOutputStream << "c   Stats: BD=" << iBranchDepth
+  /*xOutputStream << "c   Stats: BD=" << iBranchDepth
 		<< ", BP=" << _iBranchSelections
 		<< ", CD=" << _iContradictions
 		<< ", LC=" << _xLearnedClauses.iClauseCount()
 		<< ", RLC=" << _iRelevantClauses
-		<< endl;
+		<< endl;*/
   if (_iSolutionCount && !_bFindAll) {
     xOutputStream << "c     Solutions: ";
     char* aBuffer = _xKnownSolutions.aToString();
     xOutputStream << aBuffer << endl;
     delete [] aBuffer;
   }
-  xOutputStream << "c     Stack: ";
+  //xOutputStream << "c     Stack: ";
   int iNoBranch = 0;
   for (k=0; k<_iCurrentVariable; k++) {
     VariableID eWorkID = _aPositionToID[k];
     if (_aVariableStruct[eWorkID].bBranch) {
-      xOutputStream << iNoBranch << ' ';
+      //xOutputStream << iNoBranch << ' ';
       //xOutputStream << iNoBranch << " (" << eWorkID+1 << ") ";
       iNoBranch = 0;
     }
@@ -1728,9 +1750,9 @@ void SATSolver::_vPrintStack()
       iNoBranch++;
     }
   }
-  if (iNoBranch)
-    xOutputStream << iNoBranch;
-  xOutputStream << endl;
+  //if (iNoBranch)
+    //xOutputStream << iNoBranch;
+    //xOutputStream << endl;
 }
 
 void SATSolver::_vCleanup()
