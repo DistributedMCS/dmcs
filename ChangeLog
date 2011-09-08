@@ -1,3 +1,14 @@
+2011-09-08  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testDispatcher.cpp: Fix make check.
+	* testsuite/testJoinLeak.cpp: Likewise.
+
+	* testsuite/Makefile.am: Add testSATModelOrder.
+
+	* testsuite/testSATModelOrder.cpp: New file.
+	* examples/input.txt: Likewise.
+	* examples/fixed_output.txt: Likewise.
+
 2011-09-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/JoinThread.cpp: Unregister in case of inconsistent join.
