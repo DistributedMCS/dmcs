@@ -38,7 +38,7 @@ class Engine
 {
 public:
   EngineInstance*
-  createEngineInstance();
+  createEngineInstance(const std::string& kbURI);
 };
 
 } // namespace dmcs

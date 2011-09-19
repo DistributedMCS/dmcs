@@ -30,14 +30,21 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
-class Solver
+class Solver: public boost::thread
 {
 public:
-  Solver(ConcurrentMessageQueue iq, ConcurrentMessageQueue oq)
+  Solver(
+    ConcurrentMessageQueue iq,
+    ConcurrentMessageQueue oq)
     : input_queue(iq), output_queue(oq)
   { }
 
-  virtual void solve() = 0;
+  void start();
+  void stop();
+  bool terminated() const;
+
+protected:
+  virtual void run() = 0;
 
 protected:
   ConcurrentMessageQueue input_queue;

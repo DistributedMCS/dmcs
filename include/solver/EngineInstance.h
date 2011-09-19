@@ -36,21 +36,20 @@ namespace dmcs {
 
 class EngineInstance
 {
-public:
-  EngineInstance(const std::string& kbn)
-    : kbname(kbn)
-  { 
-    init();
-  }
+protected:
+  friend class Engine;
+  EngineInstance(
+      const std::string& kbURI,
+      const Engine* myEngine);
  
+public:
   virtual Solver*
-  createSolver(ConcurrentMessageQueue input_queue, ConcurrentMessageQueue output_queue) = 0;
+  createSolver(
+    ConcurrentMessageQueue input_queue,
+    ConcurrentMessageQueue output_queue) = 0;
   
-private:
-  virtual void init() = 0;
-
-private:
-  std::string kbname;
+protected:
+  const std::string& kbURI;
 };
 
 
