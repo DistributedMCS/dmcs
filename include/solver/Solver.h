@@ -30,38 +30,22 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
-template <typename Engine, typename KBType, typename InputType, typename OutputType, typename InQueue, typename OutQueue>
 class Solver
 {
 public:
-  Solver(const std::string& filename, InQueue iq, OutQueue oq)
+  Solver(KBType kb, ConcurrentMessageQueue iq, ConcurrentMessageQueue oq)
     : input_queue(iq), output_queue(oq)
-  {
-    init(filename);
-  }
-
-  // convert program/theory from file to an internal representation of type KBType
-  void
-  init(const std::string& filename);
+  { }
 
   // evaluate in order to return from k1-th to k2-th models
   void
   solve(std::size_t k1, std::size_t k2)
-  {
-    while (not reached k2)
-      {
-	head = input_queue.pop_front();
-	convert(head, input);
-	engine.solve(kb, input, output);
-	convert(output, s);
-	output_queue.push_back(h, s);
-      }
-  }
+  { }
+
 private:
-  Engine engine;
   KBType kb;
-  InQueue input_queue;
-  OutQueue output_queue;
+  ConcurrentMessageQueue input_queue;
+  ConcurrentMessageQueue output_queue;
 };
 
 #endif // SOLVER_H

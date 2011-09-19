@@ -18,32 +18,48 @@
  */
 
 /**
- * @file   Engine.h
+ * @file   EngineInstance.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Sun Sep  18 12:13:24 2011
+ * @date   Mon Sep  19 12:28:30 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef ENGINE_H
-#define ENGINE_H
+#ifndef ENGINE_INSTANCE_H
+#define ENGINE_INSTANCE_H
 
-#include "solver/EngineInstance.h"
+#include "solver/Solver.h"
 
 namespace dmcs {
 
-class Engine
+class EngineInstance
 {
 public:
-  EngineInstance
-  createEngineInstance();
+  EngineInstance(const std::string kbn)
+    : kbname(kbn)
+  { 
+    init();
+  }
+
+  // pass to Solver the 2 queues and kb
+  Solver
+  createSolver(ConcurrentMessageQueue input_queue, ConcurrentMessageQueue output_queue);
+  
+private:
+  // read the local kb from kbname
+  // ??? what type for kb?
+  void
+  init();
+
+private:
+  std::string kbname;
 };
 
 } // namespace dmcs
 
-#endif // ENGINE_H
+#endif // ENGINE_INSTANCE_H
 
 // Local Variables:
 // mode: C++
