@@ -33,19 +33,31 @@
 class Solver
 {
 public:
-  Solver(KBType kb, ConcurrentMessageQueue iq, ConcurrentMessageQueue oq)
+  Solver(ConcurrentMessageQueue iq, ConcurrentMessageQueue oq)
     : input_queue(iq), output_queue(oq)
   { }
 
-  // evaluate in order to return from k1-th to k2-th models
+  virtual void solve() = 0;
+
+protected:
+  ConcurrentMessageQueue input_queue;
+  ConcurrentMessageQueue output_queue;
+};
+
+
+class DLVSolver : public Solver
+{
+public:
+  DLVSolver(std::vector<std::string> k, ConcurrentMessageQueue iq, ConcurrentMessageQueue oq)
+    : kb(k), Solver(iq, oq)
+  { }
+
   void
-  solve(std::size_t k1, std::size_t k2)
+  solve()
   { }
 
 private:
-  KBType kb;
-  ConcurrentMessageQueue input_queue;
-  ConcurrentMessageQueue output_queue;
+  std::vector<std::string> kb;
 };
 
 #endif // SOLVER_H

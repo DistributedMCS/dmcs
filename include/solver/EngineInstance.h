@@ -37,25 +37,43 @@ namespace dmcs {
 class EngineInstance
 {
 public:
-  EngineInstance(const std::string kbn)
+  EngineInstance(const std::string& kbn)
     : kbname(kbn)
   { 
     init();
   }
-
-  // pass to Solver the 2 queues and kb
-  Solver
-  createSolver(ConcurrentMessageQueue input_queue, ConcurrentMessageQueue output_queue);
+ 
+  virtual Solver*
+  createSolver(ConcurrentMessageQueue input_queue, ConcurrentMessageQueue output_queue) = 0;
   
 private:
-  // read the local kb from kbname
-  // ??? what type for kb?
-  void
-  init();
+  virtual void init() = 0;
 
 private:
   std::string kbname;
 };
+
+
+
+class DLVEngineInstance : public EngineInstance
+{
+public:
+  DLVEngineInstance(const std::string& kbname)
+    : EngineInstance(kbname);
+  { }
+
+  Solver*
+  createSolver(ConcurrentMessageQueue input_queue, ConcurrentMessageQueue output_queue)
+  { }
+
+private:
+  void
+  init();
+
+private:
+  std::vector<std::string> kb;
+};
+
 
 } // namespace dmcs
 

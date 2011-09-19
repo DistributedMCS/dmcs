@@ -37,7 +37,7 @@ namespace dmcs {
 class Engine
 {
 public:
-  EngineInstance
+  EngineInstance*
   createEngineInstance();
 };
 
