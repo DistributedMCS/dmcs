@@ -51,11 +51,11 @@ BOOST_AUTO_TEST_CASE ( testRemoveDuplication )
   ModelSessionIdListPtr msl(new ModelSessionIdList);
 
   ModelSessionId m1(bs1, 1, 1);
-  ModelSessionId m2(bs2, 2, 2);
-  ModelSessionId m3(bs3, 3, 3);
-  ModelSessionId m4(bs4, 4, 4);
-  ModelSessionId m5(bs5, 5, 5);
-  ModelSessionId m6(bs6, 6, 6);
+  ModelSessionId m2(bs2, 1, 1);
+  ModelSessionId m3(bs3, 1, 1);
+  ModelSessionId m4(bs4, 1, 1);
+  ModelSessionId m5(bs5, 1, 1);
+  ModelSessionId m6(bs6, 1, 1);
 
   msl->push_back(m1);
   msl->push_back(m2);
