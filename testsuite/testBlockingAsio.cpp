@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE ( testBlockingAsio )
 {
   try
     {
-      std::size_t server_port = 5000;
+      std::size_t server_port = 10000;
       boost::thread server_thread(boost::bind(run_server, server_port));
 
       boost::posix_time::milliseconds n(1000);
