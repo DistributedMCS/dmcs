@@ -1,3 +1,7 @@
+2011-09-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Makefile.am (SUBDIRS): Remove duplicate mcs.
+
 2011-09-08  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/JoinThread.cpp: Put path in debugging information.
