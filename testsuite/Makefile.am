@@ -43,7 +43,8 @@ TESTS = \
 	testRemoveDuplication \
 	testDispatcher \
 	testBlockingAsio \
-	testSATModelOrder
+	testSATModelOrder \
+	testPool
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -76,7 +77,8 @@ check_PROGRAMS = \
 	testRemoveDuplication \
 	testDispatcher \
 	testBlockingAsio \
-	testSATModelOrder
+	testSATModelOrder \
+	testPool
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -189,3 +191,8 @@ testSATModelOrder_LDADD = \
 	$(top_builddir)/src/solver/libsolver.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a
+
+
+testPool_SOURCES = testPool.cpp
+testPool_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a

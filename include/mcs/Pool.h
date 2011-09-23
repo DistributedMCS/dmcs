@@ -30,6 +30,7 @@
 #ifndef POOL_H
 #define POOL_H
 
+#include <iostream>
 #include <vector>
 
 #include <boost/thread/locks.hpp>
@@ -38,21 +39,19 @@
 
 namespace dmcs {
 
-template <typename DataType>
 class Pool
 {
 public:
-  Pool(std::size_t limit)
-    : n(limit)
+  Pool(std::size_t limit, std::size_t ds)
+    : n(limit), back_slot(n), datasize(ds)
   {
-    data = malloc(n * sizeof(DataType));
-    free_slots = malloc(n * sizeof(DataType*));
-    back_slot = (DataType*) free_slots;
+    data = ::malloc(n * datasize);
+    free_slots = (void**)::malloc(n * sizeof(std::size_t));
 
     // initialize free_slots
     for (std::size_t i = 0; i < n; ++i)
       {
-	*(back_slot++) = data + i * sizeof(DataType);
+	free_slots[i] = data + i * datasize;
       }
   }
 
@@ -61,44 +60,47 @@ public:
   ~Pool()
   {
     back_slot = 0;
-    free(free_slots);
-    free(data);
+    ::free(free_slots);
+    ::free(data);
   }
 
 
 
-  DataType* malloc()
+  void* malloc()
   {
     boost::mutex::scoped_lock lock(mtx);
 
-    if (back_slot < free_slots)
+    if (back_slot == 0)
       {
 	cond.wait(lock);
       }
 
-    DataType* slot = *(back_slot--);
+    void* slot = free_slots[--back_slot];
 
     return slot;
   }
 
 
-  void free(DataType* slot)
+
+  void free(void* slot)
   {
     boost::mutex::scoped_lock lock(mtx);
     
-    assert ( slot >= data && slot <= ((n-1) * sizeof(DataType) + data) );
-    assert ( back_slot <= (n-1) * sizeof(DataType*) + free_slots );
+    //assert ( slot >= data && slot <= ((n-1) * datasize + data) );
+    //assert ( back_slot <= (n-1) * datasize + free_slots );
 
-    *(++back_slot) = slot;
+    free_slots[back_slot++] = slot;
 
     cond.notify_one();
   }
 
 private:
   std::size_t n;         // fixed size of the pool
-  DataType data[];       // the array where we store data
-  DataType** free_slots; // the list of free slots
-  DataType* back_slot;   // point to the last available free slot
+  std::size_t back_slot;
+  std::size_t datasize;
+
+  void*  data;       // the array where we store data
+  void** free_slots; // the list of free slots
 
   boost::mutex mtx;
   boost::condition_variable cond;
