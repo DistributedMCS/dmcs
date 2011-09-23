@@ -30,6 +30,8 @@
 #ifndef POOL_H
 #define POOL_H
 
+#include <list>
+
 #include <boost/thread/locks.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/mutex.hpp>
@@ -40,14 +42,13 @@ template <typename DataType>
 class Pool
 {
 public:
-  Pool(int limit)
-    : n(limit), free_point(0)
+  Pool(std::size_t limit)
+    : n(limit)
   {
     data = (DataType*)malloc(sizeof(DataType)*n);
-    used = (bool*)malloc(sizeof(bool)*n);
     for (std::size_t i = 0; i < n; ++i)
       {
-	used[i] = false;
+	free_slots.push_back(data[i]);
       }
   }
 
@@ -55,64 +56,42 @@ public:
 
   ~Pool()
   {
-    free(used);
+    free_slots.clear();
     free(data);
   }
 
 
 
-  int malloc()
+  DataType* malloc()
   {
     boost::mutex::scoped_lock lock(mtx);
 
-    if (free_point >= n)
+    if (free_slots.empty())
       {
 	cond.wait(lock);
       }
 
-    int latest_free_point = free_point;
+    DataType* slot = *free_slots.begin();
+    free_slots.pop_front();
 
-    while (free_point < n && !used[free_point])
-      {
-	++free_point;
-      }
-
-    used[latest_free_point] = true;
-
-    return latest_free_point;
+    return slot;
   }
 
 
 
-  DataType* slot(int index)
-  {
-    assert (index >= 0 && index < n);
-    return data[index];
-  }
-
-
-
-  void free(int index)
+  void free(DataType* slot)
   {
     boost::mutex::scoped_lock lock(mtx);
-
-    assert (index >= 0 && index < n && used[index]);
     
-    used[index] = false;
-
-    if (index < free_point)
-      {
-	free_point = index;
-      }
+    free_slots.push_front(slot);
 
     cond.notify_one();
   }
 
 private:
-  int n;           // fixed size of the pool
-  int free_point;  // the lowest point in the pool that is free
-  DataType* data;  // the array where we store data
-  bool*     used;  // to mark whether a chunk of memory is already in used
+  std::size_t n;                    // fixed size of the pool
+  DataType* data;                   // the array where we store data
+  std::list<DataType*> free_slots;
 
   boost::mutex mtx;
   boost::condition_variable cond;
