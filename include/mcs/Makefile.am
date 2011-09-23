@@ -4,6 +4,7 @@ AUTOMAKE_OPTIONS = gnu
 noinst_HEADERS =  \
 		BeliefState.h \
 		HashedBiMap.h \
+		Pool.h \
 		ProxySignatureByLocal.h \
 		ResourceManager.h \
 		Rule.h \
