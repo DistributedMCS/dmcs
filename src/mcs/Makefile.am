@@ -30,5 +30,6 @@ noinst_LIBRARIES = libmcs.a
 
 # the mcs library
 libmcs_a_SOURCES = \
+		Pool.cpp \
 	  	ResourceManager.cpp
 
