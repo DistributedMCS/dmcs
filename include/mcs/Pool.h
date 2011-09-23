@@ -30,7 +30,7 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include <list>
+#include <vector>
 
 #include <boost/thread/locks.hpp>
 #include <boost/thread/condition_variable.hpp>
@@ -45,10 +45,14 @@ public:
   Pool(std::size_t limit)
     : n(limit)
   {
-    data = (DataType*)malloc(sizeof(DataType)*n);
+    data = malloc(n * sizeof(DataType));
+    free_slots = malloc(n * sizeof(DataType*));
+    back_slot = (DataType*) free_slots;
+
+    // initialize free_slots
     for (std::size_t i = 0; i < n; ++i)
       {
-	free_slots.push_back(data[i]);
+	*(back_slot++) = data + i * sizeof(DataType);
       }
   }
 
@@ -56,7 +60,8 @@ public:
 
   ~Pool()
   {
-    free_slots.clear();
+    back_slot = 0;
+    free(free_slots);
     free(data);
   }
 
@@ -66,32 +71,34 @@ public:
   {
     boost::mutex::scoped_lock lock(mtx);
 
-    if (free_slots.empty())
+    if (back_slot < free_slots)
       {
 	cond.wait(lock);
       }
 
-    DataType* slot = *free_slots.begin();
-    free_slots.pop_front();
+    DataType* slot = *(back_slot--);
 
     return slot;
   }
-
 
 
   void free(DataType* slot)
   {
     boost::mutex::scoped_lock lock(mtx);
     
-    free_slots.push_front(slot);
+    assert ( slot >= data && slot <= ((n-1) * sizeof(DataType) + data) );
+    assert ( back_slot <= (n-1) * sizeof(DataType*) + free_slots );
+
+    *(++back_slot) = slot;
 
     cond.notify_one();
   }
 
 private:
-  std::size_t n;                    // fixed size of the pool
-  DataType* data;                   // the array where we store data
-  std::list<DataType*> free_slots;
+  std::size_t n;         // fixed size of the pool
+  DataType data[];       // the array where we store data
+  DataType** free_slots; // the list of free slots
+  DataType* back_slot;   // point to the last available free slot
 
   boost::mutex mtx;
   boost::condition_variable cond;
