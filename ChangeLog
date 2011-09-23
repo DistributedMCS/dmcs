@@ -1,3 +1,7 @@
+2011-09-23  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+	* include/mcs/Pool.h: New file.
+	* src/mcs/Pool.cpp: Likewise.
+
 2011-09-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/Makefile.am (SUBDIRS): Remove duplicate mcs.
