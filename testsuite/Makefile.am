@@ -195,4 +195,5 @@ testSATModelOrder_LDADD = \
 
 testPool_SOURCES = testPool.cpp
 testPool_LDADD = \
-	$(top_builddir)/src/mcs/libmcs.a
+	$(top_builddir)/src/mcs/libmcs.a \
+	$(top_builddir)/src/network/libnetwork.a
