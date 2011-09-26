@@ -51,7 +51,9 @@ public:
     // initialize free_slots
     for (std::size_t i = 0; i < n; ++i)
       {
-	free_slots[i] = data + i * datasize;
+	free_slots[i] =
+          reinterpret_cast<void*>(
+              reinterpret_cast<uint8_t*>(data) + i * datasize);
       }
   }
 
@@ -110,6 +112,7 @@ private:
 
 #endif // POOL_H
 
+// vim:ts=8:tw=100:
 // Local Variables:
 // mode: C++
 // End:
