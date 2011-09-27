@@ -39,6 +39,7 @@
 #include <csignal>
 #include <cstring>
 #include <cstdlib>
+#include <stdexcept>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -48,6 +49,53 @@
 #include <map>
 
 using namespace dmcs;
+
+namespace
+{
+
+inline int safe_open(const char *pathname, int flags)
+{
+  int countdown = 100;
+  int result;
+  while( countdown > 0 )
+  {
+    result = ::open(pathname, flags);
+    if( result != -1 )
+    {
+      return result;
+    }
+    else
+    {
+      if( errno != EINTR )
+        return result;
+    }
+    countdown--;
+  }
+  throw std::runtime_error("open() system call interrupted too often");
+}
+
+inline int safe_close(int fd)
+{
+  int countdown = 100;
+  int result;
+  while( countdown > 0 )
+  {
+    result = ::close(fd);
+    if( result != -1 )
+    {
+      return result;
+    }
+    else
+    {
+      if( errno != EINTR )
+        return result;
+    }
+    countdown--;
+  }
+  throw std::runtime_error("close() system call interrupted too often");
+}
+
+}
 
 namespace dmcs {
 
@@ -256,9 +304,10 @@ ProcessBuf::open(const std::vector<std::string>& av)
 
 	// open writing end of fifo
 
-	if ((fifo = ::open(fifoname.c_str(), O_WRONLY)) < 0)
+        fifo = safe_open(fifoname.c_str(), O_WRONLY);
+	if ( fifo < 0 )
 	  {
-	    ::perror("open");
+	    ::perror("safe_open of writing fifo end");
 	    return -1;
 	  }
 
@@ -283,9 +332,9 @@ ProcessBuf::open(const std::vector<std::string>& av)
 	  }
 	
 	// stdout and stdin is redirected, close unneeded filedescr.
-	::close(fifo);
- 	::close(inpipes[0]);
-	::close(inpipes[1]);
+	safe_close(fifo);
+ 	safe_close(inpipes[0]);
+	safe_close(inpipes[1]);
 	
 	// execute command, should not return
 	::execvp(*argv, argv);
@@ -297,17 +346,17 @@ ProcessBuf::open(const std::vector<std::string>& av)
 
 
     default: // parent
-
       // open reading end of fifo
 
-      if ((fifo = ::open(fifoname.c_str(), O_RDONLY)) < 0)
-	{
-	  ::perror("open");
-	  return -1;
-	}
+      fifo = safe_open(fifoname.c_str(), O_RDONLY);
+      if (fifo < 0)
+        {
+          ::perror("safe_open of reading fifo end");
+          return -1;
+        }
 
       // close reading end of the input pipe
-      ::close(inpipes[0]);
+      safe_close(inpipes[0]);
       inpipes[0] = -1;
       
       break;
@@ -325,7 +374,7 @@ ProcessBuf::endoffile()
 
   if (inpipes[1] != -1)
     {
-      int ret = ::close(inpipes[1]); // send EOF to stdin of child process
+      int ret = safe_close(inpipes[1]); // send EOF to stdin of child process
       inpipes[1] = -1;
 
       if (ret < 0) perror("close()");
@@ -518,6 +567,7 @@ ProcessBuf::sync()
   return 0;
 }
 
+// vim:ts=8:
 // Local Variables:
 // mode: C++
 // End:
