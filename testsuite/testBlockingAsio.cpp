@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE ( testBlockingAsio )
       std::size_t server_port = 10000;
       boost::thread server_thread(boost::bind(run_server, server_port));
 
-      boost::posix_time::milliseconds n(1000);
+      boost::posix_time::milliseconds n(3000);
       boost::this_thread::sleep(n);
 
       std::stringstream str_server_port;
