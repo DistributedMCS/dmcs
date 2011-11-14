@@ -68,6 +68,7 @@ ResourceManager::requestWorker(std::size_t path, std::size_t k1, std::size_t k2)
   boost::mutex::scoped_lock lock(request_mtx);
 
   // if there is a worker that caches models from k1 to k2 then returns it
+  DMCS_LOG_TRACE("Find a free worker that caches (" << k1 << ", " << k2 << ")");
   for (WorkerVec::const_iterator it = workers->begin(); it != workers->end(); ++it)
     {
       WorkerPtr wk = *it;

@@ -105,6 +105,9 @@ private:
 		     SignatureByCtx::const_iterator low, 
 		     SignatureByCtx::const_iterator up);
 
+  void
+  return_cache();
+
 private:
   bool is_leaf;
   std::size_t invoker;
@@ -113,6 +116,7 @@ private:
   std::size_t my_session_id;
   std::size_t k1;
   std::size_t k2;
+  bool has_cache;
   std::size_t count_models;
   const TheoryPtr theory;
   const SignaturePtr sig;

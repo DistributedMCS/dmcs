@@ -60,6 +60,9 @@ RelSatSolver::RelSatSolver(bool il,
   : is_leaf(il),
     my_id(mid),
     my_session_id(msid),
+    k1(0),
+    k2(0),
+    has_cache(false),
     theory(t), 
     sig(ls),
     c2o(co),
@@ -239,9 +242,23 @@ RelSatSolver::refresh()
 
 
 
+
+void
+RelSatSolver::return_cache()
+{
+}
+
+
+
 void
 RelSatSolver::solve(std::size_t iv, std::size_t pa, std::size_t session_id, std::size_t k_one, std::size_t k_two)
 {
+  if ((k1 == k_one) && (k2 == k_two) && has_cache)
+    {
+      return_cache();
+      return;
+    }
+
   k1 = k_one;
   k2 = k_two;
   count_models = 0;
