@@ -31,8 +31,7 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
-#include <boost/shared_ptr.hpp>
-#include "dmcs/Instantiator.h"
+#include "dmcs/AbstractContext.h"
 #include "network/ConcurrentMessageQueue.h"
 
 namespace dmcs {
@@ -61,8 +60,6 @@ private:
   ConcurrentMessageQueue* in_queue;
   ConcurrentMessageQueue* out_queue;
 };
-
-typedef boost::shared_ptr<Evaluator> EvaluatorPtr;
 
 } // namespace dmcs
 

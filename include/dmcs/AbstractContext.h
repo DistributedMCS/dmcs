@@ -18,59 +18,34 @@
  */
 
 /**
- * @file   Instantitator.h
+ * @file   AbstractContext.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Mon Nov 28 2011 17:02
+ * @date   Tue Nov 16:37:24 29 2011
  *
  * @brief 
  *
  *
  */
 
-#ifndef INSTANTIATOR_H
-#define INSTANTIATOR_H
+#ifndef ABSTRACT_CONTEXT_H
+#define ABSTRACT_CONTEXT_H
 
-#include <list>
-
-#include "AbstractContext.h"
-#include "dmcs/Engine.h"
-#include "dmcs/Evaluator.h"
-
-namespace dmcs {
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 class Engine;
+class Instantiator;
 class Evaluator;
 
-class Instantiator
-{
-public:
-  static InstantiatorPtr
-  create(const std::string& kbn, const EngineWPtr& e);
+typedef boost::share_ptr<Engine> EnginePtr;
+typedef boost::weak_ptr<Engine> EngineWPtr;
 
-  ~Instantiator();
+typedef boost::shared_ptr<Instantiator> InstantiatorPtr;
+typedef boost::weak_ptr<Instantiator> InstantiatorWPtr;
 
-  EvaluatorPtr
-  createEvaluator();
+typedef boost::shared_ptr<Evaluator> EvaluatorPtr;
 
-  void
-  removeEvaluator(EvaluatorPtr eval);
-
-private:
-  Instantiator(const std::string& kbn, const EngineWPtr& e);
-
-  void
-  parseKB();
-
-private:
-  std::string kbname;
-  TheoryPtr theory;
-  EngineWPtr engine;
-  std::list<EvaluatorPtr> evaluators;
-};
-
-} // namespace dmcs
-
-#endif // INSTANTIATOR_H
+#endif // ABSTRACT_CONTEXT_H
 
 // Local Variables:
 // mode: C++

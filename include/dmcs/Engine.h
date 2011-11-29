@@ -32,18 +32,17 @@
 #define ENGINE_H
 
 #include <list>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+
+#include "dmcs/AbstractContext.h"
 #include "dmcs/Instantiator.h"
 
 namespace dmcs {
 
-class Instantiator;
-
 class Engine
 {
 public:
-  Engine();
+  static EnginePtr
+  create();
 
   ~Engine();
 
@@ -54,11 +53,11 @@ public:
   removeInstantiator(InstantiatorPtr inst);
 
 private:
+  Engine();
+
   std::list<InstantiatorPtr> instantiators;
 };
 
-typedef boost::share_ptr<Engine> EnginePtr;
-typedef boost::weak_ptr<Engine> EngineWPtr;
 
 } // namespace dmcs
 
