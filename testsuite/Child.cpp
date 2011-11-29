@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Child.h"
 
 Child::Child(const ParentWPtr& p, const std::string n)

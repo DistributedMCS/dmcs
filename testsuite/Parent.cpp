@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Parent.h"
 
 Parent::Parent(const std::string n)

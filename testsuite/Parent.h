@@ -32,6 +32,4 @@ private:
   std::string name;
 };
 
-
-
 #endif // PARENT_H

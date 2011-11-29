@@ -21,7 +21,7 @@ private:
   std::string name;
 };
 
-#endif CHILD_H
+#endif // CHILD_H
 
 // Local Variables:
 // mode: C++
