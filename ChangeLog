@@ -1,3 +1,19 @@
+2011-11-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testWeakPointer.cpp: New file.
+	* testsuite/Family.h: Likewise.
+	* testsuite/Parent.h: Likewise.
+	* testsuite/Parent.cpp: Likewise.
+	* testsuite/Child.h: Likewise.
+	* testsuite/Child.cpp: Likewise.
+	* testsuite/Makefile.am: Add testWeakPointer.
+
+2011-11-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/Engine.h: New file.
+	* include/dmcs/Instantiator.h: Likewise.
+	* include/dmcs/Evaluator.h: Likewise.
+
 2011-09-27  Peter Schueller  <ps@kr.tuwien.ac.at>
 
 	* src/process/ProcessBuf.cpp: Added safe_close() and safe_open()
