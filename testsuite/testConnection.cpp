@@ -160,3 +160,7 @@ BOOST_AUTO_TEST_CASE ( testClient )
 
   t->join();
 }
+
+// Local Variables:
+// mode: C++
+// End:

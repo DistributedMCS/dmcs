@@ -44,7 +44,8 @@ TESTS = \
 	testDispatcher \
 	testBlockingAsio \
 	testSATModelOrder \
-	testPool
+	testPool \
+	testWeakPointer
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -78,7 +79,8 @@ check_PROGRAMS = \
 	testDispatcher \
 	testBlockingAsio \
 	testSATModelOrder \
-	testPool
+	testPool \
+	testWeakPointer
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -197,3 +199,7 @@ testPool_SOURCES = testPool.cpp
 testPool_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/network/libnetwork.a
+
+testWeakPointer_SOURCES = Child.cpp \
+	Parent.cpp \
+	testWeakPointer.cpp
