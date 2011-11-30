@@ -53,8 +53,10 @@ public:
 	virtual EvaluatorPtr
   createEvaluator() = 0;
 
+	// call this with a weak pointer to unregister the instantiator
+	// (see comment in Engine.h for why this must be a weak pointer)
 	virtual void
-  removeEvaluator(EvaluatorPtr eval);
+  removeEvaluator(EvaluatorWPtr eval);
 
 protected:
   Instantiator(const std::string& kbn, const EngineWPtr& e);
