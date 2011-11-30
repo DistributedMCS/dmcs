@@ -41,21 +41,34 @@ class Instantiator;
 class Evaluator
 {
 public:
-  Evaluator(const TheoryPtr& t, const InstantiatorWPtr& inst);
+	// theory is accessed via inst
+	// (derived classes can cache it here for better performance)
+  Evaluator(/*const TheoryPtr& t, */const InstantiatorWPtr& inst);
 
+	virtual
   ~Evaluator();
 
+	// can be nonvirtual
+	// should never be overridden (final)
   ConcurrentMessageQueue*
   getInQueue();
 
+	// can be nonvirtual
+	// should never be overridden (final)
   ConcurrentMessageQueue*
   getOutQueue();
 
-  void
-  solve();
+	// this starts the evaluator thread
+	// 
+	// perhaps (after implementing 2 or 3 different contexts)
+	// we will do the thread here and make some other low-level functionality virtual
+	// (I would let this be here for now, as we don't have much experience with
+	// implementing such contexts yet)
+	virtual void
+  solve() = 0;
 
 private:
-  TheoryPtr theory;
+  //TheoryPtr theory; see Instantiator.h why this should not be specified here
   InstantiatorWPtr instantiator;
   ConcurrentMessageQueue* in_queue;
   ConcurrentMessageQueue* out_queue;

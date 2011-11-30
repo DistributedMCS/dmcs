@@ -45,26 +45,35 @@ class Instantiator
 {
 public:
   static InstantiatorPtr
-  create(const std::string& kbn, const EngineWPtr& e);
+  create(const std::string& kbspec, const EngineWPtr& e);
 
-  ~Instantiator();
+	virtual
+	~Instantiator();
 
-  EvaluatorPtr
-  createEvaluator();
+	virtual EvaluatorPtr
+  createEvaluator() = 0;
 
-  void
+	virtual void
   removeEvaluator(EvaluatorPtr eval);
 
-private:
+protected:
   Instantiator(const std::string& kbn, const EngineWPtr& e);
 
-  void
-  parseKB();
+	// let this unspecified here (see below)
+  //void
+  //parseKB();
 
 private:
-  std::string kbname;
-  TheoryPtr theory;
+	// knowledge base specifier (can be filename or sql database connection string or rdf tuplestore location IRI)
+  std::string kbspec;
+
+	//TheoryPtr theory; // remove -> we can let this unspecified here, derived classes
+	//may have various methods to represent this, think of an sql context, it will have
+	//no theory, kbspec will be a connection string, the theory will be in the database
+	//running on some host
+
   EngineWPtr engine;
+
   std::list<EvaluatorPtr> evaluators;
 };
 
