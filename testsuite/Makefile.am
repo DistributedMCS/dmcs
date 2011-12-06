@@ -45,7 +45,8 @@ TESTS = \
 	testBlockingAsio \
 	testSATModelOrder \
 	testPool \
-	testWeakPointer
+	testWeakPointer \
+	testPolymorphismSharedPtr
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -80,7 +81,8 @@ check_PROGRAMS = \
 	testBlockingAsio \
 	testSATModelOrder \
 	testPool \
-	testWeakPointer
+	testWeakPointer \
+	testPolymorphismSharedPtr
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -203,3 +205,5 @@ testPool_LDADD = \
 testWeakPointer_SOURCES = Child.cpp \
 	Parent.cpp \
 	testWeakPointer.cpp
+
+testPolymorphismSharedPtr_SOURCES = testPolymorphismSharedPtr.cpp 
