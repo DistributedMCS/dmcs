@@ -1,3 +1,10 @@
+2011-12-06  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/solver/BaseSolverState.h: New file.
+	* include/solver/InputMessage.h: Likewise.
+	* include/solver/OutputMessage.h: Likewise.
+	* include/solver/Makefile.am: Add new header files.
+
 2011-11-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testWeakPointer.cpp: New file.
