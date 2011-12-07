@@ -1,3 +1,9 @@
+2011-12-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/Atoms.h: New file.
+	* include/mcs/ID.h: Likewise.
+	* include/mcs/Printhelpers.h: Likewise.
+
 2011-12-06  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/solver/BaseSolverState.h: New file.
