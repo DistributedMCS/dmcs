@@ -6,8 +6,6 @@ noinst_HEADERS =  \
 		BaseSolverState.h \
 		ChoicePoint.h \
 		Conflict.h \
-#		InputMessage.h \
-		OutputMessage.h 
 		SatSolver.h \
 		SatSolver.tcc \
 		SatSolverFactory.h \

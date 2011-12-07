@@ -1,5 +1,8 @@
 2011-12-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/solver/Makefile.am: Remove comments that cause
+	compiler errors.
+
 	* include/mcs/Atoms.h: New file.
 	* include/mcs/ID.h: Likewise.
 	* include/mcs/Printhelpers.h: Likewise.
