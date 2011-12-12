@@ -23,6 +23,8 @@
 	* testsuite/testTables.cpp: Likewise.
 	* src/mcs/ID.cpp: Likewise.
 	* src/mcs/Logger.cpp: Likewise.
+	* src/mcs/Belief.cpp: Likewise.
+	* include/mcs/BridgeRule.h: Likewise.
 
 2011-12-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
