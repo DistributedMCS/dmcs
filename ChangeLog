@@ -1,3 +1,12 @@
+2011-12-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/Belief.h: New file.
+	* include/mcs/BeliefTable.h: Likewise.
+	* include/mcs/Table.h: Likewise.
+	* include/mcs/Logger.h: Likewise.
+	* testsuite/testTables.cpp: Likewise.
+	* src/mcs/ID.cpp: Likewise.
+
 2011-12-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/solver/Makefile.am: Remove comments that cause
