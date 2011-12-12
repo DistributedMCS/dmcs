@@ -53,13 +53,14 @@ std::ostream& ID::print(std::ostream& o) const
   if( !!(kind & NAF_MASK) )
     o << " naf";
 
-  const unsigned MAINKIND_MAX = 4;
+  const unsigned MAINKIND_MAX = 5;
 
   const char* mainkinds[MAINKIND_MAX] = {
     " atom",
     " term",
     " literal",
     " rule",
+    " belief"
   };
 
   const unsigned mainkind = (kind & MAINKIND_MASK) >> MAINKIND_SHIFT;
@@ -72,7 +73,8 @@ std::ostream& ID::print(std::ostream& o) const
     { " ordinary_ground", " ordinary_nonground", " builtin",         " aggregate", "", "", " external", "", "", "", " module"},
     { " constant",        " integer",            " variable",        " builtin",   " predicate", "", ""          },
     { " ordinary_ground", " ordinary_nonground", " builtin",         " aggregate", "", "", " external", "", "", "", " module"},
-    { " regular",         " constraint",         " weak_constraint", " bridge_rule",           "", "", ""          }
+    { " regular",         " constraint",         " weak_constraint", " bridge_rule",           "", "", ""          },
+    { "", "", "", "", "", "", "", "", "" }
   };
 
   const unsigned subkind = (kind & SUBKIND_MASK) >> SUBKIND_SHIFT;
@@ -184,3 +186,7 @@ const char* ID::stringFromBuiltinTerm(IDAddress addr)
 }
 
 } // namespace dmcs
+
+// Local Variables:
+// mode: C++
+// End:

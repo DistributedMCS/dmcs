@@ -1,11 +1,28 @@
 2011-12-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/testTables.cpp: Finalize testBeliefTable.
+
+	* testsuite/Makefile.am: Add testTables.
+
+	* src/mcs/Makefile.am: Add new cpp files.
+
+	* src/mcs/ID.cpp: Update print() for belief.
+
+	* include/mcs/Makefile.am: Add new header files.
+
+	* include/mcs/ID.h: Add Belief related stuff.
+
+	* include/mcs/Belief.h:	Change to store kind and text.
+	* include/mcs/BeliefTable.h: Likewise.
+
 	* include/mcs/Belief.h: New file.
+
 	* include/mcs/BeliefTable.h: Likewise.
 	* include/mcs/Table.h: Likewise.
 	* include/mcs/Logger.h: Likewise.
 	* testsuite/testTables.cpp: Likewise.
 	* src/mcs/ID.cpp: Likewise.
+	* src/mcs/Logger.cpp: Likewise.
 
 2011-12-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 

@@ -31,6 +31,9 @@
 #ifndef ID_H
 #define ID_H
 
+#include <boost/cstdint.hpp>
+#include "mcs/Printhelpers.h"
+
 namespace dmcs {
 
 typedef uint32_t IDKind;
@@ -60,12 +63,13 @@ struct ID : private ostream_printable<ID>
   static const uint8_t SUBKIND_SHIFT =         24;
   static const IDKind PROPERTY_MASK =          0x00FF0000;
   static const uint8_t PROPERTY_SHIFT =        16;
-  static const IDKind UNUSED_MASK =            0x0000FFFF;
+  static const IDKind CONTEXT_ID_MASK =        0x0000FFFF;
   
   static const IDKind MAINKIND_ATOM =          0x00000000;
   static const IDKind MAINKIND_TERM =          0x10000000;
   static const IDKind MAINKIND_LITERAL =       0x20000000;
   static const IDKind MAINKIND_RULE =          0x30000000;
+  static const IDKind MAINKIND_BELIEF =        0x40000000;
   
   static const IDKind SUBKIND_TERM_CONSTANT =  0x00000000;
   static const IDKind SUBKIND_TERM_INTEGER =   0x01000000;
@@ -159,6 +163,11 @@ struct ID : private ostream_printable<ID>
     return ID((literal.kind & (~(NAF_MASK|MAINKIND_MASK))) | MAINKIND_ATOM, literal.address); 
   }
 
+  static inline ID beliefFromCtxIdAddress(uint16_t ctx_id, IDAddress address)
+  {
+    return ID(ID::MAINKIND_BELIEF | ctx_id, address);
+  }
+
   inline bool isTerm() const          
   { 
     return (kind & MAINKIND_MASK) == MAINKIND_TERM; 
@@ -248,6 +257,11 @@ struct ID : private ostream_printable<ID>
     return (kind & MAINKIND_MASK) == MAINKIND_LITERAL; 
   }
 
+  inline bool isBelief() const
+  {
+    return (kind & MAINKIND_MASK) == MAINKIND_BELIEF;
+  }
+
   inline bool isNaf() const
   { 
     return (kind & NAF_MASK) == NAF_MASK; 
@@ -309,6 +323,13 @@ struct ID : private ostream_printable<ID>
   { 
     assert(isVariableTerm()); 
     return (kind & PROPERTY_VAR_ANONYMOUS) == PROPERTY_VAR_ANONYMOUS; 
+  }
+
+  inline std::size_t
+  contextID()
+  {
+    assert ( isBelief() );
+    return (kind & CONTEXT_ID_MASK);
   }
 
   inline bool operator==(const ID& id2) const { return kind == id2.kind && address == id2.address; }

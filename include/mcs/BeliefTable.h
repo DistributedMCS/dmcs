@@ -109,7 +109,7 @@ ID BeliefTable::getIDByString(const std::string& str) const throw()
     {
       const AddressIndex& aidx = container.get<impl::AddressTag>();
       return ID(
-		it->id.kind, // kind
+		it->kind, // kind
 		container.project<impl::AddressTag>(it) - aidx.begin() // address
 		);
     }
@@ -131,7 +131,7 @@ ID BeliefTable::storeAndGetID(const Belief& b) throw()
   (void)success;
   assert(success);
   
-  return ID(b.id.kind, // kind
+  return ID(b.kind, // kind
 	    container.project<impl::AddressTag>(it) - idx.begin() // address
 	    );
 }

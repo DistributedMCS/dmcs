@@ -18,37 +18,48 @@
  */
 
 /**
- * @file   Belief.h
- * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Mon Dec  12 10:15:21 2011
+ * @file   testTables.cpp
+ * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
+ * @date   Sun Nov  8 11:03:46 2009
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef BELIEF_H
-#define BELIEF_H
+/**
+ * @file   Logger.cpp
+ * @author Peter Schueller <ps@kr.tuwien.ac.at>
+ * 
+ * @brief  Implementation of logging facility.
+ */
 
-#include "mcs/ID.h"
+#include "mcs/Logger.h"
 
-namespace dmcs {
-  
-struct Belief : private ostream_printable<Belief>
+namespace
 {
-  IDKind kind;
-  std::string text;
+  Logger* instance = 0;
+}
 
-  Belief(uint16_t ctx_id, const std::string& text)
-    : kind(ID::MAINKIND_BELIEF | ctx_id), text(text)
-  { }
+Logger& Logger::Instance()
+{
+  if( instance == 0 )
+    instance = new Logger();
+  return *instance;
+}
 
-  std::ostream& print(std::ostream& os) const;
-};
+void Logger::setPrintLevels(Levels levels)
+{
+  if( levels & ERROR != ERROR )
+    out << "Logger warning: deactivated ERROR level" << std::endl;
+  printlevels = levels;
+}
 
-} // namespace dmcs
-
-#endif // BELIEF_H
+void Logger::setPrintLevelWidth(int width)
+{
+  assert(width >= 0 );
+  levelwidth = width;
+}
 
 // Local Variables:
 // mode: C++

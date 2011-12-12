@@ -46,7 +46,8 @@ TESTS = \
 	testSATModelOrder \
 	testPool \
 	testWeakPointer \
-	testPolymorphismSharedPtr
+	testPolymorphismSharedPtr \
+	testTables
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -82,7 +83,8 @@ check_PROGRAMS = \
 	testSATModelOrder \
 	testPool \
 	testWeakPointer \
-	testPolymorphismSharedPtr
+	testPolymorphismSharedPtr \
+	testTables
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -207,3 +209,8 @@ testWeakPointer_SOURCES = Child.cpp \
 	testWeakPointer.cpp
 
 testPolymorphismSharedPtr_SOURCES = testPolymorphismSharedPtr.cpp 
+
+testTables_SOURCES = testTables.cpp
+testTables_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a
+

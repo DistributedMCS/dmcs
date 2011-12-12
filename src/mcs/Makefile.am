@@ -30,6 +30,8 @@ noinst_LIBRARIES = libmcs.a
 
 # the mcs library
 libmcs_a_SOURCES = \
+		Belief.cpp \
+		ID.cpp \
+		Logger.cpp \
 		Pool.cpp \
 	  	ResourceManager.cpp
-
