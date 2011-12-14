@@ -1,8 +1,11 @@
 #include "mcs/BeliefState.h"
+#include "mcs/NewBeliefState.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testBeliefState"
 #include <boost/test/unit_test.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/bind.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -44,4 +47,72 @@ BOOST_AUTO_TEST_CASE ( testBeliefState )
   BOOST_TEST_MESSAGE("bs5  = " << bs5);
   bool b_equal = (*bs4 == *bs5);
   BOOST_CHECK_EQUAL(b_equal, true);
+}
+
+
+
+/****************************************************************************************/
+
+void
+run_server(std::size_t server_port, NewBeliefState*& bs_received)
+{
+  std::cerr << "In server thread!" << std::endl;
+  boost::asio::io_service io_service_server;
+  boost::asio::ip::tcp::endpoint endpoint_server(boost::asio::ip::tcp::v4(), server_port);
+  
+  SimpleServer s(io_service_server, endpoint_server);
+  io_service_server.run();
+
+  bs_received = s.bs_received();
+}
+
+
+
+void
+run_client(std::string server_port, NewBeliefState* bs_sent)
+{
+  std::string host_name = "localhost";
+  boost::asio::io_service io_service_client;
+  boost::asio::ip::tcp::resolver resolver(io_service_client);
+  boost::asio::ip::tcp::resolver::query query(host_name, server_port);
+  boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
+  boost::asio::ip::tcp::endpoint endpoint_client = *it;
+
+  SimpleClient c(io_service_client, it, bs_sent);
+  io_service_client.run();
+}
+
+BOOST_AUTO_TEST_CASE ( testSendingBeliefState )
+{
+  try
+    {
+      NewBeliefState* bs_sent;
+      NewBeliefState* bs_received;
+
+      std::size_t server_port = 241181;
+      boost::thread server_thread(boost::bind(run_server, server_port, bs_received));
+
+      boost::posix_time::milliseconds n(3000);
+      boost::this_thread::sleep(n);
+
+      std::stringstream str_server_port;
+      str_server_port << server_port;
+      boost::thread client_thread(boost::bind(run_client, str_server_port.str(), bs_sent));
+      
+      server_thread.join();
+      client_thread.join();
+
+      BOOST_CHECK(bs_sent != bs_received);
+      BOOST_CHECK_EQUAL(*bs_sent, *bs_received);
+
+      delete bs_sent;
+      delete bs_received;
+      bs_sent = 0;
+      bs_received = 0;
+    }
+  catch (std::exception& e)
+    {
+      std::cerr << "Exception in testBlockingAsio: " << e.what() << std::endl;
+      std::exit(1);
+    }
 }
