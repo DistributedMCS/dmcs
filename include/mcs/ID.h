@@ -163,9 +163,22 @@ struct ID : private ostream_printable<ID>
     return ID((literal.kind & (~(NAF_MASK|MAINKIND_MASK))) | MAINKIND_ATOM, literal.address); 
   }
 
-  static inline ID beliefFromCtxIdAddress(uint16_t ctx_id, IDAddress address)
-  {
-    return ID(ID::MAINKIND_BELIEF | ctx_id, address);
+  static inline ID posLiteralFromBelief(ID belief)
+  { 
+    assert(belief.isBelief()); 
+    return ID(belief.kind | MAINKIND_BELIEF, belief.address); 
+  }
+
+  static inline ID nafLiteralFromBelief(ID belief)
+  { 
+    assert(belief.isBelief());
+    return ID(belief.kind | MAINKIND_BELIEF | NAF_MASK, belief.address); 
+  }
+
+  static inline ID literalFromBelief(ID belief, bool naf)
+  { 
+    assert(belief.isBelief()); 
+    return (naf ? nafLiteralFromBelief(belief) : posLiteralFromBelief(belief)); 
   }
 
   inline bool isTerm() const          

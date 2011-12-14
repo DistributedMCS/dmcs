@@ -1,3 +1,14 @@
+2011-12-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/Makefile.am: Add BridgeRule.h and BridgeRuleTable.h
+
+	* testsuite/testTables.cpp: Add testBridgeRuleTable.
+
+	* include/mcs/ID.h: Add methods to create belief literals from
+	ID of beliefs.
+
+	* include/mcs/BridgeRule.h: Add struct BridgeRule.
+
 2011-12-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testTables.cpp: Finalize testBeliefTable.

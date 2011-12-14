@@ -30,15 +30,35 @@
 #ifndef BRIDGE_RULE_H
 #define BRIDGE_RULE_H
 
-#include <iterator>
-#include <list>
-#include <set>
-#include <vector>
-#include <boost/shared_ptr.hpp>
+#include "mcs/ID.h"
 
 namespace dmcs {
 
+struct BridgeRule : private ostream_printable<BridgeRule>
+{
+  IDKind kind;
+  ID head;
+  Tuple body;
 
+  BridgeRule(IDKind kind)
+    : kind(kind), head(), body()
+  { 
+    assert(ID(kind,0).isBridgeRule()); 
+  }
+
+  BridgeRule(IDKind kind, ID head, const Tuple& body)
+    : kind(kind), head(head), body(body)
+  { 
+    assert(ID(kind,0).isBridgeRule()); 
+  }
+
+  std::ostream& 
+  print(std::ostream& o) const
+  { 
+    o << "Rule(" << head << " <- " << printvector(body);
+    return o << ")"; 
+  }
+};
 
 } // namespace dmcs
 

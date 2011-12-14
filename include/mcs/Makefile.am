@@ -5,6 +5,8 @@ noinst_HEADERS =  \
 		Belief.h \
 		BeliefState.h \
 		BeliefTable.h \
+		BridgeRule.h \
+		BridgeRuleTable.h \
 		HashedBiMap.h \
 		ID.h \
 		Logger.h \
