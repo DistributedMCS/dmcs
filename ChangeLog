@@ -1,5 +1,7 @@
 2011-12-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/NewBeliefState.h: New file.
+
 	* include/mcs/Makefile.am: Add BridgeRule.h and BridgeRuleTable.h
 
 	* testsuite/testTables.cpp: Add testBridgeRuleTable.
