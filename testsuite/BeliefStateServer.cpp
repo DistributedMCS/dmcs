@@ -7,7 +7,7 @@ BeliefStateServer::BeliefStateServer(boost::asio::io_service& i,
 				     const boost::asio::ip::tcp::endpoint& endpoint)
   : io_service(i),
     acceptor(io_service, endpoint),
-    bs(0)
+    bs(new dmcs::NewBeliefState(1))
 {
   std::cerr << "SERVER: constructor()" << std::endl;
 
@@ -15,7 +15,7 @@ BeliefStateServer::BeliefStateServer(boost::asio::io_service& i,
   conn_man.insert(my_connection);
   
   acceptor.async_accept(my_connection->socket(),
-			boost::bind(&BeleifStateServer::handle_accept, this,
+			boost::bind(&BeliefStateServer::handle_accept, this,
 				    boost::asio::placeholders::error, my_connection)
 			);
 }
@@ -38,15 +38,14 @@ BeliefStateServer::handle_accept(const boost::system::error_code& e,
       conn_man.insert(new_conn);
 
       acceptor.async_accept(new_conn->socket(),
-			    boost::bind(&BeleifStateServer::handle_accept, this,
+			    boost::bind(&BeliefStateServer::handle_accept, this,
 					boost::asio::placeholders::error, new_conn)
 			    );
 
-      std::cerr << "SERVER: Wait for request from SimpleClient" << std::endl;
-      boost::shared_ptr<std::string> header(new std::string);
+      std::cerr << "SERVER: Wait for a message from BeliefStateClient" << std::endl;
 
       conn->async_read(*bs,
-		       boost::bind(&BeleifStateServer::handle_finalize, this,
+		       boost::bind(&BeliefStateServer::handle_finalize, this,
 				   boost::asio::placeholders::error, conn, bs));
     }
   else
@@ -61,11 +60,14 @@ BeliefStateServer::handle_accept(const boost::system::error_code& e,
 void
 BeliefStateServer::handle_finalize(const boost::system::error_code& e, 
 				   connection_ptr conn,
-				   NewBeliefState* bs)
+				   dmcs::NewBeliefState* bs)
 {
   if (!e)
     {
-      std::cerr << "Got belief state = " << *bs << std::endl;
+      std::cerr << "SERVER: Got belief state = " << bs << ": " << *bs << std::endl;
+      std::cerr << "SERVER: finalizing..." << std::endl;
+      conn->socket().close();
+      acceptor.close();
     }
   else
     {
@@ -75,7 +77,7 @@ BeliefStateServer::handle_finalize(const boost::system::error_code& e,
 }
 
 
-NewBeliefState*
+dmcs::NewBeliefState*
 BeliefStateServer::bs_received()
 {
   return bs;

@@ -16,6 +16,7 @@ noinst_HEADERS =  \
 		Handler.tcc \
 		HandlerThread.h \
 		JoinThread.h \
+		JoinerDispatcher.h \
 		MessagingGateway.h \
 		NeighborOut.h \
 		NeighborThread.h \

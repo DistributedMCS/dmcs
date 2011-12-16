@@ -1,3 +1,18 @@
+2011-12-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBeliefState.cpp: Update testSendingBeliefState.
+	* testsuite/BeliefStateServer.h: Likewise
+	* testsuite/BeliefStateServer.cpp: Likewise.
+	* testsuite/BeliefStateClient.h: Likewise.
+	* testsuite/BeliefStateClient.cpp: Likewise.
+	* testsuite/Makefile.am: Likewise.
+
+	* src/mcs/NewBeliefState.cpp: New file.
+
+	* src/mcs/Makefile.am (libmcs_a_SOURCES): Add NewBeliefState.cpp
+
+	* inclde/mcs/NewBeliefState: Fix load & save methods.
+
 2011-12-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/NewBeliefState.h: New file.

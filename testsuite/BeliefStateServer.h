@@ -1,3 +1,6 @@
+#ifndef BELIEF_STATE_SERVER_H
+#define BELIEF_STATE_SERVER_H
+
 #include "network/connection.hpp"
 #include "mcs/NewBeliefState.h"
 
@@ -14,17 +17,19 @@ public:
   void
   handle_finalize(const boost::system::error_code& e, 
 		  connection_ptr conn,
-		  NewBeliefState* bs);
+		  dmcs::NewBeliefState* bs);
 
-  NewBeliefState*
+  dmcs::NewBeliefState*
   bs_received();
 
 private:
   boost::asio::io_service& io_service;
   boost::asio::ip::tcp::acceptor acceptor;
   std::set<connection_ptr> conn_man;
-  NewBeliefState* bs;
+  dmcs::NewBeliefState* bs;
 };
+
+#endif // BELIEF_STATE_SERVER_H
 
 // Local Variables:
 // mode: C++

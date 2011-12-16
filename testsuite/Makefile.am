@@ -153,7 +153,11 @@ testConnection_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/dmcs/liblog.a
 
-testBeliefState_SOURCES = testBeliefState.cpp
+testBeliefState_SOURCES = BeliefStateServer.cpp \
+	BeliefStateClient.cpp \
+	testBeliefState.cpp
+testBeliefState_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a
 
 testBeliefStateCaching_SOURCES = testBeliefStateCaching.cpp
 

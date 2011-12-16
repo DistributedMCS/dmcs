@@ -1,5 +1,7 @@
 #include "mcs/BeliefState.h"
 #include "mcs/NewBeliefState.h"
+#include "BeliefStateServer.h"
+#include "BeliefStateClient.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testBeliefState"
@@ -54,16 +56,25 @@ BOOST_AUTO_TEST_CASE ( testBeliefState )
 /****************************************************************************************/
 
 void
-run_server(std::size_t server_port, NewBeliefState*& bs_received)
+run_server(std::size_t server_port, NewBeliefState* bs_sent)
 {
-  std::cerr << "In server thread!" << std::endl;
+  std::cerr << "In Server Thread!" << std::endl;
   boost::asio::io_service io_service_server;
   boost::asio::ip::tcp::endpoint endpoint_server(boost::asio::ip::tcp::v4(), server_port);
   
-  SimpleServer s(io_service_server, endpoint_server);
+  BeliefStateServer s(io_service_server, endpoint_server);
   io_service_server.run();
 
-  bs_received = s.bs_received();
+  NewBeliefState* bs_received = s.bs_received();
+  std::cerr << "Server Thread: Got belief state = " << bs_received << ": " << *bs_received << std::endl;
+
+  BOOST_CHECK(bs_sent != bs_received);
+  BOOST_CHECK_EQUAL(*bs_sent, *bs_received);
+  
+  delete bs_sent;
+  delete bs_received;
+  bs_sent = 0;
+  bs_received = 0;
 }
 
 
@@ -71,6 +82,8 @@ run_server(std::size_t server_port, NewBeliefState*& bs_received)
 void
 run_client(std::string server_port, NewBeliefState* bs_sent)
 {
+  std::cerr << "In Client Thread!" << std::endl;
+
   std::string host_name = "localhost";
   boost::asio::io_service io_service_client;
   boost::asio::ip::tcp::resolver resolver(io_service_client);
@@ -78,7 +91,7 @@ run_client(std::string server_port, NewBeliefState* bs_sent)
   boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
   boost::asio::ip::tcp::endpoint endpoint_client = *it;
 
-  SimpleClient c(io_service_client, it, bs_sent);
+  BeliefStateClient c(io_service_client, it, bs_sent);
   io_service_client.run();
 }
 
@@ -86,11 +99,15 @@ BOOST_AUTO_TEST_CASE ( testSendingBeliefState )
 {
   try
     {
-      NewBeliefState* bs_sent;
+      NewBeliefState* bs_sent = new NewBeliefState(65536);
+      set(*bs_sent, 0);
+      set(*bs_sent, 1000);
+      std::cerr << "Client Thread: Want to send: " << bs_sent << ": " << *bs_sent << std::endl;
+
       NewBeliefState* bs_received;
 
       std::size_t server_port = 241181;
-      boost::thread server_thread(boost::bind(run_server, server_port, bs_received));
+      boost::thread server_thread(boost::bind(run_server, server_port, bs_sent));
 
       boost::posix_time::milliseconds n(3000);
       boost::this_thread::sleep(n);
@@ -98,21 +115,14 @@ BOOST_AUTO_TEST_CASE ( testSendingBeliefState )
       std::stringstream str_server_port;
       str_server_port << server_port;
       boost::thread client_thread(boost::bind(run_client, str_server_port.str(), bs_sent));
-      
+     
+
       server_thread.join();
       client_thread.join();
-
-      BOOST_CHECK(bs_sent != bs_received);
-      BOOST_CHECK_EQUAL(*bs_sent, *bs_received);
-
-      delete bs_sent;
-      delete bs_received;
-      bs_sent = 0;
-      bs_received = 0;
     }
   catch (std::exception& e)
     {
-      std::cerr << "Exception in testBlockingAsio: " << e.what() << std::endl;
+      std::cerr << "Exception in testSendingBeliefState: " << e.what() << std::endl;
       std::exit(1);
     }
 }
