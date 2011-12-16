@@ -10,6 +10,7 @@ noinst_HEADERS =  \
 		HashedBiMap.h \
 		ID.h \
 		Logger.h \
+		NewBeliefState.h \
 		Pool.h \
 		Printhelpers.h \
 		ProxySignatureByLocal.h \
