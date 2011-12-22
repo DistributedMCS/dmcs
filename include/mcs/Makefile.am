@@ -14,6 +14,7 @@ noinst_HEADERS =  \
 		Pool.h \
 		Printhelpers.h \
 		ProxySignatureByLocal.h \
+		QueryID.h \
 		ResourceManager.h \
 		Rule.h \
 		Signature.h \

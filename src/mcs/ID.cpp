@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   ID.h
+ * @file   ID.cpp
  * @author Peter Schueller <ps@kr.tuwien.ac.at>
  * @date   Tue Dec  7 10:27:24 2011
  * 

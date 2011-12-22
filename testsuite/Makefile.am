@@ -47,7 +47,8 @@ TESTS = \
 	testPool \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
-	testTables
+	testTables \
+	testID
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -84,7 +85,8 @@ check_PROGRAMS = \
 	testPool \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
-	testTables
+	testTables \
+	testID
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -218,3 +220,6 @@ testTables_SOURCES = testTables.cpp
 testTables_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a
 
+testID_SOURCES = testID.cpp
+testID_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a
