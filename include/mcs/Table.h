@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   Table.hpp
+ * @file   Table.h
  * @author Peter Schueller <ps@kr.tuwien.ac.at>
  * 
  * @brief  Base class for all Tables
@@ -28,7 +28,7 @@
 #define TABLE_H
 
 #include "mcs/ID.h"
-#include "mcs/Logger.hpp"
+#include "mcs/Logger.h"
 
 #include <boost/multi_index_container.hpp>
 #include <boost/thread/shared_mutex.hpp>

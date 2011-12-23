@@ -6,6 +6,7 @@ noinst_HEADERS =  \
 		BeliefState.h \
 		BeliefTable.h \
 		BridgeRule.h \
+		BridgeRuleEvaluator.h \
 		BridgeRuleTable.h \
 		HashedBiMap.h \
 		ID.h \

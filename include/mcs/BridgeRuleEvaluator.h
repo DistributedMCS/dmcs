@@ -18,31 +18,34 @@
  */
 
 /**
- * @file   testID.cpp
+ * @file   BridgeRuleEvaluator.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Mon Dec  12 10:45:16 2011
+ * @date   Fri Dec  23 16:17:32 2011
  * 
  * @brief  
  * 
  * 
  */
 
-#include "mcs/QueryID.h"
+#ifndef BRIDGE_RULE_EVALUATOR_H
+#define BRIDGE_RULE_EVALUATOR_H
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "testID"
-#include <boost/test/unit_test.hpp>
+#include "mcs/BridgeRuleTable.h"
+#include "mcs/NewBeliefState.h"
 
-BOOST_AUTO_TEST_CASE ( testQueryID )
-{
-  std::size_t qid = dmcs::query_id(24, 21);
-  std::size_t ctx_id = dmcs::ctxid_from_qid(qid);
-  std::size_t qorder = dmcs::qorder_from_qid(qid);
+namespace dmcs {
 
-  BOOST_CHECK_EQUAL(ctx_id, 24);
-  BOOST_CHECK_EQUAL(qorder, 21);
-}
+bool
+satisfied(const BridgeRule& r, 
+	  const NewBeliefState& input,
+	  const std::vector<std::size_t>& starting_offset);
 
-// Local Variables:
-// mode: C++
-// End:
+void evaluate(const BridgeRuleTablePtr& brtab,
+	      const TuplePtr& bridge_rules,
+	      const NewBeliefState& input, 
+	      const std::vector<std::size_t>& starting_offset,
+	      NewBeliefState& heads);
+
+} // namespace dmcs
+
+#endif // BRIDGE_RULE_EVALUATOR_H

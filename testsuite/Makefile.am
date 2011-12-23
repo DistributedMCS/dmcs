@@ -48,7 +48,8 @@ TESTS = \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
 	testTables \
-	testID
+	testID \
+	testBridgeRuleEvaluation
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -86,7 +87,8 @@ check_PROGRAMS = \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
 	testTables \
-	testID
+	testID \
+	testBridgeRuleEvaluation
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -222,4 +224,8 @@ testTables_LDADD = \
 
 testID_SOURCES = testID.cpp
 testID_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a
+
+testBridgeRuleEvaluation_SOURCES = testBridgeRuleEvaluation.cpp
+testBridgeRuleEvaluation_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a

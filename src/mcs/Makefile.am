@@ -36,4 +36,5 @@ libmcs_a_SOURCES = \
 		NewBeliefState.cpp \
 		Pool.cpp \
 	  	ResourceManager.cpp \
-		QueryID.cpp
+		QueryID.cpp \
+		BridgeRuleEvaluator.cpp

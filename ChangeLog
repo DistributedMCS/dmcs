@@ -1,3 +1,23 @@
+2011-12-23  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Add testBridgeRuleEvaluation.cpp.
+	* src/mcs/Makefile.am: Add BridgeRuleEvaluator.cpp.
+	* include/mcs/Makefile.am: Add BridgeRuleEvaluator.h.
+
+	* include/mcs/BridgeRuleEvaluator.h: New file.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+	* testsuite/testBridgeRuleEvaluation.cpp: Likewise.
+
+	* testsuite/testTables.cpp: Check for table size.
+
+	* testsuite/testID.cpp: Add copyright info.
+
+	* include/mcs/Table.h: Fix including Logger.h.
+
+	* include/mcs/ID.h (posLiteralFromBelief): Force NAF bit to 0.
+
+	* include/mcs/BridgeRuleTable.h: Clean up.
+
 2011-12-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/QueryID.h: New file.

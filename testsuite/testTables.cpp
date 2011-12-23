@@ -150,6 +150,9 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleTable )
   BOOST_CHECK(rtab.getByID(id_br2).head == ida);
   BOOST_CHECK(rtab.getByID(id_br2).body == body2);
 
+  std::size_t s = rtab.getSize();
+  BOOST_CHECK_EQUAL(s, 2);
+
   LOG(INFO,"BeliefTable" << btab);
   LOG(INFO,"RuleTable" << rtab);
 }

@@ -35,6 +35,7 @@
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "mcs/BridgeRule.h"
 #include "mcs/Table.h"
@@ -90,12 +91,9 @@ public:
   // update
   // (oldStorage must be from getByID() or from *const_iterator)
   inline void update(const BridgeRule& oldStorage, BridgeRule& newStorage) throw();
-  
-  // implementation in Registry.cpp !
-  //std::ostream& print(std::ostream& o, RegistryPtr reg) const throw();
 };
 
-
+typedef boost::shared_ptr<BridgeRuleTable> BridgeRuleTablePtr;
 
 
 // retrieve by ID
