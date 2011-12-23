@@ -32,6 +32,7 @@
 #define ID_H
 
 #include <boost/cstdint.hpp>
+#include <boost/shared_ptr.hpp>
 #include "mcs/Printhelpers.h"
 
 namespace dmcs {
@@ -166,7 +167,7 @@ struct ID : private ostream_printable<ID>
   static inline ID posLiteralFromBelief(ID belief)
   { 
     assert(belief.isBelief()); 
-    return ID(belief.kind | MAINKIND_BELIEF, belief.address); 
+    return ID((belief.kind & ~NAF_MASK) | MAINKIND_BELIEF, belief.address); 
   }
 
   static inline ID nafLiteralFromBelief(ID belief)
@@ -339,7 +340,7 @@ struct ID : private ostream_printable<ID>
   }
 
   inline std::size_t
-  contextID()
+  contextID() const
   {
     assert ( isBelief() );
     return (kind & CONTEXT_ID_MASK);
@@ -359,6 +360,7 @@ std::size_t hash_value(const ID& id);
 const ID ID_FAIL(ID::ALL_ONES, ID::ALL_ONES);
 
 typedef std::vector<ID> Tuple;
+typedef boost::shared_ptr<Tuple> TuplePtr;
 
 } // namespace dmcs
 
