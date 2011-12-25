@@ -175,35 +175,44 @@ BOOST_AUTO_TEST_CASE ( testBitMagicManipulation )
 
   NewBeliefState s(NO_BLOCKS * BLOCK_SIZE);
   NewBeliefState t(NO_BLOCKS * BLOCK_SIZE);
-  std::vector<BitMagic> masks(NO_BLOCKS);
+  std::vector<BitMagic*> masks;
 
   for (std::size_t i = 0; i < NO_BLOCKS; ++i)
     {
-      masks[i].resize(NO_BLOCKS * BLOCK_SIZE);
+      BitMagic* m = new BitMagic(NO_BLOCKS * BLOCK_SIZE);
+      masks.push_back(m);
       for (std::size_t j = starting_offsets[i]; j < starting_offsets[i] + BLOCK_SIZE; ++j)
 	{
-	  masks[i].set_bit(j);
+	  m->set_bit(j);
 	}
     }
-  
-  std::cerr << masks[0] << std::endl;
-  std::cerr << masks[1] << std::endl;
-  std::cerr << masks[2] << std::endl;
-
-  // test comparison
 
   // setting epsilon bits
-  s.set(0);
+  t.set(0);
   s.set(16); t.set(16);
   s.set(32); t.set(32);
 
   // set values
-  s.set(8);
-  s.set(10);
+  t.set(10);
+  t.set(15);
 
-  s.set(20); t.set(20);
+  s.set(20); t.set(21);
   s.set(25); t.set(25);
 
   s.set(35); t.set(35);
   s.set(40); t.set(40);
+
+  bool consistent = combine(s, t, starting_offsets, masks);
+  BOOST_CHECK_EQUAL(consistent, false);
+
+  s.set(20, NewBeliefState::DMCS_UNDEF);
+  s.set(21);
+
+  std::cerr << "s = " << s << std::endl;
+  std::cerr << "t = " << t << std::endl;
+  
+  consistent = combine(s, t, starting_offsets, masks);
+  BOOST_CHECK_EQUAL(consistent, true);
+  std::cerr << "s bowtie t = " << s << std::endl;
+
 }

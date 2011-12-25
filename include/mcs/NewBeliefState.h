@@ -79,6 +79,9 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
   inline bool
   operator< (const NewBeliefState& bs2) const;
 
+  inline NewBeliefState&
+  operator| (const NewBeliefState& bs2);
+
   inline std::size_t
   size() const;
 
@@ -94,11 +97,17 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
 
   inline bool
   isEpsilon(std::size_t ctx_id,
-	    const std::vector<std::size_t>& starting_offset);
+	    const std::vector<std::size_t>& starting_offset) const;
 
   inline void
   setEpsilon(std::size_t ctx_id,
 	     const std::vector<std::size_t>& starting_offset);
+
+  inline void
+  clear();
+
+  friend inline void
+  and_bm(NewBeliefState& bs, const BitMagic& mask);
 
   std::ostream&
   print(std::ostream& os) const;
@@ -138,6 +147,17 @@ NewBeliefState::operator< (const NewBeliefState& bs2) const
       return true;
     }
   return false;
+}
+
+
+
+inline NewBeliefState&
+NewBeliefState::operator| (const NewBeliefState& bs2)
+{
+  status_bit |= bs2.status_bit;
+  value_bit  |= bs2.value_bit;
+
+  return *this;
 }
 
 
@@ -215,7 +235,7 @@ NewBeliefState::set(std::size_t pos,
 
 inline bool
 NewBeliefState::isEpsilon(std::size_t ctx_id,
-			  const std::vector<std::size_t>& starting_offset)
+			  const std::vector<std::size_t>& starting_offset) const
 {
   return !(status_bit.test(starting_offset[ctx_id]));
 }
@@ -230,11 +250,31 @@ NewBeliefState::setEpsilon(std::size_t ctx_id,
   value_bit.set(starting_offset[ctx_id]); // just want to have it clean
 }
 
+
+
+inline void
+NewBeliefState::clear()
+{
+  status_bit.clear();
+  value_bit.clear();
+}
+
+
+inline void
+and_bm(NewBeliefState& bs, const BitMagic& mask)
+{
+  assert (bs.size() == mask.size());
+  bs.status_bit &= mask;
+  bs.value_bit &= mask;
+}
+
+
 // prototypes for BeliefStates combination
 bool
 combine(NewBeliefState& s,
 	const NewBeliefState& t,
-	const std::vector<std::size_t>& starting_offsets);
+	const std::vector<std::size_t>& starting_offsets,
+	const std::vector<BitMagic*>& masks);
 
 } // namespace dmcs
 

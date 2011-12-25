@@ -27,6 +27,7 @@
  * 
  */
 
+#include <list>
 #include "mcs/NewBeliefState.h"
 
 namespace dmcs {
@@ -106,7 +107,9 @@ combine(NewBeliefState& s,
 	const std::vector<std::size_t>& starting_offsets,
 	const std::vector<BitMagic*>& masks)
 {
+  assert (masks.size() > 0);
   assert (s.size() == t.size());
+  assert (s.size() == masks[0].size());
   assert (starting_offsets.size() == masks.size());
 
   if (starting_offsets.size() > 1)
@@ -114,7 +117,45 @@ combine(NewBeliefState& s,
       assert (s.size() == starting_offsets[starting_offsets.length() - 1] + starting_offsets[1] - starting_offset[0]);
     }
 
-  // CONTINUE HERE
+  std::list<std::size_t> tobe_combined;
+  BitMagic mask_check_consistency(s.size());
+  BitMagic mask_combine(s.size());
+
+  // Prepare 2 masks, then check for consistency once and 
+  // combine also just once. This is to minimize coying of NewBeliefState.
+  for (std::size_t i = 0; i < starting_offsets.size(); ++i)
+    {
+      if (!s.isEpsilon(i, starting_offsets) && !t.isEpsilon(i, starting_offsets))
+	{
+	  mask_check_consistency |= *masks[i];	  
+	}
+      else if (s.isEpsilon(i, starting_offsets) && (!t.isEpsilon(i, starting_offsets)))
+	{
+	  mask_combine |= *masks[i];
+	}
+    }
+
+  // Now check for consistency
+  NewBeliefState s1 = s;
+  NewBeliefState t1 = t;
+  and_bm(s1, mask_check_consistency);
+  and_bm(t1, mask_check_consistency);
+
+  if (s1 != t1)
+    {
+      return false;
+    }
+
+  // Now combine
+  NewBeliefState s2 = s;
+  NewBeliefState t2 = t;
+  and_bm(s2, ~mask_combine);
+  and_bm(t2, mask_combine);
+  s2 = s2 | t2;
+  
+  s = s | s2;
+
+  return true;
 }
 
 } // namespace dmcs

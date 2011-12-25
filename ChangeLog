@@ -1,3 +1,10 @@
+2011-12-25  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBeliefState.cpp: Add testcase for belief combination.
+
+	* src/mcs/NewBeliefState.cpp: Add combination of 2 NewBeliefStates.
+	* include/mcs/NewBeliefState.h: Likewise.
+
 2011-12-23  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/Makefile.am: Add testBridgeRuleEvaluation.cpp.
