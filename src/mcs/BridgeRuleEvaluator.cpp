@@ -48,14 +48,14 @@ satisfied(const BridgeRule& r,
 
       if (it->isNaf())
 	{
-	  if (test(input, global_address) == NewBeliefState::DMCS_TRUE)
+	  if (input.test(global_address) == NewBeliefState::DMCS_TRUE)
 	    {
 	      return false;
 	    }
 	}
       else
 	{
-	  if (test(input, global_address) != NewBeliefState::DMCS_TRUE)
+	  if (input.test(global_address) != NewBeliefState::DMCS_TRUE)
 	    {
 	      return false;
 	    }
@@ -82,7 +82,7 @@ evaluate(const BridgeRuleTablePtr& brtab,
 	  std::size_t ctx_id = r.head.contextID();
 	  IDAddress address = r.head.address;
 	  std::size_t global_address = address + starting_offset[ctx_id];
-	  set(heads, global_address);
+	  heads.set(global_address);
 	}
     }
 }

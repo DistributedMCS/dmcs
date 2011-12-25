@@ -64,71 +64,41 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
       DMCS_UNDEF
     };
 
-  NewBeliefState(std::size_t n)
-    : status_bit(n), 
-      value_bit(n)
-  { }
-
-  NewBeliefState(const NewBeliefState& bs)
-  {
-    assert (bs.status_bit.size() == bs.value_bit.size());
-    status_bit = bs.status_bit;
-    value_bit = bs.value_bit;
-  }
+  NewBeliefState(std::size_t n);
+  NewBeliefState(const NewBeliefState& bs);
 
   NewBeliefState&
-  operator= (const NewBeliefState& bs)
-  {
-    if (this != &bs)
-      {
-	assert (bs.status_bit.size() == bs.value_bit.size());
-	status_bit = bs.status_bit;
-	value_bit = bs.value_bit;
-      }
-
-    return *this;
-  }
+  operator= (const NewBeliefState& bs);
 
   inline bool
-  operator== (const NewBeliefState& bs2) const
-  {
-    return status_bit == bs2.status_bit && value_bit == bs2.value_bit;
-  }
+  operator== (const NewBeliefState& bs2) const;
 
   inline bool
-  operator!= (const NewBeliefState& bs2) const
-  {
-    return value_bit != bs2.value_bit || status_bit != bs2.status_bit;
-  }
+  operator!= (const NewBeliefState& bs2) const;
 
   inline bool
-  operator< (const NewBeliefState& bs2) const
-  {
-    if (status_bit < bs2.status_bit)
-      {
-	return true;
-      }
-    else if (status_bit == bs2.status_bit && value_bit < bs2.value_bit)
-      {
-	return true;
-      }
-    return false;
-  }
+  operator< (const NewBeliefState& bs2) const;
 
   inline std::size_t
-  size() const
-  {
-    assert (status_bit.size() == value_bit.size());
-    return value_bit.size();
-  }
+  size() const;
 
-  void
-  resize(std::size_t n)
-  {
-    assert (n > 0);
-    status_bit.resize(n);
-    value_bit.resize(n);
-  }
+  inline void
+  resize(std::size_t n);
+
+  inline TruthVal
+  test(std::size_t pos) const;
+
+  inline void
+  set(std::size_t pos,
+      TruthVal val = NewBeliefState::DMCS_TRUE);
+
+  inline bool
+  isEpsilon(std::size_t ctx_id,
+	    const std::vector<std::size_t>& starting_offset);
+
+  inline void
+  setEpsilon(std::size_t ctx_id,
+	     const std::vector<std::size_t>& starting_offset);
 
   std::ostream&
   print(std::ostream& os) const;
@@ -138,18 +108,67 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
 };
 
 
-  
+// inline functions ************************************************
+
+inline bool
+NewBeliefState::operator== (const NewBeliefState& bs2) const
+{
+  return status_bit == bs2.status_bit && value_bit == bs2.value_bit;
+}
+
+
+
+inline bool
+NewBeliefState::operator!= (const NewBeliefState& bs2) const
+{
+  return value_bit != bs2.value_bit || status_bit != bs2.status_bit;
+}
+
+
+
+inline bool
+NewBeliefState::operator< (const NewBeliefState& bs2) const
+{
+  if (status_bit < bs2.status_bit)
+    {
+      return true;
+    }
+  else if (status_bit == bs2.status_bit && value_bit < bs2.value_bit)
+    {
+      return true;
+    }
+  return false;
+}
+
+
+
+inline std::size_t
+NewBeliefState::size() const
+{
+  assert (status_bit.size() == value_bit.size());
+  return value_bit.size();
+}
+
+
+
+inline void
+NewBeliefState::resize(std::size_t n)
+{
+  assert (n > 0);
+  status_bit.resize(n);
+  value_bit.resize(n);
+}
+
 
 
 inline NewBeliefState::TruthVal
-test(const NewBeliefState& bs, 
-     std::size_t pos)
+NewBeliefState::test(std::size_t pos) const
 {
   assert (pos > 0 && pos < bs.size());
 
-  if (bs.status_bit.test(pos))
+  if (status_bit.test(pos))
     {
-      if (bs.value_bit.test(pos))
+      if (value_bit.test(pos))
 	{
 	  return NewBeliefState::DMCS_TRUE;
 	}
@@ -163,31 +182,31 @@ test(const NewBeliefState& bs,
 }
 
 
+
 inline void
-set(NewBeliefState& bs, 
-    std::size_t pos,
-    NewBeliefState::TruthVal val = NewBeliefState::DMCS_TRUE)
+NewBeliefState::set(std::size_t pos,
+		    NewBeliefState::TruthVal val)
 {
-  assert (pos > 0 && pos < bs.size());
+  assert (pos > 0 && pos < size());
   
   switch (val)
     {
     case NewBeliefState::DMCS_UNDEF:
       {
-	bs.status_bit.set_bit(pos, false);
-	bs.value_bit.set_bit(pos, false);
+	status_bit.set_bit(pos, false);
+	value_bit.set_bit(pos, false);
 	break;
       }
     case NewBeliefState::DMCS_TRUE:
       {
-	bs.status_bit.set_bit(pos);
-	bs.value_bit.set_bit(pos);
+	status_bit.set_bit(pos);
+	value_bit.set_bit(pos);
 	break;
       }
     case NewBeliefState::DMCS_FALSE:
       {
-	bs.status_bit.set_bit(pos);
-	bs.value_bit.set_bit(pos, false);
+	status_bit.set_bit(pos);
+	value_bit.set_bit(pos, false);
 	break;
       }
     }
@@ -195,24 +214,27 @@ set(NewBeliefState& bs,
 
 
 inline bool
-isEpsilon(const NewBeliefState& bs, 
-	  std::size_t ctx_id,
-	  const std::vector<std::size_t>& starting_offset)
+NewBeliefState::isEpsilon(std::size_t ctx_id,
+			  const std::vector<std::size_t>& starting_offset)
 {
-  return !(bs.status_bit.test(starting_offset[ctx_id]));
+  return !(status_bit.test(starting_offset[ctx_id]));
 }
 
 
 
 inline void
-setEpsilon(NewBeliefState& bs,
-	  std::size_t ctx_id,
-	  const std::vector<std::size_t>& starting_offset)
+NewBeliefState::setEpsilon(std::size_t ctx_id,
+			   const std::vector<std::size_t>& starting_offset)
 {
-  bs.status_bit.set(starting_offset[ctx_id]);
-  bs.value_bit.set(starting_offset[ctx_id]); // just want to have it clean
+  status_bit.set(starting_offset[ctx_id]);
+  value_bit.set(starting_offset[ctx_id]); // just want to have it clean
 }
 
+// prototypes for BeliefStates combination
+bool
+combine(NewBeliefState& s,
+	const NewBeliefState& t,
+	const std::vector<std::size_t>& starting_offsets);
 
 } // namespace dmcs
 

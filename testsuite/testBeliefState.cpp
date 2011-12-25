@@ -27,6 +27,8 @@
  * 
  */
 
+#include <bm/bm.h>
+
 #include "mcs/BeliefState.h"
 #include "mcs/NewBeliefState.h"
 #include "BeliefStateServer.h"
@@ -124,13 +126,14 @@ run_client(std::string server_port, NewBeliefState* bs_sent)
   io_service_client.run();
 }
 
+/*
 BOOST_AUTO_TEST_CASE ( testSendingBeliefState )
 {
   try
     {
       NewBeliefState* bs_sent = new NewBeliefState(65536);
-      set(*bs_sent, 0);
-      set(*bs_sent, 1000);
+      bs_sent->set(0);
+      bs_sent->set(1000);
       std::cerr << "Client Thread: Want to send: " << bs_sent << ": " << *bs_sent << std::endl;
 
       NewBeliefState* bs_received;
@@ -154,4 +157,53 @@ BOOST_AUTO_TEST_CASE ( testSendingBeliefState )
       std::cerr << "Exception in testSendingBeliefState: " << e.what() << std::endl;
       std::exit(1);
     }
+}*/
+
+/****************************************************************************************/
+
+BOOST_AUTO_TEST_CASE ( testBitMagicManipulation )
+{
+  const std::size_t NO_BLOCKS = 3;
+  const std::size_t BLOCK_SIZE = 16;
+
+  std::vector<std::size_t> starting_offsets(NO_BLOCKS, 0);
+
+  for (std::size_t i = 1; i < NO_BLOCKS; ++i)
+    {
+      starting_offsets[i] = starting_offsets[i-1] + BLOCK_SIZE;
+    }
+
+  NewBeliefState s(NO_BLOCKS * BLOCK_SIZE);
+  NewBeliefState t(NO_BLOCKS * BLOCK_SIZE);
+  std::vector<BitMagic> masks(NO_BLOCKS);
+
+  for (std::size_t i = 0; i < NO_BLOCKS; ++i)
+    {
+      masks[i].resize(NO_BLOCKS * BLOCK_SIZE);
+      for (std::size_t j = starting_offsets[i]; j < starting_offsets[i] + BLOCK_SIZE; ++j)
+	{
+	  masks[i].set_bit(j);
+	}
+    }
+  
+  std::cerr << masks[0] << std::endl;
+  std::cerr << masks[1] << std::endl;
+  std::cerr << masks[2] << std::endl;
+
+  // test comparison
+
+  // setting epsilon bits
+  s.set(0);
+  s.set(16); t.set(16);
+  s.set(32); t.set(32);
+
+  // set values
+  s.set(8);
+  s.set(10);
+
+  s.set(20); t.set(20);
+  s.set(25); t.set(25);
+
+  s.set(35); t.set(35);
+  s.set(40); t.set(40);
 }

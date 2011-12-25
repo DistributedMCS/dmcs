@@ -31,6 +31,37 @@
 
 namespace dmcs {
 
+NewBeliefState::NewBeliefState(std::size_t n)
+  : status_bit(n), 
+    value_bit(n)
+{ }
+
+
+
+NewBeliefState::NewBeliefState(const NewBeliefState& bs)
+{
+  assert (bs.status_bit.size() == bs.value_bit.size());
+  status_bit = bs.status_bit;
+  value_bit = bs.value_bit;
+}
+
+
+
+NewBeliefState&
+NewBeliefState::operator= (const NewBeliefState& bs)
+{
+  if (this != &bs)
+    {
+      assert (bs.status_bit.size() == bs.value_bit.size());
+      status_bit = bs.status_bit;
+      value_bit = bs.value_bit;
+    }
+  
+  return *this;
+}
+
+
+
 std::ostream&
 NewBeliefState::print(std::ostream& os) const
 {
@@ -65,6 +96,25 @@ NewBeliefState::print(std::ostream& os) const
   while (bit);
 
   return os << "]";
+}
+
+
+
+bool
+combine(NewBeliefState& s,
+	const NewBeliefState& t,
+	const std::vector<std::size_t>& starting_offsets,
+	const std::vector<BitMagic*>& masks)
+{
+  assert (s.size() == t.size());
+  assert (starting_offsets.size() == masks.size());
+
+  if (starting_offsets.size() > 1)
+    {
+      assert (s.size() == starting_offsets[starting_offsets.length() - 1] + starting_offsets[1] - starting_offset[0]);
+    }
+
+  // CONTINUE HERE
 }
 
 } // namespace dmcs
