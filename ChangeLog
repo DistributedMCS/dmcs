@@ -1,5 +1,8 @@
 2011-12-25  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/BeliefStateOffset.h: New file.
+	* src/mcs/BeliefStateOffset.cpp: Likewise.
+
 	* testsuite/testBeliefState.cpp: Add testcase for belief combination.
 
 	* src/mcs/NewBeliefState.cpp: Add combination of 2 NewBeliefStates.
