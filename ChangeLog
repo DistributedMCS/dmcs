@@ -1,3 +1,12 @@
+2011-12-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBeliefState.cpp: Adapt testcase using BeliefStateOffset.
+
+	* src/mcs/BeliefStateOffset.cpp: Fixed some small bugs.
+
+	* include/mcs/Makefile.am: Add BeliefStateOffset.h.
+	* src/mcs/Makefile.am: Add BeliefStateOffset.cpp to libmcs.
+
 2011-12-25  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/BeliefStateOffset.h: New file.

@@ -34,7 +34,7 @@ namespace dmcs {
 BeliefStateOffset* BeliefStateOffset::_instance = 0;
 
 BeliefStateOffset::BeliefStateOffset(std::size_t no_bs, std::size_t size_bs)
-  : starting_offsets(n, 0)
+  : starting_offsets(no_bs, 0)
 {
   assert (no_bs > 0 && size_bs > 0);
 
@@ -50,6 +50,7 @@ BeliefStateOffset::BeliefStateOffset(std::size_t no_bs, std::size_t size_bs)
 	{
 	  m->set_bit(j);
 	}
+      masks.push_back(m);
     }
  }
 
@@ -59,7 +60,8 @@ BeliefStateOffset*
 BeliefStateOffset::create(std::size_t no_bs, std::size_t size_bs)
 {
   assert (_instance == 0);
-  instance = new BeliefStateOffset(no_bs, size_bs);
+  _instance = new BeliefStateOffset(no_bs, size_bs);
+  return _instance;
 }
 
 

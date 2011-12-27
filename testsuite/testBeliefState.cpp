@@ -30,6 +30,7 @@
 #include <bm/bm.h>
 
 #include "mcs/BeliefState.h"
+#include "mcs/BeliefStateOffset.h"
 #include "mcs/NewBeliefState.h"
 #include "BeliefStateServer.h"
 #include "BeliefStateClient.h"
@@ -168,24 +169,10 @@ BOOST_AUTO_TEST_CASE ( testBitMagicManipulation )
 
   std::vector<std::size_t> starting_offsets(NO_BLOCKS, 0);
 
-  for (std::size_t i = 1; i < NO_BLOCKS; ++i)
-    {
-      starting_offsets[i] = starting_offsets[i-1] + BLOCK_SIZE;
-    }
+  BeliefStateOffset* bso = BeliefStateOffset::create(NO_BLOCKS, BLOCK_SIZE);
 
   NewBeliefState s(NO_BLOCKS * BLOCK_SIZE);
   NewBeliefState t(NO_BLOCKS * BLOCK_SIZE);
-  std::vector<BitMagic*> masks;
-
-  for (std::size_t i = 0; i < NO_BLOCKS; ++i)
-    {
-      BitMagic* m = new BitMagic(NO_BLOCKS * BLOCK_SIZE);
-      masks.push_back(m);
-      for (std::size_t j = starting_offsets[i]; j < starting_offsets[i] + BLOCK_SIZE; ++j)
-	{
-	  m->set_bit(j);
-	}
-    }
 
   // setting epsilon bits
   t.set(0);
@@ -202,7 +189,8 @@ BOOST_AUTO_TEST_CASE ( testBitMagicManipulation )
   s.set(35); t.set(35);
   s.set(40); t.set(40);
 
-  bool consistent = combine(s, t, starting_offsets, masks);
+
+  bool consistent = combine(s, t, bso->getStartingOffsets(), bso->getMasks());
   BOOST_CHECK_EQUAL(consistent, false);
 
   s.set(20, NewBeliefState::DMCS_UNDEF);
@@ -211,7 +199,7 @@ BOOST_AUTO_TEST_CASE ( testBitMagicManipulation )
   std::cerr << "s = " << s << std::endl;
   std::cerr << "t = " << t << std::endl;
   
-  consistent = combine(s, t, starting_offsets, masks);
+  consistent = combine(s, t, bso->getStartingOffsets(), bso->getMasks());
   BOOST_CHECK_EQUAL(consistent, true);
   std::cerr << "s bowtie t = " << s << std::endl;
 

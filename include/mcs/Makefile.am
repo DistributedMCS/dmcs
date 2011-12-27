@@ -4,6 +4,7 @@ AUTOMAKE_OPTIONS = gnu
 noinst_HEADERS =  \
 		Belief.h \
 		BeliefState.h \
+		BeliefStateOffset.h \
 		BeliefTable.h \
 		BridgeRule.h \
 		BridgeRuleEvaluator.h \

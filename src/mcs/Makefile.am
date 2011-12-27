@@ -31,6 +31,7 @@ noinst_LIBRARIES = libmcs.a
 # the mcs library
 libmcs_a_SOURCES = \
 		Belief.cpp \
+		BeliefStateOffset.cpp \
 		ID.cpp \
 		Logger.cpp \
 		NewBeliefState.cpp \
