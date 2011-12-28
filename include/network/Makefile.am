@@ -20,6 +20,7 @@ noinst_HEADERS =  \
 		MessagingGateway.h \
 		NeighborOut.h \
 		NeighborThread.h \
+		NewConcurrentMessageDispatcher.h \
 		OutputThread.h \
 		OutputDispatcher.h \
 		Server.h \

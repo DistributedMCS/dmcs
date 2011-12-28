@@ -1,3 +1,12 @@
+2011-12-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Makefile.am: Add NewConcurrentMessageDispatcher.h.
+	* src/network/Makefile.am: Add NewConcurrentMessageDispatcher.cpp.
+
+	* include/network/NewConcurrentMessageDispatcher.h: New file.
+	* include/network/NewConcurrentMessageDispatcher.tcc: Likewise.
+	* src/network/NewConcurrentMessageDispatcher.cpp: Likewise.
+
 2011-12-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testBeliefState.cpp: Adapt testcase using BeliefStateOffset.
