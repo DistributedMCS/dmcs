@@ -43,6 +43,12 @@ struct Belief : private ostream_printable<Belief>
     : kind(ID::MAINKIND_BELIEF | ctx_id), text(text)
   { }
 
+  std::size_t 
+  ctx_id()
+  {
+    return (kind & ID::CONTEXT_ID_MASK);
+  }
+
   std::ostream& print(std::ostream& os) const;
 };
 

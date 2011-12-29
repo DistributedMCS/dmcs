@@ -1,5 +1,7 @@
 2011-12-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/Belief.h: Add ctx_id().
+
 	* src/network/NewConcurrentMessageDispatcher.cpp: Move creation of mqs to ctor.
 
 	* testsuite/testMessageDispatcher.cpp: New file.
