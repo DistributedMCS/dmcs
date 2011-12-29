@@ -32,6 +32,7 @@ noinst_LIBRARIES = libmcs.a
 libmcs_a_SOURCES = \
 		Belief.cpp \
 		BeliefStateOffset.cpp \
+		ForwardMessage.cpp \
 		ID.cpp \
 		Logger.cpp \
 		NewBeliefState.cpp \

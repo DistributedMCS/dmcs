@@ -49,7 +49,8 @@ TESTS = \
 	testPolymorphismSharedPtr \
 	testTables \
 	testID \
-	testBridgeRuleEvaluation
+	testBridgeRuleEvaluation \
+	testMessageDispatcher
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -88,7 +89,8 @@ check_PROGRAMS = \
 	testPolymorphismSharedPtr \
 	testTables \
 	testID \
-	testBridgeRuleEvaluation
+	testBridgeRuleEvaluation \
+	testMessageDispatcher
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -229,3 +231,8 @@ testID_LDADD = \
 testBridgeRuleEvaluation_SOURCES = testBridgeRuleEvaluation.cpp
 testBridgeRuleEvaluation_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a
+
+testMessageDispatcher_SOURCES = testMessageDispatcher.cpp 
+testMessageDispatcher_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a \
+	$(top_builddir)/src/network/libthreads.a

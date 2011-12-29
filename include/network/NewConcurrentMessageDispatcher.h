@@ -32,16 +32,10 @@
 #ifndef NEW_CONCURRENT_MESSAGE_DISPATCHER_H
 #define NEW_CONCURRENT_MESSAGE_DISPATCHER_H
 
-#include "dmcs/AskNextNotification.h"
-#include "dmcs/StreamingForwardMessage.h"
-#include "network/MessagingGateway.h"
-#include "network/ConcurrentMessageQueue.h"
-#include "mcs/BeliefState.h"
-#include "solver/Conflict.h"
-
 #include <vector>
-#include <string>
+#include <boost/shared_ptr.hpp>
 
+#include "network/ConcurrentMessageQueue.h"
 
 namespace dmcs {
 
@@ -67,8 +61,7 @@ public:
       END_OF_MQ
     };
 
-  /// default ctor
-  NewConcurrentMessageDispatcher();
+  NewConcurrentMessageDispatcher(std::size_t k, std::size_t no_neighbors = 0);
   
   void
   registerMQ(ConcurrentMessageQueuePtr& mq, MQIDs id);
@@ -93,6 +86,9 @@ public:
   receive(MQIDs type, std::size_t id, int msecs);
 
 private:
+  void
+  init_mqs(std::size_t k, std::size_t no_neighbors);
+
   ConcurrentMessageQueuePtr
   getMQ(MQIDs id);
 
@@ -110,6 +106,8 @@ private:
 private:
   ConcurrentMessageQueueVec2 cmqs;
 };
+
+typedef boost::shared_ptr<NewConcurrentMessageDispatcher> NewConcurrentMessageDispatcherPtr;
 
 } // namespace dmcs
 

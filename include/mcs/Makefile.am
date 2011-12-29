@@ -9,10 +9,12 @@ noinst_HEADERS =  \
 		BridgeRule.h \
 		BridgeRuleEvaluator.h \
 		BridgeRuleTable.h \
+		ForwardMessage.h \
 		HashedBiMap.h \
 		ID.h \
 		Logger.h \
 		NewBeliefState.h \
+		NewMessage.h \
 		Pool.h \
 		Printhelpers.h \
 		ProxySignatureByLocal.h \

@@ -31,18 +31,44 @@
 
 namespace dmcs {
 
-NewConcurrentMessageDispatcher::NewConcurrentMessageDispatcher()
+NewConcurrentMessageDispatcher::NewConcurrentMessageDispatcher(std::size_t k, std::size_t no_neighbors)
 {
+  init_mqs(k, no_neighbors);
+}
+
+
+
+void
+NewConcurrentMessageDispatcher::init_mqs(std::size_t k, std::size_t no_neighbors)
+{
+  ConcurrentMessageQueueVecPtr cmq0(new ConcurrentMessageQueueVec);
+  cmq0->resize(SEPARATOR);
+  cmqs.push_back(cmq0);
+
+  ConcurrentMessageQueuePtr mq_request_dispatcher(new ConcurrentMessageQueue(k));
+  registerMQ(mq_request_dispatcher, REQUEST_DISPATCHER_MQ);
+
+  ConcurrentMessageQueuePtr mq_output_dispatcher(new ConcurrentMessageQueue(k));
+  registerMQ(mq_output_dispatcher, OUTPUT_DISPATCHER_MQ);
+
+  ConcurrentMessageQueuePtr mq_joiner_dispatcher(new ConcurrentMessageQueue(k));
+  registerMQ(mq_joiner_dispatcher, JOINER_DISPATCHER_MQ); 
+
   std::size_t n = JOIN_OUT_MQ - SEPARATOR;
   for (std::size_t i = 0; i < n; ++i)
     {
       ConcurrentMessageQueueVecPtr v(new ConcurrentMessageQueueVec);
-      cmqs.push_back(v);
+      cmqs.push_back(v);  
     }
 
-  std::size_t m = SEPARATOR - 1;
-  ConcurrentMessageQueueVecPtr& v = cmqs[0];
-  v->resize(m);
+  for (std::size_t i = 0; i < no_neighbors; ++i)
+    {
+      ConcurrentMessageQueuePtr mq_neighbor_in(new ConcurrentMessageQueue(k));
+      registerMQ(mq_neighbor_in, NEIGHBOR_IN_MQ, i);
+
+      ConcurrentMessageQueuePtr mq_neighbor_out(new ConcurrentMessageQueue(k));
+      registerMQ(mq_neighbor_out, NEIGHBOR_OUT_MQ, i);
+    }
 }
 
 

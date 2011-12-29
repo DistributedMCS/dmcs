@@ -82,8 +82,8 @@ template<typename MessageType>
 MessageType*
 NewConcurrentMessageDispatcher::receive(MQIDs id, int msecs)
 {
-  ConcurrentMessageQueuePtr cmq = getMQ(id);
-  receive<MessageType>(cmq.get(), msecs);
+  ConcurrentMessageQueuePtr& cmq = getMQ(id);
+  return receive<MessageType>(cmq.get(), msecs);
 }
 
 
@@ -92,7 +92,7 @@ template<typename MessageType>
 MessageType*
 NewConcurrentMessageDispatcher::receive(MQIDs type, std::size_t id, int msecs)
 {
-  ConcurrentMessageQueuePtr cmq = getMQ(type, id);
+  ConcurrentMessageQueuePtr& cmq = getMQ(type, id);
   return receive<MessageType>(cmq.get(), msecs);
 }
 

@@ -1,3 +1,25 @@
+2011-12-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/NewConcurrentMessageDispatcher.cpp: Move creation of mqs to ctor.
+
+	* testsuite/testMessageDispatcher.cpp: New file.
+
+	* testsuite/Makefile.am: add testMessageDispatcher.
+
+	* src/mcs/Makefile.am: Add ForwardMessage.cpp.
+	* incle/mcs/Makefile.am: Add NewMessage.h and ForwardMessage.h.
+
+	* include/network/NewConcurrentMessageDispatcher.tcc: Return value.
+
+	* include/network/ConcurrentMessageQueue.h: New typedef for 2-dimensional
+	vector of ConcurrentMessageQueue.
+
+	* include/mcs/ForwardMessage.h: New file.
+	* src/mcs/ForwardMessage.cpp: Likewise.
+	* include/mcs/NewMessage.h: Likewise.
+
+	* include/network/NewConcurrentMessageDispatcher.h: ctor with k and np_neighbors.
+
 2011-12-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Makefile.am: Add NewConcurrentMessageDispatcher.h.

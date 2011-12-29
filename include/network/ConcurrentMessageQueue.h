@@ -364,6 +364,7 @@ namespace dmcs {
   typedef boost::shared_ptr<ConcurrentMessageQueue>    ConcurrentMessageQueuePtr;
   typedef std::vector<ConcurrentMessageQueuePtr>       ConcurrentMessageQueueVec;
   typedef boost::shared_ptr<ConcurrentMessageQueueVec> ConcurrentMessageQueueVecPtr;
+  typedef std::vector<ConcurrentMessageQueueVecPtr>    ConcurrentMessageQueueVec2;
   typedef std::map<std::size_t, ConcurrentMessageQueue*> CMQMap;
   typedef boost::shared_ptr<CMQMap> CMQMapPtr;
 } // namespace dmcs
