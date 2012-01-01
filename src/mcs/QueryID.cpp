@@ -35,11 +35,26 @@ QueryID* QueryID::_instance = 0;
 
 QueryID::QueryID()
 {
-  local_context_shift = sizeof(std::size_t)*8 / 2;
+  std::size_t s = sizeof(std::size_t)*8;
+  
+  neighbor_offset_shift = s/2;
+  local_context_shift = 3*s/4;
 
+  local_context_mask = 0;
+  neighbor_offset_mask = 0;
   query_order_mask = 0;
 
-  for (std::size_t i = 0; i < local_context_shift; ++i)
+  for (std::size_t i = local_context_shift; i < s; ++i)
+    {
+      local_context_mask |= (std::size_t)1 << i;
+    }
+
+  for (std::size_t i = neighbor_offset_shift; i < local_context_shift; ++i)
+    {
+      neighbor_offset_mask |= (std::size_t)1 << i;
+    }
+  
+  for (std::size_t i = 0; i < neighbor_offset_shift; ++i)
     {
       query_order_mask |= (std::size_t)1 << i;
     }
@@ -66,11 +81,24 @@ QueryID::LOCAL_CONTEXT_SHIFT() const
 
 
 std::size_t
+QueryID::NEIGHBOR_OFFSET_SHIFT() const
+{
+  return neighbor_offset_shift;
+}
+
+
+std::size_t
 QueryID::LOCAL_CONTEXT_MASK() const
 {
   return local_context_mask;
 }
 
+
+std::size_t
+QueryID::NEIGHBOR_OFFSET_MASK() const
+{
+  return neighbor_offset_mask;
+}
 
 std::size_t
 QueryID::QUERY_ORDER_MASK() const

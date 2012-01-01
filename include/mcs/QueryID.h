@@ -43,7 +43,13 @@ public:
   LOCAL_CONTEXT_SHIFT() const;
 
   std::size_t
+  NEIGHBOR_OFFSET_SHIFT() const;
+
+  std::size_t
   LOCAL_CONTEXT_MASK() const;
+
+  std::size_t
+  NEIGHBOR_OFFSET_MASK() const;
 
   std::size_t
   QUERY_ORDER_MASK() const;
@@ -53,7 +59,10 @@ protected:
 
 private:
   std::size_t local_context_shift;
+  std::size_t neighbor_offset_shift;
+
   std::size_t local_context_mask;
+  std::size_t neighbor_offset_mask;
   std::size_t query_order_mask;
 
   static QueryID* _instance;
@@ -69,12 +78,30 @@ query_id(const std::size_t ctx_id,
 }
 
 
+
+inline std::size_t
+query_id(const std::size_t ctx_id, 
+	 const std::size_t neighbor_offset,
+	 const std::size_t query_order)
+{
+  return ((ctx_id << QueryID::instance()->LOCAL_CONTEXT_SHIFT()) 
+	  | (neighbor_offset << QueryID::instance()->NEIGHBOR_OFFSET_SHIFT())
+	  | query_order);
+}
+
+
 inline std::size_t
 ctxid_from_qid(std::size_t query_id)
 {
   return ((query_id & QueryID::instance()->LOCAL_CONTEXT_MASK()) >> QueryID::instance()->LOCAL_CONTEXT_SHIFT());
 }
 
+
+inline std::size_t
+neighbor_offset_from_qid(std::size_t query_id)
+{
+  return ((query_id & QueryID::instance()->NEIGHBOR_OFFSET_MASK()) >> QueryID::instance()->NEIGHBOR_OFFSET_SHIFT());
+}
 
 inline std::size_t
 qorder_from_qid(const std::size_t query_id)

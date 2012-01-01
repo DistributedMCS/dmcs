@@ -1,5 +1,10 @@
 2012-01-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/QueryID.h: Encode neighbor_offset into query_id.
+	* src/mcs/QueryID.cpp: Likewise.
+
+	* testsuite/testID.cpp: Update testcase.
+
 	* include/mcs/ForwardMessage.h: Add a comment.
 
 	* testsuite/testBeliefState.cpp: Add testcase for removing duplication.
@@ -11,8 +16,7 @@
 
 	* include/mcs/Printhelpers.h: Add printlist.
 
-	* include/mcs/Makefile.am: Add ReturnedBeliefState.h, BackwardMessage.h,
-	InputBeliefState.h.
+	* include/mcs/Makefile.am: Add ReturnedBeliefState.h, BackwardMessage.h.
 	* src/mcs/Makefile.am: Add ReturnedBeliefState.cpp, BackwardMessage.cpp.
 
 2011-12-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
