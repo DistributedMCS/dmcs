@@ -57,6 +57,7 @@ public:
       JOIN_IN_MQ,
       EVAL_IN_MQ,
       EVAL_OUT_MQ,
+      OUTPUT_MQ,
       JOIN_OUT_MQ,                // only used in DMCS-SAT algorithm
       END_OF_MQ
     };

@@ -29,6 +29,8 @@
 
 
 #include "network/NewConcurrentMessageDispatcher.h"
+#include "mcs/RequestDispatcher.h"
+#include "mcs/NewOutputDispatcher.h"
 #include "mcs/ForwardMessage.h"
 
 #define BOOST_TEST_DYN_LINK
@@ -94,6 +96,117 @@ BOOST_AUTO_TEST_CASE ( testMessageDispatcher )
 
   boost::thread workerThread(worker, md.get());
   workerThread.join();
+}
+
+
+/************************************************************************************************************/
+
+void
+send_request(const NewConcurrentMessageDispatcherPtr& md)
+{
+  std::size_t qid1 = query_id(0, 1);
+  std::size_t qid2 = query_id(0, 2);
+  std::size_t qid3 = query_id(1, 1);
+  std::size_t qid4 = query_id(1, 2);
+
+  ForwardMessage* m1 = new ForwardMessage(qid1, 1, 5);
+  ForwardMessage* m2 = new ForwardMessage(qid2, 6, 10);
+  ForwardMessage* m3 = new ForwardMessage(qid3, 1, 8);
+  ForwardMessage* m4 = new ForwardMessage(qid4, 9, 16);
+
+
+  md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, m1, 0);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, m2, 0);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, m3, 0);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, m4, 0);
+}
+
+
+
+void
+receive_request(const NewConcurrentMessageDispatcherPtr& md)
+{
+  ForwardMessage* m1 = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, 0);
+  ForwardMessage* m2 = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, 0);
+  ForwardMessage* m3 = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, 1);
+  ForwardMessage* m4 = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, 1);
+  
+  BOOST_CHECK_EQUAL(m1->k1, 1);
+  BOOST_CHECK_EQUAL(m1->k2, 5);
+  BOOST_CHECK_EQUAL(m2->k1, 6);
+  BOOST_CHECK_EQUAL(m2->k2, 10);
+
+  BOOST_CHECK_EQUAL(m3->k1, 1);
+  BOOST_CHECK_EQUAL(m3->k2, 8);
+  BOOST_CHECK_EQUAL(m4->k1, 9);
+  BOOST_CHECK_EQUAL(m4->k2, 16);
+}
+
+
+
+void
+init_belief_states(NewBeliefState*& bs1,
+		   NewBeliefState*& bs2,
+		   NewBeliefState*& bs3,
+		   NewBeliefState*& bs4)
+{
+  const std::size_t NO_BLOCKS = 3;
+  const std::size_t BLOCK_SIZE = 16;
+
+  NewBeliefState* bs1 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+  NewBeliefState* bs2 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+  NewBeliefState* bs3 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+  NewBeliefState* bs4 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+
+  bs1->set(1);
+  bs1->set(21);
+  bs1->set(40, NewBeliefState::DMCS_FALSE);
+
+  bs2->set(15);
+  bs2->set(30, NewBeliefState::DMCS_FALSE);
+  bs2->set(42);
+
+  bs3->set(0);
+  bs3->set(1);
+  bs3->set(47, NewBeliefState::DMCS_FALSE);
+
+  bs4->set(4, NewBeliefState::DMCS_FALSE);
+  bs4->set(27);
+  bs4->set(23);
+}
+
+
+void
+send_output(const NewConcurrentMessageDispatcherPtr& md)
+{
+  NewBeliefState* bs1;
+  NewBeliefState* bs2;
+  NewBeliefState* bs3;
+  NewBeliefState* bs4;
+  init_belief_states(bs1, bs2, bs3, bs4);
+
+  std::size_t qid1 = query_id(0, 1);
+
+  ReturnedBeliefState* rbs1 = new ReturnedBeliefState(bs1, qid1);
+
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs1, 0);
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs2, 0);
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs3, 0);
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs4, 0);
+}
+
+
+
+void
+receive_output(const NewConcurrentMessageDispatcherPtr& md)
+{
+}
+
+
+
+BOOST_AUTO_TEST_CASE ( testRequestAndOutputDispatcher )
+{
+  
 }
 
 // Local Variables:

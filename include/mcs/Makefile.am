@@ -13,14 +13,17 @@ noinst_HEADERS =  \
 		ForwardMessage.h \
 		HashedBiMap.h \
 		ID.h \
-		InputBeliefState.h \
+		JoinIn.h \
 		Logger.h \
+		NewBaseDispatcher.h \
 		NewBeliefState.h \
 		NewMessage.h \
+		NewOutputDispatcher.h \
 		Pool.h \
 		Printhelpers.h \
 		ProxySignatureByLocal.h \
 		QueryID.h \
+		RequestDispatcher.h \
 		ReturnedBeliefState.h \
 		ResourceManager.h \
 		Rule.h \

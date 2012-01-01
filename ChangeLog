@@ -1,6 +1,11 @@
 2012-01-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/testMessageDispatcher.cpp: On making testcase for the dispatchers.
+
+	* include/network/NewConcurrentMessageDispatcher.h: Add OUTPUT_MQ type.
+
 	* include/mcs/QueryID.h: Encode neighbor_offset into query_id.
+
 	* src/mcs/QueryID.cpp: Likewise.
 
 	* testsuite/testID.cpp: Update testcase.
@@ -13,6 +18,10 @@
 	* src/mcs/ReturnedBeliefState.cpp: Likewise.
 	* include/mcs/BackwardMessage.h: Likwise.
 	* src/mcs/BackwardMessage.cpp: Likwise.
+	* include/mcs/JoinIn.h: Likewise.
+	* include/mcs/NewBaseDispatcher: Likewie.
+	* include/mcs/NewOutputDispatcher: Likewise.
+	* include/mcs/RequestDispatcher: Likewise.
 
 	* include/mcs/Printhelpers.h: Add printlist.
 

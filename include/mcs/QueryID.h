@@ -97,11 +97,22 @@ ctxid_from_qid(std::size_t query_id)
 }
 
 
+
 inline std::size_t
 neighbor_offset_from_qid(std::size_t query_id)
 {
   return ((query_id & QueryID::instance()->NEIGHBOR_OFFSET_MASK()) >> QueryID::instance()->NEIGHBOR_OFFSET_SHIFT());
 }
+
+
+
+inline void
+set_neighbor_offset(std::size_t& query_id, const std::size_t n_offset)
+{
+  query_id |= (n_offset << QueryID::instance()->NEIGHBOR_OFFSET_SHIFT());
+}
+
+
 
 inline std::size_t
 qorder_from_qid(const std::size_t query_id)
