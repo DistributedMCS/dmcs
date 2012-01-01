@@ -18,44 +18,36 @@
  */
 
 /**
- * @file   ForwardMessage.h
+ * @file   BackwardMessage.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Fri Dec  23 10:22:17 2011
+ * @date   Sun Jan  1 15:44:21 2012
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef FORWARD_MESSAGE_H
-#define FORWARD_MESSAGE_H
+#ifndef BACKWARD_MESSAGE_H
+#define BACKWARD_MESSAGE_H
 
 #include "mcs/Printhelpers.h"
 #include "mcs/NewMessage.h"
+#include "mcs/ReturnedBeliefState.h"
 
 namespace dmcs {
 
-struct ForwardMessage : 
+struct BackwardMessage : 
     public NewMessage,
-    private ostream_printable<ForwardMessage>
+    private ostream_printable<BackwardMessage>
 {
-  ForwardMessage();
+  BackwardMessage();
 
   virtual
-  ~ForwardMessage(); 
+  ~BackwardMessage(); 
 
-  ForwardMessage(const ForwardMessage& fMess);
+  BackwardMessage(const BackwardMessage& bMess);
 
-  ForwardMessage(std::size_t qid,
-		 std::size_t k_one,
-		 std::size_t k_two);
-
-  std::size_t
-  getPackSize() const;
-
-  void
-  setPackRequest(const std::size_t k_one, 
-		 const std::size_t k_two);
+  BackwardMessage(const ReturnedBeliefStateListPtr& r);
 
   template <typename Archive>
   void
@@ -64,16 +56,15 @@ struct ForwardMessage :
   std::ostream&
   print(std::ostream& os) const;
 
-  std::size_t query_id;   // already includes context id
-  std::size_t k1;         // The invoker wants models from k1 to k2
-  std::size_t k2;
+  ReturnedBeliefStateListPtr rbsl;
+  ///TODO: add statistical information
 };
 
 } // namespace dmcs
 
 
 
-#endif // FORWARD_MESSAGE_H
+#endif // BACKWARD_MESSAGE_H
 
 // Local Variables:
 // mode: C++

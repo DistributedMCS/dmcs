@@ -18,62 +18,48 @@
  */
 
 /**
- * @file   ForwardMessage.h
+ * @file   InputBeliefState.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Fri Dec  23 10:22:17 2011
+ * @date   Sun Jan  1 16:32:24 2012
  * 
- * @brief  
+ * @brief  Type of information sent from JoinerDispatcher to Joiner (Context).
+ *         JoinerDispatcher reads ReturnedBeliefState from NeighborIn, and then
+ *         dispatches the answer based on query_id. It finally attaches neighbor_offset
+ *         to the answer (which forms an InputBeliefState) to send to the corresponding Context.
  * 
  * 
  */
 
-#ifndef FORWARD_MESSAGE_H
-#define FORWARD_MESSAGE_H
+#ifndef INPUT_BELIEF_STATE_H
+#define INPUT_BELIEF_STATE_H
 
+#include <list>
+#include <boost/shared_ptr.hpp>
+
+#include "mcs/ReturnedBeliefState.h"
 #include "mcs/Printhelpers.h"
-#include "mcs/NewMessage.h"
 
 namespace dmcs {
 
-struct ForwardMessage : 
-    public NewMessage,
-    private ostream_printable<ForwardMessage>
+struct InputBeliefState : private ostream_printable<InputBeliefState>
 {
-  ForwardMessage();
-
-  virtual
-  ~ForwardMessage(); 
-
-  ForwardMessage(const ForwardMessage& fMess);
-
-  ForwardMessage(std::size_t qid,
-		 std::size_t k_one,
-		 std::size_t k_two);
-
-  std::size_t
-  getPackSize() const;
-
-  void
-  setPackRequest(const std::size_t k_one, 
-		 const std::size_t k_two);
-
-  template <typename Archive>
-  void
-  serialize(Archive& ar, const unsigned int /* version */);
+  InputBeliefState(const ReturnedBeliefState& v, const std::size_t no)
+    : value(v), neighbor_offset(no)
+  { }
 
   std::ostream&
-  print(std::ostream& os) const;
+  print(std::ostream& os) const
+  {
+    return os << value << ", noffset = " << neighbor_offset;
+  }
 
-  std::size_t query_id;   // already includes context id
-  std::size_t k1;         // The invoker wants models from k1 to k2
-  std::size_t k2;
+  ReturnedBeliefState value;
+  std::size_t neighbor_offset;
 };
-
+ 
 } // namespace dmcs
 
-
-
-#endif // FORWARD_MESSAGE_H
+#endif // INPUT_BELIEF_STATE_H
 
 // Local Variables:
 // mode: C++

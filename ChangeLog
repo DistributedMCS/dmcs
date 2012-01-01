@@ -1,14 +1,19 @@
 2012-01-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/ForwardMessage.h: Add a comment.
+
 	* testsuite/testBeliefState.cpp: Add testcase for removing duplication.
 
 	* include/mcs/ReturnedBeliefState.h: New file.
 	* src/mcs/ReturnedBeliefState.cpp: Likewise.
+	* include/mcs/BackwardMessage.h: Likwise.
+	* src/mcs/BackwardMessage.cpp: Likwise.
 
 	* include/mcs/Printhelpers.h: Add printlist.
 
-	* include/mcs/Makefile.am: Add ReturnedMessage.h.
-	* src/mcs/Makefile.am: Add ReturnedMessage.cpp.
+	* include/mcs/Makefile.am: Add ReturnedBeliefState.h, BackwardMessage.h,
+	InputBeliefState.h.
+	* src/mcs/Makefile.am: Add ReturnedBeliefState.cpp, BackwardMessage.cpp.
 
 2011-12-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 

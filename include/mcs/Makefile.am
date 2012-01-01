@@ -2,6 +2,7 @@ AUTOMAKE_OPTIONS = gnu
 
 # including headers for make dist
 noinst_HEADERS =  \
+		BackwardMessage.h \
 		Belief.h \
 		BeliefState.h \
 		BeliefStateOffset.h \
@@ -12,6 +13,7 @@ noinst_HEADERS =  \
 		ForwardMessage.h \
 		HashedBiMap.h \
 		ID.h \
+		InputBeliefState.h \
 		Logger.h \
 		NewBeliefState.h \
 		NewMessage.h \

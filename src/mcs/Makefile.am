@@ -30,6 +30,7 @@ noinst_LIBRARIES = libmcs.a
 
 # the mcs library
 libmcs_a_SOURCES = \
+		BackwardMessage.cpp \
 		Belief.cpp \
 		BeliefStateOffset.cpp \
 		ForwardMessage.cpp \
