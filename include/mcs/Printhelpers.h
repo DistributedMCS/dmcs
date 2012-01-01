@@ -36,6 +36,7 @@
 #include <sstream>
 #include <set>
 #include <vector>
+#include <list>
 
 // with this class, you can make your own classes ostream-printable
 //
@@ -212,6 +213,16 @@ inline print_container* printvector(const std::vector<T>& t,
 {
   return printrange(t, open, sep, close);
 }
+
+template<typename T>
+inline print_container* printlist(const std::list<T>& t,
+				  const char* open="(", 
+				  const char* sep=",", 
+				  const char* close=")")
+{
+  return printrange(t, open, sep, close);
+}
+
 
 #endif // PRINTHELPERS_H
 

@@ -1,3 +1,15 @@
+2012-01-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBeliefState.cpp: Add testcase for removing duplication.
+
+	* include/mcs/ReturnedBeliefState.h: New file.
+	* src/mcs/ReturnedBeliefState.cpp: Likewise.
+
+	* include/mcs/Printhelpers.h: Add printlist.
+
+	* include/mcs/Makefile.am: Add ReturnedMessage.h.
+	* src/mcs/Makefile.am: Add ReturnedMessage.cpp.
+
 2011-12-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/Belief.h: Add ctx_id().

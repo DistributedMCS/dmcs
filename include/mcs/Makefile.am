@@ -19,6 +19,7 @@ noinst_HEADERS =  \
 		Printhelpers.h \
 		ProxySignatureByLocal.h \
 		QueryID.h \
+		ReturnedBeliefState.h \
 		ResourceManager.h \
 		Rule.h \
 		Signature.h \

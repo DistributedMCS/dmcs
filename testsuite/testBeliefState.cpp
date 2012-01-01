@@ -32,6 +32,7 @@
 #include "mcs/BeliefState.h"
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/NewBeliefState.h"
+#include "mcs/ReturnedBeliefState.h"
 #include "BeliefStateServer.h"
 #include "BeliefStateClient.h"
 
@@ -127,7 +128,7 @@ run_client(std::string server_port, NewBeliefState* bs_sent)
   io_service_client.run();
 }
 
-/*
+
 BOOST_AUTO_TEST_CASE ( testSendingBeliefState )
 {
   try
@@ -158,11 +159,11 @@ BOOST_AUTO_TEST_CASE ( testSendingBeliefState )
       std::cerr << "Exception in testSendingBeliefState: " << e.what() << std::endl;
       std::exit(1);
     }
-}*/
+}
 
 /****************************************************************************************/
 
-BOOST_AUTO_TEST_CASE ( testBitMagicManipulation )
+BOOST_AUTO_TEST_CASE ( testBeliefStateCombination )
 {
   const std::size_t NO_BLOCKS = 3;
   const std::size_t BLOCK_SIZE = 16;
@@ -202,5 +203,75 @@ BOOST_AUTO_TEST_CASE ( testBitMagicManipulation )
   consistent = combine(s, t, bso->getStartingOffsets(), bso->getMasks());
   BOOST_CHECK_EQUAL(consistent, true);
   std::cerr << "s bowtie t = " << s << std::endl;
-
 }
+
+
+/****************************************************************************************/
+
+BOOST_AUTO_TEST_CASE ( testRemoveDuplication )
+{
+  const std::size_t NO_BLOCKS = 3;
+  const std::size_t BLOCK_SIZE = 16;
+
+  NewBeliefState* bs1 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+  NewBeliefState* bs2 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+  NewBeliefState* bs3 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+  NewBeliefState* bs4 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+  NewBeliefState* bs5 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+  NewBeliefState* bs6 = new NewBeliefState(NO_BLOCKS * BLOCK_SIZE);
+
+  bs1->set(1);
+  bs1->set(21);
+  bs1->set(40, NewBeliefState::DMCS_FALSE);
+
+  bs2->set(1);
+  bs2->set(21);
+  bs2->set(40, NewBeliefState::DMCS_FALSE);
+
+  bs3->set(1);
+  bs3->set(21);
+  bs3->set(40, NewBeliefState::DMCS_FALSE);
+
+  bs4->set(15, NewBeliefState::DMCS_FALSE);
+  bs4->set(28);
+  bs4->set(42);
+
+  bs5->set(15, NewBeliefState::DMCS_FALSE);
+  bs5->set(28);
+  bs5->set(42);
+
+  bs6->set(4);
+  bs6->set(30);
+  bs6->set(40);
+
+  ReturnedBeliefState rbs1(bs1, 1);
+  ReturnedBeliefState rbs2(bs2, 1);
+  ReturnedBeliefState rbs3(bs3, 2);
+  ReturnedBeliefState rbs4(bs4, 1);
+  ReturnedBeliefState rbs5(bs5, 1);
+  ReturnedBeliefState rbs6(bs6, 1);
+
+  ReturnedBeliefStateListPtr rbsl(new ReturnedBeliefStateList);
+  
+  rbsl->push_back(rbs1);
+  rbsl->push_back(rbs2);
+  rbsl->push_back(rbs3);
+  rbsl->push_back(rbs4);
+  rbsl->push_back(rbs5);
+  rbsl->push_back(rbs6);
+
+  std::cerr << "Before removing" << std::endl 
+	    << printlist(*rbsl, "", "\n", "") << std::endl;
+
+  rbsl->sort(my_compare);
+  remove_duplication(rbsl);
+
+  std::cerr << "After removing" << std::endl 
+	    << printlist(*rbsl, "", "\n", "") << std::endl;
+
+  BOOST_CHECK_EQUAL(rbsl->size(), 4);
+}
+
+// Local Variables:
+// mode: C++
+// End:
