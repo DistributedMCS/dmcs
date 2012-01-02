@@ -37,17 +37,17 @@ namespace dmcs {
 class NewBaseDispatcher
 {
 public:
-  NewDispatcher(const NewConcurrentMessageDispatcherPtr& md)
+  NewBaseDispatcher(NewConcurrentMessageDispatcherPtr& md)
     : cmd(md)
   { }
 
   void
-  register(std::size_t id, std::size_t offset)
+  registerIdOffset(std::size_t id, std::size_t offset)
   {
     std::map<std::size_t, std::size_t>::iterator it = id2offset.find(id);
     if (it != id2offset.end())
       {
-	assert (offset == it.second());
+	assert (offset == it.second);
       }
     else
       {
@@ -57,10 +57,11 @@ public:
   }
 
   void
-  unregister(std::size_t id, std::size_t offset)
+  unregisterIdOffset(std::size_t id, std::size_t offset)
   {
     std::map<std::size_t, std::size_t>::iterator it = id2offset.find(id);
     assert (it != id2offset.end());
+    assert (it->second == offset);
     id2offset.erase(it);
   }
 
@@ -70,7 +71,7 @@ protected:
   {
     std::map<std::size_t, std::size_t>::iterator it = id2offset.find(id);
     assert (it != id2offset.end());
-    return it->second();
+    return it->second;
   }
 
 protected:

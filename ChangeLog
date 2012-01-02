@@ -1,5 +1,12 @@
 2012-01-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/testMessageDispatcher.cpp: Update testcase.
+
+	* include/mcs/NewOutputDispatcher.h: Add infinite loop.
+	* include/mcs/RequestDispatcher.h: Add infinite loop.
+
+	* include/mcs/NewBaseDispatcher.h: Fix some small bugs.
+
 	* src/mcs/QueryID.cpp: Encode SHUTDOWN flag into query_id.
 	* include/mcs/QueryID.h: Likewise.
 	* testsuite/testID: Update testcase.

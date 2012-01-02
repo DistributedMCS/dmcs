@@ -31,26 +31,37 @@
 #define NEW_OUTPUT_DISPATCHER_H
 
 #include "mcs/NewBaseDispatcher.h"
+#include "mcs/QueryID.h"
 #include "mcs/ReturnedBeliefState.h"
 
 namespace dmcs {
 
+///@TODO: Consider building a templatized class to unify RequestDispatcher and NewOutputDispatcher
 class NewOutputDispatcher : public NewBaseDispatcher
 {
 public:
-  NewOutputDispatcher(const NewConcurrentMessageDispatcherPtr& md)
+  NewOutputDispatcher(NewConcurrentMessageDispatcherPtr& md)
     : NewBaseDispatcher(md)
   { }
 
   void
   operator()()
   {
-    ReturnedBeliefState* returned_bs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, 0);
+    while (1)
+      {
+	ReturnedBeliefState* returned_bs = cmd->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, 0);
+	
+	std::size_t qid = returned_bs->query_id;
 
-    std::size_t qid = returned_bs->query_id;
-    std::size_t ctx_id = ctxid_from_qid(qid);
-    std::size_t offset = get_offset(ctx_id);
-    md->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, offset, returned_bs, 0);
+	if (shutdown(qid))
+	  {
+	    break;
+	  }
+
+	std::size_t ctx_id = ctxid_from_qid(qid);
+	std::size_t offset = get_offset(ctx_id);
+	cmd->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, offset, returned_bs, 0);
+      }
   }
 };
 

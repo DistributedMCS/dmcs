@@ -32,24 +32,35 @@
 
 #include "mcs/NewBaseDispatcher.h"
 #include "mcs/ForwardMessage.h"
+#include "mcs/QueryID.h"
 
 namespace dmcs {
 
 class RequestDispatcher : public NewBaseDispatcher
 {
 public:
-  RequestDispatcher(const NewConcurrentMessageDispatcherPtr& md)
+  RequestDispatcher(NewConcurrentMessageDispatcherPtr& md)
     : NewBaseDispatcher(md)
   { }
 
   void
   operator()()
   {
-    ForwardMessage* request = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, 0);
-    std::size_t qid = request->query_id;
-    std::size_t ctx_id = ctxid_from_qid(qid);
-    std::size_t offset = get_offset(ctx_id);
-    md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, 0);
+    while (1)
+      {
+	ForwardMessage* request = cmd->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, 0);
+	std::size_t qid = request->query_id;
+
+	if (shutdown(qid))
+	  {
+	    break;
+	  }
+
+	std::size_t ctx_id = ctxid_from_qid(qid);
+	std::size_t offset = get_offset(ctx_id);
+
+	cmd->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, 0);
+      }
   }
 };
 
