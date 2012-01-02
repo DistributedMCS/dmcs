@@ -74,7 +74,7 @@ NewConcurrentMessageDispatcher::init_mqs(std::size_t k, std::size_t no_neighbors
 
 
 void
-NewConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr& mq, MQIDs id)
+NewConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr mq, MQIDs id)
 {
   assert ( id < SEPARATOR );
   ConcurrentMessageQueueVecPtr& v = cmqs[0];
@@ -84,7 +84,7 @@ NewConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr& mq, MQIDs 
 
 
 void
-NewConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr& mq, MQIDs type, std::size_t id)
+NewConcurrentMessageDispatcher::registerMQ(ConcurrentMessageQueuePtr mq, MQIDs type, std::size_t id)
 {
   assert (SEPARATOR < type && type < END_OF_MQ);
 

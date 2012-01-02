@@ -36,7 +36,8 @@ template<typename MessageType>
 bool
 NewConcurrentMessageDispatcher::send(MQIDs id, MessageType* mess, int msecs)
 {
-  ConcurrentMessageQueuePtr& cmq = getMQ(id);
+  assert (id < SEPARATOR);
+  ConcurrentMessageQueuePtr cmq = getMQ(id);
   return send(cmq.get(), mess, msecs);
 }
 
@@ -47,7 +48,8 @@ bool
 NewConcurrentMessageDispatcher::send(MQIDs type, std::size_t id, 
 				     MessageType* mess, int msecs)
 {
-  ConcurrentMessageQueuePtr& cmq = getMQ(type, id);
+  assert (SEPARATOR < type && type < END_OF_MQ);
+  ConcurrentMessageQueuePtr cmq = getMQ(type, id);
   return send(cmq.get(), mess, msecs);
 }
 
@@ -58,6 +60,8 @@ bool
 NewConcurrentMessageDispatcher::send(ConcurrentMessageQueue* cmq,
 				     MessageType* mess, int msecs)
 {
+  assert (cmq);
+
   bool ret = true;
 
   if (msecs > 0)
@@ -82,7 +86,8 @@ template<typename MessageType>
 MessageType*
 NewConcurrentMessageDispatcher::receive(MQIDs id, int msecs)
 {
-  ConcurrentMessageQueuePtr& cmq = getMQ(id);
+  assert (id < SEPARATOR);
+  ConcurrentMessageQueuePtr cmq = getMQ(id);
   return receive<MessageType>(cmq.get(), msecs);
 }
 
@@ -92,7 +97,8 @@ template<typename MessageType>
 MessageType*
 NewConcurrentMessageDispatcher::receive(MQIDs type, std::size_t id, int msecs)
 {
-  ConcurrentMessageQueuePtr& cmq = getMQ(type, id);
+  assert (SEPARATOR < type && type < END_OF_MQ);
+  ConcurrentMessageQueuePtr cmq = getMQ(type, id);
   return receive<MessageType>(cmq.get(), msecs);
 }
 
@@ -102,6 +108,8 @@ template<typename MessageType>
 MessageType*
 NewConcurrentMessageDispatcher::receive(ConcurrentMessageQueue* cmq, int msecs)
 {
+  assert (cmq);
+
   MessageType* mess = 0;
   std::size_t recvd = 0;
   unsigned int p = 0;

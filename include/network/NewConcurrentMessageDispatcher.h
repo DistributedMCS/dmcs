@@ -65,10 +65,10 @@ public:
   NewConcurrentMessageDispatcher(std::size_t k, std::size_t no_neighbors = 0);
   
   void
-  registerMQ(ConcurrentMessageQueuePtr& mq, MQIDs id);
+  registerMQ(ConcurrentMessageQueuePtr mq, MQIDs id);
   
   void
-  registerMQ(ConcurrentMessageQueuePtr& mq, MQIDs type, std::size_t id);
+  registerMQ(ConcurrentMessageQueuePtr mq, MQIDs type, std::size_t id);
 
   template<typename MessageType>
   bool
