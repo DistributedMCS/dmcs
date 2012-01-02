@@ -47,7 +47,7 @@ struct NewJoinIn : private ostream_printable<NewJoinIn>
   std::ostream&
   print(std::ostream& os) const
   {
-    return os << "(" << neighbor_offset << ", " << no_belief_state ")" << std::endl;
+    return os << "(" << neighbor_offset << ", " << no_belief_state << ")" << std::endl;
   }
 };
 

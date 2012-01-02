@@ -30,6 +30,7 @@
 
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "mcs/RequestDispatcher.h"
+#include "mcs/NewJoinerDispatcher.h"
 #include "mcs/NewOutputDispatcher.h"
 #include "mcs/ForwardMessage.h"
 
@@ -193,8 +194,13 @@ init_belief_states(NewBeliefState*& bs1,
 }
 
 
+
 void
-send_output(const NewConcurrentMessageDispatcherPtr& md)
+init_returned_belief_states(ReturnedBeliefState*& rbs1,
+			    ReturnedBeliefState*& rbs2,
+			    ReturnedBeliefState*& rbs3,
+			    ReturnedBeliefState*& rbs4,
+			    ReturnedBeliefState*& rbs5)
 {
   NewBeliefState* bs1;
   NewBeliefState* bs2;
@@ -209,17 +215,31 @@ send_output(const NewConcurrentMessageDispatcherPtr& md)
   std::size_t qid4 = query_id(5, 2);
   std::size_t qid5 = shutdown_query_id();
 
-  ReturnedBeliefState* rbs1 = new ReturnedBeliefState(bs1, qid1);
-  ReturnedBeliefState* rbs2 = new ReturnedBeliefState(bs2, qid2);
-  ReturnedBeliefState* rbs3 = new ReturnedBeliefState(bs3, qid3);
-  ReturnedBeliefState* rbs4 = new ReturnedBeliefState(bs4, qid4);
-  ReturnedBeliefState* rbs5 = new ReturnedBeliefState(bs5, qid5);
+  rbs1 = new ReturnedBeliefState(bs1, qid1);
+  rbs2 = new ReturnedBeliefState(bs2, qid2);
+  rbs3 = new ReturnedBeliefState(bs3, qid3);
+  rbs4 = new ReturnedBeliefState(bs4, qid4);
+  rbs5 = new ReturnedBeliefState(bs5, qid5);
+}
 
-  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs1, 0);
-  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs3, 0);
-  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs2, 0);
-  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs4, 0);
-  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs5, 0);
+
+
+void
+send_output(const NewConcurrentMessageDispatcherPtr& md)
+{
+  ReturnedBeliefState* rbs1;
+  ReturnedBeliefState* rbs2;
+  ReturnedBeliefState* rbs3;
+  ReturnedBeliefState* rbs4;
+  ReturnedBeliefState* rbs5;
+  init_returned_belief_states(rbs1, rbs2, rbs3, rbs4, rbs5);
+
+  int timeout = 0;
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs1, timeout);
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs3, timeout);
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs2, timeout);
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs4, timeout);
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs5, timeout);
 }
 
 
@@ -264,9 +284,83 @@ receive_output_at_1(const NewConcurrentMessageDispatcherPtr& md)
 
 
 
-BOOST_AUTO_TEST_CASE ( testRequestAndOutputDispatcher )
+void
+send_join_in(NewConcurrentMessageDispatcherPtr md)
 {
-  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(5, 0));
+  NewJoinIn* notification1 = new NewJoinIn(1, 2);
+  NewJoinIn* notification2 = new NewJoinIn(2, 2);
+  
+  int timeout = 0;
+  md->send(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, notification1, timeout);
+  md->send(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, notification2, timeout);
+}
+
+
+
+void
+send_returned_belief_state(NewConcurrentMessageDispatcherPtr md)
+{
+  ReturnedBeliefState* rbs1;
+  ReturnedBeliefState* rbs2;
+  ReturnedBeliefState* rbs3;
+  ReturnedBeliefState* rbs4;
+  ReturnedBeliefState* rbs5;
+  init_returned_belief_states(rbs1, rbs2, rbs3, rbs4, rbs5);
+
+  int timeout = 0;
+  md->send(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, 1, rbs1, timeout);
+  md->send(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, 1, rbs3, timeout);
+  md->send(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, 2, rbs2, timeout);
+  md->send(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, 2, rbs4, timeout);
+}
+
+
+
+void
+receive_input_belief_state_at_0(NewConcurrentMessageDispatcherPtr md)
+{
+  NewBeliefState* bs1;
+  NewBeliefState* bs2;
+  NewBeliefState* bs3;
+  NewBeliefState* bs4;
+  init_belief_states(bs1, bs2, bs3, bs4);
+
+  int timeout = 0;
+  ReturnedBeliefState* rbs1 = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::JOIN_IN_MQ, 0, timeout);
+  ReturnedBeliefState* rbs2 = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::JOIN_IN_MQ, 0, timeout);
+
+  BOOST_CHECK_EQUAL(neighbor_offset_from_qid(rbs1->query_id), 1);
+  BOOST_CHECK_EQUAL(neighbor_offset_from_qid(rbs2->query_id), 2);
+  BOOST_CHECK_EQUAL(*rbs1->belief_state, *bs1);
+  BOOST_CHECK_EQUAL(*rbs2->belief_state, *bs2);
+}
+
+
+
+void
+receive_input_belief_state_at_1(NewConcurrentMessageDispatcherPtr md)
+{
+  NewBeliefState* bs1;
+  NewBeliefState* bs2;
+  NewBeliefState* bs3;
+  NewBeliefState* bs4;
+  init_belief_states(bs1, bs2, bs3, bs4);
+
+  int timeout = 0;
+  ReturnedBeliefState* rbs3 = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::JOIN_IN_MQ, 1, timeout);
+  ReturnedBeliefState* rbs4 = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::JOIN_IN_MQ, 1, timeout);
+
+  BOOST_CHECK_EQUAL(neighbor_offset_from_qid(rbs3->query_id), 1);
+  BOOST_CHECK_EQUAL(neighbor_offset_from_qid(rbs4->query_id), 2);
+  BOOST_CHECK_EQUAL(*rbs3->belief_state, *bs3);
+  BOOST_CHECK_EQUAL(*rbs4->belief_state, *bs4);
+}
+
+
+
+BOOST_AUTO_TEST_CASE ( testAllDispatchers )
+{
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(5, 3));
 
   ConcurrentMessageQueuePtr cmq1(new ConcurrentMessageQueue(5));
   ConcurrentMessageQueuePtr cmq2(new ConcurrentMessageQueue(5));
@@ -278,9 +372,14 @@ BOOST_AUTO_TEST_CASE ( testRequestAndOutputDispatcher )
   md->registerMQ(cmq3, NewConcurrentMessageDispatcher::REQUEST_MQ, 0);
   md->registerMQ(cmq4, NewConcurrentMessageDispatcher::REQUEST_MQ, 1);
 
+  ConcurrentMessageQueuePtr cmq5(new ConcurrentMessageQueue(5));
+  ConcurrentMessageQueuePtr cmq6(new ConcurrentMessageQueue(5));
+  md->registerMQ(cmq5, NewConcurrentMessageDispatcher::JOIN_IN_MQ, 0);
+  md->registerMQ(cmq6, NewConcurrentMessageDispatcher::JOIN_IN_MQ, 1);
 
   RequestDispatcher request_dispatcher(md);
   NewOutputDispatcher output_dispatcher(md);
+  NewJoinerDispatcher joiner_dispatcher(md);
 
   request_dispatcher.registerIdOffset(10, 0);
   request_dispatcher.registerIdOffset(20, 1);
@@ -288,29 +387,41 @@ BOOST_AUTO_TEST_CASE ( testRequestAndOutputDispatcher )
   output_dispatcher.registerIdOffset(3, 0);
   output_dispatcher.registerIdOffset(5, 1);
 
+  joiner_dispatcher.registerIdOffset(3, 0);
+  joiner_dispatcher.registerIdOffset(5, 1);
+
   boost::thread request_dispatcher_thread(request_dispatcher);
   boost::thread output_dispatcher_thread(output_dispatcher);
-
+  boost::thread joiner_dispatcher_thread(joiner_dispatcher);
   
   boost::thread request_sender(send_request, md);
   boost::thread output_sender(send_output, md);
-
+  boost::thread join_in_sender(send_join_in, md);
+  boost::thread returned_belief_state_sender(send_returned_belief_state, md);
 
   boost::thread request_receiver0(receive_request_at_0, md);
   boost::thread request_receiver1(receive_request_at_1, md);
   boost::thread output_receiver0(receive_output_at_0, md);
   boost::thread output_receiver1(receive_output_at_1, md);
+  boost::thread returned_belief_state_receiver0(receive_input_belief_state_at_0, md);
+  boost::thread returned_belief_state_receiver1(receive_input_belief_state_at_1, md);
 
   request_sender.join();
   output_sender.join();
+  join_in_sender.join();
+  returned_belief_state_sender.join();
 
   request_receiver0.join();
   request_receiver1.join();
   output_receiver0.join();
   output_receiver1.join();
+  returned_belief_state_receiver0.join();
+  returned_belief_state_receiver1.join();
 
   request_dispatcher_thread.join();
   output_dispatcher_thread.join();
+  joiner_dispatcher_thread.interrupt();
+  joiner_dispatcher_thread.join();
 }
 
 // Local Variables:

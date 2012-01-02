@@ -1,5 +1,10 @@
 2012-01-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/Makefile.am: Add NewJoinerDispatcher.h.
+	* include/mcs/NewJoinerDispatcher.h: Newfile.
+
+	* include/mcs/JoinIn.h: Small bug.
+
 	* testsuite/testMessageDispatcher.cpp: Update testcase.
 
 	* include/mcs/NewOutputDispatcher.h: Add infinite loop.

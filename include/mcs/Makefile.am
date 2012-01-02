@@ -18,6 +18,7 @@ noinst_HEADERS =  \
 		NewBaseDispatcher.h \
 		NewBeliefState.h \
 		NewMessage.h \
+		NewJoinerDispatcher.h \
 		NewOutputDispatcher.h \
 		Pool.h \
 		Printhelpers.h \
