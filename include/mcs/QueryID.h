@@ -46,6 +46,9 @@ public:
   NEIGHBOR_OFFSET_SHIFT() const;
 
   std::size_t
+  SHUTDOWN_MASK() const;
+
+  std::size_t
   LOCAL_CONTEXT_MASK() const;
 
   std::size_t
@@ -61,6 +64,7 @@ private:
   std::size_t local_context_shift;
   std::size_t neighbor_offset_shift;
 
+  std::size_t shutdown_mask;
   std::size_t local_context_mask;
   std::size_t neighbor_offset_mask;
   std::size_t query_order_mask;
@@ -88,6 +92,23 @@ query_id(const std::size_t ctx_id,
 	  | (neighbor_offset << QueryID::instance()->NEIGHBOR_OFFSET_SHIFT())
 	  | query_order);
 }
+
+
+
+inline std::size_t
+shutdown_query_id()
+{
+  return QueryID::instance()->SHUTDOWN_MASK();
+}
+
+
+
+inline bool
+shutdown(std::size_t query_id)
+{
+  return (query_id & QueryID::instance()->SHUTDOWN_MASK()) == QueryID::instance()->SHUTDOWN_MASK();
+}
+
 
 
 inline std::size_t

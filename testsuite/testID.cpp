@@ -36,19 +36,24 @@
 BOOST_AUTO_TEST_CASE ( testQueryID )
 {
   std::size_t qid = dmcs::query_id(21, 24, 27);
+  bool is_shutdown = dmcs::shutdown(qid);
   std::size_t ctx_id = dmcs::ctxid_from_qid(qid);
   std::size_t n_offset = dmcs::neighbor_offset_from_qid(qid);
   std::size_t qorder = dmcs::qorder_from_qid(qid);
 
+  BOOST_CHECK_EQUAL(is_shutdown, false);
   BOOST_CHECK_EQUAL(ctx_id, 21);
   BOOST_CHECK_EQUAL(n_offset, 24);
   BOOST_CHECK_EQUAL(qorder, 27);
 
+  
   qid = dmcs::query_id(12, 42);
+  is_shutdown = dmcs::shutdown(qid);
   ctx_id = dmcs::ctxid_from_qid(qid);
   n_offset = dmcs::neighbor_offset_from_qid(qid);
   qorder = dmcs::qorder_from_qid(qid);
 
+  BOOST_CHECK_EQUAL(is_shutdown, false);
   BOOST_CHECK_EQUAL(ctx_id, 12);
   BOOST_CHECK_EQUAL(n_offset, 0);
   BOOST_CHECK_EQUAL(qorder, 42);

@@ -40,11 +40,14 @@ QueryID::QueryID()
   neighbor_offset_shift = s/2;
   local_context_shift = 3*s/4;
 
+  shutdown_mask = 0;
   local_context_mask = 0;
   neighbor_offset_mask = 0;
   query_order_mask = 0;
 
-  for (std::size_t i = local_context_shift; i < s; ++i)
+  shutdown_mask |= (std::size_t)1 << (s-1);
+
+  for (std::size_t i = local_context_shift; i < s-1; ++i)
     {
       local_context_mask |= (std::size_t)1 << i;
     }
@@ -84,6 +87,14 @@ std::size_t
 QueryID::NEIGHBOR_OFFSET_SHIFT() const
 {
   return neighbor_offset_shift;
+}
+
+
+
+std::size_t
+QueryID::SHUTDOWN_MASK() const
+{
+  return shutdown_mask;
 }
 
 
