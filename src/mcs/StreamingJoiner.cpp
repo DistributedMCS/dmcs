@@ -99,9 +99,7 @@ StreamingJoiner::process(std::size_t query_id, std::size_t k1, std::size_t k2)
   else
     {
       reset();
-      std::size_t qid = shutdown_query_id();
-      ReturnedBeliefState* rbs = new ReturnedBeliefState(NULL, qid);
-      return rbs;
+      return NULL;
     }
 }
 
@@ -125,10 +123,7 @@ StreamingJoiner::first_join(std::size_t query_id, std::size_t k1, std::size_t k2
     {
       // A neighbor is inconsistent. Reset and return NULL 
       reset();
-      
-      std::size_t qid = shutdown_query_id();
-      ReturnedBeliefState* rbs = new ReturnedBeliefState(NULL, qid);
-      return rbs;
+      return NULL;
     }
   
   bool succeeded = do_join(query_id);
@@ -153,8 +148,7 @@ StreamingJoiner::first_join(std::size_t query_id, std::size_t k1, std::size_t k2
 	}
     }
 
-  ReturnedBeliefState* rbs = new ReturnedBeliefState(NULL, shutdown_query_id());
-  return rbs;
+  return NULL;
 }
 
 
@@ -162,7 +156,105 @@ StreamingJoiner::first_join(std::size_t query_id, std::size_t k1, std::size_t k2
 ReturnedBeliefState*
 StreamingJoiner::next_join(std::size_t query_id, std::size_t k1, std::size_t k2)
 {
+  if (k2 == 0)
+    {
+      pack_size = 0;
+    }
+  else
+    {
+      pack_size = k2 - k1 + 1;
+    }
+
+  // now really going to the loop of asking next =============================================
+  while (1)
+    {
+      if (next_neighbor_offset == no_neighbors)
+	{
+	  // No more models from my neighbors	    
+	  reset();
+
+	  return NULL;
+	}
+      
+      std::size_t& pc = pack_count[next_neighbor_offset];
+      pc++;
+      std::size_t k_one = pc * pack_size + 1;
+      std::size_t k_two = (pc+1) * pack_size;
+      
+      // Ask next at neighbor_offset
+      if (ask_neighbor_and_receive(next_neighbor_offset, query_id, k_one, k_two))
+	{
+	  if (asking_next)
+	    {
+	      assert (next_neighbor_offset > 0);
+	            
+	      // Ask first packs before neighbor_offset
+	      bool ret = ask_first_packs(query_id, 0, next_neighbor_offset - 1);
+	            
+	      assert (ret == true);
+	            
+	      // reset counter
+	      std::fill(pack_count.begin(), pack_count.begin() + next_neighbor_offset, 0);
+	    }
+	    
+	  bool succeeded = do_join(query_id);
+	    
+	  next_neighbor_offset = 0;
+	  asking_next = false;
+	  if (succeeded)
+	    {
+	      ReturnedBeliefState* rbs = joined_results.front();
+	      joined_results.pop_front();
+	      return rbs;
+	    }
+	}
+      else
+	{
+	  next_neighbor_offset++;
+	  asking_next = true;
+	}	
+    }
 }
+
+
+
+
+bool
+StreamingJoiner::ask_neighbor_and_receive(std::size_t noff,
+					  std::size_t query_id,
+					  std::size_t k1,
+					  std::size_t k2)
+{
+  ask_neighbor(noff, query_id, k1, k2);
+
+  int timeout = 0;
+  std::size_t count_models_read = 0;
+
+  NewBeliefStateVecPtr& bsv = input_belief_states[noff]; 
+  while (1)
+    {
+      ReturnedBeliefState* rbs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::JOIN_IN_MQ, noff, timeout);
+
+      if (rbs)
+	{
+	  std::size_t query_id = rbs->query_id;
+	  std::size_t offset = neighbor_offset_from_qid(query_id);
+	  assert (noff == offset);
+	  ++count_models_read;
+	  bsv->push_back(rbs->belief_state);
+	}
+      else
+	{
+	  break;
+	}
+    }
+
+  // now unregister from JoinerDispatcher
+  joiner_dispatcher->unregisterIdOffset(query_id, ctx_offset);
+
+  return (count_models_read != 0);
+}
+
 
 
 
@@ -311,7 +403,7 @@ StreamingJoiner::ask_first_packs(std::size_t query_id, std::size_t from_neighbor
   std::size_t all_neighbors_returned = 0;
   all_neighbors_returned = (std::size_t)1 << (to_neighbor - from_neighbor + 1);
   all_neighbors_returned--;
-  all_neighbors_returned << from_neighbor;
+  all_neighbors_returned <<= from_neighbor;
 
   std::size_t marking_neighbors = 0;
   std::vector<std::size_t> count_models_read(to_neighbor+1, 0);

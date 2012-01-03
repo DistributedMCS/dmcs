@@ -1,5 +1,8 @@
 2012-01-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/StreamingJoiner.h: Finish Joiner.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
 	* include/mcs/NewBaseDispatcher.h: include.
 
 	* include/mcs/NewBeliefState.h: New typedef(s) for Joiner.

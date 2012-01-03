@@ -71,10 +71,21 @@ private:
        const NewBeliefStateIteratorVecPtr& run_it);
 
   bool
-  ask_first_packs(std::size_t query_id, std::size_t from_neighbor, std::size_t to_neighbor);
+  ask_first_packs(std::size_t query_id, 
+		  std::size_t from_neighbor, 
+		  std::size_t to_neighbor);
 
   void
-  ask_neighbor(std::size_t noff, std::size_t query_id, std::size_t k1, std::size_t k2);
+  ask_neighbor(std::size_t noff, 
+	       std::size_t query_id, 
+	       std::size_t k1, 
+	       std::size_t k2);
+
+  bool
+  ask_neighbor_and_receive(std::size_t noff,
+			   std::size_t query_id,
+			   std::size_t k1,
+			   std::size_t k2);
 
 private:
   std::size_t pack_size;            // the real upper-bound of number of models that we ask the neighbors
