@@ -135,6 +135,13 @@ set_neighbor_offset(std::size_t& query_id, const std::size_t n_offset)
 
 
 
+inline void
+unset_neighbor_offset(std::size_t& query_id)
+{
+  query_id &= ~(QueryID::instance()->NEIGHBOR_OFFSET_MASK());
+}
+
+
 inline std::size_t
 qorder_from_qid(const std::size_t query_id)
 {

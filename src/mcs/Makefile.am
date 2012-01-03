@@ -31,14 +31,16 @@ noinst_LIBRARIES = libmcs.a
 # the mcs library
 libmcs_a_SOURCES = \
 		BackwardMessage.cpp \
+		BaseJoiner.cpp \
 		Belief.cpp \
 		BeliefStateOffset.cpp \
+		BridgeRuleEvaluator.cpp \
 		ForwardMessage.cpp \
 		ID.cpp \
 		Logger.cpp \
 		NewBeliefState.cpp \
 		Pool.cpp \
+		QueryID.cpp \
 	  	ResourceManager.cpp \
 		ReturnedBeliefState.cpp \
-		QueryID.cpp \
-		BridgeRuleEvaluator.cpp
+		StreamingJoiner.cpp 

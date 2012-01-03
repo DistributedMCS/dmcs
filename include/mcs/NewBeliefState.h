@@ -116,6 +116,15 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
   BitMagic value_bit;
 };
 
+typedef std::vector<NewBeliefState*> NewBeliefStateVec;
+typedef boost::shared_ptr<NewBeliefStateVec> NewBeliefStateVecPtr;
+
+typedef std::vector<NewBeliefStateVecPtr> NewBeliefStatePackage;
+typedef boost::shared_ptr<NewBeliefStatePackage> NewBeliefStatePackagePtr;
+
+typedef std::vector<NewBeliefStateVec::const_iterator> NewBeliefStateIteratorVec;
+typedef boost::shared_ptr<NewBeliefStateIteratorVec> NewBeliefStateIteratorVecPtr;
+
 
 // inline functions ************************************************
 

@@ -1,3 +1,25 @@
+2012-01-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/NewBaseDispatcher.h: include.
+
+	* include/mcs/NewBeliefState.h: New typedef(s) for Joiner.
+
+	* include/mcs/NewJoinerDispatcher.h: Dispatcher by query_id.
+
+	* include/mcs/QueryID.h: Add unset_neighbor_offset().
+
+	* include/mcs/ReturnedBeliefState.h: ReturnedBeliefStateList now contains pointers.
+	* src/mcs/ReturnedBeliefState.cpp: Likewise.
+	* testsuite/testBeliefState.cpp: Adapt testcase.
+
+	* include/mcs/Makefile.am: Add BaseJoiner.h and StreamingJoiner.h.
+	* src/mcs/Makefile.am: Add BaseJoiner.cpp and StreamingJoiner.cpp.
+
+	* include/mcs/BaseJoiner.h: New file.
+	* src/mcs/BaseJoiner.cpp: Likewise.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
 2012-01-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/Makefile.am: Add NewJoinerDispatcher.h.

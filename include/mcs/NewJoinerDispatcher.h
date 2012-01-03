@@ -30,6 +30,8 @@
 #ifndef NEW_JOINER_DISPATCHER_H
 #define NEW_JOINER_DISPATCHER_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "mcs/NewBaseDispatcher.h"
 #include "mcs/JoinIn.h"
 #include "mcs/QueryID.h"
@@ -40,7 +42,7 @@ namespace dmcs {
 class NewJoinerDispatcher : public NewBaseDispatcher
 {
 public:
-  NewJoinerDispatcher(NewConcurrentMessageDispatcherPtr& md)
+  NewJoinerDispatcher(NewConcurrentMessageDispatcherPtr md)
     : NewBaseDispatcher(md)
   { }
 
@@ -60,16 +62,18 @@ public:
 	for (std::size_t i = 0; i < no_belief_state; ++i)
 	  {
 	    ReturnedBeliefState* rbs = cmd->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, neighbor_offset, timeout);
-	    set_neighbor_offset(rbs->query_id, neighbor_offset);
 	    
-	    std::size_t ctx_id = ctxid_from_qid(rbs->query_id);
-	    std::size_t offset = get_offset(ctx_id);
+	    std::size_t old_qid = rbs->query_id;
+	    set_neighbor_offset(rbs->query_id, neighbor_offset);
+	    std::size_t offset = get_offset(old_qid);
 	    
 	    cmd->send(NewConcurrentMessageDispatcher::JOIN_IN_MQ, offset, rbs, timeout);
 	  }
       }
   }
 };
+
+typedef boost::shared_ptr<NewJoinerDispatcher> NewJoinerDispatcherPtr;
 
 } // namespace dmcs
 

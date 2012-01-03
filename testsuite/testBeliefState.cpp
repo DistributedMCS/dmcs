@@ -244,12 +244,12 @@ BOOST_AUTO_TEST_CASE ( testRemoveDuplication )
   bs6->set(30);
   bs6->set(40);
 
-  ReturnedBeliefState rbs1(bs1, 1);
-  ReturnedBeliefState rbs2(bs2, 1);
-  ReturnedBeliefState rbs3(bs3, 2);
-  ReturnedBeliefState rbs4(bs4, 1);
-  ReturnedBeliefState rbs5(bs5, 1);
-  ReturnedBeliefState rbs6(bs6, 1);
+  ReturnedBeliefState* rbs1 = new ReturnedBeliefState(bs1, 1);
+  ReturnedBeliefState* rbs2 = new ReturnedBeliefState(bs2, 1);
+  ReturnedBeliefState* rbs3 = new ReturnedBeliefState(bs3, 2);
+  ReturnedBeliefState* rbs4 = new ReturnedBeliefState(bs4, 1);
+  ReturnedBeliefState* rbs5 = new ReturnedBeliefState(bs5, 1);
+  ReturnedBeliefState* rbs6 = new ReturnedBeliefState(bs6, 1);
 
   ReturnedBeliefStateListPtr rbsl(new ReturnedBeliefStateList);
   

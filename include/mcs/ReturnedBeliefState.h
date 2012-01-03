@@ -63,11 +63,11 @@ struct ReturnedBeliefState : private ostream_printable<ReturnedBeliefState>
   std::size_t query_id;
 };
 
-typedef std::list<ReturnedBeliefState> ReturnedBeliefStateList;
+typedef std::list<ReturnedBeliefState*> ReturnedBeliefStateList;
 typedef boost::shared_ptr<ReturnedBeliefStateList> ReturnedBeliefStateListPtr;
 
 bool
-my_compare(const ReturnedBeliefState& rbs1, const ReturnedBeliefState& rbs2);
+my_compare(const ReturnedBeliefState* rbs1, const ReturnedBeliefState* rbs2);
 
 bool
 operator== (const ReturnedBeliefState& rbs1, const ReturnedBeliefState& rbs2);

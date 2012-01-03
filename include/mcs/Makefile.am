@@ -3,6 +3,7 @@ AUTOMAKE_OPTIONS = gnu
 # including headers for make dist
 noinst_HEADERS =  \
 		BackwardMessage.h \
+		BaseJoiner.h \
 		Belief.h \
 		BeliefState.h \
 		BeliefStateOffset.h \
@@ -29,6 +30,7 @@ noinst_HEADERS =  \
 		ResourceManager.h \
 		Rule.h \
 		Signature.h \
+		StreamingJoiner.h \
 		Table.h \
 		Theory.h
 

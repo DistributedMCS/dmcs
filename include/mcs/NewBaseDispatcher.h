@@ -31,6 +31,7 @@
 #define NEW_BASE_DISPATCHER_H
 
 #include <map>
+#include "network/NewConcurrentMessageDispatcher.h"
 
 namespace dmcs {
 

@@ -49,25 +49,25 @@ ReturnedBeliefState::print(std::ostream& os) const
 
 
 bool
-my_compare(const ReturnedBeliefState& rbs1, const ReturnedBeliefState& rbs2)
+my_compare(const ReturnedBeliefState* rbs1, const ReturnedBeliefState* rbs2)
 {
-  if (!rbs1.belief_state)
+  if (!rbs1->belief_state)
     {
       return false;
     }
 
-  if (!rbs2.belief_state)
+  if (!rbs2->belief_state)
     {
       return true;
     }
 
-  if (*(rbs1.belief_state) < *(rbs2.belief_state))
+  if (*(rbs1->belief_state) < *(rbs2->belief_state))
     {
       return true;
     }
-  else if (*(rbs1.belief_state) == *(rbs2.belief_state))
+  else if (*(rbs1->belief_state) == *(rbs2->belief_state))
     {
-      if (rbs1.query_id < rbs2.query_id)
+      if (rbs1->query_id < rbs2->query_id)
 	{
 	  return true;
 	}
@@ -111,18 +111,18 @@ remove_duplication(ReturnedBeliefStateListPtr& rbsl)
 
   while (++first != last)
   {
-    if (!(*mid == *first))
+    if (!(**mid == **first))
       {
 	for (ReturnedBeliefStateList::iterator it = beg_remove; it != first; ++it)
 	  {
-	    ReturnedBeliefState& rbs = *it;
-	    NewBeliefState* pbs = rbs.belief_state;
+	    ReturnedBeliefState* rbs = *it;
+	    NewBeliefState* pbs = rbs->belief_state;
 	    delete pbs;
 	    pbs = 0;
 	  }
 
 	// copy here, but we can afford it because it contains just 2 integers
-	*(++mid) = *first;
+	**(++mid) = **first;
 	beg_remove = first;
 	beg_remove++;
       }
@@ -130,8 +130,8 @@ remove_duplication(ReturnedBeliefStateListPtr& rbsl)
 
   for (ReturnedBeliefStateList::iterator it = beg_remove; it != last; ++it)
     {
-      ReturnedBeliefState& rbs = *it;
-      NewBeliefState* pbs = rbs.belief_state;
+      ReturnedBeliefState* rbs = *it;
+      NewBeliefState* pbs = rbs->belief_state;
       delete pbs;
       pbs = 0;      
     }
