@@ -58,10 +58,16 @@ BOOST_AUTO_TEST_CASE ( testQueryID )
   BOOST_CHECK_EQUAL(n_offset, 0);
   BOOST_CHECK_EQUAL(qorder, 42);
 
+  std::size_t old_qid = qid;
+
   dmcs::set_neighbor_offset(qid, 30);
   n_offset = dmcs::neighbor_offset_from_qid(qid);
 
   BOOST_CHECK_EQUAL(n_offset, 30);
+  BOOST_CHECK_EQUAL(qid == old_qid, false);
+
+  dmcs::unset_neighbor_offset(qid);
+  BOOST_CHECK_EQUAL(qid, old_qid);
 }
 
 // Local Variables:
