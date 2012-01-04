@@ -36,7 +36,7 @@ TESTS = \
 	testConnection \
 	testMessagingGateway \
 	testBeliefState \
-	testJoinThread \
+	testJoiner \
 	testJoinLeak \
 	testInterfaceRelSat \
 	testBeliefStateCaching \
@@ -76,7 +76,7 @@ check_PROGRAMS = \
 	testConnection \
 	testMessagingGateway \
 	testBeliefState \
-	testJoinThread \
+	testJoiner \
 	testJoinLeak \
 	testInterfaceRelSat \
 	testBeliefStateCaching \
@@ -167,9 +167,10 @@ testBeliefState_LDADD = \
 
 testBeliefStateCaching_SOURCES = testBeliefStateCaching.cpp
 
-testJoinThread_SOURCES = testJoinThread.cpp
-testJoinThread_LDADD = \
+testJoiner_SOURCES = testJoiner.cpp
+testJoiner_LDADD = \
 	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a
 

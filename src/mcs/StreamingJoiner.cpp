@@ -41,9 +41,7 @@ StreamingJoiner::StreamingJoiner(std::size_t c, std::size_t n,
     first_round(true),
     asking_next(false),
     pack_count(n, 0)
-{
-  init();
-}
+{ }
 
 
 
@@ -233,12 +231,15 @@ StreamingJoiner::ask_neighbor_and_receive(std::size_t noff,
   NewBeliefStateVecPtr& bsv = input_belief_states[noff]; 
   while (1)
     {
-      ReturnedBeliefState* rbs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::JOIN_IN_MQ, noff, timeout);
+      ReturnedBeliefState* rbs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::JOIN_IN_MQ, ctx_offset, timeout);
 
-      if (rbs)
+      NewBeliefState* bs = rbs->belief_state;
+
+      if (bs)
 	{
-	  std::size_t query_id = rbs->query_id;
-	  std::size_t offset = neighbor_offset_from_qid(query_id);
+
+	  std::size_t qid = rbs->query_id;
+	  std::size_t offset = neighbor_offset_from_qid(qid);
 	  assert (noff == offset);
 	  ++count_models_read;
 	  bsv->push_back(rbs->belief_state);
@@ -288,6 +289,20 @@ StreamingJoiner::join(std::size_t query_id,
 {
   assert ((input_belief_states.size() == beg_it->size()) && (beg_it->size() == end_it->size()));
   bool ret = false;
+
+#if 0
+  std::cerr << "Join:" << std::endl;
+  NewBeliefStateIteratorVec::const_iterator bt = beg_it->begin();
+  NewBeliefStateIteratorVec::const_iterator et = end_it->begin();
+  for (; bt != beg_it->end(); ++bt, ++et)
+    {
+      for (NewBeliefStateVec::const_iterator it = *bt; it != *et; ++it)
+	{
+	  std::cerr << **it << std::endl;
+	}
+      std::cerr << std::endl;
+    }
+#endif // 0
 
   std::size_t n = input_belief_states.size();
 
@@ -403,7 +418,7 @@ StreamingJoiner::ask_first_packs(std::size_t query_id, std::size_t from_neighbor
   std::size_t all_neighbors_returned = 0;
   all_neighbors_returned = (std::size_t)1 << (to_neighbor - from_neighbor + 1);
   all_neighbors_returned--;
-  all_neighbors_returned <<= from_neighbor;
+  all_neighbors_returned = all_neighbors_returned << from_neighbor;
 
   std::size_t marking_neighbors = 0;
   std::vector<std::size_t> count_models_read(to_neighbor+1, 0);
@@ -416,17 +431,17 @@ StreamingJoiner::ask_first_packs(std::size_t query_id, std::size_t from_neighbor
       NewBeliefState* bs = rbs->belief_state;
       std::size_t qid = rbs->query_id;
       std::size_t noff = neighbor_offset_from_qid(qid);
-      
-      unset_neighbor_offset(qid);
-      assert (qid == query_id);
 
       if (bs)
 	{
+	  unset_neighbor_offset(qid);
+	  assert (qid == query_id);
+
 	  NewBeliefStateVecPtr& bsv = input_belief_states[noff];
 	  ++count_models_read[noff];
 	  bsv->push_back(bs);
 	}
-      else
+      else // NULL rbs <--> end of pack from JOIN_IN 
 	{
 	  if (count_models_read[noff] == 0)
 	    {

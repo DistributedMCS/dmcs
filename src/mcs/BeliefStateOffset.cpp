@@ -42,9 +42,9 @@ BeliefStateOffset::BeliefStateOffset(std::size_t no_bs, std::size_t size_bs)
     {
       if (i > 0)
 	{
-	  starting_offsets[i] = starting_offsets[i-1] + size_bs;
+	  starting_offsets[i] = starting_offsets[i-1] + size_bs + 1;
 	}
-      BitMagic* m = new BitMagic(no_bs * size_bs);
+      BitMagic* m = new BitMagic(no_bs * (size_bs+1));
       for (std::size_t j = starting_offsets[i]; 
 	   j < starting_offsets[i] + size_bs; ++j)
 	{

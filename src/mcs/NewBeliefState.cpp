@@ -39,6 +39,13 @@ NewBeliefState::NewBeliefState(std::size_t n)
 
 
 
+NewBeliefState::NewBeliefState(std::size_t no_bs, std::size_t bs_size)
+  : status_bit(no_bs * (bs_size+1)), 
+    value_bit(no_bs * (bs_size+1))
+{ }
+
+
+
 NewBeliefState::NewBeliefState(const NewBeliefState& bs)
 {
   assert (bs.status_bit.size() == bs.value_bit.size());

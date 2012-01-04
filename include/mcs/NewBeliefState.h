@@ -65,6 +65,7 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
     };
 
   NewBeliefState(std::size_t n);
+  NewBeliefState(std::size_t no_bs, std::size_t bs_size);
   NewBeliefState(const NewBeliefState& bs);
 
   NewBeliefState&
@@ -91,8 +92,19 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
   inline TruthVal
   test(std::size_t pos) const;
 
+  inline TruthVal
+  test(std::size_t ctx_id, 
+       std::size_t pos, 
+       const std::vector<std::size_t>& starting_offset) const;
+
   inline void
   set(std::size_t pos,
+      TruthVal val = NewBeliefState::DMCS_TRUE);
+
+  inline void
+  set(std::size_t ctx_id,
+      std::size_t pos,
+      const std::vector<std::size_t>& starting_offset,
       TruthVal val = NewBeliefState::DMCS_TRUE);
 
   inline bool
@@ -211,6 +223,19 @@ NewBeliefState::test(std::size_t pos) const
 }
 
 
+inline NewBeliefState::TruthVal
+NewBeliefState::test(std::size_t ctx_id, 
+		     std::size_t pos, 
+		     const std::vector<std::size_t>& starting_offset) const
+{
+  assert (ctx_id < starting_offset.size());
+  std::size_t abs_pos = starting_offset[ctx_id] + pos;
+  assert (abs_pos > 0 && abs_pos < size());
+
+  return test(abs_pos);
+}
+
+
 
 inline void
 NewBeliefState::set(std::size_t pos,
@@ -239,6 +264,21 @@ NewBeliefState::set(std::size_t pos,
 	break;
       }
     }
+}
+
+
+
+inline void
+NewBeliefState::set(std::size_t ctx_id,
+		    std::size_t pos,
+		    const std::vector<std::size_t>& starting_offset,
+		    TruthVal val)
+{
+  assert (ctx_id < starting_offset.size());
+  std::size_t abs_pos = starting_offset[ctx_id] + pos;
+  assert (abs_pos > 0 && abs_pos < size());
+
+  set(abs_pos, val);
 }
 
 

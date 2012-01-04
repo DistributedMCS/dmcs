@@ -1,3 +1,15 @@
+2012-01-04  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Replace testJoinThread by testJoiner.
+
+	* src/mcs/StreamingJoiner.cpp: Fix bug: initialization and receive NULL.
+
+	* include/mcs/NewBeliefState.h: Fix bug: epsilon bits for belief sets.
+	* src/mcs/NewBeliefState.cpp: Likewise.
+	* src/mcs/BeliefStateOffset.cpp: Likewise.
+
+	* testsuite/testJoiner.cpp: New file.
+
 2012-01-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/StreamingJoiner.h: Finish Joiner.
