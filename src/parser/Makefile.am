@@ -28,6 +28,6 @@ noinst_LIBRARIES = libparser.a
 
 # the parser library
 libparser_a_SOURCES = \
-		ClaspResultOnlineParser.cpp
-
-
+		ClaspResultOnlineParser.cpp \
+		DLVResultGrammar.cpp \
+		DLVResultParser.cpp 

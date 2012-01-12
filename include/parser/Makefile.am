@@ -15,14 +15,15 @@ noinst_HEADERS =  \
 		CnfBuilder.tcc \
 		CnfGrammar.h \
 		CnfGrammar.tcc \
+		DLVResultGrammar.h \
+		DLVResultParser.h \
 		LocalKBBuilder.h \
 		LocalKBBuilder.tcc \
 		PropositionalASPGrammar.h \
 		PropositionalASPGrammar.tcc \
 		ParserDirector.h \
 		ParserDirector.tcc \
+		ParserState.h \
 		SpiritDebugging.h \
 		SpiritFilePositionNode.h 
-
-
 

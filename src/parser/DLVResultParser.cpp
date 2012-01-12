@@ -36,17 +36,18 @@
 
 namespace dmcs {
 
-DLVResultParser::DLVResultParser(BeliefTablePtr b)
-  : btab(b)
+DLVResultParser::DLVResultParser(std::size_t cid, BeliefTablePtr b)
+  : ctx_id(cid),
+    btab(b)
 { }
 
 void
 DLVResultParser::parse(std::istream& is,
 		       BeliefStateAdder adder)
 {
-  ParserState state(btab, adder);
+  ParserState state(ctx_id, btab, adder);
   
-  typedef std::string::const_iterator> forward_iterator_t;
+  typedef std::string::const_iterator forward_iterator_t;
   DLVResultGrammar<forward_iterator_t> grammar(state);
   std::size_t errors = 0;
 
@@ -61,7 +62,7 @@ DLVResultParser::parse(std::istream& is,
 		    << ", eof " << is.eof() << std::endl;
 	}
       
-      forward_iterator_t fwd_beg = input.begin();
+      forward_iterator_t fwd_begin = input.begin();
       forward_iterator_t fwd_end = input.end();
 
       try
@@ -76,7 +77,7 @@ DLVResultParser::parse(std::istream& is,
 	      errors++;
 	    }
 	}
-      catch(const qi::expectation_failure<forward_iterator_type>& e)
+      catch(const qi::expectation_failure<forward_iterator_t>& e)
 	{
 	  std::cerr << "for input '" << input 
 		    << "': could not parse DLV output(expectation failure) " << e.what_ << std::endl;

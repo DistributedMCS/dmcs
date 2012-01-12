@@ -37,13 +37,16 @@ namespace dmcs {
 
 struct ParserState
 {
+  std::size_t ctx_id;
   BeliefTablePtr btab;
   NewBeliefState* current;
   DLVResultParser::BeliefStateAdder adder;
 
-  ParserState(BeliefTablePtr b,
+  ParserState(std::size_t cid,
+	      BeliefTablePtr b,
 	      DLVResultParser::BeliefStateAdder a)
-    : btab(b),
+    : ctx_id(cid),
+      btab(b),
       current(new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(), 
 				 BeliefStateOffset::instance()->SIZE_BS())),
       adder(a)

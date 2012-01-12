@@ -40,12 +40,13 @@ class DLVResultParser
 public:
   typedef boost::function<void (NewBeliefState*)> BeliefStateAdder;
 
-  DLVResultParser(BeliefTablePtr b);
+  DLVResultParser(std::size_t cid, BeliefTablePtr b);
 
   void
   parse(std::istream& is, BeliefStateAdder bsAdder);
 
 protected:
+  std::size_t ctx_id;
   BeliefTablePtr btab;
 };
 

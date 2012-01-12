@@ -59,7 +59,7 @@ struct handle_literal
 {
   handle_literal(ParserState& state);
 
-  void operator()(boost::fusion::pair<boost::optional<char>,
+  void operator()(boost::fusion::vector2<boost::optional<char>,
 				      std::string>& attr, 
 		  qi::unused_type, qi::unused_type) const;
 
@@ -128,10 +128,10 @@ struct DLVResultGrammar : public qi::grammar<Iterator, ascii::space_type>
 #endif
   }
   
-  qi::rule<Iterator, ascii::space_type>                  dlvline, answerset, literal, fact, costline;
-  qi::rule<Iterator, ID(), ascii::space_type>            groundterm;
-  qi::rule<Iterator, std::string(), ascii::space_type>   ident;
-  qi::rule<Iterator, Tuple(), ascii::space_type>         params;
+  qi::rule<Iterator, ascii::space_type>                  dlvline, answerset, literal, costline, groundterm, params;
+  //qi::rule<Iterator, ID(), ascii::space_type>            groundterm;
+  qi::rule<Iterator, std::string(), ascii::space_type>   ident, fact;
+  //qi::rule<Iterator, Tuple(), ascii::space_type>         params;
   
   ParserState& state;
 };
