@@ -1,3 +1,12 @@
+2012-01-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/BeliefStateAdder.h: New file.
+	* include/parser/DLVResultGrammar.h: Likewise.
+	* include/parser/DLVResultParser.h: Likewise.
+	* include/parser/ParserState.h: Likewise.
+	* src/parser/DLVResultGrammar.cpp: Likewise.
+	* src/parser/DLVResultParser.cpp: Likewise.
+
 2012-01-04  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/Makefile.am: Replace testJoinThread by testJoiner.
