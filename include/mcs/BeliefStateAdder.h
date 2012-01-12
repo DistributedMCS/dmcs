@@ -37,6 +37,8 @@
 #include "mcs/NewBeliefState.h"
 #include "network/ConcurrentMessageQueue.h"
 
+namespace dmcs {
+
 struct BeliefStateAdder
 {
   std::vector<NewBeliefState*> results;
@@ -47,6 +49,8 @@ struct BeliefStateAdder
     boost::this_thread::interruption_point();
   }
 };
+
+} // namespace dmcs
 
 #endif // BELIEF_STATE_ADDER_H
 

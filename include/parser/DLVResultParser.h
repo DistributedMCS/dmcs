@@ -38,7 +38,7 @@ namespace dmcs {
 class DLVResultParser
 {
 public:
-  typedef boost::function<void (BeliefState*)> BeliefStateAdder;
+  typedef boost::function<void (NewBeliefState*)> BeliefStateAdder;
 
   DLVResultParser(BeliefTablePtr b);
 

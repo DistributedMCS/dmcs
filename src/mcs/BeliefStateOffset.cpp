@@ -90,14 +90,14 @@ BeliefStateOffset::getStartingOffsets()
 
 
 std::size_t
-NO_BLOCKS() const
+BeliefStateOffset::NO_BLOCKS() const
 {
   return no_blocks;
 }
 
 
 std::size_t
-SIZE_BS() const
+BeliefStateOffset::SIZE_BS() const
 {
   return size_belief_state;
 }

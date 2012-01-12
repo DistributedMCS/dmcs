@@ -30,9 +30,10 @@
 #ifndef PARSER_STATE_H
 #define PARSER_STATE_H
 
-namespace dmcs {
-
+#include "mcs/BeliefStateOffset.h"
 #include "parser/DLVResultParser.h"
+
+namespace dmcs {
 
 struct ParserState
 {
@@ -41,7 +42,7 @@ struct ParserState
   DLVResultParser::BeliefStateAdder adder;
 
   ParserState(BeliefTablePtr b,
-	      DLVResultParsser::BeliefStateAdder a)
+	      DLVResultParser::BeliefStateAdder a)
     : btab(b),
       current(new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(), 
 				 BeliefStateOffset::instance()->SIZE_BS())),

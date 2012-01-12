@@ -29,6 +29,8 @@
 
 #include "parser/DLVResultGrammar.h"
 
+namespace dmcs {
+
 handle_literal::handle_literal(ParserState& state)
   : state(state)
 { }
@@ -65,6 +67,8 @@ handle_finished_answerset::operator()(qi::unused_type, qi::unused_type, qi::unus
   state.current = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
 				     BeliefStateOffset::instance()->SIZE_BS());
 }
+
+} // namespacee dmcs
 
 // Local Variables:
 // mode: C++

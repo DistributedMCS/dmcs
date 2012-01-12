@@ -39,11 +39,19 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/fusion/support/pair.hpp>
+#include <boost/fusion/include/pair.hpp>
 
 #include <sstream>
 #include <iostream>
 
-#includee "parser/ParserState.h"
+#include "parser/ParserState.h"
+
+namespace spirit = boost::spirit;
+namespace qi = boost::spirit::qi;
+namespace ascii = boost::spirit::ascii;
+namespace fusion = boost::fusion;
+namespace phoenix = boost::phoenix;
 
 namespace dmcs {
 
