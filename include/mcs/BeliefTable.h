@@ -79,6 +79,7 @@ public:
   // retrieve range by kind (return lower/upper bound iterators, +provide method to get ID from iterator)
 };
 
+typedef boost::shared_ptr<BeliefTable> BeliefTablePtr;
 
 // retrieve by ID
 // assert that id.kind is correct for Term

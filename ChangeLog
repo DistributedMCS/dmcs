@@ -1,5 +1,10 @@
 2012-01-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/BeliefTable.h: Add BeliefTablePtr.
+
+	* include/mcs/BeliefStateOffset.h: Add NO_BLOCKS() and SIZE_BS().
+	* src/mcs/BeliefStateOffset.cpp: Likewise.
+
 	* include/mcs/BeliefStateAdder.h: New file.
 	* include/parser/DLVResultGrammar.h: Likewise.
 	* include/parser/DLVResultParser.h: Likewise.

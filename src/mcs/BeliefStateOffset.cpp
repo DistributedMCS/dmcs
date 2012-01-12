@@ -34,7 +34,9 @@ namespace dmcs {
 BeliefStateOffset* BeliefStateOffset::_instance = 0;
 
 BeliefStateOffset::BeliefStateOffset(std::size_t no_bs, std::size_t size_bs)
-  : starting_offsets(no_bs, 0)
+  : no_blocks(no_bs),
+    size_belief_state(size_bs),
+    starting_offsets(no_bs, 0)
 {
   assert (no_bs > 0 && size_bs > 0);
 
@@ -84,6 +86,20 @@ std::vector<std::size_t>&
 BeliefStateOffset::getStartingOffsets()
 {
   return starting_offsets;
+}
+
+
+std::size_t
+NO_BLOCKS() const
+{
+  return no_blocks;
+}
+
+
+std::size_t
+SIZE_BS() const
+{
+  return size_belief_state;
 }
 
 } // namespace dmcs

@@ -49,10 +49,18 @@ public:
   std::vector<std::size_t>&
   getStartingOffsets();
 
+  std::size_t
+  NO_BLOCKS() const;
+
+  std::size_t
+  SIZE_BS() const;
+
 protected:
   BeliefStateOffset(std::size_t no_bs, std::size_t size_bs);
 
 private:
+  std::size_t no_blocks;
+  std::size_t size_belief_state;
   std::vector<BitMagic*> masks;
   std::vector<std::size_t> starting_offsets;
 
