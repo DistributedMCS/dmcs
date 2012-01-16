@@ -71,23 +71,26 @@ BOOST_AUTO_TEST_CASE ( testDLVResultParser )
       all_answers = all_answers + (*it) + "\n";
     }
 
-  std::cerr << "All answers = " << all_answers;
-
   std::istringstream iss(all_answers);
 
-  DLVResultParser dlv_parser(1, btab);
+  std::size_t ctx_id = 0;
+  DLVResultParser dlv_parser(ctx_id, btab);
 
-  SimpleBeliefStateAdder adder;
+  std::vector<NewBeliefState*> results;
+  SimpleBeliefStateAdder adder(results);
 
   dlv_parser.parse(iss, adder);
 
-  for (std::vector<NewBeliefState*>::const_iterator it = adder.results.begin();
-       it != adder.results.end(); ++it)
+  for (std::vector<NewBeliefState*>::const_iterator it = results.begin();
+       it != results.end(); ++it)
     {
       std::cerr << **it << std::endl;
     }
 
-  std::cerr << "BeliefTable: " << *btab << std::endl;
+  std::cerr << "BeliefTable: " << std::endl << *btab << std::endl;
+
+  BOOST_CHECK_EQUAL(results.size(), 3);
+  BOOST_CHECK_EQUAL(btab->getSize(), 5);
 }
 
 

@@ -1,3 +1,13 @@
+2012-01-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testResultParser.cpp: Update testcase.
+
+	* testsuite/SimpleBeliefStateAdder.h: New file, for testing DLVResultParser.
+
+	* include/parser/DLVResultGrammar.h: Fix grammar.
+
+	* src/parser/DLVResultGrammar.cpp: Fix setting truth value of beliefs.
+
 2012-01-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/BeliefTable.h: Add BeliefTablePtr.

@@ -46,7 +46,20 @@ handle_literal::operator()(boost::fusion::vector2<boost::optional<char>,
   const std::string& belief_text = boost::fusion::at_c<1>(attr);
   Belief belief(state.ctx_id, belief_text);
   ID belief_id = state.btab->storeAndGetID(belief);
-  state.current->set(belief_id.address);
+  
+  if (strong_neg)
+    {
+      state.current->set(state.ctx_id, 
+			 belief_id.address,
+			 BeliefStateOffset::instance()->getStartingOffsets(),
+			 NewBeliefState::DMCS_FALSE);
+    }
+  else
+    {
+      state.current->set(state.ctx_id, 
+			 belief_id.address,
+			 BeliefStateOffset::instance()->getStartingOffsets());
+    }
 }
 
 
@@ -62,6 +75,7 @@ handle_finished_answerset::operator()(qi::unused_type, qi::unused_type, qi::unus
 {
   // add current answer set as full answer set
   //DBGLOG(DBG,"handling parsed answer set " << *state.current);
+
   state.adder(state.current);
   // create empty answer set for subsequent parsing
   state.current = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),

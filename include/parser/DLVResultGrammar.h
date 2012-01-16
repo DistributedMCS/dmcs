@@ -93,21 +93,21 @@ struct DLVResultGrammar : public qi::grammar<Iterator, ascii::space_type>
     using qi::omit;
     using qi::lit;
 
-    mynumber = 
+    number = 
       lexeme[ char_('0') ]
       | lexeme[ char_('1', '9') >> *(char_('0', '9')) ];
   
-    ident %=
+    ident =
         lexeme[char_('"') >> *(char_ - '"') >> char_('"')]
       | (ascii::lower >> *(ascii::alnum|char_('_')));
 
-    params %= *( char_(',') >> ident );
+    ///TODO: When raw[] is not used, we won't get from 2nd arguments in the facts. 
+    ///Something wrong with boost!!! try not to use raw[] with newer version of boost!
+    fact = 
+      raw[ident >> -( char_('(') >> (ident | number) >> *(char_(',') >> (ident | number)) >> char_(')') )];
 
-    fact %= 
-      raw[ident >> -( char_('(') >> ident >> *(char_(',') >> ident) >> char_(')') )];
-
-    mlit = ( -char_('-') >> fact >> lit(',') ) [ handle_literal(state) ] ;
-    flit = ( -char_('-') >> fact >> lit('}') ) [ handle_literal(state) ] ;
+    mlit = ( -char_('-') >> fact >> lit(',') ) [ handle_literal(state) ];
+    flit = ( -char_('-') >> fact >> lit('}') ) [ handle_literal(state) ];
 
     answerset
       = (lit('{') >> '}') [ handle_finished_answerset(state) ]
@@ -128,14 +128,13 @@ struct DLVResultGrammar : public qi::grammar<Iterator, ascii::space_type>
     BOOST_SPIRIT_DEBUG_NODE(mlit);
     BOOST_SPIRIT_DEBUG_NODE(flit);
     BOOST_SPIRIT_DEBUG_NODE(fact);
-    BOOST_SPIRIT_DEBUG_NODE(params);
-    BOOST_SPIRIT_DEBUG_NODE(mynumber);
+    BOOST_SPIRIT_DEBUG_NODE(number);
     BOOST_SPIRIT_DEBUG_NODE(ident);
 #endif
   }
   
   qi::rule<Iterator, ascii::space_type>                  dlvline, costline, answerset, mlit, flit;
-  qi::rule<Iterator, std::string(), ascii::space_type>   ident, fact, mynumber, params;
+  qi::rule<Iterator, std::string(), ascii::space_type>   ident, fact, number;
   
   ParserState& state;
 };
