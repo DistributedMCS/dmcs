@@ -60,6 +60,7 @@ DLVResultParser::parse(std::istream& is,
 	  std::cerr << "leaving loop because got input size " << input.size() 
 		    << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
 		    << ", eof " << is.eof() << std::endl;
+	  break;
 	}
       
       forward_iterator_t fwd_begin = input.begin();

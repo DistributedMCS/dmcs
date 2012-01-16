@@ -6,7 +6,6 @@ noinst_HEADERS =  \
 		BaseJoiner.h \
 		Belief.h \
 		BeliefState.h \
-		BeliefStateAdder.h \
 		BeliefStateOffset.h \
 		BeliefTable.h \
 		BridgeRule.h \

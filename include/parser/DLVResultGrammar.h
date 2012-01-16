@@ -60,7 +60,7 @@ struct handle_literal
   handle_literal(ParserState& state);
 
   void operator()(boost::fusion::vector2<boost::optional<char>,
-				      std::string>& attr, 
+					 std::string>& attr, 
 		  qi::unused_type, qi::unused_type) const;
 
   ParserState& state;
@@ -88,29 +88,33 @@ struct DLVResultGrammar : public qi::grammar<Iterator, ascii::space_type>
     using spirit::_val;
     using spirit::_1;
     using qi::lexeme;
+    using qi::raw;
     using qi::char_;
     using qi::omit;
     using qi::lit;
-    
-    ident = lexeme[char_('"') > *(char_ - '"') > char_('"')]
-      | lexeme[ascii::lower > *(ascii::alnum|char_('_'))];
 
-    groundterm = int_ | ident;
+    mynumber = 
+      lexeme[ char_('0') ]
+      | lexeme[ char_('1', '9') >> *(char_('0', '9')) ];
+  
+    ident %=
+        lexeme[char_('"') >> *(char_ - '"') >> char_('"')]
+      | (ascii::lower >> *(ascii::alnum|char_('_')));
 
-    // char_ synthesizes a char attribute!
-    fact = ( ident > -params );
+    params %= *( char_(',') >> ident );
 
-    literal = ( -char_('-') > fact ) [ handle_literal(state) ] ;
+    fact %= 
+      raw[ident >> -( char_('(') >> ident >> *(char_(',') >> ident) >> char_(')') )];
 
-    params
-      %= '(' > groundterm > *(',' > groundterm) > ')';
+    mlit = ( -char_('-') >> fact >> lit(',') ) [ handle_literal(state) ] ;
+    flit = ( -char_('-') >> fact >> lit('}') ) [ handle_literal(state) ] ;
 
     answerset
       = (lit('{') >> '}') [ handle_finished_answerset(state) ]
-      | (lit('{') > literal > *(',' > literal) > lit('}') [ handle_finished_answerset(state) ]);
+      | (lit('{') >> *(mlit) >> flit) [ handle_finished_answerset(state) ];
 
     costline
-      = lit("Cost") > +(ascii::alnum|char_("[]<>():"));
+      = lit("Cost") >> +(ascii::alnum|char_("[]<>():"));
 
     dlvline
       = (-lit("Best model:") >> answerset)
@@ -121,17 +125,17 @@ struct DLVResultGrammar : public qi::grammar<Iterator, ascii::space_type>
     BOOST_SPIRIT_DEBUG_NODE(dlvline);
     BOOST_SPIRIT_DEBUG_NODE(answerset);
     BOOST_SPIRIT_DEBUG_NODE(costline);
-    BOOST_SPIRIT_DEBUG_NODE(literal);
+    BOOST_SPIRIT_DEBUG_NODE(mlit);
+    BOOST_SPIRIT_DEBUG_NODE(flit);
     BOOST_SPIRIT_DEBUG_NODE(fact);
-    BOOST_SPIRIT_DEBUG_NODE(groundterm);
+    BOOST_SPIRIT_DEBUG_NODE(params);
+    BOOST_SPIRIT_DEBUG_NODE(mynumber);
     BOOST_SPIRIT_DEBUG_NODE(ident);
 #endif
   }
   
-  qi::rule<Iterator, ascii::space_type>                  dlvline, answerset, literal, costline, groundterm, params;
-  //qi::rule<Iterator, ID(), ascii::space_type>            groundterm;
-  qi::rule<Iterator, std::string(), ascii::space_type>   ident, fact;
-  //qi::rule<Iterator, Tuple(), ascii::space_type>         params;
+  qi::rule<Iterator, ascii::space_type>                  dlvline, costline, answerset, mlit, flit;
+  qi::rule<Iterator, std::string(), ascii::space_type>   ident, fact, mynumber, params;
   
   ParserState& state;
 };

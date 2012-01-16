@@ -50,7 +50,8 @@ TESTS = \
 	testTables \
 	testID \
 	testBridgeRuleEvaluation \
-	testMessageDispatcher
+	testMessageDispatcher \
+	testResultParser
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -90,7 +91,8 @@ check_PROGRAMS = \
 	testTables \
 	testID \
 	testBridgeRuleEvaluation \
-	testMessageDispatcher
+	testMessageDispatcher \
+	testResultParser
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -237,3 +239,8 @@ testMessageDispatcher_SOURCES = testMessageDispatcher.cpp
 testMessageDispatcher_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/network/libthreads.a
+
+testResultParser_SOURCES = testResultParser.cpp 
+testResultParser_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a \
+	$(top_builddir)/src/parser/libparser.a 
