@@ -70,6 +70,9 @@ public:
   void
   registerMQ(ConcurrentMessageQueuePtr mq, MQIDs type, std::size_t id);
 
+  std::size_t
+  createAndRegisterMQ(MQIDs type);
+
   template<typename MessageType>
   bool
   send(MQIDs id, MessageType* mess, int msecs);

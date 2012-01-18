@@ -131,6 +131,24 @@ NewConcurrentMessageDispatcher::getMQ(MQIDs type, std::size_t id)
 }
 
 
+std::size_t
+NewConcurrentMessageDispatcher::createAndRegisterMQ(MQIDs type)
+{
+  assert (SEPARATOR < type && type < END_OF_MQ);
+
+  std::size_t type_index = type - SEPARATOR;
+  ConcurrentMessageQueueVecPtr& v = cmqs[type_index];
+  ConcurrentMessageQueuePtr mq(new ConcurrentMessageQueue);
+
+  ///TODO: more intelligent way of managing ConcurrentMessageQueue inside the MessageDispatcher:
+  ///For example: MD maintains a list of unused cmq(s) and when the client requests a cmq, it just
+  ///             find one in the list, marks it somehow as used and return the id to the client.
+  ///For now, we use this stupid strategy which might waste memory.
+  v->push_back(mq);
+  return v->size() - 1;
+}
+
+
 } // namespace dmcs
 
 // Local Variables:

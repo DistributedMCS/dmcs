@@ -74,7 +74,9 @@ BOOST_AUTO_TEST_CASE ( testMessageDispatcher )
   ForwardMessage* m6 = new ForwardMessage(6, 1, 10);
   std::cerr << "m1 = " << *m1 << std::endl;
 
-  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(5, 2));
+  std::size_t k = 5;
+  std::size_t no_neighbors = 2;
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(k, no_neighbors));
 
   ConcurrentMessageQueuePtr cmq1(new ConcurrentMessageQueue(5));
   ConcurrentMessageQueuePtr cmq2(new ConcurrentMessageQueue(5));

@@ -1,3 +1,15 @@
+2012-01-18  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/NewConcurrentMessageDispatcher.cpp: Support creating and registering a new cmq.
+	* include/network/NewConcurrentMessageDispatcher.h: Likewise.
+
+	* testsuite/testMessageDispatcher.cpp: Clarify params.
+
+	* src/dmcs/Evaluator.cpp: New file.
+
+	* include/dmcs/Evaluator.h: No direct ConcurrentMessageQueue,
+	invoke MessageDispatcher instead and get back some id.
+
 2012-01-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testResultParser.cpp: Update testcase.
