@@ -31,6 +31,17 @@
 
 namespace dmcs {
 
+Evaluator::GenericOptions::GenericOptions()
+  : includeFacts(true)
+{ }
+
+
+
+Evaluator::GenericOptions::~GenericOptions()
+{ }
+
+
+
 Evaluator::Evaluator(const InstantiatorWPtr& inst,
 		     const NewConcurrentMessageDispatcherPtr d)
   : instantiator(inst),

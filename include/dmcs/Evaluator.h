@@ -41,31 +41,30 @@ class Instantiator;
 class Evaluator
 {
 public:
+  struct GenericOptions
+  {
+    GenericOptions();
+    virtual ~GenericOptions();
+
+    bool includeFacts;
+  };
+
   Evaluator(const InstantiatorWPtr& inst,
 	    const NewConcurrentMessageDispatcherPtr d);
 
   virtual ~Evaluator();
   
-  // can be nonvirtual
-  // should never be overridden (final)
   std::size_t
   getInQueue();
 
-  // can be nonvirtual
-  // should never be overridden (final)
   std::size_t
   getOutQueue();
 
+  // this starts the evaluator thread
   void
   operator()();
 
 protected:
-  // this starts the evaluator thread
-  // 
-  // perhaps (after implementing 2 or 3 different contexts)
-  // we will do the thread here and make some other low-level functionality virtual
-  // (I would let this be here for now, as we don't have much experience with
-  // implementing such contexts yet)
   virtual void
   solve(NewBeliefState* heads) = 0;
 

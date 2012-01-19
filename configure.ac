@@ -9,6 +9,31 @@ AC_CANONICAL_HOST
 #
 # the user didn't supply a path for dlv
 #
+if test "$DLV" = ""; then
+    # we assume "dlv"
+    DLV=dlv
+    # and check if it exists
+    AC_CHECK_PROG(DLVPATH, $DLV, $DLV, notfound)
+else
+    # the user supplied a 'DLV=...'
+    # check if it exists (with search path=/, since the user supplied
+    # an entire path!) and set DLVPATH to it!
+    AC_CHECK_PROG(DLVPATH, $DLV, $DLV, notfound, [/])
+fi
+
+if test "$DLVPATH" = notfound; then
+  AC_MSG_WARN([dlv not found. Download it at http://www.dlvsystem.com/])
+else
+  extsolver_found=true
+  AC_DEFINE([HAVE_DLV], [1], [Defined if we found dlv.])
+  AC_DEFINE_UNQUOTED(DLVPATH,"$DLVPATH",[Path of DLV executable])
+fi
+
+
+
+#
+# the user didn't supply a path for clasp
+#
 if test "$CLASP" = ""; then
     # we assume "clasp"
     CLASP=clasp
@@ -89,6 +114,12 @@ AC_CONFIG_MACRO_DIR([m4])
 #
 # Check for external libraries
 #
+
+
+#
+# check for libcurl
+#
+LIBCURL_CHECK_CONFIG([], [], [], [AC_MSG_ERROR([could not find CURL library. Download it at http://curl.haxx.se/.])])
 
 
 #

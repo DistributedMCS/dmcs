@@ -1,3 +1,28 @@
+2012-01-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/process/Makefile.am: Add NewProcess stuff.
+
+	* include/process/Makefile.am: Add header files to interface with dlv.
+	Use NewProcess for now to avoid fixing Clasp related stuff. Will later
+	unify to Process/ProcessBuf.
+
+	* include/dmcs/Evaluator.h: Add GenericOptions.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: New file.
+	* include/dmcs/InputProvider.h: Likewise.
+	* include/dmcs/URLBuf.h: Likewise.
+	* include/process/DLVProcess.h: Likewise.
+	* include/process/NewProcess.h: Likewise.
+	* include/process/NewProcessBuf.h: Likewise.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+	* src/dmcs/InputProvider.cpp: Likewise.
+	* src/dmcs/URLBuf.cpp: Likewise.
+	* src/process/DLVProcess.cpp: Likewise.
+	* src/process/NewProcessBuf.cpp: Likewise.
+
+	* configure.ac: Check for dlv, libcurl.
+
 2012-01-18  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/NewConcurrentMessageDispatcher.cpp: Support creating and registering a new cmq.
