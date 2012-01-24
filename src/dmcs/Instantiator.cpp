@@ -18,48 +18,44 @@
  */
 
 /**
- * @file   AbstractContext.h
+ * @file   Instantitator.cpp
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Nov 16:37:24 29 2011
+ * @date   Tue Jan 24 2012 15:56
  *
  * @brief 
  *
  *
  */
 
-#ifndef ABSTRACT_CONTEXT_H
-#define ABSTRACT_CONTEXT_H
-
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include "dmcs/Instantiator.h"
 
 namespace dmcs {
 
-class Engine;
-class Instantiator;
-class Evaluator;
+Instantiator::Instantiator(const std::string& kbn, const EngineWPtr& e)
+  : kbspec(kbn), engine(e)
+{
+  inp.addFileInput(kbspec);
+}
 
-class DLVInstantiator;
-class DLVEvaluator;
 
-typedef boost::shared_ptr<Engine> EnginePtr;
-typedef boost::weak_ptr<Engine> EngineWPtr;
+void
+Instantiator::removeEvaluator(EvaluatorWPtr eval)
+{
+  if (eval.use_count() == 1)
+    {
+      EvaluatorPtr evalp = eval.lock();
+      evaluators.remove(evalp);
+    }
+}
 
-typedef boost::shared_ptr<Instantiator> InstantiatorPtr;
-typedef boost::weak_ptr<Instantiator> InstantiatorWPtr;
 
-typedef boost::shared_ptr<Evaluator> EvaluatorPtr;
-typedef boost::weak_ptr<Evaluator> EvaluatorWPtr;
-
-typedef boost::shared_ptr<DLVInstantiator> DLVInstantiatorPtr;
-typedef boost::weak_ptr<DLVInstantiator> DLVInstantiatorWPtr;
-
-typedef boost::shared_ptr<DLVEvaluator> DLVEvaluatorPtr;
-typedef boost::weak_ptr<DLVEvaluator> DLVEvaluatorWPtr;
+std::istream&
+Instantiator::getKB()
+{
+  return inp.getAsStream();
+}
 
 } // namespace dmcs
-
-#endif // ABSTRACT_CONTEXT_H
 
 // Local Variables:
 // mode: C++

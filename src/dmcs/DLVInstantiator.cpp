@@ -18,48 +18,50 @@
  */
 
 /**
- * @file   AbstractContext.h
+ * @file   DLVInstantitator.cpp
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Nov 16:37:24 29 2011
+ * @date   Tue Jan 24 2012 16:49
  *
  * @brief 
  *
  *
  */
 
-#ifndef ABSTRACT_CONTEXT_H
-#define ABSTRACT_CONTEXT_H
-
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include "dmcs/DLVInstantiator.h"
+#include "dmcs/DLVEvaluator.h"
 
 namespace dmcs {
 
-class Engine;
-class Instantiator;
-class Evaluator;
+DLVInstantiator::DLVInstantiator(const std::string& kbspec, const EngineWPtr& e)
+  : Instantiator(kbspec, e)
+{ }
 
-class DLVInstantiator;
-class DLVEvaluator;
 
-typedef boost::shared_ptr<Engine> EnginePtr;
-typedef boost::weak_ptr<Engine> EngineWPtr;
+DLVInstantiatorPtr
+DLVInstantiator::create(const std::string& kbspec, const EngineWPtr& e)
+{
+  DLVInstantiatorPtr dlv_inst(new DLVInstantiator(kbspec, e));
+  return dlv_inst;
+}
 
-typedef boost::shared_ptr<Instantiator> InstantiatorPtr;
-typedef boost::weak_ptr<Instantiator> InstantiatorWPtr;
 
-typedef boost::shared_ptr<Evaluator> EvaluatorPtr;
-typedef boost::weak_ptr<Evaluator> EvaluatorWPtr;
+EvaluatorPtr
+DLVInstantiator::createEvaluator(const InstantiatorWPtr& inst,
+				 const NewConcurrentMessageDispatcherPtr md)
+{
+  InstantiatorPtr inst_p = inst.lock();
+  Instantiator* inst_s = inst_p.get();
+  assert (this == inst_s);
 
-typedef boost::shared_ptr<DLVInstantiator> DLVInstantiatorPtr;
-typedef boost::weak_ptr<DLVInstantiator> DLVInstantiatorWPtr;
+  EvaluatorPtr eval(new DLVEvaluator(inst, md));
+  evaluators.push_back(eval);
 
-typedef boost::shared_ptr<DLVEvaluator> DLVEvaluatorPtr;
-typedef boost::weak_ptr<DLVEvaluator> DLVEvaluatorWPtr;
+  return eval;
+}
+
+
 
 } // namespace dmcs
-
-#endif // ABSTRACT_CONTEXT_H
 
 // Local Variables:
 // mode: C++

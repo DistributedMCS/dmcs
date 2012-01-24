@@ -32,9 +32,10 @@
 
 #include <list>
 
-#include "AbstractContext.h"
+#include "dmcs/AbstractContext.h"
 #include "dmcs/Engine.h"
 #include "dmcs/Evaluator.h"
+#include "dmcs/InputProvider.h"
 
 namespace dmcs {
 
@@ -44,39 +45,42 @@ class Evaluator;
 class Instantiator
 {
 public:
-  static InstantiatorPtr
-  create(const std::string& kbspec, const EngineWPtr& e);
+  //static InstantiatorPtr
+  //create(const std::string& kbspec, const EngineWPtr& e);
 
-	virtual
-	~Instantiator();
+  virtual
+  ~Instantiator();
+  
+  virtual EvaluatorPtr
+  createEvaluator(const InstantiatorWPtr& inst,
+		  const NewConcurrentMessageDispatcherPtr md) = 0;
 
-	virtual EvaluatorPtr
-  createEvaluator() = 0;
-
-	// call this with a weak pointer to unregister the instantiator
-	// (see comment in Engine.h for why this must be a weak pointer)
-	virtual void
+  // call this with a weak pointer to unregister the instantiator
+  // (see comment in Engine.h for why this must be a weak pointer)
+  virtual void
   removeEvaluator(EvaluatorWPtr eval);
+
+  std::istream&
+  getKB();
 
 protected:
   Instantiator(const std::string& kbn, const EngineWPtr& e);
 
-	// let this unspecified here (see below)
-  //void
-  //parseKB();
+protected:
+  std::list<EvaluatorPtr> evaluators;
 
 private:
-	// knowledge base specifier (can be filename or sql database connection string or rdf tuplestore location IRI)
+  // knowledge base specifier (can be filename or sql database connection string or rdf tuplestore location IRI)
   std::string kbspec;
 
-	//TheoryPtr theory; // remove -> we can let this unspecified here, derived classes
-	//may have various methods to represent this, think of an sql context, it will have
-	//no theory, kbspec will be a connection string, the theory will be in the database
-	//running on some host
+  InputProvider inp;
 
+  //TheoryPtr theory; // remove -> we can let this unspecified here, derived classes
+  //may have various methods to represent this, think of an sql context, it will have
+  //no theory, kbspec will be a connection string, the theory will be in the database
+  //running on some host
+  
   EngineWPtr engine;
-
-  std::list<EvaluatorPtr> evaluators;
 };
 
 } // namespace dmcs

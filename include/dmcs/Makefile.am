@@ -13,7 +13,10 @@ noinst_HEADERS =  \
 		ConflictNotification.h \
 		Context.h \
 		Debug.h \
+		DLVEvaluator.h \
+		DLVInstantiator.h \
 		Log.h \
+		InputProvider.h \
 		ModelSessionId.h \
 		Message.h \
 		Neighbor.h \
@@ -34,4 +37,5 @@ noinst_HEADERS =  \
 		StreamingDMCSNotification.h \
 		StreamingForwardMessage.h \
 		StreamingBackwardMessage.h \
-		UnsatNotification.h
+		UnsatNotification.h \
+		URLBuf.h

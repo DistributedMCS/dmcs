@@ -1,6 +1,6 @@
 /* DMCS -- Distributed Nonmonotonic Multi-Context Systems.
  * Copyright (C) 2009, 2010 Minh Dao-Tran, Thomas Krennwallner
- *
+ * 
  * This file is part of DMCS.
  *
  *  DMCS is free software: you can redistribute it and/or modify
@@ -17,49 +17,55 @@
  *  along with DMCS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file   AbstractContext.h
- * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Nov 16:37:24 29 2011
- *
- * @brief 
- *
- *
- */
+ /**
+  * @file   NewNeighbor.h
+  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
+  * @date   Wed Dec  21 17:10:29 2011
+  * 
+  * @brief  
+  * 
+  * 
+  */
 
-#ifndef ABSTRACT_CONTEXT_H
-#define ABSTRACT_CONTEXT_H
+#ifndef NEW_NEIGHBOR_H
+#define NEW_NEIGHBOR_H
 
+#include <vector>
 #include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include "mcs/BeliefTable.h"
 
 namespace dmcs {
 
-class Engine;
-class Instantiator;
-class Evaluator;
+struct NewNeighbor 
+{
+  std::size_t neighbor_id;
+  std::string hostname;
+  std::string port;
+  BeliefTable output_interface;
 
-class DLVInstantiator;
-class DLVEvaluator;
+  NewNeighbor(std::size_t nid, 
+	      const std::string& hn,
+	      const std::string& p)
+    : neighbor_id(nid),
+      hostname(hn),
+      port(p)
+  { }
+};
 
-typedef boost::shared_ptr<Engine> EnginePtr;
-typedef boost::weak_ptr<Engine> EngineWPtr;
+inline std::ostream&
+operator<< (std::ostream& os, const NewNeighbor& nb)
+{
+  
+  os << "(" << nb.neighbor_id << "@" << nb.hostname << ":" << nb.port << ")";
+  return os;
+}
 
-typedef boost::shared_ptr<Instantiator> InstantiatorPtr;
-typedef boost::weak_ptr<Instantiator> InstantiatorWPtr;
-
-typedef boost::shared_ptr<Evaluator> EvaluatorPtr;
-typedef boost::weak_ptr<Evaluator> EvaluatorWPtr;
-
-typedef boost::shared_ptr<DLVInstantiator> DLVInstantiatorPtr;
-typedef boost::weak_ptr<DLVInstantiator> DLVInstantiatorWPtr;
-
-typedef boost::shared_ptr<DLVEvaluator> DLVEvaluatorPtr;
-typedef boost::weak_ptr<DLVEvaluator> DLVEvaluatorWPtr;
+typedef boost::shared_ptr<NewNeighbor> NewNeighborPtr;
+typedef std::vector<NewNeighborPtr> NewNeighborVec;
 
 } // namespace dmcs
 
-#endif // ABSTRACT_CONTEXT_H
+#endif // NEW_NEIGHBOR_H
 
 // Local Variables:
 // mode: C++

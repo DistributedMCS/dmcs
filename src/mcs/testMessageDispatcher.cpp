@@ -1,6 +1,6 @@
 /* DMCS -- Distributed Nonmonotonic Multi-Context Systems.
  * Copyright (C) 2009, 2010 Minh Dao-Tran, Thomas Krennwallner
- *
+ * 
  * This file is part of DMCS.
  *
  *  DMCS is free software: you can redistribute it and/or modify
@@ -18,67 +18,40 @@
  */
 
 /**
- * @file   Evaluator.h
+ * @file   testMessageDispatcher.cpp
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Mon Nov 17:22:00 28 2011
- *
- * @brief 
- *
- *
+ * @date   Thu Dec 29 17:25:23 2011
+ * 
+ * @brief  
+ * 
+ * 
  */
 
 
-#ifndef EVALUATOR_H
-#define EVALUATOR_H
-
-#include "dmcs/AbstractContext.h"
-#include "mcs/NewBeliefState.h"
 #include "network/NewConcurrentMessageDispatcher.h"
+#include "mcs/ForwardMessage.h"
 
-namespace dmcs {
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "testMessageDispatcher"
+#include <boost/test/unit_test.hpp>
 
-class Instantiator;
+#include <boost/thread.hpp> 
+#include <boost/date_time.hpp>
+#include <iostream>
 
-class Evaluator
+using namespace dmcs;
+
+BOOST_AUTO_TEST_CASE ( testMessageDispatcher )
 {
-public:
-  struct GenericOptions
-  {
-    GenericOptions();
-    virtual ~GenericOptions();
-
-    bool includeFacts;
-  };
-
-  Evaluator(const InstantiatorWPtr& inst,
-	    const NewConcurrentMessageDispatcherPtr d);
-
-  virtual ~Evaluator();
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(5, 2));
   
-  std::size_t
-  getInQueue();
+  ForwardMessage* m1 = new ForwardMessage(1, 1, 10);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, m1);
+  
+  ForwardMessage* m2 = md->receive(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ);
 
-  std::size_t
-  getOutQueue();
-
-  // this starts the evaluator thread
-  void
-  operator()();
-
-protected:
-  virtual void
-  solve(NewBeliefState* heads) = 0;
-
-protected:
-  InstantiatorWPtr instantiator;
-  NewConcurrentMessageDispatcherPtr md;
-  std::size_t in_queue;                      // id to the ConcurrentMessageQueue provided by the MessageDispatcher
-  std::size_t out_queue;
-};
-
-} // namespace dmcs
-
-#endif // EVALUATOR_H
+  BOOST_CHECK_EQUAL(m1, m2);  
+}
 
 // Local Variables:
 // mode: C++

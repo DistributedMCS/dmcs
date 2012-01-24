@@ -77,9 +77,10 @@ DLVEvaluator::solve(NewBeliefState* heads)
   proc.spawn();
 
   std::ostream& programStream = proc.getOutput();
-  
+
   // copy stream
-  programStream << inp.getAsStream().rdbuf();
+  std::istream& input_stream = instantiator->getKB();
+  programStream << input_stream.rdbuf();
   programStream.flush();
 
   proc.endoffile();

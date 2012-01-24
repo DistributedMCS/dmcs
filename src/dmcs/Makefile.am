@@ -38,10 +38,14 @@ liblog_a_SOURCES = Log.cpp
 libdmcs_a_SOURCES = \
 		BaseDMCS.cpp \
 		Debug.cpp \
+		DLVInstantiator.cpp \
+		InputProvider.cpp \
+		Instantiator.cpp \
 		OptDMCS.cpp \
 		PrimitiveDMCS.cpp \
                 QueryPlan.cpp \
                 BeliefCombination.cpp \
 		PrimitiveDMCS.cpp \
-		OptDMCS.cpp 
+		OptDMCS.cpp \
+		URLBuf.cpp
 #		StreamingDMCS.cpp

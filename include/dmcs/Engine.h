@@ -42,26 +42,26 @@ class Engine
 {
 public:
   static EnginePtr
-	create();
+  create();
 
   virtual 
-	~Engine();
+  ~Engine();
 
-	// kbspec may simply contain a filename or something engine-specific
+  // kbspec may simply contain a filename or something engine-specific
   virtual InstantiatorPtr
   createInstantiator(std::string kbspec) = 0;
 
-	// call this with a weak pointer to unregister the instantiator
-	//
-	// in debug mode, removeInstantiator will check whether the
-	// usage count of inst is 1, so it will ensure that inst is really destructed
-	// (passing a non-weak pointer as argument would be misleading,
-	//  as passing a non-weak pointer will also occupy at least one usage count)
+  // call this with a weak pointer to unregister the instantiator
+  //
+  // in debug mode, removeInstantiator will check whether the
+  // usage count of inst is 1, so it will ensure that inst is really destructed
+  // (passing a non-weak pointer as argument would be misleading,
+  // as passing a non-weak pointer will also occupy at least one usage count)
   virtual void
   removeInstantiator(InstantiatorWPtr inst);
 
 protected:
-	// objects must be created via create()
+  // objects must be created via create()
   Engine();
 
   std::list<InstantiatorPtr> instantiators;
