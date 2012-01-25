@@ -31,8 +31,9 @@
 
 namespace dmcs {
 
-Instantiator::Instantiator(const std::string& kbn, const EngineWPtr& e)
-  : kbspec(kbn), engine(e)
+Instantiator::Instantiator(const EngineWPtr& e,
+			   const std::string& kbn)
+  : engine(e), kbspec(kbn)
 {
   inp.addFileInput(kbspec);
 }
@@ -43,8 +44,8 @@ Instantiator::removeEvaluator(EvaluatorWPtr eval)
 {
   if (eval.use_count() == 1)
     {
-      EvaluatorPtr evalp = eval.lock();
-      evaluators.remove(evalp);
+      EvaluatorPtr eval_p = eval.lock();
+      evaluators.remove(eval_p);
     }
 }
 

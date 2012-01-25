@@ -18,51 +18,39 @@
  */
 
 /**
- * @file   DLVInstantitator.cpp
+ * @file   DLVEngine.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Jan 24 2012 16:49
+ * @date   Wed Jan 25 2012 11:57
  *
  * @brief 
  *
  *
  */
 
-#include "dmcs/DLVInstantiator.h"
-#include "dmcs/DLVEvaluator.h"
+#ifndef DLV_ENGINE_H
+#define DLV_ENGINE_H
+
+#include "dmcs/Engine.h"
 
 namespace dmcs {
 
-DLVInstantiator::DLVInstantiator(const EngineWPtr& e,
-				 const std::string& kbspec)
-  : Instantiator(e, kbspec)
-{ }
-
-
-DLVInstantiatorPtr
-DLVInstantiator::create(const EngineWPtr& e, const std::string& kbspec)
+class DLVEngine : public Engine
 {
-  DLVInstantiatorPtr dlv_inst(new DLVInstantiator(e, kbspec));
-  return dlv_inst;
-}
+public:
+  static DLVEnginePtr
+  create();
 
+  InstantiatorPtr
+  createInstantiator(const EngineWPtr& eng,
+		     const std::string& kbspec);
 
-EvaluatorPtr
-DLVInstantiator::createEvaluator(const InstantiatorWPtr& inst,
-				 const NewConcurrentMessageDispatcherPtr md)
-{
-  InstantiatorPtr inst_p = inst.lock();
-  Instantiator* inst_s = inst_p.get();
-  assert (this == inst_s);
-
-  EvaluatorPtr eval(new DLVEvaluator(inst, md));
-  evaluators.push_back(eval);
-
-  return eval;
-}
-
-
+private:
+  DLVEngine();
+};
 
 } // namespace dmcs
+
+#endif // DLV_ENGINE_H
 
 // Local Variables:
 // mode: C++

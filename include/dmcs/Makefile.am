@@ -13,8 +13,10 @@ noinst_HEADERS =  \
 		ConflictNotification.h \
 		Context.h \
 		Debug.h \
+		DLVEngine.h \
 		DLVEvaluator.h \
 		DLVInstantiator.h \
+		Engine.h \
 		Log.h \
 		InputProvider.h \
 		ModelSessionId.h \

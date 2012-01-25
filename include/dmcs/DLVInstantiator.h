@@ -38,14 +38,16 @@ class DLVInstantiator : public Instantiator
 {
 public:
   static DLVInstantiatorPtr
-  create(const std::string& kbspec, const EngineWPtr& e);
+  create(const EngineWPtr& e,
+	 const std::string& kbspec);
 
   EvaluatorPtr
   createEvaluator(const InstantiatorWPtr& inst,
 		  const NewConcurrentMessageDispatcherPtr md);
 
 private:
-  DLVInstantiator(const std::string& kbspec, const EngineWPtr& e);
+  DLVInstantiator(const EngineWPtr& e,
+		  const std::string& kbspec);
 };
 
 } // namespace dmcs 

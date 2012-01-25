@@ -49,7 +49,8 @@ public:
 
   // kbspec may simply contain a filename or something engine-specific
   virtual InstantiatorPtr
-  createInstantiator(std::string kbspec) = 0;
+  createInstantiator(const EngineWPtr& eng,
+		     const std::string& kbspec) = 0;
 
   // call this with a weak pointer to unregister the instantiator
   //

@@ -39,6 +39,7 @@ class Engine;
 class Instantiator;
 class Evaluator;
 
+class DLVEngine;
 class DLVInstantiator;
 class DLVEvaluator;
 
@@ -50,6 +51,9 @@ typedef boost::weak_ptr<Instantiator> InstantiatorWPtr;
 
 typedef boost::shared_ptr<Evaluator> EvaluatorPtr;
 typedef boost::weak_ptr<Evaluator> EvaluatorWPtr;
+
+typedef boost::shared_ptr<DLVEngine> DLVEnginePtr;
+typedef boost::weak_ptr<DLVEngine> DLVEngineWPtr;
 
 typedef boost::shared_ptr<DLVInstantiator> DLVInstantiatorPtr;
 typedef boost::weak_ptr<DLVInstantiator> DLVInstantiatorWPtr;

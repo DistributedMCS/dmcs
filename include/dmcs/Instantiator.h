@@ -64,12 +64,15 @@ public:
   getKB();
 
 protected:
-  Instantiator(const std::string& kbn, const EngineWPtr& e);
+  Instantiator(const EngineWPtr& e,
+	       const std::string& kbn);
 
 protected:
   std::list<EvaluatorPtr> evaluators;
 
 private:
+  EngineWPtr engine;
+
   // knowledge base specifier (can be filename or sql database connection string or rdf tuplestore location IRI)
   std::string kbspec;
 
@@ -79,8 +82,6 @@ private:
   //may have various methods to represent this, think of an sql context, it will have
   //no theory, kbspec will be a connection string, the theory will be in the database
   //running on some host
-  
-  EngineWPtr engine;
 };
 
 } // namespace dmcs

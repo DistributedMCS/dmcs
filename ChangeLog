@@ -1,6 +1,23 @@
+2012-01-25  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/DLVEngine.h: New file.
+	* src/dmcs/Engine.cpp: Likewise.
+	* src/dmcs/DLVEngine.cpp: Likewise.
+
+	* include/dmcs/Makefile.am: Add DLVEngine.h and Engine.h.
+
+	* src/dmcs/Makefile.am: Add DLVEngine.cpp and Engine.cpp.
+
+	* include/dmcs/Engine.h: Add self weak pointer to createInstantiator.
+
+	* include/dmcs/DLVInstantiator.h: Change arguments order.
+	* src/dmcs/DLVInstantiator.cpp: Likewise.
+	* include/dmcs/Instantiator.h: Likewise.
+	* src/dmcs/Instantiator.cpp: Likewise.
+
+	* include/dmcs/AbstractContext.h: Add forward declaration of DLVEngine.
+
 2012-01-24  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
-
-
 
 	* src/dmcs/DLVInstantiator.cpp: New file.
 	* src/dmcs/Instantiator.cpp: Likewise.

@@ -18,49 +18,32 @@
  */
 
 /**
- * @file   DLVInstantitator.cpp
+ * @file   Engine.cpp
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Jan 24 2012 16:49
+ * @date   Mon Nov 28 2011 16:50
  *
  * @brief 
  *
  *
  */
 
-#include "dmcs/DLVInstantiator.h"
-#include "dmcs/DLVEvaluator.h"
+#include "dmcs/Engine.h"
 
 namespace dmcs {
 
-DLVInstantiator::DLVInstantiator(const EngineWPtr& e,
-				 const std::string& kbspec)
-  : Instantiator(e, kbspec)
+Engine::Engine()
 { }
 
 
-DLVInstantiatorPtr
-DLVInstantiator::create(const EngineWPtr& e, const std::string& kbspec)
+void
+Engine::removeInstantiator(InstantiatorWPtr inst)
 {
-  DLVInstantiatorPtr dlv_inst(new DLVInstantiator(e, kbspec));
-  return dlv_inst;
+  if (inst.use_count() == 1)
+    {
+      InstantiatorPtr inst_p = inst.lock();
+      instantiators.remove(inst_p);
+    }
 }
-
-
-EvaluatorPtr
-DLVInstantiator::createEvaluator(const InstantiatorWPtr& inst,
-				 const NewConcurrentMessageDispatcherPtr md)
-{
-  InstantiatorPtr inst_p = inst.lock();
-  Instantiator* inst_s = inst_p.get();
-  assert (this == inst_s);
-
-  EvaluatorPtr eval(new DLVEvaluator(inst, md));
-  evaluators.push_back(eval);
-
-  return eval;
-}
-
-
 
 } // namespace dmcs
 
