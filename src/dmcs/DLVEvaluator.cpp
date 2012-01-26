@@ -27,7 +27,12 @@
  * 
  */
 
-#include "DLVEvaluator.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif // HAVE_CONFIG_H
+
+#include "dmcs/DLVEvaluator.h"
+#include "dmcs/Instantiator.h"
 
 namespace dmcs {
 
@@ -37,6 +42,7 @@ DLVEvaluator::Options::Options()
 {
   arguments.push_back("-silent");
 }
+
 
 
 
@@ -56,6 +62,7 @@ DLVEvaluator::solve(NewBeliefState* heads)
 {
   // setupProcess
   proc.setPath(DLVPATH);
+  //proc.setPath("/usr/bin/dlv");
   if (options.includeFacts)
     {
       proc.addOption("-facts");
@@ -65,9 +72,10 @@ DLVEvaluator::solve(NewBeliefState* heads)
       proc.addOption("-nofacts");
     }
 
-  BOOST_FOREACH(const std::string& arg, options.arguments)
+  for (std::vector<std::string>::const_iterator it = options.arguments.begin();
+       it != options.arguments.end(); ++it)
     {
-      proc.addOption(arg);
+      proc.addOption(*it);
     }
 
   // request stdin as last parameter
@@ -79,7 +87,8 @@ DLVEvaluator::solve(NewBeliefState* heads)
   std::ostream& programStream = proc.getOutput();
 
   // copy stream
-  std::istream& input_stream = instantiator->getKB();
+  InstantiatorPtr instantiator_p = instantiator.lock();
+  std::istream& input_stream = instantiator_p->getKB();
   programStream << input_stream.rdbuf();
   programStream.flush();
 

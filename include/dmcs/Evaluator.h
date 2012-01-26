@@ -53,7 +53,8 @@ public:
   Evaluator(const InstantiatorWPtr& inst,
 	    const NewConcurrentMessageDispatcherPtr d);
 
-  virtual ~Evaluator();
+  virtual 
+  ~Evaluator();
   
   std::size_t
   getInQueue();

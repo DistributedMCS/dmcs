@@ -36,6 +36,10 @@ DLVEngine::DLVEngine()
 { }
 
 
+DLVEngine::~DLVEngine()
+{ }
+
+
 DLVEnginePtr
 DLVEngine::create()
 {

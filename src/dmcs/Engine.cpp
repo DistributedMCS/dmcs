@@ -35,15 +35,28 @@ Engine::Engine()
 { }
 
 
+Engine::~Engine()
+{ }
+
+
 void
 Engine::removeInstantiator(InstantiatorWPtr inst)
 {
-  if (inst.use_count() == 1)
+  // See comment in Instantiator::removeEvaluator(EvaluatorWPtr eval)
+  if (inst.use_count() == 2)
     {
       InstantiatorPtr inst_p = inst.lock();
       instantiators.remove(inst_p);
     }
 }
+
+
+std::size_t
+Engine::getNoInstantiators()
+{
+  return instantiators.size();
+}
+
 
 } // namespace dmcs
 

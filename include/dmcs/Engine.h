@@ -61,6 +61,9 @@ public:
   virtual void
   removeInstantiator(InstantiatorWPtr inst);
 
+  std::size_t
+  getNoInstantiators();
+
 protected:
   // objects must be created via create()
   Engine();

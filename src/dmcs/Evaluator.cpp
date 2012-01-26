@@ -53,6 +53,11 @@ Evaluator::Evaluator(const InstantiatorWPtr& inst,
 
 
 
+Evaluator::~Evaluator()
+{ }
+
+
+
 std::size_t
 Evaluator::getInQueue()
 {

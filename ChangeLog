@@ -1,3 +1,29 @@
+2012-01-26  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Add testAbstractContext.
+
+	* src/dmcs/Makefile.am: Add Evaluator.cpp and DLVEvaluator.cpp.
+
+	* src/dmcs/Engine.cpp: Add destructor and method for debugging.
+	* src/dmcs/Instantiator.cpp: Likewise.
+
+	* src/dmcs/DLVEvaluator.cpp: Fix some bugs.
+
+	* src/Makefile.am: Add libcurl.
+
+	* include/dmcs/Engine.h: Add method for debugging.
+	* include/dmcs/Instantiator.h: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: Add options.
+
+	* examples/testAbstractContext.inp: New file.
+	* testsuite/testAbstractContext.cpp: Likewise.
+
+	* include/dmcs/DLVEngine.h: Add destructor.
+	* src/dmcs/DLVEngine.cpp: Likewise.
+	* include/dmcs/Evaluator.h: Likewise.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
 2012-01-25  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/dmcs/DLVEngine.h: New file.

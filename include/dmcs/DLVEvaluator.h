@@ -55,6 +55,7 @@ public:
 
 private:
   DLVProcess proc;
+  Options options;
 };
 
 } // namespace dmcs

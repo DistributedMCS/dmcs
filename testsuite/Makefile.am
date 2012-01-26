@@ -4,7 +4,8 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	$(BM_CPPFLAGS) \
 	$(BOOST_CPPFLAGS) \
-	$(LOG4CXX_CFLAGS)
+	$(LOG4CXX_CFLAGS) \
+	@LIBCURL_CPPFLAGS@
 
 # global linker flags
 AM_LDFLAGS = \
@@ -51,7 +52,8 @@ TESTS = \
 	testID \
 	testBridgeRuleEvaluation \
 	testMessageDispatcher \
-	testResultParser
+	testResultParser \
+	testAbstractContext
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -92,7 +94,8 @@ check_PROGRAMS = \
 	testID \
 	testBridgeRuleEvaluation \
 	testMessageDispatcher \
-	testResultParser
+	testResultParser \
+	testAbstractContext
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -244,3 +247,10 @@ testResultParser_SOURCES = testResultParser.cpp
 testResultParser_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/parser/libparser.a 
+
+testAbstractContext_SOURCES = testAbstractContext.cpp 
+testAbstractContext_LDADD = \
+	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/process/libprocess.a \
+	$(top_builddir)/src/network/libthreads.a \
+	@LIBCURL@

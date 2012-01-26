@@ -38,11 +38,13 @@ liblog_a_SOURCES = Log.cpp
 libdmcs_a_SOURCES = \
 		BaseDMCS.cpp \
 		Debug.cpp \
-		DLVEngine.cpp \
-		DLVInstantiator.cpp \
 		Engine.cpp \
-		InputProvider.cpp \
 		Instantiator.cpp \
+		Evaluator.cpp \
+		DLVEngine.cpp \
+		DLVEvaluator.cpp \
+		DLVInstantiator.cpp \
+		InputProvider.cpp \
 		OptDMCS.cpp \
 		PrimitiveDMCS.cpp \
                 QueryPlan.cpp \

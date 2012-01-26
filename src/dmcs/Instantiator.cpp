@@ -39,10 +39,16 @@ Instantiator::Instantiator(const EngineWPtr& e,
 }
 
 
+Instantiator::~Instantiator()
+{ }
+
+
 void
 Instantiator::removeEvaluator(EvaluatorWPtr eval)
 {
-  if (eval.use_count() == 1)
+  // We need at least 1 EvaluatorPtr outside to get the corresponding weak pointer
+  // and one unit for the counter comes from the EvaluatorPtr in the list
+  if (eval.use_count() == 2)
     {
       EvaluatorPtr eval_p = eval.lock();
       evaluators.remove(eval_p);
@@ -54,6 +60,13 @@ std::istream&
 Instantiator::getKB()
 {
   return inp.getAsStream();
+}
+
+
+std::size_t
+Instantiator::getNoEvaluators()
+{
+  return evaluators.size();
 }
 
 } // namespace dmcs

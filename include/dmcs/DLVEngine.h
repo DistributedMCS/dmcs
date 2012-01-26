@@ -40,6 +40,8 @@ public:
   static DLVEnginePtr
   create();
 
+  ~DLVEngine();
+
   InstantiatorPtr
   createInstantiator(const EngineWPtr& eng,
 		     const std::string& kbspec);

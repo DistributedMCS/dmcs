@@ -63,6 +63,9 @@ public:
   std::istream&
   getKB();
 
+  std::size_t
+  getNoEvaluators();
+
 protected:
   Instantiator(const EngineWPtr& e,
 	       const std::string& kbn);

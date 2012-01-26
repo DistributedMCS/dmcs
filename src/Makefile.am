@@ -9,7 +9,9 @@ AM_CPPFLAGS = \
     $(BM_CPPFLAGS) \
     $(BOOST_CPPFLAGS) \
     $(LOG4CXX_CFLAGS) \
-    -DNO_GMP
+    -DNO_GMP \
+    @LIBCURL_CPPFLAGS@
+
 
 # global linker flags
 AM_LDFLAGS = \
@@ -50,7 +52,8 @@ dmcsd_LDADD = \
 	$(top_builddir)/src/dyndmcs/libdyndmcs.a \
 	$(top_builddir)/src/solver/libsolver.a \
 	$(top_builddir)/src/mcs/libmcs.a \
-	$(top_builddir)/relsat-20070104/librelsat.a
+	$(top_builddir)/relsat-20070104/librelsat.a \
+	@LIBCURL@
 
 
 # the dmcsc binary
