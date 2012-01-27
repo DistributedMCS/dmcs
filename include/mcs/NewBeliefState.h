@@ -115,6 +115,12 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
   setEpsilon(std::size_t ctx_id,
 	     const std::vector<std::size_t>& starting_offset);
 
+  inline std::size_t
+  getFirst() const;
+
+  inline std::size_t
+  getNext(std::size_t bit) const;
+
   inline void
   clear();
 
@@ -299,6 +305,56 @@ NewBeliefState::setEpsilon(std::size_t ctx_id,
   value_bit.set(starting_offset[ctx_id]); // just want to have it clean
 }
 
+
+inline std::size_t
+NewBeliefState::getFirst() const
+{
+  if (status_bit.count() == 0)
+    {
+      return 0;
+    }
+
+  std::size_t bit = status_bit.get_first();
+  do
+    {
+      if (value_bit.test(bit))
+	{
+	  return bit;
+	}
+
+      bit = status_bit.get_next(bit);
+    }
+  while (bit);
+
+  return 0;
+}
+
+
+inline std::size_t
+NewBeliefState::getNext(std::size_t bit) const
+{
+  assert (bit < status_bit.size());
+
+  std::size_t next = status_bit.get_next(bit);
+
+  if (next == 0)
+    {
+      return 0;
+    }
+
+  do
+    {
+      if (value_bit.test(next))
+	{
+	  return next;
+	}
+
+      next = status_bit.get_next(next);
+    }
+  while (next);
+  
+  return 0;
+}
 
 
 inline void

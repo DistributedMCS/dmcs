@@ -75,13 +75,19 @@ Evaluator::getOutQueue()
 
 
 void
-Evaluator::operator()()
+Evaluator::operator()(std::size_t ctx_id,
+		      BeliefTablePtr btab)
 {
-  std::size_t timeout = 0;
+  int timeout = 0;
   while (1)
     {      
       NewBeliefState* heads = md->receive<NewBeliefState>(NewConcurrentMessageDispatcher::EVAL_IN_MQ, in_queue, timeout);
-      solve(heads);
+      if (heads == NULL)
+	{
+	  break;
+	}
+
+      solve(ctx_id, heads, btab);
     }
 }
 

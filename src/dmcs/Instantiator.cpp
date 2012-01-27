@@ -34,9 +34,7 @@ namespace dmcs {
 Instantiator::Instantiator(const EngineWPtr& e,
 			   const std::string& kbn)
   : engine(e), kbspec(kbn)
-{
-  inp.addFileInput(kbspec);
-}
+{ }
 
 
 Instantiator::~Instantiator()
@@ -53,13 +51,6 @@ Instantiator::removeEvaluator(EvaluatorWPtr eval)
       EvaluatorPtr eval_p = eval.lock();
       evaluators.remove(eval_p);
     }
-}
-
-
-std::istream&
-Instantiator::getKB()
-{
-  return inp.getAsStream();
 }
 
 

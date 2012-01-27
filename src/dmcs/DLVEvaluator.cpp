@@ -31,7 +31,9 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
+#include "dmcs/BeliefStateResultAdder.h"
 #include "dmcs/DLVEvaluator.h"
+#include "parser/DLVResultParser.h"
 #include "dmcs/Instantiator.h"
 
 namespace dmcs {
@@ -58,11 +60,12 @@ DLVEvaluator::DLVEvaluator(const InstantiatorWPtr& inst,
 
 
 void
-DLVEvaluator::solve(NewBeliefState* heads)
+DLVEvaluator::solve(std::size_t ctx_id, 
+		    NewBeliefState* heads,
+		    BeliefTablePtr btab)
 {
   // setupProcess
   proc.setPath(DLVPATH);
-  //proc.setPath("/usr/bin/dlv");
   if (options.includeFacts)
     {
       proc.addOption("-facts");
@@ -88,12 +91,66 @@ DLVEvaluator::solve(NewBeliefState* heads)
 
   // copy stream
   InstantiatorPtr instantiator_p = instantiator.lock();
-  std::istream& input_stream = instantiator_p->getKB();
-  programStream << input_stream.rdbuf();
+  Instantiator* instantiator_star = instantiator_p.get();
+
+  assert (instantiator_star);
+  std::string local_kb = instantiator_p->getKB();
+  programStream << local_kb;
+
+  // putting heads into programStream
+  std::size_t pos = heads->getFirst();
+  do
+    {
+      IDKind kind = ID::MAINKIND_BELIEF | ctx_id;
+      IDAddress address = pos;
+
+      ID id(kind, address);
+      const Belief& belief = btab->getByID(id);
+
+      programStream << belief.text << ".\n";
+      pos = heads->getNext(pos);
+    }
+    while (pos);
+
   programStream.flush();
 
   proc.endoffile();
-  
+
+  BeliefStateResultAdder adder(out_queue, md);
+  DLVResultParser dlv_parser(ctx_id, btab);
+
+  std::istream& is = proc.getInput();
+  do
+    {
+      std::string input;
+      std::getline(is, input);
+
+      if ( input.empty() || is.bad() )
+      {
+	/*std::cerr << "leaving loop because got input size " << input.size() 
+		  << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
+		  << ", eof " << is.eof() << std::endl;*/
+	break;
+      }
+
+      // discard weak answer set cost lines
+      if( 0 == input.compare(0, 22, "Cost ([Weight:Level]):") )
+      {
+	//std::cerr << "discarding weak answer set cost line" << std::endl;
+      }
+      else
+      {
+	// parse line
+	std::istringstream iss(input);
+	dlv_parser.parse(iss, adder);
+      }      
+    }
+  while (1);
+
+  // nomore answer wrt this heads. Send a NULL to EVAL_OUT
+  int timeout = 0;
+  NewBeliefState* null_ans = NULL;
+  md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, null_ans, timeout);
 }
 
 } // namespace dmcs

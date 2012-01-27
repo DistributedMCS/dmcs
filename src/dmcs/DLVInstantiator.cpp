@@ -29,13 +29,32 @@
 
 #include "dmcs/DLVInstantiator.h"
 #include "dmcs/DLVEvaluator.h"
+#include "dmcs/InputProvider.h"
 
 namespace dmcs {
 
 DLVInstantiator::DLVInstantiator(const EngineWPtr& e,
 				 const std::string& kbspec)
   : Instantiator(e, kbspec)
-{ }
+{
+  InputProvider inp;
+  inp.addFileInput(kbspec);
+  
+  std::istream& iss = inp.getAsStream();
+  local_kb = "";
+  do
+    {
+      std::string line;
+      std::getline(iss, line);
+      if (line == "")
+	{
+	  break;
+	}
+
+      local_kb = local_kb + line + "\n";
+    }
+  while (1);
+}
 
 
 DLVInstantiatorPtr
@@ -61,6 +80,11 @@ DLVInstantiator::createEvaluator(const InstantiatorWPtr& inst,
 }
 
 
+std::string
+DLVInstantiator::getKB()
+{
+  return local_kb;
+}
 
 } // namespace dmcs
 

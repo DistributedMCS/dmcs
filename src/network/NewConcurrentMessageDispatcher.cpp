@@ -32,8 +32,9 @@
 namespace dmcs {
 
 NewConcurrentMessageDispatcher::NewConcurrentMessageDispatcher(std::size_t k, std::size_t no_neighbors)
+  : queue_size(k)
 {
-  init_mqs(k, no_neighbors);
+  init_mqs(queue_size, no_neighbors);
 }
 
 
@@ -138,7 +139,7 @@ NewConcurrentMessageDispatcher::createAndRegisterMQ(MQIDs type)
 
   std::size_t type_index = type - SEPARATOR;
   ConcurrentMessageQueueVecPtr& v = cmqs[type_index];
-  ConcurrentMessageQueuePtr mq(new ConcurrentMessageQueue);
+  ConcurrentMessageQueuePtr mq(new ConcurrentMessageQueue(queue_size));
 
   ///TODO: more intelligent way of managing ConcurrentMessageQueue inside the MessageDispatcher:
   ///For example: MD maintains a list of unused cmq(s) and when the client requests a cmq, it just

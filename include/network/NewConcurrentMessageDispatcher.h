@@ -108,6 +108,7 @@ private:
   receive(ConcurrentMessageQueue* cmq, int msecs);
 
 private:
+  std::size_t queue_size;
   ConcurrentMessageQueueVec2 cmqs;
 };
 

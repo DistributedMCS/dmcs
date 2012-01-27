@@ -1,3 +1,34 @@
+2012-01-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testResultParser.cpp: Remove include boost::thread.
+
+	* testsuite/testAbstractContext.cpp: Add testRunningDLV.
+
+	* testsuite/Makefile.am (testAbstractContext_LDADD): Add more libs.
+
+	* src/dmcs/DLVEvaluator.cpp: Finish with solve().
+
+	* include/network/NewConcurrentMessageDispatcher.h: Store queue_size.
+	* src/network/NewConcurrentMessageDispatcher.cpp: Likewise.
+
+	* include/mcs/NewBeliefState.h: Add method for finding TRUE bits.
+
+	* include/dmcs/Makefile.am: Add BeliefStateResultAdder.h.
+
+	* include/dmcs/Instantiator.h: Remove InputProvider.
+	* src/dmcs/Instantiator.cpp: Likewise.
+
+	* include/dmcs/DLVInstantiator.h: Store local_kb as a string.
+	* src/dmcs/DLVInstantiator.cpp: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: More parameters to solve().
+	* include/dmcs/Evaluator.h: Likewise.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
+	* configure.ac: Show DLVPATH.
+
+	* examples/testAbstractContext.inp: Update eample.
+
 2012-01-26  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/Makefile.am: Add testAbstractContext.

@@ -51,7 +51,9 @@ public:
 	       const NewConcurrentMessageDispatcherPtr d);
 
   void
-  solve(NewBeliefState* heads);
+  solve(std::size_t ctx_id,
+	NewBeliefState* heads,
+	BeliefTablePtr btab);
 
 private:
   DLVProcess proc;

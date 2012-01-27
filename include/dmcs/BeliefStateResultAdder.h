@@ -1,6 +1,6 @@
 /* DMCS -- Distributed Nonmonotonic Multi-Context Systems.
  * Copyright (C) 2009, 2010 Minh Dao-Tran, Thomas Krennwallner
- *
+ * 
  * This file is part of DMCS.
  *
  *  DMCS is free software: you can redistribute it and/or modify
@@ -18,47 +18,43 @@
  */
 
 /**
- * @file   DLVInstantitator.h
- * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Tue Jan 24 2012 16:41
- *
- * @brief 
- *
- *
+ * @file   BeliefStateResultAdder.h
+ * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
+ * @date   Thu Jan  19 15:10:24 2012
+ * 
+ * @brief  
+ * 
+ * 
  */
 
-#ifndef DLV_INSTANTIATOR_H
-#define DLV_INSTANTIATOR_H
+#ifndef BELIEF_STATE_RESULT_ADDER_H
+#define BELIEF_STATE_RESULT_ADDER_H
 
-#include "dmcs/Instantiator.h"
+#include "mcs/NewBeliefState.h"
+#include "network/NewConcurrentMessageDispatcher.h"
 
 namespace dmcs {
 
-class DLVInstantiator : public Instantiator
+struct BeliefStateResultAdder
 {
-public:
-  static DLVInstantiatorPtr
-  create(const EngineWPtr& e,
-	 const std::string& kbspec);
+  std::size_t out_queue;
+  NewConcurrentMessageDispatcherPtr md;
 
-  EvaluatorPtr
-  createEvaluator(const InstantiatorWPtr& inst,
-		  const NewConcurrentMessageDispatcherPtr md);
+  BeliefStateResultAdder(std::size_t oq, NewConcurrentMessageDispatcherPtr d)
+    : out_queue(oq), md(d)
+  { }
 
-  std::string
-  getKB();
-
-private:
-  DLVInstantiator(const EngineWPtr& e,
-		  const std::string& kbspec);
-
-private:
-  std::string local_kb;
+  void
+  operator()(NewBeliefState* ans)
+  {
+    int timeout = 0;
+    md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, ans, timeout);
+  }
 };
 
-} // namespace dmcs 
+} // namespace dmcs
 
-#endif // DLV_INSTANTIATOR_H
+#endif // BELIEF_STATE_RESULT_ADDER_H
 
 // Local Variables:
 // mode: C++

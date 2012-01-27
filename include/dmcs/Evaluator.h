@@ -27,12 +27,12 @@
  *
  */
 
-
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
 #include "dmcs/AbstractContext.h"
 #include "mcs/NewBeliefState.h"
+#include "mcs/BeliefTable.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 
 namespace dmcs {
@@ -64,11 +64,14 @@ public:
 
   // this starts the evaluator thread
   void
-  operator()();
+  operator()(std::size_t ctx_id, 
+	     BeliefTablePtr btab);
 
 protected:
   virtual void
-  solve(NewBeliefState* heads) = 0;
+  solve(std::size_t ctx_id,
+	NewBeliefState* heads,
+	BeliefTablePtr btab) = 0;
 
 protected:
   InstantiatorWPtr instantiator;

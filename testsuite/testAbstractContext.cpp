@@ -31,6 +31,7 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
+#include "mcs/BeliefStateOffset.h"
 #include "dmcs/DLVEngine.h"
 #include "dmcs/DLVInstantiator.h"
 #include "dmcs/DLVEvaluator.h"
@@ -39,12 +40,14 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testAbstractContext"
 #include <boost/test/unit_test.hpp>
+#include <boost/thread.hpp>
 
 #include <iostream>
 #include <string>
 #include <assert.h>
 
 using namespace dmcs;
+
 
 // run me with
 // EXAMPLESDIR=../../examples ./testAbstractContext
@@ -72,6 +75,86 @@ BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
   EvaluatorWPtr dlv_eval_wp(dlv_eval);
   dlv_inst->removeEvaluator(dlv_eval_wp);
   BOOST_CHECK_EQUAL(dlv_inst->getNoEvaluators(), 0);
+}
+
+
+BOOST_AUTO_TEST_CASE ( testRunningDLV )
+{
+  EnginePtr dlv_engine = DLVEngine::create();
+  EngineWPtr dlv_engine_wp(dlv_engine);
+
+  const char* ex = getenv("EXAMPLESDIR");
+  assert (ex != 0);
+  std::string kbspec(ex);
+  kbspec += "/testAbstractContext.inp";
+
+  InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
+  InstantiatorWPtr dlv_inst_wp(dlv_inst);
+
+  std::size_t queue_size = 5;
+  std::size_t no_neighbors = 3;
+
+  std::size_t no_bs = 4;
+  std::size_t bs_size = 10;
+
+  BeliefStateOffset* bso = BeliefStateOffset::create(no_bs, bs_size);
+
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(queue_size, no_neighbors));
+  EvaluatorPtr dlv_eval = dlv_inst->createEvaluator(dlv_inst_wp, md);
+
+  std::size_t ctx_id = 0;
+
+  Belief epsilon(ctx_id, "epsilon0");
+  Belief bird_tweety(ctx_id, "bird(tweety)");
+  Belief flies_tweety(ctx_id, "flies(tweety)");
+  Belief not_flies_tweety(ctx_id, "not_flies(tweety)");
+  Belief fit_tweety(ctx_id, "fit(tweety)");
+
+  BeliefTablePtr btab(new BeliefTable);
+  ID id_epsilon = btab->storeAndGetID(epsilon);
+  ID id_bird_tweety = btab->storeAndGetID(bird_tweety);
+  ID id_flies_tweety = btab->storeAndGetID(flies_tweety);
+  ID id_not_files_tweety = btab->storeAndGetID(not_flies_tweety);
+  ID id_fit_tweety = btab->storeAndGetID(fit_tweety);
+
+  DLVEvaluatorPtr dlv_eval_casted = boost::static_pointer_cast<DLVEvaluator>(dlv_eval);
+  
+  boost::thread evaluation_thread(*dlv_eval_casted, ctx_id, btab);
+
+  NewBeliefState* heads = new NewBeliefState(no_bs, bs_size);
+  heads->set(ctx_id, id_fit_tweety.address, bso->getStartingOffsets());
+  
+  NewBeliefState* end_heads = NULL;
+
+  int timeout = 0;
+  md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), heads, timeout);
+  md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), end_heads, timeout);
+
+  evaluation_thread.join();
+
+  // input program is:
+  //
+  // flies(X) v not_flies(X) :- bird(X), fit(X).
+  // bird(tweety).
+  //
+  // with heads = {fit(tweety).}
+  //
+  // expect 2 answers [1, 2, 4] and [1, 3, 4]
+  
+  std::size_t count = 0;
+  do
+    {
+      int timeout = 0;
+      NewBeliefState* ans = md->receive<NewBeliefState>(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, dlv_eval->getInQueue(), timeout);
+      if (ans == NULL)
+	{
+	  break;
+	}
+      ++count;
+    }
+  while (1);
+  
+  BOOST_CHECK_EQUAL(count, 2);
 }
 
 // Local Variables:

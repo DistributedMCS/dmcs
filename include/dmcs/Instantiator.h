@@ -35,7 +35,6 @@
 #include "dmcs/AbstractContext.h"
 #include "dmcs/Engine.h"
 #include "dmcs/Evaluator.h"
-#include "dmcs/InputProvider.h"
 
 namespace dmcs {
 
@@ -60,8 +59,8 @@ public:
   virtual void
   removeEvaluator(EvaluatorWPtr eval);
 
-  std::istream&
-  getKB();
+  virtual std::string
+  getKB() = 0;
 
   std::size_t
   getNoEvaluators();
@@ -78,8 +77,6 @@ private:
 
   // knowledge base specifier (can be filename or sql database connection string or rdf tuplestore location IRI)
   std::string kbspec;
-
-  InputProvider inp;
 
   //TheoryPtr theory; // remove -> we can let this unspecified here, derived classes
   //may have various methods to represent this, think of an sql context, it will have

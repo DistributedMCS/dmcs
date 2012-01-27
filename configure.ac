@@ -259,6 +259,9 @@ $PACKAGE_TARNAME $PACKAGE_VERSION configuration:
  minisat:
  picosat:
 
+ - Using the following solver backends:
+ DLV: $DLVPATH
+
  - Options:
  Debug: $debug_support
  Stats: $stats_support

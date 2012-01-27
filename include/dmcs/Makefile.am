@@ -7,6 +7,7 @@ noinst_HEADERS =  \
 		BaseNotification.h \
 		BaseTypes.h \
 		BeliefCombination.h \
+		BeliefStateResultAdder.h \
 		Cache.h \
 		CommandType.h \
 		CommandTypeFactory.h \
