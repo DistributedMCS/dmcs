@@ -42,7 +42,7 @@ DLVInstantiator::DLVInstantiator(const EngineWPtr& e,
   
   std::istream& iss = inp.getAsStream();
   local_kb = "";
-  do
+  while (!iss.eof())
     {
       std::string line;
       std::getline(iss, line);
@@ -51,7 +51,6 @@ DLVInstantiator::DLVInstantiator(const EngineWPtr& e,
 	  local_kb = local_kb + line + "\n";
 	}
     }
-  while (!iss.eof());
 }
 
 
