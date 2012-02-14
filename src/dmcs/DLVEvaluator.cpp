@@ -110,13 +110,13 @@ DLVEvaluator::solve(std::size_t ctx_id,
       programStream << belief.text << ".\n";
       pos = heads->getNext(pos);
     }
-    while (pos);
+  while (pos);
 
   programStream.flush();
 
   proc.endoffile();
 
-  BeliefStateResultAdder adder(out_queue, md);
+  BeliefStateResultAdder adder(out_queue, md, heads);
   DLVResultParser dlv_parser(ctx_id, btab);
 
   std::istream& is = proc.getInput();

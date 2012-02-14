@@ -1,3 +1,13 @@
+2012-02-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBridgeRuleEvaluation.cpp: Fix testcase.
+
+	* include/mcs/BridgeRuleEvaluator.h: Pass input and heads as pointers.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+
+	* include/dmcs/BeliefStateResultAdder.h: Add heads.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+
 2012-01-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testResultParser.cpp: Remove include boost::thread.

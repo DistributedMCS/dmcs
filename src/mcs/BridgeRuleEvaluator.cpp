@@ -34,7 +34,7 @@ namespace dmcs {
 
 bool
 satisfied(const BridgeRule& r, 
-	  const NewBeliefState& input,
+	  const NewBeliefState* input,
 	  const std::vector<std::size_t>& starting_offset)
 {
   for (Tuple::const_iterator it = r.body.begin();
@@ -48,14 +48,14 @@ satisfied(const BridgeRule& r,
 
       if (it->isNaf())
 	{
-	  if (input.test(global_address) == NewBeliefState::DMCS_TRUE)
+	  if (input->test(global_address) == NewBeliefState::DMCS_TRUE)
 	    {
 	      return false;
 	    }
 	}
       else
 	{
-	  if (input.test(global_address) != NewBeliefState::DMCS_TRUE)
+	  if (input->test(global_address) != NewBeliefState::DMCS_TRUE)
 	    {
 	      return false;
 	    }
@@ -69,9 +69,9 @@ satisfied(const BridgeRule& r,
 void
 evaluate(const BridgeRuleTablePtr& brtab,
 	 const TuplePtr& bridge_rules,
-	 const NewBeliefState& input, 
+	 const NewBeliefState* input, 
 	 const std::vector<std::size_t>& starting_offset,
-	 NewBeliefState& heads)
+	 NewBeliefState* heads)
 {
   for (Tuple::const_iterator it = bridge_rules->begin(); 
        it != bridge_rules->end(); ++it)
@@ -82,7 +82,7 @@ evaluate(const BridgeRuleTablePtr& brtab,
 	  std::size_t ctx_id = r.head.contextID();
 	  IDAddress address = r.head.address;
 	  std::size_t global_address = address + starting_offset[ctx_id];
-	  heads.set(global_address);
+	  heads->set(global_address);
 	}
     }
 }

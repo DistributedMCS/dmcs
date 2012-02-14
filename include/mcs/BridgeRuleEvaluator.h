@@ -37,14 +37,14 @@ namespace dmcs {
 
 bool
 satisfied(const BridgeRule& r, 
-	  const NewBeliefState& input,
+	  const NewBeliefState* input,
 	  const std::vector<std::size_t>& starting_offset);
 
 void evaluate(const BridgeRuleTablePtr& brtab,
 	      const TuplePtr& bridge_rules,
-	      const NewBeliefState& input, 
+	      const NewBeliefState* input, 
 	      const std::vector<std::size_t>& starting_offset,
-	      NewBeliefState& heads);
+	      NewBeliefState* heads);
 
 } // namespace dmcs
 

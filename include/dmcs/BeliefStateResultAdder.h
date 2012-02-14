@@ -39,14 +39,19 @@ struct BeliefStateResultAdder
 {
   std::size_t out_queue;
   NewConcurrentMessageDispatcherPtr md;
+  NewBeliefState* heads;
 
-  BeliefStateResultAdder(std::size_t oq, NewConcurrentMessageDispatcherPtr d)
-    : out_queue(oq), md(d)
+  BeliefStateResultAdder(std::size_t oq, 
+			 NewConcurrentMessageDispatcherPtr d,
+			 NewBeliefState* h)
+    : out_queue(oq), md(d), heads(h)
   { }
 
   void
   operator()(NewBeliefState* ans)
   {
+    
+
     int timeout = 0;
     md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, ans, timeout);
   }

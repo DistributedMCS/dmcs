@@ -28,6 +28,7 @@
  */
 
 #include <iostream>
+#include "mcs/BeliefStateOffset.h"
 #include "mcs/BeliefTable.h"
 #include "mcs/BridgeRuleEvaluator.h"
 
@@ -118,35 +119,26 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleEvaluation )
   bridge_rules->push_back(id_br2);
   bridge_rules->push_back(id_br3);
 
-  // prepare offset: [0, 20, 40]
-  std::vector<std::size_t> starting_offset(3,0);
-  for (std::size_t i = 1; i < 3; ++i)
-    {
-      starting_offset[i] = starting_offset[i-1] + 20;
-    }
+  std::size_t NO_BS = 3;
+  std::size_t BS_SIZE = 20;
+  BeliefStateOffset* bso = BeliefStateOffset::create(NO_BS, BS_SIZE);
+  
+  NewBeliefState* input = new NewBeliefState(NO_BS, BS_SIZE);
+  NewBeliefState* heads = new NewBeliefState(NO_BS, BS_SIZE);
 
-  NewBeliefState input(3);
-  NewBeliefState heads(3);
+  std::vector<std::size_t>& starting_offsets = bso->getStartingOffsets();
 
   // setting up input: (\epsilon {d2, e2}, {g3, i3})
-  std::size_t global_address_a1 = starting_offset[0] + ida1.address;
-  std::size_t global_address_b1 = starting_offset[0] + idb1.address;
-  std::size_t global_address_c1 = starting_offset[0] + idc1.address;
-  std::size_t global_address_d2 = starting_offset[1] + idd2.address;
-  std::size_t global_address_e2 = starting_offset[1] + ide2.address;
-  std::size_t global_address_g3 = starting_offset[2] + idg3.address;
-  std::size_t global_address_h3 = starting_offset[2] + idh3.address;
+  input->set(1, idd2.address, starting_offsets);
+  input->set(1, ide2.address, starting_offsets);
+  input->set(2, idg3.address, starting_offsets);
+  input->set(2, idh3.address, starting_offsets);
 
-  set(input, global_address_d2);
-  set(input, global_address_e2);
-  set(input, global_address_g3);
-  set(input, global_address_h3);
-
-  evaluate(brtab, bridge_rules, input, starting_offset, heads);
+  evaluate(brtab, bridge_rules, input, starting_offsets, heads);
   
-  NewBeliefState::TruthVal a1_val = test(heads, global_address_a1);
-  NewBeliefState::TruthVal b1_val = test(heads, global_address_b1);
-  NewBeliefState::TruthVal c1_val = test(heads, global_address_c1);
+  NewBeliefState::TruthVal a1_val = heads->test(0, ida1.address, starting_offsets);
+  NewBeliefState::TruthVal b1_val = heads->test(0, idb1.address, starting_offsets);
+  NewBeliefState::TruthVal c1_val = heads->test(0, idc1.address, starting_offsets);
 
   BOOST_CHECK_EQUAL(a1_val, NewBeliefState::DMCS_UNDEF);
   BOOST_CHECK_EQUAL(b1_val, NewBeliefState::DMCS_TRUE);
