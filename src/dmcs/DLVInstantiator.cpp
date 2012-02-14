@@ -46,14 +46,12 @@ DLVInstantiator::DLVInstantiator(const EngineWPtr& e,
     {
       std::string line;
       std::getline(iss, line);
-      if (line == "")
+      if (line != "")
 	{
-	  break;
+	  local_kb = local_kb + line + "\n";
 	}
-
-      local_kb = local_kb + line + "\n";
     }
-  while (1);
+  while (!iss.eof());
 }
 
 

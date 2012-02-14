@@ -1,2 +1,3 @@
 flies(X) v not_flies(X) :- bird(X), fit(X).
+
 bird(tweety).

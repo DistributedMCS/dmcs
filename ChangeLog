@@ -1,5 +1,9 @@
 2012-02-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* src/dmcs/DLVInstantiator.cpp: Fix input reading bug.
+
+	* examples/testAbstractContext.inp: Add a blank line.
+
 	* testsuite/testBridgeRuleEvaluation.cpp: Fix testcase.
 
 	* include/mcs/BridgeRuleEvaluator.h: Pass input and heads as pointers.
