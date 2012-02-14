@@ -31,9 +31,12 @@
 #include "mcs/Belief.h"
 #include "mcs/Table.h"
 
+#include <vector>
+
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/random_access_index.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace dmcs {
 
@@ -137,6 +140,8 @@ ID BeliefTable::storeAndGetID(const Belief& b) throw()
 	    );
 }
 
+typedef boost::shared_ptr<BeliefTable> BeliefTablePtr;
+typedef std::vector<BeliefTablePtr> BeliefTableVec;
 
 } // namespace dmcs
 

@@ -1,5 +1,9 @@
 2012-02-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/BeliefTable.h: New typedef.
+
+	* include/mcs/NewContext.h: New file.
+
 	* src/dmcs/DLVInstantiator.cpp: Fix input reading bug.
 
 	* examples/testAbstractContext.inp: Add a blank line.

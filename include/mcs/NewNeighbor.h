@@ -32,7 +32,6 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include "mcs/BeliefTable.h"
 
 namespace dmcs {
 
