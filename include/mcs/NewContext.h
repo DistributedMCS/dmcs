@@ -33,25 +33,45 @@
 
 #include "dmcs/Instantiator.h"
 #include "mcs/BeliefTable.h"
+#include "mcs/StreamingJoiner.h"
+#include "network/NewConcurrentMessageDispatcher.h"
 
 struct NewContext 
 {
   std::size_t ctx_id;
 
+  // The instantiator holds the path (string) to the local knowledge base
   InstantiatorPtr inst;
 
   BridgeRuleTablePtr bridge_rules;
-  BeliefTablePtr local_signature;
 
-  BeliefTableVec neighbors_interfaces;
+  // This just contains the beliefs that are exported to the parents.
+  // Other local beliefs should be hidden inside the Evaluator and treated
+  // as text. 
+  BeliefTablePtr export_signature;
+
+  // For now, neighbors' signatures are not needed
+  // as we assume that they are provided once by the query plan.
   NewNeighborVec neighbors;
 
-  // ?? should the context have a method to read off the query plan
-  // or every data member of the context is initialized during construction time??
+  // For now, we initialize the context only at the beginning.
+  // Later, the idea is to have the query plan included in the request to a context.
+  // Upon receiving a request, the context goes to the specified query plan and 
+  // reads off information regarding bridge rules, neighbors, export signature,...
+  // This is the dynamic setting for future work.
+  NewContext(std::size_t cid,
+	     InstantiatorPtr i,
+	     BridgeRuleTablePtr br,
+	     BeliefTablePtr ex_sig,
+	     NewNeighborVec nbs);
 
-  NewContext(std::size_t cid)
-    : ctx_id(cid)
-  { }
+  void
+  operator()(NewConcurrentMessageDispatcherPtr md,
+	     NewJoinerDispatcherPtr jd);
+  
+
+  void
+  combine();
 };
 
 #endif // NEW_CONTEXT_H

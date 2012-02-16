@@ -1,5 +1,10 @@
 2012-02-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/NewContext.h: Starting implementing context.
+	Add comments for future work.
+
+	* src/mcs/NewContext.cpp: New file.
+
 	* src/mcs/BridgeRuleEvaluator.cpp: Return Heads(PlusBeliefState).
 	* include/mcs/BridgeRuleEvaluator.h: Likewise.
 
