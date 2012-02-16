@@ -74,7 +74,8 @@ public:
   typedef Container::index<impl::KindTag>::type KindIndex;
   typedef Container::index<impl::ElementTag>::type ElementIndex;
   typedef ElementIndex::iterator ElementIterator;
-	// methods
+  typedef AddressIndex::iterator AddressIterator;
+  // methods
 public:
   // retrieve by ID
   // assert that id.kind is correct for BridgeRule
@@ -91,6 +92,9 @@ public:
   // update
   // (oldStorage must be from getByID() or from *const_iterator)
   inline void update(const BridgeRule& oldStorage, BridgeRule& newStorage) throw();
+
+  inline std::pair<AddressIterator, AddressIterator>
+  getAllByAddress() const throw();
 };
 
 typedef boost::shared_ptr<BridgeRuleTable> BridgeRuleTablePtr;
@@ -163,6 +167,17 @@ BridgeRuleTable::clear()
   WriteLock lock(mutex);
   container.clear();
 }
+
+
+std::pair<BridgeRuleTable::AddressIterator, BridgeRuleTable::AddressIterator>
+BridgeRuleTable::getAllByAddress() const throw()
+{
+  ReadLock lock(mutex);
+  const AddressIndex& idx = container.get<impl::AddressTag>();
+
+  return std::make_pair(idx.begin(), idx.end());
+}
+
 
 } // namespace dmcs
 

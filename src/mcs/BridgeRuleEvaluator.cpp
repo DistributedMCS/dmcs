@@ -68,15 +68,15 @@ satisfied(const BridgeRule& r,
 
 void
 evaluate(const BridgeRuleTablePtr& brtab,
-	 const TuplePtr& bridge_rules,
 	 const NewBeliefState* input, 
 	 const std::vector<std::size_t>& starting_offset,
 	 NewBeliefState* heads)
 {
-  for (Tuple::const_iterator it = bridge_rules->begin(); 
-       it != bridge_rules->end(); ++it)
-    {      
-      const BridgeRule& r = brtab->getByID(*it);
+  std::pair<BridgeRuleTable::AddressIterator, BridgeRuleTable::AddressIterator> iters = brtab->getAllByAddress();
+
+  for (BridgeRuleTable::AddressIterator it = iters.first; it != iters.second; ++it)
+    {
+      const BridgeRule& r = *it;
       if (satisfied(r, input, starting_offset))
 	{
 	  std::size_t ctx_id = r.head.contextID();

@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleEvaluation )
   input->set(2, idg3.address, starting_offsets);
   input->set(2, idh3.address, starting_offsets);
 
-  evaluate(brtab, bridge_rules, input, starting_offsets, heads);
+  evaluate(brtab, input, starting_offsets, heads);
   
   NewBeliefState::TruthVal a1_val = heads->test(0, ida1.address, starting_offsets);
   NewBeliefState::TruthVal b1_val = heads->test(0, idb1.address, starting_offsets);

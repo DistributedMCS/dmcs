@@ -41,7 +41,6 @@ satisfied(const BridgeRule& r,
 	  const std::vector<std::size_t>& starting_offset);
 
 void evaluate(const BridgeRuleTablePtr& brtab,
-	      const TuplePtr& bridge_rules,
 	      const NewBeliefState* input, 
 	      const std::vector<std::size_t>& starting_offset,
 	      NewBeliefState* heads);

@@ -1,3 +1,12 @@
+2012-02-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBridgeRuleEvaluation.cpp: Adapt testcase.
+
+	* include/mcs/BridgeRuleTable.h (getAllByAddress): New member function.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+
+	* include/mcs/BridgeRuleEvaluator.h: Evaluate the whole table.
+
 2012-02-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/BeliefTable.h: New typedef.
