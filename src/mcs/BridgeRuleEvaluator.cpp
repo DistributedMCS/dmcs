@@ -27,6 +27,7 @@
  * 
  */
 
+#include "mcs/BeliefStateOffset.h"
 #include "mcs/BridgeRuleEvaluator.h"
 
 namespace dmcs {
@@ -66,12 +67,14 @@ satisfied(const BridgeRule& r,
 }
 
 
-void
+Heads*
 evaluate(const BridgeRuleTablePtr& brtab,
 	 const NewBeliefState* input, 
-	 const std::vector<std::size_t>& starting_offset,
-	 NewBeliefState* heads)
+	 const std::vector<std::size_t>& starting_offset)
 {
+  NewBeliefState* h = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+					 BeliefStateOffset::instance()->SIZE_BS());
+  
   std::pair<BridgeRuleTable::AddressIterator, BridgeRuleTable::AddressIterator> iters = brtab->getAllByAddress();
 
   for (BridgeRuleTable::AddressIterator it = iters.first; it != iters.second; ++it)
@@ -82,9 +85,12 @@ evaluate(const BridgeRuleTablePtr& brtab,
 	  std::size_t ctx_id = r.head.contextID();
 	  IDAddress address = r.head.address;
 	  std::size_t global_address = address + starting_offset[ctx_id];
-	  heads->set(global_address);
+	  h->set(global_address);
 	}
     }
+
+  HeadsPlusBeliefState* heads = new HeadsPlusBeliefState(h, input);
+  return heads;
 }
 
 } // namespace dmcs

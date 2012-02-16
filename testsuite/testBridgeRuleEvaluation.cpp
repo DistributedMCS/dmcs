@@ -31,6 +31,7 @@
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/BeliefTable.h"
 #include "mcs/BridgeRuleEvaluator.h"
+#include "mcs/Heads.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testBridgeRuleEvaluation"
@@ -124,7 +125,6 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleEvaluation )
   BeliefStateOffset* bso = BeliefStateOffset::create(NO_BS, BS_SIZE);
   
   NewBeliefState* input = new NewBeliefState(NO_BS, BS_SIZE);
-  NewBeliefState* heads = new NewBeliefState(NO_BS, BS_SIZE);
 
   std::vector<std::size_t>& starting_offsets = bso->getStartingOffsets();
 
@@ -134,11 +134,12 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleEvaluation )
   input->set(2, idg3.address, starting_offsets);
   input->set(2, idh3.address, starting_offsets);
 
-  evaluate(brtab, input, starting_offsets, heads);
+  Heads* heads = evaluate(brtab, input, starting_offsets);
+  HeadsPlusBeliefState* headsbs = static_cast<HeadsPlusBeliefState*>(heads);
   
-  NewBeliefState::TruthVal a1_val = heads->test(0, ida1.address, starting_offsets);
-  NewBeliefState::TruthVal b1_val = heads->test(0, idb1.address, starting_offsets);
-  NewBeliefState::TruthVal c1_val = heads->test(0, idc1.address, starting_offsets);
+  NewBeliefState::TruthVal a1_val = headsbs->getHeads()->test(0, ida1.address, starting_offsets);
+  NewBeliefState::TruthVal b1_val = headsbs->getHeads()->test(0, idb1.address, starting_offsets);
+  NewBeliefState::TruthVal c1_val = headsbs->getHeads()->test(0, idc1.address, starting_offsets);
 
   BOOST_CHECK_EQUAL(a1_val, NewBeliefState::DMCS_UNDEF);
   BOOST_CHECK_EQUAL(b1_val, NewBeliefState::DMCS_TRUE);

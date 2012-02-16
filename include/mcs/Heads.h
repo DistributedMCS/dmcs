@@ -18,34 +18,61 @@
  */
 
 /**
- * @file   BridgeRuleEvaluator.h
+ * @file   Heads.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Fri Dec  23 16:17:32 2011
+ * @date   Thu Feb  16 16:46:16 2012
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef BRIDGE_RULE_EVALUATOR_H
-#define BRIDGE_RULE_EVALUATOR_H
+#ifndef HEADS_H
+#define HEADS_H
 
-#include "mcs/BridgeRuleTable.h"
 #include "mcs/NewBeliefState.h"
-#include "mcs/Heads.h"
 
 namespace dmcs {
 
-bool
-satisfied(const BridgeRule& r, 
-	  const NewBeliefState* input,
-	  const std::vector<std::size_t>& starting_offset);
+class Heads
+{
+public:
+  Heads(NewBeliefState* h)
+    : heads(h)
+  { }
 
-Heads*
-evaluate(const BridgeRuleTablePtr& brtab,
-	 const NewBeliefState* input, 
-	 const std::vector<std::size_t>& starting_offset);
+  NewBeliefState*
+  getHeads()
+  {
+    return heads;
+  }
+
+protected:
+  NewBeliefState* heads;
+};
+
+
+class HeadsPlusBeliefState : public Heads
+{
+public:
+  HeadsPlusBeliefState(NewBeliefState* h, const NewBeliefState* i)
+    : Heads(h), input(i)
+  { }
+
+  const NewBeliefState*
+  getInputBeliefState() const
+  {
+    return input;
+  }
+
+private:
+  const NewBeliefState* input; // the input belief state from that this head is inferred (by BridgeRuleEvaluator)
+};
 
 } // namespace dmcs
 
-#endif // BRIDGE_RULE_EVALUATOR_H
+#endif // HEADS_H
+
+// Local Variables:
+// mode: C++
+// End:

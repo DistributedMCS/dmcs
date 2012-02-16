@@ -13,6 +13,7 @@ noinst_HEADERS =  \
 		BridgeRuleTable.h \
 		ForwardMessage.h \
 		HashedBiMap.h \
+		Heads.h \
 		ID.h \
 		JoinIn.h \
 		Logger.h \
