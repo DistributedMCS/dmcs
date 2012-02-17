@@ -34,6 +34,7 @@
 #include <boost/shared_ptr.hpp>
 #include "mcs/NewBeliefState.h"
 #include "mcs/NewJoinerDispatcher.h"
+#include "mcs/NewNeighbor.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 
 namespace dmcs {
@@ -41,7 +42,8 @@ namespace dmcs {
 class BaseJoiner
 {
 public:
-  BaseJoiner(std::size_t c, std::size_t n,
+  BaseJoiner(std::size_t c,
+	     NewNeighborVecPtr n,
 	     NewConcurrentMessageDispatcherPtr m,
 	     NewJoinerDispatcherPtr jd);
 
@@ -57,9 +59,9 @@ protected:
 
 protected:
   std::size_t ctx_offset;
-  std::size_t no_neighbors;
   NewConcurrentMessageDispatcherPtr md;
   NewJoinerDispatcherPtr joiner_dispatcher;
+  NewNeighborVecPtr neighbors;
   NewBeliefStatePackage input_belief_states;
   ReturnedBeliefStateList joined_results;
 };

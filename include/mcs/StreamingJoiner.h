@@ -30,15 +30,23 @@
 #ifndef STREAMING_JOINER_H
 #define STREAMING_JOINER_H
 
+#include <map>
+#include <boost/shared_ptr.hpp>
+
 #include "mcs/BaseJoiner.h"
 #include "mcs/ReturnedBeliefState.h"
 
 namespace dmcs {
 
+typedef std::map<std::size_t, std::size_t> NeighborOffset2Index;
+typedef boost::shared_ptr<NeighborOffset2Index> NeighborOffset2IndexPtr;
+
 class StreamingJoiner : public BaseJoiner
 {
 public:
-  StreamingJoiner(std::size_t c, std::size_t n,
+  StreamingJoiner(std::size_t c, 
+		  NewNeighborVecPtr n,
+		  NeighborOffset2IndexPtr o2i,
 		  NewConcurrentMessageDispatcherPtr m,
 		  NewJoinerDispatcherPtr jd);
 
@@ -76,7 +84,7 @@ private:
 		  std::size_t to_neighbor);
 
   void
-  ask_neighbor(std::size_t noff, 
+  ask_neighbor(std::size_t neighbor_index, 
 	       std::size_t query_id, 
 	       std::size_t k1, 
 	       std::size_t k2);
@@ -89,10 +97,11 @@ private:
 
 private:
   std::size_t pack_size;            // the real upper-bound of number of models that we ask the neighbors
-  std::size_t next_neighbor_offset;
+  std::size_t next_neighbor;
   bool first_round;
   bool asking_next;
   std::vector<std::size_t> pack_count;
+  NeighborOffset2IndexPtr offset2index;
 };
 
 } // namespace dmcs

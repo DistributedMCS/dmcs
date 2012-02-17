@@ -28,6 +28,7 @@ send_input_belief_state(NewConcurrentMessageDispatcherPtr md,
   int timeout = 0;
 
   ForwardMessage* notification = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::NEIGHBOR_OUT_MQ, neighbor_offset, timeout);
+  
   std::size_t qid = notification->query_id;
 
   std::size_t ctx_id = ctxid_from_qid(qid);
@@ -166,6 +167,7 @@ BOOST_AUTO_TEST_CASE ( testStreamingJoiner )
   std::size_t qid23 = query_id(5, 1);
   ReturnedBeliefState* rbs23 = new ReturnedBeliefState(bs23, qid23);
   ReturnedBeliefState* rbs24 = new ReturnedBeliefState(NULL, qid23);
+  ReturnedBeliefState* rbs24p = new ReturnedBeliefState(NULL, qid23);
   ReturnedBeliefStateList rbs2;
   rbs2.push_back(rbs21);
   rbs2.push_back(rbs22);
@@ -173,14 +175,40 @@ BOOST_AUTO_TEST_CASE ( testStreamingJoiner )
 
   ReturnedBeliefStateList rbs2p;
   rbs2p.push_back(rbs23);
-  rbs2p.push_back(rbs24);
+  rbs2p.push_back(rbs24p);
 
   /*************************************************************************************************/
 
   std::size_t queue_size = 5;
-  std::size_t no_neighbors = 3;
+  std::size_t real_neighbors = 3;
+  std::size_t more_neighbors = 5;
 
-  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(queue_size, no_neighbors));
+  NeighborOffset2IndexPtr o2i(new NeighborOffset2Index);
+  // At neighbor threads
+  std::size_t noff2 = 2;
+  std::size_t noff3 = 3;
+  std::size_t noff4 = 4;
+
+  // Inside Joiner
+  std::size_t nindex0 = 0;
+  std::size_t nindex1 = 1;
+  std::size_t nindex2 = 2;
+
+  // store the mapping
+  o2i->insert(std::pair<std::size_t, std::size_t>(noff2, nindex0));
+  o2i->insert(std::pair<std::size_t, std::size_t>(noff3, nindex1));
+  o2i->insert(std::pair<std::size_t, std::size_t>(noff4, nindex2));
+
+  NewNeighborVecPtr neighbors(new NewNeighborVec);
+
+  NewNeighborPtr nb2(new NewNeighbor(nindex0, noff2, "", ""));
+  neighbors->push_back(nb2);
+  NewNeighborPtr nb3(new NewNeighbor(nindex1, noff3, "", ""));
+  neighbors->push_back(nb3);
+  NewNeighborPtr nb4(new NewNeighbor(nindex2, noff4, "", ""));
+  neighbors->push_back(nb4);
+
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(queue_size, more_neighbors));
   ConcurrentMessageQueuePtr cmq0(new ConcurrentMessageQueue(queue_size));
   ConcurrentMessageQueuePtr cmq1(new ConcurrentMessageQueue(queue_size));
   md->registerMQ(cmq1, NewConcurrentMessageDispatcher::JOIN_IN_MQ, 1);
@@ -193,14 +221,16 @@ BOOST_AUTO_TEST_CASE ( testStreamingJoiner )
   joiner_dispatcher->registerIdOffset(qid_ctx5, 1);
   boost::thread joiner_dispatcher_thread(*joiner_dispatcher);
 
+
+
   std::size_t ctx_offset = 1;
-  StreamingJoiner streaming_joiner(ctx_offset, no_neighbors, md, joiner_dispatcher);
+  StreamingJoiner streaming_joiner(ctx_offset, neighbors, o2i, md, joiner_dispatcher);
 
   // send results to JoinerDispatcher
-  boost::thread send_from_4_thread(send_input_belief_state, md, 2, rbs4, 1);
-  boost::thread send_from_3_thread(send_input_belief_state, md, 1, rbs3, 1);
-  boost::thread send_from_2_thread(send_input_belief_state, md, 0, rbs2, 1);
-  boost::thread send_from_2p_thread(send_input_belief_state, md, 0, rbs2p, 2000);
+  boost::thread send_from_4_thread(send_input_belief_state, md, noff4, rbs4, 1);
+  boost::thread send_from_3_thread(send_input_belief_state, md, noff3, rbs3, 1);
+  boost::thread send_from_2_thread(send_input_belief_state, md, noff2, rbs2, 1);
+  boost::thread send_from_2p_thread(send_input_belief_state, md, noff2, rbs2p, 2000);
 
   std::size_t qid = query_id(5, 1);
   std::size_t k1 = 1;

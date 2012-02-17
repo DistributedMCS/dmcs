@@ -1,3 +1,15 @@
+2012-02-17  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testJoiner.cpp: Adapt testcase.
+
+	* include/mcs/StreamingJoiner.h: Store a map from neighbor offset to index.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
+	* include/mcs/NewNeighbor.h: Store neighbor_offset.
+
+	* include/mcs/BaseJoiner.h: Give neighbors to Joiner.
+	* src/mcs/BaseJoiner.cpp: Likewise.
+
 2012-02-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/NewContext.h: Starting implementing context.

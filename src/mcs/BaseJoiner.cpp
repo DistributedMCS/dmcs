@@ -31,11 +31,12 @@
 
 namespace dmcs {
 
-BaseJoiner::BaseJoiner(std::size_t c, std::size_t n,
+BaseJoiner::BaseJoiner(std::size_t c,
+		       NewNeighborVecPtr n,
 		       NewConcurrentMessageDispatcherPtr m,
 		       NewJoinerDispatcherPtr jd)
   : ctx_offset(c),
-    no_neighbors(n),
+    neighbors(n),
     md(m),
     joiner_dispatcher(jd)
 {
@@ -48,7 +49,7 @@ void
 BaseJoiner::init()
 {
   // set up a package of empty BeliefStates
-  for (std::size_t i = 0; i < no_neighbors; ++i)
+  for (std::size_t i = 0; i < neighbors->size(); ++i)
     {
       NewBeliefStateVecPtr bsv(new NewBeliefStateVec);
       input_belief_states.push_back(bsv);
@@ -58,9 +59,9 @@ BaseJoiner::init()
 
 
 void
-BaseJoiner::cleanup_input(std::size_t noff)
+BaseJoiner::cleanup_input(std::size_t neighbor_index)
 {
-  NewBeliefStateVecPtr& bsv = input_belief_states[noff];
+  NewBeliefStateVecPtr& bsv = input_belief_states[neighbor_index];
   for (NewBeliefStateVec::iterator it = bsv->begin(); it != bsv->end(); ++it)
     {
       assert (*it);
@@ -88,7 +89,7 @@ BaseJoiner::reset()
   joined_results.clear();
 
   // clean up input
-  for (std::size_t i = 0; i < no_neighbors; ++i)
+  for (std::size_t i = 0; i < neighbors->size(); ++i)
     {
       cleanup_input(i);
     }

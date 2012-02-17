@@ -38,14 +38,16 @@ namespace dmcs {
 struct NewNeighbor 
 {
   std::size_t neighbor_id;
+  std::size_t neighbor_offset;
   std::string hostname;
   std::string port;
-  BeliefTable output_interface;
 
   NewNeighbor(std::size_t nid, 
+	      std::size_t n_off,
 	      const std::string& hn,
 	      const std::string& p)
     : neighbor_id(nid),
+      neighbor_offset(n_off),
       hostname(hn),
       port(p)
   { }
@@ -55,12 +57,13 @@ inline std::ostream&
 operator<< (std::ostream& os, const NewNeighbor& nb)
 {
   
-  os << "(" << nb.neighbor_id << "@" << nb.hostname << ":" << nb.port << ")";
+  os << "(" << nb.neighbor_id << "(" << nb.neighbor_offset << ")" << "@" << nb.hostname << ":" << nb.port << ")";
   return os;
 }
 
 typedef boost::shared_ptr<NewNeighbor> NewNeighborPtr;
 typedef std::vector<NewNeighborPtr> NewNeighborVec;
+typedef boost::shared_ptr<NewNeighborVec> NewNeighborVecPtr;
 
 } // namespace dmcs
 
