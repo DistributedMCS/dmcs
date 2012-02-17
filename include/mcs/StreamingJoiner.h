@@ -46,28 +46,44 @@ class StreamingJoiner : public BaseJoiner
 public:
   StreamingJoiner(std::size_t c, 
 		  NewNeighborVecPtr n,
-		  NeighborOffset2IndexPtr o2i,
-		  NewConcurrentMessageDispatcherPtr m,
-		  NewJoinerDispatcherPtr jd);
+		  NeighborOffset2IndexPtr o2i);
 
   ReturnedBeliefState*
-  trigger_join(std::size_t query_id, std::size_t k1, std::size_t k2);
+  trigger_join(std::size_t query_id, 
+	       std::size_t k1, 
+	       std::size_t k2,
+	       NewConcurrentMessageDispatcherPtr md,
+	       NewJoinerDispatcherPtr jd);
 
 private:
   void
   reset();
 
   ReturnedBeliefState*
-  process(std::size_t query_id, std::size_t k1, std::size_t k2);
+  process(std::size_t query_id, 
+	  std::size_t k1, 
+	  std::size_t k2,
+	  NewConcurrentMessageDispatcherPtr md,
+	  NewJoinerDispatcherPtr jd);
 
   ReturnedBeliefState*
-  first_join(std::size_t query_id, std::size_t k1, std::size_t k2);
+  first_join(std::size_t query_id, 
+	     std::size_t k1, 
+	     std::size_t k2,
+	     NewConcurrentMessageDispatcherPtr md,
+	     NewJoinerDispatcherPtr jd);
 
   ReturnedBeliefState*
-  next_join(std::size_t query_id, std::size_t k1, std::size_t k2);
+  next_join(std::size_t query_id, 
+	    std::size_t k1, 
+	    std::size_t k2,
+	    NewConcurrentMessageDispatcherPtr md,
+	    NewJoinerDispatcherPtr jd);
+
 
   bool
   do_join(std::size_t query_id);
+
 
   bool
   join(std::size_t query_id,
@@ -81,19 +97,25 @@ private:
   bool
   ask_first_packs(std::size_t query_id, 
 		  std::size_t from_neighbor, 
-		  std::size_t to_neighbor);
+		  std::size_t to_neighbor,
+		  NewConcurrentMessageDispatcherPtr md,
+		  NewJoinerDispatcherPtr jd);
 
   void
   ask_neighbor(std::size_t neighbor_index, 
 	       std::size_t query_id, 
 	       std::size_t k1, 
-	       std::size_t k2);
+	       std::size_t k2,
+	       NewConcurrentMessageDispatcherPtr md,
+	       NewJoinerDispatcherPtr jd);
 
   bool
   ask_neighbor_and_receive(std::size_t noff,
 			   std::size_t query_id,
 			   std::size_t k1,
-			   std::size_t k2);
+			   std::size_t k2,
+			   NewConcurrentMessageDispatcherPtr md,
+			   NewJoinerDispatcherPtr jd);
 
 private:
   std::size_t pack_size;            // the real upper-bound of number of models that we ask the neighbors

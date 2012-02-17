@@ -43,9 +43,7 @@ class BaseJoiner
 {
 public:
   BaseJoiner(std::size_t c,
-	     NewNeighborVecPtr n,
-	     NewConcurrentMessageDispatcherPtr m,
-	     NewJoinerDispatcherPtr jd);
+	     NewNeighborVecPtr n);
 
 protected:
   void
@@ -59,8 +57,6 @@ protected:
 
 protected:
   std::size_t ctx_offset;
-  NewConcurrentMessageDispatcherPtr md;
-  NewJoinerDispatcherPtr joiner_dispatcher;
   NewNeighborVecPtr neighbors;
   NewBeliefStatePackage input_belief_states;
   ReturnedBeliefStateList joined_results;

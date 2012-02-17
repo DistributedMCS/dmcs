@@ -180,7 +180,6 @@ BOOST_AUTO_TEST_CASE ( testStreamingJoiner )
   /*************************************************************************************************/
 
   std::size_t queue_size = 5;
-  std::size_t real_neighbors = 3;
   std::size_t more_neighbors = 5;
 
   NeighborOffset2IndexPtr o2i(new NeighborOffset2Index);
@@ -224,7 +223,7 @@ BOOST_AUTO_TEST_CASE ( testStreamingJoiner )
 
 
   std::size_t ctx_offset = 1;
-  StreamingJoiner streaming_joiner(ctx_offset, neighbors, o2i, md, joiner_dispatcher);
+  StreamingJoiner streaming_joiner(ctx_offset, neighbors, o2i);
 
   // send results to JoinerDispatcher
   boost::thread send_from_4_thread(send_input_belief_state, md, noff4, rbs4, 1);
@@ -235,7 +234,7 @@ BOOST_AUTO_TEST_CASE ( testStreamingJoiner )
   std::size_t qid = query_id(5, 1);
   std::size_t k1 = 1;
   std::size_t k2 = 10;
-  ReturnedBeliefState* res1 = streaming_joiner.trigger_join(qid, k1, k2);
+  ReturnedBeliefState* res1 = streaming_joiner.trigger_join(qid, k1, k2, md, joiner_dispatcher);
 
   std::cerr << "res1 = " << *res1 << std::endl;
 

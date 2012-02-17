@@ -1,5 +1,10 @@
 2012-02-17  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/BaseJoiner.h: Remove md, jd from objects and use as parameters.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/mcs/BaseJoiner.cpp: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
 	* testsuite/testJoiner.cpp: Adapt testcase.
 
 	* include/mcs/StreamingJoiner.h: Store a map from neighbor offset to index.

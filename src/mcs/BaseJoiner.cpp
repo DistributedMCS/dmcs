@@ -32,13 +32,9 @@
 namespace dmcs {
 
 BaseJoiner::BaseJoiner(std::size_t c,
-		       NewNeighborVecPtr n,
-		       NewConcurrentMessageDispatcherPtr m,
-		       NewJoinerDispatcherPtr jd)
+		       NewNeighborVecPtr n)
   : ctx_offset(c),
-    neighbors(n),
-    md(m),
-    joiner_dispatcher(jd)
+    neighbors(n)
 {
   init();
 }
