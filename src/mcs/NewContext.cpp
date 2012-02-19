@@ -30,6 +30,7 @@
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/NewContext.h"
 #include "mcs/ForwardMessage.h"
+#include "dmcs/DLVEvaluator.h"
 
 #include "boost/thread.hpp"
 
@@ -60,7 +61,8 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
   // start evaluator thread
   InstantiatorWPtr inst_wptr(inst);
   EvaluatorPtr eval = inst->createEvaluator(inst_wptr);
-  boost::thread eval_thread((*eval.get()), ctx_id, export_signature, md);
+  DLVEvaluatorPtr dlv_eval = boost::static_pointer_cast<DLVEvaluator>(eval);
+  boost::thread eval_thread(*dlv_eval, ctx_id, export_signature, md);
 
   while (1)
     {
@@ -121,7 +123,7 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
 	} // end while solving up to k2
     } // end while listening to request
 
-  //eval_thread.join();
+  eval_thread.join();
 }
 
 

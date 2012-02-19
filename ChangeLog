@@ -1,5 +1,7 @@
 2012-02-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* src/mcs/NewContext.cpp: A walk-around for the problem of creating thread.
+
 	* src/dmcs/DLVInstantiator.cpp: ConcurrentMessageDispatcher used as parameters
 	instead of data member of Evaluator.
 	* src/dmcs/Evaluator.cpp: Likewise.
