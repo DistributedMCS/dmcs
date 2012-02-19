@@ -63,14 +63,13 @@ DLVInstantiator::create(const EngineWPtr& e, const std::string& kbspec)
 
 
 EvaluatorPtr
-DLVInstantiator::createEvaluator(const InstantiatorWPtr& inst,
-				 const NewConcurrentMessageDispatcherPtr md)
+DLVInstantiator::createEvaluator(const InstantiatorWPtr& inst)
 {
   InstantiatorPtr inst_p = inst.lock();
   Instantiator* inst_s = inst_p.get();
   assert (this == inst_s);
 
-  EvaluatorPtr eval(new DLVEvaluator(inst, md));
+  EvaluatorPtr eval(new DLVEvaluator(inst));
   evaluators.push_back(eval);
 
   return eval;

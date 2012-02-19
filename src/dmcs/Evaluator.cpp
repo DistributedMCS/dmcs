@@ -42,14 +42,10 @@ Evaluator::GenericOptions::~GenericOptions()
 
 
 
-Evaluator::Evaluator(const InstantiatorWPtr& inst,
-		     const NewConcurrentMessageDispatcherPtr d)
+Evaluator::Evaluator(const InstantiatorWPtr& inst)
   : instantiator(inst),
-    md(d)
-{
-  in_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_IN_MQ);
-  out_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_OUT_MQ);
-}
+    initialized(false)
+{ }
 
 
 
@@ -76,18 +72,26 @@ Evaluator::getOutQueue()
 
 void
 Evaluator::operator()(std::size_t ctx_id,
-		      BeliefTablePtr btab)
+		      BeliefTablePtr btab,
+		      NewConcurrentMessageDispatcherPtr md)
 {
-  int timeout = 0;
+  if (!initialized)
+    {
+      in_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_IN_MQ);
+      out_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_OUT_MQ);
+      initialized = true;
+    }
+
   while (1)
-    {      
-      NewBeliefState* heads = md->receive<NewBeliefState>(NewConcurrentMessageDispatcher::EVAL_IN_MQ, in_queue, timeout);
+    {
+      int timeout = 0;
+      Heads* heads = md->receive<Heads>(NewConcurrentMessageDispatcher::EVAL_IN_MQ, in_queue, timeout);
       if (heads == NULL)
 	{
 	  break;
 	}
 
-      solve(ctx_id, heads, btab);
+      solve(ctx_id, heads, btab, md);
     }
 }
 

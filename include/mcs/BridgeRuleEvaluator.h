@@ -42,9 +42,9 @@ satisfied(const BridgeRule& r,
 	  const std::vector<std::size_t>& starting_offset);
 
 Heads*
-evaluate(const BridgeRuleTablePtr& brtab,
-	 const NewBeliefState* input, 
-	 const std::vector<std::size_t>& starting_offset);
+evaluate_bridge_rules(const BridgeRuleTablePtr& brtab,
+		      const NewBeliefState* input, 
+		      const std::vector<std::size_t>& starting_offset);
 
 } // namespace dmcs
 

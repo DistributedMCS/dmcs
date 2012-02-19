@@ -42,8 +42,7 @@ public:
 	 const std::string& kbspec);
 
   EvaluatorPtr
-  createEvaluator(const InstantiatorWPtr& inst,
-		  const NewConcurrentMessageDispatcherPtr md);
+  createEvaluator(const InstantiatorWPtr& inst);
 
   std::string
   getKB();

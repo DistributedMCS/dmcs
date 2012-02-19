@@ -33,6 +33,7 @@
 #include "dmcs/AbstractContext.h"
 #include "mcs/NewBeliefState.h"
 #include "mcs/BeliefTable.h"
+#include "mcs/Heads.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 
 namespace dmcs {
@@ -50,8 +51,7 @@ public:
     bool includeFacts;
   };
 
-  Evaluator(const InstantiatorWPtr& inst,
-	    const NewConcurrentMessageDispatcherPtr d);
+  Evaluator(const InstantiatorWPtr& inst);
 
   virtual 
   ~Evaluator();
@@ -65,19 +65,21 @@ public:
   // this starts the evaluator thread
   void
   operator()(std::size_t ctx_id, 
-	     BeliefTablePtr btab);
+	     BeliefTablePtr btab,
+	     NewConcurrentMessageDispatcherPtr md);
 
 protected:
   virtual void
   solve(std::size_t ctx_id,
-	NewBeliefState* heads,
-	BeliefTablePtr btab) = 0;
+	Heads* heads,
+	BeliefTablePtr btab,
+	NewConcurrentMessageDispatcherPtr md) = 0;
 
 protected:
   InstantiatorWPtr instantiator;
-  NewConcurrentMessageDispatcherPtr md;
   std::size_t in_queue;                      // id to the ConcurrentMessageQueue provided by the MessageDispatcher
   std::size_t out_queue;
+  bool initialized;
 };
 
 } // namespace dmcs

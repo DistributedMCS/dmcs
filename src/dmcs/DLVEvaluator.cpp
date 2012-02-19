@@ -52,17 +52,17 @@ DLVEvaluator::Options::~Options()
 { }
 
 
-DLVEvaluator::DLVEvaluator(const InstantiatorWPtr& inst,
-			   const NewConcurrentMessageDispatcherPtr d)
-  : Evaluator(inst, d)
+DLVEvaluator::DLVEvaluator(const InstantiatorWPtr& inst)
+  : Evaluator(inst)
 { }
 
 
 
 void
 DLVEvaluator::solve(std::size_t ctx_id, 
-		    NewBeliefState* heads,
-		    BeliefTablePtr btab)
+		    Heads* heads,
+		    BeliefTablePtr btab,
+		    NewConcurrentMessageDispatcherPtr md)
 {
   // setupProcess
   proc.setPath(DLVPATH);
@@ -98,7 +98,8 @@ DLVEvaluator::solve(std::size_t ctx_id,
   programStream << local_kb;
 
   // putting heads into programStream
-  std::size_t pos = heads->getFirst();
+  NewBeliefState* head_input = heads->getHeads();
+  std::size_t pos = head_input->getFirst();
   do
     {
       IDKind kind = ID::MAINKIND_BELIEF | ctx_id;
@@ -108,7 +109,7 @@ DLVEvaluator::solve(std::size_t ctx_id,
       const Belief& belief = btab->getByID(id);
 
       programStream << belief.text << ".\n";
-      pos = heads->getNext(pos);
+      pos = head_input->getNext(pos);
     }
   while (pos);
 

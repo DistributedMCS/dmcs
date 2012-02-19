@@ -33,12 +33,17 @@
 
 #include "dmcs/Instantiator.h"
 #include "mcs/BeliefTable.h"
+#include "mcs/BridgeRuleEvaluator.h"
 #include "mcs/StreamingJoiner.h"
 #include "network/NewConcurrentMessageDispatcher.h"
+
+namespace dmcs {
 
 struct NewContext 
 {
   std::size_t ctx_id;
+  std::size_t query_counter;
+  std::size_t answer_counter;
 
   // The instantiator holds the path (string) to the local knowledge base
   InstantiatorPtr inst;
@@ -52,8 +57,12 @@ struct NewContext
 
   // For now, neighbors' signatures are not needed
   // as we assume that they are provided once by the query plan.
-  NewNeighborVec neighbors;
+  NewNeighborVecPtr neighbors;
 
+  NeighborOffset2IndexPtr offset2index;
+
+  StreamingJoiner joiner;
+  
   // For now, we initialize the context only at the beginning.
   // Later, the idea is to have the query plan included in the request to a context.
   // Upon receiving a request, the context goes to the specified query plan and 
@@ -63,16 +72,32 @@ struct NewContext
 	     InstantiatorPtr i,
 	     BridgeRuleTablePtr br,
 	     BeliefTablePtr ex_sig,
-	     NewNeighborVec nbs);
+	     NewNeighborVecPtr nbs,
+	     NeighborOffset2IndexPtr o2i);
 
   void
   operator()(NewConcurrentMessageDispatcherPtr md,
 	     NewJoinerDispatcherPtr jd);
   
 
+private:
+  bool
+  read_until_k2(std::size_t k1, 
+		std::size_t k2,
+		std::size_t parent_qid,
+		EvaluatorPtr eval,
+		NewConcurrentMessageDispatcherPtr md);
+
   void
-  combine();
+  read_all(std::size_t parent_qid,
+	   EvaluatorPtr eval,
+	   NewConcurrentMessageDispatcherPtr md);
+
+  void
+  reset();
 };
+
+} // namespace dmcs
 
 #endif // NEW_CONTEXT_H
   

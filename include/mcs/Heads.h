@@ -69,6 +69,8 @@ private:
   const NewBeliefState* input; // the input belief state from that this head is inferred (by BridgeRuleEvaluator)
 };
 
+typedef std::pair<Heads*, NewBeliefState*> HeadsBeliefStatePair;
+
 } // namespace dmcs
 
 #endif // HEADS_H

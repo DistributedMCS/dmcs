@@ -19,6 +19,7 @@ noinst_HEADERS =  \
 		Logger.h \
 		NewBaseDispatcher.h \
 		NewBeliefState.h \
+		NewContext.h \
 		NewMessage.h \
 		NewJoinerDispatcher.h \
 		NewOutputDispatcher.h \

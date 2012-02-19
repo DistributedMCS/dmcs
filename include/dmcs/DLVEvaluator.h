@@ -47,13 +47,13 @@ public:
     std::vector<std::string> arguments;
   };
 
-  DLVEvaluator(const InstantiatorWPtr& inst,
-	       const NewConcurrentMessageDispatcherPtr d);
+  DLVEvaluator(const InstantiatorWPtr& inst);
 
   void
   solve(std::size_t ctx_id,
-	NewBeliefState* heads,
-	BeliefTablePtr btab);
+	Heads* heads,
+	BeliefTablePtr btab,
+	NewConcurrentMessageDispatcherPtr md);
 
 private:
   DLVProcess proc;

@@ -49,7 +49,8 @@ public:
   {
     while (1)
       {
-	ReturnedBeliefState* returned_bs = cmd->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, 0);
+	int timeout = 0;
+	ReturnedBeliefState* returned_bs = cmd->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
 	
 	std::size_t qid = returned_bs->query_id;
 

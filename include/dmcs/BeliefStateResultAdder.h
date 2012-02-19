@@ -31,6 +31,7 @@
 #define BELIEF_STATE_RESULT_ADDER_H
 
 #include "mcs/NewBeliefState.h"
+#include "mcs/Heads.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 
 namespace dmcs {
@@ -39,21 +40,23 @@ struct BeliefStateResultAdder
 {
   std::size_t out_queue;
   NewConcurrentMessageDispatcherPtr md;
-  NewBeliefState* heads;
+  Heads* heads;
 
   BeliefStateResultAdder(std::size_t oq, 
 			 NewConcurrentMessageDispatcherPtr d,
-			 NewBeliefState* h)
+			 Heads* h)
     : out_queue(oq), md(d), heads(h)
   { }
 
   void
   operator()(NewBeliefState* ans)
   {
-    
+    HeadsBeliefStatePair* res = new HeadsBeliefStatePair();
+    res->first = heads;
+    res->second = ans;
 
     int timeout = 0;
-    md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, ans, timeout);
+    md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, res, timeout);
   }
 };
 

@@ -1,3 +1,30 @@
+2012-02-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/DLVInstantiator.cpp: ConcurrentMessageDispatcher used as parameters
+	instead of data member of Evaluator.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
+	* include/mcs/NewOutputDispatcher.h: Use timeout.
+
+	* include/mcs/NewContext.h: Implement StreamingDMCS algorithm.
+	* src/mcs/NewContext.cpp: Likewise.
+
+	* include/mcs/Makefile.am: Add NewContext.h.
+	* src/mcs/Makefile.am: Add NewContext.cpp.
+
+	* include/mcs/BridgeRuleEvaluator.h: Change method's name.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+
+	* include/dmcs/Instantiator.h: Remove some comment.
+
+	* include/mcs/Heads.h: Introduce pair of Heads* and NewBeliefState*.
+
+	* include/dmcs/BeliefStateResultAdder.h: Heads instead of belief states.
+	* include/dmcs/DLVEvaluator.h: Likewise.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+	* include/dmcs/Evaluator.h: Likewise.
+	* include/mcs/BridgeRuleEvaluator.h: Likewise.
+
 2012-02-17  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/BaseJoiner.h: Remove md, jd from objects and use as parameters.

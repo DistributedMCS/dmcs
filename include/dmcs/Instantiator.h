@@ -51,8 +51,7 @@ public:
   ~Instantiator();
   
   virtual EvaluatorPtr
-  createEvaluator(const InstantiatorWPtr& inst,
-		  const NewConcurrentMessageDispatcherPtr md) = 0;
+  createEvaluator(const InstantiatorWPtr& inst) = 0;
 
   // call this with a weak pointer to unregister the instantiator
   // (see comment in Engine.h for why this must be a weak pointer)
@@ -77,11 +76,6 @@ private:
 
   // knowledge base specifier (can be filename or sql database connection string or rdf tuplestore location IRI)
   std::string kbspec;
-
-  //TheoryPtr theory; // remove -> we can let this unspecified here, derived classes
-  //may have various methods to represent this, think of an sql context, it will have
-  //no theory, kbspec will be a connection string, the theory will be in the database
-  //running on some host
 };
 
 } // namespace dmcs
