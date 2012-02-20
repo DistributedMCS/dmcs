@@ -48,7 +48,8 @@ public:
   {
     while (1)
       {
-	ForwardMessage* request = cmd->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, 0);
+	int timeout = 0;
+	ForwardMessage* request = cmd->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, timeout);
 	std::size_t qid = request->query_id;
 
 	if (shutdown(qid))
@@ -59,7 +60,7 @@ public:
 	std::size_t ctx_id = ctxid_from_qid(qid);
 	std::size_t offset = get_offset(ctx_id);
 
-	cmd->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, 0);
+	cmd->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
       }
   }
 };

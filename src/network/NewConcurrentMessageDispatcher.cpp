@@ -150,6 +150,12 @@ NewConcurrentMessageDispatcher::createAndRegisterMQ(MQIDs type)
 }
 
 
+std::size_t
+NewConcurrentMessageDispatcher::getQueueSize()
+{
+  return queue_size;
+}
+
 } // namespace dmcs
 
 // Local Variables:
