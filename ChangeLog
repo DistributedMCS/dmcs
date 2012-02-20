@@ -1,3 +1,11 @@
+2012-02-20  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testAbstractContext.cpp: Fix test case.
+
+	* src/dmcs/Evaluator.cpp: Fix checking last NULL answer.
+
+	* src/dmcs/DLVEvaluator.cpp: Fix return last NULL answer.
+
 2012-02-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/mcs/NewContext.cpp: A walk-around for the problem of creating thread.

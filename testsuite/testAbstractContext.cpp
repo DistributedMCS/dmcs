@@ -48,7 +48,6 @@
 
 using namespace dmcs;
 
-
 // run me with
 // EXAMPLESDIR=../../examples ./testAbstractContext
 BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
@@ -67,7 +66,7 @@ BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
   std::size_t queue_size = 5;
   std::size_t no_neighbors = 3;
   NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(queue_size, no_neighbors));
-  EvaluatorPtr dlv_eval = dlv_inst->createEvaluator(dlv_inst_wp, md);
+  EvaluatorPtr dlv_eval = dlv_inst->createEvaluator(dlv_inst_wp);
 
   BOOST_CHECK_EQUAL(dlv_engine->getNoInstantiators(), 1);
   BOOST_CHECK_EQUAL(dlv_inst->getNoEvaluators(), 1);
@@ -83,6 +82,7 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
 
+  
   const char* ex = getenv("EXAMPLESDIR");
   assert (ex != 0);
   std::string kbspec(ex);
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
   BeliefStateOffset* bso = BeliefStateOffset::create(no_bs, bs_size);
 
   NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(queue_size, no_neighbors));
-  EvaluatorPtr dlv_eval = dlv_inst->createEvaluator(dlv_inst_wp, md);
+  EvaluatorPtr dlv_eval = dlv_inst->createEvaluator(dlv_inst_wp);
 
   std::size_t ctx_id = 0;
 
@@ -119,12 +119,21 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
 
   DLVEvaluatorPtr dlv_eval_casted = boost::static_pointer_cast<DLVEvaluator>(dlv_eval);
   
-  boost::thread evaluation_thread(*dlv_eval_casted, ctx_id, btab);
+  boost::thread evaluation_thread(*dlv_eval_casted, ctx_id, btab, md);
 
-  NewBeliefState* heads = new NewBeliefState(no_bs, bs_size);
-  heads->set(ctx_id, id_fit_tweety.address, bso->getStartingOffsets());
+  boost::posix_time::milliseconds n(1000);
+  boost::this_thread::sleep(n);
+
+  NewBeliefState* head_input = new NewBeliefState(no_bs, bs_size);
+  const NewBeliefState* input_bs = new NewBeliefState(no_bs, bs_size);
+  head_input->set(ctx_id, id_fit_tweety.address, bso->getStartingOffsets());
+
+  HeadsPlusBeliefState* heads = new HeadsPlusBeliefState(head_input, input_bs);
+
   
-  NewBeliefState* end_heads = NULL;
+  NewBeliefState* end_head_input = NULL;
+  NewBeliefState* end_input_bs = NULL;
+  HeadsPlusBeliefState* end_heads = new HeadsPlusBeliefState(end_head_input, end_input_bs);
 
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), heads, timeout);
@@ -145,8 +154,8 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
   do
     {
       int timeout = 0;
-      NewBeliefState* ans = md->receive<NewBeliefState>(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, dlv_eval->getInQueue(), timeout);
-      if (ans == NULL)
+      HeadsBeliefStatePair* ans = md->receive<HeadsBeliefStatePair>(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, dlv_eval->getOutQueue(), timeout);
+      if (ans->second == NULL)
 	{
 	  break;
 	}

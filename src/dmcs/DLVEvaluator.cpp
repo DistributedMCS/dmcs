@@ -150,7 +150,10 @@ DLVEvaluator::solve(std::size_t ctx_id,
 
   // nomore answer wrt this heads. Send a NULL to EVAL_OUT
   int timeout = 0;
-  NewBeliefState* null_ans = NULL;
+
+  HeadsBeliefStatePair* null_ans = new HeadsBeliefStatePair();
+  null_ans->first = heads;
+  null_ans->second = NULL;
   md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, null_ans, timeout);
 }
 

@@ -86,7 +86,7 @@ Evaluator::operator()(std::size_t ctx_id,
     {
       int timeout = 0;
       Heads* heads = md->receive<Heads>(NewConcurrentMessageDispatcher::EVAL_IN_MQ, in_queue, timeout);
-      if (heads == NULL)
+      if (heads->getHeads() == NULL)
 	{
 	  break;
 	}
