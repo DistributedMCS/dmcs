@@ -58,6 +58,10 @@ void
 NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
 		       NewJoinerDispatcherPtr jd)
 {
+  // register REQUEST_MQ to md
+  ConcurrentMessageQueuePtr my_request_mq(new ConcurrentMessageQueue(md->getQueueSize()));
+  md->registerMQ(my_request_mq, NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id);
+
   // start evaluator thread
   InstantiatorWPtr inst_wptr(inst);
   EvaluatorPtr eval = inst->createEvaluator(inst_wptr);
@@ -69,6 +73,8 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
       int timeout = 0;
 
       ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id, timeout);
+
+      std::cerr << "NewContext::got fwd_mess = " << *fwd_mess << std::endl;
       
       std::size_t parent_qid = fwd_mess->query_id;
       if (shutdown(parent_qid))
@@ -86,14 +92,18 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
 	  // intermediate context
 	  if (neighbors->size() > 0)
 	    {
+	      std::cerr << "Going to trigger joiner" << std::endl;
 	      std::size_t this_qid = query_id(ctx_id, query_counter++);
 	      ReturnedBeliefState* rbs = joiner.trigger_join(this_qid, k1, k2, md, jd);
 	      if (rbs->belief_state == NULL)
 		{
+		  std::cerr << "Got rbs = NULL" << std::endl;
 		  rbs->query_id = parent_qid;		
 		  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs, timeout);
 		  break;
 		}
+
+	      std::cerr << "Got rbs = " << *rbs << std::endl;
 
 	      NewBeliefState* input = rbs->belief_state;
 	      heads = evaluate_bridge_rules(bridge_rules, input, BeliefStateOffset::instance()->getStartingOffsets());
@@ -122,7 +132,9 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
 	} // end while solving up to k2
     } // end while listening to request
 
+  std::cerr << "NewContext: end of listening to request" << std::endl;
   inst->stopThread(eval);
+  std::cerr << "Stopped eval thread" << std::endl;
 }
 
 
@@ -167,6 +179,7 @@ NewContext::read_until_k2(std::size_t k1,
 			  EvaluatorPtr eval,
 			  NewConcurrentMessageDispatcherPtr md)
 {
+
   assert (k1 > 0 && k2 > k1);
 
   if (answer_counter >= k1)
@@ -176,6 +189,7 @@ NewContext::read_until_k2(std::size_t k1,
 
   while (answer_counter < k1-1)
     {
+      std::cerr << "Read and ignore" << std::endl;
       int timeout = 0;
       HeadsBeliefStatePair* res = md->receive<HeadsBeliefStatePair>(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, eval->getOutQueue(), timeout);
 
@@ -196,6 +210,7 @@ NewContext::read_until_k2(std::size_t k1,
 	}
     }
 
+  std::cerr << "Reading until k2 = " << k2 << std::endl;
   while (answer_counter < k2)
     {
       int timeout = 0;
@@ -203,6 +218,10 @@ NewContext::read_until_k2(std::size_t k1,
 
       Heads* heads = res->first;
       NewBeliefState* belief_state = res->second;
+
+      std::cerr << "Got heads = " << *(heads->getHeads()) << std::endl;
+      std::cerr << "Got belief_state = " << *belief_state << std::endl;
+
       delete res;
       res = 0;
 
@@ -224,8 +243,11 @@ NewContext::read_until_k2(std::size_t k1,
 	}
     }
 
+  std::cerr << "Got up to k2 = " << k2 << std::endl;
+
   if (answer_counter == k2)
     {
+      std::cerr << "Return true" << std::endl;
       return true;
     }
   

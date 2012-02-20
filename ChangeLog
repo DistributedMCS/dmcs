@@ -1,5 +1,12 @@
 2012-02-20  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* src/mcs/NewContext.cpp: Register REQUEST_MQ to md.
+
+	* testsuite/testAbstractContext.cpp: Add testRunningContext.
+
+	* include/network/NewConcurrentMessageDispatcher.h: Return queue size.
+	* src/network/NewConcurrentMessageDispatcher.cpp: Likewise.
+
 	* include/dmcs/DLVInstantiator.h: Start and stop threads by instantiators.
 	* src/dmcs/DLVInstantiator.cpp: Likewise.
 	* include/dmcs/Instantiator.h: Likewise.

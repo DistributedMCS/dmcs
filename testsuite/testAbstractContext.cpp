@@ -31,7 +31,12 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
+#include "mcs/Belief.h"
 #include "mcs/BeliefStateOffset.h"
+#include "mcs/BridgeRuleTable.h"
+#include "mcs/NewContext.h"
+#include "mcs/ForwardMessage.h"
+#include "mcs/NewNeighbor.h"
 #include "dmcs/DLVEngine.h"
 #include "dmcs/DLVInstantiator.h"
 #include "dmcs/DLVEvaluator.h"
@@ -48,6 +53,7 @@
 
 using namespace dmcs;
 
+/*
 // run me with
 // EXAMPLESDIR=../../examples ./testAbstractContext
 BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
@@ -164,7 +170,225 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
   while (1);
   
   BOOST_CHECK_EQUAL(count, 2);
+}*/
+
+void
+send_input_belief_state(NewConcurrentMessageDispatcherPtr md, 
+			std::size_t neighbor_offset,
+			ReturnedBeliefStateList& rbs)
+{
+  int timeout = 0;
+
+  ForwardMessage* notification = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::NEIGHBOR_OUT_MQ, neighbor_offset, timeout);
+  
+  std::size_t qid = notification->query_id;
+
+  std::size_t ctx_id = ctxid_from_qid(qid);
+  std::size_t query_order = qorder_from_qid(qid);
+
+  std::size_t no_rbs = rbs.size();
+  NewJoinIn* ji = new NewJoinIn(neighbor_offset, no_rbs);
+
+  std::cerr << "Got notification = " << *notification  << "@noff = " << neighbor_offset << std::endl;
+
+  md->send<NewJoinIn>(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, ji, timeout);
+
+  std::cerr << "Sent JoinIn = " << *ji << std::endl;
+  
+  for (ReturnedBeliefStateList::const_iterator it = rbs.begin(); it != rbs.end(); ++it)
+    {
+      md->send<ReturnedBeliefState>(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, neighbor_offset, *it, timeout);
+    }
 }
+
+
+BOOST_AUTO_TEST_CASE ( testRunningContext )
+{
+  std::size_t NO_BS = 4;
+  std::size_t BS_SIZE = 3;
+  BeliefStateOffset* bso = BeliefStateOffset::create(NO_BS, BS_SIZE);
+
+  std::size_t QUEUE_SIZE = 5;
+  std::size_t NO_NEIGHBORS = 2;
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
+  ConcurrentMessageQueuePtr cmq0(new ConcurrentMessageQueue(QUEUE_SIZE));
+  ConcurrentMessageQueuePtr cmq1(new ConcurrentMessageQueue(QUEUE_SIZE));
+  md->registerMQ(cmq0, NewConcurrentMessageDispatcher::JOIN_IN_MQ, 0);
+  md->registerMQ(cmq1, NewConcurrentMessageDispatcher::JOIN_IN_MQ, 1);
+
+  std::size_t ctx_id0 = 0;
+  Belief epsilon0(ctx_id0, "epsilon");
+  Belief a(ctx_id0, "a");
+  Belief a1(ctx_id0, "a1");
+  Belief a2(ctx_id0, "a2");
+  BeliefTablePtr btab0(new BeliefTable);
+
+  ID id_epsilon0 = btab0->storeAndGetID(epsilon0);
+  ID id_a = btab0->storeAndGetID(a);
+  ID id_a1 = btab0->storeAndGetID(a1);
+  ID id_a2 = btab0->storeAndGetID(a2);
+
+  std::size_t ctx_id1 = 1;
+  Belief epsilon1(ctx_id1, "epsilon");
+  Belief b(ctx_id1, "b");
+  Belief b1(ctx_id1, "b1");
+  Belief b2(ctx_id1, "b2");
+  BeliefTablePtr btab1(new BeliefTable);
+
+  ID id_epsilon1 = btab1->storeAndGetID(epsilon1);
+  ID id_b = btab1->storeAndGetID(b);
+  ID id_b1 = btab1->storeAndGetID(b1);
+  ID id_b2 = btab1->storeAndGetID(b2);
+
+  std::size_t ctx_id2 = 2;
+  Belief epsilon2(ctx_id2, "epsilon");
+  Belief c(ctx_id2, "c");
+  Belief d(ctx_id2, "d");
+  Belief e(ctx_id2, "e");
+  BeliefTablePtr btab2(new BeliefTable);
+
+  ID id_epsilon2 = btab2->storeAndGetID(epsilon2);
+  ID id_c = btab2->storeAndGetID(c);
+  ID id_d = btab2->storeAndGetID(d);
+  ID id_e = btab2->storeAndGetID(e);
+
+  std::size_t ctx_id3 = 3;
+  Belief epsilon3(ctx_id3, "epsilon");
+  Belief f(ctx_id3, "f");
+  Belief g(ctx_id3, "g");
+  Belief h(ctx_id3, "h");
+  BeliefTablePtr btab3(new BeliefTable);
+
+  ID id_epsilon3 = btab3->storeAndGetID(epsilon3);
+  ID id_f = btab3->storeAndGetID(f);
+  ID id_g = btab3->storeAndGetID(g);
+  ID id_h = btab3->storeAndGetID(h);
+
+  // Initialize input belief states
+  // C2:
+  // \epsilon, {b}, \epsilon, {\neg f, g}
+  NewBeliefState* bs21 = new NewBeliefState(NO_BS, BS_SIZE);
+  bs21->setEpsilon(ctx_id1, bso->getStartingOffsets());
+  bs21->set(ctx_id1, id_b.address, bso->getStartingOffsets());
+  bs21->setEpsilon(ctx_id3, bso->getStartingOffsets());
+  bs21->set(ctx_id3, id_f.address, bso->getStartingOffsets(), NewBeliefState::DMCS_FALSE);
+  bs21->set(ctx_id3, id_g.address, bso->getStartingOffsets());
+
+  // \epsilon, {b}, \epsilon, {f, \neg g}
+  NewBeliefState* bs22 = new NewBeliefState(NO_BS, BS_SIZE);
+  bs22->setEpsilon(ctx_id1, bso->getStartingOffsets());
+  bs22->set(ctx_id1, id_b.address, bso->getStartingOffsets(), NewBeliefState::DMCS_FALSE);
+  bs22->setEpsilon(ctx_id3, bso->getStartingOffsets());
+  bs22->set(ctx_id3, id_f.address, bso->getStartingOffsets());
+  bs22->set(ctx_id3, id_g.address, bso->getStartingOffsets(), NewBeliefState::DMCS_FALSE);
+
+  std::size_t qid = query_id(ctx_id0, 0);
+  ReturnedBeliefState* rbs21 = new ReturnedBeliefState(bs21, qid);
+  ReturnedBeliefState* rbs22 = new ReturnedBeliefState(bs22, qid);
+  ReturnedBeliefState* rbs23 = new ReturnedBeliefState(NULL, qid);
+  ReturnedBeliefStateList rbs2;
+  rbs2.push_back(rbs21);
+  rbs2.push_back(rbs22);
+  rbs2.push_back(rbs23);
+
+  // C3:
+  // \epsilon, \epsilon, {c}, {\neg f, g}
+  NewBeliefState* bs31 = new NewBeliefState(NO_BS, BS_SIZE);
+  bs31->setEpsilon(ctx_id2, bso->getStartingOffsets());
+  bs31->set(ctx_id2, id_c.address, bso->getStartingOffsets());
+  bs31->setEpsilon(ctx_id3, bso->getStartingOffsets());
+  bs31->set(ctx_id3, id_f.address, bso->getStartingOffsets(), NewBeliefState::DMCS_FALSE);
+  bs31->set(ctx_id3, id_g.address, bso->getStartingOffsets());
+
+  // \epsilon, \epsilon, {\neg c}, {\neg f, g}
+  NewBeliefState* bs32 = new NewBeliefState(NO_BS, BS_SIZE);
+  bs32->setEpsilon(ctx_id2, bso->getStartingOffsets());
+  bs32->set(ctx_id2, id_c.address, bso->getStartingOffsets(), NewBeliefState::DMCS_FALSE);
+  bs32->setEpsilon(ctx_id3, bso->getStartingOffsets());
+  bs32->set(ctx_id3, id_f.address, bso->getStartingOffsets(), NewBeliefState::DMCS_FALSE);
+  bs32->set(ctx_id3, id_g.address, bso->getStartingOffsets());
+
+  // \epsilon, \epsilon, {\neg c}, {f, \neg g}
+  NewBeliefState* bs33 = new NewBeliefState(NO_BS, BS_SIZE);
+  bs33->setEpsilon(ctx_id2, bso->getStartingOffsets());
+  bs33->set(ctx_id2, id_c.address, bso->getStartingOffsets(), NewBeliefState::DMCS_FALSE);
+  bs33->setEpsilon(ctx_id3, bso->getStartingOffsets());
+  bs33->set(ctx_id3, id_f.address, bso->getStartingOffsets());
+  bs33->set(ctx_id3, id_g.address, bso->getStartingOffsets(), NewBeliefState::DMCS_FALSE);
+
+  ReturnedBeliefState* rbs31 = new ReturnedBeliefState(bs31, qid);
+  ReturnedBeliefState* rbs32 = new ReturnedBeliefState(bs32, qid);
+  ReturnedBeliefState* rbs33 = new ReturnedBeliefState(bs33, qid);
+  ReturnedBeliefState* rbs34 = new ReturnedBeliefState(NULL, qid);
+  ReturnedBeliefStateList rbs3;
+  rbs3.push_back(rbs31);
+  rbs3.push_back(rbs32);
+  rbs3.push_back(rbs33);
+  rbs3.push_back(rbs34);
+
+  std::size_t noff0 = 0;
+  std::size_t noff1 = 1;
+
+  std::size_t nindex0 = 0;
+  std::size_t nindex1 = 1;
+
+  boost::thread send_from_2_thread(send_input_belief_state, md, noff0, rbs2);
+  boost::thread send_from_3_thread(send_input_belief_state, md, noff1, rbs3);
+
+  Tuple bridge_body;
+  bridge_body.push_back(id_b);
+  bridge_body.push_back(id_c);
+  BridgeRule br(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_a, bridge_body);
+
+  BridgeRuleTablePtr brtab(new BridgeRuleTable);
+  ID id_br = brtab->storeAndGetID(br);
+
+  NewNeighborPtr neighbor1(new NewNeighbor(nindex0, noff0, "localhost", "5001"));
+  NewNeighborPtr neighbor2(new NewNeighbor(nindex1, noff1, "localhost", "5002"));
+  NewNeighborVecPtr neighbors(new NewNeighborVec);
+  neighbors->push_back(neighbor1);
+  neighbors->push_back(neighbor2);
+
+  NeighborOffset2IndexPtr o2i(new NeighborOffset2Index);
+  o2i->insert(std::pair<std::size_t, std::size_t>(noff0, nindex0));
+  o2i->insert(std::pair<std::size_t, std::size_t>(noff1, nindex1));
+
+  EnginePtr dlv_engine = DLVEngine::create();
+  EngineWPtr dlv_engine_wp(dlv_engine);
+
+  /*  const char* ex = getenv("EXAMPLESDIR");
+  assert (ex != 0);
+  std::string kbspec(ex);
+  kbspec += "/testRunningContext.inp";*/
+
+  std::string kbspec = "../../examples/testRunningContext.inp";
+
+  InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
+
+  NewContext ctx(ctx_id0, dlv_inst, brtab, btab0, neighbors, o2i);
+
+  NewJoinerDispatcherPtr joiner_dispatcher(new NewJoinerDispatcher(md));
+  joiner_dispatcher->registerIdOffset(qid, ctx_id0);
+  
+  boost::thread joiner_dispatcher_thread(*joiner_dispatcher);
+  boost::thread context_thread(ctx, md, joiner_dispatcher);
+
+  std::size_t parent_qid = query_id(100, 1);
+  ForwardMessage* fwd_mess = new ForwardMessage(parent_qid, 1, 2);
+  ForwardMessage* end_mess = new ForwardMessage(shutdown_query_id(), 1, 2);
+
+  std::cerr << "Going to send fwd_mess = " << *fwd_mess << std::endl;
+  int timeout = 0;
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id0, fwd_mess, timeout);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id0, end_mess, timeout);
+
+  std::cerr << "Sent fwd_mess = " << *fwd_mess << std::endl;
+
+  send_from_2_thread.join();
+  send_from_3_thread.join();
+  context_thread.join();
+}
+
 
 // Local Variables:
 // mode: C++
