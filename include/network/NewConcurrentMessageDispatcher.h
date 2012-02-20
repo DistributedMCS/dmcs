@@ -89,6 +89,9 @@ public:
   MessageType*
   receive(MQIDs type, std::size_t id, int msecs);
 
+  std::size_t
+  getQueueSize();
+
 private:
   void
   init_mqs(std::size_t k, std::size_t no_neighbors);
