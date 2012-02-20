@@ -30,6 +30,8 @@
 #ifndef ABSTRACT_CONTEXT_H
 #define ABSTRACT_CONTEXT_H
 
+#include <list>
+#include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -51,6 +53,7 @@ typedef boost::weak_ptr<Instantiator> InstantiatorWPtr;
 
 typedef boost::shared_ptr<Evaluator> EvaluatorPtr;
 typedef boost::weak_ptr<Evaluator> EvaluatorWPtr;
+typedef std::list<EvaluatorPtr> EvaluatorList;
 
 typedef boost::shared_ptr<DLVEngine> DLVEnginePtr;
 typedef boost::weak_ptr<DLVEngine> DLVEngineWPtr;
@@ -60,6 +63,8 @@ typedef boost::weak_ptr<DLVInstantiator> DLVInstantiatorWPtr;
 
 typedef boost::shared_ptr<DLVEvaluator> DLVEvaluatorPtr;
 typedef boost::weak_ptr<DLVEvaluator> DLVEvaluatorWPtr;
+
+typedef std::list<boost::thread*> BoostThreadList;
 
 } // namespace dmcs
 

@@ -58,6 +58,16 @@ public:
   virtual void
   removeEvaluator(EvaluatorWPtr eval);
 
+  virtual void
+  startThread(EvaluatorPtr eval,
+	      std::size_t ctx_id,
+	      BeliefTablePtr ex_sig,
+	      NewConcurrentMessageDispatcherPtr md) = 0;
+  
+
+  void
+  stopThread(EvaluatorPtr eval);
+
   virtual std::string
   getKB() = 0;
 
@@ -68,8 +78,12 @@ protected:
   Instantiator(const EngineWPtr& e,
 	       const std::string& kbn);
 
+  boost::thread*
+  getThread(EvaluatorPtr eval);
+
 protected:
-  std::list<EvaluatorPtr> evaluators;
+  EvaluatorList evaluators;
+  BoostThreadList eval_threads;
 
 private:
   EngineWPtr engine;

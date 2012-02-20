@@ -61,8 +61,7 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
   // start evaluator thread
   InstantiatorWPtr inst_wptr(inst);
   EvaluatorPtr eval = inst->createEvaluator(inst_wptr);
-  DLVEvaluatorPtr dlv_eval = boost::static_pointer_cast<DLVEvaluator>(eval);
-  boost::thread eval_thread(*dlv_eval, ctx_id, export_signature, md);
+  inst->startThread(eval, ctx_id, export_signature, md);
 
   while (1)
     {
@@ -123,7 +122,7 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
 	} // end while solving up to k2
     } // end while listening to request
 
-  eval_thread.join();
+  inst->stopThread(eval);
 }
 
 

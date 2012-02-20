@@ -44,6 +44,15 @@ public:
   EvaluatorPtr
   createEvaluator(const InstantiatorWPtr& inst);
 
+  void
+  startThread(EvaluatorPtr eval,
+	      std::size_t ctx_id,
+	      BeliefTablePtr ex_sig,
+	      NewConcurrentMessageDispatcherPtr md);
+
+  void
+  stopThread(EvaluatorPtr eval);
+
   std::string
   getKB();
 
