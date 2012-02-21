@@ -78,7 +78,7 @@ protected:
   Instantiator(const EngineWPtr& e,
 	       const std::string& kbn);
 
-  boost::thread*
+  boost::thread*&
   getThread(EvaluatorPtr eval);
 
 protected:

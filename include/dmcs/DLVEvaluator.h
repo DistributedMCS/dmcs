@@ -49,6 +49,8 @@ public:
 
   DLVEvaluator(const InstantiatorWPtr& inst);
 
+  ~DLVEvaluator();
+
   void
   solve(std::size_t ctx_id,
 	Heads* heads,
@@ -56,7 +58,7 @@ public:
 	NewConcurrentMessageDispatcherPtr md);
 
 private:
-  DLVProcess proc;
+  DLVProcess* proc;
   Options options;
 };
 

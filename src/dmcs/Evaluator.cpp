@@ -86,12 +86,22 @@ Evaluator::operator()(std::size_t ctx_id,
     {
       int timeout = 0;
       Heads* heads = md->receive<Heads>(NewConcurrentMessageDispatcher::EVAL_IN_MQ, in_queue, timeout);
-      if (heads->getHeads() == NULL)
+      
+      if (heads == NULL) // Leaf context
 	{
+	  solve(ctx_id, heads, btab, md);
 	  break;
 	}
-
-      solve(ctx_id, heads, btab, md);
+      else if (heads->getHeads() != NULL) // Intermediate context with input
+	{
+	  solve(ctx_id, heads, btab, md);
+	}
+      else // Intermediate context at the end
+	{
+	  delete heads;
+	  heads = 0;
+	  break;
+	}
     }
 }
 

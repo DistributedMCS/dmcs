@@ -57,6 +57,8 @@ DLVEvaluator::DLVEvaluator(const InstantiatorWPtr& inst)
 { }
 
 
+DLVEvaluator::~DLVEvaluator()
+{ }
 
 void
 DLVEvaluator::solve(std::size_t ctx_id, 
@@ -64,30 +66,32 @@ DLVEvaluator::solve(std::size_t ctx_id,
 		    BeliefTablePtr btab,
 		    NewConcurrentMessageDispatcherPtr md)
 {
+  proc = new DLVProcess;
+
   // setupProcess
-  proc.setPath(DLVPATH);
+  proc->setPath(DLVPATH);
   if (options.includeFacts)
     {
-      proc.addOption("-facts");
+      proc->addOption("-facts");
     }
   else
     {
-      proc.addOption("-nofacts");
+      proc->addOption("-nofacts");
     }
 
   for (std::vector<std::string>::const_iterator it = options.arguments.begin();
        it != options.arguments.end(); ++it)
     {
-      proc.addOption(*it);
+      proc->addOption(*it);
     }
 
   // request stdin as last parameter
-  proc.addOption("--");
-  
-  // fork dlv process
-  proc.spawn();
+  proc->addOption("--");
 
-  std::ostream& programStream = proc.getOutput();
+  // fork dlv process
+  proc->spawn();
+
+  std::ostream& programStream = proc->getOutput();
 
   // copy stream
   InstantiatorPtr instantiator_p = instantiator.lock();
@@ -115,12 +119,12 @@ DLVEvaluator::solve(std::size_t ctx_id,
 
   programStream.flush();
 
-  proc.endoffile();
+  proc->endoffile();
 
   BeliefStateResultAdder adder(out_queue, md, heads);
   DLVResultParser dlv_parser(ctx_id, btab);
 
-  std::istream& is = proc.getInput();
+  std::istream& is = proc->getInput();
   do
     {
       std::string input;
@@ -147,6 +151,9 @@ DLVEvaluator::solve(std::size_t ctx_id,
       }      
     }
   while (1);
+
+  delete proc;
+  proc = 0;
 
   // nomore answer wrt this heads. Send a NULL to EVAL_OUT
   int timeout = 0;

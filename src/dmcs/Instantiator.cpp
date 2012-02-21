@@ -41,13 +41,14 @@ Instantiator::~Instantiator()
 { }
 
 
-boost::thread*
+boost::thread*&
 Instantiator::getThread(EvaluatorPtr eval)
 {
   EvaluatorList::iterator eval_it = std::find(evaluators.begin(), evaluators.end(), eval);
   assert (eval_it != evaluators.end());
 
   std::size_t dist = std::distance(evaluators.begin(), eval_it);
+
   BoostThreadList::iterator thread_it = eval_threads.begin();
   std::advance(thread_it, dist);  
 
@@ -58,7 +59,7 @@ Instantiator::getThread(EvaluatorPtr eval)
 void
 Instantiator::stopThread(EvaluatorPtr eval)
 {
-  boost::thread* t = getThread(eval);
+  boost::thread*& t = getThread(eval);
   t->join();
 }
 

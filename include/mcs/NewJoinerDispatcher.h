@@ -42,8 +42,8 @@ namespace dmcs {
 class NewJoinerDispatcher : public NewBaseDispatcher
 {
 public:
-  NewJoinerDispatcher(NewConcurrentMessageDispatcherPtr md)
-    : NewBaseDispatcher(md)
+  NewJoinerDispatcher(NewConcurrentMessageDispatcherPtr m)
+    : NewBaseDispatcher(m)
   { }
 
   void
@@ -52,7 +52,7 @@ public:
     while (1)
       {
 	int timeout = 0;
-	NewJoinIn* notification = cmd->receive<NewJoinIn>(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, timeout);
+	NewJoinIn* notification = md->receive<NewJoinIn>(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, timeout);
 	std::size_t neighbor_offset = notification->neighbor_offset;
 	std::size_t no_belief_state = notification->no_belief_state;
 	
@@ -61,13 +61,13 @@ public:
 
 	for (std::size_t i = 0; i < no_belief_state; ++i)
 	  {
-	    ReturnedBeliefState* rbs = cmd->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, neighbor_offset, timeout);
+	    ReturnedBeliefState* rbs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, neighbor_offset, timeout);
 	    
 	    std::size_t old_qid = rbs->query_id;
 	    set_neighbor_offset(rbs->query_id, neighbor_offset);
 	    std::size_t offset = get_offset(old_qid);
 	    
-	    cmd->send(NewConcurrentMessageDispatcher::JOIN_IN_MQ, offset, rbs, timeout);
+	    md->send(NewConcurrentMessageDispatcher::JOIN_IN_MQ, offset, rbs, timeout);
 	  }
       }
   }

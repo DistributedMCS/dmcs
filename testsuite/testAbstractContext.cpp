@@ -53,7 +53,6 @@
 
 using namespace dmcs;
 
-/*
 // run me with
 // EXAMPLESDIR=../../examples ./testAbstractContext
 BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
@@ -83,21 +82,23 @@ BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
 }
 
 
+ 
 BOOST_AUTO_TEST_CASE ( testRunningDLV )
 {
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
 
-  
   const char* ex = getenv("EXAMPLESDIR");
   assert (ex != 0);
   std::string kbspec(ex);
   kbspec += "/testAbstractContext.inp";
 
+  //std::string kbspec = "../../examples/testAbstractContext.inp";
+
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
   InstantiatorWPtr dlv_inst_wp(dlv_inst);
 
-  std::size_t queue_size = 5;
+  std::size_t queue_size = 100;
   std::size_t no_neighbors = 3;
 
   std::size_t no_bs = 4;
@@ -143,6 +144,13 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
 
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), heads, timeout);
+
+  boost::posix_time::milliseconds n1(100);
+  //boost::this_thread::sleep(n1);
+
+  md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), heads, timeout);
+  md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), heads, timeout);
+
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), end_heads, timeout);
 
   evaluation_thread.join();
@@ -155,6 +163,7 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
   // with heads = {fit(tweety).}
   //
   // expect 2 answers [1, 2, 4] and [1, 3, 4]
+  
   
   std::size_t count = 0;
   do
@@ -170,7 +179,8 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
   while (1);
   
   BOOST_CHECK_EQUAL(count, 2);
-}*/
+}
+
 
 void
 send_input_belief_state(NewConcurrentMessageDispatcherPtr md, 
@@ -189,11 +199,7 @@ send_input_belief_state(NewConcurrentMessageDispatcherPtr md,
   std::size_t no_rbs = rbs.size();
   NewJoinIn* ji = new NewJoinIn(neighbor_offset, no_rbs);
 
-  std::cerr << "Got notification = " << *notification  << "@noff = " << neighbor_offset << std::endl;
-
   md->send<NewJoinIn>(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, ji, timeout);
-
-  std::cerr << "Sent JoinIn = " << *ji << std::endl;
   
   for (ReturnedBeliefStateList::const_iterator it = rbs.begin(); it != rbs.end(); ++it)
     {
@@ -215,6 +221,10 @@ BOOST_AUTO_TEST_CASE ( testRunningContext )
   ConcurrentMessageQueuePtr cmq1(new ConcurrentMessageQueue(QUEUE_SIZE));
   md->registerMQ(cmq0, NewConcurrentMessageDispatcher::JOIN_IN_MQ, 0);
   md->registerMQ(cmq1, NewConcurrentMessageDispatcher::JOIN_IN_MQ, 1);
+
+  // needs some time for md to start up all of its MQ, otherwise we get some segfaults
+  boost::posix_time::milliseconds md_starting_up(100);
+  boost::this_thread::sleep(md_starting_up);
 
   std::size_t ctx_id0 = 0;
   Belief epsilon0(ctx_id0, "epsilon");
@@ -335,6 +345,14 @@ BOOST_AUTO_TEST_CASE ( testRunningContext )
   boost::thread send_from_2_thread(send_input_belief_state, md, noff0, rbs2);
   boost::thread send_from_3_thread(send_input_belief_state, md, noff1, rbs3);
 
+  ReturnedBeliefState* rbs41 = new ReturnedBeliefState(NULL, qid);
+  ReturnedBeliefStateList rbs4;
+  rbs4.push_back(rbs41);
+
+  ReturnedBeliefState* rbs51 = new ReturnedBeliefState(NULL, qid);
+  ReturnedBeliefStateList rbs5;
+  rbs5.push_back(rbs51);  
+
   Tuple bridge_body;
   bridge_body.push_back(id_b);
   bridge_body.push_back(id_c);
@@ -356,12 +374,12 @@ BOOST_AUTO_TEST_CASE ( testRunningContext )
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
 
-  /*  const char* ex = getenv("EXAMPLESDIR");
+  const char* ex = getenv("EXAMPLESDIR");
   assert (ex != 0);
   std::string kbspec(ex);
-  kbspec += "/testRunningContext.inp";*/
+  kbspec += "/testRunningContext.inp";
 
-  std::string kbspec = "../../examples/testRunningContext.inp";
+  //std::string kbspec = "../../examples/testRunningContext.inp";
 
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
@@ -373,20 +391,33 @@ BOOST_AUTO_TEST_CASE ( testRunningContext )
   boost::thread joiner_dispatcher_thread(*joiner_dispatcher);
   boost::thread context_thread(ctx, md, joiner_dispatcher);
 
-  std::size_t parent_qid = query_id(100, 1);
-  ForwardMessage* fwd_mess = new ForwardMessage(parent_qid, 1, 2);
-  ForwardMessage* end_mess = new ForwardMessage(shutdown_query_id(), 1, 2);
+  // needs some time for the context thread to start up and register its REQUEST_MQ to md
+  boost::posix_time::milliseconds context_starting_up(100);
+  boost::this_thread::sleep(context_starting_up);  
 
-  std::cerr << "Going to send fwd_mess = " << *fwd_mess << std::endl;
+  std::size_t parent_qid = query_id(100, 1);
+  ForwardMessage* fwd_mess = new ForwardMessage(parent_qid, 1, 5);
+  ForwardMessage* end_mess = new ForwardMessage(shutdown_query_id(), 1, 5);
+
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id0, fwd_mess, timeout);
   md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id0, end_mess, timeout);
 
-  std::cerr << "Sent fwd_mess = " << *fwd_mess << std::endl;
-
   send_from_2_thread.join();
   send_from_3_thread.join();
+
+  boost::thread send_ending_from_2_thread(send_input_belief_state, md, noff0, rbs4);
+  boost::thread send_ending_from_3_thread(send_input_belief_state, md, noff1, rbs5);
+
+  send_ending_from_2_thread.join();
+  send_ending_from_3_thread.join();
   context_thread.join();
+
+  ReturnedBeliefState* res1 = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
+  ReturnedBeliefState* res2 = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
+
+  std::cerr << "res1 = " << *res1 << std::endl;
+  std::cerr << "res2 = " << *res2 << std::endl;
 }
 
 

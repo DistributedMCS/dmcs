@@ -1,3 +1,19 @@
+2012-02-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testAbstractContext.cpp: Fix testcase.
+
+	* src/mcs/NewContext.cpp: Fix return NULL heads.
+
+	* src/dmcs/Evaluator.cpp: Fix case distinction.
+
+	* src/dmcs/DLVInstantiator.cpp: Pass reference of the thread around.
+	* src/dmcs/Instantiator.cpp: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: Create 1 process for each call.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+
+	* src/mcs/StreamingJoiner.cpp: Fix return NULL.
+
 2012-02-20  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/mcs/NewContext.cpp: Register REQUEST_MQ to md.

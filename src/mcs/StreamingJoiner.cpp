@@ -71,7 +71,8 @@ StreamingJoiner::trigger_join(std::size_t query_id,
   if (shutdown(query_id))
     {
       reset();
-      return NULL;
+      ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);
+      return end_rbs;
     }
 
   if (!joined_results.empty())
@@ -106,7 +107,8 @@ StreamingJoiner::process(std::size_t query_id,
   else
     {
       reset();
-      return NULL;
+      ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);
+      return end_rbs;
     }
 }
 
@@ -130,11 +132,13 @@ StreamingJoiner::first_join(std::size_t query_id,
 
   // Warming up round, set first_round to FALSE
   first_round = false;
+
   if (!ask_first_packs(query_id, 0, neighbors->size()-1, md, jd))
     {
       // A neighbor is inconsistent. Reset and return NULL 
       reset();
-      return NULL;
+      ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);
+      return end_rbs;
     }
   
   bool succeeded = do_join(query_id);
@@ -159,7 +163,8 @@ StreamingJoiner::first_join(std::size_t query_id,
 	}
     }
 
-  return NULL;
+  ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);
+  return end_rbs;
 }
 
 
@@ -188,7 +193,8 @@ StreamingJoiner::next_join(std::size_t query_id,
 	  // No more models from my neighbors	    
 	  reset();
 
-	  return NULL;
+	  ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);
+	  return end_rbs;
 	}
       
       std::size_t& pc = pack_count[next_neighbor];
@@ -501,6 +507,7 @@ StreamingJoiner::ask_neighbor(std::size_t neighbor_index,
   ForwardMessage* request = new ForwardMessage(query_id, k1, k2);
 
   std::size_t noff = ((*neighbors)[neighbor_index])->neighbor_offset;
+
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::NEIGHBOR_OUT_MQ, noff, request, timeout);
 }

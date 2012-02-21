@@ -87,7 +87,7 @@ DLVInstantiator::startThread(EvaluatorPtr eval,
 {
   DLVEvaluatorPtr dlv_eval = boost::static_pointer_cast<DLVEvaluator>(eval);
 
-  boost::thread* t = getThread(eval);
+  boost::thread*& t = getThread(eval);
   t = new boost::thread(*dlv_eval, ctx_id, ex_sig, md);
 }
 
