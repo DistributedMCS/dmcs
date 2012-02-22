@@ -53,19 +53,24 @@ DLVEvaluator::Options::~Options()
 
 
 DLVEvaluator::DLVEvaluator(const InstantiatorWPtr& inst)
-  : Evaluator(inst)
+  : Evaluator(inst),
+    proc(NULL)
 { }
 
 
 DLVEvaluator::~DLVEvaluator()
 { }
 
+
+
 void
-DLVEvaluator::solve(std::size_t ctx_id, 
-		    Heads* heads,
-		    BeliefTablePtr btab,
-		    NewConcurrentMessageDispatcherPtr md)
+DLVEvaluator::reset_process(std::size_t ctx_id,
+			    Heads* heads,
+			    BeliefTablePtr btab)
 {
+  models_counter = 0;
+
+  assert (proc == NULL);
   proc = new DLVProcess;
 
   // setupProcess
@@ -124,7 +129,15 @@ DLVEvaluator::solve(std::size_t ctx_id,
   programStream.flush();
 
   proc->endoffile();
+}
 
+
+void
+DLVEvaluator::read_all(std::size_t ctx_id,
+		       Heads* heads,
+		       BeliefTablePtr btab,
+		       NewConcurrentMessageDispatcherPtr md)
+{
   BeliefStateResultAdder adder(out_queue, md, heads);
   DLVResultParser dlv_parser(ctx_id, btab);
 
@@ -155,11 +168,133 @@ DLVEvaluator::solve(std::size_t ctx_id,
       }      
     }
   while (1);
+}
 
+void
+DLVEvaluator::read_until_k2(std::size_t ctx_id, 
+			    std::size_t k1,
+			    std::size_t k2,
+			    Heads* heads,
+			    BeliefTablePtr btab,
+			    NewConcurrentMessageDispatcherPtr md)
+{
+  assert (0 < k1 && k1 < k2);
+
+  BeliefStateResultAdder adder(out_queue, md, heads);
+  DLVResultParser dlv_parser(ctx_id, btab);
+
+  std::istream& is = proc->getInput();
+
+  // ignore  the first k1 models
+  while (models_counter < k1-1)
+    {
+      std::string input;
+      std::getline(is, input);
+
+      if ( input.empty() || is.bad() )
+      {
+	/*std::cerr << "leaving loop because got input size " << input.size() 
+		  << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
+		  << ", eof " << is.eof() << std::endl;*/
+	break;
+      }
+
+      // discard weak answer set cost lines
+      if ( 0 == input.compare(0, 22, "Cost ([Weight:Level]):") )
+      {
+	//std::cerr << "discarding weak answer set cost line" << std::endl;
+      }
+      else
+      {
+	++models_counter;
+      }      
+    }
+
+  if (models_counter < k1-1)
+    {
+      return;
+    }
+
+  while (models_counter < k2)
+    {
+      std::string input;
+      std::getline(is, input);
+
+      if ( input.empty() || is.bad() )
+      {
+	/*std::cerr << "leaving loop because got input size " << input.size() 
+		  << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
+		  << ", eof " << is.eof() << std::endl;*/
+	break;
+      }
+
+      // discard weak answer set cost lines
+      if( 0 == input.compare(0, 22, "Cost ([Weight:Level]):") )
+      {
+	//std::cerr << "discarding weak answer set cost line" << std::endl;
+      }
+      else
+      {
+	// parse line
+	++models_counter;
+	std::istringstream iss(input);
+	dlv_parser.parse(iss, adder);
+      }      
+    }
+}
+
+
+
+
+
+void
+DLVEvaluator::solve(std::size_t ctx_id, 
+		    std::size_t k1,
+		    std::size_t k2,
+		    Heads* heads,
+		    BeliefTablePtr btab,
+		    NewConcurrentMessageDispatcherPtr md)
+{
+  reset_process(ctx_id, heads, btab);
+
+  if (k1 == 0 && k2 == 0)
+    {
+      read_all(ctx_id, heads, btab, md);
+    }
+  else
+    {
+      assert (k1 <= k2);
+      read_until_k2(ctx_id, k1, k2, heads, btab, md);
+    }
+
+  std::cerr << "Going to delete proc." << std::endl;
   delete proc;
   proc = 0;
+  std::cerr << "Deleting done" << std::endl;
 
-  // nomore answer wrt this heads. Send a NULL to EVAL_OUT
+  // Either no more answer wrt this heads,
+  // or k2 answers reached.
+  // Send a NULL to EVAL_OUT
+  int timeout = 0;
+  HeadsBeliefStatePair* null_ans = new HeadsBeliefStatePair();
+  null_ans->first = heads;
+  null_ans->second = NULL;
+  md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, null_ans, timeout);
+}
+
+
+void
+DLVEvaluator::solve(std::size_t ctx_id, 
+		    Heads* heads,
+		    BeliefTablePtr btab,
+		    NewConcurrentMessageDispatcherPtr md)
+{
+  reset_process(ctx_id, heads, btab);
+
+
+  // Either no more answer wrt this heads,
+  // or k2 answers reached.
+  // Send a NULL to EVAL_OUT
   int timeout = 0;
 
   HeadsBeliefStatePair* null_ans = new HeadsBeliefStatePair();

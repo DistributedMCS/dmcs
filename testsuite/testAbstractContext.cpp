@@ -52,10 +52,114 @@
 #include <assert.h>
 
 using namespace dmcs;
-/*
+
 // run me with
 // EXAMPLESDIR=../../examples ./testAbstractContext
-BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
+
+void
+init_local_kb(std::size_t ctx_id,
+	      std::string& kbspec,
+	      BeliefTablePtr& btab)
+{
+  //const char* ex = getenv("EXAMPLESDIR");
+  //assert (ex != 0);
+  //std::string kbspec(ex);
+  //kbspec += "/testRunningLeafContext.inp";
+  kbspec = "../../examples/abcdContext.inp";
+
+  Belief belief_epsilon1(ctx_id, "epsilon");
+  Belief belief_a(ctx_id, "a");
+  Belief belief_b(ctx_id, "b");
+  Belief belief_c(ctx_id, "c");
+  Belief belief_d(ctx_id, "d");
+  Belief belief_e(ctx_id, "e");
+  Belief belief_f(ctx_id, "f");
+  Belief belief_g(ctx_id, "g");
+  Belief belief_h(ctx_id, "h");
+  Belief belief_i(ctx_id, "i");
+  Belief belief_j(ctx_id, "j");
+
+  BeliefTablePtr btab1(new BeliefTable);
+  btab1->storeAndGetID(belief_epsilon1);
+  btab1->storeAndGetID(belief_a);
+  btab1->storeAndGetID(belief_b);
+  btab1->storeAndGetID(belief_c);
+  btab1->storeAndGetID(belief_d);
+  btab1->storeAndGetID(belief_e);
+  btab1->storeAndGetID(belief_f);
+  btab1->storeAndGetID(belief_g);
+  btab1->storeAndGetID(belief_h);
+  btab1->storeAndGetID(belief_i);
+  btab1->storeAndGetID(belief_j);
+}
+
+
+
+void
+read_eval(NewConcurrentMessageDispatcherPtr md,
+	  EvaluatorPtr dlv_eval)
+{
+  int timeout = 0;
+  std::size_t count = 0;
+  while (1)
+    {
+      HeadsBeliefStatePair* ans = md->receive<HeadsBeliefStatePair>(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, dlv_eval->getOutQueue(), timeout);
+      if (ans->second == NULL)
+	{
+	  break;
+	}
+      std::cerr << "ans = " << *(ans->second) << ", count = " << ++count << std::endl;
+    }
+
+}
+
+BOOST_AUTO_TEST_CASE ( testDLVEvaluator )
+{
+  std::size_t NO_BS = 2;
+  std::size_t BS_SIZE = 10;
+  BeliefStateOffset* bso = BeliefStateOffset::create(NO_BS, BS_SIZE);
+
+  std::string kbspec;
+  BeliefTablePtr btab(new BeliefTable);
+
+  std::size_t QUEUE_SIZE = 10;
+  std::size_t NO_NEIGHBORS = 0;
+
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
+
+  std::size_t ctx_id1 = 1;
+  init_local_kb(ctx_id1, kbspec, btab);
+
+  EnginePtr dlv_engine = DLVEngine::create();
+  EngineWPtr dlv_engine_wp(dlv_engine);
+
+  InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
+  InstantiatorWPtr dlv_inst_wp(dlv_inst);
+
+  EvaluatorPtr dlv_eval = dlv_inst->createEvaluator(dlv_inst_wp);
+
+  dlv_eval->init_mqs(md);
+
+  dlv_eval->solve(ctx_id1, 5, 10, NULL, btab, md);
+  read_eval(md, dlv_eval);
+  std::cerr << std::endl;
+
+  
+  dlv_eval->solve(ctx_id1, 1, 3, NULL, btab, md);
+  read_eval(md, dlv_eval);
+  std::cerr << std::endl;
+
+  dlv_eval->solve(ctx_id1, 2, 5, NULL, btab, md);
+  read_eval(md, dlv_eval);
+  std::cerr << std::endl;
+
+
+  dlv_eval->solve(ctx_id1, 0, 0, NULL, btab, md);
+  read_eval(md, dlv_eval);
+  std::cerr << std::endl;
+}
+
+/*BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
 {
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
@@ -419,7 +523,7 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
   std::cerr << "res1 = " << *res1 << std::endl;
   std::cerr << "res2 = " << *res2 << std::endl;
 }
-*/
+
 
 
 BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
@@ -520,7 +624,7 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
   std::cerr << "Second request severed! count = " << count << std::endl << std::endl;
 
   context_thread.join();
-}
+}*/
 
 // Local Variables:
 // mode: C++

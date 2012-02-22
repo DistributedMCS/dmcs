@@ -47,6 +47,61 @@ public:
     return heads;
   }
 
+  bool
+  operator==(const Heads& h) const
+  {
+    if (heads == NULL)
+      {
+	if (h.heads == NULL)
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
+    else
+      {
+	if (h.heads == NULL)
+	  {
+	    return false;
+	  }
+	else
+	  {
+	    return (*heads == *(h.heads));
+	  }
+      }
+  }
+
+
+  bool
+  operator!=(const Heads& h) const
+  {
+    if (heads == NULL)
+      {
+	if (h.heads == NULL)
+	  {
+	    return false;
+	  }
+	else
+	  {
+	    return true;
+	  }
+      }
+    else
+      {
+	if (h.heads == NULL)
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return (*heads != *(h.heads));
+	  }
+      }
+  }
+
 protected:
   NewBeliefState* heads;
 };

@@ -68,17 +68,30 @@ public:
 	     BeliefTablePtr btab,
 	     NewConcurrentMessageDispatcherPtr md);
 
-protected:
+  //protected:
   virtual void
   solve(std::size_t ctx_id,
 	Heads* heads,
 	BeliefTablePtr btab,
 	NewConcurrentMessageDispatcherPtr md) = 0;
 
+  virtual void
+  solve(std::size_t ctx_id,
+	std::size_t k1,
+	std::size_t k2,
+	Heads* heads,
+	BeliefTablePtr btab,
+	NewConcurrentMessageDispatcherPtr md) = 0;
+
+  void
+  init_mqs(NewConcurrentMessageDispatcherPtr md);
+
 protected:
   InstantiatorWPtr instantiator;
   std::size_t in_queue;                      // id to the ConcurrentMessageQueue provided by the MessageDispatcher
   std::size_t out_queue;
+  std::size_t models_counter;
+  Heads* current_heads;
   bool initialized;
 };
 

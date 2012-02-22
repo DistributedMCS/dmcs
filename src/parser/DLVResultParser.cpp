@@ -57,9 +57,9 @@ DLVResultParser::parse(std::istream& is,
       std::getline(is, input);
       if (input.empty() || is.bad())
 	{
-	  std::cerr << "leaving loop because got input size " << input.size() 
-		    << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
-		    << ", eof " << is.eof() << std::endl;
+	  //std::cerr << "leaving loop because got input size " << input.size() 
+	  //	    << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
+	  //	    << ", eof " << is.eof() << std::endl;
 	  break;
 	}
       

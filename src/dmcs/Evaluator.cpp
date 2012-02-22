@@ -27,6 +27,7 @@
  *
  */
 
+#include <limits>
 #include "dmcs/Evaluator.h"
 
 namespace dmcs {
@@ -44,6 +45,8 @@ Evaluator::GenericOptions::~GenericOptions()
 
 Evaluator::Evaluator(const InstantiatorWPtr& inst)
   : instantiator(inst),
+    models_counter(std::numeric_limits<std::size_t>::max()),
+    current_heads(new Heads(NULL)),
     initialized(false)
 { }
 
@@ -77,9 +80,7 @@ Evaluator::operator()(std::size_t ctx_id,
 {
   if (!initialized)
     {
-      in_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_IN_MQ);
-      out_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_OUT_MQ);
-      initialized = true;
+      init_mqs(md);
     }
 
   while (1)
@@ -102,6 +103,16 @@ Evaluator::operator()(std::size_t ctx_id,
 	  break;
 	}
     }
+}
+
+
+void
+Evaluator::init_mqs(NewConcurrentMessageDispatcherPtr md)
+{
+  assert (!initialized);
+  in_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_IN_MQ);
+  out_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_OUT_MQ);
+  initialized = true;
 }
 
 

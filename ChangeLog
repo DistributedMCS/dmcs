@@ -1,6 +1,15 @@
 2012-02-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* src/dmcs/Evaluator.cpp: Separate init_mqs().
+
+	* include/mcs/Heads.h: Add comparison operators for heads.
+
+	* include/dmcs/DLVEvaluator.h: Move k1, k2 to the level of Evaluator.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+	* include/dmcs/Evaluator.h: Likewise.
+
 	* testsuite/testAbstractContext.cpp: Add testcase for leaf contexts.
+	Add testcase for DLVEvaluator.
 
 	* include/mcs/NewContext.h: Deal with leaf contexts.
 	* src/mcs/NewContext.cpp: Likewise.
