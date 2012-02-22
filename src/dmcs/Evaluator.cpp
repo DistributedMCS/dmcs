@@ -90,7 +90,6 @@ Evaluator::operator()(std::size_t ctx_id,
       if (heads == NULL) // Leaf context
 	{
 	  solve(ctx_id, heads, btab, md);
-	  break;
 	}
       else if (heads->getHeads() != NULL) // Intermediate context with input
 	{

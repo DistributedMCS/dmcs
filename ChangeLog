@@ -1,3 +1,13 @@
+2012-02-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testAbstractContext.cpp: Add testcase for leaf contexts.
+
+	* include/mcs/NewContext.h: Deal with leaf contexts.
+	* src/mcs/NewContext.cpp: Likewise.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
 2012-02-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testAbstractContext.cpp: Fix testcase.

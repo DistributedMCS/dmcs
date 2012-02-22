@@ -126,6 +126,8 @@ private:
   NeighborOffset2IndexPtr offset2index;
 };
 
+typedef boost::shared_ptr<StreamingJoiner> StreamingJoinerPtr;
+
 } // namespace dmcs
 
 #endif // BASE_JOINER_H

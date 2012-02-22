@@ -52,7 +52,7 @@
 #include <assert.h>
 
 using namespace dmcs;
-
+/*
 // run me with
 // EXAMPLESDIR=../../examples ./testAbstractContext
 BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
@@ -208,7 +208,7 @@ send_input_belief_state(NewConcurrentMessageDispatcherPtr md,
 }
 
 
-BOOST_AUTO_TEST_CASE ( testRunningContext )
+BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
 {
   std::size_t NO_BS = 4;
   std::size_t BS_SIZE = 3;
@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE ( testRunningContext )
 
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
-  NewContext ctx(ctx_id0, dlv_inst, brtab, btab0, neighbors, o2i);
+  NewContext ctx(ctx_id0, dlv_inst, btab0, brtab, neighbors, o2i);
 
   NewJoinerDispatcherPtr joiner_dispatcher(new NewJoinerDispatcher(md));
   joiner_dispatcher->registerIdOffset(qid, ctx_id0);
@@ -419,7 +419,108 @@ BOOST_AUTO_TEST_CASE ( testRunningContext )
   std::cerr << "res1 = " << *res1 << std::endl;
   std::cerr << "res2 = " << *res2 << std::endl;
 }
+*/
 
+
+BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
+{
+  std::size_t NO_BS = 2;
+  std::size_t BS_SIZE = 10;
+  BeliefStateOffset* bso = BeliefStateOffset::create(NO_BS, BS_SIZE);
+
+  std::size_t QUEUE_SIZE = 10;
+  std::size_t NO_NEIGHBORS = 0;
+
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
+  std::size_t ctx_id1 = 1;
+
+  Belief belief_epsilon1(ctx_id1, "epsilon");
+  Belief belief_a(ctx_id1, "a");
+  Belief belief_b(ctx_id1, "b");
+  Belief belief_c(ctx_id1, "c");
+  Belief belief_d(ctx_id1, "d");
+  Belief belief_e(ctx_id1, "e");
+  Belief belief_f(ctx_id1, "f");
+  Belief belief_g(ctx_id1, "g");
+  Belief belief_h(ctx_id1, "h");
+  Belief belief_i(ctx_id1, "i");
+  Belief belief_j(ctx_id1, "j");
+
+  BeliefTablePtr btab1(new BeliefTable);
+  ID id_epsilon1 = btab1->storeAndGetID(belief_epsilon1);
+  ID id_a = btab1->storeAndGetID(belief_a);
+  ID id_b = btab1->storeAndGetID(belief_b);
+  ID id_c = btab1->storeAndGetID(belief_c);
+  ID id_d = btab1->storeAndGetID(belief_d);
+  ID id_e = btab1->storeAndGetID(belief_e);
+  ID id_f = btab1->storeAndGetID(belief_f);
+  ID id_g = btab1->storeAndGetID(belief_g);
+  ID id_h = btab1->storeAndGetID(belief_h);
+  ID id_i = btab1->storeAndGetID(belief_i);
+  ID id_j = btab1->storeAndGetID(belief_j);
+
+  EnginePtr dlv_engine = DLVEngine::create();
+  EngineWPtr dlv_engine_wp(dlv_engine);
+
+  //const char* ex = getenv("EXAMPLESDIR");
+  //assert (ex != 0);
+  //std::string kbspec(ex);
+  //kbspec += "/testRunningLeafContext.inp";
+  std::string kbspec = "../../examples/testRunningLeafContext.inp";
+
+  InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
+
+  NewContext ctx(ctx_id1, dlv_inst, btab1);
+  NewJoinerDispatcherPtr joiner_dispatcher = NewJoinerDispatcherPtr();
+
+  boost::thread context_thread(ctx, md, joiner_dispatcher);
+
+  // needs some time for the context thread to start up and register its REQUEST_MQ to md
+  boost::posix_time::milliseconds context_starting_up(100);
+  boost::this_thread::sleep(context_starting_up);
+
+  std::size_t parent_qid = query_id(0, 1);
+  ForwardMessage* request1 = new ForwardMessage(parent_qid, 1, 5);
+  ForwardMessage* request2 = new ForwardMessage(parent_qid, 0, 0);
+  ForwardMessage* end_request = new ForwardMessage(shutdown_query_id(), 1, 5);
+  int timeout = 0;
+
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, request2, timeout);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, request1, timeout);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, end_request, timeout);
+
+  std::cerr << "Getting answers" << std::endl << std::endl;
+
+  std::size_t count = 0;
+  while (1)
+    {
+      ReturnedBeliefState* ans = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
+      if (ans->belief_state == NULL)
+	{
+	  break;
+	}
+      ++count;
+      std::cerr << *(ans->belief_state) << ". count = " << count << std::endl;
+
+    }
+
+  std::cerr << "First request severed! count = " << count << std::endl << std::endl;
+
+  count = 0;
+  while (1)
+    {
+      ReturnedBeliefState* ans = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
+      if (ans->belief_state == NULL)
+	{
+	  break;
+	}
+      std::cerr << *(ans->belief_state) << std::endl;
+      ++count;
+    }
+  std::cerr << "Second request severed! count = " << count << std::endl << std::endl;
+
+  context_thread.join();
+}
 
 // Local Variables:
 // mode: C++

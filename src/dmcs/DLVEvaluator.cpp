@@ -102,20 +102,24 @@ DLVEvaluator::solve(std::size_t ctx_id,
   programStream << local_kb;
 
   // putting heads into programStream
-  NewBeliefState* head_input = heads->getHeads();
-  std::size_t pos = head_input->getFirst();
-  do
+  // only for intermediate context, i.e., heads != NULL
+  if (heads)
     {
-      IDKind kind = ID::MAINKIND_BELIEF | ctx_id;
-      IDAddress address = pos;
-
-      ID id(kind, address);
-      const Belief& belief = btab->getByID(id);
-
-      programStream << belief.text << ".\n";
-      pos = head_input->getNext(pos);
+      NewBeliefState* head_input = heads->getHeads();
+      std::size_t pos = head_input->getFirst();
+      do
+	{
+	  IDKind kind = ID::MAINKIND_BELIEF | ctx_id;
+	  IDAddress address = pos;
+	  
+	  ID id(kind, address);
+	  const Belief& belief = btab->getByID(id);
+	  
+	  programStream << belief.text << ".\n";
+	  pos = head_input->getNext(pos);
+	}
+      while (pos);
     }
-  while (pos);
 
   programStream.flush();
 

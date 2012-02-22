@@ -39,30 +39,9 @@
 
 namespace dmcs {
 
-struct NewContext 
+class NewContext 
 {
-  std::size_t ctx_id;
-  std::size_t query_counter;
-  std::size_t answer_counter;
-
-  // The instantiator holds the path (string) to the local knowledge base
-  InstantiatorPtr inst;
-
-  BridgeRuleTablePtr bridge_rules;
-
-  // This just contains the beliefs that are exported to the parents.
-  // Other local beliefs should be hidden inside the Evaluator and treated
-  // as text. 
-  BeliefTablePtr export_signature;
-
-  // For now, neighbors' signatures are not needed
-  // as we assume that they are provided once by the query plan.
-  NewNeighborVecPtr neighbors;
-
-  NeighborOffset2IndexPtr offset2index;
-
-  StreamingJoiner joiner;
-  
+public:
   // For now, we initialize the context only at the beginning.
   // Later, the idea is to have the query plan included in the request to a context.
   // Upon receiving a request, the context goes to the specified query plan and 
@@ -70,10 +49,15 @@ struct NewContext
   // This is the dynamic setting for future work.
   NewContext(std::size_t cid,
 	     InstantiatorPtr i,
-	     BridgeRuleTablePtr br,
 	     BeliefTablePtr ex_sig,
+	     BridgeRuleTablePtr br,
 	     NewNeighborVecPtr nbs,
 	     NeighborOffset2IndexPtr o2i);
+
+  // Constructor for leaf contexts
+  NewContext(std::size_t cid,
+	     InstantiatorPtr i,
+	     BeliefTablePtr ex_sig);
 
   void
   operator()(NewConcurrentMessageDispatcherPtr md,
@@ -94,7 +78,37 @@ private:
 	   NewConcurrentMessageDispatcherPtr md);
 
   void
+  send_out_result(std::size_t parent_qid,
+		  Heads* heads,
+		  NewBeliefState* belief_state,
+		  NewConcurrentMessageDispatcherPtr md);
+
+  void
   reset();
+
+private:
+  bool is_leaf;
+  std::size_t ctx_id;
+  std::size_t query_counter;
+  std::size_t answer_counter;
+
+  // The instantiator holds the path (string) to the local knowledge base
+  InstantiatorPtr inst;
+
+  BridgeRuleTablePtr bridge_rules;
+
+  // This just contains the beliefs that are exported to the parents.
+  // Other local beliefs should be hidden inside the Evaluator and treated
+  // as text. 
+  BeliefTablePtr export_signature;
+
+  // For now, neighbors' signatures are not needed
+  // as we assume that they are provided once by the query plan.
+  NewNeighborVecPtr neighbors;
+
+  NeighborOffset2IndexPtr offset2index;
+
+  StreamingJoinerPtr joiner;
 };
 
 } // namespace dmcs

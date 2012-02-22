@@ -38,19 +38,35 @@ namespace dmcs {
 
 NewContext::NewContext(std::size_t cid,
 		       InstantiatorPtr i,
-		       BridgeRuleTablePtr br,
-		       BeliefTablePtr ex_sig,
-		       NewNeighborVecPtr nbs,
-		       NeighborOffset2IndexPtr o2i)
-  : ctx_id(cid),
+		       BeliefTablePtr ex_sig)
+  : is_leaf(true),
+    ctx_id(cid),
     query_counter(0),
     answer_counter(0),
     inst(i),
-    bridge_rules(br),
     export_signature(ex_sig),
+    bridge_rules(BridgeRuleTablePtr()),
+    neighbors(NewNeighborVecPtr()),
+    offset2index(NeighborOffset2IndexPtr()),
+    joiner(StreamingJoinerPtr())
+{ }
+
+NewContext::NewContext(std::size_t cid,
+		       InstantiatorPtr i,
+		       BeliefTablePtr ex_sig,
+		       BridgeRuleTablePtr br,
+		       NewNeighborVecPtr nbs,
+		       NeighborOffset2IndexPtr o2i)
+  : is_leaf(nbs->size() == 0),
+    ctx_id(cid),
+    query_counter(0),
+    answer_counter(0),
+    inst(i),
+    export_signature(ex_sig),
+    bridge_rules(br),
     neighbors(nbs),
     offset2index(o2i),
-    joiner(cid, nbs, o2i)
+    joiner(new StreamingJoiner(cid, nbs, o2i))
 { }
 
 
@@ -88,10 +104,10 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
 	  Heads* heads = NULL;
 	  
 	  // intermediate context
-	  if (neighbors->size() > 0)
+	  if (!is_leaf)
 	    {
 	      std::size_t this_qid = query_id(ctx_id, query_counter++);
-	      ReturnedBeliefState* rbs = joiner.trigger_join(this_qid, k1, k2, md, jd);
+	      ReturnedBeliefState* rbs = joiner->trigger_join(this_qid, k1, k2, md, jd);
 	      if (rbs->belief_state == NULL)
 		{
 		  rbs->query_id = parent_qid;		
@@ -109,7 +125,7 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
 	  if (k1 == 0 && k2 == 0)
 	    {
 	      read_all(parent_qid, eval, md);
-	      if (neighbors->size() == 0)
+	      if (is_leaf)
 		{
 		  ReturnedBeliefState* rbs = new ReturnedBeliefState(NULL, parent_qid);
 		  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs, timeout);
@@ -120,6 +136,7 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
 	    {
 	      if (read_until_k2(k1, k2, parent_qid, eval, md))
 		{
+		  std::cerr << "Got up to k2 = " << k2 << ". Now break!" << std::endl;
 		  break;
 		}
 	    }
@@ -154,14 +171,7 @@ NewContext::read_all(std::size_t parent_qid,
 	}
       else
 	{
-	  HeadsPlusBeliefState* heads_plus_bs = static_cast<HeadsPlusBeliefState*>(heads);
-	  const NewBeliefState* input_bs = heads_plus_bs->getInputBeliefState();
-	  
-	  // combine
-	  (*belief_state) = (*belief_state) | (*input_bs); 
-	  ReturnedBeliefState* rbs = new ReturnedBeliefState(belief_state, parent_qid);
-	  
-	  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs, timeout);
+	  send_out_result(parent_qid, heads, belief_state, md);
 	}
     }
 }
@@ -174,7 +184,6 @@ NewContext::read_until_k2(std::size_t k1,
 			  EvaluatorPtr eval,
 			  NewConcurrentMessageDispatcherPtr md)
 {
-
   assert (k1 > 0 && k2 > k1);
 
   /*
@@ -188,7 +197,6 @@ NewContext::read_until_k2(std::size_t k1,
       int timeout = 0;
       HeadsBeliefStatePair* res = md->receive<HeadsBeliefStatePair>(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, eval->getOutQueue(), timeout);
 
-      Heads* heads = res->first;
       NewBeliefState* belief_state = res->second;
       delete res;
       res = 0;
@@ -222,24 +230,40 @@ NewContext::read_until_k2(std::size_t k1,
 	}
       else
 	{
-	  HeadsPlusBeliefState* heads_plus_bs = static_cast<HeadsPlusBeliefState*>(heads);
-	  const NewBeliefState* input_bs = heads_plus_bs->getInputBeliefState();
-
-	  // combine
-	  (*belief_state) = (*belief_state) | (*input_bs); 
-	  ReturnedBeliefState* rbs = new ReturnedBeliefState(belief_state, parent_qid);
-
-	  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs, timeout);
+	  send_out_result(parent_qid, heads, belief_state, md);
 	  answer_counter++;
 	}
     }
 
+  std::cerr << "answer_counter = " << answer_counter << std::endl;
   if (answer_counter == k2)
     {
       return true;
     }
   
   return false;
+}
+
+
+void
+NewContext::send_out_result(std::size_t parent_qid,
+			    Heads* heads,
+			    NewBeliefState* belief_state,
+			    NewConcurrentMessageDispatcherPtr md)
+{
+  if (heads != NULL)
+    {
+      HeadsPlusBeliefState* heads_plus_bs = static_cast<HeadsPlusBeliefState*>(heads);
+      const NewBeliefState* input_bs = heads_plus_bs->getInputBeliefState();
+      
+      // combine
+      (*belief_state) = (*belief_state) | (*input_bs); 
+    }
+
+  ReturnedBeliefState* rbs = new ReturnedBeliefState(belief_state, parent_qid);
+
+  int timeout = 0;
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs, timeout);
 }
 
 
