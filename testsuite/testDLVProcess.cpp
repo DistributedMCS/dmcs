@@ -97,6 +97,8 @@ private:
   std::string input;
 };
 
+// to run:
+// ./testDLVProcess --catch_system_errors=no
 BOOST_AUTO_TEST_CASE ( testDLVProcess )
 {
   std::string line1 = "a v b :- c.\n";

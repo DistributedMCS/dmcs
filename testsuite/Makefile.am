@@ -53,7 +53,8 @@ TESTS = \
 	testBridgeRuleEvaluation \
 	testMessageDispatcher \
 	testResultParser \
-	testAbstractContext
+	testAbstractContext \
+	testDLVProcess
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -95,7 +96,8 @@ check_PROGRAMS = \
 	testBridgeRuleEvaluation \
 	testMessageDispatcher \
 	testResultParser \
-	testAbstractContext
+	testAbstractContext \
+	testDLVProcess
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -255,4 +257,9 @@ testAbstractContext_LDADD = \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/mcs/libmcs.a \
+	@LIBCURL@
+
+testDLVProcess_SOURCES = testDLVProcess.cpp
+testDLVProcess_LDADD = \
+	$(top_builddir)/src/process/libprocess.a \
 	@LIBCURL@

@@ -1,4 +1,22 @@
+2012-02-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testDLVProcess.cpp: Add some remarks.
+	* testsuite/testAbstractContext.cpp: Likewise.
+
+	* testsuite/Makefile.am: Add testDLVProcess.
+
+	* src/dmcs/DLVEvaluator.cpp: Clean up.
+	* include/mcs/NewContext.h: Likewise.
+	* src/mcs/NewContext.cpp: Likewise.
+
+2012-02-24  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testDLVProcess.cpp: New file.
+
 2012-02-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/DLVEvaluator.cpp: A dirty hack: sleep 1 microsec to deal with
+	race conditions when deleting dlvprocess.
 
 	* src/dmcs/Evaluator.cpp: Separate init_mqs().
 

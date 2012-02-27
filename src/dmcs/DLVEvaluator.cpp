@@ -70,10 +70,9 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
 {
   models_counter = 0;
 
+  // setupProcess
   assert (proc == NULL);
   proc = new DLVProcess;
-
-  // setupProcess
   proc->setPath(DLVPATH);
   if (options.includeFacts)
     {
@@ -245,8 +244,6 @@ DLVEvaluator::read_until_k2(std::size_t ctx_id,
 
 
 
-
-
 void
 DLVEvaluator::solve(std::size_t ctx_id, 
 		    std::size_t k1,
@@ -266,11 +263,9 @@ DLVEvaluator::solve(std::size_t ctx_id,
       assert (k1 <= k2);
       read_until_k2(ctx_id, k1, k2, heads, btab, md);
     }
-
-  std::cerr << "Going to delete proc." << std::endl;
+  
   delete proc;
   proc = 0;
-  std::cerr << "Deleting done" << std::endl;
 
   // Either no more answer wrt this heads,
   // or k2 answers reached.

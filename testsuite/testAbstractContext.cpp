@@ -54,18 +54,18 @@
 using namespace dmcs;
 
 // run me with
-// EXAMPLESDIR=../../examples ./testAbstractContext
+// EXAMPLESDIR=../../examples ./testAbstractContext --catch_system_errors=no
 
 void
 init_local_kb(std::size_t ctx_id,
 	      std::string& kbspec,
 	      BeliefTablePtr& btab)
 {
-  //const char* ex = getenv("EXAMPLESDIR");
-  //assert (ex != 0);
-  //std::string kbspec(ex);
-  //kbspec += "/testRunningLeafContext.inp";
-  kbspec = "../../examples/abcdContext.inp";
+  const char* ex = getenv("EXAMPLESDIR");
+  assert (ex != 0);
+  kbspec = ex;
+  kbspec += "/abcdContext.inp";
+  //kbspec = "../../examples/abcdContext.inp";
 
   Belief belief_epsilon1(ctx_id, "epsilon");
   Belief belief_a(ctx_id, "a");
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE ( testDLVEvaluator )
   std::string kbspec;
   BeliefTablePtr btab(new BeliefTable);
 
-  std::size_t QUEUE_SIZE = 10;
+  std::size_t QUEUE_SIZE = 100;
   std::size_t NO_NEIGHBORS = 0;
 
   NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
@@ -143,7 +143,6 @@ BOOST_AUTO_TEST_CASE ( testDLVEvaluator )
   dlv_eval->solve(ctx_id1, 5, 10, NULL, btab, md);
   read_eval(md, dlv_eval);
   std::cerr << std::endl;
-
   
   dlv_eval->solve(ctx_id1, 1, 3, NULL, btab, md);
   read_eval(md, dlv_eval);
@@ -159,7 +158,8 @@ BOOST_AUTO_TEST_CASE ( testDLVEvaluator )
   std::cerr << std::endl;
 }
 
-/*BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
+/*
+BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
 {
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
@@ -624,7 +624,8 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
   std::cerr << "Second request severed! count = " << count << std::endl << std::endl;
 
   context_thread.join();
-}*/
+}
+*/
 
 // Local Variables:
 // mode: C++

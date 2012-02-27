@@ -65,17 +65,25 @@ public:
   
 
 private:
-  bool
-  read_until_k2(std::size_t k1, 
-		std::size_t k2,
-		std::size_t parent_qid,
-		EvaluatorPtr eval,
-		NewConcurrentMessageDispatcherPtr md);
+  void
+  leaf_process_request(std::size_t parent_qid,
+		       EvaluatorPtr eval,
+		       NewConcurrentMessageDispatcherPtr md,
+		       std::size_t k1,
+		       std::size_t k2);
 
   void
-  read_all(std::size_t parent_qid,
-	   EvaluatorPtr eval,
-	   NewConcurrentMessageDispatcherPtr md);
+  intermediate_process_request(std::size_t parent_qid,
+			       EvaluatorPtr eval,
+			       NewConcurrentMessageDispatcherPtr md,
+			       NewJoinerDispatcherPtr jd,
+			       std::size_t k1,
+			       std::size_t k2);
+
+  std::size_t
+  read_and_send(std::size_t parent_qid,
+		EvaluatorPtr eval,
+		NewConcurrentMessageDispatcherPtr md);
 
   void
   send_out_result(std::size_t parent_qid,
@@ -83,14 +91,10 @@ private:
 		  NewBeliefState* belief_state,
 		  NewConcurrentMessageDispatcherPtr md);
 
-  void
-  reset();
-
 private:
   bool is_leaf;
   std::size_t ctx_id;
   std::size_t query_counter;
-  std::size_t answer_counter;
 
   // The instantiator holds the path (string) to the local knowledge base
   InstantiatorPtr inst;
