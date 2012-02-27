@@ -1,5 +1,18 @@
 2012-02-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/testAbstractContext.cpp: Fix testcases.
+
+	* src/dmcs/DLVInstantiator.cpp: Init evaluator's mqs from here.
+	* src/dmcs/Evaluator.cpp: Let Instantiator initialize mqs.
+
+	* include/mcs/BridgeRuleEvaluator.h: Update heads with k1, k2.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+	* include/mcs/Heads.h: Likewise.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: Remove temporary method.
+	* include/dmcs/Evaluator.h: Likewise.
+
 	* include/mcs/NewContext.h: Set fixed pack_size for asking neighbors.
 	Will be initiated from command line arguments.
 	* src/mcs/NewContext.cpp: Likewise.

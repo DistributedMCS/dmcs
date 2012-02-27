@@ -37,14 +37,30 @@ namespace dmcs {
 class Heads
 {
 public:
-  Heads(NewBeliefState* h)
-    : heads(h)
+  Heads(NewBeliefState* h,
+	std::size_t k_one,
+	std::size_t k_two)
+    : heads(h),
+      k1(k_one),
+      k2(k_two)
   { }
 
   NewBeliefState*
   getHeads()
   {
     return heads;
+  }
+
+  std::size_t
+  getK1()
+  {
+    return k1;
+  }
+
+  std::size_t
+  getK2()
+  {
+    return k2;
   }
 
   bool
@@ -69,7 +85,7 @@ public:
 	  }
 	else
 	  {
-	    return (*heads == *(h.heads));
+	    return (*heads == *(h.heads) && k1 == h.k1 && k2 == h.k2);
 	  }
       }
   }
@@ -97,21 +113,26 @@ public:
 	  }
 	else
 	  {
-	    return (*heads != *(h.heads));
+	    return (*heads != *(h.heads) || k1 != h.k1 || k2 != h.k2);
 	  }
       }
   }
 
 protected:
   NewBeliefState* heads;
+  std::size_t k1;
+  std::size_t k2;
 };
 
 
 class HeadsPlusBeliefState : public Heads
 {
 public:
-  HeadsPlusBeliefState(NewBeliefState* h, const NewBeliefState* i)
-    : Heads(h), input(i)
+  HeadsPlusBeliefState(NewBeliefState* h, 
+		       std::size_t k1,
+		       std::size_t k2,
+		       const NewBeliefState* i)
+    : Heads(h, k1, k2), input(i)
   { }
 
   const NewBeliefState*

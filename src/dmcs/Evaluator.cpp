@@ -46,7 +46,7 @@ Evaluator::GenericOptions::~GenericOptions()
 Evaluator::Evaluator(const InstantiatorWPtr& inst)
   : instantiator(inst),
     models_counter(std::numeric_limits<std::size_t>::max()),
-    current_heads(new Heads(NULL)),
+    current_heads(new Heads(NULL, 0, 0)),
     initialized(false)
 { }
 
@@ -58,7 +58,7 @@ Evaluator::~Evaluator()
 
 
 std::size_t
-Evaluator::getInQueue()
+Evaluator::getInQueue() const
 {
   return in_queue;
 }
@@ -66,7 +66,7 @@ Evaluator::getInQueue()
 
 
 std::size_t
-Evaluator::getOutQueue()
+Evaluator::getOutQueue() const
 {
   return out_queue;
 }
@@ -78,28 +78,17 @@ Evaluator::operator()(std::size_t ctx_id,
 		      BeliefTablePtr btab,
 		      NewConcurrentMessageDispatcherPtr md)
 {
-  if (!initialized)
-    {
-      init_mqs(md);
-    }
-
   while (1)
     {
       int timeout = 0;
       Heads* heads = md->receive<Heads>(NewConcurrentMessageDispatcher::EVAL_IN_MQ, in_queue, timeout);
       
-      if (heads == NULL) // Leaf context
+      if (heads != NULL)
 	{
 	  solve(ctx_id, heads, btab, md);
 	}
-      else if (heads->getHeads() != NULL) // Intermediate context with input
+      else
 	{
-	  solve(ctx_id, heads, btab, md);
-	}
-      else // Intermediate context at the end
-	{
-	  delete heads;
-	  heads = 0;
 	  break;
 	}
     }
@@ -109,10 +98,12 @@ Evaluator::operator()(std::size_t ctx_id,
 void
 Evaluator::init_mqs(NewConcurrentMessageDispatcherPtr md)
 {
-  assert (!initialized);
-  in_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_IN_MQ);
-  out_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_OUT_MQ);
-  initialized = true;
+  if (!initialized)
+    {
+      in_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_IN_MQ);
+      out_queue = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::EVAL_OUT_MQ);
+      initialized = true;
+    }
 }
 
 

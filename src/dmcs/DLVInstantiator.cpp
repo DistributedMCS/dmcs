@@ -86,6 +86,7 @@ DLVInstantiator::startThread(EvaluatorPtr eval,
 			     NewConcurrentMessageDispatcherPtr md)
 {
   DLVEvaluatorPtr dlv_eval = boost::static_pointer_cast<DLVEvaluator>(eval);
+  dlv_eval->init_mqs(md);
 
   boost::thread*& t = getThread(eval);
   t = new boost::thread(*dlv_eval, ctx_id, ex_sig, md);

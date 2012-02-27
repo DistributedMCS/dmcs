@@ -69,7 +69,9 @@ satisfied(const BridgeRule& r,
 
 Heads*
 evaluate_bridge_rules(const BridgeRuleTablePtr& brtab,
-		      const NewBeliefState* input, 
+		      const NewBeliefState* input,
+		      std::size_t k1,
+		      std::size_t k2,
 		      const std::vector<std::size_t>& starting_offset)
 {
   NewBeliefState* h = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
@@ -89,7 +91,7 @@ evaluate_bridge_rules(const BridgeRuleTablePtr& brtab,
 	}
     }
 
-  HeadsPlusBeliefState* heads = new HeadsPlusBeliefState(h, input);
+  HeadsPlusBeliefState* heads = new HeadsPlusBeliefState(h, k1, k2, input);
   return heads;
 }
 

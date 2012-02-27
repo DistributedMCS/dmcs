@@ -32,8 +32,6 @@
 #include "mcs/ForwardMessage.h"
 #include "dmcs/DLVEvaluator.h"
 
-#include "boost/thread.hpp"
-
 namespace dmcs {
 
 // for leaf contexts
@@ -103,7 +101,7 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
       std::size_t k2 = fwd_mess->k2;
 
       // Bad requests are not allowed
-      assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 <= k2));
+      //assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
 
       if (is_leaf)
 	{
@@ -120,7 +118,7 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
     } 
 
   // send NULL to evaluator to tell it to stop
-  Heads* end_heads = new Heads(NULL);
+  Heads* end_heads = NULL;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), end_heads, timeout);
   inst->stopThread(eval);
 }
@@ -135,12 +133,12 @@ NewContext::leaf_process_request(std::size_t parent_qid,
 				 std::size_t k2)
 {
   // send heads to Evaluator
-  Heads* heads = NULL;
+  Heads* heads = new Heads(NULL, k1, k2);
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);
 
   // read the output from EVAL_OUT_MQ
-  std::size_t models_counter = read_and_send(parent_qid, eval, md);
+  read_and_send(parent_qid, eval, md);
 }
 
 
@@ -152,6 +150,8 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
 					 std::size_t k1,
 					 std::size_t k2)
 {
+  assert (0 < k1 && k1 < k2);
+
   while (1)
     {
       // prepare the heads
@@ -163,7 +163,8 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
 	}
 
       NewBeliefState* input = rbs->belief_state;
-      Heads* heads = evaluate_bridge_rules(bridge_rules, input, BeliefStateOffset::instance()->getStartingOffsets());      
+      Heads* heads = evaluate_bridge_rules(bridge_rules, input, k1, k2,
+					   BeliefStateOffset::instance()->getStartingOffsets());      
 
       // send heads to Evaluator
       int timeout = 0;
@@ -171,18 +172,15 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
       
       std::size_t models_counter = read_and_send(parent_qid, eval, md);
 
-      if (k1 > 0)
+      if (models_counter < k2 - k1 + 1)
 	{
-	  if (models_counter < k2 - k1 + 1)
-	    {
-	      k2 = k2 - models_counter - k1 + 1;
-	      k1 = 1;
-	    }
-	  else
-	    {
-	      assert (models_counter == k2 - k1 + 1);
-	      break;
-	    }
+	  k2 = k2 - models_counter - k1 + 1;
+	  k1 = 1;
+	}
+      else
+	{
+	  assert (models_counter == k2 - k1 + 1);
+	  break;
 	}
     }
 }
@@ -228,7 +226,7 @@ NewContext::send_out_result(std::size_t parent_qid,
 			    NewBeliefState* belief_state,
 			    NewConcurrentMessageDispatcherPtr md)
 {
-  if (heads != NULL)
+  if (heads->getHeads() != NULL)
     {
       HeadsPlusBeliefState* heads_plus_bs = static_cast<HeadsPlusBeliefState*>(heads);
       const NewBeliefState* input_bs = heads_plus_bs->getInputBeliefState();

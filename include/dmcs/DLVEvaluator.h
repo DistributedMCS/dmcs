@@ -57,14 +57,6 @@ public:
 	BeliefTablePtr btab,
 	NewConcurrentMessageDispatcherPtr md);
 
-  void
-  solve(std::size_t ctx_id,
-	std::size_t k1,
-	std::size_t k2,
-	Heads* heads,
-	BeliefTablePtr btab,
-	NewConcurrentMessageDispatcherPtr md);
-
 private:
   void
   read_all(std::size_t ctx_id,

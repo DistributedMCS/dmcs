@@ -43,7 +43,9 @@ satisfied(const BridgeRule& r,
 
 Heads*
 evaluate_bridge_rules(const BridgeRuleTablePtr& brtab,
-		      const NewBeliefState* input, 
+		      const NewBeliefState* input,
+		      std::size_t k1,
+		      std::size_t k2,
 		      const std::vector<std::size_t>& starting_offset);
 
 } // namespace dmcs

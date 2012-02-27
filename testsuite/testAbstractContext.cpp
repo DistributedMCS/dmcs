@@ -56,16 +56,17 @@ using namespace dmcs;
 // run me with
 // EXAMPLESDIR=../../examples ./testAbstractContext --catch_system_errors=no
 
+
 void
 init_local_kb(std::size_t ctx_id,
 	      std::string& kbspec,
 	      BeliefTablePtr& btab)
 {
-  const char* ex = getenv("EXAMPLESDIR");
-  assert (ex != 0);
-  kbspec = ex;
-  kbspec += "/abcdContext.inp";
-  //kbspec = "../../examples/abcdContext.inp";
+  //const char* ex = getenv("EXAMPLESDIR");
+  //assert (ex != 0);
+  //kbspec = ex;
+  //kbspec += "/abcdContext.inp";
+  kbspec = "../../examples/abcdContext.inp";
 
   Belief belief_epsilon1(ctx_id, "epsilon");
   Belief belief_a(ctx_id, "a");
@@ -91,6 +92,28 @@ init_local_kb(std::size_t ctx_id,
   btab1->storeAndGetID(belief_h);
   btab1->storeAndGetID(belief_i);
   btab1->storeAndGetID(belief_j);
+}
+
+
+std::size_t
+read_output_dispatcher(NewConcurrentMessageDispatcherPtr md)
+{
+  int timeout = 0;
+  std::size_t count = 0;
+  while (1)
+    {
+      ReturnedBeliefState* ans = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
+      if (ans->belief_state == NULL)
+	{
+	  break;
+	}
+      ++count;
+      std::cerr << *(ans->belief_state) << std::endl;
+
+    }
+  std::cerr << std::endl;
+  
+  return count;
 }
 
 
@@ -140,20 +163,25 @@ BOOST_AUTO_TEST_CASE ( testDLVEvaluator )
 
   dlv_eval->init_mqs(md);
 
-  dlv_eval->solve(ctx_id1, 5, 10, NULL, btab, md);
+  Heads* heads1 = new Heads(NULL, 1, 3);
+  Heads* heads2 = new Heads(NULL, 2, 6);
+  Heads* heads3 = new Heads(NULL, 0, 0);
+  Heads* heads4 = new Heads(NULL, 5, 10);
+
+  dlv_eval->solve(ctx_id1, heads1, btab, md);
   read_eval(md, dlv_eval);
   std::cerr << std::endl;
   
-  dlv_eval->solve(ctx_id1, 1, 3, NULL, btab, md);
+  dlv_eval->solve(ctx_id1, heads2, btab, md);
   read_eval(md, dlv_eval);
   std::cerr << std::endl;
 
-  dlv_eval->solve(ctx_id1, 2, 5, NULL, btab, md);
+  dlv_eval->solve(ctx_id1, heads3, btab, md);
   read_eval(md, dlv_eval);
   std::cerr << std::endl;
 
 
-  dlv_eval->solve(ctx_id1, 0, 0, NULL, btab, md);
+  dlv_eval->solve(ctx_id1, heads4, btab, md);
   read_eval(md, dlv_eval);
   std::cerr << std::endl;
 }
@@ -164,10 +192,11 @@ BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
 
-  const char* ex = getenv("EXAMPLESDIR");
-  assert (ex != 0);
-  std::string kbspec(ex);
-  kbspec += "/testAbstractContext.inp";
+  //const char* ex = getenv("EXAMPLESDIR");
+  //assert (ex != 0);
+  //std::string kbspec(ex);
+  //kbspec += "/testAbstractContext.inp";
+  std::string kbspec = "../../examples/testAbstractContext.inp";
 
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
   InstantiatorWPtr dlv_inst_wp(dlv_inst);
@@ -185,19 +214,18 @@ BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
   BOOST_CHECK_EQUAL(dlv_inst->getNoEvaluators(), 0);
 }
 
-/*
- 
+
 BOOST_AUTO_TEST_CASE ( testRunningDLV )
 {
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
 
-  const char* ex = getenv("EXAMPLESDIR");
-  assert (ex != 0);
-  std::string kbspec(ex);
-  kbspec += "/testAbstractContext.inp";
+  //const char* ex = getenv("EXAMPLESDIR");
+  //assert (ex != 0);
+  //std::string kbspec(ex);
+  //kbspec += "/testAbstractContext.inp";
 
-  //std::string kbspec = "../../examples/testAbstractContext.inp";
+  std::string kbspec = "../../examples/testAbstractContext.inp";
 
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
   InstantiatorWPtr dlv_inst_wp(dlv_inst);
@@ -212,6 +240,8 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
 
   NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(queue_size, no_neighbors));
   EvaluatorPtr dlv_eval = dlv_inst->createEvaluator(dlv_inst_wp);
+
+  dlv_eval->init_mqs(md);
 
   std::size_t ctx_id = 0;
 
@@ -229,23 +259,19 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
   ID id_fit_tweety = btab->storeAndGetID(fit_tweety);
 
   DLVEvaluatorPtr dlv_eval_casted = boost::static_pointer_cast<DLVEvaluator>(dlv_eval);
-  
+
   boost::thread evaluation_thread(*dlv_eval_casted, ctx_id, btab, md);
 
-  boost::posix_time::milliseconds n(1000);
-  boost::this_thread::sleep(n);
+  //  boost::posix_time::milliseconds n(1000);
+  //boost::this_thread::sleep(n);
 
   NewBeliefState* head_input = new NewBeliefState(no_bs, bs_size);
   const NewBeliefState* input_bs = new NewBeliefState(no_bs, bs_size);
   head_input->set(ctx_id, id_fit_tweety.address, bso->getStartingOffsets());
 
-  HeadsPlusBeliefState* heads = new HeadsPlusBeliefState(head_input, input_bs);
-
-  
-  NewBeliefState* end_head_input = NULL;
-  NewBeliefState* end_input_bs = NULL;
-  HeadsPlusBeliefState* end_heads = new HeadsPlusBeliefState(end_head_input, end_input_bs);
-
+  HeadsPlusBeliefState* heads = new HeadsPlusBeliefState(head_input, 0, 0, input_bs);
+  HeadsPlusBeliefState* end_heads = NULL;
+ 
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), heads, timeout);
 
@@ -254,7 +280,6 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
 
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), heads, timeout);
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), heads, timeout);
-
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, dlv_eval->getInQueue(), end_heads, timeout);
 
   evaluation_thread.join();
@@ -284,6 +309,7 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
   
   BOOST_CHECK_EQUAL(count, 2);
 }
+
 
 
 void
@@ -478,16 +504,17 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
 
-  const char* ex = getenv("EXAMPLESDIR");
-  assert (ex != 0);
-  std::string kbspec(ex);
-  kbspec += "/testRunningContext.inp";
+  //const char* ex = getenv("EXAMPLESDIR");
+  //assert (ex != 0);
+  //std::string kbspec(ex);
+  //kbspec += "/testRunningContext.inp";
 
-  //std::string kbspec = "../../examples/testRunningContext.inp";
+  std::string kbspec = "../../examples/testRunningContext.inp";
 
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
-  NewContext ctx(ctx_id0, dlv_inst, btab0, brtab, neighbors, o2i);
+  std::size_t pack_size = 10;
+  NewContext ctx(ctx_id0, pack_size, dlv_inst, btab0, brtab, neighbors, o2i);
 
   NewJoinerDispatcherPtr joiner_dispatcher(new NewJoinerDispatcher(md));
   joiner_dispatcher->registerIdOffset(qid, ctx_id0);
@@ -532,49 +559,23 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
   std::size_t BS_SIZE = 10;
   BeliefStateOffset* bso = BeliefStateOffset::create(NO_BS, BS_SIZE);
 
+  std::string kbspec;
+  BeliefTablePtr btab(new BeliefTable);
+
   std::size_t QUEUE_SIZE = 10;
   std::size_t NO_NEIGHBORS = 0;
 
   NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
+
   std::size_t ctx_id1 = 1;
-
-  Belief belief_epsilon1(ctx_id1, "epsilon");
-  Belief belief_a(ctx_id1, "a");
-  Belief belief_b(ctx_id1, "b");
-  Belief belief_c(ctx_id1, "c");
-  Belief belief_d(ctx_id1, "d");
-  Belief belief_e(ctx_id1, "e");
-  Belief belief_f(ctx_id1, "f");
-  Belief belief_g(ctx_id1, "g");
-  Belief belief_h(ctx_id1, "h");
-  Belief belief_i(ctx_id1, "i");
-  Belief belief_j(ctx_id1, "j");
-
-  BeliefTablePtr btab1(new BeliefTable);
-  ID id_epsilon1 = btab1->storeAndGetID(belief_epsilon1);
-  ID id_a = btab1->storeAndGetID(belief_a);
-  ID id_b = btab1->storeAndGetID(belief_b);
-  ID id_c = btab1->storeAndGetID(belief_c);
-  ID id_d = btab1->storeAndGetID(belief_d);
-  ID id_e = btab1->storeAndGetID(belief_e);
-  ID id_f = btab1->storeAndGetID(belief_f);
-  ID id_g = btab1->storeAndGetID(belief_g);
-  ID id_h = btab1->storeAndGetID(belief_h);
-  ID id_i = btab1->storeAndGetID(belief_i);
-  ID id_j = btab1->storeAndGetID(belief_j);
+  init_local_kb(ctx_id1, kbspec, btab);
 
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
 
-  //const char* ex = getenv("EXAMPLESDIR");
-  //assert (ex != 0);
-  //std::string kbspec(ex);
-  //kbspec += "/testRunningLeafContext.inp";
-  std::string kbspec = "../../examples/testRunningLeafContext.inp";
-
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
-  NewContext ctx(ctx_id1, dlv_inst, btab1);
+  NewContext ctx(ctx_id1, dlv_inst, btab);
   NewJoinerDispatcherPtr joiner_dispatcher = NewJoinerDispatcherPtr();
 
   boost::thread context_thread(ctx, md, joiner_dispatcher);
@@ -583,49 +584,36 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
   boost::posix_time::milliseconds context_starting_up(100);
   boost::this_thread::sleep(context_starting_up);
 
+  std::size_t k11 = 3;
+  std::size_t k12 = 5;
+  std::size_t k21 = 0;
+  std::size_t k22 = 0;
+  std::size_t k31 = 1;
+  std::size_t k32 = 10;
+
   std::size_t parent_qid = query_id(0, 1);
-  ForwardMessage* request1 = new ForwardMessage(parent_qid, 1, 5);
-  ForwardMessage* request2 = new ForwardMessage(parent_qid, 0, 0);
+  ForwardMessage* request1 = new ForwardMessage(parent_qid, k11, k12);
+  ForwardMessage* request2 = new ForwardMessage(parent_qid, k21, k22);
+  ForwardMessage* request3 = new ForwardMessage(parent_qid, k31, k32);
   ForwardMessage* end_request = new ForwardMessage(shutdown_query_id(), 1, 5);
   int timeout = 0;
 
-  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, request2, timeout);
   md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, request1, timeout);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, request2, timeout);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, request3, timeout);
   md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, end_request, timeout);
 
-  std::cerr << "Getting answers" << std::endl << std::endl;
+  std::size_t count1 = read_output_dispatcher(md);
+  std::size_t count2 = read_output_dispatcher(md);
+  std::size_t count3 = read_output_dispatcher(md);
 
-  std::size_t count = 0;
-  while (1)
-    {
-      ReturnedBeliefState* ans = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
-      if (ans->belief_state == NULL)
-	{
-	  break;
-	}
-      ++count;
-      std::cerr << *(ans->belief_state) << ". count = " << count << std::endl;
-
-    }
-
-  std::cerr << "First request severed! count = " << count << std::endl << std::endl;
-
-  count = 0;
-  while (1)
-    {
-      ReturnedBeliefState* ans = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
-      if (ans->belief_state == NULL)
-	{
-	  break;
-	}
-      std::cerr << *(ans->belief_state) << std::endl;
-      ++count;
-    }
-  std::cerr << "Second request severed! count = " << count << std::endl << std::endl;
+  BOOST_CHECK_EQUAL(count1, k12 - k11 + 1);
+  BOOST_CHECK_EQUAL(count2, 6);
+  BOOST_CHECK_EQUAL(count3, 6);
 
   context_thread.join();
 }
-*/
+
 
 // Local Variables:
 // mode: C++

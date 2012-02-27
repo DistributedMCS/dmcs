@@ -68,6 +68,8 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
 			    Heads* heads,
 			    BeliefTablePtr btab)
 {
+  assert (heads != NULL);
+
   models_counter = 0;
 
   // setupProcess
@@ -107,9 +109,9 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
 
   // putting heads into programStream
   // only for intermediate context, i.e., heads != NULL
-  if (heads)
+  NewBeliefState* head_input = heads->getHeads();
+  if (head_input)
     {
-      NewBeliefState* head_input = heads->getHeads();
       std::size_t pos = head_input->getFirst();
       do
 	{
@@ -246,13 +248,14 @@ DLVEvaluator::read_until_k2(std::size_t ctx_id,
 
 void
 DLVEvaluator::solve(std::size_t ctx_id, 
-		    std::size_t k1,
-		    std::size_t k2,
 		    Heads* heads,
 		    BeliefTablePtr btab,
 		    NewConcurrentMessageDispatcherPtr md)
 {
   reset_process(ctx_id, heads, btab);
+
+  std::size_t k1 = heads->getK1();
+  std::size_t k2 = heads->getK2();
 
   if (k1 == 0 && k2 == 0)
     {
@@ -277,26 +280,6 @@ DLVEvaluator::solve(std::size_t ctx_id,
   md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, null_ans, timeout);
 }
 
-
-void
-DLVEvaluator::solve(std::size_t ctx_id, 
-		    Heads* heads,
-		    BeliefTablePtr btab,
-		    NewConcurrentMessageDispatcherPtr md)
-{
-  reset_process(ctx_id, heads, btab);
-
-
-  // Either no more answer wrt this heads,
-  // or k2 answers reached.
-  // Send a NULL to EVAL_OUT
-  int timeout = 0;
-
-  HeadsBeliefStatePair* null_ans = new HeadsBeliefStatePair();
-  null_ans->first = heads;
-  null_ans->second = NULL;
-  md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, null_ans, timeout);
-}
 
 } // namespace dmcs
 

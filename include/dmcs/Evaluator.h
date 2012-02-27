@@ -57,10 +57,10 @@ public:
   ~Evaluator();
   
   std::size_t
-  getInQueue();
+  getInQueue() const;
 
   std::size_t
-  getOutQueue();
+  getOutQueue() const;
 
   // this starts the evaluator thread
   void
@@ -71,14 +71,6 @@ public:
   //protected:
   virtual void
   solve(std::size_t ctx_id,
-	Heads* heads,
-	BeliefTablePtr btab,
-	NewConcurrentMessageDispatcherPtr md) = 0;
-
-  virtual void
-  solve(std::size_t ctx_id,
-	std::size_t k1,
-	std::size_t k2,
 	Heads* heads,
 	BeliefTablePtr btab,
 	NewConcurrentMessageDispatcherPtr md) = 0;
