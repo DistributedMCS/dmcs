@@ -45,13 +45,12 @@ class StreamingJoiner : public BaseJoiner
 {
 public:
   StreamingJoiner(std::size_t c, 
+		  std::size_t ps,
 		  NewNeighborVecPtr n,
 		  NeighborOffset2IndexPtr o2i);
 
   ReturnedBeliefState*
   trigger_join(std::size_t query_id, 
-	       std::size_t k1, 
-	       std::size_t k2,
 	       NewConcurrentMessageDispatcherPtr md,
 	       NewJoinerDispatcherPtr jd);
 
@@ -61,22 +60,16 @@ private:
 
   ReturnedBeliefState*
   process(std::size_t query_id, 
-	  std::size_t k1, 
-	  std::size_t k2,
 	  NewConcurrentMessageDispatcherPtr md,
 	  NewJoinerDispatcherPtr jd);
 
   ReturnedBeliefState*
   first_join(std::size_t query_id, 
-	     std::size_t k1, 
-	     std::size_t k2,
 	     NewConcurrentMessageDispatcherPtr md,
 	     NewJoinerDispatcherPtr jd);
 
   ReturnedBeliefState*
   next_join(std::size_t query_id, 
-	    std::size_t k1, 
-	    std::size_t k2,
 	    NewConcurrentMessageDispatcherPtr md,
 	    NewJoinerDispatcherPtr jd);
 
@@ -118,7 +111,9 @@ private:
 			   NewJoinerDispatcherPtr jd);
 
 private:
-  std::size_t pack_size;            // the real upper-bound of number of models that we ask the neighbors
+  // the real upper-bound of number of models that we ask the neighbors
+  // if pack_size == 0, we ask for all models
+  std::size_t pack_size;            
   std::size_t next_neighbor;
   bool first_round;
   bool asking_next;

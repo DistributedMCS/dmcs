@@ -48,6 +48,7 @@ public:
   // reads off information regarding bridge rules, neighbors, export signature,...
   // This is the dynamic setting for future work.
   NewContext(std::size_t cid,
+	     std::size_t pack_size,
 	     InstantiatorPtr i,
 	     BeliefTablePtr ex_sig,
 	     BridgeRuleTablePtr br,

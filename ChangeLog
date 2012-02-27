@@ -1,5 +1,12 @@
 2012-02-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/NewContext.h: Set fixed pack_size for asking neighbors.
+	Will be initiated from command line arguments.
+	* src/mcs/NewContext.cpp: Likewise.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+	* testsuite/testJoiner.cpp: Likewise.
+
 	* testsuite/testDLVProcess.cpp: Add some remarks.
 	* testsuite/testAbstractContext.cpp: Likewise.
 

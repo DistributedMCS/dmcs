@@ -36,6 +36,7 @@
 
 namespace dmcs {
 
+// for leaf contexts
 NewContext::NewContext(std::size_t cid,
 		       InstantiatorPtr i,
 		       BeliefTablePtr ex_sig)
@@ -43,14 +44,18 @@ NewContext::NewContext(std::size_t cid,
     ctx_id(cid),
     query_counter(0),
     inst(i),
-    export_signature(ex_sig),
     bridge_rules(BridgeRuleTablePtr()),
+    export_signature(ex_sig),
     neighbors(NewNeighborVecPtr()),
     offset2index(NeighborOffset2IndexPtr()),
     joiner(StreamingJoinerPtr())
 { }
 
+
+
+// for intermediate contexts
 NewContext::NewContext(std::size_t cid,
+		       std::size_t pack_size,
 		       InstantiatorPtr i,
 		       BeliefTablePtr ex_sig,
 		       BridgeRuleTablePtr br,
@@ -60,12 +65,13 @@ NewContext::NewContext(std::size_t cid,
     ctx_id(cid),
     query_counter(0),
     inst(i),
-    export_signature(ex_sig),
     bridge_rules(br),
+    export_signature(ex_sig),
     neighbors(nbs),
     offset2index(o2i),
-    joiner(new StreamingJoiner(cid, nbs, o2i))
+    joiner(new StreamingJoiner(cid, pack_size, nbs, o2i))
 { }
+
 
 
 void
@@ -150,7 +156,7 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
     {
       // prepare the heads
       std::size_t this_qid = query_id(ctx_id, ++query_counter);
-      ReturnedBeliefState* rbs = joiner->trigger_join(this_qid, k1, k2, md, jd);
+      ReturnedBeliefState* rbs = joiner->trigger_join(this_qid, md, jd);
       if (rbs->belief_state == NULL)
 	{
 	  break;

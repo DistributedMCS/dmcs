@@ -34,9 +34,11 @@
 namespace dmcs {
 
 StreamingJoiner::StreamingJoiner(std::size_t c,
+				 std::size_t ps,
 				 NewNeighborVecPtr n,
 				 NeighborOffset2IndexPtr o2i)
   : BaseJoiner(c, n),
+    pack_size(ps),
     offset2index(o2i),
     next_neighbor(0),
     first_round(true),
@@ -63,8 +65,6 @@ StreamingJoiner::reset()
 
 ReturnedBeliefState*
 StreamingJoiner::trigger_join(std::size_t query_id, 
-			      std::size_t k1, 
-			      std::size_t k2,
 			      NewConcurrentMessageDispatcherPtr md,
 			      NewJoinerDispatcherPtr jd)
 {
@@ -83,7 +83,7 @@ StreamingJoiner::trigger_join(std::size_t query_id,
     }
   else
     {
-      return process(query_id, k1, k2, md, jd);
+      return process(query_id, md, jd);
     }
 }
 
@@ -91,18 +91,16 @@ StreamingJoiner::trigger_join(std::size_t query_id,
 
 ReturnedBeliefState*
 StreamingJoiner::process(std::size_t query_id, 
-			 std::size_t k1, 
-			 std::size_t k2,
 			 NewConcurrentMessageDispatcherPtr md,
 			 NewJoinerDispatcherPtr jd)
 {
   if (first_round)
     {
-      return first_join(query_id, k1, k2, md, jd);
+      return first_join(query_id, md, jd);
     }
-  else if (k2 > 0)
+  else if (pack_size > 0)
     {
-      return next_join(query_id, k1, k2, md, jd);
+      return next_join(query_id, md, jd);
     }
   else
     {
@@ -116,20 +114,9 @@ StreamingJoiner::process(std::size_t query_id,
 
 ReturnedBeliefState*
 StreamingJoiner::first_join(std::size_t query_id, 
-			    std::size_t k1, 
-			    std::size_t k2,
 			    NewConcurrentMessageDispatcherPtr md,
 			    NewJoinerDispatcherPtr jd)
 {
-  if (k2 == 0)
-    {
-      pack_size = 0;
-    }
-  else
-    {
-      pack_size = k2 - k1 + 1;
-    }
-
   // Warming up round, set first_round to FALSE
   first_round = false;
 
@@ -152,9 +139,9 @@ StreamingJoiner::first_join(std::size_t query_id,
       return rbs;
     }
 
-  if (k2 > 0)
+  if (pack_size > 0)
     {
-      succeeded = next_join(query_id, k1, k2, md, jd);
+      succeeded = next_join(query_id, md, jd);
       if (succeeded)
 	{
 	  ReturnedBeliefState* rbs = joined_results.front();
@@ -171,20 +158,9 @@ StreamingJoiner::first_join(std::size_t query_id,
 
 ReturnedBeliefState*
 StreamingJoiner::next_join(std::size_t query_id, 
-			   std::size_t k1, 
-			   std::size_t k2,
 			   NewConcurrentMessageDispatcherPtr md,
 			   NewJoinerDispatcherPtr jd)
 {
-  if (k2 == 0)
-    {
-      pack_size = 0;
-    }
-  else
-    {
-      pack_size = k2 - k1 + 1;
-    }
-
   // now really going to the loop of asking next =============================================
   while (1)
     {

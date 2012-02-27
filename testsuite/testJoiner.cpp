@@ -220,10 +220,11 @@ BOOST_AUTO_TEST_CASE ( testStreamingJoiner )
   joiner_dispatcher->registerIdOffset(qid_ctx5, 1);
   boost::thread joiner_dispatcher_thread(*joiner_dispatcher);
 
-
-
   std::size_t ctx_offset = 1;
-  StreamingJoiner streaming_joiner(ctx_offset, neighbors, o2i);
+  std::size_t k1 = 1;
+  std::size_t k2 = 10;
+  std::size_t pack_size = k2 - k1 + 1;
+  StreamingJoiner streaming_joiner(ctx_offset, pack_size, neighbors, o2i);
 
   // send results to JoinerDispatcher
   boost::thread send_from_4_thread(send_input_belief_state, md, noff4, rbs4, 1);
@@ -232,9 +233,7 @@ BOOST_AUTO_TEST_CASE ( testStreamingJoiner )
   boost::thread send_from_2p_thread(send_input_belief_state, md, noff2, rbs2p, 2000);
 
   std::size_t qid = query_id(5, 1);
-  std::size_t k1 = 1;
-  std::size_t k2 = 10;
-  ReturnedBeliefState* res1 = streaming_joiner.trigger_join(qid, k1, k2, md, joiner_dispatcher);
+  ReturnedBeliefState* res1 = streaming_joiner.trigger_join(qid, md, joiner_dispatcher);
 
   std::cerr << "res1 = " << *res1 << std::endl;
 

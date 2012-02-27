@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE ( testDLVEvaluator )
   std::cerr << std::endl;
 }
 
-/*
+
 BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
 {
   EnginePtr dlv_engine = DLVEngine::create();
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
   BOOST_CHECK_EQUAL(dlv_inst->getNoEvaluators(), 0);
 }
 
-
+/*
  
 BOOST_AUTO_TEST_CASE ( testRunningDLV )
 {
