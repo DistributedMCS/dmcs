@@ -60,6 +60,8 @@ struct BackwardMessage :
   ///TODO: add statistical information
 };
 
+typedef boost::shared_ptr<BackwardMessage> BackwardMessagePtr;
+
 } // namespace dmcs
 
 

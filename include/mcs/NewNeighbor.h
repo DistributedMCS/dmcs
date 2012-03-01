@@ -33,6 +33,9 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
+#include <string>
+#include <iostream>
+
 namespace dmcs {
 
 struct NewNeighbor 

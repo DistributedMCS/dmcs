@@ -1,12 +1,17 @@
 2012-03-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
-	* include/network/Makefile.am: Add NewOutputThread.h.
-	* src/network/Makefile.am: Add NewOutputThread.cpp.
+	* include/mcs/NewNeighbor.h: Include some basic stuff.
+
+	* include/network/Makefile.am: Add NewOutputThread.h, NewNeighborThread.h.
+	* src/network/Makefile.am: Add NewOutputThread.cpp, NewNeighborThread.cpp.
 
 	* include/network/NewOutputThread.h: New file.
 	* src/network/NewOutputThread.cpp: Likewise.
+	* include/network/NewNeighborThread.h: Likewise.
+	* src/network/NewNeighborThread.cpp: Likewise.
 
 	* include/mcs/NewOutputDispatcher.h: Add Ptr type.
+	* include/mcs/BackwardMessage.h: Likewise.
 
 2012-02-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 

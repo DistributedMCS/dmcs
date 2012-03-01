@@ -21,6 +21,7 @@ noinst_HEADERS =  \
 		NewBeliefState.h \
 		NewContext.h \
 		NewMessage.h \
+		NewNeighbor.h \
 		NewJoinerDispatcher.h \
 		NewOutputDispatcher.h \
 		Pool.h \
