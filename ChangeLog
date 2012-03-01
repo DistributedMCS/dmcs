@@ -1,3 +1,13 @@
+2012-03-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Makefile.am: Add NewOutputThread.h.
+	* src/network/Makefile.am: Add NewOutputThread.cpp.
+
+	* include/network/NewOutputThread.h: New file.
+	* src/network/NewOutputThread.cpp: Likewise.
+
+	* include/mcs/NewOutputDispatcher.h: Add Ptr type.
+
 2012-02-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testAbstractContext.cpp: Fix testcases.

@@ -30,6 +30,8 @@
 #ifndef NEW_OUTPUT_DISPATCHER_H
 #define NEW_OUTPUT_DISPATCHER_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "mcs/NewBaseDispatcher.h"
 #include "mcs/QueryID.h"
 #include "mcs/ReturnedBeliefState.h"
@@ -50,7 +52,7 @@ public:
     while (1)
       {
 	int timeout = 0;
-	ReturnedBeliefState* returned_bs = cmd->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
+	ReturnedBeliefState* returned_bs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
 	
 	std::size_t qid = returned_bs->query_id;
 
@@ -61,10 +63,12 @@ public:
 
 	std::size_t ctx_id = ctxid_from_qid(qid);
 	std::size_t offset = get_offset(ctx_id);
-	cmd->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, offset, returned_bs, 0);
+	md->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, offset, returned_bs, 0);
       }
   }
 };
+
+typedef boost::shared_ptr<NewOutputDispatcher> NewOutputDispatcherPtr;
 
 } // namespace dmcs
 

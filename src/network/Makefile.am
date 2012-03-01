@@ -43,7 +43,8 @@ libthreads_a_SOURCES = \
 		RelSatSolverThread.cpp \
 		OutputDispatcher.cpp \
 		JoinerDispatcher.cpp \
-		NewConcurrentMessageDispatcher.cpp
+		NewConcurrentMessageDispatcher.cpp \
+		NewOutputThread.cpp
 
 
 # don't compile boost::message_queue for now

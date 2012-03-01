@@ -21,6 +21,7 @@ noinst_HEADERS =  \
 		NeighborOut.h \
 		NeighborThread.h \
 		NewConcurrentMessageDispatcher.h \
+		NewOutputThread.h \
 		OutputThread.h \
 		OutputDispatcher.h \
 		Server.h \
