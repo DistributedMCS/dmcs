@@ -45,6 +45,7 @@ libthreads_a_SOURCES = \
 		JoinerDispatcher.cpp \
 		NewConcurrentMessageDispatcher.cpp \
 		NewOutputThread.cpp \
+		NewNeighborOut.cpp \
 		NewNeighborThread.cpp
 
 

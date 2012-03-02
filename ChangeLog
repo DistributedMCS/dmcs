@@ -1,3 +1,15 @@
+2012-03-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/NewNeighborOut.h: New file.
+	* src/network/NewNeighborOut.cpp: Likewise.
+
+	* include/network/Makefile.am: Add NewNeighborOut.h.
+	* src/network/Makefile.am: Add NewNeighborOut.cpp.
+
+	* include/mcs/QueryID.h: Encode more information in QueryID.
+	* src/mcs/QueryID.cpp: Likewise.
+	* testsuite/testID.cpp: Adapt testcase.
+
 2012-03-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/NewNeighbor.h: Include some basic stuff.
