@@ -33,37 +33,44 @@ namespace dmcs {
 
 QueryID* QueryID::_instance = 0;
 
+
+
+void
+QueryID::setupMask(std::size_t& mask,
+		   std::size_t mask_beg, 
+		   std::size_t mask_end)
+{
+  mask = 0;
+  for (std::size_t i = mask_beg; i < mask_end; ++i)
+    {
+      mask |= (std::size_t)1 << i;
+    } 
+}
+
+
+
 QueryID::QueryID()
 {
   std::size_t s = sizeof(std::size_t)*8;
-  
-  neighbor_offset_shift = s/2;
-  local_context_shift = 3*s/4;
+  std::size_t query_order_length = 30;
 
-  shutdown_mask = 0;
-  local_context_mask = 0;
-  neighbor_offset_mask = 0;
-  query_order_mask = 0;
+  query_order_shift = 4;
+  while ((s - query_order_shift - query_order_length) % 3 != 0) query_order_shift++;
 
-  shutdown_mask |= (std::size_t)1 << (s-1);
+  std::size_t one_third_left = (s - query_order_shift - query_order_length) / 3;
 
-  for (std::size_t i = local_context_shift; i < s-1; ++i)
-    {
-      local_context_mask |= (std::size_t)1 << i;
-    }
+  local_context_shift = query_order_shift + query_order_length;
+  neighbor_offset_shift = local_context_shift + one_third_left;
+  neighbor_id_shift = neighbor_offset_shift + one_third_left;
 
-  for (std::size_t i = neighbor_offset_shift; i < local_context_shift; ++i)
-    {
-      neighbor_offset_mask |= (std::size_t)1 << i;
-    }
-  
-  for (std::size_t i = 0; i < neighbor_offset_shift; ++i)
-    {
-      query_order_mask |= (std::size_t)1 << i;
-    }
-
-  local_context_mask = ~query_order_mask;
+  setupMask(query_type_mask, 0, query_order_shift);
+  setupMask(query_order_mask, query_order_shift, local_context_shift);
+  setupMask(local_context_mask, local_context_shift, neighbor_offset_shift);
+  setupMask(neighbor_offset_mask, neighbor_offset_shift, neighbor_id_shift);
+  setupMask(neighbor_id_mask, neighbor_id_shift, s);
 }
+
+
 
 QueryID* 
 QueryID::instance()
@@ -74,6 +81,15 @@ QueryID::instance()
     }
   return _instance;
 }
+
+
+
+std::size_t
+QueryID::QUERY_ORDER_SHIFT() const
+{
+  return query_order_shift;
+}
+
 
 
 std::size_t
@@ -92,10 +108,27 @@ QueryID::NEIGHBOR_OFFSET_SHIFT() const
 
 
 std::size_t
-QueryID::SHUTDOWN_MASK() const
+QueryID::NEIGHBOR_ID_SHIFT() const
 {
-  return shutdown_mask;
+  return neighbor_id_shift;
 }
+
+
+
+std::size_t
+QueryID::QUERY_TYPE_MASK() const
+{
+  return query_type_mask;
+}
+
+
+
+std::size_t
+QueryID::QUERY_ORDER_MASK() const
+{
+  return query_order_mask;
+}
+
 
 
 std::size_t
@@ -111,10 +144,12 @@ QueryID::NEIGHBOR_OFFSET_MASK() const
   return neighbor_offset_mask;
 }
 
+
+
 std::size_t
-QueryID::QUERY_ORDER_MASK() const
+QueryID::NEIGHBOR_ID_MASK() const
 {
-  return query_order_mask;
+  return neighbor_id_mask;
 }
 
 } // namespace dmcs

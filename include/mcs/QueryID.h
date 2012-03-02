@@ -30,14 +30,23 @@
 #ifndef QUERY_ID_H
 #define QUERY_ID_H
 
-#include <boost/cstdint.hpp>
+#include <iostream>
+#include <iomanip>
 
 namespace dmcs {
 
 class QueryID
 {
 public:
+  // can now afford up to 2^4 = 16 different types
+  static const std::size_t TYPE_SHUTDOWN = 1;
+  static const std::size_t TYPE_REQUEST  = 2;
+  static const std::size_t TYPE_ANSWER   = 3;
+
   static QueryID* instance();
+
+  std::size_t
+  QUERY_ORDER_SHIFT() const;
 
   std::size_t
   LOCAL_CONTEXT_SHIFT() const;
@@ -46,7 +55,13 @@ public:
   NEIGHBOR_OFFSET_SHIFT() const;
 
   std::size_t
-  SHUTDOWN_MASK() const;
+  NEIGHBOR_ID_SHIFT() const;
+
+  std::size_t
+  QUERY_TYPE_MASK() const;
+
+  std::size_t
+  QUERY_ORDER_MASK() const;
 
   std::size_t
   LOCAL_CONTEXT_MASK() const;
@@ -55,42 +70,66 @@ public:
   NEIGHBOR_OFFSET_MASK() const;
 
   std::size_t
-  QUERY_ORDER_MASK() const;
+  NEIGHBOR_ID_MASK() const;
+
+  std::ostream&
+  print(std::ostream& os) const;
 
 protected:
   QueryID();
 
 private:
+  void
+  setupMask(std::size_t& mask,
+	    std::size_t mask_beg, 
+	    std::size_t mask_shift);
+
+private:
+  std::size_t query_order_shift;
   std::size_t local_context_shift;
   std::size_t neighbor_offset_shift;
+  std::size_t neighbor_id_shift;
 
-  std::size_t shutdown_mask;
+  std::size_t query_type_mask;
+  std::size_t query_order_mask;
   std::size_t local_context_mask;
   std::size_t neighbor_offset_mask;
-  std::size_t query_order_mask;
+  std::size_t neighbor_id_mask;
 
   static QueryID* _instance;
 };
 
 // Helper functions
 
+inline void
+print_query_id(const std::size_t qid)
+{
+  std::cerr << std::setfill('0') << std::hex << std::setw(16) << qid << std::endl;
+}
+
 inline std::size_t
 query_id(const std::size_t ctx_id, 
 	 const std::size_t query_order)
 {
-  return ((ctx_id << QueryID::instance()->LOCAL_CONTEXT_SHIFT()) | query_order);
+  return (QueryID::TYPE_REQUEST
+	  | (query_order << QueryID::instance()->QUERY_ORDER_SHIFT())
+	  | (ctx_id << QueryID::instance()->LOCAL_CONTEXT_SHIFT()));
 }
 
 
 
 inline std::size_t
-query_id(const std::size_t ctx_id, 
+query_id(const std::size_t query_type,
+	 const std::size_t ctx_id, 
+	 const std::size_t neighbor_id,
 	 const std::size_t neighbor_offset,
 	 const std::size_t query_order)
 {
-  return ((ctx_id << QueryID::instance()->LOCAL_CONTEXT_SHIFT()) 
+  return (query_type
+	  | (query_order << QueryID::instance()->QUERY_ORDER_SHIFT()) 
+	  | (ctx_id << QueryID::instance()->LOCAL_CONTEXT_SHIFT()) 
 	  | (neighbor_offset << QueryID::instance()->NEIGHBOR_OFFSET_SHIFT())
-	  | query_order);
+	  | (neighbor_id << QueryID::instance()->NEIGHBOR_ID_SHIFT()));
 }
 
 
@@ -98,7 +137,7 @@ query_id(const std::size_t ctx_id,
 inline std::size_t
 shutdown_query_id()
 {
-  return QueryID::instance()->SHUTDOWN_MASK();
+  return QueryID::TYPE_SHUTDOWN;
 }
 
 
@@ -106,7 +145,23 @@ shutdown_query_id()
 inline bool
 shutdown(std::size_t query_id)
 {
-  return (query_id & QueryID::instance()->SHUTDOWN_MASK()) == QueryID::instance()->SHUTDOWN_MASK();
+  return (query_id & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_SHUTDOWN;
+}
+
+
+
+inline bool
+is_request(std::size_t query_id)
+{
+  return (query_id & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_REQUEST;
+}
+
+
+
+inline bool
+is_answer(std::size_t query_id)
+{
+  return (query_id & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_ANSWER;
 }
 
 
@@ -127,6 +182,14 @@ neighbor_offset_from_qid(std::size_t query_id)
 
 
 
+inline std::size_t
+neighbor_id_from_qid(std::size_t query_id)
+{
+  return ((query_id & QueryID::instance()->NEIGHBOR_ID_MASK()) >> QueryID::instance()->NEIGHBOR_ID_SHIFT());
+}
+
+
+
 inline void
 set_neighbor_offset(std::size_t& query_id, const std::size_t n_offset)
 {
@@ -142,10 +205,11 @@ unset_neighbor_offset(std::size_t& query_id)
 }
 
 
+
 inline std::size_t
 qorder_from_qid(const std::size_t query_id)
 {
-  return (query_id & QueryID::instance()->QUERY_ORDER_MASK());
+  return ((query_id & QueryID::instance()->QUERY_ORDER_MASK()) >> QueryID::instance()->QUERY_ORDER_SHIFT());
 }
 
 } // namespace dmcs
