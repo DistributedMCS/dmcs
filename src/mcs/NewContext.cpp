@@ -92,7 +92,7 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
       ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id, timeout);
       
       std::size_t parent_qid = fwd_mess->qid;
-      if (shutdown(parent_qid))
+      if (is_shutdown(parent_qid))
 	{
 	  break;
 	}

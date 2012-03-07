@@ -18,67 +18,48 @@
  */
 
 /**
- * @file   ForwardMessage.h
+ * @file   NeighborOutServer.h
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Fri Dec  23 10:22:17 2011
+ * @date   Wed Mar  7 21:37:40 2012
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef FORWARD_MESSAGE_H
-#define FORWARD_MESSAGE_H
+#ifndef NEIGHBOR_OUT_SERVER_TEST_H
+#define NEIGHBOR_OUT_SERVER_TEST_H
 
-#include "mcs/Printhelpers.h"
-#include "mcs/NewMessage.h"
+#include "network/connection.hpp"
+#include "mcs/ForwardMessage.h"
 
-namespace dmcs {
-
-struct ForwardMessage : 
-    public NewMessage,
-    private ostream_printable<ForwardMessage>
+class NeighborOutServer
 {
-  ForwardMessage();
-
-  virtual
-  ~ForwardMessage(); 
-
-  ForwardMessage(const ForwardMessage& fMess);
-
-  ForwardMessage(std::size_t qid,
-		 std::size_t k_one,
-		 std::size_t k_two);
-
-  std::size_t
-  getPackSize() const;
+public:
+  NeighborOutServer(boost::asio::io_service& i,
+		    const boost::asio::ip::tcp::endpoint& endpoint);
 
   void
-  setPackRequest(const std::size_t k_one, 
-		 const std::size_t k_two);
+  handle_accept(const boost::system::error_code& e, 
+		connection_ptr conn);
 
-  template <typename Archive>
   void
-  serialize(Archive& ar, const unsigned int /* version */)
-  {
-    ar & qid;
-    ar & k1;
-    ar & k2;
-  }
+  handle_read_message(const boost::system::error_code& e, 
+		      connection_ptr conn,
+		      dmcs::ForwardMessage* mess);
 
-  std::ostream&
-  print(std::ostream& os) const;
+  dmcs::ForwardMessage
+  getMessage();
 
-  std::size_t qid;
-  std::size_t k1;         // The invoker wants models from k1 to k2
-  std::size_t k2;
+private:
+  boost::asio::io_service& io_service;
+  boost::asio::ip::tcp::acceptor acceptor;
+  std::set<connection_ptr> conn_man;
+
+  dmcs::ForwardMessage m;
 };
 
-} // namespace dmcs
-
-
-
-#endif // FORWARD_MESSAGE_H
+#endif // NEIGHBOR_OUT_SERVER_TEST_H
 
 // Local Variables:
 // mode: C++

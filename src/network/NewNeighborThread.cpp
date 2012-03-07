@@ -28,6 +28,7 @@
  */
 
 #include "mcs/JoinIn.h"
+#include "network/NewNeighborOut.h"
 #include "network/NewNeighborThread.h"
 
 #include <boost/bind.hpp>
@@ -93,8 +94,8 @@ NewNeighborThread::establish_connections(const boost::system::error_code& e,
 {
   if (!e)
     {
-      //NewNeighborOut nop;
-      //nop_thread = new boost::thread(nop, conn, md);
+      NewNeighborOut nop;
+      nop_thread = new boost::thread(nop, conn, md, neighbor->neighbor_offset);
 
       boost::shared_ptr<std::string> header(new std::string);
 

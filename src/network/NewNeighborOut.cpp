@@ -55,7 +55,7 @@ NewNeighborOut::operator()(connection_ptr conn,
 
       conn->write(*fwd_mess);
 
-      if (shutdown(fwd_mess->qid))
+      if (is_shutdown(fwd_mess->qid))
 	{
 	  delete fwd_mess;
 	  fwd_mess = 0;

@@ -143,7 +143,7 @@ shutdown_query_id()
 
 
 inline bool
-shutdown(std::size_t qid)
+is_shutdown(std::size_t qid)
 {
   return (qid & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_SHUTDOWN;
 }

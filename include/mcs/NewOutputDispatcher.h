@@ -56,7 +56,7 @@ public:
 	
 	std::size_t qid = returned_bs->qid;
 
-	if (shutdown(qid))
+	if (is_shutdown(qid))
 	  {
 	    break;
 	  }

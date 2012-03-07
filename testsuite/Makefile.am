@@ -267,7 +267,8 @@ testDLVProcess_LDADD = \
 	@LIBCURL@
 
 testNeighbors_SOURCES = testNeighbors.cpp \
-	NeighborInServer.cpp
+	NeighborInServer.cpp \
+	NeighborOutServer.cpp
 testNeighbors_LDADD = \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/mcs/libmcs.a \

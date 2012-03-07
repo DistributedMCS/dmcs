@@ -68,7 +68,7 @@ StreamingJoiner::trigger_join(std::size_t query_id,
 			      NewConcurrentMessageDispatcherPtr md,
 			      NewJoinerDispatcherPtr jd)
 {
-  if (shutdown(query_id))
+  if (is_shutdown(query_id))
     {
       reset();
       ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);

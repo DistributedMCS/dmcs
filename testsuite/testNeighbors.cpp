@@ -29,10 +29,12 @@
 
 #include "mcs/BackwardMessage.h"
 #include "mcs/JoinIn.h"
+#include "mcs/QueryID.h"
 #include "network/NewNeighborThread.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 
 #include "NeighborInServer.h"
+#include "NeighborOutServer.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testNeighbors"
@@ -43,7 +45,7 @@ using namespace dmcs;
 
 
 void
-run_server(std::size_t server_port)
+run_neighbor_in_server(std::size_t server_port)
 {
   std::size_t no_blocks = 5;
   std::size_t block_size = 10;
@@ -76,6 +78,7 @@ run_server(std::size_t server_port)
   io_service_server.run();
 }
 
+
 BOOST_AUTO_TEST_CASE ( testNeighborIn )
 {
   std::size_t nid = 3;
@@ -84,14 +87,14 @@ BOOST_AUTO_TEST_CASE ( testNeighborIn )
   std::string port = "5050";
   std::size_t server_port = 5050;
 
-  std::size_t message_size = 10;
+  std::size_t queue_size = 10;
   std::size_t no_neighbors = 5;
 
-  boost::thread* server_thread = new boost::thread(run_server, server_port);
+  boost::thread* server_thread = new boost::thread(run_neighbor_in_server, server_port);
   boost::posix_time::milliseconds server_starting_sleep(100);
   boost::this_thread::sleep(server_starting_sleep);
 
-  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(message_size, no_neighbors));
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(queue_size, no_neighbors));
   NewNeighborPtr neighbor(new NewNeighbor(nid, noff, hostname, port));
 
   NewNeighborThread* neighbor_in = new NewNeighborThread(neighbor);
@@ -120,24 +123,85 @@ BOOST_AUTO_TEST_CASE ( testNeighborIn )
 
   std::cerr << "Finished checking!" << std::endl;
 
-  //server_thread->join();
-  //std::cerr << "Server joined!" << std::endl;
-  //  nit->interrupt();
-  //nit->join();
-  //std::cerr << "NeighborIn joined!" << std::endl;
+  server_thread->join();
+  std::cerr << "Server joined!" << std::endl;
+  nit->join();
+  std::cerr << "NeighborIn joined!" << std::endl;
 
-  /*
   delete server_thread;
   server_thread = 0;
   
   delete nit;
   nit = 0;
-  */
 
-  /*
+  std::cerr << "Sleeping for 2 secs to release the port." << std::endl;
   boost::posix_time::milliseconds final_sleep(2000);
-  boost::this_thread::sleep(final_sleep);*/
+  boost::this_thread::sleep(final_sleep);
 }
+
+
+void
+run_neighbor_out_server(std::size_t server_port)
+{
+  boost::asio::io_service io_service_server;
+  boost::asio::ip::tcp::endpoint endpoint_server(boost::asio::ip::tcp::v4(), server_port);
+
+  NeighborOutServer s(io_service_server, endpoint_server);
+  io_service_server.run();
+
+  ForwardMessage m = s.getMessage();
+  BOOST_CHECK_EQUAL(m.qid, 23456);
+  BOOST_CHECK_EQUAL(m.k1, 5);
+  BOOST_CHECK_EQUAL(m.k2, 10);
+}
+
+
+
+BOOST_AUTO_TEST_CASE ( testNeighborOut )
+{
+  std::size_t nid = 3;
+  std::size_t noff = 2;
+  std::string hostname = "localhost";
+  std::string port = "1040";
+  std::size_t server_port = 1040;
+
+  std::size_t queue_size = 10;
+  std::size_t no_neighbors = 5;
+
+  boost::thread* server_thread = new boost::thread(run_neighbor_out_server, server_port);
+  boost::posix_time::milliseconds server_starting_sleep(100);
+  boost::this_thread::sleep(server_starting_sleep);
+
+  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(queue_size, no_neighbors));
+  NewNeighborPtr neighbor(new NewNeighbor(nid, noff, hostname, port));
+
+  // NeighborOut is implicitly run from NeighborThread
+  NewNeighborThread* neighbor_in = new NewNeighborThread(neighbor);
+  boost::thread* nit = new boost::thread(*neighbor_in, md);
+
+  ForwardMessage* fwd_mess1 = new ForwardMessage(23456, 5, 10);
+  ForwardMessage* fwd_mess2 = new ForwardMessage(shutdown_query_id(), 0, 0);
+
+  int timeout = 0;
+  md->send(NewConcurrentMessageDispatcher::NEIGHBOR_OUT_MQ, noff, fwd_mess1, timeout);
+  md->send(NewConcurrentMessageDispatcher::NEIGHBOR_OUT_MQ, noff, fwd_mess2, timeout);
+
+  server_thread->join();
+  std::cerr << "Server joined!" << std::endl;
+  nit->join();
+  std::cerr << "NeighborIn joined!" << std::endl;
+
+  delete server_thread;
+  server_thread = 0;
+  
+  delete nit;
+  nit = 0;
+
+  std::cerr << "Sleeping for 2 secs to release the port." << std::endl;
+  boost::posix_time::milliseconds final_sleep(2000);
+  boost::this_thread::sleep(final_sleep);
+}
+
 
 // Local Variables:
 // mode: C++

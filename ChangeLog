@@ -1,5 +1,19 @@
 2012-03-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/testNeighbors.cpp: Add testcase for NewNeighborOut.
+	* testsuite/NeighborOutServer.h: New file.
+	* testsuite/NeighborOutServer.cpp: Likewise.
+
+	* testsuite/Makefile.am (testDLVProcess_LDADD): Add NeighborOutServer.
+
+	* src/network/NewNeighborThread.cpp: Enable NewNeighborOut.
+
+	* include/mcs/NewOutputDispatcher.h: shutdown() --> is_shutdown()
+	* include/mcs/QueryID.h: Likewise.
+	* src/mcs/NewContext.cpp: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+	* src/network/NewNeighborOut.cpp: Likewise.
+
 	* testsuite/Makefile.am: Add testNeighbors.
 	* testsuite/NeighborInServer.h: New file.
 	* testsuite/testNeighbors.h: Likewise.
@@ -30,6 +44,8 @@
 
 	* include/mcs/BackwardMessage.h: Move the implementation of serialze() to header file.
 	* src/mcs/BackwardMessage.cpp: Likewise.
+	* include/mcs/ForwardMessage.h: Likewise.
+	* src/mcs/ForwardMessage.cpp: Likewise.
 
 2012-03-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 

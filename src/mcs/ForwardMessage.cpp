@@ -80,16 +80,6 @@ ForwardMessage::setPackRequest(const std::size_t k_one,
 }
 
 
-template <typename Archive>
-void
-ForwardMessage::serialize(Archive& ar, const unsigned int /* version */)
-{
-  ar & qid;
-  ar & k1;
-  ar & k2;
-}
-
-
 std::ostream&
 ForwardMessage::print(std::ostream& os) const
 {
