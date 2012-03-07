@@ -57,8 +57,8 @@ public:
 	    break;
 	  }
 
-	std::size_t ctx_id = ctxid_from_qid(qid);
-	std::size_t offset = get_offset(ctx_id);
+	std::size_t invokder = invoker_from_qid(qid);
+	std::size_t offset = get_offset(invoker);
 
 	cmd->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
       }

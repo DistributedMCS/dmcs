@@ -64,7 +64,7 @@ struct ForwardMessage :
   std::ostream&
   print(std::ostream& os) const;
 
-  std::size_t query_id;   // already includes context id
+  std::size_t qid;
   std::size_t k1;         // The invoker wants models from k1 to k2
   std::size_t k2;
 };

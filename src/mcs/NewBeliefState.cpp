@@ -32,6 +32,11 @@
 
 namespace dmcs {
 
+NewBeliefState::NewBeliefState()
+{ }
+
+
+
 NewBeliefState::NewBeliefState(std::size_t n)
   : status_bit(n), 
     value_bit(n)
@@ -116,12 +121,12 @@ combine(NewBeliefState& s,
 {
   assert (masks.size() > 0);
   assert (s.size() == t.size());
-  assert (s.size() == masks[0].size());
+  assert (s.size() == (masks[0])->size());
   assert (starting_offsets.size() == masks.size());
 
   if (starting_offsets.size() > 1)
     {
-      assert (s.size() == starting_offsets[starting_offsets.length() - 1] + starting_offsets[1] - starting_offset[0]);
+      assert (s.size() == starting_offsets[starting_offsets.size() - 1] + starting_offsets[1] - starting_offsets[0]);
     }
 
   std::list<std::size_t> tobe_combined;

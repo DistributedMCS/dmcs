@@ -27,6 +27,7 @@
  * 
  */
 
+#include "mcs/ID.h"
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/BridgeRuleEvaluator.h"
 
@@ -41,7 +42,7 @@ satisfied(const BridgeRule& r,
   for (Tuple::const_iterator it = r.body.begin();
        it != r.body.end(); ++it)
     {
-      assert (ID::isBelief(*it));
+      assert (it->isBelief());
       std::size_t ctx_id = it->contextID();
       IDAddress address = it->address;
 

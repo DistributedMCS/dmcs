@@ -51,7 +51,10 @@ struct BackwardMessage :
 
   template <typename Archive>
   void
-  serialize(Archive& ar, const unsigned int /* version */);
+  serialize(Archive& ar, const unsigned int /* version */)
+  {
+    ar & rbsl; 
+  }
 
   std::ostream&
   print(std::ostream& os) const;

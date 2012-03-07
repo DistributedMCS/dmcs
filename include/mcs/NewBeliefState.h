@@ -64,6 +64,7 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
       DMCS_UNDEF
     };
 
+  NewBeliefState();
   NewBeliefState(std::size_t n);
   NewBeliefState(std::size_t no_bs, std::size_t bs_size);
   NewBeliefState(const NewBeliefState& bs);
@@ -211,7 +212,7 @@ NewBeliefState::resize(std::size_t n)
 inline NewBeliefState::TruthVal
 NewBeliefState::test(std::size_t pos) const
 {
-  assert (pos > 0 && pos < bs.size());
+  assert (pos > 0 && pos < status_bit.size());
 
   if (status_bit.test(pos))
     {

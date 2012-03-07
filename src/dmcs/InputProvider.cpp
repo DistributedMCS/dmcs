@@ -80,7 +80,7 @@ void InputProvider::addFileInput(const std::string& filename)
   ifs.open(filename.c_str());
   
   std::string err = "File " + filename + " not found";
-  assert (ifs.is_open() && err);
+  assert (ifs.is_open() && err.c_str());
 
   pimpl->stream << ifs.rdbuf();
   ifs.close();
@@ -98,7 +98,7 @@ void InputProvider::addURLInput(const std::string& url)
   pimpl->stream << is.rdbuf();
 
   std::string err = "Requested URL " + url + " was not found";
-  assert (ubuf.responsecode() != 404 && err);
+  assert (ubuf.responsecode() != 404 && err.c_str());
 
   pimpl->contentNames.push_back(url);
 }

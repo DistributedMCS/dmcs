@@ -26,7 +26,6 @@
  * 
  * 
  */
-
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
@@ -55,14 +54,6 @@ BackwardMessage::BackwardMessage(const ReturnedBeliefStateListPtr& r)
   : rbsl(r)
 { }
 
-
-
-template <typename Archive>
-void
-BackwardMessage::serialize(Archive& ar, const unsigned int /* version */)
-{
-  ar & rbsl;
-}
 
 
 std::ostream&

@@ -1,3 +1,22 @@
+2012-03-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+
+
+	* include/mcs/NewBaseDispatcher.h: Fix bugs that are not detected in -O3 compiling mode.
+	* include/mcs/NewBeliefState.h: Likewise.
+	* src/dmcs/InputProvider.cpp: Likewise.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+	* src/mcs/NewBeliefState.cpp: Likewise.
+
+	* include/mcs/ForwardMessage.h: query_id --> qid.
+	* src/mcs/ForwardMessage.cpp: Likewise.
+	* include/mcs/QueryID.h: Likewise.
+	* src/mcs/NewContext.cpp: Likewise.
+	* src/network/NewNeighborOut.cpp: Likewise.
+
+	* include/mcs/BackwardMessage.h: Move the implementation of serialze() to header file.
+	* src/mcs/BackwardMessage.cpp: Likewise.
+
 2012-03-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/NewNeighborOut.h: New file.

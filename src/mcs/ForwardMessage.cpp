@@ -32,7 +32,7 @@
 namespace dmcs {
 
 ForwardMessage::ForwardMessage()
-  : query_id(0), k1(1), k2(1)
+  : qid(0), k1(1), k2(1)
 { }
 
 
@@ -42,16 +42,16 @@ ForwardMessage::~ForwardMessage()
 
 ForwardMessage::ForwardMessage(const ForwardMessage& fMess)
 {
-  query_id = fMess.query_id;
+  qid = fMess.qid;
   k1 = fMess.k1;
   k2 = fMess.k2;
 }
 
 
-ForwardMessage::ForwardMessage(std::size_t qid,
+ForwardMessage::ForwardMessage(std::size_t q,
 			       std::size_t k_one,
 			       std::size_t k_two)
-  : query_id(qid), 
+  : qid(q), 
     k1(k_one),
     k2(k_two)
 { }
@@ -84,7 +84,7 @@ template <typename Archive>
 void
 ForwardMessage::serialize(Archive& ar, const unsigned int /* version */)
 {
-  ar & query_id;
+  ar & qid;
   ar & k1;
   ar & k2;
 }
@@ -93,7 +93,7 @@ ForwardMessage::serialize(Archive& ar, const unsigned int /* version */)
 std::ostream&
 ForwardMessage::print(std::ostream& os) const
 {
-  os << "{" << query_id << "}" << "[" << k1 << "," << k2 << "]";
+  os << "{" << qid << "}" << "[" << k1 << "," << k2 << "]";
   return os;
 }
 

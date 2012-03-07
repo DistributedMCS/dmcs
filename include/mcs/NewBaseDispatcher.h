@@ -48,7 +48,7 @@ public:
     std::map<std::size_t, std::size_t>::iterator it = id2offset.find(id);
     if (it != id2offset.end())
       {
-	assert (offset == it.second);
+	assert (offset == it->second);
       }
     else
       {

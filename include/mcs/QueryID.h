@@ -143,73 +143,89 @@ shutdown_query_id()
 
 
 inline bool
-shutdown(std::size_t query_id)
+shutdown(std::size_t qid)
 {
-  return (query_id & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_SHUTDOWN;
+  return (qid & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_SHUTDOWN;
 }
 
 
 
 inline bool
-is_request(std::size_t query_id)
+is_request(std::size_t qid)
 {
-  return (query_id & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_REQUEST;
+  return (qid & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_REQUEST;
 }
 
 
 
 inline bool
-is_answer(std::size_t query_id)
+is_answer(std::size_t qid)
 {
-  return (query_id & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_ANSWER;
+  return (qid & QueryID::instance()->QUERY_TYPE_MASK()) == QueryID::TYPE_ANSWER;
 }
 
 
 
 inline std::size_t
-ctxid_from_qid(std::size_t query_id)
+ctxid_from_qid(std::size_t qid)
 {
-  return ((query_id & QueryID::instance()->LOCAL_CONTEXT_MASK()) >> QueryID::instance()->LOCAL_CONTEXT_SHIFT());
+  return ((qid & QueryID::instance()->LOCAL_CONTEXT_MASK()) >> QueryID::instance()->LOCAL_CONTEXT_SHIFT());
+}
+
+
+
+// just a synonym, for more intuitive use at the request dispatcher
+inline std::size_t
+invoker_from_qid(std::size_t qid)
+{
+  return ctxid_from_qid(qid);
 }
 
 
 
 inline std::size_t
-neighbor_offset_from_qid(std::size_t query_id)
+neighbor_offset_from_qid(std::size_t qid)
 {
-  return ((query_id & QueryID::instance()->NEIGHBOR_OFFSET_MASK()) >> QueryID::instance()->NEIGHBOR_OFFSET_SHIFT());
+  return ((qid & QueryID::instance()->NEIGHBOR_OFFSET_MASK()) >> QueryID::instance()->NEIGHBOR_OFFSET_SHIFT());
 }
 
 
 
 inline std::size_t
-neighbor_id_from_qid(std::size_t query_id)
+neighbor_id_from_qid(std::size_t qid)
 {
-  return ((query_id & QueryID::instance()->NEIGHBOR_ID_MASK()) >> QueryID::instance()->NEIGHBOR_ID_SHIFT());
+  return ((qid & QueryID::instance()->NEIGHBOR_ID_MASK()) >> QueryID::instance()->NEIGHBOR_ID_SHIFT());
+}
+
+
+// just a synonym, for more intuitive use at the message receiver
+inline std::size_t
+receiver_from_qid(std::size_t qid)
+{
+  return neighbor_id_from_qid(qid);
+}
+
+
+inline void
+set_neighbor_offset(std::size_t& qid, const std::size_t n_offset)
+{
+  qid |= (n_offset << QueryID::instance()->NEIGHBOR_OFFSET_SHIFT());
 }
 
 
 
 inline void
-set_neighbor_offset(std::size_t& query_id, const std::size_t n_offset)
+unset_neighbor_offset(std::size_t& qid)
 {
-  query_id |= (n_offset << QueryID::instance()->NEIGHBOR_OFFSET_SHIFT());
-}
-
-
-
-inline void
-unset_neighbor_offset(std::size_t& query_id)
-{
-  query_id &= ~(QueryID::instance()->NEIGHBOR_OFFSET_MASK());
+  qid &= ~(QueryID::instance()->NEIGHBOR_OFFSET_MASK());
 }
 
 
 
 inline std::size_t
-qorder_from_qid(const std::size_t query_id)
+qorder_from_qid(const std::size_t qid)
 {
-  return ((query_id & QueryID::instance()->QUERY_ORDER_MASK()) >> QueryID::instance()->QUERY_ORDER_SHIFT());
+  return ((qid & QueryID::instance()->QUERY_ORDER_MASK()) >> QueryID::instance()->QUERY_ORDER_SHIFT());
 }
 
 } // namespace dmcs
