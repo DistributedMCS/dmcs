@@ -100,7 +100,7 @@ BeliefStateServer::handle_finalize(const boost::system::error_code& e,
     }
   else
     {
-      std::cerr << "SERVER: ERROR handle_read_header: " << e.message() << std::endl;
+      std::cerr << "SERVER: ERROR handle_finalize: " << e.message() << std::endl;
       throw std::runtime_error(e.message());
     }
 }

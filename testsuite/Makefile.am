@@ -54,7 +54,8 @@ TESTS = \
 	testMessageDispatcher \
 	testResultParser \
 	testAbstractContext \
-	testDLVProcess
+	testDLVProcess \
+	testNeighbors
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -97,7 +98,8 @@ check_PROGRAMS = \
 	testMessageDispatcher \
 	testResultParser \
 	testAbstractContext \
-	testDLVProcess
+	testDLVProcess \
+	testNeighbors
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
@@ -263,3 +265,11 @@ testDLVProcess_SOURCES = testDLVProcess.cpp
 testDLVProcess_LDADD = \
 	$(top_builddir)/src/process/libprocess.a \
 	@LIBCURL@
+
+testNeighbors_SOURCES = testNeighbors.cpp \
+	NeighborInServer.cpp
+testNeighbors_LDADD = \
+	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/src/mcs/libmcs.a \
+	$(top_builddir)/src/dmcs/libdmcs.a
+

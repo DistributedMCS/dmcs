@@ -1,7 +1,17 @@
 2012-03-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/Makefile.am: Add testNeighbors.
+	* testsuite/NeighborInServer.h: New file.
+	* testsuite/testNeighbors.h: Likewise.
+
+	* testsuite/BeliefStateServer.cpp: Typo.
+
+	* src/network/NewNeighborThread.cpp: Allow to terminate.
+
 	* include/mcs/NewBaseDispatcher.h: Fix bugs that are not detected in -O3 compiling mode.
 	* include/mcs/NewBeliefState.h: Likewise.
+
+
 	* src/dmcs/InputProvider.cpp: Likewise.
 	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
 	* src/mcs/NewBeliefState.cpp: Likewise.

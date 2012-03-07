@@ -212,7 +212,7 @@ NewBeliefState::resize(std::size_t n)
 inline NewBeliefState::TruthVal
 NewBeliefState::test(std::size_t pos) const
 {
-  assert (pos > 0 && pos < status_bit.size());
+  assert (pos < size());
 
   if (status_bit.test(pos))
     {
@@ -237,7 +237,7 @@ NewBeliefState::test(std::size_t ctx_id,
 {
   assert (ctx_id < starting_offset.size());
   std::size_t abs_pos = starting_offset[ctx_id] + pos;
-  assert (abs_pos > 0 && abs_pos < size());
+  assert (abs_pos < size());
 
   return test(abs_pos);
 }
@@ -248,7 +248,7 @@ inline void
 NewBeliefState::set(std::size_t pos,
 		    NewBeliefState::TruthVal val)
 {
-  assert (pos > 0 && pos < size());
+  assert (pos < size());
   
   switch (val)
     {
@@ -283,7 +283,7 @@ NewBeliefState::set(std::size_t ctx_id,
 {
   assert (ctx_id < starting_offset.size());
   std::size_t abs_pos = starting_offset[ctx_id] + pos;
-  assert (abs_pos > 0 && abs_pos < size());
+  assert (abs_pos < size());
 
   set(abs_pos, val);
 }

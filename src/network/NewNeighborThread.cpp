@@ -135,16 +135,24 @@ NewNeighborThread::handle_read_header(const boost::system::error_code& e,
 {
   if (!e)
     {
-      assert (header->find(HEADER_ANS) != std::string::npos);
+      assert ((header->find(HEADER_ANS) != std::string::npos) || 
+	      (header->find(HEADER_TERMINATE) != std::string::npos));
 
-      BackwardMessagePtr mess(new BackwardMessage);
-
-      conn->async_read(*mess,
-		       boost::bind(&NewNeighborThread::handle_read_message, this,
-				   boost::asio::placeholders::error,
-				   conn,
-				   md,
-				   mess));
+      if (header->find(HEADER_TERMINATE) != std::string::npos)
+	{
+	  conn->socket().close();
+	}
+      else
+	{
+	  BackwardMessagePtr mess(new BackwardMessage);
+	  
+	  conn->async_read(*mess,
+			   boost::bind(&NewNeighborThread::handle_read_message, this,
+				       boost::asio::placeholders::error,
+				       conn,
+				       md,
+				       mess));
+	}
     }
   else
     {
@@ -176,6 +184,7 @@ NewNeighborThread::handle_read_message(const boost::system::error_code& e,
 	  md->send(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, neighbor->neighbor_offset, rbs, timeout);
 	}
 
+      boost::this_thread::interruption_point();
       boost::shared_ptr<std::string> header(new std::string);
 
       conn->async_read(*header,
