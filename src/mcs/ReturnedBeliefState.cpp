@@ -36,11 +36,11 @@ ReturnedBeliefState::print(std::ostream& os) const
 {						
   if (belief_state)
     {
-      os << *belief_state << ", qid = " << query_id;
+      os << *belief_state << ", qid = " << qid;
     }
   else
     {
-      os << "NULL, qid = " << query_id;
+      os << "NULL, qid = " << qid;
     }
   
   return os;
@@ -67,7 +67,7 @@ my_compare(const ReturnedBeliefState* rbs1, const ReturnedBeliefState* rbs2)
     }
   else if (*(rbs1->belief_state) == *(rbs2->belief_state))
     {
-      if (rbs1->query_id < rbs2->query_id)
+      if (rbs1->qid < rbs2->qid)
 	{
 	  return true;
 	}
@@ -92,7 +92,7 @@ operator== (const ReturnedBeliefState& rbs1, const ReturnedBeliefState& rbs2)
     }
 
   return ((*(rbs1.belief_state) == *(rbs2.belief_state)) 
-	  && (rbs1.query_id == rbs2.query_id));
+	  && (rbs1.qid == rbs2.qid));
 }
 
 

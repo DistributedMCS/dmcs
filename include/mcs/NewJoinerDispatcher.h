@@ -63,8 +63,8 @@ public:
 	  {
 	    ReturnedBeliefState* rbs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, neighbor_offset, timeout);
 	    
-	    std::size_t old_qid = rbs->query_id;
-	    set_neighbor_offset(rbs->query_id, neighbor_offset);
+	    std::size_t old_qid = rbs->qid;
+	    set_neighbor_offset(rbs->qid, neighbor_offset);
 	    std::size_t offset = get_offset(old_qid);
 	    
 	    md->send(NewConcurrentMessageDispatcher::JOIN_IN_MQ, offset, rbs, timeout);

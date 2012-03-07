@@ -1,7 +1,5 @@
 2012-03-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
-
-
 	* include/mcs/NewBaseDispatcher.h: Fix bugs that are not detected in -O3 compiling mode.
 	* include/mcs/NewBeliefState.h: Likewise.
 	* src/dmcs/InputProvider.cpp: Likewise.
@@ -13,6 +11,12 @@
 	* include/mcs/QueryID.h: Likewise.
 	* src/mcs/NewContext.cpp: Likewise.
 	* src/network/NewNeighborOut.cpp: Likewise.
+	* include/mcs/NewJoinerDispatcher.h: Likewise.
+	* include/mcs/NewOutputDispatcher.h: Likewise.
+	* include/mcs/ReturnedBeliefState.h: Likewise.
+	* src/mcs/ReturnedBeliefState.cpp: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+	* src/network/NewOutputThread.cpp: Likewise.
 
 	* include/mcs/BackwardMessage.h: Move the implementation of serialze() to header file.
 	* src/mcs/BackwardMessage.cpp: Likewise.

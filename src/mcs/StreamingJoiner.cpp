@@ -239,7 +239,7 @@ StreamingJoiner::ask_neighbor_and_receive(std::size_t neighbor_index,
 
       if (bs)
 	{
-	  std::size_t qid = rbs->query_id;
+	  std::size_t qid = rbs->qid;
 	  std::size_t offset = neighbor_offset_from_qid(qid);
 	  std::size_t noff = ((*neighbors)[neighbor_index])->neighbor_offset;
 	  assert (noff == offset);
@@ -435,7 +435,7 @@ StreamingJoiner::ask_first_packs(std::size_t query_id,
       ReturnedBeliefState* rbs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::JOIN_IN_MQ, ctx_offset, timeout);
 
       NewBeliefState* bs = rbs->belief_state;
-      std::size_t qid = rbs->query_id;
+      std::size_t qid = rbs->qid;
       std::size_t noff = neighbor_offset_from_qid(qid);
       std::size_t neighbor_index = (*offset2index)[noff];
 

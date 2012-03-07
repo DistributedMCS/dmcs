@@ -41,11 +41,11 @@ namespace dmcs {
 struct ReturnedBeliefState : private ostream_printable<ReturnedBeliefState>
 {
   ReturnedBeliefState()
-    : belief_state(0), query_id(0)
+    : belief_state(0), qid(0)
   { }
   
-  ReturnedBeliefState(NewBeliefState* bs, std::size_t qid)
-    : belief_state(bs), query_id(qid)
+  ReturnedBeliefState(NewBeliefState* bs, std::size_t q)
+    : belief_state(bs), qid(q)
   { }
 
   template <typename Archive>
@@ -53,14 +53,14 @@ struct ReturnedBeliefState : private ostream_printable<ReturnedBeliefState>
   serialize(Archive& ar, const unsigned int /* version */)
   {
     ar & belief_state;
-    ar & query_id;
+    ar & qid;
   }
 
   std::ostream&
   print(std::ostream& os) const;
 
   NewBeliefState* belief_state;
-  std::size_t query_id;
+  std::size_t qid;
 };
 
 typedef std::list<ReturnedBeliefState*> ReturnedBeliefStateList;

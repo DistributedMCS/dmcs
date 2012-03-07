@@ -54,7 +54,7 @@ public:
 	int timeout = 0;
 	ReturnedBeliefState* returned_bs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
 	
-	std::size_t qid = returned_bs->query_id;
+	std::size_t qid = returned_bs->qid;
 
 	if (shutdown(qid))
 	  {

@@ -96,7 +96,7 @@ NewOutputThread::operator()(connection_ptr conn,
 	  break;
 	}
 
-      std::size_t cid = ctxid_from_qid(res->query_id);
+      std::size_t cid = ctxid_from_qid(res->qid);
       assert (cid == ctx_id);
 
       output_list->push_back(res);
