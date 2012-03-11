@@ -1,3 +1,11 @@
+2012-03-11  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Makefile.am: Add NewHandler.h.
+	* src/network/Makefile.am: Add NewHandler.cpp.
+
+	* include/network/NewHandler.h: New file.
+	* src/network/NewHandler.cpp: Likewise.
+
 2012-03-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testNeighbors.cpp: Add testcase for NewNeighborOut.

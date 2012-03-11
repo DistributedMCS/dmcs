@@ -46,7 +46,8 @@ libthreads_a_SOURCES = \
 		NewConcurrentMessageDispatcher.cpp \
 		NewOutputThread.cpp \
 		NewNeighborOut.cpp \
-		NewNeighborThread.cpp
+		NewNeighborThread.cpp \
+		NewHandler.cpp
 
 
 # don't compile boost::message_queue for now
