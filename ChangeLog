@@ -1,3 +1,21 @@
+2012-03-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/NewNeighborOut.cpp: Now also sends headers.
+
+	* include/network/NewHandler.h: Now also receives headers.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* include/network/Makefile.am: Add NewServer.h.
+	* src/network/Makefile.am: Add NewServer.cpp.
+
+	* include/network/NewServer.h: New file.
+	* src/network/NewServer.cpp: Likewise.
+
+	* include/mcs/Makefile.am: Add Registry.h.
+	* include/mcs/Registry.h: New file.
+
+	* include/mcs/NewMessage.h: New header.
+
 2012-03-11  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/network/Makefile.am: Add NewHandler.h.

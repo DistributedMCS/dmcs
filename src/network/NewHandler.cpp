@@ -32,7 +32,8 @@
 namespace dmcs {
 
 NewHandler::NewHandler(std::size_t p)
-  : port(p)
+  : first_round(true),
+    port(p)
 { }
 
 
@@ -58,27 +59,24 @@ NewHandler::~NewHandler()
 
 
 void
-NewHandler::operator()(NewHandlerPtr hdl,
-		       connection_ptr conn,
+NewHandler::operator()(connection_ptr conn,
 		       NewConcurrentMessageDispatcherPtr md,
-		       NewOutputDispatcherPtr od,
-		       ForwardMessage* first_mess)
+		       NewOutputDispatcherPtr od)
 {
-  assert (hdl.get() == this);
-
-  std::size_t qid = first_mess->qid;
-  std::size_t invoker = invoker_from_qid(qid);
-  output_sender = new NewOutputThread(port, invoker);
-  output_thread = new boost::thread(*output_sender, conn, md, od);
-
-  boost::system::error_code e;
-  handle_read_message(e, hdl, conn, md, od, first_mess);
+  ForwardMessage* mess = new ForwardMessage;
+  conn->async_read(*mess,
+		   boost::bind(&NewHandler::handle_read_message, this,
+			       boost::asio::placeholders::error,
+			       conn,
+			       md,
+			       od,
+			       mess));  
 }
+
 
 
 void
 NewHandler::handle_read_message(const boost::system::error_code& e,
-				NewHandlerPtr hdl,
 				connection_ptr conn,
 				NewConcurrentMessageDispatcherPtr md,
 				NewOutputDispatcherPtr od,
@@ -86,21 +84,26 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
 {
   if (!e)
     {
+      if (first_round)
+	{
+	  first_round = false;
+	  std::size_t qid = mess->qid;
+	  std::size_t invoker = invoker_from_qid(qid);
+	  output_sender = new NewOutputThread(port, invoker);
+	  output_thread = new boost::thread(*output_sender, conn, md, od);	  
+	}
+
       int timeout = 0;
       md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, mess, timeout);
       
-      if (!is_shutdown(mess->qid))
-	{
-	  ForwardMessage* next_mess = new ForwardMessage;
-	  conn->async_read(*next_mess,
-			   boost::bind(&NewHandler::handle_read_message, this,
-				       boost::asio::placeholders::error,
-				       hdl,
-				       conn,
-				       md,
-				       od,
-				       next_mess));
-	}
+      boost::shared_ptr<std::string> header(new std::string);
+      conn->async_read(*header,
+		       boost::bind(&NewHandler::handle_read_header, this,
+				   boost::asio::placeholders::error,
+				   conn,
+				   md,
+				   od,
+				   header));
     }
   else
     {
@@ -108,6 +111,38 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
     }
 }
 
+
+
+void
+NewHandler::handle_read_header(const boost::system::error_code& e,
+			       connection_ptr conn,
+			       NewConcurrentMessageDispatcherPtr md,
+			       NewOutputDispatcherPtr od,
+			       boost::shared_ptr<std::string> header)
+{
+  if (!e)
+    {
+      if (header->find(HEADER_REQ_DMCS) != std::string::npos)
+	{
+	  ForwardMessage* mess = new ForwardMessage;
+	  conn->async_read(*mess,
+			   boost::bind(&NewHandler::handle_read_message, this,
+				       boost::asio::placeholders::error,
+				       conn,
+				       md,
+				       od,
+				       mess));
+	}
+      else
+	{
+	  assert (header->find(HEADER_TERMINATE) != std::string::npos);
+	}
+    }
+  else
+    {
+      throw std::runtime_error(e.message());
+    }
+}
 
 
 } // namespace dmcs

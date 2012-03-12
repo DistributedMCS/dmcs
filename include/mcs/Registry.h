@@ -18,46 +18,40 @@
  */
 
 /**
- * @file   Message.h
- * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Fri Dec  23 10:24:54 2011
+ * @file   Registry.h
+ * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
+ * @date   Mon Mar  12 17:41:20 2012
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef NEW_MESSAGE_H
-#define NEW_MESSAGE_H
+#ifndef REGISTRY_H
+#define REGISTRY_H
+
+#include "network/NewConcurrentMessageDispatcher.h"
+#include "mcs/NewOutputDispatcher.h"
 
 namespace dmcs {
 
-#define HEADER_REQ_DMCS "DMCS REQ DMCS"
-#define HEADER_REQ_PRI_DMCS "DMCS REQ PRI_DMCS"
-#define HEADER_REQ_OPT_DMCS "DMCS REQ OPT_DMCS"
-#define HEADER_REQ_STM_DMCS "DMCS REQ STM_DMCS"
-#define HEADER_REQ_DYN_DMCS "DMCS REQ DYN_DMCS"
-#define HEADER_REQ_INSTANTIATE "DMCS REQ INSTANTIATE"
-#define HEADER_ANS "DMCS ANS"
-#define HEADER_EOF "DMCS EOF"
-#define HEADER_NEXT "DMCS NEXT"
-#define HEADER_TERMINATE "DMCS TERMINATE"
-
-
-struct NewMessage
+struct Registry
 {
-  virtual ~NewMessage() 
-  {}
+  Registry(NewConcurrentMessageDispatcherPtr m,
+	   NewOutputDispatcherPtr o)
+    : md(m),
+      od(o)
+  { }
 
-  // templates cant be virtual
-  template<class Archive>
-  void serialize(Archive & /* ar */, const unsigned int /* version */)
-  {}
+  NewConcurrentMessageDispatcherPtr md;
+  NewOutputDispatcherPtr od;
 };
+
+typedef boost::shared_ptr<Registry> RegistryPtr;
 
 } // namespace dmcs
 
-#endif // NEW_MESSAGE_H
+#endif // REGISTRY_H
 
 // Local Variables:
 // mode: C++

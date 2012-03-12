@@ -51,21 +51,27 @@ public:
 
   ~NewHandler();
   void
-  operator()(NewHandlerPtr hdl,
-	     connection_ptr conn,
+  operator()(connection_ptr conn,
 	     NewConcurrentMessageDispatcherPtr md,
-	     NewOutputDispatcherPtr od,
-	     ForwardMessage* first_mess);
+	     NewOutputDispatcherPtr od);
+
+  void
+  handle_read_header(const boost::system::error_code& e,
+		     connection_ptr conn,
+		     NewConcurrentMessageDispatcherPtr md,
+		     NewOutputDispatcherPtr od,
+		     boost::shared_ptr<std::string> header);
+  
 
   void
   handle_read_message(const boost::system::error_code& e,
-		      NewHandlerPtr hdl,
 		      connection_ptr conn,
 		      NewConcurrentMessageDispatcherPtr md,
 		      NewOutputDispatcherPtr od,
-		      ForwardMessage* next_mess);
+		      ForwardMessage* mess);
 
 private:
+  bool first_round;
   std::size_t port;              // just for debugging information
   NewOutputThread* output_sender;
   boost::thread* output_thread;

@@ -53,15 +53,24 @@ NewNeighborOut::operator()(connection_ptr conn,
     {
       ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::NEIGHBOR_OUT_MQ, neighbor_offset, timeout);
 
-      conn->write(*fwd_mess);
-
+      std::string header;
       if (is_shutdown(fwd_mess->qid))
 	{
+	  header = HEADER_TERMINATE;
+	  conn->write(header);
+
 	  delete fwd_mess;
 	  fwd_mess = 0;
 	  break;
 	}
-      
+      else if (is_request(fwd_mess->qid))
+	{
+	  header = HEADER_REQ_DMCS;
+	}
+
+      conn->write(header);
+      conn->write(*fwd_mess);
+
       delete fwd_mess;
       fwd_mess = 0;
     }

@@ -104,7 +104,7 @@ NewNeighborThread::establish_connections(const boost::system::error_code& e,
 				   boost::asio::placeholders::error,
 				   conn,
 				   md,
-				   header));      
+				   header));
     }
   else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator())
       {

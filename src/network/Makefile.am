@@ -29,7 +29,8 @@ noinst_LIBRARIES = libnetwork.a libthreads.a
 
 # the NETWORK library
 libnetwork_a_SOURCES = \
-		Server.cpp
+		Server.cpp \
+		NewServer.cpp
 
 
 # the THREADS library
