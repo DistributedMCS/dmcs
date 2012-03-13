@@ -576,9 +576,9 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
   NewContext ctx(ctx_id1, dlv_inst, btab);
-  NewJoinerDispatcherPtr joiner_dispatcher = NewJoinerDispatcherPtr();
+  //NewJoinerDispatcherPtr joiner_dispatcher = NewJoinerDispatcherPtr();
 
-  boost::thread context_thread(ctx, md, joiner_dispatcher);
+  boost::thread context_thread(ctx, md);
 
   // needs some time for the context thread to start up and register its REQUEST_MQ to md
   boost::posix_time::milliseconds context_starting_up(100);
