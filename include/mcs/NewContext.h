@@ -62,7 +62,7 @@ public:
 
   void
   operator()(NewConcurrentMessageDispatcherPtr md,
-	     NewJoinerDispatcherPtr jd);
+	     NewJoinerDispatcherPtr jd = NewJoinerDispatcherPtr());
   
 
 private:

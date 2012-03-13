@@ -105,6 +105,7 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
 
       if (is_leaf)
 	{
+	  assert ( jd == NewJoinerDispatcherPtr() );
 	  leaf_process_request(parent_qid, eval, md, k1, k2);
 	}
       else
