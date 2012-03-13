@@ -1,3 +1,15 @@
+2012-03-13  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Add testSystem.
+
+	* testsuite/testSystem.cpp: New file.
+	* testsuite/DmcsClientTest.h: Likewise.
+	* testsuite/DmcsClientTest.cpp: Likewise.
+
+	* include/mcs/NewContext.h: Give leaf context null joiner dispatcher.
+	* src/mcs/NewContext.cpp: Likewise.
+	* testsuite/testAbstractContext.cpp: Adapt testcase.
+
 2012-03-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/network/NewNeighborOut.cpp: Now also sends headers.
