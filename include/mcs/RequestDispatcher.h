@@ -34,6 +34,8 @@
 #include "mcs/ForwardMessage.h"
 #include "mcs/QueryID.h"
 
+#include <boost/shared_ptr.hpp>
+
 namespace dmcs {
 
 class RequestDispatcher : public NewBaseDispatcher
@@ -44,24 +46,36 @@ public:
   { }
 
   void
-  operator()()
+  startup()
   {
     while (1)
       {
 	int timeout = 0;
-	ForwardMessage* request = cmd->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, timeout);
-	std::size_t qid = request->query_id;
+	ForwardMessage* request = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, timeout);
+	std::size_t qid = request->qid;
 
-	if (shutdown(qid))
+	if (is_shutdown(qid))
 	  {
 	    break;
 	  }
 
-	std::size_t invokder = invoker_from_qid(qid);
+	std::size_t invoker = invoker_from_qid(qid);
 	std::size_t offset = get_offset(invoker);
 
-	cmd->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
+	md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
       }
+  }
+};
+
+typedef boost::shared_ptr<RequestDispatcher> RequestDispatcherPtr;
+
+
+struct RequestDispatcherWrapper
+{
+  void
+  operator()(RequestDispatcherPtr rd)
+  {
+    rd->startup();
   }
 };
 

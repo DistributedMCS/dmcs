@@ -34,8 +34,11 @@
 #include "dmcs/Instantiator.h"
 #include "mcs/BeliefTable.h"
 #include "mcs/BridgeRuleEvaluator.h"
+#include "mcs/RequestDispatcher.h"
 #include "mcs/StreamingJoiner.h"
 #include "network/NewConcurrentMessageDispatcher.h"
+
+#include <boost/shared_ptr.hpp>
 
 namespace dmcs {
 
@@ -61,9 +64,12 @@ public:
 	     BeliefTablePtr ex_sig);
 
   void
-  operator()(NewConcurrentMessageDispatcherPtr md,
-	     NewJoinerDispatcherPtr jd = NewJoinerDispatcherPtr());
+  startup(NewConcurrentMessageDispatcherPtr md,
+	  RequestDispatcherPtr rd,
+	  NewJoinerDispatcherPtr jd = NewJoinerDispatcherPtr());
   
+  std::size_t 
+  getRequestOffset();
 
 private:
   void
@@ -95,6 +101,7 @@ private:
 private:
   bool is_leaf;
   std::size_t ctx_id;
+  std::size_t ctx_offset;
   std::size_t query_counter;
 
   // The instantiator holds the path (string) to the local knowledge base
@@ -114,6 +121,20 @@ private:
   NeighborOffset2IndexPtr offset2index;
 
   StreamingJoinerPtr joiner;
+};
+
+typedef boost::shared_ptr<NewContext> NewContextPtr;
+
+struct NewContextWrapper
+{
+  void
+  operator()(NewContextPtr context,
+	     NewConcurrentMessageDispatcherPtr md,
+	     RequestDispatcherPtr rd,
+	     NewJoinerDispatcherPtr jd = NewJoinerDispatcherPtr())
+  {
+    context->startup(md, rd, jd);
+  }
 };
 
 } // namespace dmcs

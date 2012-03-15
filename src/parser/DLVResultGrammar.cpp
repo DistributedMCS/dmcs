@@ -39,13 +39,13 @@ handle_literal::handle_literal(ParserState& state)
 
 void 
 handle_literal::operator()(boost::fusion::vector2<boost::optional<char>,
-					       std::string>& attr, 
-			     qi::unused_type, qi::unused_type) const
+						  std::string>& attr, 
+			   qi::unused_type, qi::unused_type) const
 {
   bool strong_neg = boost::fusion::at_c<0>(attr);
   const std::string& belief_text = boost::fusion::at_c<1>(attr);
-  Belief belief(state.ctx_id, belief_text);
-  ID belief_id = state.btab->storeAndGetID(belief);
+  ID belief_id = state.btab->getIDByString(belief_text);
+  assert (belief_id != ID_FAIL);
   
   if (strong_neg)
     {

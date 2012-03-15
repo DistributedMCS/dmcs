@@ -80,18 +80,17 @@ init_local_kb(std::size_t ctx_id,
   Belief belief_i(ctx_id, "i");
   Belief belief_j(ctx_id, "j");
 
-  BeliefTablePtr btab1(new BeliefTable);
-  btab1->storeAndGetID(belief_epsilon1);
-  btab1->storeAndGetID(belief_a);
-  btab1->storeAndGetID(belief_b);
-  btab1->storeAndGetID(belief_c);
-  btab1->storeAndGetID(belief_d);
-  btab1->storeAndGetID(belief_e);
-  btab1->storeAndGetID(belief_f);
-  btab1->storeAndGetID(belief_g);
-  btab1->storeAndGetID(belief_h);
-  btab1->storeAndGetID(belief_i);
-  btab1->storeAndGetID(belief_j);
+  btab->storeAndGetID(belief_epsilon1);
+  btab->storeAndGetID(belief_a);
+  btab->storeAndGetID(belief_b);
+  btab->storeAndGetID(belief_c);
+  btab->storeAndGetID(belief_d);
+  btab->storeAndGetID(belief_e);
+  btab->storeAndGetID(belief_f);
+  btab->storeAndGetID(belief_g);
+  btab->storeAndGetID(belief_h);
+  btab->storeAndGetID(belief_i);
+  btab->storeAndGetID(belief_j);
 }
 
 
@@ -136,6 +135,7 @@ read_eval(NewConcurrentMessageDispatcherPtr md,
 
 }
 
+/*
 BOOST_AUTO_TEST_CASE ( testDLVEvaluator )
 {
   std::size_t NO_BS = 2;
@@ -550,7 +550,7 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
   std::cerr << "res1 = " << *res1 << std::endl;
   std::cerr << "res2 = " << *res2 << std::endl;
 }
-
+*/
 
 
 BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
@@ -575,10 +575,15 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
 
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
-  NewContext ctx(ctx_id1, dlv_inst, btab);
-  //NewJoinerDispatcherPtr joiner_dispatcher = NewJoinerDispatcherPtr();
+  std::cerr << "btab = " << *btab << std::endl;
 
-  boost::thread context_thread(ctx, md);
+  NewContextPtr ctx(new NewContext(ctx_id1, dlv_inst, btab));
+  NewContextWrapper context_wraper;
+  //NewJoinerDispatcherPtr joiner_dispatcher = NewJoinerDispatcherPtr();
+  
+  RequestDispatcherPtr rd(new RequestDispatcher(md));
+
+  boost::thread context_thread(context_wraper, ctx, md, rd);
 
   // needs some time for the context thread to start up and register its REQUEST_MQ to md
   boost::posix_time::milliseconds context_starting_up(100);
@@ -598,10 +603,10 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
   ForwardMessage* end_request = new ForwardMessage(shutdown_query_id(), 1, 5);
   int timeout = 0;
 
-  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, request1, timeout);
-  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, request2, timeout);
-  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, request3, timeout);
-  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id1, end_request, timeout);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx->getRequestOffset(), request1, timeout);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx->getRequestOffset(), request2, timeout);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx->getRequestOffset(), request3, timeout);
+  md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx->getRequestOffset(), end_request, timeout);
 
   std::size_t count1 = read_output_dispatcher(md);
   std::size_t count2 = read_output_dispatcher(md);

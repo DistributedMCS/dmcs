@@ -34,12 +34,15 @@ namespace dmcs {
 NewHandler::NewHandler(std::size_t p)
   : first_round(true),
     port(p)
-{ }
+{
+  std::cerr << "NewHandler::ctor()" << std::endl;
+}
 
 
 
 NewHandler::~NewHandler()
 {
+#if 0
   if (output_thread && output_thread->joinable())
     {
       output_thread->interrupt();
@@ -54,19 +57,24 @@ NewHandler::~NewHandler()
 
   delete output_sender;
   output_sender = 0;
+#endif
 }
 
 
 
 void
-NewHandler::operator()(connection_ptr conn,
-		       NewConcurrentMessageDispatcherPtr md,
-		       NewOutputDispatcherPtr od)
+NewHandler::startup(NewHandlerPtr handler,
+		    connection_ptr conn,
+		    NewConcurrentMessageDispatcherPtr md,
+		    NewOutputDispatcherPtr od)
 {
+  assert (this == handler.get());
+  std::cerr << "NewHandler::operator()" <<  std::endl;
   ForwardMessage* mess = new ForwardMessage;
   conn->async_read(*mess,
 		   boost::bind(&NewHandler::handle_read_message, this,
 			       boost::asio::placeholders::error,
+			       handler,
 			       conn,
 			       md,
 			       od,
@@ -77,11 +85,13 @@ NewHandler::operator()(connection_ptr conn,
 
 void
 NewHandler::handle_read_message(const boost::system::error_code& e,
+				NewHandlerPtr handler,
 				connection_ptr conn,
 				NewConcurrentMessageDispatcherPtr md,
 				NewOutputDispatcherPtr od,
 				ForwardMessage* mess)
 {
+  assert (this == handler.get());
   if (!e)
     {
       if (first_round)
@@ -93,6 +103,8 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
 	  output_thread = new boost::thread(*output_sender, conn, md, od);	  
 	}
 
+      std::cerr << "NewHandler: Got message = " << *mess << std::endl;
+
       int timeout = 0;
       md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, mess, timeout);
       
@@ -100,6 +112,7 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
       conn->async_read(*header,
 		       boost::bind(&NewHandler::handle_read_header, this,
 				   boost::asio::placeholders::error,
+				   handler,
 				   conn,
 				   md,
 				   od,
@@ -107,6 +120,7 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
     }
   else
     {
+      std::cerr << "NewHandler::handle_read_message(): ERROR:" << e.message() <<  std::endl;
       throw std::runtime_error(e.message());
     }
 }
@@ -115,11 +129,13 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
 
 void
 NewHandler::handle_read_header(const boost::system::error_code& e,
+			       NewHandlerPtr handler,
 			       connection_ptr conn,
 			       NewConcurrentMessageDispatcherPtr md,
 			       NewOutputDispatcherPtr od,
 			       boost::shared_ptr<std::string> header)
 {
+  assert (this == handler.get());
   if (!e)
     {
       if (header->find(HEADER_REQ_DMCS) != std::string::npos)
@@ -128,6 +144,7 @@ NewHandler::handle_read_header(const boost::system::error_code& e,
 	  conn->async_read(*mess,
 			   boost::bind(&NewHandler::handle_read_message, this,
 				       boost::asio::placeholders::error,
+				       handler,
 				       conn,
 				       md,
 				       od,
@@ -140,6 +157,7 @@ NewHandler::handle_read_header(const boost::system::error_code& e,
     }
   else
     {
+      std::cerr << "NewHandler::handle_read_header(): ERROR:" << e.message() <<  std::endl;
       throw std::runtime_error(e.message());
     }
 }

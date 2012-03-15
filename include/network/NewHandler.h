@@ -50,13 +50,16 @@ public:
   NewHandler(std::size_t p);
 
   ~NewHandler();
-  void
-  operator()(connection_ptr conn,
-	     NewConcurrentMessageDispatcherPtr md,
-	     NewOutputDispatcherPtr od);
 
   void
+  startup(NewHandlerPtr handler,
+	  connection_ptr conn,
+	  NewConcurrentMessageDispatcherPtr md,
+	  NewOutputDispatcherPtr od);
+  
+  void
   handle_read_header(const boost::system::error_code& e,
+		     NewHandlerPtr handler,
 		     connection_ptr conn,
 		     NewConcurrentMessageDispatcherPtr md,
 		     NewOutputDispatcherPtr od,
@@ -65,6 +68,7 @@ public:
 
   void
   handle_read_message(const boost::system::error_code& e,
+		      NewHandlerPtr handler,
 		      connection_ptr conn,
 		      NewConcurrentMessageDispatcherPtr md,
 		      NewOutputDispatcherPtr od,

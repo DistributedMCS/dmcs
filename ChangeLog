@@ -1,3 +1,27 @@
+2012-03-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/mcs/ID.cpp: Add value for belief mainkind.
+
+	* testsuite/testAbstractContext.cpp: Typo.
+
+	* src/parser/DLVResultGrammar.cpp: Fix parsing bug.
+
+	* include/network/NewServer.h: Make use of HandlerWraper.
+	* src/network/NewServer.cpp: Likewise.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* include/network/NewHandler.h: Pass NewHandlerPtr around to keep the object alive.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* include/network/HandlerWrapper.h: New file.
+
+	* include/network/Makefile.am: Add HandlerWrapper.h.
+
+	* include/mcs/NewContext.h: Use a wrapper to create bug-free thread.
+	(Since boost::thread creates some temporary objects and makes copies of
+	the object with operator()(), this might mess up the value inside the object).
+	* include/mcs/RequestDispatcher.h: Likewise.
+
 2012-03-13  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/Makefile.am: Add testSystem.

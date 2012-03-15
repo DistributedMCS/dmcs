@@ -18,62 +18,42 @@
  */
 
 /**
- * @file   NewServer.h
+ * @file   HandlerWrapper.h
  * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
- * @date   Sun Mar  11 20:20:20 2012
+ * @date   Thu Mar  15 9:45:03 2012
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef NEW_SERVER_H
-#define NEW_SERVER_H
+#ifndef HANDLER_WRAPPER_H
+#define HANDLER_WRAPPER_H
 
-#include "mcs/Registry.h"
 #include "network/connection.hpp"
 #include "network/NewHandler.h"
-#include "network/HandlerWrapper.h"
-
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
+#include "mcs/Registry.h"
 
 namespace dmcs {
 
-class NewServer
+class HandlerWrapper
 {
 public:
-  NewServer(const RegistryPtr r,
-	    boost::asio::io_service& i,
-	    const boost::asio::ip::tcp::endpoint& endpoint);
+  HandlerWrapper()
+  { }
 
-  ~NewServer();
-
-  void
-  handle_accept(const boost::system::error_code& e, 
-		connection_ptr conn);
+  ~HandlerWrapper()
+  { }
 
   void
-  handle_read_header(const boost::system::error_code& e, 
-		     connection_ptr conn,
-		     boost::shared_ptr<std::string> header);
-
-private:
-  boost::asio::io_service& io_service;
-  boost::asio::ip::tcp::acceptor acceptor;
-  std::size_t port;
-  boost::mutex mtx;
-
-  RegistryPtr reg;
-  std::vector<HandlerWrapper*> handler_vec;
-  std::vector<boost::thread*> handler_thread_vec;
+  operator()(NewHandlerPtr handler,
+	     connection_ptr conn,
+	     RegistryPtr reg);
 };
-
-typedef boost::shared_ptr<NewServer> NewServerPtr;
 
 } // namespace dmcs
 
-#endif // NEW_SERVER_H
+#endif // HANDLER_WRAPPER_H
 
 // Local Variables:
 // mode: C++

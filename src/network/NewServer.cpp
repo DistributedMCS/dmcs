@@ -27,20 +27,31 @@
  * 
  */
 
+#include "network/HandlerWrapper.h"
 #include "network/NewServer.h"
 #include <boost/thread/mutex.hpp>
 
 namespace dmcs {
 
-NewServer::NewServer(const RegistryPtr& r,
+void
+HandlerWrapper::operator()(NewHandlerPtr handler,
+			   connection_ptr conn,
+			   RegistryPtr reg)
+{
+  handler->startup(handler, conn, reg->md, reg->od);
+}
+
+NewServer::NewServer(const RegistryPtr r,
 		     boost::asio::io_service& i,
 		     const boost::asio::ip::tcp::endpoint& endpoint)
-  : reg(r),
-    io_service(i),
+  : io_service(i),
     acceptor(io_service, endpoint),
-    port(endpoint.port())
+    port(endpoint.port()),
+    reg(r)
 {
   connection_ptr my_connection(new connection(io_service));
+
+  std::cerr << "NewServer::async_accept" << std::endl;
 
   acceptor.async_accept(my_connection->socket(),
 			boost::bind(&NewServer::handle_accept, this,
@@ -53,10 +64,10 @@ NewServer::NewServer(const RegistryPtr& r,
 
 NewServer::~NewServer()
 {
-  for (std::vector<NewHandler*>::iterator it = handler_vec.begin();
+  for (std::vector<HandlerWrapper*>::iterator it = handler_vec.begin();
        it != handler_vec.end(); ++it)
     {
-      NewHandler* handler = *it;
+      HandlerWrapper* handler = *it;
       delete handler;
       handler = 0;
     }
@@ -83,6 +94,7 @@ NewServer::handle_accept(const boost::system::error_code& e,
 {
   if (!e)
     {
+      std::cerr << "NewServer: start a new connection..." << std::endl;
       // Start an accept operation for a new connection.
       connection_ptr new_conn(new connection(acceptor.io_service()));
       acceptor.async_accept(new_conn->socket(),
@@ -101,6 +113,7 @@ NewServer::handle_accept(const boost::system::error_code& e,
     }
   else
     {
+      std::cerr << "NewServer::handle_accept: ERROR:" << e.message() << std::endl;
       throw std::runtime_error(e.message());
     }
 }
@@ -112,27 +125,32 @@ NewServer::handle_read_header(const boost::system::error_code& e,
 			      connection_ptr conn,
 			      boost::shared_ptr<std::string> header)
 {
-  boost::mutex::scoped_lock lock(mtx);
+  //boost::mutex::scoped_lock lock(mtx);
 
   if (!e)
     {
+      std::cerr << "NewServer: got header = " << *header << std::endl;
       if (header->find(HEADER_REQ_DMCS) != std::string::npos)
 	{
 	  boost::asio::ip::tcp::socket& sock = conn->socket();
 	  boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
 
-	  NewHandler* handler = new NewHandler(ep.port());
-	  boost::thread* handler_thread = new boost::thread(*handler,
-							    conn,
-							    reg->md, 
-							    reg->od);
+	  NewHandlerPtr handler(new NewHandler(ep.port()));
+	  HandlerWrapper* handler_wrapper = new HandlerWrapper();
 
-	  handler_vec.push_back(handler);
+	  assert (reg);
+	  boost::thread* handler_thread = new boost::thread(*handler_wrapper,
+							    handler,
+							    conn,
+							    reg);
+
+	  handler_vec.push_back(handler_wrapper);
 	  handler_thread_vec.push_back(handler_thread);
 	}
     }
   else
     {
+      std::cerr << "NewServer::handle_read_header: ERROR:" << e.message() << std::endl;
       throw std::runtime_error(e.message());
     }
 }

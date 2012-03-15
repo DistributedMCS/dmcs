@@ -72,13 +72,25 @@ NewContext::NewContext(std::size_t cid,
 
 
 
+
+std::size_t
+NewContext::getRequestOffset()
+{
+  return ctx_offset;
+}
+
+
+
 void
-NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
-		       NewJoinerDispatcherPtr jd)
+NewContext::startup(NewConcurrentMessageDispatcherPtr md,
+		    RequestDispatcherPtr rd,
+		    NewJoinerDispatcherPtr jd)
 {
   // Register REQUEST_MQ to md
-  ConcurrentMessageQueuePtr my_request_mq(new ConcurrentMessageQueue(md->getQueueSize()));
-  md->registerMQ(my_request_mq, NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id);
+  ctx_offset = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::REQUEST_MQ);
+  rd->registerIdOffset(ctx_id, ctx_offset);
+
+  std::cerr << "NewContext::operator()(): id = " << ctx_id << ", offset" << ctx_offset << std::endl;
 
   // Start evaluator thread
   InstantiatorWPtr inst_wptr(inst);
@@ -88,8 +100,11 @@ NewContext::operator()(NewConcurrentMessageDispatcherPtr md,
   int timeout = 0;
   while (1)
     {
+      std::cerr << "NewContext::operator()(): Waiting at REQUEST_MQ[" << ctx_offset << "]" << std::endl;
       // Listen to the REQUEST_MQ
-      ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_id, timeout);
+      ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_offset, timeout);
+
+      std::cerr << "NewContext::operator()(): Got message: " << *fwd_mess << std::endl;
       
       std::size_t parent_qid = fwd_mess->qid;
       if (is_shutdown(parent_qid))
@@ -133,9 +148,11 @@ NewContext::leaf_process_request(std::size_t parent_qid,
 				 std::size_t k1,
 				 std::size_t k2)
 {
+  std::cerr << "NewContext::leaf_process_request()" << std::endl;
   // send heads to Evaluator
   Heads* heads = new Heads(NULL, k1, k2);
   int timeout = 0;
+  std::cerr << "Send k1 = " << k1 << ", k2 = " << k2  << " to eval = " << eval->getInQueue() << std::endl;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);
 
   // read the output from EVAL_OUT_MQ
@@ -195,23 +212,28 @@ NewContext::read_and_send(std::size_t parent_qid,
 			  EvaluatorPtr eval,
 			  NewConcurrentMessageDispatcherPtr md)
 {
+  std::cerr << "NewContext::read_and_send()" << std::endl;
   std::size_t models_counter = 0;
   int timeout = 0;
   while (1)
     {
       HeadsBeliefStatePair* res = md->receive<HeadsBeliefStatePair>(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, eval->getOutQueue(), timeout);
-      
+      assert (res);
+
       Heads* heads = res->first;
       NewBeliefState* belief_state = res->second;
+
       delete res;
       res = 0;
       
       if (belief_state == NULL)
 	{
+	  //std::cerr << "NewContext::read_and_send(). Got res = NULL" << std::endl;
 	  break;
 	}
       else
 	{
+	  //std::cerr << "NewContext::read_and_send(). Got res = " << *belief_state << std::endl;
 	  ++models_counter;
 	  send_out_result(parent_qid, heads, belief_state, md);
 	}

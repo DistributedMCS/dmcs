@@ -70,11 +70,11 @@ std::ostream& ID::print(std::ostream& o) const
   const unsigned SUBKIND_MAX = 11;
 
   const char* subkinds[MAINKIND_MAX][SUBKIND_MAX] = {
-    { " ordinary_ground", " ordinary_nonground", " builtin",         " aggregate", "", "", " external", "", "", "", " module"},
-    { " constant",        " integer",            " variable",        " builtin",   " predicate", "", ""          },
-    { " ordinary_ground", " ordinary_nonground", " builtin",         " aggregate", "", "", " external", "", "", "", " module"},
-    { " regular",         " constraint",         " weak_constraint", " bridge_rule",           "", "", ""          },
-    { "", "", "", "", "", "", "", "", "" }
+    { " ordinary_ground", " ordinary_nonground", " builtin",         " aggregate",   "",           "", " external", "", "", "", " module"},
+    { " constant",        " integer",            " variable",        " builtin",     " predicate", "",              ""          },
+    { " ordinary_ground", " ordinary_nonground", " builtin",         " aggregate",   "",           "", " external", "", "", "", " module"},
+    { " regular",         " constraint",         " weak_constraint", " bridge_rule", "",           "", ""          },
+    { " ",                "",                    "",                 "",             "",           "", "",          "", "" }
   };
 
   const unsigned subkind = (kind & SUBKIND_MASK) >> SUBKIND_SHIFT;
