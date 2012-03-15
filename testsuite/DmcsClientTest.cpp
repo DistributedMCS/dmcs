@@ -40,6 +40,7 @@ DmcsClientTest::DmcsClientTest(boost::asio::io_service& i,
     conn(new connection(io_service)),
     count(0)
 {
+  std::cerr << "DmcsClientTest: connecting to server..." << std::endl;
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
   conn->socket().async_connect(endpoint,
 			      boost::bind(&DmcsClientTest::send_header, this,
@@ -62,6 +63,7 @@ DmcsClientTest::send_header(const boost::system::error_code& e,
   if (!e)
     {
       std::string header = HEADER_REQ_DMCS;
+      std::cerr << "DmcsClientTest: sending header = " << header << std::endl;
       conn->async_write(header,
 			boost::bind(&DmcsClientTest::send_message, this,
 				    boost::asio::placeholders::error,
@@ -84,6 +86,7 @@ DmcsClientTest::send_header(const boost::system::error_code& e,
     }
   else
     {
+      std::cerr << "DmcsClientTest::send_header(): ERROR: " << e.message() << std::endl;
       throw std::runtime_error(e.message());
     }
 }
@@ -109,6 +112,7 @@ DmcsClientTest::send_message(const boost::system::error_code& e,
 	}
       ++count;
 
+      std::cerr << "DmcsClientTest: sending message = " << *to_be_sent << std::endl;
       conn->async_write(*to_be_sent,
 			boost::bind(&DmcsClientTest::read_header, this,
 				    boost::asio::placeholders::error,
@@ -118,6 +122,7 @@ DmcsClientTest::send_message(const boost::system::error_code& e,
     }
   else
     {
+      std::cerr << "DmcsClientTest::send_message(): ERROR: " << e.message() << std::endl;
       throw std::runtime_error(e.message());
     }
 }
@@ -129,9 +134,11 @@ DmcsClientTest::read_header(const boost::system::error_code& e,
 			    ForwardMessage* ws1,
 			    ForwardMessage* ws2)
 {
+  std::cerr << "DmcsClientTest::read_header" << std::endl;
   if (!e)
     {
       boost::shared_ptr<std::string> header(new std::string);
+      std::cerr << "DmcsClientTest: going to read" << std::endl;
       conn->async_read(*header,
 		       boost::bind(&DmcsClientTest::handle_read_header, this,
 				   boost::asio::placeholders::error,
@@ -142,6 +149,7 @@ DmcsClientTest::read_header(const boost::system::error_code& e,
     }
   else
     {
+      std::cerr << "DmcsClientTest::read_header(): ERROR: " << e.message() << std::endl;
       throw std::runtime_error(e.message());
     }
 }
@@ -154,9 +162,12 @@ DmcsClientTest::handle_read_header(const boost::system::error_code& e,
 				   dmcs::ForwardMessage* ws1,
 				   dmcs::ForwardMessage* ws2)
 {
+  std::cerr << "DmcsClientTest: handle_read_header = " << std::endl;
   if (!e)
     {
       assert (header->find(HEADER_ANS) != std::string::npos);
+      std::cerr << "DmcsClientTest: Got header = " << *header << std::endl;
+
       BackwardMessagePtr bmess(new BackwardMessage);
       
       conn->async_read(*bmess,
@@ -169,6 +180,7 @@ DmcsClientTest::handle_read_header(const boost::system::error_code& e,
     }
   else
     {
+      std::cerr << "DmcsClientTest::handle_read_reader(): ERROR: " << e.message() << std::endl;
       throw std::runtime_error(e.message());
     }
 }
@@ -193,7 +205,30 @@ DmcsClientTest::handle_read_message(const boost::system::error_code& e,
       else
 	{
 	  std::cerr << "DmcsClientTest: FINISHED HERE!" << std::endl;
+	  std::string header = HEADER_TERMINATE;
+
+	  conn->async_write(header,
+			    boost::bind(&DmcsClientTest::handle_finalize, this,
+					boost::asio::placeholders::error,
+					conn));
 	}
+    }
+  else
+    {
+      std::cerr << "DmcsClientTest::handle_read_message(): ERROR: " << e.message() << std::endl;
+      throw std::runtime_error(e.message());
+    }
+}
+
+
+
+void
+DmcsClientTest::handle_finalize(const boost::system::error_code& e,
+				connection_ptr conn)
+{
+  if (!e)
+    {
+      conn->socket().close();
     }
   else
     {

@@ -1,5 +1,12 @@
 2012-03-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* testsuite/testSystem.cpp: Fix initialization.
+
+	* testsuite/DmcsClientTest.cpp: Handle finalizing.
+	* testsuite/DmcsClientTest.h: Likewise.
+
+	* src/network/NewOutputThread.cpp: ctx_id ~~> invoker_id.
+
 	* src/mcs/ID.cpp: Add value for belief mainkind.
 
 	* testsuite/testAbstractContext.cpp: Typo.
@@ -21,6 +28,8 @@
 	(Since boost::thread creates some temporary objects and makes copies of
 	the object with operator()(), this might mess up the value inside the object).
 	* include/mcs/RequestDispatcher.h: Likewise.
+	* include/mcs/NewOutputDispatcher.h: Likewise.
+	* include/network/NewOutputThread.h: Likewise.
 
 2012-03-13  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 

@@ -76,6 +76,11 @@ public:
 		      dmcs::ForwardMessage* ws1,
 		      dmcs::ForwardMessage* ws2);
 
+  void
+  handle_finalize(const boost::system::error_code& e,
+		  connection_ptr conn);
+
+
 private:
   boost::asio::io_service& io_service;
   connection_ptr conn;

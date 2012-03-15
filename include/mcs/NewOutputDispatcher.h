@@ -44,10 +44,12 @@ class NewOutputDispatcher : public NewBaseDispatcher
 public:
   NewOutputDispatcher(NewConcurrentMessageDispatcherPtr& md)
     : NewBaseDispatcher(md)
-  { }
+  {
+    std::cerr << "NewOutputDispatcher::ctor = " << this << std::endl;
+  }
 
   void
-  operator()()
+  startup()
   {
     while (1)
       {
@@ -62,6 +64,7 @@ public:
 	  }
 
 	std::size_t ctx_id = ctxid_from_qid(qid);
+	std::cerr << "NewOutputDispatcher = " << this << std::endl;
 	std::size_t offset = get_offset(ctx_id);
 	md->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, offset, returned_bs, 0);
       }
@@ -69,6 +72,17 @@ public:
 };
 
 typedef boost::shared_ptr<NewOutputDispatcher> NewOutputDispatcherPtr;
+
+
+struct NewOutputDispatcherWrapper
+{
+  void
+  operator()(NewOutputDispatcherPtr od)
+  {
+    od->startup();
+  }
+};
+
 
 } // namespace dmcs
 

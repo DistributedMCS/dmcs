@@ -54,9 +54,6 @@ NewHandler::~NewHandler()
       delete output_thread;
       output_thread = 0;
     }
-
-  delete output_sender;
-  output_sender = 0;
 #endif
 }
 
@@ -99,8 +96,9 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
 	  first_round = false;
 	  std::size_t qid = mess->qid;
 	  std::size_t invoker = invoker_from_qid(qid);
-	  output_sender = new NewOutputThread(port, invoker);
-	  output_thread = new boost::thread(*output_sender, conn, md, od);	  
+	  output_sender = NewOutputThreadPtr(new NewOutputThread(port, invoker));
+	  NewOutputWrapper output_wrapper;
+	  output_thread = new boost::thread(output_wrapper, output_sender, conn, md, od);	  
 	}
 
       std::cerr << "NewHandler: Got message = " << *mess << std::endl;
@@ -153,6 +151,8 @@ NewHandler::handle_read_header(const boost::system::error_code& e,
       else
 	{
 	  assert (header->find(HEADER_TERMINATE) != std::string::npos);
+	  std::cerr << "Got " << HEADER_TERMINATE << ". Close connection now." << std::endl;
+	  conn->socket().close();
 	}
     }
   else

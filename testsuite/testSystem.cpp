@@ -35,7 +35,9 @@
 #include "dmcs/DLVEngine.h"
 #include "dmcs/DLVInstantiator.h"
 #include "dmcs/DLVEvaluator.h"
+#include "mcs/RequestDispatcher.h"
 #include "network/NewConcurrentMessageDispatcher.h"
+
 #include "network/NewServer.h"
 
 #define BOOST_TEST_DYN_LINK
@@ -69,6 +71,7 @@ init_local_kb(std::size_t ctx_id,
   Belief belief_i(ctx_id, "i");
   Belief belief_j(ctx_id, "j");
 
+  std::cerr << "Initializing belief table." << std::endl;
   btab->storeAndGetID(belief_epsilon1);
   btab->storeAndGetID(belief_a);
   btab->storeAndGetID(belief_b);
@@ -80,17 +83,20 @@ init_local_kb(std::size_t ctx_id,
   btab->storeAndGetID(belief_h);
   btab->storeAndGetID(belief_i);
   btab->storeAndGetID(belief_j);
+  std::cerr << "Initializing belief table: DONE." << std::endl;
 }
 
 
 void
-run_server(std::size_t server_port, const RegistryPtr& reg)
+run_server(std::size_t server_port, const RegistryPtr reg)
 {
   boost::asio::io_service io_service_server;
   boost::asio::ip::tcp::endpoint endpoint_server(boost::asio::ip::tcp::v4(), server_port);
 
   NewServer s(reg, io_service_server, endpoint_server);
   io_service_server.run();
+  
+  std::cerr << "exit from run_server" << std::endl;
 }
 
 
@@ -106,6 +112,8 @@ run_client(std::string server_port, ForwardMessage* ws1, ForwardMessage* ws2)
 
   DmcsClientTest c(io_service_client, it, ws1, ws2);
   io_service_client.run();
+
+  std::cerr << "exit from run_client" << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE ( testLeafSystem )
@@ -131,20 +139,36 @@ BOOST_AUTO_TEST_CASE ( testLeafSystem )
 
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
-  NewContext ctx(ctx_id1, dlv_inst, btab);
-  boost::thread context_thread(ctx, md);
+
+  NewOutputDispatcherPtr output_dispatcher(new NewOutputDispatcher(md));
+  std::cerr << "Starting output dispatcher thread... " << output_dispatcher.get() << std::endl;
+  NewOutputDispatcherWrapper output_dispatcher_wrapper;
+  boost::thread* output_dispatcher_thread = new boost::thread(output_dispatcher_wrapper, output_dispatcher);
+
+
+  std::cerr << "Starting request dispatcher thread..." << std::endl;
+  RequestDispatcherPtr request_dispatcher(new RequestDispatcher(md));
+  RequestDispatcherWrapper request_dispatcher_wrapper;
+  boost::thread* request_dispatcher_thread = new boost::thread(request_dispatcher_wrapper, request_dispatcher);
+
+  std::cerr << "Starting context..." << std::endl;
+  NewContextPtr ctx(new NewContext(ctx_id1, dlv_inst, btab));
+  NewContextWrapper context_wrapper;
+  boost::thread* context_thread = new boost::thread(context_wrapper, ctx, md, request_dispatcher);
 
   // needs some time for the context thread to start up and register its REQUEST_MQ to md
   boost::posix_time::milliseconds context_starting_up(100);
   boost::this_thread::sleep(context_starting_up);
-
-  NewOutputDispatcherPtr output_dispatcher(new NewOutputDispatcher(md));
   RegistryPtr reg(new Registry(md, output_dispatcher));
 
+  std::cerr << "Starting server..." << std::endl;
   // start the server
   std::string port = "5555";
   std::size_t server_port = 5555;
   boost::thread* server_thread = new boost::thread(run_server, server_port, reg);
+
+  boost::posix_time::milliseconds server_starting_up(200);
+  boost::this_thread::sleep(server_starting_up);
 
   std::size_t query_order1 = 1;
   std::size_t query_order2 = 2;
@@ -159,7 +183,14 @@ BOOST_AUTO_TEST_CASE ( testLeafSystem )
   ForwardMessage* ws1 = new ForwardMessage(qid1, k11, k12);
   ForwardMessage* ws2 = new ForwardMessage(qid1, k21, k22);
 
+  std::cerr << "Starting client..." << std::endl;
   boost::thread* client_thread = new boost::thread(run_client, port, ws1, ws2);
+
+  output_dispatcher_thread->join();
+  request_dispatcher_thread->join();
+  context_thread->join();
+  server_thread->join();
+  client_thread->join();
 }
 
 // Local Variables:

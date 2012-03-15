@@ -43,14 +43,14 @@ class NewOutputThread
 {
 public:
   NewOutputThread(std::size_t p,
-		  std::size_t cid);
+		  std::size_t iid);
 
   ~NewOutputThread();
 
   void
-  operator()(connection_ptr c,
-	     NewConcurrentMessageDispatcherPtr md,
-	     NewOutputDispatcherPtr od);
+  startup(connection_ptr c,
+	  NewConcurrentMessageDispatcherPtr md,
+	  NewOutputDispatcherPtr od);
 
 private:
   void
@@ -66,8 +66,24 @@ private:
 private:
   bool initialized;
   std::size_t port;
-  std::size_t ctx_id; // id of the context on which the connection through this output thread is established
+  std::size_t invoker_id; // id of the context on which the connection through this output thread is established
   std::size_t offset; // offset of the corresponding concurrent message queue in md
+};
+
+
+typedef boost::shared_ptr<NewOutputThread> NewOutputThreadPtr;
+
+
+struct NewOutputWrapper
+{
+  void
+  operator()(NewOutputThreadPtr output_sender,
+	     connection_ptr conn,
+	     NewConcurrentMessageDispatcherPtr md,
+	     NewOutputDispatcherPtr od)    
+  {
+    output_sender->startup(conn, md, od);
+  }
 };
 
 } // namespace dmcs

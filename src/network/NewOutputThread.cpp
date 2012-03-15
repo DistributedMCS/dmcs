@@ -33,10 +33,10 @@
 namespace dmcs {
 
 NewOutputThread::NewOutputThread(std::size_t p,
-				 std::size_t cid)
+				 std::size_t iid)
   : initialized(false), 
     port(p), 
-    ctx_id(cid)
+    invoker_id(iid)
 { }
 
 
@@ -50,8 +50,9 @@ void
 NewOutputThread::init_mq(NewConcurrentMessageDispatcherPtr md)
 {
   if (!initialized)
-    {
+    {      
       offset = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::OUTPUT_MQ);
+      std::cerr << "init mq for invoker = " << invoker_id << ". Got offset = " << offset << std::endl;
       initialized = true;
     }
 }
@@ -77,12 +78,14 @@ NewOutputThread::clean_up(ReturnedBeliefStateListPtr output_list)
 
 
 void
-NewOutputThread::operator()(connection_ptr conn,
-			    NewConcurrentMessageDispatcherPtr md,
-			    NewOutputDispatcherPtr od)
+NewOutputThread::startup(connection_ptr conn,
+			 NewConcurrentMessageDispatcherPtr md,
+			 NewOutputDispatcherPtr od)
 {
   init_mq(md);
-  od->registerIdOffset(ctx_id, offset);
+  std::cerr << "Register output thread for id = " << invoker_id << ", offset = " << offset << std::endl;
+  std::cerr << "od = " << od.get() << std::endl;
+  od->registerIdOffset(invoker_id, offset);
   ReturnedBeliefStateListPtr output_list(new ReturnedBeliefStateList);
 
   int timeout = 0;
@@ -96,8 +99,8 @@ NewOutputThread::operator()(connection_ptr conn,
 	  break;
 	}
 
-      std::size_t cid = ctxid_from_qid(res->qid);
-      assert (cid == ctx_id);
+      std::size_t iid = ctxid_from_qid(res->qid);
+      assert (iid == invoker_id);
 
       output_list->push_back(res);
       

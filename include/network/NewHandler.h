@@ -77,7 +77,7 @@ public:
 private:
   bool first_round;
   std::size_t port;              // just for debugging information
-  NewOutputThread* output_sender;
+  NewOutputThreadPtr output_sender;
   boost::thread* output_thread;
 };
   
