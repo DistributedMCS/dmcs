@@ -55,7 +55,8 @@ TESTS = \
 	testResultParser \
 	testAbstractContext \
 	testDLVProcess \
-	testNeighbors
+	testNeighbors \
+	testSystem
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -99,7 +100,8 @@ check_PROGRAMS = \
 	testResultParser \
 	testAbstractContext \
 	testDLVProcess \
-	testNeighbors
+	testNeighbors \
+	testSystem
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \
