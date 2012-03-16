@@ -35,6 +35,7 @@
 #include "mcs/QueryID.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 
 namespace dmcs {
 
@@ -53,16 +54,12 @@ public:
 	int timeout = 0;
 	ForwardMessage* request = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, timeout);
 	std::size_t qid = request->qid;
-
-	if (is_shutdown(qid))
-	  {
-	    break;
-	  }
-
-	std::size_t invoker = invoker_from_qid(qid);
-	std::size_t offset = get_offset(invoker);
+	std::size_t receiver = receiver_from_qid(qid);
+	std::size_t offset = get_offset(receiver);
 
 	md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
+
+	boost::this_thread::interruption_point();
       }
   }
 };

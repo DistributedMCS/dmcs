@@ -74,6 +74,14 @@ public:
 		      NewOutputDispatcherPtr od,
 		      ForwardMessage* mess);
 
+  void
+  handle_finalize(const boost::system::error_code& e,
+		  NewHandlerPtr handler,
+		  connection_ptr conn,
+		  NewConcurrentMessageDispatcherPtr md,
+		  NewOutputDispatcherPtr od,
+		  ForwardMessage* mess);
+
 private:
   bool first_round;
   std::size_t port;              // just for debugging information

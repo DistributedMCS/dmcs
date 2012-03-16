@@ -472,15 +472,19 @@ StreamingJoiner::ask_first_packs(std::size_t query_id,
 
 void
 StreamingJoiner::ask_neighbor(std::size_t neighbor_index, 
-			      std::size_t query_id, 
+			      std::size_t qid, 
 			      std::size_t k1, 
 			      std::size_t k2,
 			      NewConcurrentMessageDispatcherPtr md,
 			      NewJoinerDispatcherPtr jd)
 {
   cleanup_input(neighbor_index);
-  jd->registerIdOffset(query_id, ctx_offset);
-  ForwardMessage* request = new ForwardMessage(query_id, k1, k2);
+  std::size_t neighbor_id = ((*neighbors)[neighbor_index])->neighbor_id;
+  set_neighbor_id(qid, neighbor_id);
+
+  jd->registerIdOffset(qid, ctx_offset);
+  ForwardMessage* request = new ForwardMessage(qid, k1, k2);
+
 
   std::size_t noff = ((*neighbors)[neighbor_index])->neighbor_offset;
 

@@ -80,6 +80,10 @@ public:
   handle_finalize(const boost::system::error_code& e,
 		  connection_ptr conn);
 
+  void
+  closing(const boost::system::error_code& e,
+	  connection_ptr conn);
+
 
 private:
   boost::asio::io_service& io_service;

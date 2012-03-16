@@ -116,7 +116,7 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
       std::size_t k2 = fwd_mess->k2;
 
       // Bad requests are not allowed
-      //assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
+      assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
 
       if (is_leaf)
 	{

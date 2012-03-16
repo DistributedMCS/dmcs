@@ -107,6 +107,7 @@ print_query_id(const std::size_t qid)
   std::cerr << std::setfill('0') << std::hex << std::setw(16) << qid << std::endl;
 }
 
+
 inline std::size_t
 query_id(const std::size_t ctx_id, 
 	 const std::size_t query_order)
@@ -114,6 +115,18 @@ query_id(const std::size_t ctx_id,
   return (QueryID::TYPE_REQUEST
 	  | (query_order << QueryID::instance()->QUERY_ORDER_SHIFT())
 	  | (ctx_id << QueryID::instance()->LOCAL_CONTEXT_SHIFT()));
+}
+
+
+inline std::size_t
+query_id(const std::size_t ctx_id, 
+	 const std::size_t neighbor_id, 
+	 const std::size_t query_order)
+{
+  return (QueryID::TYPE_REQUEST
+	  | (query_order << QueryID::instance()->QUERY_ORDER_SHIFT())
+	  | (ctx_id << QueryID::instance()->LOCAL_CONTEXT_SHIFT())
+	  | (neighbor_id << QueryID::instance()->NEIGHBOR_ID_SHIFT()));
 }
 
 
@@ -140,6 +153,16 @@ shutdown_query_id()
   return QueryID::TYPE_SHUTDOWN;
 }
 
+
+
+inline std::size_t
+shutdown_query_id(const std::size_t ctx_id,
+		  const std::size_t neighbor_id)
+{
+  return (QueryID::TYPE_SHUTDOWN
+	  | (ctx_id << QueryID::instance()->LOCAL_CONTEXT_SHIFT())
+	  | (neighbor_id << QueryID::instance()->NEIGHBOR_ID_SHIFT()));
+}
 
 
 inline bool
@@ -212,6 +235,13 @@ set_neighbor_offset(std::size_t& qid, const std::size_t n_offset)
   qid |= (n_offset << QueryID::instance()->NEIGHBOR_OFFSET_SHIFT());
 }
 
+
+
+inline void
+set_neighbor_id(std::size_t& qid, const std::size_t nid)
+{
+  qid |= (nid << QueryID::instance()->NEIGHBOR_ID_SHIFT());
+}
 
 
 inline void

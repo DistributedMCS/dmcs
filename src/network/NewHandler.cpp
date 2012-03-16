@@ -134,6 +134,7 @@ NewHandler::handle_read_header(const boost::system::error_code& e,
 			       boost::shared_ptr<std::string> header)
 {
   assert (this == handler.get());
+
   if (!e)
     {
       if (header->find(HEADER_REQ_DMCS) != std::string::npos)
@@ -151,8 +152,15 @@ NewHandler::handle_read_header(const boost::system::error_code& e,
       else
 	{
 	  assert (header->find(HEADER_TERMINATE) != std::string::npos);
-	  std::cerr << "Got " << HEADER_TERMINATE << ". Close connection now." << std::endl;
-	  conn->socket().close();
+	  ForwardMessage* mess = new ForwardMessage;
+	  conn->async_read(*mess,
+			   boost::bind(&NewHandler::handle_finalize, this,
+				       boost::asio::placeholders::error,
+				       handler,
+				       conn,
+				       md,
+				       od,
+				       mess));
 	}
     }
   else
@@ -162,6 +170,33 @@ NewHandler::handle_read_header(const boost::system::error_code& e,
     }
 }
 
+
+
+void
+NewHandler::handle_finalize(const boost::system::error_code& e,
+			    NewHandlerPtr handler,
+			    connection_ptr conn,
+			    NewConcurrentMessageDispatcherPtr md,
+			    NewOutputDispatcherPtr od,
+			    ForwardMessage* mess)
+{
+  assert (this == handler.get());
+
+  if (!e)
+    {
+      assert (is_shutdown(mess->qid));
+      int timeout = 0;
+      md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, mess, timeout);
+
+      std::cerr << "NewHandler::handle_finalize: closing connection." << std::endl;
+      conn->socket().close();
+    }
+  else
+    {
+      std::cerr << "NewHandler::handle_finalize(): ERROR:" << e.message() <<  std::endl;
+      throw std::runtime_error(e.message());
+    }
+}
 
 } // namespace dmcs
 

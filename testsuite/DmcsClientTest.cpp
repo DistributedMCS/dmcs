@@ -29,6 +29,7 @@
 
 #include <sstream>
 #include "DmcsClientTest.h"
+#include "mcs/QueryID.h"
 
 using namespace dmcs;
 
@@ -225,6 +226,29 @@ DmcsClientTest::handle_read_message(const boost::system::error_code& e,
 void
 DmcsClientTest::handle_finalize(const boost::system::error_code& e,
 				connection_ptr conn)
+{
+  if (!e)
+    {
+      std::cerr << "DmcsClientTest: Send shutdown_qid to neighbor!" << std::endl;
+      std::size_t ctx_id = 0;
+      std::size_t neighbor_id = 1;
+      std::size_t sqid = shutdown_query_id(ctx_id, neighbor_id);
+      ForwardMessage* end_mess = new ForwardMessage(sqid, 0, 0);
+      conn->async_write(*end_mess,
+			boost::bind(&DmcsClientTest::closing, this,
+				    boost::asio::placeholders::error,
+				    conn));
+    }
+  else
+    {
+      throw std::runtime_error(e.message());
+    }
+}
+
+
+void
+DmcsClientTest::closing(const boost::system::error_code& e,
+			connection_ptr conn)
 {
   if (!e)
     {

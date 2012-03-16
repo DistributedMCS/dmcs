@@ -31,6 +31,7 @@
 #define NEW_OUTPUT_DISPATCHER_H
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 
 #include "mcs/NewBaseDispatcher.h"
 #include "mcs/QueryID.h"
@@ -44,9 +45,7 @@ class NewOutputDispatcher : public NewBaseDispatcher
 public:
   NewOutputDispatcher(NewConcurrentMessageDispatcherPtr& md)
     : NewBaseDispatcher(md)
-  {
-    std::cerr << "NewOutputDispatcher::ctor = " << this << std::endl;
-  }
+  { }
 
   void
   startup()
@@ -64,9 +63,11 @@ public:
 	  }
 
 	std::size_t ctx_id = ctxid_from_qid(qid);
-	std::cerr << "NewOutputDispatcher = " << this << std::endl;
+	//std::cerr << "NewOutputDispatcher = " << this << std::endl;
 	std::size_t offset = get_offset(ctx_id);
 	md->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, offset, returned_bs, 0);
+
+	boost::this_thread::interruption_point();
       }
   }
 };

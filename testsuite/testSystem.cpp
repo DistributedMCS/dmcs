@@ -131,6 +131,7 @@ BOOST_AUTO_TEST_CASE ( testLeafSystem )
   NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
 
   // setup a leaf context
+  std::size_t invoker0 = 0;
   std::size_t ctx_id1 = 1;
   init_local_kb(ctx_id1, kbspec, btab);
 
@@ -172,8 +173,8 @@ BOOST_AUTO_TEST_CASE ( testLeafSystem )
 
   std::size_t query_order1 = 1;
   std::size_t query_order2 = 2;
-  std::size_t qid1 = query_id(ctx_id1, query_order1);
-  std::size_t qid2 = query_id(ctx_id1, query_order2);
+  std::size_t qid1 = query_id(invoker0, ctx_id1, query_order1);
+  std::size_t qid2 = query_id(invoker0, ctx_id1, query_order2);
 
   std::size_t k11 = 1;
   std::size_t k12 = 5;
@@ -186,11 +187,24 @@ BOOST_AUTO_TEST_CASE ( testLeafSystem )
   std::cerr << "Starting client..." << std::endl;
   boost::thread* client_thread = new boost::thread(run_client, port, ws1, ws2);
 
-  output_dispatcher_thread->join();
-  request_dispatcher_thread->join();
-  context_thread->join();
-  server_thread->join();
+
   client_thread->join();
+  std::cerr << "Join client." << std::endl;
+
+  context_thread->join();
+  std::cerr << "Join context." << std::endl;
+
+  request_dispatcher_thread->interrupt();
+  request_dispatcher_thread->join();
+  std::cerr << "Join request dispatcher." << std::endl;
+
+  output_dispatcher_thread->interrupt();
+  output_dispatcher_thread->join();
+  std::cerr << "Join output dispatcher." << std::endl;
+
+  server_thread->interrupt();
+  server_thread->join();
+  std::cerr << "Join server." << std::endl;
 }
 
 // Local Variables:
