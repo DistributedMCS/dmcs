@@ -43,12 +43,11 @@ namespace dmcs {
 class NewJoinerDispatcher : public NewBaseDispatcher
 {
 public:
-  NewJoinerDispatcher(NewConcurrentMessageDispatcherPtr m)
-    : NewBaseDispatcher(m)
+  NewJoinerDispatcher()
   { }
 
   void
-  startup()
+  startup(NewConcurrentMessageDispatcherPtr md)
   {
     while (1)
       {
@@ -80,9 +79,10 @@ typedef boost::shared_ptr<NewJoinerDispatcher> NewJoinerDispatcherPtr;
 struct NewJoinerDispatcherWrapper
 {
   void
-  operator()(NewJoinerDispatcherPtr joiner_dispatcher)
+  operator()(NewJoinerDispatcherPtr jd,
+	     NewConcurrentMessageDispatcherPtr md)
   {
-    joiner_dispatcher->startup();
+    jd->startup(md);
   }
 };
 

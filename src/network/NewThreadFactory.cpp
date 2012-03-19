@@ -105,15 +105,15 @@ NewThreadFactory::createMainThreads(NewConcurrentMessageDispatcherPtr md,
 				    NewJoinerDispatcherPtr jd)
 {
   RequestDispatcherWrapper rdw;
-  request_dispatcher_thread = new boost::thread(rdw, rd);
+  request_dispatcher_thread = new boost::thread(rdw, rd, md);
 
   NewOutputDispatcherWrapper odw;
-  output_dispatcher_thread = new boost::thread(odw, od);
+  output_dispatcher_thread = new boost::thread(odw, od, md);
 
   if (jd != NewJoinerDispatcherPtr()) // non-leaf case
     {
       NewJoinerDispatcherWrapper jdw;
-      joiner_dispatcher_thread = new boost::thread(jdw, jd);
+      joiner_dispatcher_thread = new boost::thread(jdw, jd, md);
     }
 }
 

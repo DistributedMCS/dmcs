@@ -1,5 +1,13 @@
 2012-03-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* include/mcs/NewBaseDispatcher.h: Move message_dispatcher out ouf dispatcher.
+	Now use it at the call of startup().
+	* src/network/NewThreadFactory.cpp: Likewise.
+	* src/network/NewServer.cpp: Likewise.
+	* include/mcs/RequestDispatcher.h: Likewise.
+	* include/mcs/NewOutputDispatcher.h: Likewise.
+	* include/mcs/NewJoinerDispatcher.h: Likewise.
+
 	* src/network/NewNeighborThread.cpp: Clean up.
 
 	* src/dmcs/DLVEvaluator.cpp: Nice log messages.

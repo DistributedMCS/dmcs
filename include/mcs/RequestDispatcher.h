@@ -42,12 +42,11 @@ namespace dmcs {
 class RequestDispatcher : public NewBaseDispatcher
 {
 public:
-  RequestDispatcher(NewConcurrentMessageDispatcherPtr& md)
-    : NewBaseDispatcher(md)
+  RequestDispatcher()
   { }
 
   void
-  startup()
+  startup(NewConcurrentMessageDispatcherPtr md)
   {
     while (1)
       {
@@ -70,9 +69,9 @@ typedef boost::shared_ptr<RequestDispatcher> RequestDispatcherPtr;
 struct RequestDispatcherWrapper
 {
   void
-  operator()(RequestDispatcherPtr rd)
+  operator()(RequestDispatcherPtr rd, NewConcurrentMessageDispatcherPtr md)
   {
-    rd->startup();
+    rd->startup(md);
   }
 };
 

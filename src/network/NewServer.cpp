@@ -109,15 +109,15 @@ NewServer::initialize()
   reg->belief_state_offset = BeliefStateOffset::create(reg->system_size, reg->belief_set_size);
   reg->message_dispatcher = NewConcurrentMessageDispatcherPtr(new NewConcurrentMessageDispatcher(reg->queue_size, no_neighbors));
 
-  reg->request_dispatcher = RequestDispatcherPtr(new RequestDispatcher(reg->message_dispatcher));
-  reg->output_dispatcher = NewOutputDispatcherPtr(new NewOutputDispatcher(reg->message_dispatcher));
+  reg->request_dispatcher = RequestDispatcherPtr(new RequestDispatcher);
+  reg->output_dispatcher = NewOutputDispatcherPtr(new NewOutputDispatcher);
 
   if (reg->neighbors != NewNeighborVecPtr())
     {
       thread_factory->createNeighborThreads(reg->message_dispatcher,
 					    reg->neighbors);
 
-      reg->joiner_dispatcher = NewJoinerDispatcherPtr(new NewJoinerDispatcher(reg->message_dispatcher));
+      reg->joiner_dispatcher = NewJoinerDispatcherPtr(new NewJoinerDispatcher);
     }
   
   thread_factory->createMainThreads(reg->message_dispatcher,

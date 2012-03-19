@@ -38,8 +38,7 @@ namespace dmcs {
 class NewBaseDispatcher
 {
 public:
-  NewBaseDispatcher(NewConcurrentMessageDispatcherPtr& m)
-    : md(m)
+  NewBaseDispatcher()
   { }
 
   void
@@ -66,6 +65,9 @@ public:
     id2offset.erase(it);
   }
 
+  virtual void
+  startup(NewConcurrentMessageDispatcherPtr md) = 0;
+
 protected:
   std::size_t
   get_offset(std::size_t id)
@@ -76,7 +78,6 @@ protected:
   }
 
 protected:
-  NewConcurrentMessageDispatcherPtr md;
   std::map<std::size_t, std::size_t> id2offset;
 };
 
