@@ -28,6 +28,7 @@
  */
 
 #include "mcs/BackwardMessage.h"
+#include "mcs/Logger.h"
 #include "network/NewOutputThread.h"
 
 namespace dmcs {
@@ -52,7 +53,7 @@ NewOutputThread::init_mq(NewConcurrentMessageDispatcherPtr md)
   if (!initialized)
     {      
       offset = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::OUTPUT_MQ);
-      std::cerr << "init mq for invoker = " << invoker_id << ". Got offset = " << offset << std::endl;
+      DBGLOG(DBG, "NewOutputThread::init_mq(): For invoker = " << invoker_id << ", got offset = " << offset);
       initialized = true;
     }
 }
@@ -83,8 +84,6 @@ NewOutputThread::startup(connection_ptr conn,
 			 NewOutputDispatcherPtr od)
 {
   init_mq(md);
-  std::cerr << "Register output thread for id = " << invoker_id << ", offset = " << offset << std::endl;
-  std::cerr << "od = " << od.get() << std::endl;
   od->registerIdOffset(invoker_id, offset);
   ReturnedBeliefStateListPtr output_list(new ReturnedBeliefStateList);
 
@@ -122,6 +121,8 @@ NewOutputThread::write_result(connection_ptr conn,
       remove_duplication(output_list);
       BackwardMessage bmess(output_list);
       
+      DBGLOG(DBG, "NewOutThread::write_result(): to invoker: bmess = " << bmess);
+
       conn->write(bmess);
 
       clean_up(output_list);

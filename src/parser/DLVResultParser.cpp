@@ -55,11 +55,12 @@ DLVResultParser::parse(std::istream& is,
     {
       std::string input;
       std::getline(is, input);
+      DBGLOG(DBG, "DLVResultParser::parse(): Input to parser = " << input);
       if (input.empty() || is.bad())
 	{
-	  //std::cerr << "leaving loop because got input size " << input.size() 
-	  //	    << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
-	  //	    << ", eof " << is.eof() << std::endl;
+	  /*DBGLOG(DBG, "leaving loop because got input size " << input.size() 
+	  	    << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
+	  	    << ", eof " << is.eof());*/
 	  break;
 	}
       
@@ -73,15 +74,15 @@ DLVResultParser::parse(std::istream& is,
 	  // @todo: add better error message with position iterator 
 	  if (!r || fwd_begin != fwd_end)
 	    {
-	      std::cerr << "for input '" << input << "': r=" << r 
-			<< " (begin!=end)=" << (fwd_begin != fwd_end) << std::endl;
+	      DBGLOG(ERROR, "DLVResultParser::parse(): For input '" << input << "': r=" << r 
+		     << " (begin!=end)=" << (fwd_begin != fwd_end));
 	      errors++;
 	    }
 	}
       catch(const qi::expectation_failure<forward_iterator_t>& e)
 	{
-	  std::cerr << "for input '" << input 
-		    << "': could not parse DLV output(expectation failure) " << e.what_ << std::endl;
+	  DBGLOG(ERROR, "DLVResultParser::parse(): For input '" << input 
+		 << "': could not parse DLV output(expectation failure) " << e.what_);
 	  errors++;
 	}
 

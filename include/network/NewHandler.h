@@ -79,7 +79,6 @@ public:
 		  NewHandlerPtr handler,
 		  connection_ptr conn,
 		  NewConcurrentMessageDispatcherPtr md,
-		  NewOutputDispatcherPtr od,
 		  ForwardMessage* mess);
 
 private:

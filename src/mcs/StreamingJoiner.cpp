@@ -28,6 +28,7 @@
   */
 
 #include "mcs/BeliefStateOffset.h"
+#include "mcs/Logger.h"
 #include "mcs/ForwardMessage.h"
 #include "mcs/StreamingJoiner.h"
 
@@ -300,16 +301,16 @@ StreamingJoiner::join(std::size_t query_id,
   bool ret = false;
 
 #if 0
-  std::cerr << "Join:" << std::endl;
+  DBGLOG(DBG, "Join:");
   NewBeliefStateIteratorVec::const_iterator bt = beg_it->begin();
   NewBeliefStateIteratorVec::const_iterator et = end_it->begin();
   for (; bt != beg_it->end(); ++bt, ++et)
     {
       for (NewBeliefStateVec::const_iterator it = *bt; it != *et; ++it)
 	{
-	  std::cerr << **it << std::endl;
+	  DBGLOG(DBG, **it);
 	}
-      std::cerr << std::endl;
+      DBGLOG(std::endl);
     }
 #endif // 0
 
@@ -407,7 +408,7 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
 {
   assert (from_neighbor <= to_neighbor && to_neighbor < neighbors->size());
 
-  std::cerr << "StreamingJoiner::ask_first_packs: forward_qid = " << forward_qid << std::endl;
+  DBGLOG(DBG, "StreamingJoiner::ask_first_packs: forward_qid = " << forward_qid);
 
   for (std::size_t i = from_neighbor; i <= to_neighbor; ++i)
     {
@@ -439,7 +440,6 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
   std::vector<std::size_t> count_models_read(to_neighbor+1, 0);
 
   int timeout = 0;
-  std::cerr << "StreamingJoiner:: joiner_offset = " << joiner_offset << std::endl;
   while (marking_neighbors != all_neighbors_returned)
     {
       ReturnedBeliefState* rbs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::JOIN_IN_MQ, joiner_offset, timeout);
@@ -453,8 +453,6 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
 	{
 	  std::size_t stripped_qid = qid;
 	  unset_neighbor_id(stripped_qid);
-	  std::cerr << "bs = " << *bs << std::endl;
-	  std::cerr << "stripped_qid = " << stripped_qid << ", forward_qid = " << forward_qid << std::endl;
 	  assert (stripped_qid == forward_qid);
 
 	  NewBeliefStateVecPtr& bsv = input_belief_states[neighbor_index];
@@ -493,15 +491,13 @@ StreamingJoiner::ask_neighbor(std::size_t neighbor_index,
   std::size_t neighbor_id = ((*neighbors)[neighbor_index])->neighbor_id;
   set_neighbor_id(qid, neighbor_id);
 
-  std::cerr << "StreamingJoiner: register forward_qid = " << qid << ", joiner_offset = " << joiner_offset << std::endl;
   jd->registerIdOffset(qid, joiner_offset);
 
   ForwardMessage* request = new ForwardMessage(qid, k1, k2);
 
-
   std::size_t noff = ((*neighbors)[neighbor_index])->neighbor_offset;
 
-  std::cerr << "StreamingJoiner: sending to noff = " << noff << ". With mess = " << *request << std::endl;
+  DBGLOG(DBG, "StreamingJoiner: sending to noff = " << noff << ". With mess = " << *request);
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::NEIGHBOR_OUT_MQ, noff, request, timeout);
 }

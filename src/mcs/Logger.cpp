@@ -18,16 +18,6 @@
  */
 
 /**
- * @file   testTables.cpp
- * @author Thomas Krennwallner <tkren@kr.tuwien.ac.at>
- * @date   Sun Nov  8 11:03:46 2009
- * 
- * @brief  
- * 
- * 
- */
-
-/**
  * @file   Logger.cpp
  * @author Peter Schueller <ps@kr.tuwien.ac.at>
  * 

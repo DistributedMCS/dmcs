@@ -1,5 +1,18 @@
 2012-03-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
+	* src/network/NewNeighborThread.cpp: Clean up.
+
+	* src/dmcs/DLVEvaluator.cpp: Nice log messages.
+	* src/mcs/NewContext.cpp: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+	* src/network/NewNeighborOut.cpp: Likewise.
+	* src/network/NewOutputThread.cpp: Likewise.
+	* src/network/NewServer.cpp: Likewise.
+	* src/parser/DLVResultParser.cpp: Likewise.
+
+	* include/network/NewHandler.h: Simplify handle_finalize.
+	* src/network/NewHandler.cpp: Likewise.
+
 	* testsuite/testSystem.cpp: Add testcase for intermediate contexts.
 
 	* testsuite/DmcsClientTest.cpp: Fix input to shutdown query.

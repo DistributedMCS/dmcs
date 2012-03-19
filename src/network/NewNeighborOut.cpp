@@ -28,6 +28,7 @@
  */
 
 #include "mcs/ForwardMessage.h"
+#include "mcs/Logger.h"
 #include "mcs/QueryID.h"
 #include "network/NewNeighborOut.h"
 
@@ -51,7 +52,11 @@ NewNeighborOut::operator()(connection_ptr conn,
   int timeout = 0;
   while (1)
     {
+      DBGLOG(DBG, "NewNeighborOut::op(): waiting at noff = " << neighbor_offset);
+
       ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::NEIGHBOR_OUT_MQ, neighbor_offset, timeout);
+
+      DBGLOG(DBG, "NewNeighborOut::op(): got fwd_mess = " << *fwd_mess);
 
       std::string header;
       if (is_shutdown(fwd_mess->qid))

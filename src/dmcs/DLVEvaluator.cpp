@@ -150,16 +150,16 @@ DLVEvaluator::read_all(std::size_t ctx_id,
 
       if ( input.empty() || is.bad() )
       {
-	/*std::cerr << "leaving loop because got input size " << input.size() 
+	/*DBGLOG(DBG, "DLVEvaluator::read_all: Leaving loop because got input size " << input.size() 
 		  << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
-		  << ", eof " << is.eof() << std::endl;*/
+		  << ", eof " << is.eof());*/
 	break;
       }
 
       // discard weak answer set cost lines
       if( 0 == input.compare(0, 22, "Cost ([Weight:Level]):") )
       {
-	//std::cerr << "discarding weak answer set cost line" << std::endl;
+	//DBGLOG(DBG, "DLVEvaluator::read_all: Discarding weak answer set cost line");
       }
       else
       {
@@ -194,16 +194,16 @@ DLVEvaluator::read_until_k2(std::size_t ctx_id,
 
       if ( input.empty() || is.bad() )
       {
-	/*std::cerr << "leaving loop because got input size " << input.size() 
+	/*DBGLOG(DBG, "DLVEvaluator::read_until_k2: Leaving loop because got input size " << input.size() 
 		  << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
-		  << ", eof " << is.eof() << std::endl;*/
+		  << ", eof " << is.eof());*/
 	break;
       }
 
       // discard weak answer set cost lines
       if ( 0 == input.compare(0, 22, "Cost ([Weight:Level]):") )
       {
-	//std::cerr << "discarding weak answer set cost line" << std::endl;
+	//DBGLOG(DBG, "DLVEvaluator::read_until_k2: Discarding weak answer set cost line");
       }
       else
       {
@@ -223,7 +223,7 @@ DLVEvaluator::read_until_k2(std::size_t ctx_id,
 
       if ( input.empty() || is.bad() )
       {
-	/*std::cerr << "leaving loop because got input size " << input.size() 
+	/*DBGLOG(DBG, "DLVEvaluator::read_until_k2: Leaving loop because got input size " << input.size() 
 		  << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
 		  << ", eof " << is.eof() << std::endl;*/
 	break;
@@ -232,7 +232,7 @@ DLVEvaluator::read_until_k2(std::size_t ctx_id,
       // discard weak answer set cost lines
       if( 0 == input.compare(0, 22, "Cost ([Weight:Level]):") )
       {
-	//std::cerr << "discarding weak answer set cost line" << std::endl;
+	//DBGLOG(DBG, "DLVEvaluator::read_until_k2: Discarding weak answer set cost line");
       }
       else
       {
@@ -256,6 +256,8 @@ DLVEvaluator::solve(std::size_t ctx_id,
 
   std::size_t k1 = heads->getK1();
   std::size_t k2 = heads->getK2();
+
+  DBGLOG(DBG, "DLVEvaluator::solve(). k1 = " << k1 << ", k2 = " << k2);
 
   if (k1 == 0 && k2 == 0)
     {

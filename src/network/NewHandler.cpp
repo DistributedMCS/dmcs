@@ -27,6 +27,7 @@
  * 
  */
 
+#include "mcs/Logger.h"
 #include "network/NewHandler.h"
 
 namespace dmcs {
@@ -34,27 +35,19 @@ namespace dmcs {
 NewHandler::NewHandler(std::size_t p)
   : first_round(true),
     port(p)
-{
-  std::cerr << "NewHandler::ctor()" << std::endl;
-}
+{ }
 
 
 
 NewHandler::~NewHandler()
 {
-#if 0
   if (output_thread && output_thread->joinable())
     {
       output_thread->interrupt();
       output_thread->join();
-    }
-
-  if (output_thread)
-    {
       delete output_thread;
       output_thread = 0;
     }
-#endif
 }
 
 
@@ -66,7 +59,7 @@ NewHandler::startup(NewHandlerPtr handler,
 		    NewOutputDispatcherPtr od)
 {
   assert (this == handler.get());
-  std::cerr << "NewHandler::operator()" <<  std::endl;
+  DBGLOG(DBG, "NewHandler::startup()");
   ForwardMessage* mess = new ForwardMessage;
   conn->async_read(*mess,
 		   boost::bind(&NewHandler::handle_read_message, this,
@@ -101,7 +94,7 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
 	  output_thread = new boost::thread(output_wrapper, output_sender, conn, md, od);	  
 	}
 
-      std::cerr << "NewHandler: Got message = " << *mess << std::endl;
+      DBGLOG(DBG, "NewHandler: Got message = " << *mess);
 
       int timeout = 0;
       md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, mess, timeout);
@@ -118,7 +111,7 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
     }
   else
     {
-      std::cerr << "NewHandler::handle_read_message(): ERROR:" << e.message() <<  std::endl;
+      DBGLOG(ERROR, "NewHandler::handle_read_message(): ERROR:" << e.message());
       throw std::runtime_error(e.message());
     }
 }
@@ -159,13 +152,12 @@ NewHandler::handle_read_header(const boost::system::error_code& e,
 				       handler,
 				       conn,
 				       md,
-				       od,
 				       mess));
 	}
     }
   else
     {
-      std::cerr << "NewHandler::handle_read_header(): ERROR:" << e.message() <<  std::endl;
+      DBGLOG(ERROR, "NewHandler::handle_read_header(): ERROR:" << e.message());
       throw std::runtime_error(e.message());
     }
 }
@@ -177,7 +169,6 @@ NewHandler::handle_finalize(const boost::system::error_code& e,
 			    NewHandlerPtr handler,
 			    connection_ptr conn,
 			    NewConcurrentMessageDispatcherPtr md,
-			    NewOutputDispatcherPtr od,
 			    ForwardMessage* mess)
 {
   assert (this == handler.get());
@@ -188,12 +179,12 @@ NewHandler::handle_finalize(const boost::system::error_code& e,
       int timeout = 0;
       md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, mess, timeout);
 
-      std::cerr << "NewHandler::handle_finalize: closing connection." << std::endl;
+      DBGLOG(DBG, "NewHandler::handle_finalize: closing connection.");
       conn->socket().close();
     }
   else
     {
-      std::cerr << "NewHandler::handle_finalize(): ERROR:" << e.message() <<  std::endl;
+      DBGLOG(ERROR, "NewHandler::handle_finalize(): ERROR:" << e.message());
       throw std::runtime_error(e.message());
     }
 }

@@ -56,7 +56,7 @@ NewServer::NewServer(boost::asio::io_service& i,
   initialize();
   connection_ptr my_connection(new connection(io_service));
 
-  std::cerr << "NewServer::async_accept" << std::endl;
+  DBGLOG(DBG, "NewServer::ctor: waiting for new connection.");
 
   acceptor.async_accept(my_connection->socket(),
 			boost::bind(&NewServer::handle_accept, this,
@@ -138,8 +138,7 @@ NewServer::handle_accept(const boost::system::error_code& e,
 {
   if (!e)
     {
-      boost::this_thread::interruption_point();
-      std::cerr << "NewServer: start a new connection..." << std::endl;
+      // boost::this_thread::interruption_point();
       // Start an accept operation for a new connection.
       connection_ptr new_conn(new connection(acceptor.io_service()));
       acceptor.async_accept(new_conn->socket(),
@@ -158,7 +157,7 @@ NewServer::handle_accept(const boost::system::error_code& e,
     }
   else
     {
-      std::cerr << "NewServer::handle_accept: ERROR:" << e.message() << std::endl;
+      DBGLOG(ERROR, "NewServer::handle_accept: ERROR:" << e.message());
       throw std::runtime_error(e.message());
     }
 }
@@ -173,7 +172,7 @@ NewServer::handle_read_header(const boost::system::error_code& e,
   //boost::mutex::scoped_lock lock(mtx);
   if (!e)
     {
-      std::cerr << "NewServer: got header = " << *header << std::endl;
+      DBGLOG(DBG, "NewServer: got header = " << *header);
       if (header->find(HEADER_REQ_DMCS) != std::string::npos)
 	{
 	  boost::asio::ip::tcp::socket& sock = conn->socket();
@@ -196,7 +195,7 @@ NewServer::handle_read_header(const boost::system::error_code& e,
     }
   else
     {
-      std::cerr << "NewServer::handle_read_header: ERROR:" << e.message() << std::endl;
+      DBGLOG(ERROR, "NewServer::handle_read_header: ERROR:" << e.message());
       throw std::runtime_error(e.message());
     }
 }

@@ -93,8 +93,6 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
       joiner->registerJoinIn(ctx_offset, md);
     }
 
-  std::cerr << "NewContext::operator()(): id = " << ctx_id << ", offset" << ctx_offset << std::endl;
-
   // Start evaluator thread
   InstantiatorWPtr inst_wptr(inst);
   EvaluatorPtr eval = inst->createEvaluator(inst_wptr);
@@ -103,11 +101,11 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
   int timeout = 0;
   while (1)
     {
-      std::cerr << "NewContext::operator()(): Waiting at REQUEST_MQ[" << ctx_offset << "]" << std::endl;
+      DBGLOG(DBG, "NewContext::startup(): Waiting at REQUEST_MQ[" << ctx_offset << "]");
       // Listen to the REQUEST_MQ
       ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_offset, timeout);
 
-      std::cerr << "NewContext::operator()(): Got message: " << *fwd_mess << std::endl;
+      DBGLOG(DBG, "NewContext::startup(): Got message: " << *fwd_mess);
       
       std::size_t parent_qid = fwd_mess->qid;
       if (is_shutdown(parent_qid))
@@ -151,11 +149,10 @@ NewContext::leaf_process_request(std::size_t parent_qid,
 				 std::size_t k1,
 				 std::size_t k2)
 {
-  std::cerr << "NewContext::leaf_process_request()" << std::endl;
   // send heads to Evaluator
   Heads* heads = new Heads(NULL, k1, k2);
   int timeout = 0;
-  std::cerr << "Send k1 = " << k1 << ", k2 = " << k2  << " to eval = " << eval->getInQueue() << std::endl;
+  DBGLOG(DBG, "NewContext::leaf_process_request: Send (" << k1 << ", " << k2  << ") to eval[" << eval->getInQueue() << "]");
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);
 
   // read the output from EVAL_OUT_MQ
@@ -177,7 +174,7 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
     {
       // prepare the heads
       std::size_t this_qid = query_id(ctx_id, ++query_counter);
-      std::cerr << "NewContext:: trigger join with query_id = " << this_qid << std::endl;
+      DBGLOG(DBG, "NewContext::intermediate_process_request: trigger join with query_id = " << this_qid);
       ReturnedBeliefState* rbs = joiner->trigger_join(this_qid, md, jd);
       if (rbs->belief_state == NULL)
 	{
@@ -186,7 +183,7 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
 
 
       NewBeliefState* input = rbs->belief_state;
-      std::cerr << "NewContext: got input = " << *input << std::endl;
+      DBGLOG(DBG, "NewContext::intermediate_process_request: got input = " << *input);
       Heads* heads = evaluate_bridge_rules(bridge_rules, input, k1, k2,
 					   BeliefStateOffset::instance()->getStartingOffsets());      
 
@@ -218,7 +215,6 @@ NewContext::read_and_send(std::size_t parent_qid,
 			  EvaluatorPtr eval,
 			  NewConcurrentMessageDispatcherPtr md)
 {
-  std::cerr << "NewContext::read_and_send()" << std::endl;
   std::size_t models_counter = 0;
   int timeout = 0;
   while (1)
@@ -234,12 +230,12 @@ NewContext::read_and_send(std::size_t parent_qid,
       
       if (belief_state == NULL)
 	{
-	  //std::cerr << "NewContext::read_and_send(). Got res = NULL" << std::endl;
+	  DBGLOG(DBG, "NewContext::read_and_send(). Got res = NULL");
 	  break;
 	}
       else
 	{
-	  //std::cerr << "NewContext::read_and_send(). Got res = " << *belief_state << std::endl;
+	  DBGLOG(DBG, "NewContext::read_and_send(). Got res = " << *belief_state);
 	  ++models_counter;
 	  send_out_result(parent_qid, heads, belief_state, md);
 	}
