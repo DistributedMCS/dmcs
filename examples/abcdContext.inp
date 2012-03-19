@@ -1,0 +1,5 @@
+a v b :- c.
+c v d :- e.
+e v f :- g.
+g v h :- i.
+i v j.
