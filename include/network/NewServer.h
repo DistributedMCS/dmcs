@@ -34,6 +34,7 @@
 #include "network/connection.hpp"
 #include "network/NewHandler.h"
 #include "network/HandlerWrapper.h"
+#include "network/NewThreadFactory.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
@@ -43,9 +44,9 @@ namespace dmcs {
 class NewServer
 {
 public:
-  NewServer(const RegistryPtr r,
-	    boost::asio::io_service& i,
-	    const boost::asio::ip::tcp::endpoint& endpoint);
+  NewServer(boost::asio::io_service& i,
+	    const boost::asio::ip::tcp::endpoint& endpoint,
+	    const RegistryPtr r);
 
   ~NewServer();
 
@@ -59,14 +60,19 @@ public:
 		     boost::shared_ptr<std::string> header);
 
 private:
+  void
+  initialize();
+
+private:
   boost::asio::io_service& io_service;
   boost::asio::ip::tcp::acceptor acceptor;
   std::size_t port;
   boost::mutex mtx;
 
   RegistryPtr reg;
+  NewThreadFactoryPtr thread_factory;
   std::vector<HandlerWrapper*> handler_vec;
-  std::vector<boost::thread*> handler_thread_vec;
+  BoostThreadVec handler_thread_vec;
 };
 
 typedef boost::shared_ptr<NewServer> NewServerPtr;

@@ -73,6 +73,9 @@ public:
   std::size_t
   createAndRegisterMQ(MQIDs type);
 
+  void
+  createAndRegisterMQ(MQIDs type, std::size_t id);
+
   template<typename MessageType>
   bool
   send(MQIDs id, MessageType* mess, int msecs);

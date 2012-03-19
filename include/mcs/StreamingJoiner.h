@@ -44,10 +44,8 @@ typedef boost::shared_ptr<NeighborOffset2Index> NeighborOffset2IndexPtr;
 class StreamingJoiner : public BaseJoiner
 {
 public:
-  StreamingJoiner(std::size_t c, 
-		  std::size_t ps,
-		  NewNeighborVecPtr n,
-		  NeighborOffset2IndexPtr o2i);
+  StreamingJoiner(std::size_t ps,
+		  NewNeighborVecPtr n);
 
   ReturnedBeliefState*
   trigger_join(std::size_t query_id, 

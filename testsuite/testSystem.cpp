@@ -93,7 +93,7 @@ run_server(std::size_t server_port, const RegistryPtr reg)
   boost::asio::io_service io_service_server;
   boost::asio::ip::tcp::endpoint endpoint_server(boost::asio::ip::tcp::v4(), server_port);
 
-  NewServer s(reg, io_service_server, endpoint_server);
+  NewServer s(io_service_server, endpoint_server, reg);
   boost::this_thread::interruption_point();
   io_service_server.run();
   
@@ -209,6 +209,156 @@ BOOST_AUTO_TEST_CASE ( testLeafSystem )
   std::cerr << "Join server." << std::endl;
 #endif
 }
+
+
+void
+init_leaf_ctx(std::size_t leaf_id,
+	      std::string& leaf_kbspec,
+	      BeliefTablePtr leaf_btab)
+{
+  //const char* ex = getenv("EXAMPLESDIR");
+  //assert (ex != 0);
+  //leaf_kbspec = ex;
+  //leaf_kbspec += "/leafContext.inp";
+  leaf_kbspec = "../../examples/leafContext.inp";
+
+
+  Belief belief_epsilon2(leaf_id, "epsilon");
+  Belief belief_d(leaf_id, "d");
+  Belief belief_e(leaf_id, "e");
+
+  leaf_btab->storeAndGetID(belief_epsilon2);
+  leaf_btab->storeAndGetID(belief_d);
+  leaf_btab->storeAndGetID(belief_e);
+}
+
+
+
+void
+init_root_ctx(std::size_t root_id,
+	      std::string& root_kbspec,
+	      BeliefTablePtr root_btab,
+	      BeliefTablePtr leaf_btab,
+	      BridgeRuleTablePtr bridge_rules)
+{
+  //const char* ex = getenv("EXAMPLESDIR");
+  //assert (ex != 0);
+  //root_kbspec = ex;
+  //root_kbspec += "/rootContext.inp";
+  root_kbspec = "../../examples/rootContext.inp";
+
+
+  Belief belief_epsilon1(root_id, "epsilon");
+  Belief belief_a(root_id, "a");
+  Belief belief_b(root_id, "b");
+  Belief belief_c(root_id, "c");
+
+  root_btab->storeAndGetID(belief_epsilon1);
+  root_btab->storeAndGetID(belief_a);
+  root_btab->storeAndGetID(belief_b);
+  root_btab->storeAndGetID(belief_c);
+
+  // bridge rules
+  std::string str_c = "c";
+  std::string str_d = "d";
+  ID id_c = root_btab->getIDByString(str_c);
+  ID id_d = leaf_btab->getIDByString(str_d);
+
+  Tuple body1;
+  body1.push_back(id_d);
+
+  // c :- (2:d)
+  BridgeRule br1(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_c, body1);
+  bridge_rules->storeAndGetID(br1);  
+}
+
+
+
+
+
+BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
+{
+  std::size_t SYSTEM_SIZE = 2;
+  std::size_t BS_SIZE = 10;
+  std::size_t QUEUE_SIZE = 10;
+
+  /************************** LEAF CONTEXT **************************/
+  std::string kbspec2;
+  BeliefTablePtr btab2(new BeliefTable);
+
+  std::size_t ctx_id2 = 1;
+  std::string ctx_hostname2 = "localhost";
+  std::string port2 = "5678";
+  std::size_t ctx_port2 = 5678;
+
+  init_leaf_ctx(ctx_id2, kbspec2, btab2);
+
+  EnginePtr dlv_engine2 = DLVEngine::create();
+  EngineWPtr dlv_engine_wp2(dlv_engine2);
+  InstantiatorPtr dlv_inst2 = dlv_engine2->createInstantiator(dlv_engine_wp2, kbspec2);
+
+  NewContextPtr ctx2(new NewContext(ctx_id2, dlv_inst2, btab2));
+  NewContextVecPtr contexts2(new NewContextVec);
+  contexts2->push_back(ctx2);
+
+  RegistryPtr reg2(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts2));
+
+  boost::thread server_thread2(run_server, ctx_port2, reg2);
+  boost::posix_time::milliseconds server_starting_up2(200);
+  boost::this_thread::sleep(server_starting_up2);
+
+  /************************** ROOT CONTEXT **************************/
+  std::string kbspec1;
+  BeliefTablePtr btab1(new BeliefTable);
+  BridgeRuleTablePtr br1(new BridgeRuleTable);
+
+  std::size_t invoker = 1000;
+  std::size_t ctx_id1 = 0;
+  init_root_ctx(ctx_id1, kbspec1, btab1, btab2, br1);
+
+  std::size_t ctx_off2 = 0;
+  
+  NewNeighborPtr n1(new NewNeighbor(ctx_id2, ctx_off2, ctx_hostname2, port2));
+  NewNeighborVecPtr neighbors1(new NewNeighborVec);
+  neighbors1->push_back(n1);
+
+  EnginePtr dlv_engine1 = DLVEngine::create();
+  EngineWPtr dlv_engine_wp1(dlv_engine1);
+  InstantiatorPtr dlv_inst1 = dlv_engine1->createInstantiator(dlv_engine_wp1, kbspec1);
+
+  std::size_t pack_size = 3;
+  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, btab1, br1, neighbors1));
+  NewContextVecPtr contexts1(new NewContextVec);
+  contexts1->push_back(ctx1);
+
+  RegistryPtr reg1(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts1, neighbors1));
+  std::string port1 = "5120";
+  std::size_t ctx_port1 = 5120;
+  boost::thread server_thread1(run_server, ctx_port1, reg1);
+
+  boost::posix_time::milliseconds server_starting_up1(200);
+  boost::this_thread::sleep(server_starting_up1);
+
+  std::size_t invoker0 = 1000;
+  std::size_t query_order1 = 1;
+  std::size_t query_order2 = 2;
+  std::size_t qid1 = query_id(invoker0, ctx_id1, query_order1);
+  std::size_t qid2 = query_id(invoker0, ctx_id1, query_order2);
+
+  std::size_t k11 = 1;
+  std::size_t k12 = 5;
+  std::size_t k21 = 2;
+  std::size_t k22 = 7;
+
+  ForwardMessage* ws1 = new ForwardMessage(qid1, k11, k12);
+  ForwardMessage* ws2 = new ForwardMessage(qid1, k21, k22);
+
+  std::cerr << "Starting client..." << std::endl;
+  boost::thread client_thread(run_client, port1, ws1, ws2);  
+
+  client_thread.join();
+}
+
 
 // Local Variables:
 // mode: C++

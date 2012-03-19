@@ -55,8 +55,7 @@ public:
 	     InstantiatorPtr i,
 	     BeliefTablePtr ex_sig,
 	     BridgeRuleTablePtr br,
-	     NewNeighborVecPtr nbs,
-	     NeighborOffset2IndexPtr o2i);
+	     NewNeighborVecPtr nbs);
 
   // Constructor for leaf contexts
   NewContext(std::size_t cid,
@@ -107,6 +106,8 @@ private:
   // The instantiator holds the path (string) to the local knowledge base
   InstantiatorPtr inst;
 
+  // Somehow bridge rules should know the input interface from the neighbors.
+  // This is done at while reading the query plan.
   BridgeRuleTablePtr bridge_rules;
 
   // This just contains the beliefs that are exported to the parents.
@@ -118,12 +119,12 @@ private:
   // as we assume that they are provided once by the query plan.
   NewNeighborVecPtr neighbors;
 
-  NeighborOffset2IndexPtr offset2index;
-
   StreamingJoinerPtr joiner;
 };
 
 typedef boost::shared_ptr<NewContext> NewContextPtr;
+typedef std::vector<NewContextPtr> NewContextVec;
+typedef boost::shared_ptr<NewContextVec> NewContextVecPtr;
 
 struct NewContextWrapper
 {

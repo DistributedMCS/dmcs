@@ -150,6 +150,31 @@ NewConcurrentMessageDispatcher::createAndRegisterMQ(MQIDs type)
 }
 
 
+void
+NewConcurrentMessageDispatcher::createAndRegisterMQ(MQIDs type, std::size_t id)
+{
+  assert (SEPARATOR < type && type < END_OF_MQ);
+
+  std::size_t type_index = type - SEPARATOR;
+  ConcurrentMessageQueueVecPtr& v = cmqs[type_index];
+  ConcurrentMessageQueuePtr mq(new ConcurrentMessageQueue(queue_size));
+
+  if (id < v->size())
+    {
+      (*v)[id] = mq;
+    }
+  else if (id == v->size())
+    {
+      v->push_back(mq);
+    }
+  else
+    {
+      v->resize(id+1);
+      (*v)[id] = mq;
+    }
+}
+
+
 std::size_t
 NewConcurrentMessageDispatcher::getQueueSize()
 {

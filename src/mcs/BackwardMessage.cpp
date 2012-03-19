@@ -59,7 +59,13 @@ BackwardMessage::BackwardMessage(const ReturnedBeliefStateListPtr& r)
 std::ostream&
 BackwardMessage::print(std::ostream& os) const
 {
-  return os << printlist(*rbsl, "", "\n", "");
+  for (ReturnedBeliefStateList::const_iterator it = rbsl->begin();
+       it != rbsl->end(); ++it)
+    {
+      os << **it << std::endl;
+    }
+
+  return os;
 }
 
 } // namespace dmcs

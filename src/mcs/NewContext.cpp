@@ -45,7 +45,6 @@ NewContext::NewContext(std::size_t cid,
     bridge_rules(BridgeRuleTablePtr()),
     export_signature(ex_sig),
     neighbors(NewNeighborVecPtr()),
-    offset2index(NeighborOffset2IndexPtr()),
     joiner(StreamingJoinerPtr())
 { }
 
@@ -57,8 +56,7 @@ NewContext::NewContext(std::size_t cid,
 		       InstantiatorPtr i,
 		       BeliefTablePtr ex_sig,
 		       BridgeRuleTablePtr br,
-		       NewNeighborVecPtr nbs,
-		       NeighborOffset2IndexPtr o2i)
+		       NewNeighborVecPtr nbs)
   : is_leaf(nbs->size() == 0),
     ctx_id(cid),
     query_counter(0),
@@ -66,8 +64,7 @@ NewContext::NewContext(std::size_t cid,
     bridge_rules(br),
     export_signature(ex_sig),
     neighbors(nbs),
-    offset2index(o2i),
-    joiner(new StreamingJoiner(cid, pack_size, nbs, o2i))
+    joiner(new StreamingJoiner(pack_size, nbs))
 { }
 
 
@@ -89,6 +86,12 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
   // Register REQUEST_MQ to md
   ctx_offset = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::REQUEST_MQ);
   rd->registerIdOffset(ctx_id, ctx_offset);
+
+  if (!is_leaf)
+    {
+      assert (joiner);
+      joiner->registerJoinIn(ctx_offset, md);
+    }
 
   std::cerr << "NewContext::operator()(): id = " << ctx_id << ", offset" << ctx_offset << std::endl;
 
@@ -174,13 +177,16 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
     {
       // prepare the heads
       std::size_t this_qid = query_id(ctx_id, ++query_counter);
+      std::cerr << "NewContext:: trigger join with query_id = " << this_qid << std::endl;
       ReturnedBeliefState* rbs = joiner->trigger_join(this_qid, md, jd);
       if (rbs->belief_state == NULL)
 	{
 	  break;
 	}
 
+
       NewBeliefState* input = rbs->belief_state;
+      std::cerr << "NewContext: got input = " << *input << std::endl;
       Heads* heads = evaluate_bridge_rules(bridge_rules, input, k1, k2,
 					   BeliefStateOffset::instance()->getStartingOffsets());      
 

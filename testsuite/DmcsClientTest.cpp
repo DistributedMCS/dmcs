@@ -230,8 +230,8 @@ DmcsClientTest::handle_finalize(const boost::system::error_code& e,
   if (!e)
     {
       std::cerr << "DmcsClientTest: Send shutdown_qid to neighbor!" << std::endl;
-      std::size_t ctx_id = 0;
-      std::size_t neighbor_id = 1;
+      std::size_t ctx_id = 1000;
+      std::size_t neighbor_id = 0;
       std::size_t sqid = shutdown_query_id(ctx_id, neighbor_id);
       ForwardMessage* end_mess = new ForwardMessage(sqid, 0, 0);
       conn->async_write(*end_mess,

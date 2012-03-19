@@ -42,8 +42,11 @@ namespace dmcs {
 class BaseJoiner
 {
 public:
-  BaseJoiner(std::size_t c,
-	     NewNeighborVecPtr n);
+  BaseJoiner(NewNeighborVecPtr n);
+
+  void
+  registerJoinIn(std::size_t offset,
+		 NewConcurrentMessageDispatcherPtr md);
 
 protected:
   void
@@ -56,7 +59,7 @@ protected:
   reset();
 
 protected:
-  std::size_t ctx_offset;
+  std::size_t joiner_offset; // offset of the joiner in JOIN_IN_MQ
   NewNeighborVecPtr neighbors;
   NewBeliefStatePackage input_belief_states;
   ReturnedBeliefStateList joined_results;

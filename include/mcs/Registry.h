@@ -31,20 +31,62 @@
 #define REGISTRY_H
 
 #include "network/NewConcurrentMessageDispatcher.h"
+#include "mcs/BeliefStateOffset.h"
+#include "mcs/NewContext.h"
 #include "mcs/NewOutputDispatcher.h"
+#include "mcs/NewJoinerDispatcher.h"
+#include "mcs/RequestDispatcher.h"
+#include "mcs/NewNeighbor.h"
 
 namespace dmcs {
 
 struct Registry
 {
-  Registry(NewConcurrentMessageDispatcherPtr m,
-	   NewOutputDispatcherPtr o)
-    : md(m),
-      od(o)
+  Registry(const std::size_t ss,
+	   const std::size_t qs,
+	   const std::size_t bs,
+	   NewContextVecPtr cs)
+    : system_size(ss),
+      queue_size(qs),
+      belief_set_size(bs),
+      belief_state_offset(0),
+      contexts(cs),
+      neighbors(NewNeighborVecPtr())
   { }
 
-  NewConcurrentMessageDispatcherPtr md;
-  NewOutputDispatcherPtr od;
+  Registry(const std::size_t ss,
+	   const std::size_t qs,
+	   const std::size_t bs,
+	   NewContextVecPtr cs,
+	   NewNeighborVecPtr ns)
+    : system_size(ss),
+      queue_size(qs),
+      belief_set_size(bs),
+      belief_state_offset(0),
+      contexts(cs),
+      neighbors(ns)
+  { }
+
+  ~Registry()
+  {
+    if (belief_state_offset)
+      {
+	delete belief_state_offset;
+	belief_state_offset = 0;
+      }
+  }
+
+  std::size_t system_size;
+  std::size_t queue_size;
+  std::size_t belief_set_size;
+
+  BeliefStateOffset* belief_state_offset;
+  NewConcurrentMessageDispatcherPtr message_dispatcher;
+  RequestDispatcherPtr request_dispatcher;
+  NewOutputDispatcherPtr output_dispatcher;
+  NewJoinerDispatcherPtr joiner_dispatcher;
+  NewContextVecPtr contexts;
+  NewNeighborVecPtr neighbors;
 };
 
 typedef boost::shared_ptr<Registry> RegistryPtr;

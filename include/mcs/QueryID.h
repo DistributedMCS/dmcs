@@ -238,16 +238,25 @@ set_neighbor_offset(std::size_t& qid, const std::size_t n_offset)
 
 
 inline void
+unset_neighbor_offset(std::size_t& qid)
+{
+  qid &= ~(QueryID::instance()->NEIGHBOR_OFFSET_MASK());
+}
+
+
+
+inline void
 set_neighbor_id(std::size_t& qid, const std::size_t nid)
 {
   qid |= (nid << QueryID::instance()->NEIGHBOR_ID_SHIFT());
 }
 
 
+
 inline void
-unset_neighbor_offset(std::size_t& qid)
+unset_neighbor_id(std::size_t& qid)
 {
-  qid &= ~(QueryID::instance()->NEIGHBOR_OFFSET_MASK());
+  qid &= ~(QueryID::instance()->NEIGHBOR_ID_MASK());
 }
 
 

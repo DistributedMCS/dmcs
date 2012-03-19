@@ -29,6 +29,8 @@
 
 #include "network/HandlerWrapper.h"
 #include "network/NewServer.h"
+
+#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
 namespace dmcs {
@@ -36,19 +38,22 @@ namespace dmcs {
 void
 HandlerWrapper::operator()(NewHandlerPtr handler,
 			   connection_ptr conn,
-			   RegistryPtr reg)
+			   NewConcurrentMessageDispatcherPtr md,
+			   NewOutputDispatcherPtr od)
 {
-  handler->startup(handler, conn, reg->md, reg->od);
+  handler->startup(handler, conn, md, od);
 }
 
-NewServer::NewServer(const RegistryPtr r,
-		     boost::asio::io_service& i,
-		     const boost::asio::ip::tcp::endpoint& endpoint)
+NewServer::NewServer(boost::asio::io_service& i,
+		     const boost::asio::ip::tcp::endpoint& endpoint,
+		     const RegistryPtr r)
   : io_service(i),
     acceptor(io_service, endpoint),
     port(endpoint.port()),
-    reg(r)
+    reg(r),
+    thread_factory(new NewThreadFactory)
 {
+  initialize();
   connection_ptr my_connection(new connection(io_service));
 
   std::cerr << "NewServer::async_accept" << std::endl;
@@ -68,6 +73,8 @@ NewServer::~NewServer()
        it != handler_vec.end(); ++it)
     {
       HandlerWrapper* handler = *it;
+      assert (handler);
+
       delete handler;
       handler = 0;
     }
@@ -76,6 +83,8 @@ NewServer::~NewServer()
        it != handler_thread_vec.end(); ++it)
     {
       boost::thread* handler_thread = *it;
+      assert (handler_thread);
+
       if (handler_thread->joinable())
 	{
 	  handler_thread->interrupt();
@@ -89,11 +98,47 @@ NewServer::~NewServer()
 
 
 void
+NewServer::initialize()
+{
+  std::size_t no_neighbors = 0;
+  if (reg->neighbors != NewNeighborVecPtr())
+    {
+      no_neighbors = reg->neighbors->size();
+    }
+
+  reg->belief_state_offset = BeliefStateOffset::create(reg->system_size, reg->belief_set_size);
+  reg->message_dispatcher = NewConcurrentMessageDispatcherPtr(new NewConcurrentMessageDispatcher(reg->queue_size, no_neighbors));
+
+  reg->request_dispatcher = RequestDispatcherPtr(new RequestDispatcher(reg->message_dispatcher));
+  reg->output_dispatcher = NewOutputDispatcherPtr(new NewOutputDispatcher(reg->message_dispatcher));
+
+  if (reg->neighbors != NewNeighborVecPtr())
+    {
+      thread_factory->createNeighborThreads(reg->message_dispatcher,
+					    reg->neighbors);
+
+      reg->joiner_dispatcher = NewJoinerDispatcherPtr(new NewJoinerDispatcher(reg->message_dispatcher));
+    }
+  
+  thread_factory->createMainThreads(reg->message_dispatcher,
+				    reg->request_dispatcher,
+				    reg->output_dispatcher,
+				    reg->joiner_dispatcher);
+
+  thread_factory->createContextThreads(reg->contexts,
+				       reg->message_dispatcher,
+				       reg->request_dispatcher,
+				       reg->joiner_dispatcher);
+}
+
+
+void
 NewServer::handle_accept(const boost::system::error_code& e, 
 			 connection_ptr conn)
 {
   if (!e)
     {
+      boost::this_thread::interruption_point();
       std::cerr << "NewServer: start a new connection..." << std::endl;
       // Start an accept operation for a new connection.
       connection_ptr new_conn(new connection(acceptor.io_service()));
@@ -126,7 +171,6 @@ NewServer::handle_read_header(const boost::system::error_code& e,
 			      boost::shared_ptr<std::string> header)
 {
   //boost::mutex::scoped_lock lock(mtx);
-
   if (!e)
     {
       std::cerr << "NewServer: got header = " << *header << std::endl;
@@ -138,11 +182,13 @@ NewServer::handle_read_header(const boost::system::error_code& e,
 	  NewHandlerPtr handler(new NewHandler(ep.port()));
 	  HandlerWrapper* handler_wrapper = new HandlerWrapper();
 
+	  boost::this_thread::interruption_point();
 	  assert (reg);
 	  boost::thread* handler_thread = new boost::thread(*handler_wrapper,
 							    handler,
 							    conn,
-							    reg);
+							    reg->message_dispatcher,
+							    reg->output_dispatcher);
 
 	  handler_vec.push_back(handler_wrapper);
 	  handler_thread_vec.push_back(handler_thread);

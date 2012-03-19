@@ -1,3 +1,44 @@
+2012-03-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testSystem.cpp: Add testcase for intermediate contexts.
+
+	* testsuite/DmcsClientTest.cpp: Fix input to shutdown query.
+
+	* src/mcs/BeliefStateOffset.cpp: Disable assertion.
+
+	* src/mcs/BackwardMessage.cpp: Fix print().
+
+	* include/network/NewServer.h: Initialize threads at construction time.
+	* src/network/NewServer.cpp: Likewise.
+
+	* include/network/NewConcurrentMessageDispatcher.h: New method for create and register an mq.
+	* src/network/NewConcurrentMessageDispatcher.cpp: Likewise.
+
+	* include/network/NewThreadFactory.h: New file.
+	* src/network/NewThreadFactory.cpp: Likewise.
+
+	* include/network/Makefile.am: Add NewThreadFactory.h
+	* src/network/Makefile.am: Add NewThreadFactory.cpp.
+
+	* include/network/HandlerWrapper.h: Minimize parameters passed.
+
+	* include/mcs/Registry.h: Add lots of information into the Regitry.
+
+	* include/mcs/QueryID.h: Add unset_neighbor_id().
+
+	* include/mcs/NewJoinerDispatcher.h: Create wrapper.
+	* include/network/NewNeighborThread.h: Likewise.
+	* src/network/NewNeighborThread.cpp: Likewise.
+
+	* include/mcs/NewContext.h: Let joiner initialize the offset-index mapping
+	from neighbors' mq to its internal neighbors' index.
+	* src/mcs/NewContext.cpp: Likewise.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
+	* include/mcs/BaseJoiner.h: Fix joiner_offset.
+	* src/mcs/BaseJoiner.cpp: Likewise.
+
 2012-03-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testSystem.cpp: Fix query creation.

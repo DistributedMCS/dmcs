@@ -27,6 +27,7 @@ noinst_HEADERS =  \
 		NewNeighborThread.h \
 		NewOutputThread.h \
 		NewServer.h \
+		NewThreadFactory.h \
 		OutputThread.h \
 		OutputDispatcher.h \
 		Server.h \

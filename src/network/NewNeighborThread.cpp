@@ -63,7 +63,7 @@ NewNeighborThread::~NewNeighborThread()
 
 
 void
-NewNeighborThread::operator()(NewConcurrentMessageDispatcherPtr md)
+NewNeighborThread::startup(NewConcurrentMessageDispatcherPtr md)
 {
   boost::asio::ip::tcp::resolver resolver(*io_service);
   boost::asio::ip::tcp::resolver::query query(neighbor->hostname, neighbor->port);
@@ -182,6 +182,7 @@ NewNeighborThread::handle_read_message(const boost::system::error_code& e,
 	{
 	  ReturnedBeliefState* rbs = *it;
 	  assert (rbs);
+	  std::cerr << "NewNeighborThread::sending to NEIGHBOR_IN_MQ[" << neighbor->neighbor_offset << "]: " << *rbs << std::endl; 
 	  md->send(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, neighbor->neighbor_offset, rbs, timeout);
 	}
 

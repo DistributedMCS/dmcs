@@ -48,7 +48,8 @@ public:
   void
   operator()(NewHandlerPtr handler,
 	     connection_ptr conn,
-	     RegistryPtr reg);
+	     NewConcurrentMessageDispatcherPtr md,
+	     NewOutputDispatcherPtr od);
 };
 
 } // namespace dmcs

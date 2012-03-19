@@ -48,7 +48,8 @@ libthreads_a_SOURCES = \
 		NewOutputThread.cpp \
 		NewNeighborOut.cpp \
 		NewNeighborThread.cpp \
-		NewHandler.cpp
+		NewHandler.cpp \
+		NewThreadFactory.cpp
 
 
 # don't compile boost::message_queue for now

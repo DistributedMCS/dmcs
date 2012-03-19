@@ -31,9 +31,8 @@
 
 namespace dmcs {
 
-BaseJoiner::BaseJoiner(std::size_t c,
-		       NewNeighborVecPtr n)
-  : ctx_offset(c),
+BaseJoiner::BaseJoiner(NewNeighborVecPtr n)
+  : joiner_offset(std::numeric_limits<std::size_t>::max()),
     neighbors(n)
 {
   init();
@@ -52,6 +51,15 @@ BaseJoiner::init()
     }
 }
 
+
+
+void
+BaseJoiner::registerJoinIn(std::size_t offset,
+			   NewConcurrentMessageDispatcherPtr md)
+{
+  joiner_offset = offset;
+  md->createAndRegisterMQ(NewConcurrentMessageDispatcher::JOIN_IN_MQ, joiner_offset);
+}
 
 
 void

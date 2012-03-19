@@ -48,7 +48,7 @@ public:
   ~NewNeighborThread();
 
   void
-  operator()(NewConcurrentMessageDispatcherPtr md);
+  startup(NewConcurrentMessageDispatcherPtr md);
 
 private:
   void
@@ -73,6 +73,17 @@ private:
   NewNeighborPtr neighbor;
   boost::thread* nop_thread;    // the corresponding neighbor output thread
   boost::shared_ptr<boost::asio::io_service> io_service;
+};
+
+typedef boost::shared_ptr<NewNeighborThread> NewNeighborThreadPtr;
+
+struct NewNeighborThreadWrapper
+{
+  void
+  operator()(NewNeighborThreadPtr neighbor, NewConcurrentMessageDispatcherPtr md)
+  {
+    neighbor->startup(md);
+  }
 };
 
 } // namespace dmcs

@@ -61,8 +61,11 @@ BeliefStateOffset::BeliefStateOffset(std::size_t no_bs, std::size_t size_bs)
 BeliefStateOffset*
 BeliefStateOffset::create(std::size_t no_bs, std::size_t size_bs)
 {
-  assert (_instance == 0);
-  _instance = new BeliefStateOffset(no_bs, size_bs);
+  //assert (_instance == 0);
+  if (_instance == 0)
+    {
+      _instance = new BeliefStateOffset(no_bs, size_bs);
+    }
   return _instance;
 }
 

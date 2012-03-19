@@ -31,6 +31,7 @@
 #define NEW_JOINER_DISPATCHER_H
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 
 #include "mcs/NewBaseDispatcher.h"
 #include "mcs/JoinIn.h"
@@ -47,7 +48,7 @@ public:
   { }
 
   void
-  operator()()
+  startup()
   {
     while (1)
       {
@@ -69,11 +70,21 @@ public:
 	    
 	    md->send(NewConcurrentMessageDispatcher::JOIN_IN_MQ, offset, rbs, timeout);
 	  }
+	boost::this_thread::interruption_point();
       }
   }
 };
 
 typedef boost::shared_ptr<NewJoinerDispatcher> NewJoinerDispatcherPtr;
+
+struct NewJoinerDispatcherWrapper
+{
+  void
+  operator()(NewJoinerDispatcherPtr joiner_dispatcher)
+  {
+    joiner_dispatcher->startup();
+  }
+};
 
 } // namespace dmcs
 
