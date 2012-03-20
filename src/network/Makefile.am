@@ -44,6 +44,7 @@ libthreads_a_SOURCES = \
 		RelSatSolverThread.cpp \
 		OutputDispatcher.cpp \
 		JoinerDispatcher.cpp \
+		NewClient.cpp \
 		NewConcurrentMessageDispatcher.cpp \
 		NewOutputThread.cpp \
 		NewNeighborOut.cpp \

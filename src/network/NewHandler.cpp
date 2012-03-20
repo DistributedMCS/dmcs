@@ -130,7 +130,8 @@ NewHandler::handle_read_header(const boost::system::error_code& e,
 
   if (!e)
     {
-      if (header->find(HEADER_REQ_DMCS) != std::string::npos)
+      if (header->find(HEADER_REQ_DMCS) != std::string::npos 
+	  || header->find(HEADER_NEXT) != std::string::npos)
 	{
 	  ForwardMessage* mess = new ForwardMessage;
 	  conn->async_read(*mess,

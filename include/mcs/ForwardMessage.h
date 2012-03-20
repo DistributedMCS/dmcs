@@ -30,6 +30,8 @@
 #ifndef FORWARD_MESSAGE_H
 #define FORWARD_MESSAGE_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "mcs/Printhelpers.h"
 #include "mcs/NewMessage.h"
 
@@ -73,6 +75,8 @@ struct ForwardMessage :
   std::size_t k1;         // The invoker wants models from k1 to k2
   std::size_t k2;
 };
+
+typedef boost::shared_ptr<ForwardMessage> ForwardMessagePtr;
 
 } // namespace dmcs
 

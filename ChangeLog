@@ -1,3 +1,15 @@
+2012-03-20  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Makefile.am: Add NewClient.h.
+	* src/network/Makefile.am: Add NewClient.cpp.
+
+	* src/network/NewHandler.cpp: Also accept HEADER_NEXT.
+
+	* include/network/NewClient.h: New file.
+	* src/network/NewClient.cpp: Likewise.
+
+	* include/mcs/ForwardMessage.h: Add Ptr type.
+
 2012-03-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* include/mcs/NewBaseDispatcher.h: Move message_dispatcher out ouf dispatcher.
