@@ -183,24 +183,34 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
 
 
       NewBeliefState* input = rbs->belief_state;
-      DBGLOG(DBG, "NewContext::intermediate_process_request: got input = " << *input);
+      DBGLOG(DBG, "NewContext::intermediate_process_request(): got input = " << *input);
       Heads* heads = evaluate_bridge_rules(bridge_rules, input, k1, k2,
 					   BeliefStateOffset::instance()->getStartingOffsets());      
 
+      DBGLOG(DBG, "NewContext::intermediate_process_request(): heads = " << *(heads->getHeads()));
       // send heads to Evaluator
       int timeout = 0;
       md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);
       
-      std::size_t models_counter = read_and_send(parent_qid, eval, md);
+      std::size_t models_sent = read_and_send(parent_qid, eval, md);
+      std::size_t models_counter = eval->getModelsCounter();
 
-      if (models_counter < k2 - k1 + 1)
+      if (models_sent == 0)
 	{
-	  k2 = k2 - models_counter - k1 + 1;
+	  DBGLOG(DBG, "DLVEvaluator::intermediate_process_request(): models_counter = " << models_counter);
+	  DBGLOG(DBG, "DLVEvaluator::intermediate_process_request(): models_sent    = " << models_sent);
+	  assert (models_counter < k1);
+	  k2 -= models_counter;
+	  k1 -= models_counter;
+	}
+      else if (models_sent < k2 - k1 + 1)
+	{
+	  k2 = k2 - models_sent - k1 + 1;
 	  k1 = 1;
 	}
       else
 	{
-	  assert (models_counter == k2 - k1 + 1);
+	  assert (models_sent == k2 - k1 + 1);
 	  break;
 	}
     }

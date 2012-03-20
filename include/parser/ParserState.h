@@ -50,7 +50,9 @@ struct ParserState
       current(new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(), 
 				 BeliefStateOffset::instance()->SIZE_BS())),
       adder(a)
-  { }
+  {
+    current->setEpsilon(ctx_id, BeliefStateOffset::instance()->getStartingOffsets());
+  }
 };
 
 } // namespace dmcs

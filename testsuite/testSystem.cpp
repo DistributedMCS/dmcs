@@ -36,8 +36,8 @@
 #include "dmcs/DLVInstantiator.h"
 #include "dmcs/DLVEvaluator.h"
 #include "mcs/RequestDispatcher.h"
+#include "network/NewClient.h"
 #include "network/NewConcurrentMessageDispatcher.h"
-
 #include "network/NewServer.h"
 
 #define BOOST_TEST_DYN_LINK
@@ -102,8 +102,9 @@ run_server(std::size_t server_port, const RegistryPtr reg)
 
 
 void
-run_client(std::string server_port, ForwardMessage* ws1, ForwardMessage* ws2)
+run_client(std::string server_port, ForwardMessage& want_send)
 {
+  std::string header = HEADER_REQ_DMCS;
   std::string host_name = "localhost";
   boost::asio::io_service io_service_client;
   boost::asio::ip::tcp::resolver resolver(io_service_client);
@@ -111,7 +112,16 @@ run_client(std::string server_port, ForwardMessage* ws1, ForwardMessage* ws2)
   boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
   boost::asio::ip::tcp::endpoint endpoint_client = *it;
 
-  DmcsClientTest c(io_service_client, it, ws1, ws2);
+  NewClient c(io_service_client, it, header, want_send);
+  io_service_client.run();
+  io_service_client.reset();
+
+  std::size_t invoker = invoker_from_qid(want_send.qid);
+  std::size_t neighbor_id = neighbor_id_from_qid(want_send.qid);
+  std::size_t end_qid = shutdown_query_id(invoker, neighbor_id);
+  ForwardMessage end_mess(end_qid);
+
+  c.terminate(end_mess);
   io_service_client.run();
 
   std::cerr << "exit from run_client" << std::endl;
@@ -350,11 +360,10 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   std::size_t k21 = 2;
   std::size_t k22 = 7;
 
-  ForwardMessage* ws1 = new ForwardMessage(qid1, k11, k12);
-  ForwardMessage* ws2 = new ForwardMessage(qid1, k21, k22);
+  ForwardMessage want_send(qid1, k11, k12);
 
   std::cerr << "Starting client..." << std::endl;
-  boost::thread client_thread(run_client, port1, ws1, ws2);  
+  boost::thread client_thread(run_client, port1, want_send);
 
   client_thread.join();
 }

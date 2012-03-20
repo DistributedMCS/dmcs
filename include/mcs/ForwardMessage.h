@@ -49,8 +49,8 @@ struct ForwardMessage :
   ForwardMessage(const ForwardMessage& fMess);
 
   ForwardMessage(std::size_t qid,
-		 std::size_t k_one,
-		 std::size_t k_two);
+		 std::size_t k_one = 0,
+		 std::size_t k_two = 0);
 
   std::size_t
   getPackSize() const;

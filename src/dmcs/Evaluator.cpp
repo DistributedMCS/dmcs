@@ -73,10 +73,17 @@ Evaluator::getOutQueue() const
 
 
 
+std::size_t
+Evaluator::getModelsCounter() const
+{
+  return models_counter;
+}
+
+
 void
-Evaluator::operator()(std::size_t ctx_id,
-		      BeliefTablePtr btab,
-		      NewConcurrentMessageDispatcherPtr md)
+Evaluator::startup(std::size_t ctx_id,
+		   BeliefTablePtr btab,
+		   NewConcurrentMessageDispatcherPtr md)
 {
   while (1)
     {

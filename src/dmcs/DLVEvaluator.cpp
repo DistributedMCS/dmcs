@@ -113,18 +113,19 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
   if (head_input)
     {
       std::size_t pos = head_input->getFirst();
-      do
+      while (pos)      
 	{
 	  IDKind kind = ID::MAINKIND_BELIEF | ctx_id;
 	  IDAddress address = pos;
 	  
 	  ID id(kind, address);
 	  const Belief& belief = btab->getByID(id);
+
+	  DBGLOG(DBG, "DLVEvaluator::reset_process(): Add " << belief.text << " into program stream.");
 	  
 	  programStream << belief.text << ".\n";
 	  pos = head_input->getNext(pos);
 	}
-      while (pos);
     }
 
   programStream.flush();

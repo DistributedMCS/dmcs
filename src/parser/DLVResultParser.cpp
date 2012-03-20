@@ -79,7 +79,7 @@ DLVResultParser::parse(std::istream& is,
 	      errors++;
 	    }
 	}
-      catch(const qi::expectation_failure<forward_iterator_t>& e)
+      catch (const qi::expectation_failure<forward_iterator_t>& e)
 	{
 	  DBGLOG(ERROR, "DLVResultParser::parse(): For input '" << input 
 		 << "': could not parse DLV output(expectation failure) " << e.what_);

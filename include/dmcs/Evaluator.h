@@ -62,11 +62,14 @@ public:
   std::size_t
   getOutQueue() const;
 
+  std::size_t
+  getModelsCounter() const;
+
   // this starts the evaluator thread
   void
-  operator()(std::size_t ctx_id, 
-	     BeliefTablePtr btab,
-	     NewConcurrentMessageDispatcherPtr md);
+  startup(std::size_t ctx_id, 
+	  BeliefTablePtr btab,
+	  NewConcurrentMessageDispatcherPtr md);
 
   //protected:
   virtual void
@@ -85,6 +88,21 @@ protected:
   std::size_t models_counter;
   Heads* current_heads;
   bool initialized;
+};
+
+typedef boost::shared_ptr<Evaluator> EvaluatorPtr;
+
+struct EvaluatorWrapper
+{
+  void
+  operator()(EvaluatorPtr eval,
+	     std::size_t ctx_id, 
+	     BeliefTablePtr btab,
+	     NewConcurrentMessageDispatcherPtr md)
+  {
+    eval->startup(ctx_id, btab, md);
+  }
+
 };
 
 } // namespace dmcs
