@@ -1,3 +1,13 @@
+2012-03-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testSystem.cpp: Adapt testcase for leaf context.
+
+	* include/network/NewOutputThread.h: Fix synchronization problem.
+	* src/network/NewOutputThread.cpp: Likewise.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* include/mcs/NewOutputDispatcher.h: Add logging information.
+
 2012-03-20  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testSystem.cpp: Adapt testcase using NewClient.

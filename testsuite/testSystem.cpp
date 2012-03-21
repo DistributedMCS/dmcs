@@ -129,95 +129,50 @@ run_client(std::string server_port, ForwardMessage& want_send)
 
 BOOST_AUTO_TEST_CASE ( testLeafSystem )
 {
-#if 0
-  std::size_t NO_BS = 2;
+  std::size_t SYSTEM_SIZE = 2;
   std::size_t BS_SIZE = 10;
-  BeliefStateOffset* bso = BeliefStateOffset::create(NO_BS, BS_SIZE);
+  std::size_t QUEUE_SIZE = 10;
 
   std::string kbspec;
   BeliefTablePtr btab(new BeliefTable);
 
-  std::size_t QUEUE_SIZE = 10;
-  std::size_t NO_NEIGHBORS = 0;
-
-  NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
-
   // setup a leaf context
-  std::size_t invoker0 = 0;
-  std::size_t ctx_id1 = 1;
+  std::size_t invoker0 = 1000;
+  std::size_t ctx_id1 = 0;
   init_local_kb(ctx_id1, kbspec, btab);
 
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
-
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
-
-
-  NewOutputDispatcherPtr output_dispatcher(new NewOutputDispatcher(md));
-  std::cerr << "Starting output dispatcher thread... " << output_dispatcher.get() << std::endl;
-  NewOutputDispatcherWrapper output_dispatcher_wrapper;
-  boost::thread* output_dispatcher_thread = new boost::thread(output_dispatcher_wrapper, output_dispatcher);
-
-
-  std::cerr << "Starting request dispatcher thread..." << std::endl;
-  RequestDispatcherPtr request_dispatcher(new RequestDispatcher(md));
-  RequestDispatcherWrapper request_dispatcher_wrapper;
-  boost::thread* request_dispatcher_thread = new boost::thread(request_dispatcher_wrapper, request_dispatcher);
 
   std::cerr << "Starting context..." << std::endl;
   NewContextPtr ctx(new NewContext(ctx_id1, dlv_inst, btab));
-  NewContextWrapper context_wrapper;
-  boost::thread* context_thread = new boost::thread(context_wrapper, ctx, md, request_dispatcher);
-
-  // needs some time for the context thread to start up and register its REQUEST_MQ to md
-  boost::posix_time::milliseconds context_starting_up(100);
-  boost::this_thread::sleep(context_starting_up);
-  RegistryPtr reg(new Registry(md, output_dispatcher));
+  NewContextVecPtr ctxs(new NewContextVec);
+  ctxs->push_back(ctx);
+  
+  RegistryPtr reg(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, ctxs));
 
   std::cerr << "Starting server..." << std::endl;
   // start the server
   std::string port = "5555";
   std::size_t server_port = 5555;
-  boost::thread* server_thread = new boost::thread(run_server, server_port, reg);
+  boost::thread server_thread(run_server, server_port, reg);
 
   boost::posix_time::milliseconds server_starting_up(200);
   boost::this_thread::sleep(server_starting_up);
 
   std::size_t query_order1 = 1;
-  std::size_t query_order2 = 2;
   std::size_t qid1 = query_id(invoker0, ctx_id1, query_order1);
-  std::size_t qid2 = query_id(invoker0, ctx_id1, query_order2);
 
-  std::size_t k11 = 1;
-  std::size_t k12 = 5;
-  std::size_t k21 = 2;
-  std::size_t k22 = 7;
+  std::size_t k1 = 1;
+  std::size_t k2 = 5;
 
-  ForwardMessage* ws1 = new ForwardMessage(qid1, k11, k12);
-  ForwardMessage* ws2 = new ForwardMessage(qid1, k21, k22);
+  ForwardMessage want_send(qid1, k1, k2);
 
   std::cerr << "Starting client..." << std::endl;
-  boost::thread* client_thread = new boost::thread(run_client, port, ws1, ws2);
+  boost::thread client_thread(run_client, port, want_send);
 
-
-  client_thread->join();
-  std::cerr << "Join client." << std::endl;
-
-  context_thread->join();
-  std::cerr << "Join context." << std::endl;
-
-  request_dispatcher_thread->interrupt();
-  request_dispatcher_thread->join();
-  std::cerr << "Join request dispatcher." << std::endl;
-
-  output_dispatcher_thread->interrupt();
-  output_dispatcher_thread->join();
-  std::cerr << "Join output dispatcher." << std::endl;
-
-  server_thread->interrupt();
-  server_thread->join();
-  std::cerr << "Join server." << std::endl;
-#endif
+  client_thread.join();
 }
 
 
@@ -351,16 +306,12 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
 
   std::size_t invoker0 = 1000;
   std::size_t query_order1 = 1;
-  std::size_t query_order2 = 2;
   std::size_t qid1 = query_id(invoker0, ctx_id1, query_order1);
-  std::size_t qid2 = query_id(invoker0, ctx_id1, query_order2);
 
-  std::size_t k11 = 1;
-  std::size_t k12 = 5;
-  std::size_t k21 = 2;
-  std::size_t k22 = 7;
+  std::size_t k1 = 1;
+  std::size_t k2 = 5;
 
-  ForwardMessage want_send(qid1, k11, k12);
+  ForwardMessage want_send(qid1, k1, k2);
 
   std::cerr << "Starting client..." << std::endl;
   boost::thread client_thread(run_client, port1, want_send);

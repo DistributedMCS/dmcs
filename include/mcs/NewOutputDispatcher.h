@@ -34,6 +34,7 @@
 #include <boost/thread.hpp>
 
 #include "mcs/NewBaseDispatcher.h"
+#include "mcs/Logger.h"
 #include "mcs/QueryID.h"
 #include "mcs/ReturnedBeliefState.h"
 
@@ -62,7 +63,7 @@ public:
 	  }
 
 	std::size_t ctx_id = ctxid_from_qid(qid);
-	//std::cerr << "NewOutputDispatcher = " << this << std::endl;
+	DBGLOG(DBG, "NewOutputDispatcher::startup(): send to ctx_id = " << ctx_id);
 	std::size_t offset = get_offset(ctx_id);
 	md->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, offset, returned_bs, 0);
 

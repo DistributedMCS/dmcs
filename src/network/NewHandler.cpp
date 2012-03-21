@@ -90,8 +90,9 @@ NewHandler::handle_read_message(const boost::system::error_code& e,
 	  std::size_t qid = mess->qid;
 	  std::size_t invoker = invoker_from_qid(qid);
 	  output_sender = NewOutputThreadPtr(new NewOutputThread(port, invoker));
+	  output_sender->init_mq(md, od);
 	  NewOutputWrapper output_wrapper;
-	  output_thread = new boost::thread(output_wrapper, output_sender, conn, md, od);	  
+	  output_thread = new boost::thread(output_wrapper, output_sender, conn, md);	  
 	}
 
       DBGLOG(DBG, "NewHandler: Got message = " << *mess);

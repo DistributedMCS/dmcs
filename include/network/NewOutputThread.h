@@ -49,13 +49,14 @@ public:
 
   void
   startup(connection_ptr c,
-	  NewConcurrentMessageDispatcherPtr md,
+	  NewConcurrentMessageDispatcherPtr md);
+
+
+  void
+  init_mq(NewConcurrentMessageDispatcherPtr md,
 	  NewOutputDispatcherPtr od);
 
 private:
-  void
-  init_mq(NewConcurrentMessageDispatcherPtr md);
-
   void
   write_result(connection_ptr c,
 	       ReturnedBeliefStateListPtr output_list);
@@ -79,10 +80,9 @@ struct NewOutputWrapper
   void
   operator()(NewOutputThreadPtr output_sender,
 	     connection_ptr conn,
-	     NewConcurrentMessageDispatcherPtr md,
-	     NewOutputDispatcherPtr od)    
+	     NewConcurrentMessageDispatcherPtr md)
   {
-    output_sender->startup(conn, md, od);
+    output_sender->startup(conn, md);
   }
 };
 

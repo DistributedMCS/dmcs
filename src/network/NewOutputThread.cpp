@@ -48,7 +48,8 @@ NewOutputThread::~NewOutputThread()
 
 
 void
-NewOutputThread::init_mq(NewConcurrentMessageDispatcherPtr md)
+NewOutputThread::init_mq(NewConcurrentMessageDispatcherPtr md,
+			 NewOutputDispatcherPtr od)
 {
   if (!initialized)
     {      
@@ -56,6 +57,7 @@ NewOutputThread::init_mq(NewConcurrentMessageDispatcherPtr md)
       DBGLOG(DBG, "NewOutputThread::init_mq(): For invoker = " << invoker_id << ", got offset = " << offset);
       initialized = true;
     }
+  od->registerIdOffset(invoker_id, offset);
 }
 
 
@@ -80,11 +82,8 @@ NewOutputThread::clean_up(ReturnedBeliefStateListPtr output_list)
 
 void
 NewOutputThread::startup(connection_ptr conn,
-			 NewConcurrentMessageDispatcherPtr md,
-			 NewOutputDispatcherPtr od)
+			 NewConcurrentMessageDispatcherPtr md)
 {
-  init_mq(md);
-  od->registerIdOffset(invoker_id, offset);
   ReturnedBeliefStateListPtr output_list(new ReturnedBeliefStateList);
 
   int timeout = 0;
