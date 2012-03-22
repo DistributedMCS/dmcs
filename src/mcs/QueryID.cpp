@@ -51,6 +51,14 @@ QueryID::setupMask(std::size_t& mask,
 
 QueryID::QueryID()
 {
+  // for a 64-bit integer:
+  //  4 bits for query type
+  // 30 bits for query order
+  // 10 bits for context id
+  // 10 bits for neighbor offset
+  // 10 bits for neighbor id
+  // We don't expect more than 2^10 contexts
+
   std::size_t s = sizeof(std::size_t)*8;
   std::size_t query_order_length = 30;
 

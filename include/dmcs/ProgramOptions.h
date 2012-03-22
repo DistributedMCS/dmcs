@@ -62,7 +62,8 @@ namespace dmcs {
 #define MQ_SIZE          "mq_size"
 #define CONFLICTS_DRIVEN "cd"
 #define MAX_RESOURCES    "reso"
-
+#define K1               "k1"
+#define K2               "k2"
 
 } // namespace dmcs
 

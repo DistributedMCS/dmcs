@@ -1,3 +1,11 @@
+2012-03-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/mcs/QueryID.cpp: Add some comments.
+
+	* include/dmcs/ProgramOptions.h: Add options for k1, k2.
+
+	* src/new_dmcsc.cpp: New file.
+
 2012-03-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* testsuite/testSystem.cpp: Adapt testcase for leaf context.
