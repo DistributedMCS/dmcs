@@ -27,6 +27,7 @@ LIBS = \
 TESTS = \
 	testClasp \
 	testBeliefComparison \
+	testQueryPlanParser \
 	testParsers \
 	testTranslation \
 	testSignature \
@@ -66,6 +67,7 @@ TESTS_ENVIRONMENT = \
 check_PROGRAMS = \
 	testClasp \
 	testBeliefComparison \
+	testQueryPlanParser \
 	testParsers \
 	testTranslation \
 	testSignature \
@@ -113,6 +115,9 @@ testClasp_LDADD = \
 
 testBeliefComparison_SOURCES = testBeliefComparison.cpp
 testBeliefComparison_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+
+testQueryPlanParser_SOURCES = testQueryPlanParser.cpp QueryPlanParser.cpp QueryPlan.cpp
+testQueryPlanParser_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 testParsers_SOURCES = testParsers.cpp
 testParsers_LDADD = \

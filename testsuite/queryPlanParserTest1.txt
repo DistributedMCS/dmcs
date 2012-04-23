@@ -1,0 +1,97 @@
+# collection of contexts
+[
+{
+  ContextId: 1,
+
+  # entities used for grouding this context
+  Constants: [c1,c2,c3,c4], 
+  
+  # grouping constants into constant categories
+  # implicit: constant = category containing that constant
+  # -> constants cannot be predicate names!
+  ConstantCategories:
+  [
+    {Category: cat1, Constants: [c1,c2]},
+    {Category: cat2, Constants: [c2,c3]}
+  ],
+  
+  # predicates used as beliefs of this context
+  Predicates: 
+  [
+    {Pred: a1, Arity: 1}, 
+    {Pred: a2, Arity: 2}
+  ], 
+
+  # which predicates are grounded with which constant categories
+  Filters: 
+  [
+    {Name:a, Pred:a1, Arguments:
+      [
+        {Position:1, Using:[c1,c3]}
+      ]
+    },
+    {Name:b, Pred:a2, Arguments:
+      [
+        {Position:1, Using:[c1,c2]},
+        {Position:2, Using:[cat2]},
+      ]
+    }
+  ],
+
+  # above this line = input for grounding
+  # below = output of local grounding
+
+  # belief signature of this context (only given for local context)
+  # belief_ID:[constants_of_ground_atom]
+  LocalSignature:
+  {
+    # we could use a more structured representation like
+    # {Pred: a1, Extension: { 1:[b3,b4], 2:[b2,b3] } }
+    # to represent 1:[a1,b3,b4] and 2:[a1,b2,b3]
+    # but we do not, because we want to avoid the following:
+    # {Pred: a1, Extension: { 1:[] } } for 1:[a1]
+    1: [a1,c1],
+    2: [a1,c3],
+    3: [a2,c1,c2],
+    4: [a2,c1,c3],
+    5: [a2,c2,c2],
+    6: [a2,c2,c3]
+  },
+
+  # above this line = output of local grounding
+  # below = output of optimization and projection calculation
+
+  # input signature for this context (we ask beliefs from ourself via bridge rules)
+  # belief_ID:[constants_of_ground_atom]
+  InputSignature:
+  {
+    # we only ask ourself for pred a1/1
+    1: [a1,c1],
+    2: [a1,c3]
+  },
+
+  # if we reply to ourself,
+  # which id's of each context to we send (=project to these id's)
+  # context_id:[id_s_of_context_to_project_to]
+  OutputProjection:
+  {
+    1: [3,4],
+    2: [27,410],
+  }
+},
+{
+  ContextId: 2,
+  OutputProjection:
+  {
+    1: [1,2,3],
+  }
+},
+{
+  ContextId: 3,
+  OutputProjection:
+  {
+    1: [2,3,4],
+  }
+},
+]
+
