@@ -1,0 +1,82 @@
+[
+{
+  ContextId: 2,
+
+  Constants: [c1,c2,c3,c4,c5,c6],
+
+  ConstantCategories:
+  [
+    {Category: cat1, Constants: [c1,c2,c3]},
+    {Category: cat2, Constants: [c4,c5,c6]}
+  ],
+
+  Predicates:
+  [
+    {Pred: b, Arity: 1},
+    {Pred: dom, Arity: 2}
+  ],
+
+  Filters:
+  [
+    { Name: filter_b, Pred: b, Arguments: [ {Position: 1, Using:[cat1]} ] },
+    { Name: filter_dom, Pred: dom, Arguments:
+      [
+        {Position:1, Using:[c1,c2,c3]},
+	{Position:2, Using:[cat2]}
+      ]
+    }
+  ],
+
+  LocalSignature:
+  [
+    {Pred: b, Extension:
+      {
+        1: [c1,c4],
+	2: [c2,c5],
+	3: [c3,c6]
+      }
+    },
+    {Pred:dom, Extension:
+      {
+        4: [c1,c4],
+	5: [c2,c5],
+	6: [c3,c6]
+      }
+    }
+  ],
+
+  InputSignature:
+  [
+    {
+      ContextId: 3,
+      {Pred: c, Extension:
+        {
+	  1: [c1,c4],
+	  2: [c2,c5],
+	  3: [c3,c6]
+	}
+      }
+    },
+
+    {
+      ContextId: 5,
+      {Pred: e, Extension:
+        {
+	  4: [c1,c4],
+	  5: [c2,c5],
+	  6: [c3,c6]
+	}
+      }
+    }
+  ],
+
+  OutputProjection:
+  [
+    ContextId: user,
+    Ids:
+    {
+      2: [1,2,3]
+    }
+  ]
+}
+]
