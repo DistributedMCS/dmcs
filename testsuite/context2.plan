@@ -28,55 +28,32 @@
   ],
 
   LocalSignature:
-  [
-    {Pred: b, Extension:
-      {
-        1: [c1,c4],
-	2: [c2,c5],
-	3: [c3,c6]
-      }
-    },
-    {Pred:dom, Extension:
-      {
-        4: [c1,c4],
-	5: [c2,c5],
-	6: [c3,c6]
-      }
-    }
-  ],
+  {
+    1: [b,c1],
+    2: [b,c2],
+    3: [b,c3],
+    4: [dom,c1,c4],
+    5: [dom,c2,c5],
+    6: [dom,c3,c6]
 
+  }
+},
+
+{
+  ContextId: 3,
   InputSignature:
-  [
-    {
-      ContextId: 3,
-      {Pred: c, Extension:
-        {
-	  1: [c1,c4],
-	  2: [c2,c5],
-	  3: [c3,c6]
-	}
-      }
-    },
+  {
+    1: [c,c1,c4],
+    2: [c,c2,c5],
+    3: [c,c3,c6]
+  }
+},
 
-    {
-      ContextId: 5,
-      {Pred: e, Extension:
-        {
-	  4: [c1,c4],
-	  5: [c2,c5],
-	  6: [c3,c6]
-	}
-      }
-    }
-  ],
-
+{
+  ContextId: user,
   OutputProjection:
-  [
-    ContextId: user,
-    Ids:
-    {
-      2: [1,2,3]
-    }
-  ]
+  {
+    2: [1,2,3]
+  }
 }
 ]
