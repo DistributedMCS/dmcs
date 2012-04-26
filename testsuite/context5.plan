@@ -1,0 +1,74 @@
+[
+{
+  ContextId: 5,
+
+  Constants: [c1,c2,c3,c4,c5,c6],
+
+  ConstantCategories:
+  [
+    {Category: cat1, Constants: [c1,c2,c3]},
+    {Category: cat2, Constants: [c4,c5,c6]}
+  ],
+
+  Predicates:
+  [
+    {Pred: e, Arity: 2},
+    {Pred: f, Arity: 2},
+    {Pred: p, Arity: 2}
+  ],
+
+  Filters:
+  [
+    { Name: filter_e, Pred: e, Arguments:
+      [
+        {Position:1, Using:[cat1]},
+	{Position:2, Using:[c4,c5,c6]}
+      ]
+    },
+
+    { Name: filter_f, Pred: f, Arguments:
+      [
+        {Position:1, Using:[cat1]},
+	{Position:2, Using:[c4,c5,c6]}
+      ]
+    },
+
+    { Name: filter_p, Pred: p, Arguments:
+      [
+        {Position:1, Using:[cat1]},
+	{Position:2, Using:[c4,c5,c6]}
+      ]
+    }
+  ],
+
+  LocalSignature:
+  {
+    1: [e,c1,c4],
+    2: [e,c2,c5],
+    3: [e,c3,c6],
+    4: [f,c1,c4],
+    5: [f,c2,c5],
+    6: [f,c3,c6],
+    7: [p,c1,c4],
+    8: [p,c2,c5],
+    9: [p,c3,c6]
+
+  }
+},
+
+{
+  ContextId: 3,
+  OutputProjection:
+  {
+    5: [4,5,6,7,8,9]
+  }
+},
+
+{
+  ContextId: 4,
+  OutputProjection:
+  {
+    5: [4,5,6,7,8,9]
+  }
+}
+]
