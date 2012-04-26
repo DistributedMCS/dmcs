@@ -320,6 +320,125 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
 }
 
 
+BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
+{
+  std::size_t SYSTEM_SIZE = 6;
+  std::size_t BS_SIZE = 10;
+  std::size_t QUEUE_SIZE = 10;
+
+  std::size_t ctx_id1 = 1;
+  std::size_t ctx_id2 = 2;
+  std::size_t ctx_id3 = 3;
+  std::size_t ctx_id4 = 4;
+  std::size_t ctx_id5 = 5;
+
+  std::string ctx_hostname1 = "localhost";
+  std::string ctx_hostname2 = "localhost";
+  std::string ctx_hostname3 = "localhost";
+  std::string ctx_hostname4 = "localhost";
+  std::string ctx_hostname5 = "localhost";
+
+  std::string port1 = "7001";
+  std::string port2 = "7002";
+  std::string port3 = "7003";
+  std::string port4 = "7004";
+  std::string port5 = "7005";
+
+  std::size_t ctx_port1 = 7001;
+  std::size_t ctx_port2 = 7002;
+  std::size_t ctx_port3 = 7003;
+  std::size_t ctx_port4 = 7004;
+  std::size_t ctx_port5 = 7005;
+
+  /************************** CONTEXT 5 **************************/
+  BeliefTablePtr btab55(new BeliefTable);
+
+  //const char* ex = getenv("EXAMPLESDIR");
+  //assert (ex != 0);
+  //kbspec5 = ex;
+  //kbspec5 += "/context5.lp";
+  kbspec5 = "../../examples/context5.lp";
+
+  Belief belief_epsilon55(ctx_id5, "epsilon");
+  Belief belief_pc1c4_55(ctx_id5, "p(c1,c4)");
+  Belief belief_pc2c5_55(ctx_id5, "p(c2,c5)");
+  Belief belief_pc3c6_55(ctx_id5, "p(c3,c6)");
+  Belief belief_ec1c4_55(ctx_id5, "e(c1,c4)");
+  Belief belief_ec2c5_55(ctx_id5, "e(c2,c5)");
+  Belief belief_ec3c6_55(ctx_id5, "e(c3,c6)");
+  Belief belief_fc1c4_55(ctx_id5, "f(c1,c4)");
+  Belief belief_fc2c5_55(ctx_id5, "f(c2,c5)");
+  Belief belief_fc3c6_55(ctx_id5, "f(c3,c6)");
+
+
+  ID id_epsilon55 = btab55->storeAndGetID(belief_epsilon55);
+  ID id_pc1c4_55  = btab55->storeAndGetID(belief_pc1c4_55);
+  ID id_pc2c5_55  = btab55->storeAndGetID(belief_pc2c5_55);
+  ID id_pc3c6_55  = btab55->storeAndGetID(belief_pc3c6_55);
+  ID id_ec1c4_55  = btab55->storeAndGetID(belief_ec1c4_55);
+  ID id_ec2c5_55  = btab55->storeAndGetID(belief_ec2c5_55);
+  ID id_ec3c6_55  = btab55->storeAndGetID(belief_ec3c6_55);
+  ID id_fc1c4_55  = btab55->storeAndGetID(belief_fc1c4_55);
+  ID id_fc2c5_55  = btab55->storeAndGetID(belief_fc2c5_55);
+  ID id_fc3c6_55  = btab55->storeAndGetID(belief_fc3c6_55);
+
+  EnginePtr dlv_engine5 = DLVEngine::create();
+  EngineWPtr dlv_engine_wp5(dlv_engine5);
+  InstantiatorPtr dlv_inst5 = dlv_engine5->createInstantiator(dlv_engine_wp5, kbspec5);
+
+  NewContextPtr ctx5(new NewContext(ctx_id5, dlv_inst5, btrab55));
+  NewContextVecPtr contexts5(new NewContextVec);
+  contexts5->push_back(ctx_5);
+
+  RegistryPtr reg5(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, reg5));
+  
+
+  boost::thread server_thread5(run_server, ctx_port5, reg5);
+  boost::posix_time::milliseconds server_starting_up5(200);
+  boost::this_thread::sleep(server_starting_up5);
+
+  /************************** CONTEXT 4 **************************/
+  BeliefTablePtr btab44(new BeliefTable);
+  //kbspec4 = ex;
+  //kbspec4 += "/context4.lp";
+  kbspec4 = "../../examples/context4.lp";
+
+  Belief belief_epsilon44(ctx_id4, "epsilon");
+  Belief belief_dc1c4_44(ctx_id4, "d(c1,c4)");
+  Belief belief_dc2c5_44(ctx_id4, "d(c2,c5)");
+  Belief belief_dc3c6_44(ctx_id4, "d(c3,c6)");
+  Belief belief_dprimec1c4_44(ctx_id4, "dprime(c1,c4)");
+  Belief belief_dprimec2c5_44(ctx_id4, "dprime(c2,c5)");
+  Belief belief_dprimec3c6_44(ctx_id4, "dprime(c3,c6)");
+
+  ID id_epsilon44 = btab44->storeAndGetID(belief_epsilon44);
+  ID id_dc1c4 = btab44->storeAndGetID(belief_dc1c4_44);
+  ID id_dc2c5 = btab44->storeAndGetID(belief_dc2c5_44);
+  ID id_dc3c6 = btab44->storeAndGetID(belief_dc3c6_44);
+  ID id_dprimec1c4 = btab44->storeAndGetID(belief_dprimec1c4_44);
+  ID id_dprimec2c5 = btab44->storeAndGetID(belief_dprimec2c5_44);
+  ID id_dprimec3c6 = btab44->storeAndGetID(belief_dprimec3c6_44);
+
+  BeliefTablePtr btab54(new BeliefTable);
+  ID id_epsilon54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 0);
+  ID id_ec1c4_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 4);
+  ID id_ec2c5_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 5);
+  ID id_ec3c6_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 6);
+  ID id_fc1c4_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 7);
+  ID id_fc2c5_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 8);
+  ID id_fc3c6_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 9);
+
+  BOOST_CHECK_EQUAL(id_epsilon54, id_epsilon_55);
+  BOOST_CHECK_EQUAL(id_ec1c4_54, id_ec1c4_55);
+  BOOST_CHECK_EQUAL(id_ec2c5_54, id_ec2c5_55);
+  BOOST_CHECK_EQUAL(id_ec3c6_54, id_ec3c6_55);
+  BOOST_CHECK_EQUAL(id_fc1c4_54, id_fc1c4_55);
+  BOOST_CHECK_EQUAL(id_fc2c5_54, id_fc2c5_55);
+  BOOST_CHECK_EQUAL(id_fc3c6_54, id_fc3c6_55);
+  
+  // add to btab54 using the new method
+}
+
 // Local Variables:
 // mode: C++
 // End:
