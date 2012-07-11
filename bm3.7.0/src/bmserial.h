@@ -1269,7 +1269,7 @@ unsigned deseriaizer_base<DEC>::read_gap_block(decoder_type&   decoder,
     case set_block_arrgap_egamma:
     case set_block_arrgap_egamma_inv:
         {
-        	unsigned arr_len = read_id_list(decoder, block_type, id_array_);
+        	unsigned arr_len = deseriaizer_base<DEC>::read_id_list(decoder, block_type, id_array_);
             dst_block[0] = 0;
             gap_len = gap_set_array(dst_block, id_array_, arr_len);
         }
@@ -1381,7 +1381,7 @@ deserializer<BV, DEC>::deserialize_gap(unsigned char btype, decoder_type& dec,
     case set_block_arrgap: 
     case set_block_arrgap_egamma:
         {
-        	unsigned arr_len = read_id_list(dec, btype, this->id_array_);
+        	unsigned arr_len = deseriaizer_base<DEC>::read_id_list(dec, btype, this->id_array_);
             gap_len = gap_set_array(gap_temp_block_, this->id_array_, arr_len);
             break;
         }
@@ -1390,7 +1390,7 @@ deserializer<BV, DEC>::deserialize_gap(unsigned char btype, decoder_type& dec,
             (sizeof(gap_word_t) == 2 ? dec.get_16() : dec.get_32());
     case set_block_arrgap_egamma_inv:
     case set_block_arrgap_inv:
-        gap_len = read_gap_block(dec, btype, gap_temp_block_, gap_head);
+        gap_len = deseriaizer_base<DEC>::read_gap_block(dec, btype, gap_temp_block_, gap_head);
         break;
     default:
         BM_ASSERT(0);
@@ -2763,7 +2763,7 @@ serial_stream_iterator<DEC>::get_gap_block(bm::gap_word_t* dst_block)
               this->block_type_ == set_block_bit_1bit);
     BM_ASSERT(dst_block);
 
-    read_gap_block(this->decoder_,
+    deseriaizer_base<DEC>::read_gap_block(this->decoder_,
                    this->block_type_,
                    dst_block,
                    this->gap_head_);
