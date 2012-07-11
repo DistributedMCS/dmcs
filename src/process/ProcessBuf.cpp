@@ -287,7 +287,8 @@ ProcessBuf::open(const std::vector<std::string>& av)
       {
 	// setup argv
 
-	char* argv[av.size() + 1];
+        const size_t argvsize = av.size() + 1;
+	char* argv[argvsize];
 	int i = 0;
 
 	for (std::vector<std::string>::const_iterator it = av.begin();
