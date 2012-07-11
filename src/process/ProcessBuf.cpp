@@ -144,7 +144,7 @@ ProcessBuf::ProcessBuf()
     }
 
   sa.sa_sigaction = sigchild_handler;
-  sa.sa_flags = SA_SIGINFO;
+  sa.sa_flags = SA_SIGINFO | SA_RESTART;
   sigemptyset(&sa.sa_mask);
 
   if (::sigaction(SIGCHLD, &sa, 0))
