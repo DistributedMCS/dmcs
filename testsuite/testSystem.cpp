@@ -388,11 +388,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp5(dlv_engine5);
   InstantiatorPtr dlv_inst5 = dlv_engine5->createInstantiator(dlv_engine_wp5, kbspec5);
 
-  NewContextPtr ctx5(new NewContext(ctx_id5, dlv_inst5, btrab55));
+  NewContextPtr ctx5(new NewContext(ctx_id5, dlv_inst5, btab55));
   NewContextVecPtr contexts5(new NewContextVec);
-  contexts5->push_back(ctx_5);
+  contexts5->push_back(ctx5);
 
-  RegistryPtr reg5(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, reg5));
+  RegistryPtr reg5(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts5));
   
 
   boost::thread server_thread5(run_server, ctx_port5, reg5);
