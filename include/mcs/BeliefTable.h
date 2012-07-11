@@ -40,16 +40,33 @@
 
 namespace dmcs {
 
+class BeliefUnknownException:
+  public std::runtime_error
+{
+  public:
+    BeliefUnknownException(IDAddress addr):
+      std::runtime_error("belief unknown during BeliefTable lookup!"),
+      addr(addr) {}
+
+  private:
+    IDAddress addr;
+};
+
 class BeliefTable :
     public Table<
   // value type is Belief struct
   Belief,
   // index is
   boost::multi_index::indexed_by<
+    // no random_access, as we might need very sparse and incomplete belief tables for all other contexts, IDs are determined by query plan!
     // address = running ID for constant access
-    boost::multi_index::random_access<
-      boost::multi_index::tag<impl::AddressTag>
-      >,
+    //boost::multi_index::random_access<
+    //  boost::multi_index::tag<impl::AddressTag>
+    //  >,
+    boost::multi_index::hashed_unique<
+      boost::multi_index::tag<impl::AddressTag>,
+      BOOST_MULTI_INDEX_MEMBER(Belief, IDAddress, address)
+    >,
     // unique IDs for unique symbol strings
     boost::multi_index::hashed_unique<
       boost::multi_index::tag<impl::BeliefTag>,
@@ -66,20 +83,26 @@ public:
 
 // methods
 public:
+  BeliefTable():
+    nextAddress(0) {}
+
   // retrieve by ID
   // assert that id.kind is correct for Term
   // assert that ID exists
-  inline const Belief& getByID(ID id) const throw ();
+  inline const Belief& getByID(ID id) const throw (BeliefUnknownException);
   
   // given string, look if already stored
   // if no, return ID_FAIL, otherwise return ID
   inline ID getIDByString(const std::string& str) const throw();
   
-  // store text, assuming it does not exist
-  // assert that text did not exist
+  // store text, assuming this belief is not yet stored
   inline ID storeAndGetID(const Belief& symb) throw();
+
+  // store whole belief, assuming this belief is not yet stored
+  inline ID storeWithID(const Belief& symb, ID setid) throw();
   
-  // retrieve range by kind (return lower/upper bound iterators, +provide method to get ID from iterator)
+protected:
+  IDAddress nextAddress;
 };
 
 typedef boost::shared_ptr<BeliefTable> BeliefTablePtr;
@@ -88,15 +111,17 @@ typedef boost::shared_ptr<BeliefTable> BeliefTablePtr;
 // assert that id.kind is correct for Term
 // assert that ID exists
 const Belief&
-BeliefTable::getByID(ID id) const throw ()
+BeliefTable::getByID(ID id) const throw (BeliefUnknownException)
 {
   assert(id.isBelief());
 
   ReadLock lock(mutex);
   const AddressIndex& idx = container.get<impl::AddressTag>();
-  // the following check only works for random access indices, but here it is ok
-  assert( id.address < idx.size() );
-  return idx.at(id.address);
+  AddressIndex::const_iterator it = idx.find(id.address);
+  if( it == idx.end() )
+    throw BeliefUnknownException(id.address);
+  else
+    return *it;
 }
 
 // given string, look if already stored
@@ -110,34 +135,58 @@ ID BeliefTable::getIDByString(const std::string& str) const throw()
   if( it == sidx.end() )
     return ID_FAIL;
   else
-    {
-      const AddressIndex& aidx = container.get<impl::AddressTag>();
-      return ID(
-		it->kind, // kind
-		container.project<impl::AddressTag>(it) - aidx.begin() // address
-		);
-    }
+    return ID(it->kind, it->address);
 }
 
-// store text, assuming it does not exist
-// assert that text did not exist
+// store text, assuming this belief is not yet stored
 ID BeliefTable::storeAndGetID(const Belief& b) throw()
 {
   assert(ID(b.kind,0).isBelief());
   assert(!b.text.empty());
   
+  WriteLock lock(mutex);
+  // copy belief to new belief
+  Belief nb(b);
+  // set address
+  nb.address = nextAddress;
+  // increment for next new address
+  nextAddress++;
+
+  // store into idx
+  AddressIndex& idx = container.get<impl::AddressTag>();
   bool success;
   AddressIndex::const_iterator it;
-
-  WriteLock lock(mutex);
-  AddressIndex& idx = container.get<impl::AddressTag>();
-  boost::tie(it, success) = idx.push_back(b);
+  boost::tie(it, success) = idx.insert(nb);
   (void)success;
   assert(success);
   
-  return ID(b.kind, // kind
-	    container.project<impl::AddressTag>(it) - idx.begin() // address
-	    );
+  return ID(nb.kind, nb.address);
+}
+
+// store whole belief, assuming this belief is not yet stored
+ID BeliefTable::storeWithID(const Belief& b, ID setid) throw()
+{
+  assert(setid.isBelief());
+  assert(!b.text.empty());
+  assert(nextAddress == 0 && "if you use storeWithID you should not also use storeAndGetID");
+  
+  // copy belief to new belief
+  Belief nb(b);
+  // set kind and address
+  nb.kind = setid.kind;
+  nb.address = setid.address;
+
+  WriteLock lock(mutex);
+
+  // store into idx
+  bool success;
+  AddressIndex::const_iterator it;
+  AddressIndex& idx = container.get<impl::AddressTag>();
+  boost::tie(it, success) = idx.insert(nb);
+  (void)success;
+  assert(success);
+  
+  return setid;
 }
 
 typedef boost::shared_ptr<BeliefTable> BeliefTablePtr;

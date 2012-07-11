@@ -36,18 +36,31 @@ namespace dmcs {
   
 struct Belief : private ostream_printable<Belief>
 {
+  IDAddress address;
   IDKind kind;
   std::string text;
 
-  Belief(uint16_t ctx_id, const std::string& text)
-    : kind(ID::MAINKIND_BELIEF | ctx_id), text(text)
-  { }
+  Belief(
+      uint16_t ctx_id,
+      const std::string& text):
+    address(0),
+    kind(ID::MAINKIND_BELIEF | ctx_id),
+    text(text) { }
+  Belief(
+      uint16_t ctx_id,
+      uint32_t address,
+      const std::string& text):
+    address(address),
+    kind(ID::MAINKIND_BELIEF | ctx_id),
+    text(text) { }
 
   std::size_t 
   ctx_id()
   {
     return (kind & ID::CONTEXT_ID_MASK);
   }
+
+  ID id() { return ID(kind, address); }
 
   std::ostream& print(std::ostream& os) const;
 };
