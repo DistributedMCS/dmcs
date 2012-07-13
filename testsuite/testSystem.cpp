@@ -31,6 +31,7 @@
 
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/BeliefTable.h"
+#include "mcs/ID.h"
 #include "mcs/NewContext.h"
 #include "dmcs/DLVEngine.h"
 #include "dmcs/DLVInstantiator.h"
@@ -414,12 +415,12 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   Belief belief_dprimec3c6_44(ctx_id4, "dprime(c3,c6)");
 
   ID id_epsilon44 = btab44->storeAndGetID(belief_epsilon44);
-  ID id_dc1c4 = btab44->storeAndGetID(belief_dc1c4_44);
-  ID id_dc2c5 = btab44->storeAndGetID(belief_dc2c5_44);
-  ID id_dc3c6 = btab44->storeAndGetID(belief_dc3c6_44);
-  ID id_dprimec1c4 = btab44->storeAndGetID(belief_dprimec1c4_44);
-  ID id_dprimec2c5 = btab44->storeAndGetID(belief_dprimec2c5_44);
-  ID id_dprimec3c6 = btab44->storeAndGetID(belief_dprimec3c6_44);
+  ID id_dc1c4_44 = btab44->storeAndGetID(belief_dc1c4_44);
+  ID id_dc2c5_44 = btab44->storeAndGetID(belief_dc2c5_44);
+  ID id_dc3c6_44 = btab44->storeAndGetID(belief_dc3c6_44);
+  ID id_dprimec1c4_44 = btab44->storeAndGetID(belief_dprimec1c4_44);
+  ID id_dprimec2c5_44 = btab44->storeAndGetID(belief_dprimec2c5_44);
+  ID id_dprimec3c6_44 = btab44->storeAndGetID(belief_dprimec3c6_44);
 
   BeliefTablePtr btab54(new BeliefTable);
   Belief belief_epsilon54(ctx_id5, "epsilon");
@@ -463,19 +464,19 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   // d(c1,c4) :- (5:f(c1,c4)).
   Tuple body14;
   body14.push_back(id_fc1c4_54);
-  BridgeRule br14(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_dc1c4_54, body14);
+  BridgeRule br14(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_dc1c4_44, body14);
   bridge_rules4->storeAndGetID(br14);
 
   // d(c2,c5) :- (5:f(c2,c5)).
   Tuple body24;
   body24.push_back(id_fc2c5_54);
-  BridgeRule br24(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_dc2c5_54, body24);
+  BridgeRule br24(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_dc2c5_44, body24);
   bridge_rules4->storeAndGetID(br24);
   
   // d(c3,c6) :- (5:f(c3,c6)).
   Tuple body34;
   body34.push_back(id_fc3c6_54);
-  BridgeRule br34(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_dc3c6_54, body34);
+  BridgeRule br34(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_dc3c6_44, body34);
   bridge_rules4->storeAndGetID(br34);
 
   std::size_t ctx_off54 = 0;
@@ -487,7 +488,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp4(dlv_engine4);
   InstantiatorPtr dlv_inst4 = dlv_engine4->createInstantiator(dlv_engine_wp4, kbspec4);
 
-  NewContextPtr ctx4(new NewContext(ctx_id4, pack_size, dlv_inst4, btab4, bridge_rules4, neighbors4));
+  NewContextPtr ctx4(new NewContext(ctx_id4, pack_size, dlv_inst4, btab44, bridge_rules4, neighbors4));
   NewContextVecPtr contexts4(new NewContextVec);
   contexts4->push_back(ctx4);
 
@@ -507,8 +508,8 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   ID id_epsilon33 = btab33->storeAndGetID(belief_epsilon33);
   ID id_cc1c4_33 = btab33->storeAndGetID(belief_cc1c4_33);
-  ID id_cc2c5_33 = btab33->storeAndGetID(belief_cc3c5_33);
-  ID id_cc3c6_33 = btab33->storeAndGetID(belief_cc4c6_33);
+  ID id_cc2c5_33 = btab33->storeAndGetID(belief_cc2c5_33);
+  ID id_cc3c6_33 = btab33->storeAndGetID(belief_cc3c6_33);
 
   BeliefTablePtr btab53(new BeliefTable);
   Belief belief_epsilon53(ctx_id5, "epsilon");
@@ -576,7 +577,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp3(dlv_engine3);
   InstantiatorPtr dlv_inst3 = dlv_engine3->createInstantiator(dlv_engine_wp3, kbspec3);
 
-  NewContextPtr ctx3(new NewContext(ctx_id3, pack_size, dlv_inst3, btab3, bridge_rules3, neighbors3));
+  NewContextPtr ctx3(new NewContext(ctx_id3, pack_size, dlv_inst3, btab33, bridge_rules3, neighbors3));
   NewContextVecPtr contexts3(new NewContextVec);
   contexts3->push_back(ctx3);
 
@@ -606,6 +607,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   ID id_domc3c6_22 = btab22->storeAndGetID(belief_domc3c6_22);
 
   BeliefTablePtr btab32(new BeliefTable);
+  Belief belief_epsilon32(ctx_id3, "epsilon");
+  Belief belief_cc1c4_32(ctx_id3, "c(c1,c4)");
+  Belief belief_cc2c5_32(ctx_id3, "c(c2,c5)");
+  Belief belief_cc3c6_32(ctx_id3, "c(c3,c6)");
+
   ID id_epsilon32 = ID(ID::MAINKIND_BELIEF | ctx_id3, 0);
   ID id_cc1c4_32 = ID(ID::MAINKIND_BELIEF | ctx_id3, 1);
   ID id_cc2c5_32 = ID(ID::MAINKIND_BELIEF | ctx_id3, 2);
@@ -630,21 +636,21 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   // b(c4) :- (2:dom(c1,c4)), not (3:c(c1,c4)).
   Tuple body12;
   body12.push_back(id_domc1c4_22);
-  body12.push_back(nafLiteralFromBelief(id_cc1c4_32));
+  body12.push_back(ID::nafLiteralFromBelief(id_cc1c4_32));
   BridgeRule br12(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_bc4_22, body12);
   bridge_rules2->storeAndGetID(br12);
 
   // b(c5) :- (2:dom(c2,c5)), not (3:c(c2,c5)).
   Tuple body22;
   body22.push_back(id_domc2c5_22);
-  body22.push_back(nafLiteralFromBelief(id_cc2c5_32));
+  body22.push_back(ID::nafLiteralFromBelief(id_cc2c5_32));
   BridgeRule br22(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_bc5_22, body22);
   bridge_rules2->storeAndGetID(br22);
 
   // b(c6) :- (2:dom(c3,c6)), not (3:c(c3,c6)).
   Tuple body32;
   body32.push_back(id_domc3c6_22);
-  body32.push_back(nafLiteralFromBelief(id_cc3c6_32));
+  body32.push_back(ID::nafLiteralFromBelief(id_cc3c6_32));
   BridgeRule br32(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_bc6_22, body32);
   bridge_rules2->storeAndGetID(br32);
 
@@ -666,9 +672,9 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   /************************** CONTEXT 1 **************************/  
   BeliefTablePtr btab11(new BeliefTable);
-  //kbspec2 = ex;
-  //kbspec2 += "/context2.lp";
-  std::string kbspec2 = "../../examples/context2.lp";
+  //kbspec1 = ex;
+  //kbspec1 += "/context1.lp";
+  std::string kbspec1 = "../../examples/context1.lp";
 
   Belief belief_epsilon11(ctx_id1, "epsilon");
   Belief belief_ac1_11(ctx_id1, "a(c1)");
@@ -681,6 +687,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   ID id_ac3_11 = btab11->storeAndGetID(belief_ac3_11);
 
   BeliefTablePtr btab31(new BeliefTable);
+  Belief belief_epsilon31(ctx_id3, "epsilon");
+  Belief belief_cc1c4_31(ctx_id3, "c(c1,c4)");
+  Belief belief_cc2c5_31(ctx_id3, "c(c2,c5)");
+  Belief belief_cc3c6_31(ctx_id3, "c(c3,c6)");
+
   ID id_epsilon31 = ID(ID::MAINKIND_BELIEF | ctx_id3, 0);
   ID id_cc1c4_31 = ID(ID::MAINKIND_BELIEF | ctx_id3, 1);
   ID id_cc2c5_31 = ID(ID::MAINKIND_BELIEF | ctx_id3, 2);
@@ -698,6 +709,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   btab31->storeWithID(belief_cc3c6_31, id_cc3c6_31);
 
   BeliefTablePtr btab41(new BeliefTable);
+  Belief belief_epsilon41(ctx_id4, "epsilon");
+  Belief belief_dprimec1c4_41(ctx_id4, "dprime(c1,c4)");
+  Belief belief_dprimec2c5_41(ctx_id4, "dprime(c2,c5)");
+  Belief belief_dprimec3c6_41(ctx_id4, "dprime(c3,c6)");
+
   ID id_epsilon41 = ID(ID::MAINKIND_BELIEF | ctx_id4, 0);
   ID id_dprimec1c4_41 = ID(ID::MAINKIND_BELIEF | ctx_id4, 4);
   ID id_dprimec2c5_41 = ID(ID::MAINKIND_BELIEF | ctx_id4, 5);
@@ -722,21 +738,21 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   // a(c1) :- (3:c(c1,c4)), not (4:dprime(c1,c4)).
   Tuple body11;
   body11.push_back(id_cc1c4_31);
-  body11.push_back(nafLiteralFromBelief(id_dprimec1c4_41));
+  body11.push_back(ID::nafLiteralFromBelief(id_dprimec1c4_41));
   BridgeRule br11(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_ac1_11, body11);
   bridge_rules1->storeAndGetID(br11);
 
   // a(c2) :- (3:c(c2,c5)), not (4:dprime(c2,c5)).
   Tuple body21;
   body21.push_back(id_cc2c5_31);
-  body21.push_back(nafLiteralFromBelief(id_dprimec2c5_41));
+  body21.push_back(ID::nafLiteralFromBelief(id_dprimec2c5_41));
   BridgeRule br21(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_ac2_11, body21);
   bridge_rules1->storeAndGetID(br21); 
 
   // a(c3) :- (3:c(c3,c6)), not (4:dprime(c3,c6)).
   Tuple body31;
   body31.push_back(id_cc3c6_31);
-  body31.push_back(nafLiteralFromBelief(id_dprimec3c6_41));
+  body31.push_back(ID::nafLiteralFromBelief(id_dprimec3c6_41));
   BridgeRule br31(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_ac3_11, body31);
   bridge_rules1->storeAndGetID(br31);
 
