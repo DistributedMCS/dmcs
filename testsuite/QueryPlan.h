@@ -1,6 +1,7 @@
 #ifndef __QUERY_PLAN__INCLUDED__
 #define __QUERY_PLAN__INCLUDED__
 
+#include "mcs/ID.h"
 #include "mcs/BeliefState.h"
 #include "mcs/BeliefTable.h"
 #include "mcs/Printhelpers.h"
@@ -15,7 +16,7 @@
 namespace dmcs
 {
 
-typedef uint32_t ContextID;
+typedef int ContextID;
 typedef std::list<std::string>
   ConstantList;
 typedef std::map<ContextID, BeliefState>
@@ -66,58 +67,67 @@ struct Filter:
 typedef std::list<Filter>
   FilterList;
 
+typedef boost::shared_ptr<ConstantList> ConstantListPtr;
+typedef boost::shared_ptr<ConstantCategoryList> ConstantCategoryListPtr;
+typedef boost::shared_ptr<PredicateArityMap> PredicateArityMapPtr;
+typedef boost::shared_ptr<FilterList> FilterListPtr;
+typedef boost::shared_ptr<BeliefTable> BeliefTablePtr;
+typedef boost::shared_ptr<OutputProjectionMap> OutputProjectionMapPtr;
+
 struct ContextQueryPlan:
   private ostream_printable<ContextQueryPlan>
 {
   //id of context
-  ContextID ctxID;
+  ContextID ctx;
 
   // below: information before grounding and/or optimization
 
-protected:
   // local constants
-  ConstantList constants;
+  ConstantListPtr constants;
 
   // categories of local constants (without implicit categories)
-  ConstantCategoryList constCats;
+  ConstantCategoryListPtr constCats;
 
-public:
-  // throws if we try to add a constant that is constant category name
-  void addConstant();
-  // throws if we try to add a category that has as name a constant
-  void addConstantCategory();
-
-  // retrieves constants into category, maybe single constant via implicit category
-  void getConstantsForCategory(ConstantList& container) const;
-
-public:
   // predicates
-  PredicateArityMap preds;
+  PredicateArityMapPtr preds;
 
   // filters
-  FilterList filters;
+  FilterListPtr filters;
 
   // full signature of context
   // (only known for own context)
-  BeliefTable localSignature;
+  BeliefTablePtr localSignature;
 
   // below: information for evaluation
 
   // for which bits do we know the predicates?
   // this is necessary for evaluating bridge rules given bitsets
   // (known for all contexts where this context requests information from)
-  BeliefTable groundInputSignature;
+  BeliefTablePtr groundInputSignature;
 
   // for each other context, which bits do we send to this context?
   // this is necessary for returning bitset results
   // (only known for own context)
-  OutputProjectionMap outputProjections;
+  OutputProjectionMapPtr outputProjections;
+
+  ContextQueryPlan() {}
+  ContextQueryPlan(ContextID ctx, ConstantListPtr constants,
+      ConstantCategoryListPtr constCats, PredicateArityMapPtr preds,
+      FilterListPtr filters, BeliefTablePtr localSignature,
+      BeliefTablePtr groundInputSignature, OutputProjectionMapPtr outputProjections):
+    ctx(ctx), constants(constants),
+    constCats(constCats), preds(preds),
+    filters(filters), localSignature(localSignature),
+    groundInputSignature(groundInputSignature), outputProjections(outputProjections) {}
 
   std::ostream& print(std::ostream& os) const;
 };
 
 typedef std::map<ContextID, ContextQueryPlan>
   ContextQueryPlanMap;
+
+typedef boost::shared_ptr<ContextQueryPlanMap>
+  ContextQueryPlanMapPtr;
 
 } //namespace dmcs
 

@@ -57,6 +57,7 @@ TESTS = \
 	testAbstractContext \
 	testDLVProcess \
 	testNeighbors \
+	testSystemWithQueryPlan \
 	testSystem
 
 TESTS_ENVIRONMENT = \
@@ -103,6 +104,7 @@ check_PROGRAMS = \
 	testAbstractContext \
 	testDLVProcess \
 	testNeighbors \
+	testSystemWithQueryPlan \
 	testSystem
 
 testClasp_SOURCES = testClasp.cpp 
@@ -284,6 +286,17 @@ testNeighbors_LDADD = \
 testSystem_SOURCES = testSystem.cpp \
 	DmcsClientTest.cpp 
 testSystem_LDADD = \
+	$(top_builddir)/src/network/libnetwork.a \
+	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/src/mcs/libmcs.a \
+	$(top_builddir)/src/dmcs/libdmcs.a \
+	$(top_builddir)/src/process/libprocess.a \
+	$(top_builddir)/src/parser/libparser.a \
+	@LIBCURL@
+
+testSystemWithQueryPlan_SOURCES = testSystemWithQueryPlan.cpp  QueryPlanParser.cpp QueryPlan.cpp \
+	DmcsClientTest.cpp 
+testSystemWithQueryPlan_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/mcs/libmcs.a \

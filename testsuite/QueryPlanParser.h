@@ -12,9 +12,9 @@ namespace dmcs
 class QueryPlanParser
 {
 public:
-  static void parseStream(std::istream& in, ContextQueryPlanMap& cqpm);
-  static void parseFile(const std::string& infile, ContextQueryPlanMap& cqpm);
-  static void parseString(const std::string& instr, ContextQueryPlanMap& cqpm);
+  static ContextQueryPlanMapPtr parseStream(std::istream& in);
+  static ContextQueryPlanMapPtr parseFile(const std::string& infile);
+  static ContextQueryPlanMapPtr parseString(const std::string& instr);
 };
 
 } // namespace dmcs
