@@ -156,7 +156,8 @@ NewProcessBuf::open(const std::vector<std::string>& av)
       {
 	// setup argv
 
-	char* argv[av.size() + 1];
+        const unsigned sz = av.size() + 1;
+	char* argv[sz];
 	int i = 0;
 
 	for (std::vector<std::string>::const_iterator it = av.begin();
