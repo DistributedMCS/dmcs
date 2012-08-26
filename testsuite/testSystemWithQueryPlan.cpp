@@ -40,6 +40,9 @@
 #include "network/NewClient.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "network/NewServer.h"
+#warning TODO put into correct directory
+#include "QueryPlan.h"
+#include "QueryPlanParser.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testSystem"
@@ -325,6 +328,26 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
 
 #endif
 
+// check if belief strings in localSignature of one query plan has same id as
+// belief string in inputSignature of other query plan
+inline void CHECK_BeliefIDs(
+    ContextQueryPlanMapConstPtr localQP, ContextQueryPlanMapConstPtr inputQP,
+    unsigned ctxIdx, const char* belief)
+{
+  // ctxIdx must be the same, only first query plan is local query plan,
+  // other query plan only knows part of the context
+  ContextQueryPlanMap::const_iterator itl = localQP->find(ctxIdx);
+  BOOST_CHECK(itl != localQP->end());
+  const ContextQueryPlan& localPlan = itl->second;
+
+  ContextQueryPlanMap::const_iterator iti = inputQP->find(ctxIdx);
+  BOOST_CHECK(iti != inputQP->end());
+  const ContextQueryPlan& inputPlan = iti->second;
+
+  BOOST_CHECK_EQUAL(localPlan.localSignature->getIDByString(belief),
+                    inputPlan.groundInputSignature->getIDByString(belief));
+}
+
 BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 {
   std::size_t SYSTEM_SIZE = 6;
@@ -508,6 +531,9 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   const char* brfile5 = "";
 
   /************************** CONTEXT 5 **************************/
+  ContextQueryPlanMapPtr qp5 = QueryPlanParser::parseString(queryPlan5);
+  const ContextQueryPlan& at5ctx5 = qp5->find(5)->second;
+
   BeliefTablePtr btab55(new BeliefTable);
 
   //const char* ex = getenv("EXAMPLESDIR");
@@ -555,6 +581,10 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   boost::this_thread::sleep(server_starting_up5);
 
   /************************** CONTEXT 4 **************************/
+  ContextQueryPlanMapPtr qp4 = QueryPlanParser::parseString(queryPlan4);
+  const ContextQueryPlan& at4ctx4 = qp4->find(4)->second;
+  const ContextQueryPlan& at4ctx5 = qp4->find(5)->second;
+
   BeliefTablePtr btab44(new BeliefTable);
   //kbspec4 = ex;
   //kbspec4 += "/context4.lp";
@@ -650,6 +680,10 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   boost::thread server_thread4(run_server, ctx_port4, reg4);
 
   /************************** CONTEXT 3 **************************/  
+  ContextQueryPlanMapPtr qp3 = QueryPlanParser::parseString(queryPlan3);
+  const ContextQueryPlan& at3ctx3 = qp3->find(3)->second;
+  const ContextQueryPlan& at3ctx5 = qp3->find(5)->second;
+
   BeliefTablePtr btab33(new BeliefTable);
   //kbspec3 = ex;
   //kbspec3 += "/context3.lp";
@@ -739,6 +773,10 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   boost::thread server_thread3(run_server, ctx_port3, reg3);
 
   /************************** CONTEXT 2 **************************/
+  ContextQueryPlanMapPtr qp2 = QueryPlanParser::parseString(queryPlan2);
+  const ContextQueryPlan& at2ctx2 = qp2->find(2)->second;
+  const ContextQueryPlan& at2ctx3 = qp2->find(3)->second;
+
   BeliefTablePtr btab22(new BeliefTable);
   //kbspec2 = ex;
   //kbspec2 += "/context2.lp";
@@ -825,10 +863,16 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   boost::thread server_thread2(run_server, ctx_port2, reg2);
 
   /************************** CONTEXT 1 **************************/  
-  BeliefTablePtr btab11(new BeliefTable);
+  ContextQueryPlanMapPtr qp1 = QueryPlanParser::parseString(queryPlan1);
+  const ContextQueryPlan& at1ctx1 = qp1->find(1)->second;
+  const ContextQueryPlan& at1ctx3 = qp1->find(3)->second;
+
   //kbspec1 = ex;
   //kbspec1 += "/context1.lp";
   std::string kbspec1 = "../../examples/context1.lp";
+
+  #if 0
+  BeliefTablePtr btab11(new BeliefTable);
 
   Belief belief_epsilon11(ctx_id1, "epsilon");
   Belief belief_ac1_11(ctx_id1, "a(c1)");
@@ -855,7 +899,18 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   BOOST_CHECK_EQUAL(id_cc1c4_31, id_cc1c4_33);
   BOOST_CHECK_EQUAL(id_cc2c5_31, id_cc2c5_33);
   BOOST_CHECK_EQUAL(id_cc3c6_31, id_cc3c6_33);
+  #endif
 
+  // instead of this complicated lines
+  BOOST_CHECK_EQUAL(at1ctx3.groundInputSignature->getIDByString("c(c1,c4)"),
+                    at3ctx3.localSignature->getIDByString("c(c1,c4)"));
+
+  // we do this (here and in the following)
+  CHECK_BeliefIDs(qp1, qp3, 3, "c(c1,c4)");
+  CHECK_BeliefIDs(qp1, qp3, 3, "c(c2,c5)");
+  CHECK_BeliefIDs(qp1, qp3, 3, "c(c3,c6)");
+
+  #if 0
   // add beliefs to btab31 using the new method
   btab31->storeWithID(belief_epsilon31, id_epsilon31);
   btab31->storeWithID(belief_cc1c4_31, id_cc1c4_31);
@@ -877,13 +932,29 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   BOOST_CHECK_EQUAL(id_dprimec1c4_41, id_dprimec1c4_44);
   BOOST_CHECK_EQUAL(id_dprimec2c5_41, id_dprimec2c5_44);
   BOOST_CHECK_EQUAL(id_dprimec3c6_41, id_dprimec3c6_44);
+  #endif
 
+  CHECK_BeliefIDs(qp1, qp4, 4, "dprime(c1,c4)");
+  CHECK_BeliefIDs(qp1, qp4, 4, "dprime(c2,c5)");
+  CHECK_BeliefIDs(qp1, qp4, 4, "dprime(c3,c6)");
+
+  #if 0
   // add beliefs to btab31 using the new method
   btab41->storeWithID(belief_epsilon41, id_epsilon41);
   btab41->storeWithID(belief_dprimec1c4_41, id_dprimec1c4_41);
   btab41->storeWithID(belief_dprimec2c5_41, id_dprimec2c5_41);
   btab41->storeWithID(belief_dprimec3c6_41, id_dprimec3c6_41);
+  #endif
 
+  #if 0
+  // query plan of ctx 1 must be sufficient to parse bridge rules!
+  BridgeRuleTablePtr bridge_rules1 = BridgeRuleParser::parseString(brfile1, qp1);
+  #else
+  // make compiler happy
+  BridgeRuleTablePtr bridge_rules1;
+  #endif
+
+  #if 0
   // bridge rules C3,C4 --> C1
   BridgeRuleTablePtr bridge_rules1(new BridgeRuleTable);
 
@@ -909,7 +980,9 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   body31.push_back(ID::nafLiteralFromBelief(id_dprimec3c6_41));
   BridgeRule br31(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_ac3_11, body31);
   bridge_rules1->storeAndGetID(br31);
+  #endif
 
+  #warning what's that?
   std::size_t ctx_off31 = 0;
   std::size_t ctx_off41 = 1;
   NewNeighborPtr neighbor31(new NewNeighbor(ctx_id3, ctx_off31, ctx_hostname3, port3));
@@ -922,7 +995,8 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp1(dlv_engine1);
   InstantiatorPtr dlv_inst1 = dlv_engine1->createInstantiator(dlv_engine_wp1, kbspec1);
 
-  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, btab11, bridge_rules1, neighbors1));
+  #warning for a clean interface, the context should store qp1 and the index 1 (i.e., that it is the context with index 1 in this plan) Note: we could make an autodetection of the index 1: a query plan only contains a localSignature for the context where it is located
+  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, at1ctx1.localSignature, bridge_rules1, neighbors1));
   NewContextVecPtr contexts1(new NewContextVec);
   contexts1->push_back(ctx1);
 

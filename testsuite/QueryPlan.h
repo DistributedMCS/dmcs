@@ -129,6 +129,9 @@ typedef std::map<ContextID, ContextQueryPlan>
 typedef boost::shared_ptr<ContextQueryPlanMap>
   ContextQueryPlanMapPtr;
 
+typedef boost::shared_ptr<const ContextQueryPlanMap>
+  ContextQueryPlanMapConstPtr;
+
 } //namespace dmcs
 
 std::ostream& operator<< (std::ostream& os, const dmcs::ContextQueryPlanMap& m);
