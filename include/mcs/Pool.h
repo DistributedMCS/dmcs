@@ -88,7 +88,9 @@ public:
   {
     boost::mutex::scoped_lock lock(mtx);
     
-    assert ( slot >= data && slot <= ((n-1) * datasize + data) );
+    assert ( slot >= data &&
+        reinterpret_cast<int8_t*>(slot) <=
+        ((n-1) * datasize + reinterpret_cast<int8_t*>(data)) );
     assert ( 0 <= back_slot && back_slot <= n-1 );
 
     free_slots[back_slot++] = slot;
