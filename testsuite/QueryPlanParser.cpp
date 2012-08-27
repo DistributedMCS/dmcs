@@ -1,3 +1,6 @@
+#undef BOOST_SPIRIT_DEBUG
+#undef BOOST_SPIRIT_DEBUG_WS
+
 #include "QueryPlanParser.h"
 
 #include <boost/config/warning_disable.hpp>
@@ -8,7 +11,7 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
-//#include <boost/spirit/home/phoenix/operator/self.hpp> 
+#include <boost/spirit/home/phoenix/statement/if.hpp> 
 
 #include <istream>
 
@@ -25,8 +28,13 @@ using namespace dmcs;
 // state such that semantic actions can communicate
 struct SemState
 {
+  //SemState(): qplan(), currentCtx(0) {}
+  ContextQueryPlanMapPtr qplan;
   ContextID currentCtx;
 };
+
+//std::ostream& operator<<(std::ostream& o, const SemState& s)
+//  { return o << "SemState("<< s.qplan << "," << s.currentCtx << ")"; }
 
 struct StoreAndRememberContextId
 {
@@ -44,7 +52,7 @@ struct StoreAndRememberContextId
     const int& parserattr = source;
     s.currentCtx = parserattr;
     ctx_in_locals = parserattr;
-    std::cerr << "encountering context " << s.currentCtx << std::endl;
+    //std::cerr << "encountering context " << s.currentCtx << std::endl;
   }
 };
 
@@ -59,7 +67,9 @@ struct InsertIntoMap
     Ctx& ctx,
     boost::spirit::qi::unused_type) const
   {
-    ContextQueryPlanMapPtr qpm = boost::fusion::at_c<0>(ctx.attributes);
+    ContextQueryPlanMapPtr& qpm = s.qplan;
+    if( !qpm )
+      qpm.reset(new ContextQueryPlanMap);
     const std::vector<ContextQueryPlan>& qp = source;
     for(std::vector<ContextQueryPlan>::const_iterator it = qp.begin();
         it != qp.end(); ++it)
@@ -68,6 +78,26 @@ struct InsertIntoMap
     }
   }
 };
+
+#if 0
+struct AssignPtrOptional
+{
+  BeliefTablePtr& tgt;
+  AssignPtrOptional(BeliefTablePtr& tgt): tgt(tgt) {}
+
+  template<typename SourceAttributes, typename Ctx>
+  void operator()(
+    const boost::optional<BeliefTablePtr>& source,
+    Ctx& ctx,
+    boost::spirit::qi::unused_type) const
+  {
+    if( !!source )
+    {
+      tgt = source.get();
+    }
+  }
+};
+#endif
 
 struct RegisterAndInsertIntoBeliefSet
 {
@@ -80,7 +110,7 @@ struct RegisterAndInsertIntoBeliefSet
     Ctx& ctx,
     boost::spirit::qi::unused_type) const
   {
-    BeliefTablePtr qpm = boost::fusion::at_c<0>(ctx.attributes);
+    BeliefTablePtr& qpm = boost::fusion::at_c<0>(ctx.attributes);
     if( !qpm )
     {
       // create belief table if does not exist
@@ -111,14 +141,37 @@ struct RegisterAndInsertIntoBeliefSet
       }
       std::cerr << "got belief " << address << " with string '" << predicate << "'" << std::endl;
 
-      // TODO: qpm->storeWithID(address, predicate);
+      Belief bel(s.currentCtx, address, predicate);
+      qpm->storeWithID(bel, ID(bel.kind, bel.address));
     }
   }
 };
 
+struct lazy_get_impl
+{
+  template<typename X>
+  struct result;
+
+  template<typename T>
+  struct result<boost::optional<T> >
+  {
+    typedef T type;
+  };
+
+  template<typename T>
+  T operator()(const boost::optional<T>& optarg) const
+  {
+    //std::cerr << "doing lazy get impl for arg " << !!optarg << std::endl;
+    //std::cerr << "doing lazy get impl for ARG " << optarg.get() << std::endl;
+    return optarg.get();
+  }
+};
+
+phoenix::function<lazy_get_impl> lazy_get;
+
 template<typename Iterator, typename Skipper>
 struct QueryPlanGrammar:
-  qi::grammar<Iterator, ContextQueryPlanMapPtr(), Skipper>
+  qi::grammar<Iterator, Skipper>
 {
   QueryPlanGrammar(SemState& state) : QueryPlanGrammar::base_type(start)
   {
@@ -148,25 +201,29 @@ struct QueryPlanGrammar:
             ) [InsertIntoMap(state)];
 
     contextqueryplan = lit('{') >>
-      lit("ContextId") >> ':' >> int_ /*[_a = _1]*/ [StoreAndRememberContextId(state)] >> ',' >>
-      lit("Constants") >> ':' >>
+      lit("ContextId") >> ':' >> int_ /*[_a = _1]*/ [StoreAndRememberContextId(state)] >> 
+      -(',' >> lit("Constants") >> ':' >>
         //_b = construct<ConstantListPtr>(new_<ConstantList>(_1)) ?
-        constants [_b = _1] >> ',' >>
-      lit("ConstantCategories") >> ':' >>
+        constants [_b = _1]) >>
+      -(',' >> lit("ConstantCategories") >> ':' >>
         //_c = construct<CategoryListPtr>(new_<CategoryList>(_1)) ?
-        categories [_c = _1] >> ',' >>
-      lit("Predicates") >> ':' >>
+        categories [_c = _1]) >>
+      -(',' >> lit("Predicates") >> ':' >>
         //_d = construct<PredicateListPtr>(new_<PredicateList>(_1)) ?
-        predicates [_d = _1] >> ',' >>
-      lit("Filters") >> ':' >>
+        predicates [_d = _1]) >>
+      -(',' >> lit("Filters") >> ':' >>
         //_e = construct<FilterListPtr>(new_<FilterList>(_1)) ?
-        filters [_e = _1] >> ',' >>
-      lit("LocalSignature") >> ':' >>
-        signature [_f = _1] >> ',' >>
-      lit("InputSignature") >> ':' >>
-        signature [_g = _1] >> ',' >>
-      lit("OutputProjections") >> ':' >>
-        outputprojections [_h = _1] >> -(lit(',')) >>
+        filters [_e = _1]) >>
+      (-(',' >> lit("LocalSignature") >> ':' >> signature ))
+        [ if_( !!_1)
+          [ _f = lazy_get(_1) ]
+        ] >>
+      (-(',' >> lit("InputSignature") >> ':' >> signature ))
+        [ if_( !!_1)
+          [ _g = lazy_get(_1) ]
+        ] >>
+      -(',' >> lit("OutputProjections") >> ':' >>
+        outputprojections [_h = _1]) >> -(lit(',')) >>
     '}' >> eps [_val = construct<ContextQueryPlan>(
                         _a, _b, _c, _d, _e, _f, _g, _h)];
 
@@ -210,9 +267,21 @@ struct QueryPlanGrammar:
 //    filterName = eps [_val = construct<FilterNamePtr>(new_<FilterName>())] >> (+(alnum) [push_back(*_val, _1)]);
 
 */
+    #ifdef BOOST_SPIRIT_DEBUG
+    BOOST_SPIRIT_DEBUG_NODE(start);
+    BOOST_SPIRIT_DEBUG_NODE(contextqueryplan);
+    BOOST_SPIRIT_DEBUG_NODE(constants);
+    BOOST_SPIRIT_DEBUG_NODE(categories);
+    BOOST_SPIRIT_DEBUG_NODE(predicates);
+    BOOST_SPIRIT_DEBUG_NODE(filters);
+    BOOST_SPIRIT_DEBUG_NODE(signature);
+    BOOST_SPIRIT_DEBUG_NODE(id_with_ground_tuple);
+    BOOST_SPIRIT_DEBUG_NODE(outputprojections);
+    BOOST_SPIRIT_DEBUG_NODE(ident);
+    #endif
   }
   
-  qi::rule<Iterator, ContextQueryPlanMapPtr(), Skipper> start;
+  qi::rule<Iterator, Skipper> start;
 
   qi::rule<Iterator, ContextQueryPlan(),
 	   qi::locals<
@@ -257,7 +326,7 @@ struct SkipperGrammar:
     ws = ascii::space
        | qi::lexeme[ qi::char_('%') > *(qi::char_ - qi::eol) ];
 
-    #ifdef BOOST_SPIRIT_DEBUG
+    #ifdef BOOST_SPIRIT_DEBUG_WS
     BOOST_SPIRIT_DEBUG_NODE(ws);
     #endif
   }
@@ -296,15 +365,14 @@ QueryPlanParser::parseString(const std::string& str)
   SemState state;
   QueryPlanGrammar<std::string::const_iterator, Skipper> grammar(state);
 
-  ContextQueryPlanMapPtr qplan;
-  bool r = phrase_parse(begIt, endIt, grammar, skipper, qplan);
+  bool r = phrase_parse(begIt, endIt, grammar, skipper);
    
   if(r && begIt == endIt)
   {
     std::cout << "Parsing succeeded\n";
-    std::cout << "Result is :\n";
-    std::cout << *qplan;
-    return qplan;
+    std::cout << "Result is: " << state.qplan << std::endl;
+    std::cout << *state.qplan << std::endl;
+    return state.qplan;
   }
   else
   {

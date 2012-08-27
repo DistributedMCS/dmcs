@@ -73,7 +73,8 @@ class BeliefTable :
       BOOST_MULTI_INDEX_MEMBER(Belief, std::string, text)
       >
     >
-  >
+  >,
+  private ostream_printable<BeliefTable>
 {
   
 // types
@@ -85,6 +86,7 @@ public:
 public:
   BeliefTable():
     nextAddress(0) {}
+  virtual ~BeliefTable();
 
   // retrieve by ID
   // assert that id.kind is correct for Term
@@ -100,6 +102,8 @@ public:
 
   // store whole belief, assuming this belief is not yet stored
   inline ID storeWithID(const Belief& symb, ID setid) throw();
+
+  virtual std::ostream& print(std::ostream& o) const;
   
 protected:
   IDAddress nextAddress;

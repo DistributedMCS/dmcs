@@ -33,6 +33,7 @@ libmcs_a_SOURCES = \
 		BackwardMessage.cpp \
 		BaseJoiner.cpp \
 		Belief.cpp \
+		BeliefTable.cpp \
 		BeliefStateOffset.cpp \
 		BridgeRuleEvaluator.cpp \
 		ForwardMessage.cpp \

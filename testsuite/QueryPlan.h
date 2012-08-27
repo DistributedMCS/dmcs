@@ -118,7 +118,7 @@ struct ContextQueryPlan:
     ctx(ctx), constants(constants),
     constCats(constCats), preds(preds),
     filters(filters), localSignature(localSignature),
-    groundInputSignature(groundInputSignature), outputProjections(outputProjections) {}
+    groundInputSignature(groundInputSignature), outputProjections(outputProjections) { }
 
   std::ostream& print(std::ostream& os) const;
 };

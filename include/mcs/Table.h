@@ -100,6 +100,11 @@ public:
     ReadLock lock(mutex);
     return container.size();
   }
+
+  inline bool empty() const
+  {
+    return container.empty();
+  }
 };
 
 template<typename ValueT, typename IndexT>
