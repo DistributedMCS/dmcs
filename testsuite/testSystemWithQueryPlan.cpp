@@ -45,7 +45,7 @@
 #include "QueryPlanParser.h"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "testSystem"
+#define BOOST_TEST_MODULE "testSystemWithQueryPlan"
 #include <boost/test/unit_test.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
@@ -53,47 +53,6 @@
 #define INSTANTIATE 1
 
 using namespace dmcs;
-
-#if 0 
-void
-init_local_kb(std::size_t ctx_id,
-	      std::string& kbspec,
-	      BeliefTablePtr& btab)
-{
-  //const char* ex = getenv("EXAMPLESDIR");
-  //assert (ex != 0);
-  //kbspec = ex;
-  //kbspec += "/abcdContext.inp";
-  kbspec = "../../examples/abcdContext.inp";
-
-  Belief belief_epsilon1(ctx_id, "epsilon");
-  Belief belief_a(ctx_id, "a");
-  Belief belief_b(ctx_id, "b");
-  Belief belief_c(ctx_id, "c");
-  Belief belief_d(ctx_id, "d");
-  Belief belief_e(ctx_id, "e");
-  Belief belief_f(ctx_id, "f");
-  Belief belief_g(ctx_id, "g");
-  Belief belief_h(ctx_id, "h");
-  Belief belief_i(ctx_id, "i");
-  Belief belief_j(ctx_id, "j");
-
-  std::cerr << "Initializing belief table." << std::endl;
-  btab->storeAndGetID(belief_epsilon1);
-  btab->storeAndGetID(belief_a);
-  btab->storeAndGetID(belief_b);
-  btab->storeAndGetID(belief_c);
-  btab->storeAndGetID(belief_d);
-  btab->storeAndGetID(belief_e);
-  btab->storeAndGetID(belief_f);
-  btab->storeAndGetID(belief_g);
-  btab->storeAndGetID(belief_h);
-  btab->storeAndGetID(belief_i);
-  btab->storeAndGetID(belief_j);
-  std::cerr << "Initializing belief table: DONE." << std::endl;
-}
-
-#endif
 
 void
 run_server(std::size_t server_port, const RegistryPtr reg)
@@ -135,27 +94,57 @@ run_client(std::string server_port, ForwardMessage& want_send)
   std::cerr << "exit from run_client" << std::endl;
 }
 
-#if 0 
-BOOST_AUTO_TEST_CASE ( testLeafSystem )
+#if 0
+BOOST_AUTO_TEST_CASE ( testLeafSystemWithQueryPlan )
 {
   std::size_t SYSTEM_SIZE = 2;
   std::size_t BS_SIZE = 10;
   std::size_t QUEUE_SIZE = 10;
 
-  std::string kbspec;
+  std::string kbspec = "../../examples/abcdContext.inp";
   BeliefTablePtr btab(new BeliefTable);
 
   // setup a leaf context
   std::size_t invoker0 = 1000;
   std::size_t ctx_id1 = 0;
-  init_local_kb(ctx_id1, kbspec, btab);
+  std::string ctx_hostname1 = "localhost";
+  std::string port1 = "5001";
+  std::size_t ctx_port1 = 5001;
+
+  const char* queryplan =
+    "["
+    "  {"
+    "    ContextId: 0,"
+    "    LocalSignature:"
+    "    {"
+    "      1:  [a],"
+    "      2:  [b],"
+    "      3:  [c],"
+    "      4:  [d],"
+    "      5:  [e],"
+    "      6:  [f],"
+    "      7:  [g],"
+    "      8:  [h],"
+    "      9:  [i],"
+    "      10: [j],"
+    "    },"
+    "  },"
+    "]";
+
+  ContextQueryPlanMapPtr qp0 = QueryPlanParser::parseString(queryplan);
+  const ContextQueryPlan& at0ctx0 = qp0->find(0)->second;
+
+  //  init_local_kb(ctx_id1, kbspec, btab);
+
 
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
+
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
+
   std::cerr << "Starting context..." << std::endl;
-  NewContextPtr ctx(new NewContext(ctx_id1, dlv_inst, btab));
+  NewContextPtr ctx(new NewContext(ctx_id1, dlv_inst, at0ctx0.localSignature));
   NewContextVecPtr ctxs(new NewContextVec);
   ctxs->push_back(ctx);
   
@@ -183,6 +172,7 @@ BOOST_AUTO_TEST_CASE ( testLeafSystem )
 
   client_thread.join();
 }
+#endif
 
 
 void
@@ -247,31 +237,64 @@ init_root_ctx(std::size_t root_id,
 }
 
 
-
-
-
+#if 0
 BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
 {
   std::size_t SYSTEM_SIZE = 2;
   std::size_t BS_SIZE = 10;
   std::size_t QUEUE_SIZE = 10;
 
-  /************************** LEAF CONTEXT **************************/
-  std::string kbspec2;
-  BeliefTablePtr btab2(new BeliefTable);
+  std::string kbspec1 = "../../examples/rootContext.inp";
+  std::string kbspec2 = "../../examples/leafContext.inp";
 
+  std::size_t invoker = 1000;
+  std::size_t ctx_id1 = 0;
   std::size_t ctx_id2 = 1;
   std::string ctx_hostname2 = "localhost";
   std::string port2 = "5678";
   std::size_t ctx_port2 = 5678;
 
-  init_leaf_ctx(ctx_id2, kbspec2, btab2);
+  const char* queryplan_leaf =
+    "["
+    "  {"
+    "    ContextId: 1,"
+    "    LocalSignature:"
+    "    {"
+    "      1: [d],"
+    "    },"
+    "  },"
+    "]";
+
+  const char* queryplan_root =
+    "["
+    "  {"
+    "    ContextId: 0,"
+    "    LocalSignature:"
+    "    {"
+    "      1:  [a],"
+    "      2:  [b],"
+    "      3:  [c],"
+    "    },"
+    "  },"
+    "  {"
+    "    ContextId: 1,"
+    "    InputSignature:"
+    "    {"
+    "      1: [d],"
+    "      2: [e],"
+    "    },"
+    "  },"
+    "]";
+
+  /************************** LEAF CONTEXT **************************/
+  ContextQueryPlanMapPtr qp_leaf = QueryPlanParser::parseString(queryplan_leaf);
+  const ContextQueryPlan& at1ctx1 = qp_leaf->find(1)->second;
 
   EnginePtr dlv_engine2 = DLVEngine::create();
   EngineWPtr dlv_engine_wp2(dlv_engine2);
   InstantiatorPtr dlv_inst2 = dlv_engine2->createInstantiator(dlv_engine_wp2, kbspec2);
 
-  NewContextPtr ctx2(new NewContext(ctx_id2, dlv_inst2, btab2));
+  NewContextPtr ctx2(new NewContext(ctx_id2, dlv_inst2, at1ctx1.localSignature));
   NewContextVecPtr contexts2(new NewContextVec);
   contexts2->push_back(ctx2);
 
@@ -282,16 +305,24 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   boost::this_thread::sleep(server_starting_up2);
 
   /************************** ROOT CONTEXT **************************/
-  std::string kbspec1;
-  BeliefTablePtr btab1(new BeliefTable);
-  BridgeRuleTablePtr br1(new BridgeRuleTable);
+  ContextQueryPlanMapPtr qp_root = QueryPlanParser::parseString(queryplan_root);
+  const ContextQueryPlan& at0ctx0 = qp_root->find(0)->second;
+  const ContextQueryPlan& at0ctx1 = qp_root->find(1)->second;
 
-  std::size_t invoker = 1000;
-  std::size_t ctx_id1 = 0;
-  init_root_ctx(ctx_id1, kbspec1, btab1, btab2, br1);
+  BridgeRuleTablePtr br1(new BridgeRuleTable);
+  std::string str_c = "c";
+  std::string str_d = "d";
+  ID id_c = at0ctx0.localSignature->getIDByString(str_c);
+  ID id_d = at0ctx1.groundInputSignature->getIDByString(str_d);  
+
+  Tuple body1;
+  body1.push_back(id_d);
+
+  // c :- (2:d)
+  BridgeRule r1(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_c, body1);
+  br1->storeAndGetID(r1);
 
   std::size_t ctx_off2 = 0;
-  
   NewNeighborPtr n1(new NewNeighbor(ctx_id2, ctx_off2, ctx_hostname2, port2));
   NewNeighborVecPtr neighbors1(new NewNeighborVec);
   neighbors1->push_back(n1);
@@ -301,7 +332,7 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   InstantiatorPtr dlv_inst1 = dlv_engine1->createInstantiator(dlv_engine_wp1, kbspec1);
 
   std::size_t pack_size = 3;
-  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, btab1, br1, neighbors1));
+  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, at0ctx0.localSignature, br1, neighbors1));
   NewContextVecPtr contexts1(new NewContextVec);
   contexts1->push_back(ctx1);
 
@@ -327,8 +358,10 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
 
   client_thread.join();
 }
-
 #endif
+
+
+
 
 // check if belief strings in localSignature of one query plan has same id as
 // belief string in inputSignature of other query plan
@@ -353,6 +386,7 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   BOOST_CHECK_EQUAL(localPlan.localSignature->getIDByString(belief), \
                     inputPlan.groundInputSignature->getIDByString(belief)); \
 }
+
 
 BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 {
@@ -536,6 +570,43 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   "]";
   const char* brfile5 = "";
 
+  // context 1
+  std::string str_ac1 = "a(c1)";
+  std::string str_ac2 = "a(c2)";
+  std::string str_ac3 = "a(c3)";
+
+  // context 2
+  std::string str_bc4 = "b(c4)";
+  std::string str_bc5 = "b(c5)";
+  std::string str_bc6 = "b(c6)";
+  std::string str_domc1c4 = "dom(c1,c4)";
+  std::string str_domc2c5 = "dom(c2,c5)";
+  std::string str_domc3c6 = "dom(c3,c6)";
+
+  // context 3
+  std::string str_cc1c4 = "c(c1,c4)";
+  std::string str_cc2c5 = "c(c2,c5)";
+  std::string str_cc3c6 = "c(c3,c6)";
+
+  // context 4
+  std::string str_dc1c4 = "d(c1,c4)";
+  std::string str_dc2c5 = "d(c2,c5)";
+  std::string str_dc3c6 = "d(c3,c6)";
+  std::string str_dprimec1c4 = "dprime(c1,c4)";
+  std::string str_dprimec2c5 = "dprime(c2,c5)";
+  std::string str_dprimec3c6 = "dprime(c3,c6)";
+
+  // context 5
+  std::string str_pc1c4 = "p(c1,c4)";
+  std::string str_pc2c5 = "p(c2,c5)";
+  std::string str_pc3c6 = "p(c3,c6)";
+  std::string str_ec1c4 = "e(c1,c4)";
+  std::string str_ec2c5 = "e(c2,c5)";
+  std::string str_ec3c6 = "e(c3,c6)";
+  std::string str_fc1c4 = "f(c1,c4)";
+  std::string str_fc2c5 = "f(c2,c5)";
+  std::string str_fc3c6 = "f(c3,c6)";
+
   /************************** CONTEXT 5 **************************/
   ContextQueryPlanMapPtr qp5 = QueryPlanParser::parseString(queryPlan5);
   const ContextQueryPlan& at5ctx5 = qp5->find(5)->second;
@@ -546,34 +617,6 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   //kbspec5 += "/context5.lp";
   std::string kbspec5 = "../../examples/context5.lp";
 
-  #if 0
-  BeliefTablePtr btab55(new BeliefTable);
-
-  Belief belief_epsilon55(ctx_id5, "epsilon");
-  Belief belief_pc1c4_55(ctx_id5, "p(c1,c4)");
-  Belief belief_pc2c5_55(ctx_id5, "p(c2,c5)");
-  Belief belief_pc3c6_55(ctx_id5, "p(c3,c6)");
-  Belief belief_ec1c4_55(ctx_id5, "e(c1,c4)");
-  Belief belief_ec2c5_55(ctx_id5, "e(c2,c5)");
-  Belief belief_ec3c6_55(ctx_id5, "e(c3,c6)");
-  Belief belief_fc1c4_55(ctx_id5, "f(c1,c4)");
-  Belief belief_fc2c5_55(ctx_id5, "f(c2,c5)");
-  Belief belief_fc3c6_55(ctx_id5, "f(c3,c6)");
-
-
-  ID id_epsilon55 = btab55->storeAndGetID(belief_epsilon55);
-  ID id_pc1c4_55  = btab55->storeAndGetID(belief_pc1c4_55);
-  ID id_pc2c5_55  = btab55->storeAndGetID(belief_pc2c5_55);
-  ID id_pc3c6_55  = btab55->storeAndGetID(belief_pc3c6_55);
-  ID id_ec1c4_55  = btab55->storeAndGetID(belief_ec1c4_55);
-  ID id_ec2c5_55  = btab55->storeAndGetID(belief_ec2c5_55);
-  ID id_ec3c6_55  = btab55->storeAndGetID(belief_ec3c6_55);
-  ID id_fc1c4_55  = btab55->storeAndGetID(belief_fc1c4_55);
-  ID id_fc2c5_55  = btab55->storeAndGetID(belief_fc2c5_55);
-  ID id_fc3c6_55  = btab55->storeAndGetID(belief_fc3c6_55);
-  #endif
-
-  #if INSTANTIATE
   EnginePtr dlv_engine5 = DLVEngine::create();
   EngineWPtr dlv_engine_wp5(dlv_engine5);
   InstantiatorPtr dlv_inst5 = dlv_engine5->createInstantiator(dlv_engine_wp5, kbspec5);
@@ -587,7 +630,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   boost::thread server_thread5(run_server, ctx_port5, reg5);
   boost::posix_time::milliseconds server_starting_up5(200);
   boost::this_thread::sleep(server_starting_up5);
-  #endif
+
 
   /************************** CONTEXT 4 **************************/
   ContextQueryPlanMapPtr qp4 = QueryPlanParser::parseString(queryPlan4);
@@ -598,84 +641,29 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   //kbspec4 += "/context4.lp";
   std::string kbspec4 = "../../examples/context4.lp";
 
-  #if 0
-  BeliefTablePtr btab44(new BeliefTable);
-
-  Belief belief_epsilon44(ctx_id4, "epsilon");
-  Belief belief_dc1c4_44(ctx_id4, "d(c1,c4)");
-  Belief belief_dc2c5_44(ctx_id4, "d(c2,c5)");
-  Belief belief_dc3c6_44(ctx_id4, "d(c3,c6)");
-  Belief belief_dprimec1c4_44(ctx_id4, "dprime(c1,c4)");
-  Belief belief_dprimec2c5_44(ctx_id4, "dprime(c2,c5)");
-  Belief belief_dprimec3c6_44(ctx_id4, "dprime(c3,c6)");
-
-  ID id_epsilon44 = btab44->storeAndGetID(belief_epsilon44);
-  ID id_dc1c4_44 = btab44->storeAndGetID(belief_dc1c4_44);
-  ID id_dc2c5_44 = btab44->storeAndGetID(belief_dc2c5_44);
-  ID id_dc3c6_44 = btab44->storeAndGetID(belief_dc3c6_44);
-  ID id_dprimec1c4_44 = btab44->storeAndGetID(belief_dprimec1c4_44);
-  ID id_dprimec2c5_44 = btab44->storeAndGetID(belief_dprimec2c5_44);
-  ID id_dprimec3c6_44 = btab44->storeAndGetID(belief_dprimec3c6_44);
-
-  BeliefTablePtr btab54(new BeliefTable);
-  Belief belief_epsilon54(ctx_id5, "epsilon");
-  Belief belief_ec1c4_54(ctx_id5, "e(c1,c4)");
-  Belief belief_ec2c5_54(ctx_id5, "e(c2,c5)");
-  Belief belief_ec3c6_54(ctx_id5, "e(c3,c6)");
-  Belief belief_fc1c4_54(ctx_id5, "f(c1,c4)");
-  Belief belief_fc2c5_54(ctx_id5, "f(c2,c5)");
-  Belief belief_fc3c6_54(ctx_id5, "f(c3,c6)");
-
-  ID id_epsilon54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 0);
-  ID id_ec1c4_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 4);
-  ID id_ec2c5_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 5);
-  ID id_ec3c6_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 6);
-  ID id_fc1c4_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 7);
-  ID id_fc2c5_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 8);
-  ID id_fc3c6_54 = ID(ID::MAINKIND_BELIEF | ctx_id5, 9);
-
-  BOOST_CHECK_EQUAL(id_epsilon54, id_epsilon55);
-  BOOST_CHECK_EQUAL(id_ec1c4_54, id_ec1c4_55);
-  BOOST_CHECK_EQUAL(id_ec2c5_54, id_ec2c5_55);
-  BOOST_CHECK_EQUAL(id_ec3c6_54, id_ec3c6_55);
-  BOOST_CHECK_EQUAL(id_fc1c4_54, id_fc1c4_55);
-  BOOST_CHECK_EQUAL(id_fc2c5_54, id_fc2c5_55);
-  BOOST_CHECK_EQUAL(id_fc3c6_54, id_fc3c6_55);
-  #endif
-
   CHECK_BeliefIDs(qp4, qp5, 5, "e(c1,c4)");
   CHECK_BeliefIDs(qp4, qp5, 5, "e(c2,c5)");
   CHECK_BeliefIDs(qp4, qp5, 5, "e(c3,c6)");
   CHECK_BeliefIDs(qp4, qp5, 5, "f(c1,c4)");
   CHECK_BeliefIDs(qp4, qp5, 5, "f(c2,c5)");
   CHECK_BeliefIDs(qp4, qp5, 5, "f(c3,c6)");
-  
-  #if 0
-  // add beliefs to btab54 using the new method
-  btab54->storeWithID(belief_epsilon54, id_epsilon54);
-  btab54->storeWithID(belief_ec1c4_54, id_ec1c4_54);
-  btab54->storeWithID(belief_ec2c5_54, id_ec2c5_54);
-  btab54->storeWithID(belief_ec3c6_54, id_ec3c6_54);
-  btab54->storeWithID(belief_fc1c4_54, id_fc1c4_54);
-  btab54->storeWithID(belief_fc2c5_54, id_fc2c5_54);
-  btab54->storeWithID(belief_fc3c6_54, id_fc3c6_54);
-  #endif
 
   #if 0
   // query plan of ctx 4 must be sufficient to parse bridge rules!
   BridgeRuleTablePtr bridge_rules4 = BridgeRuleParser::parseString(brfile4, qp4);
   #else
-  // make compiler happy
-  BridgeRuleTablePtr bridge_rules4;
-  #endif
-
-  #if 0
   // bridge rules C5 --> C4
   BridgeRuleTablePtr bridge_rules4(new BridgeRuleTable);
 
   // adding all ground instances of d(X,Y) :- (5:f(X,Y)).
   //
   // d(c1,c4) :- (5:f(c1,c4)).
+  ID id_dc1c4_44 = at4ctx4.localSignature->getIDByString(str_dc1c4);
+  ID id_dc2c5_44 = at4ctx4.localSignature->getIDByString(str_dc2c5);
+  ID id_dc3c6_44 = at4ctx4.localSignature->getIDByString(str_dc3c6);
+  ID id_fc1c4_54 = at4ctx5.groundInputSignature->getIDByString(str_fc1c4);
+  ID id_fc2c5_54 = at4ctx5.groundInputSignature->getIDByString(str_fc2c5);
+  ID id_fc3c6_54 = at4ctx5.groundInputSignature->getIDByString(str_fc3c6);
   Tuple body14;
   body14.push_back(id_fc1c4_54);
   BridgeRule br14(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, id_dc1c4_44, body14);
@@ -694,7 +682,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   bridge_rules4->storeAndGetID(br34);
   #endif
 
-  #if INSTANTIATE
+  //  #if INSTANTIATE
   std::size_t ctx_off54 = 0;
   NewNeighborPtr neighbor54(new NewNeighbor(ctx_id5, ctx_off54, ctx_hostname5, port5));
   NewNeighborVecPtr neighbors4(new NewNeighborVec);
@@ -710,7 +698,8 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   RegistryPtr reg4(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts4));
   boost::thread server_thread4(run_server, ctx_port4, reg4);
-  #endif
+  //  #endif
+
 
   /************************** CONTEXT 3 **************************/  
   ContextQueryPlanMapPtr qp3 = QueryPlanParser::parseString(queryPlan3);
@@ -722,68 +711,19 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   std::string kbspec3 = "../../examples/context3.lp";
 
   #if 0
-  BeliefTablePtr btab33(new BeliefTable);
-
-  Belief belief_epsilon33(ctx_id3, "epsilon");
-  Belief belief_cc1c4_33(ctx_id3, "c(c1,c4)");
-  Belief belief_cc2c5_33(ctx_id3, "c(c2,c5)");
-  Belief belief_cc3c6_33(ctx_id3, "c(c3,c6)");
-
-  ID id_epsilon33 = btab33->storeAndGetID(belief_epsilon33);
-  ID id_cc1c4_33 = btab33->storeAndGetID(belief_cc1c4_33);
-  ID id_cc2c5_33 = btab33->storeAndGetID(belief_cc2c5_33);
-  ID id_cc3c6_33 = btab33->storeAndGetID(belief_cc3c6_33);
-
-  BeliefTablePtr btab53(new BeliefTable);
-  Belief belief_epsilon53(ctx_id5, "epsilon");
-  Belief belief_ec1c4_53(ctx_id5, "e(c1,c4)");
-  Belief belief_ec2c5_53(ctx_id5, "e(c2,c5)");
-  Belief belief_ec3c6_53(ctx_id5, "e(c3,c6)");
-  Belief belief_fc1c4_53(ctx_id5, "f(c1,c4)");
-  Belief belief_fc2c5_53(ctx_id5, "f(c2,c5)");
-  Belief belief_fc3c6_53(ctx_id5, "f(c3,c6)");
-
-  ID id_epsilon53 = ID(ID::MAINKIND_BELIEF | ctx_id5, 0);
-  ID id_ec1c4_53 = ID(ID::MAINKIND_BELIEF | ctx_id5, 4);
-  ID id_ec2c5_53 = ID(ID::MAINKIND_BELIEF | ctx_id5, 5);
-  ID id_ec3c6_53 = ID(ID::MAINKIND_BELIEF | ctx_id5, 6);
-  ID id_fc1c4_53 = ID(ID::MAINKIND_BELIEF | ctx_id5, 7);
-  ID id_fc2c5_53 = ID(ID::MAINKIND_BELIEF | ctx_id5, 8);
-  ID id_fc3c6_53 = ID(ID::MAINKIND_BELIEF | ctx_id5, 9);
-
-  BOOST_CHECK_EQUAL(id_epsilon53, id_epsilon55);
-  BOOST_CHECK_EQUAL(id_ec1c4_53, id_ec1c4_55);
-  BOOST_CHECK_EQUAL(id_ec2c5_53, id_ec2c5_55);
-  BOOST_CHECK_EQUAL(id_ec3c6_53, id_ec3c6_55);
-  BOOST_CHECK_EQUAL(id_fc1c4_53, id_fc1c4_55);
-  BOOST_CHECK_EQUAL(id_fc2c5_53, id_fc2c5_55);
-  BOOST_CHECK_EQUAL(id_fc3c6_53, id_fc3c6_55);
-  #endif
-
-  #if 0
-  // add beliefs to btab53 using the new method
-  btab53->storeWithID(belief_epsilon53, id_epsilon53);
-  btab53->storeWithID(belief_ec1c4_53, id_ec1c4_53);
-  btab53->storeWithID(belief_ec2c5_53, id_ec2c5_53);
-  btab53->storeWithID(belief_ec3c6_53, id_ec3c6_53);
-  btab53->storeWithID(belief_fc1c4_53, id_fc1c4_53);
-  btab53->storeWithID(belief_fc2c5_53, id_fc2c5_53);
-  btab53->storeWithID(belief_fc3c6_53, id_fc3c6_53);
-  #endif
-
-  #if 0
   // query plan of ctx 3 must be sufficient to parse bridge rules!
   BridgeRuleTablePtr bridge_rules3 = BridgeRuleParser::parseString(brfile3, qp3);
   #else
-  // make compiler happy
-  BridgeRuleTablePtr bridge_rules3;
-  #endif
-
-  #if 0
   // bridge rules C5 --> C3
   BridgeRuleTablePtr bridge_rules3(new BridgeRuleTable);
 
-  // adding all ground instances of c(C,Y) :- (5:e(X,Y));
+  ID id_cc1c4_33 = at3ctx3.localSignature->getIDByString(str_cc1c4);
+  ID id_cc2c5_33 = at3ctx3.localSignature->getIDByString(str_cc2c5);
+  ID id_cc3c6_33 = at3ctx3.localSignature->getIDByString(str_cc3c6);
+  ID id_ec1c4_53 = at3ctx5.groundInputSignature->getIDByString(str_ec1c4);
+  ID id_ec2c5_53 = at3ctx5.groundInputSignature->getIDByString(str_ec2c5);
+  ID id_ec3c6_53 = at3ctx5.groundInputSignature->getIDByString(str_ec3c6);
+  // adding all ground instances of c(X,Y) :- (5:e(X,Y));
   //
   // c(c1,c4) :- (5:e(c1,c4)).
   Tuple body13;
@@ -804,7 +744,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   bridge_rules3->storeAndGetID(br33);
   #endif
 
-  #if INSTANTIATE
+  //  #if INSTANTIATE
   std::size_t ctx_off53 = 0;
   NewNeighborPtr neighbor53(new NewNeighbor(ctx_id5, ctx_off53, ctx_hostname5, port5));
   NewNeighborVecPtr neighbors3(new NewNeighborVec);
@@ -820,7 +760,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   RegistryPtr reg3(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts3));
   boost::thread server_thread3(run_server, ctx_port3, reg3);
-  #endif
+  //  #endif
 
   /************************** CONTEXT 2 **************************/
   ContextQueryPlanMapPtr qp2 = QueryPlanParser::parseString(queryPlan2);
@@ -832,61 +772,21 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   std::string kbspec2 = "../../examples/context2.lp";
 
   #if 0
-  BeliefTablePtr btab22(new BeliefTable);
-
-  Belief belief_epsilon22(ctx_id2, "epsilon");
-  Belief belief_bc4_22(ctx_id2, "b(c4)");
-  Belief belief_bc5_22(ctx_id2, "b(c5)");
-  Belief belief_bc6_22(ctx_id2, "b(c6)");
-  Belief belief_domc1c4_22(ctx_id2, "dom(c1,c4)");
-  Belief belief_domc2c5_22(ctx_id2, "dom(c2,c5)");
-  Belief belief_domc3c6_22(ctx_id2, "dom(c3,c6)");
-
-  ID id_epsilon22 = btab22->storeAndGetID(belief_epsilon22);
-  ID id_bc4_22 = btab22->storeAndGetID(belief_bc4_22);
-  ID id_bc5_22 = btab22->storeAndGetID(belief_bc5_22);
-  ID id_bc6_22 = btab22->storeAndGetID(belief_bc6_22);
-  ID id_domc1c4_22 = btab22->storeAndGetID(belief_domc1c4_22);
-  ID id_domc2c5_22 = btab22->storeAndGetID(belief_domc2c5_22);
-  ID id_domc3c6_22 = btab22->storeAndGetID(belief_domc3c6_22);
-
-  BeliefTablePtr btab32(new BeliefTable);
-  Belief belief_epsilon32(ctx_id3, "epsilon");
-  Belief belief_cc1c4_32(ctx_id3, "c(c1,c4)");
-  Belief belief_cc2c5_32(ctx_id3, "c(c2,c5)");
-  Belief belief_cc3c6_32(ctx_id3, "c(c3,c6)");
-
-  ID id_epsilon32 = ID(ID::MAINKIND_BELIEF | ctx_id3, 0);
-  ID id_cc1c4_32 = ID(ID::MAINKIND_BELIEF | ctx_id3, 1);
-  ID id_cc2c5_32 = ID(ID::MAINKIND_BELIEF | ctx_id3, 2);
-  ID id_cc3c6_32 = ID(ID::MAINKIND_BELIEF | ctx_id3, 3);
-
-  BOOST_CHECK_EQUAL(id_epsilon32, id_epsilon33);
-  BOOST_CHECK_EQUAL(id_cc1c4_32, id_cc1c4_33);
-  BOOST_CHECK_EQUAL(id_cc2c5_32, id_cc2c5_33);
-  BOOST_CHECK_EQUAL(id_cc3c6_32, id_cc3c6_33);
-  #endif
-
-  #if 0
-  // add beliefs to btab32 using the new method
-  btab32->storeWithID(belief_epsilon32, id_epsilon32);
-  btab32->storeWithID(belief_cc1c4_32, id_cc1c4_32);
-  btab32->storeWithID(belief_cc2c5_32, id_cc2c5_32);
-  btab32->storeWithID(belief_cc3c6_32, id_cc3c6_32);
-  #endif
-
-  #if 0
   // query plan of ctx 2 must be sufficient to parse bridge rules!
   BridgeRuleTablePtr bridge_rules2 = BridgeRuleParser::parseString(brfile2, qp2);
   #else
-  // make compiler happy
-  BridgeRuleTablePtr bridge_rules2;
-  #endif
-
-  #if 0
   // bridge rules C3 --> C2
   BridgeRuleTablePtr bridge_rules2(new BridgeRuleTable);
-  
+
+  ID id_bc4_22 = at2ctx2.localSignature->getIDByString(str_bc4);
+  ID id_bc5_22 = at2ctx2.localSignature->getIDByString(str_bc5);
+  ID id_bc6_22 = at2ctx2.localSignature->getIDByString(str_bc6);
+  ID id_domc1c4_22 = at2ctx2.localSignature->getIDByString(str_domc1c4);
+  ID id_domc2c5_22 = at2ctx2.localSignature->getIDByString(str_domc2c5);
+  ID id_domc3c6_22 = at2ctx2.localSignature->getIDByString(str_domc3c6);
+  ID id_cc1c4_32 = at2ctx3.groundInputSignature->getIDByString(str_cc1c4);
+  ID id_cc2c5_32 = at2ctx3.groundInputSignature->getIDByString(str_cc2c5);
+  ID id_cc3c6_32 = at2ctx3.groundInputSignature->getIDByString(str_cc3c6);
   // adding all ground instances of b(Y) :- (2:dom(X,Y)), not (3:c(X,Y)).
   //
   // b(c4) :- (2:dom(c1,c4)), not (3:c(c1,c4)).
@@ -911,7 +811,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   bridge_rules2->storeAndGetID(br32);
   #endif
 
-  #if INSTANTIATE
+  //  #if INSTANTIATE
   std::size_t ctx_off32 = 0;
   NewNeighborPtr neighbor32(new NewNeighbor(ctx_id3, ctx_off32, ctx_hostname3, port3));
   NewNeighborVecPtr neighbors2(new NewNeighborVec);
@@ -927,46 +827,17 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   RegistryPtr reg2(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts2));
   boost::thread server_thread2(run_server, ctx_port2, reg2);
-  #endif
+  //  #endif
 
   /************************** CONTEXT 1 **************************/  
   ContextQueryPlanMapPtr qp1 = QueryPlanParser::parseString(queryPlan1);
   const ContextQueryPlan& at1ctx1 = qp1->find(1)->second;
   const ContextQueryPlan& at1ctx3 = qp1->find(3)->second;
+  const ContextQueryPlan& at1ctx4 = qp1->find(4)->second;
 
   //kbspec1 = ex;
   //kbspec1 += "/context1.lp";
   std::string kbspec1 = "../../examples/context1.lp";
-
-  #if 0
-  BeliefTablePtr btab11(new BeliefTable);
-
-  Belief belief_epsilon11(ctx_id1, "epsilon");
-  Belief belief_ac1_11(ctx_id1, "a(c1)");
-  Belief belief_ac2_11(ctx_id1, "a(c2)");
-  Belief belief_ac3_11(ctx_id1, "a(c3)");
-
-  ID id_epsilon11 = btab11->storeAndGetID(belief_epsilon11);
-  ID id_ac1_11 = btab11->storeAndGetID(belief_ac1_11);
-  ID id_ac2_11 = btab11->storeAndGetID(belief_ac2_11);
-  ID id_ac3_11 = btab11->storeAndGetID(belief_ac3_11);
-
-  BeliefTablePtr btab31(new BeliefTable);
-  Belief belief_epsilon31(ctx_id3, "epsilon");
-  Belief belief_cc1c4_31(ctx_id3, "c(c1,c4)");
-  Belief belief_cc2c5_31(ctx_id3, "c(c2,c5)");
-  Belief belief_cc3c6_31(ctx_id3, "c(c3,c6)");
-
-  ID id_epsilon31 = ID(ID::MAINKIND_BELIEF | ctx_id3, 0);
-  ID id_cc1c4_31 = ID(ID::MAINKIND_BELIEF | ctx_id3, 1);
-  ID id_cc2c5_31 = ID(ID::MAINKIND_BELIEF | ctx_id3, 2);
-  ID id_cc3c6_31 = ID(ID::MAINKIND_BELIEF | ctx_id3, 3);
-
-  BOOST_CHECK_EQUAL(id_epsilon31, id_epsilon33);
-  BOOST_CHECK_EQUAL(id_cc1c4_31, id_cc1c4_33);
-  BOOST_CHECK_EQUAL(id_cc2c5_31, id_cc2c5_33);
-  BOOST_CHECK_EQUAL(id_cc3c6_31, id_cc3c6_33);
-  #endif
 
   // instead of this complicated lines
   BOOST_CHECK_EQUAL(at1ctx3.groundInputSignature->getIDByString("c(c1,c4)"),
@@ -976,55 +847,27 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   CHECK_BeliefIDs(qp1, qp3, 3, "c(c1,c4)");
   CHECK_BeliefIDs(qp1, qp3, 3, "c(c2,c5)");
   CHECK_BeliefIDs(qp1, qp3, 3, "c(c3,c6)");
-
-  #if 0
-  // add beliefs to btab31 using the new method
-  btab31->storeWithID(belief_epsilon31, id_epsilon31);
-  btab31->storeWithID(belief_cc1c4_31, id_cc1c4_31);
-  btab31->storeWithID(belief_cc2c5_31, id_cc2c5_31);
-  btab31->storeWithID(belief_cc3c6_31, id_cc3c6_31);
-
-  BeliefTablePtr btab41(new BeliefTable);
-  Belief belief_epsilon41(ctx_id4, "epsilon");
-  Belief belief_dprimec1c4_41(ctx_id4, "dprime(c1,c4)");
-  Belief belief_dprimec2c5_41(ctx_id4, "dprime(c2,c5)");
-  Belief belief_dprimec3c6_41(ctx_id4, "dprime(c3,c6)");
-
-  ID id_epsilon41 = ID(ID::MAINKIND_BELIEF | ctx_id4, 0);
-  ID id_dprimec1c4_41 = ID(ID::MAINKIND_BELIEF | ctx_id4, 4);
-  ID id_dprimec2c5_41 = ID(ID::MAINKIND_BELIEF | ctx_id4, 5);
-  ID id_dprimec3c6_41 = ID(ID::MAINKIND_BELIEF | ctx_id4, 6);
-
-  BOOST_CHECK_EQUAL(id_epsilon41, id_epsilon44);
-  BOOST_CHECK_EQUAL(id_dprimec1c4_41, id_dprimec1c4_44);
-  BOOST_CHECK_EQUAL(id_dprimec2c5_41, id_dprimec2c5_44);
-  BOOST_CHECK_EQUAL(id_dprimec3c6_41, id_dprimec3c6_44);
-  #endif
-
+ 
   CHECK_BeliefIDs(qp1, qp4, 4, "dprime(c1,c4)");
   CHECK_BeliefIDs(qp1, qp4, 4, "dprime(c2,c5)");
   CHECK_BeliefIDs(qp1, qp4, 4, "dprime(c3,c6)");
 
   #if 0
-  // add beliefs to btab31 using the new method
-  btab41->storeWithID(belief_epsilon41, id_epsilon41);
-  btab41->storeWithID(belief_dprimec1c4_41, id_dprimec1c4_41);
-  btab41->storeWithID(belief_dprimec2c5_41, id_dprimec2c5_41);
-  btab41->storeWithID(belief_dprimec3c6_41, id_dprimec3c6_41);
-  #endif
-
-  #if 0
   // query plan of ctx 1 must be sufficient to parse bridge rules!
   BridgeRuleTablePtr bridge_rules1 = BridgeRuleParser::parseString(brfile1, qp1);
   #else
-  // make compiler happy
-  BridgeRuleTablePtr bridge_rules1;
-  #endif
-
-  #if 0
   // bridge rules C3,C4 --> C1
   BridgeRuleTablePtr bridge_rules1(new BridgeRuleTable);
 
+  ID id_ac1_11 = at1ctx1.localSignature->getIDByString(str_ac1);
+  ID id_ac2_11 = at1ctx1.localSignature->getIDByString(str_ac2);
+  ID id_ac3_11 = at1ctx1.localSignature->getIDByString(str_ac3);
+  ID id_cc1c4_31 = at1ctx3.groundInputSignature->getIDByString(str_cc1c4);
+  ID id_cc2c5_31 = at1ctx3.groundInputSignature->getIDByString(str_cc2c5);
+  ID id_cc3c6_31 = at1ctx3.groundInputSignature->getIDByString(str_cc3c6);
+  ID id_dprimec1c4_41 = at1ctx4.groundInputSignature->getIDByString(str_dprimec1c4);
+  ID id_dprimec2c5_41 = at1ctx4.groundInputSignature->getIDByString(str_dprimec2c5);
+  ID id_dprimec3c6_41 = at1ctx4.groundInputSignature->getIDByString(str_dprimec3c6);
   // adding all ground instances of a(X) :- (3:c(X,Y)), not (4:dprime(X,Y)).
   //
   // a(c1) :- (3:c(c1,c4)), not (4:dprime(c1,c4)).
@@ -1049,7 +892,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   bridge_rules1->storeAndGetID(br31);
   #endif
 
-  #if INSTANTIATE
+  //  #if INSTANTIATE
 
   #warning what's that offset?
   std::size_t ctx_off31 = 0;
@@ -1074,7 +917,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   boost::posix_time::milliseconds servers_starting_up(500);
   boost::this_thread::sleep(servers_starting_up);
-  #endif
+  //  #endif
 
   std::size_t invoker0 = 1000;
   std::size_t query_order1 = 1;
@@ -1083,12 +926,13 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   std::size_t k1 = 1;
   std::size_t k2 = 5;
 
-  ForwardMessage want_send(qid1, k1, k2);
+  //  ForwardMessage want_send(qid1, k1, k2);
 
-  std::cerr << "Starting client..." << std::endl;
-  boost::thread client_thread(run_client, port1, want_send);
+  //  std::cerr << "Starting client..." << std::endl;
+  //  boost::thread client_thread(run_client, port1, want_send);
 
-  client_thread.join();
+  //  client_thread.join();
+
 }
 
 // Local Variables:
