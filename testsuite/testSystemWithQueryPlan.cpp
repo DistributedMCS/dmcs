@@ -687,6 +687,8 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   NewNeighborPtr neighbor54(new NewNeighbor(ctx_id5, ctx_off54, ctx_hostname5, port5));
   NewNeighborVecPtr neighbors4(new NewNeighborVec);
   neighbors4->push_back(neighbor54);
+  NewNeighborVecPtr neighbors_reg4(new NewNeighborVec);
+  neighbors_reg4->push_back(neighbor54);
 
   EnginePtr dlv_engine4 = DLVEngine::create();
   EngineWPtr dlv_engine_wp4(dlv_engine4);
@@ -696,7 +698,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   NewContextVecPtr contexts4(new NewContextVec);
   contexts4->push_back(ctx4);
 
-  RegistryPtr reg4(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts4));
+  RegistryPtr reg4(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts4, neighbors_reg4));
   boost::thread server_thread4(run_server, ctx_port4, reg4);
   //  #endif
 
@@ -749,6 +751,8 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   NewNeighborPtr neighbor53(new NewNeighbor(ctx_id5, ctx_off53, ctx_hostname5, port5));
   NewNeighborVecPtr neighbors3(new NewNeighborVec);
   neighbors3->push_back(neighbor53);
+  NewNeighborVecPtr neighbors_reg3(new NewNeighborVec);
+  neighbors_reg3->push_back(neighbor53);
 
   EnginePtr dlv_engine3 = DLVEngine::create();
   EngineWPtr dlv_engine_wp3(dlv_engine3);
@@ -758,7 +762,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   NewContextVecPtr contexts3(new NewContextVec);
   contexts3->push_back(ctx3);
 
-  RegistryPtr reg3(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts3));
+  RegistryPtr reg3(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts3, neighbors_reg3));
   boost::thread server_thread3(run_server, ctx_port3, reg3);
   //  #endif
 
@@ -816,6 +820,8 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   NewNeighborPtr neighbor32(new NewNeighbor(ctx_id3, ctx_off32, ctx_hostname3, port3));
   NewNeighborVecPtr neighbors2(new NewNeighborVec);
   neighbors2->push_back(neighbor32);
+  NewNeighborVecPtr neighbors_reg2(new NewNeighborVec);
+  neighbors_reg2->push_back(neighbor32);
 
   EnginePtr dlv_engine2 = DLVEngine::create();
   EngineWPtr dlv_engine_wp2(dlv_engine2);
@@ -825,7 +831,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   NewContextVecPtr contexts2(new NewContextVec);
   contexts2->push_back(ctx2);
 
-  RegistryPtr reg2(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts2));
+  RegistryPtr reg2(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts2, neighbors_reg2));
   boost::thread server_thread2(run_server, ctx_port2, reg2);
   //  #endif
 
@@ -903,6 +909,10 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   neighbors1->push_back(neighbor31);
   neighbors1->push_back(neighbor41);
 
+  NewNeighborVecPtr neighbors_reg1(new NewNeighborVec);
+  neighbors_reg1->push_back(neighbor31);
+  neighbors_reg1->push_back(neighbor41);
+
   EnginePtr dlv_engine1 = DLVEngine::create();
   EngineWPtr dlv_engine_wp1(dlv_engine1);
   InstantiatorPtr dlv_inst1 = dlv_engine1->createInstantiator(dlv_engine_wp1, kbspec1);
@@ -912,7 +922,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   NewContextVecPtr contexts1(new NewContextVec);
   contexts1->push_back(ctx1);
 
-  RegistryPtr reg1(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts1));
+  RegistryPtr reg1(new Registry(SYSTEM_SIZE, QUEUE_SIZE, BS_SIZE, contexts1, neighbors_reg1));
   boost::thread server_thread1(run_server, ctx_port1, reg1);
 
   boost::posix_time::milliseconds servers_starting_up(500);
@@ -926,12 +936,12 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   std::size_t k1 = 1;
   std::size_t k2 = 5;
 
-  //  ForwardMessage want_send(qid1, k1, k2);
+  ForwardMessage want_send(qid1, k1, k2);
 
-  //  std::cerr << "Starting client..." << std::endl;
-  //  boost::thread client_thread(run_client, port1, want_send);
+  std::cerr << "Starting client..." << std::endl;
+  boost::thread client_thread(run_client, port1, want_send);
 
-  //  client_thread.join();
+  client_thread.join();
 
 }
 
