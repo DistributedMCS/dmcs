@@ -33,8 +33,10 @@
 
 #include "dmcs/BeliefStateResultAdder.h"
 #include "dmcs/DLVEvaluator.h"
-#include "parser/DLVResultParser.h"
 #include "dmcs/Instantiator.h"
+#include "mcs/BeliefStateOffset.h"
+#include "mcs/Logger.h"
+#include "parser/DLVResultParser.h"
 
 namespace dmcs {
 
@@ -107,6 +109,9 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
   std::string local_kb = instantiator_p->getKB();
   programStream << local_kb;
 
+  const std::vector<std::size_t>& starting_offset = BeliefStateOffset::instance()->getStartingOffsets();
+  const std::size_t this_starting_offset = starting_offset[ctx_id];
+
   // putting heads into programStream
   // only for intermediate context, i.e., heads != NULL
   NewBeliefState* head_input = heads->getHeads();
@@ -116,9 +121,12 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
       while (pos)      
 	{
 	  IDKind kind = ID::MAINKIND_BELIEF | ctx_id;
-	  IDAddress address = pos;
+	  IDAddress address = pos - this_starting_offset;
 	  
 	  ID id(kind, address);
+	  DBGLOG(DBG, "DLVEvaluator::reset_process(). pos = " << pos);
+	  DBGLOG(DBG, "DLVEvaluator::reset_process(). address = " << address);
+	  DBGLOG(DBG, "DLVEvaluator::reset_process(). id = " << id);
 	  const Belief& belief = btab->getByID(id);
 
 	  DBGLOG(DBG, "DLVEvaluator::reset_process(): Add " << belief.text << " into program stream.");
@@ -180,7 +188,7 @@ DLVEvaluator::read_until_k2(std::size_t ctx_id,
 			    BeliefTablePtr btab,
 			    NewConcurrentMessageDispatcherPtr md)
 {
-  assert (0 < k1 && k1 < k2);
+  assert (0 < k1 && k1 <= k2);
 
   BeliefStateResultAdder adder(out_queue, md, heads);
   DLVResultParser dlv_parser(ctx_id, btab);
