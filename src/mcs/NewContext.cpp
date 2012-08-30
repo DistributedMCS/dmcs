@@ -101,11 +101,11 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
   int timeout = 0;
   while (1)
     {
-      DBGLOG(DBG, "NewContext::startup(): Waiting at REQUEST_MQ[" << ctx_offset << "]");
+      DBGLOG(DBG, "NewContext[" << ctx_id << "]::startup(): Waiting at REQUEST_MQ[" << ctx_offset << "]");
       // Listen to the REQUEST_MQ
       ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_offset, timeout);
 
-      DBGLOG(DBG, "NewContext::startup(): Got message: " << *fwd_mess);
+      DBGLOG(DBG, "NewContext[" << ctx_id << "]::startup(): Got message: " << *fwd_mess);
       
       std::size_t parent_qid = fwd_mess->qid;
       if (is_shutdown(parent_qid))
@@ -152,7 +152,7 @@ NewContext::leaf_process_request(std::size_t parent_qid,
   // send heads to Evaluator
   Heads* heads = new Heads(NULL, k1, k2);
   int timeout = 0;
-  DBGLOG(DBG, "NewContext::leaf_process_request: Send (" << k1 << ", " << k2  << ") to eval[" << eval->getInQueue() << "]");
+  DBGLOG(DBG, "NewContext[" << ctx_id << "]::leaf_process_request: Send (" << k1 << ", " << k2  << ") to eval[" << eval->getInQueue() << "]");
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);
 
   // read the output from EVAL_OUT_MQ
@@ -174,7 +174,7 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
     {
       // prepare the heads
       std::size_t this_qid = query_id(ctx_id, ++query_counter);
-      DBGLOG(DBG, "NewContext::intermediate_process_request: trigger join with query_id = " << this_qid);
+      DBGLOG(DBG, "NewContext[" << ctx_id << "]::intermediate_process_request: trigger join with query_id = " << this_qid << " " << detailprint(this_qid));
       ReturnedBeliefState* rbs = joiner->trigger_join(this_qid, md, jd);
       if (rbs->belief_state == NULL)
 	{
@@ -183,11 +183,11 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
 
 
       NewBeliefState* input = rbs->belief_state;
-      DBGLOG(DBG, "NewContext::intermediate_process_request(): got input = " << *input);
+      DBGLOG(DBG, "NewContext[" << ctx_id << "]::intermediate_process_request(): got input = " << *input);
       Heads* heads = evaluate_bridge_rules(bridge_rules, input, k1, k2,
 					   BeliefStateOffset::instance()->getStartingOffsets());      
 
-      DBGLOG(DBG, "NewContext::intermediate_process_request(): heads = " << *(heads->getHeads()));
+      DBGLOG(DBG, "NewContext[" << ctx_id << "]::intermediate_process_request(): heads = " << *(heads->getHeads()));
       // send heads to Evaluator
       int timeout = 0;
       md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);
@@ -240,12 +240,12 @@ NewContext::read_and_send(std::size_t parent_qid,
       
       if (belief_state == NULL)
 	{
-	  DBGLOG(DBG, "NewContext::read_and_send(). Got res = NULL");
+	  DBGLOG(DBG, "NewContext[" << ctx_id << "]::read_and_send(). Got res = NULL");
 	  break;
 	}
       else
 	{
-	  DBGLOG(DBG, "NewContext::read_and_send(). Got res = " << *belief_state);
+	  DBGLOG(DBG, "NewContext[" << ctx_id << "]::read_and_send(). Got res = " << *belief_state);
 	  ++models_counter;
 	  send_out_result(parent_qid, heads, belief_state, md);
 	}
