@@ -33,6 +33,8 @@
 #include <iostream>
 #include <iomanip>
 
+#define detailprint(qid) "{ctx=" << ctxid_from_qid(qid) << ", invoker=" << invoker_from_qid(qid) << ", noff=" << neighbor_offset_from_qid(qid) << ", nid=" << neighbor_id_from_qid(qid) << ", qorder=" << qorder_from_qid(qid) << "}"
+
 namespace dmcs {
 
 class QueryID
