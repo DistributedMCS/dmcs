@@ -27,6 +27,7 @@ LIBS = \
 TESTS = \
 	testClasp \
 	testBeliefComparison \
+	testBridgeRuleParswer \
 	testQueryPlanParser \
 	testParsers \
 	testTranslation \
@@ -68,6 +69,7 @@ TESTS_ENVIRONMENT = \
 check_PROGRAMS = \
 	testClasp \
 	testBeliefComparison \
+	testBridgeRuleParser \
 	testQueryPlanParser \
 	testParsers \
 	testTranslation \
@@ -294,7 +296,9 @@ testSystem_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	@LIBCURL@
 
-testSystemWithQueryPlan_SOURCES = testSystemWithQueryPlan.cpp  QueryPlanParser.cpp QueryPlan.cpp \
+testSystemWithQueryPlan_SOURCES = testSystemWithQueryPlan.cpp \
+	QueryPlanParser.cpp \
+	QueryPlan.cpp \
 	DmcsClientTest.cpp 
 testSystemWithQueryPlan_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
@@ -304,3 +308,8 @@ testSystemWithQueryPlan_LDADD = \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/parser/libparser.a \
 	@LIBCURL@
+
+testBridgeRuleParser_SOURCES = testBridgeRuleParser.cpp \
+	BridgeRuleParser.cpp
+testBridgeRuleParser_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a 
