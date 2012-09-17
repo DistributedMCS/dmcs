@@ -77,13 +77,17 @@ struct TestOp
 {
   template<typename SourceAttributes>
   void 
-  operator()(boost::spirit::qi::unused_type,
-	     const SourceAttributes& source,
+  operator()(const SourceAttributes& source,
+	     boost::spirit::qi::unused_type,
 	     boost::spirit::qi::unused_type) const
   {
-    const std::vector<std::string>& v = source;
-    //for (std::vector<std::string>::const_iterator it = source.begin(); it != source.end(); ++it)
-    //  std::cout << *it << std::endl;
+    const fusion::vector4<std::string, char, std::vector<std::string>, char>& input = source;
+    std::string pred_name = fusion::at_c<0>(input);
+    std::vector<std::string> terms = fusion::at_c<2>(input);
+    std::cout << pred_name << std::endl;
+    
+    for (std::vector<std::string>::const_iterator it = terms.begin(); it != terms.end(); ++it)
+      std::cout << *it << std::endl;
   }
 };
 
@@ -98,6 +102,7 @@ struct BridgeRuleGrammar : qi::grammar<Iterator, Skipper>
     using qi::int_;
     using qi::uint_;
     using qi::_val;
+    using qi::char_;
     using namespace qi::labels;
     using phoenix::construct;
     using phoenix::new_;
@@ -113,16 +118,14 @@ struct BridgeRuleGrammar : qi::grammar<Iterator, Skipper>
       = ident % qi::lit(',');
 
     predicate 
-      = ident >> lit('(') >> terms >> lit(')');
-
-    
+      = ident >> char_('(') >> terms >> char_(')');
 
     start = predicate [ TestOp() ];
   }
 
   qi::rule<Iterator, std::string(), Skipper> ident;
-  qi::rule<Iterator, std::vector<std::string>, Skipper> terms;
-  qi::rule<Iterator, std::vector<std::string>, Skipper> predicate;
+  qi::rule<Iterator, std::vector<std::string>(), Skipper> terms;
+  qi::rule<Iterator, fusion::vector4<std::string, char, std::vector<std::string>, char>(), Skipper> predicate;
   qi::rule<Iterator, Skipper> start;
 };
 
