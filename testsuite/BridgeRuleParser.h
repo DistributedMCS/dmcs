@@ -31,6 +31,7 @@
 #define __BRIDGE_RULE_PARSER_H__
 
 #include "mcs/Rule.h"
+#include "QueryPlan.h"
 
 namespace dmcs {
 
@@ -40,7 +41,8 @@ public:
   //static BridgeRuleListPtr parseStream(std::istream& in);
   //static BridgeRuleListPtr parseFile(const std::string& infile);
   //static BridgeRuleListPtr parseString(const std::string& instr);
-  static bool parseString(const std::string& instr);
+  static bool parseString(const std::string& instr,
+			  ContextQueryPlanMapPtr& queryplan);
 };
 
 } // namespace dmcs

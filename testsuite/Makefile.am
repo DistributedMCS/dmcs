@@ -310,6 +310,8 @@ testSystemWithQueryPlan_LDADD = \
 	@LIBCURL@
 
 testBridgeRuleParser_SOURCES = testBridgeRuleParser.cpp \
-	BridgeRuleParser.cpp
+	BridgeRuleParser.cpp \
+	QueryPlanParser.cpp \
+	QueryPlan.cpp
 testBridgeRuleParser_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a 

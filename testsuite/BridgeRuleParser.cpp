@@ -53,7 +53,11 @@ using namespace dmcs;
 
 struct SemState
 {
+  SemState(const ContextQueryPlanMapPtr& qp)
+    : queryplan(qp)
+  { }
   //BridgeRuleListPtr bridge_rules;
+  const ContextQueryPlanMapPtr queryplan;
 };
 
 template<typename Iterator>
@@ -81,13 +85,48 @@ struct TestOp
 	     boost::spirit::qi::unused_type,
 	     boost::spirit::qi::unused_type) const
   {
+    const std::string& s = source;
+    std::cout << "TestOp: s = " << s << std::endl;
+  }
+};
+
+struct PassIdentToBelief
+{
+  template<typename SourceAttributes, typename Context>
+  void
+  operator()(const SourceAttributes& source,
+	     Context& ctx,
+	     boost::spirit::qi::unused_type) const
+  {
+    const std::string& ident = source;
+    std::string& belief = boost::fusion::at_c<0>(ctx.attributes);
+    belief = source;
+    std::cout << "belief = " << belief << std::endl;
+  }
+};
+
+struct PassPredToBelief
+{
+  template<typename SourceAttributes, typename Context>
+  void
+  operator()(const SourceAttributes& source,
+	     Context& ctx,
+	     boost::spirit::qi::unused_type) const
+  {
     const fusion::vector4<std::string, char, std::vector<std::string>, char>& input = source;
     std::string pred_name = fusion::at_c<0>(input);
     std::vector<std::string> terms = fusion::at_c<2>(input);
-    std::cout << pred_name << std::endl;
-    
-    for (std::vector<std::string>::const_iterator it = terms.begin(); it != terms.end(); ++it)
-      std::cout << *it << std::endl;
+    std::string& belief = boost::fusion::at_c<0>(ctx.attributes);
+    belief = pred_name;
+    if (!terms.empty())
+      {
+	belief = belief + "(";
+	std::vector<std::string>::const_iterator endIt = terms.end();
+	endIt--;
+	for (std::vector<std::string>::const_iterator it = terms.begin(); it != endIt; ++it)
+	  belief = belief + (*it) + ",";
+	belief = belief + (*endIt) + ")";
+      }
   }
 };
 
@@ -120,12 +159,17 @@ struct BridgeRuleGrammar : qi::grammar<Iterator, Skipper>
     predicate 
       = ident >> char_('(') >> terms >> char_(')');
 
-    start = predicate [ TestOp() ];
+    belief 
+      = predicate [ PassPredToBelief() ]
+      | ident [ PassIdentToBelief() ];
+
+    start = belief [ TestOp() ];
   }
 
   qi::rule<Iterator, std::string(), Skipper> ident;
   qi::rule<Iterator, std::vector<std::string>(), Skipper> terms;
   qi::rule<Iterator, fusion::vector4<std::string, char, std::vector<std::string>, char>(), Skipper> predicate;
+  qi::rule<Iterator, std::string(), Skipper> belief;
   qi::rule<Iterator, Skipper> start;
 };
 
@@ -153,7 +197,8 @@ BridgeRuleParser::parseString(const std::string& instr)
 }*/
 
 bool
-BridgeRuleParser::parseString(const std::string& instr)
+BridgeRuleParser::parseString(const std::string& instr,
+			      ContextQueryPlanMapPtr& queryplan)
 {
   std::string::const_iterator begIt = instr.begin();
   std::string::const_iterator endIt = instr.end();
@@ -161,7 +206,7 @@ BridgeRuleParser::parseString(const std::string& instr)
   typedef SkipperGrammar<std::string::const_iterator> Skipper;
 
   Skipper skipper;
-  SemState state;
+  SemState state(queryplan);
   BridgeRuleGrammar<std::string::const_iterator, Skipper> grammar(state);
 
   bool r = qi::phrase_parse(begIt, endIt, grammar, skipper);

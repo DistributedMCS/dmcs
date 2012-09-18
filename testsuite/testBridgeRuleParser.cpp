@@ -32,13 +32,47 @@
 #include <boost/test/unit_test.hpp>
 
 #include "BridgeRuleParser.h"
+#include "QueryPlan.h"
+#include "QueryPlanParser.h"
 
 using namespace dmcs;
 
 BOOST_AUTO_TEST_CASE ( testBridgeRuleParser )
 {
-  std::cout << "testBridgeRuleParser" << std::endl;
+  const char* queryPlan1 =
+  "["
+  "  {"
+  "    ContextId: 1,"
+  "    LocalSignature:" 
+  "    {" 
+  "      1: [a, c1]," 
+  "      2: [a, c2]," 
+  "      3: [a, c3]," 
+  "    }," 
+  "  }," 
+  "  {"
+  "    ContextId: 3,"
+  "    InputSignature:" 
+  "    {" 
+  "      1: [c, c1, c4]," 
+  "      2: [c, c2, c5]," 
+  "      3: [c, c3, c6]," 
+  "    }," 
+  "  }," 
+  "  {"
+  "    ContextId: 4,"
+  "    InputSignature:" 
+  "    {" 
+  "      4: [dprime, c1, c4]," 
+  "      5: [dprime, c2, c5]," 
+  "      6: [dprime, c3, c6]," 
+  "    }," 
+  "  }," 
+  "]";
 
-  const char* brrule = "p(\"ab(2)\", ab2c, 200)";
-  bool r = BridgeRuleParser::parseString(brrule);
+  ContextQueryPlanMapPtr qp1 = QueryPlanParser::parseString(queryPlan1);
+
+  //const char* brrule = "p(\"ab(2)\", ab2c, 200)";
+  const char* brrule = "\"abc supseq D\"";
+  bool r = BridgeRuleParser::parseString(brrule, qp1);
 }
