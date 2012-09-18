@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleParser )
 
   ContextQueryPlanMapPtr qp1 = QueryPlanParser::parseString(queryPlan1);
 
-  //const char* brrule = "p(\"ab(2)\", ab2c, 200)";
-  const char* brrule = "\"abc supseq D\"";
-  bool r = BridgeRuleParser::parseString(brrule, qp1);
+  const char* brrule = "not (1:a(c1))";
+  const unsigned int ctx_id = 1;
+  bool r = BridgeRuleParser::parseString(brrule, qp1, ctx_id);
 }

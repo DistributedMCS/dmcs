@@ -42,7 +42,8 @@ public:
   //static BridgeRuleListPtr parseFile(const std::string& infile);
   //static BridgeRuleListPtr parseString(const std::string& instr);
   static bool parseString(const std::string& instr,
-			  ContextQueryPlanMapPtr& queryplan);
+			  ContextQueryPlanMapPtr& queryplan,
+			  const unsigned int ctx_id);
 };
 
 } // namespace dmcs
