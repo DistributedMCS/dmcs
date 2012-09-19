@@ -30,7 +30,6 @@
 #ifndef __BRIDGE_RULE_PARSER_H__
 #define __BRIDGE_RULE_PARSER_H__
 
-#include "mcs/Rule.h"
 #include "QueryPlan.h"
 
 namespace dmcs {

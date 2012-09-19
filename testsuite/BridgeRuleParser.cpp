@@ -31,6 +31,7 @@
 #undef BOOST_SPIRIT_DEBUG_WS
 
 #include "BridgeRuleParser.h"
+#include "mcs/BridgeRuleTable.h"
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -55,10 +56,12 @@ struct SemState
 {
   SemState(const ContextQueryPlanMapPtr& queryplan,
 	   const unsigned int ctx_id)
-    : queryplan(queryplan),
+    : bridge_rules(new BridgeRuleTable),
+      queryplan(queryplan),
       ctx_id(ctx_id)
   { }
-  //BridgeRuleListPtr bridge_rules;
+
+  BridgeRuleTablePtr bridge_rules;
   const ContextQueryPlanMapPtr queryplan;
   const unsigned int ctx_id;
 };
@@ -116,9 +119,9 @@ struct PassPredToBelief
 	     Context& ctx,
 	     boost::spirit::qi::unused_type) const
   {
-    const fusion::vector4<std::string, char, std::vector<std::string>, char>& input = source;
+    const fusion::vector2<std::string, std::vector<std::string> >& input = source;
     std::string pred_name = fusion::at_c<0>(input);
-    std::vector<std::string> terms = fusion::at_c<2>(input);
+    std::vector<std::string> terms = fusion::at_c<1>(input);
     std::string& belief = fusion::at_c<0>(ctx.attributes);
     belief = pred_name;
     if (!terms.empty())
@@ -143,11 +146,11 @@ struct GetBridgeAtom
 	     Context& ctx,
 	     boost::spirit::qi::unused_type) const
   {
-    const fusion::vector5<char, unsigned int, char, const std::string&, char>& input = source;
+    const fusion::vector2<unsigned int, const std::string&>& input = source;
     dmcs::ID& id = fusion::at_c<0>(ctx.attributes);
 
-    unsigned int ctx_id = fusion::at_c<1>(input);
-    const std::string& belief = fusion::at_c<3>(input);
+    unsigned int ctx_id = fusion::at_c<0>(input);
+    const std::string& belief = fusion::at_c<1>(input);
     const ContextQueryPlan& qp = s.queryplan->find(ctx_id)->second;
 
     if (ctx_id == s.ctx_id)
@@ -185,6 +188,16 @@ struct GetBridgeRule
 	     Context& ctx,
 	     boost::spirit::qi::unused_type) const
   {
+    const fusion::vector2<const std::string&, std::vector<dmcs::ID> >& input = source;
+
+    const std::string& head = fusion::at_c<0>(input);
+    const ContextQueryPlan& qp = s.queryplan->find(s.ctx_id)->second;
+    dmcs::ID head_id = qp.localSignature->getIDByString(head);
+
+    const Tuple& body = fusion::at_c<1>(input);
+
+    dmcs::BridgeRule r(ID::MAINKIND_RULE | ID::SUBKIND_RULE_BRIDGE_RULE, head_id, body);
+    s.bridge_rules->storeAndGetID(r);
   }
 
   SemState& s;
@@ -217,31 +230,31 @@ struct BridgeRuleGrammar : qi::grammar<Iterator, Skipper>
       = ident % qi::lit(',');
 
     predicate 
-      = ident >> char_('(') >> terms >> char_(')');
+      = ident >> lit('(') >> terms >> lit(')');
 
     belief 
       = predicate [ PassPredToBelief() ]
       | ident [ PassIdentToBelief() ];
 
     bridge_atom
-      = ( char_('(') >> uint_ >> char_(':') >> belief >> char_(')') ) [ GetBridgeAtom(state) ];
+      = ( lit('(') >> uint_ >> lit(':') >> belief >> lit(')') ) [ GetBridgeAtom(state) ];
 
     bridge_literal 
       = ( -qi::string("not") >> bridge_atom ) [ GetBridgeLiteral() ];
 
     bridge_rule
       = ( belief 
-	  >> qi::string(":-")
+	  >> qi::lit(":-")
 	  >> ( bridge_literal % qi::char_(',') )
-	  >> qi::char_('.')
+	  >> qi::lit('.')
 	  ) [ GetBridgeRule(state) ];
 
-    start = bridge_literal;
+    start = +bridge_rule;
   }
 
   qi::rule<Iterator, std::string(), Skipper> ident;
   qi::rule<Iterator, std::vector<std::string>(), Skipper> terms;
-  qi::rule<Iterator, fusion::vector4<std::string, char, std::vector<std::string>, char>(), Skipper> predicate;
+  qi::rule<Iterator, fusion::vector2<std::string, std::vector<std::string> >(), Skipper> predicate;
   qi::rule<Iterator, std::string(), Skipper> belief;
   qi::rule<Iterator, dmcs::ID(), Skipper> bridge_atom;
   qi::rule<Iterator, dmcs::ID(), Skipper> bridge_literal;
