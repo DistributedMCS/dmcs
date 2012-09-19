@@ -1,0 +1,2 @@
+a(c1) :- not (1:a(c1)), (4:dprime(c1,c4)).
+a(c2) :- not (1:a(c2)), (4:dprime(c2,c5)).

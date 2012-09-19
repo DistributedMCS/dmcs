@@ -14,6 +14,7 @@
 #include <boost/spirit/home/phoenix/statement/if.hpp> 
 
 #include <istream>
+#include <fstream>
 
 namespace
 {
@@ -340,14 +341,43 @@ namespace dmcs
 {
 
 ContextQueryPlanMapPtr
-QueryPlanParser::parseStream(std::istream& in)
-{
-}
-
-ContextQueryPlanMapPtr
 QueryPlanParser::parseFile(const std::string& infile)
 {
+  std::ifstream ifs;
+
+  ifs.open(infile.c_str());
+  if (!ifs.is_open())
+    {
+      std::ostringstream oss;
+      oss << "File " << infile << " not found!";
+      throw std::runtime_error(oss.str());
+    }
+  else
+    {
+      return parseStream(ifs);
+    }
 }
+
+
+ContextQueryPlanMapPtr
+QueryPlanParser::parseStream(std::istream& in)
+{
+  std::ostringstream buf;
+  std::string line;
+
+  while (!in.eof())
+    {
+      std::getline(in, line);
+      buf << line << std::endl;
+      std::cerr << "Read >>" << line << "<<" << std::endl;
+    }
+
+  if (in.fail()) in.clear();
+
+  std::string input = buf.str();
+  return parseString(input);
+}
+
 
 ContextQueryPlanMapPtr
 QueryPlanParser::parseString(const std::string& str)

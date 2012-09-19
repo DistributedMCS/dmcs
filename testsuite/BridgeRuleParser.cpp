@@ -33,6 +33,9 @@
 #include "BridgeRuleParser.h"
 #include "mcs/BridgeRuleTable.h"
 
+#include <iostream>
+#include <fstream>
+
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -83,6 +86,7 @@ struct SkipperGrammar: boost::spirit::qi::grammar<Iterator>
   boost::spirit::qi::rule<Iterator> ws; 
 };
 
+
 struct TestOp
 {
   template<typename SourceAttributes>
@@ -95,6 +99,7 @@ struct TestOp
     std::cout << "TestOp: s = " << s << std::endl;
   }
 };
+
 
 struct PassIdentToBelief
 {
@@ -203,6 +208,7 @@ struct GetBridgeRule
   SemState& s;
 };
 
+
 template<typename Iterator, typename Skipper>
 struct BridgeRuleGrammar : qi::grammar<Iterator, Skipper>
 {
@@ -269,23 +275,52 @@ struct BridgeRuleGrammar : qi::grammar<Iterator, Skipper>
 
 namespace dmcs {
 
-  /*
-BridgeRuleListPtr
-BridgeRuleParser::parseStream(std::istream& in)
+BridgeRuleTablePtr
+BridgeRuleParser::parseFile(const std::string& infile,
+			    ContextQueryPlanMapPtr& queryplan,
+			    const unsigned int ctx_id)
 {
+  std::ifstream ifs;
+
+  ifs.open(infile.c_str());
+  if (!ifs.is_open())
+    {
+      std::ostringstream oss;
+      oss << "File " << infile << " not found!";
+      throw std::runtime_error(oss.str());
+    }
+  else
+    {
+      return parseStream(ifs, queryplan, ctx_id);
+    }
 }
 
-BridgeRuleListPtr
-BridgeRuleParser::parseFile(const std::string& infile)
+
+
+BridgeRuleTablePtr
+BridgeRuleParser::parseStream(std::istream& in,
+			      ContextQueryPlanMapPtr& queryplan,
+			      const unsigned int ctx_id)
 {
+  std::ostringstream buf;
+  std::string line;
+
+  while (!in.eof())
+    {
+      std::getline(in, line);
+      buf << line << std::endl;
+      //std::cerr << "Read >>" << line << "<<" << std::endl;
+    }
+
+  if (in.fail()) in.clear();
+
+  std::string input = buf.str();
+  return parseString(input, queryplan, ctx_id);
 }
 
-BridgeRuleListPtr 
-BridgeRuleParser::parseString(const std::string& instr)
-{
-}*/
 
-bool
+
+BridgeRuleTablePtr
 BridgeRuleParser::parseString(const std::string& instr,
 			      ContextQueryPlanMapPtr& queryplan,
 			      const unsigned int ctx_id)
@@ -304,7 +339,7 @@ BridgeRuleParser::parseString(const std::string& instr,
   if (r && begIt == endIt)
     {
       std::cerr << "Bridge rules parsing succeeded" << std::endl;
-      return true;
+      return state.bridge_rules;
     }
   else
     {

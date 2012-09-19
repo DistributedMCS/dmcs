@@ -39,40 +39,18 @@ using namespace dmcs;
 
 BOOST_AUTO_TEST_CASE ( testBridgeRuleParser )
 {
-  const char* queryPlan1 =
-  "["
-  "  {"
-  "    ContextId: 1,"
-  "    LocalSignature:" 
-  "    {" 
-  "      1: [a, c1]," 
-  "      2: [a, c2]," 
-  "      3: [a, c3]," 
-  "    }," 
-  "  }," 
-  "  {"
-  "    ContextId: 3,"
-  "    InputSignature:" 
-  "    {" 
-  "      1: [c, c1, c4]," 
-  "      2: [c, c2, c5]," 
-  "      3: [c, c3, c6]," 
-  "    }," 
-  "  }," 
-  "  {"
-  "    ContextId: 4,"
-  "    InputSignature:" 
-  "    {" 
-  "      4: [dprime, c1, c4]," 
-  "      5: [dprime, c2, c5]," 
-  "      6: [dprime, c3, c6]," 
-  "    }," 
-  "  }," 
-  "]";
+  std::string queryplan_file = "../../examples/context1.qp";
+  ContextQueryPlanMapPtr qp1 = QueryPlanParser::parseFile(queryplan_file);
 
-  ContextQueryPlanMapPtr qp1 = QueryPlanParser::parseString(queryPlan1);
-
-  const char* brrule = "a(c1) :- not (1:a(c1)), (4:dprime(c1,c4)). a(c2) :- not (1:a(c1)), (4:dprime(c1,c4)).";
+  std::string bridge_rules_file = "../../examples/bridge_rules.inp";
   const unsigned int ctx_id = 1;
-  bool r = BridgeRuleParser::parseString(brrule, qp1, ctx_id);
+  BridgeRuleTablePtr brtab = BridgeRuleParser::parseFile(bridge_rules_file, qp1, ctx_id);
+
+  std::cout << "Got bridge rules:" << std::endl;
+  std::pair<BridgeRuleTable::AddressIterator, BridgeRuleTable::AddressIterator> iters = brtab->getAllByAddress();
+  for (BridgeRuleTable::AddressIterator it = iters.first; it != iters.second; ++it)
+    {
+      const BridgeRule& r = *it;
+      std::cout << r << std::endl;
+    }
 }
