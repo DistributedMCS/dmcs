@@ -297,21 +297,17 @@ testSystem_LDADD = \
 	@LIBCURL@
 
 testSystemWithQueryPlan_SOURCES = testSystemWithQueryPlan.cpp \
-	QueryPlanParser.cpp \
-	QueryPlan.cpp \
 	DmcsClientTest.cpp 
 testSystemWithQueryPlan_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
-	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/parser/libparser.a \
+	$(top_builddir)/src/mcs/libmcs.a \
 	@LIBCURL@
 
-testBridgeRuleParser_SOURCES = testBridgeRuleParser.cpp \
-	BridgeRuleParser.cpp \
-	QueryPlanParser.cpp \
-	QueryPlan.cpp
+testBridgeRuleParser_SOURCES = testBridgeRuleParser.cpp 
 testBridgeRuleParser_LDADD = \
+	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/mcs/libmcs.a 

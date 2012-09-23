@@ -31,9 +31,9 @@
 #define BOOST_TEST_MODULE "testBridgeRuleParser"
 #include <boost/test/unit_test.hpp>
 
-#include "BridgeRuleParser.h"
-#include "QueryPlan.h"
-#include "QueryPlanParser.h"
+#include "parser/BridgeRuleParser.h"
+#include "mcs/QueryPlan.h"
+#include "parser/QueryPlanParser.h"
 
 using namespace dmcs;
 

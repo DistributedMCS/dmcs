@@ -43,6 +43,7 @@ libmcs_a_SOURCES = \
 		NewContext.cpp \
 		Pool.cpp \
 		QueryID.cpp \
+		QueryPlan.cpp \
 	  	ResourceManager.cpp \
 		ReturnedBeliefState.cpp \
 		StreamingJoiner.cpp 

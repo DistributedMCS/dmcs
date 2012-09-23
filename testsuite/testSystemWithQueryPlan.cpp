@@ -40,9 +40,8 @@
 #include "network/NewClient.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "network/NewServer.h"
-#warning TODO put into correct directory
-#include "QueryPlan.h"
-#include "QueryPlanParser.h"
+#include "mcs/QueryPlan.h"
+#include "parser/QueryPlanParser.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testSystemWithQueryPlan"

@@ -5,6 +5,7 @@ noinst_HEADERS =  \
 		BaseBuilder.h \
 		BridgeRulesBuilder.h \
 		BridgeRulesBuilder.tcc \
+		BridgeRuleParser.h \
 		ClaspResultBuilder.h \
 		ClaspResultBuilder.tcc \
 		ClaspResultGrammar.h \
@@ -24,6 +25,7 @@ noinst_HEADERS =  \
 		ParserDirector.h \
 		ParserDirector.tcc \
 		ParserState.h \
+		QueryPlanParser.h \
 		SpiritDebugging.h \
 		SpiritFilePositionNode.h 
 
