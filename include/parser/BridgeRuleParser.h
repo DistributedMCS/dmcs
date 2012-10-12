@@ -39,16 +39,16 @@ class BridgeRuleParser
 {
 public:
   static BridgeRuleTablePtr parseFile(const std::string& infile,
-				     ContextQueryPlanMapPtr& queryplan,
-				     const unsigned int ctx_id);
+				      ContextQueryPlanMapPtr& queryplan,
+				      const std::size_t ctx_id);
 
   static BridgeRuleTablePtr parseStream(std::istream& in,
-				       ContextQueryPlanMapPtr& queryplan,
-				       const unsigned int ctx_id);
+					ContextQueryPlanMapPtr& queryplan,
+					const std::size_t ctx_id);
 
   static BridgeRuleTablePtr parseString(const std::string& instr,
 					ContextQueryPlanMapPtr& queryplan,
-					const unsigned int ctx_id);
+					const std::size_t ctx_id);
 };
 
 } // namespace dmcs

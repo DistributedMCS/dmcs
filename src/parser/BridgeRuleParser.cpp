@@ -58,7 +58,7 @@ using namespace dmcs;
 struct SemState
 {
   SemState(const ContextQueryPlanMapPtr& queryplan,
-	   const unsigned int ctx_id)
+	   const std::size_t ctx_id)
     : bridge_rules(new BridgeRuleTable),
       queryplan(queryplan),
       ctx_id(ctx_id)
@@ -66,7 +66,7 @@ struct SemState
 
   BridgeRuleTablePtr bridge_rules;
   const ContextQueryPlanMapPtr queryplan;
-  const unsigned int ctx_id;
+  const std::size_t ctx_id;
 };
 
 template<typename Iterator>
@@ -151,10 +151,10 @@ struct GetBridgeAtom
 	     Context& ctx,
 	     boost::spirit::qi::unused_type) const
   {
-    const fusion::vector2<unsigned int, const std::string&>& input = source;
+    const fusion::vector2<std::size_t, const std::string&>& input = source;
     dmcs::ID& id = fusion::at_c<0>(ctx.attributes);
 
-    unsigned int ctx_id = fusion::at_c<0>(input);
+    std::size_t ctx_id = fusion::at_c<0>(input);
     const std::string& belief = fusion::at_c<1>(input);
     const ContextQueryPlan& qp = s.queryplan->find(ctx_id)->second;
 
@@ -278,7 +278,7 @@ namespace dmcs {
 BridgeRuleTablePtr
 BridgeRuleParser::parseFile(const std::string& infile,
 			    ContextQueryPlanMapPtr& queryplan,
-			    const unsigned int ctx_id)
+			    const std::size_t ctx_id)
 {
   std::ifstream ifs;
 
@@ -300,7 +300,7 @@ BridgeRuleParser::parseFile(const std::string& infile,
 BridgeRuleTablePtr
 BridgeRuleParser::parseStream(std::istream& in,
 			      ContextQueryPlanMapPtr& queryplan,
-			      const unsigned int ctx_id)
+			      const std::size_t ctx_id)
 {
   std::ostringstream buf;
   std::string line;
@@ -323,7 +323,7 @@ BridgeRuleParser::parseStream(std::istream& in,
 BridgeRuleTablePtr
 BridgeRuleParser::parseString(const std::string& instr,
 			      ContextQueryPlanMapPtr& queryplan,
-			      const unsigned int ctx_id)
+			      const std::size_t ctx_id)
 {
   std::string::const_iterator begIt = instr.begin();
   std::string::const_iterator endIt = instr.end();
