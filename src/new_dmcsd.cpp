@@ -61,6 +61,7 @@ main(int argc, char* argv[])
       std::size_t system_size = 0;
       std::size_t queue_size = 0;
       std::size_t bs_size = 0; // for testing, the generator should take care of this value
+      std::size_t pack_size = 0;
       std::string filename_local_kb;
       std::string filename_bridge_rules;
       std::string filename_query_plan;
@@ -77,6 +78,7 @@ Options";
 	(SYSTEM_SIZE, boost::program_options::value<std::size_t>(&system_size), "set system size")
 	(QUEUE_SIZE, boost::program_options::value<std::size_t>(&queue_size)->default_value(DEFAULT_QUEUE_SIZE), "set concurrent message queue size")
 	(BS_SIZE, boost::program_options::value<std::size_t>(&bs_size), "set belief state size")
+	(PACK_SIZE, boost::program_options::value<std::size_t>(&pack_size)->default_value(DEFAULT_PACK_SIZE), "set size of packages of belief states to be transferred")
 	(KB, boost::program_options::value<std::string>(&filename_local_kb), "set Knowledge Base file name")
 	(BR, boost::program_options::value<std::string>(&filename_bridge_rules), "set Bridge Rules file name")
 	(QP, boost::program_options::value<std::string>(&filename_query_plan), "set Query Plan file name")
@@ -104,15 +106,26 @@ Options";
 
       ContextQueryPlanMapPtr queryplan_map = QueryPlanParser::parseFile(filename_query_plan);
       const ContextQueryPlan& local_queryplan = queryplan_map->find(myid)->second;
-      BridgeRuleTablePtr bridge_rules = BridgeRuleParser::parseFile(filename_bridge_rules, queryplan_map, myid);
+      BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(filename_bridge_rules, queryplan_map, myid);;
+      BridgeRuleTablePtr bridge_rules = ret_val.first;
+      NewNeighborVecPtr neighbors = ret_val.second;
 
       EnginePtr dlv_engine = DLVEngine::create();
       EngineWPtr dlv_engine_wp(dlv_engine);
       InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, filename_local_kb);
-      
-      NewContextPtr ctx(new NewContext(myid, dlv_inst, local_queryplan.localSignature));
+
       NewContextVecPtr ctx_vec(new NewContextVec);
-      ctx_vec->push_back(ctx);
+      
+      if (neighbors->empty())
+	{
+	  NewContextPtr ctx(new NewContext(myid, dlv_inst, local_queryplan.localSignature));
+	  ctx_vec->push_back(ctx);
+	}
+      else
+	{
+	  NewContextPtr ctx(new NewContext(myid, pack_size, dlv_inst, local_queryplan.localSignature, bridge_rules, neighbors));
+	  ctx_vec->push_back(ctx);
+	}
 
       RegistryPtr reg(new Registry(system_size, queue_size, bs_size, ctx_vec));
       

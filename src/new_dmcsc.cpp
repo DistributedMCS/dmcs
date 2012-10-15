@@ -31,11 +31,15 @@
 #include "config.h"
 #endif
 
-#include <set>
-
+#include <boost/bind.hpp>
+#include <boost/asio.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/functional/hash.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
-#include <boost/thread/mutex.hpp>
+#include <boost/thread.hpp>
 
 #include "dmcs/ProgramOptions.h"
 #include "mcs/BackwardMessage.h"
@@ -45,6 +49,13 @@
 #include "mcs/QueryID.h"
 #include "mcs/ReturnedBeliefState.h"
 #include "network/NewClient.h"
+
+#include <set>
+#include <fstream>
+#include <iostream>
+#include <set>
+#include <string> 
+#include <csignal>
 
 using namespace dmcs;
 
@@ -71,12 +82,12 @@ handle_belief_states(ReturnedBeliefStateListPtr result)
 
 	      boost::mutex::scoped_lock lock(print_mutex);
 
-	      std::cout << "Partial Equilibrium #" << no_beliefstates << ": ( " << *p.first << ")" << std::endl;
+	      std::cout << "Partial Equilibrium #" << no_belief_states << ": ( " << *p.first << ")" << std::endl;
 
 	      boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
 
 	      std::cerr << "[" << diff.total_seconds() << "." << diff.total_milliseconds() << "] "
-			<< "Partial Equilibrium #" << no_beliefstates << ": ( " << *p.first << ")" << std::endl;
+			<< "Partial Equilibrium #" << no_belief_states << ": ( " << *p.first << ")" << std::endl;
 	      
 	    }
 
@@ -99,7 +110,7 @@ handle_signal(int signum)
 
       std::cerr << "Total Number of Received Equilibria: " << handled_belief_states << std::endl;
 
-      std::cout << "Total Number of Equilibria: " << no_beliefstates << "+" << std::endl;
+      std::cout << "Total Number of Equilibria: " << no_belief_states << "+" << std::endl;
 
       exit(0);
     }
@@ -142,13 +153,13 @@ main(int argc, char* argv[])
       std::size_t k1;
       std::size_t k2;
 
-      const char* help_description = "Usage: dmcsc --hostname=HOSTNAME --port=PORT [OPTIONS]\n\nOptions";
+      const char* help_description = "\nUsage: dmcsc --hostname=HOSTNAME --port=PORT [OPTIONS]\n\nOptions";
 
       boost::program_options::options_description desc(help_description);
 
       desc.add_options()
 	(HELP, "produce help and usage message")
-	(HOSTNAME, boost::program_options::value<std::string>(&hostName)->default_value("localhost"), "set host name")
+	(HOSTNAME, boost::program_options::value<std::string>(&hostname)->default_value("localhost"), "set host name")
 	(PORT, boost::program_options::value<std::string>(&port), "set port")
 	(ROOT_CTX, boost::program_options::value<std::size_t>(&root_ctx)->default_value(0), "set root context id to query")
 	(K1, boost::program_options::value<std::size_t>(&k1)->default_value(1), "set starting range of requested equlibria. k1 <= k2")
@@ -181,7 +192,7 @@ main(int argc, char* argv[])
       // setup connection
       boost::shared_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
       boost::asio::ip::tcp::resolver resolver(*io_service);
-      boost::asio::ip::tcp::resolver::query query(hostName, port);
+      boost::asio::ip::tcp::resolver::query query(hostname, port);
       boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
       boost::asio::ip::tcp::endpoint endpoint = *it;
 
@@ -195,7 +206,7 @@ main(int argc, char* argv[])
       ForwardMessage end_message(end_qid);
 
       NewClient client(*io_service, it, header, request);
-      client->setCallback(&handle_belief_state);
+      client.setCallback(&handle_belief_states);
 
       // catch Ctrl-C and interrupts
       sig_t s = signal(SIGINT, handle_signal);
