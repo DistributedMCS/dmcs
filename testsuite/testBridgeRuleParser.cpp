@@ -33,6 +33,7 @@
 
 #include "parser/BridgeRuleParser.h"
 #include "mcs/QueryPlan.h"
+#include "mcs/NewNeighbor.h"
 #include "parser/QueryPlanParser.h"
 
 using namespace dmcs;
@@ -44,7 +45,9 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleParser )
 
   std::string bridge_rules_file = "../../examples/bridge_rules.inp";
   const unsigned int ctx_id = 1;
-  BridgeRuleTablePtr brtab = BridgeRuleParser::parseFile(bridge_rules_file, qp1, ctx_id);
+  BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(bridge_rules_file, qp1, ctx_id);
+  BridgeRuleTablePtr brtab = ret_val.first;
+  NewNeighborVecPtr neighbors = ret_val.second;
 
   std::cout << "Got bridge rules:" << std::endl;
   std::pair<BridgeRuleTable::AddressIterator, BridgeRuleTable::AddressIterator> iters = brtab->getAllByAddress();
@@ -52,5 +55,12 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleParser )
     {
       const BridgeRule& r = *it;
       std::cout << r << std::endl;
+    }
+
+  std::cout << "Got neighbors:" << std::endl;
+  for (NewNeighborVec::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
+    {
+      const NewNeighbor n = **it;
+      std::cout << n << std::endl;
     }
 }

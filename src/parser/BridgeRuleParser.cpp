@@ -32,9 +32,12 @@
 
 #include "parser/BridgeRuleParser.h"
 #include "mcs/BridgeRuleTable.h"
+#include "mcs/NewNeighbor.h"
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <set>
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -60,11 +63,16 @@ struct SemState
   SemState(const ContextQueryPlanMapPtr& queryplan,
 	   const std::size_t ctx_id)
     : bridge_rules(new BridgeRuleTable),
+      neighbors(new NewNeighborVec),
+      neighbor_offset(0),
       queryplan(queryplan),
       ctx_id(ctx_id)
   { }
 
   BridgeRuleTablePtr bridge_rules;
+  NewNeighborVecPtr neighbors;
+  std::size_t neighbor_offset;
+  std::set<std::size_t> neighbor_ids;
   const ContextQueryPlanMapPtr queryplan;
   const std::size_t ctx_id;
 };
@@ -85,21 +93,6 @@ struct SkipperGrammar: boost::spirit::qi::grammar<Iterator>
 
   boost::spirit::qi::rule<Iterator> ws; 
 };
-
-
-struct TestOp
-{
-  template<typename SourceAttributes>
-  void 
-  operator()(const SourceAttributes& source,
-	     boost::spirit::qi::unused_type,
-	     boost::spirit::qi::unused_type) const
-  {
-    const std::string& s = source;
-    std::cout << "TestOp: s = " << s << std::endl;
-  }
-};
-
 
 struct PassIdentToBelief
 {
@@ -161,7 +154,21 @@ struct GetBridgeAtom
     if (ctx_id == s.ctx_id)
       id = qp.localSignature->getIDByString(belief);
     else
-      id = qp.groundInputSignature->getIDByString(belief);
+      {
+	id = qp.groundInputSignature->getIDByString(belief);
+	std::set<std::size_t>::const_iterator it = s.neighbor_ids.find(ctx_id);
+	if (it == s.neighbor_ids.end())
+	  {
+	    s.neighbor_ids.insert(ctx_id);
+
+	    std::stringstream str_port;
+	    str_port << qp.port;
+
+	    NewNeighborPtr neighbor(new NewNeighbor(ctx_id, s.neighbor_offset, qp.hostname, str_port.str()));
+	    s.neighbors->push_back(neighbor);
+	    s.neighbor_offset++;
+	  }
+      }
   }
 
   SemState& s;
@@ -255,7 +262,7 @@ struct BridgeRuleGrammar : qi::grammar<Iterator, Skipper>
 	  >> qi::lit('.')
 	  ) [ GetBridgeRule(state) ];
 
-    start = +bridge_rule;
+    start = *bridge_rule;
   }
 
   qi::rule<Iterator, std::string(), Skipper> ident;
@@ -275,7 +282,7 @@ struct BridgeRuleGrammar : qi::grammar<Iterator, Skipper>
 
 namespace dmcs {
 
-BridgeRuleTablePtr
+BridgeRuleParserReturnVal
 BridgeRuleParser::parseFile(const std::string& infile,
 			    ContextQueryPlanMapPtr& queryplan,
 			    const std::size_t ctx_id)
@@ -297,7 +304,7 @@ BridgeRuleParser::parseFile(const std::string& infile,
 
 
 
-BridgeRuleTablePtr
+BridgeRuleParserReturnVal
 BridgeRuleParser::parseStream(std::istream& in,
 			      ContextQueryPlanMapPtr& queryplan,
 			      const std::size_t ctx_id)
@@ -320,7 +327,7 @@ BridgeRuleParser::parseStream(std::istream& in,
 
 
 
-BridgeRuleTablePtr
+BridgeRuleParserReturnVal
 BridgeRuleParser::parseString(const std::string& instr,
 			      ContextQueryPlanMapPtr& queryplan,
 			      const std::size_t ctx_id)
@@ -339,7 +346,8 @@ BridgeRuleParser::parseString(const std::string& instr,
   if (r && begIt == endIt)
     {
       std::cerr << "Bridge rules parsing succeeded" << std::endl;
-      return state.bridge_rules;
+      BridgeRuleParserReturnVal ret_val(state.bridge_rules, state.neighbors);
+      return ret_val;
     }
   else
     {

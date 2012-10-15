@@ -32,23 +32,26 @@
 
 #include "mcs/QueryPlan.h"
 #include "mcs/BridgeRuleTable.h"
+#include "mcs/NewNeighbor.h"
 
 namespace dmcs {
+
+typedef std::pair<BridgeRuleTablePtr, NewNeighborVecPtr> BridgeRuleParserReturnVal;
 
 class BridgeRuleParser
 {
 public:
-  static BridgeRuleTablePtr parseFile(const std::string& infile,
-				      ContextQueryPlanMapPtr& queryplan,
-				      const std::size_t ctx_id);
+  static BridgeRuleParserReturnVal parseFile(const std::string& infile,
+					     ContextQueryPlanMapPtr& queryplan,
+					     const std::size_t ctx_id);
 
-  static BridgeRuleTablePtr parseStream(std::istream& in,
-					ContextQueryPlanMapPtr& queryplan,
-					const std::size_t ctx_id);
+  static BridgeRuleParserReturnVal parseStream(std::istream& in,
+					       ContextQueryPlanMapPtr& queryplan,
+					       const std::size_t ctx_id);
 
-  static BridgeRuleTablePtr parseString(const std::string& instr,
-					ContextQueryPlanMapPtr& queryplan,
-					const std::size_t ctx_id);
+  static BridgeRuleParserReturnVal parseString(const std::string& instr,
+					       ContextQueryPlanMapPtr& queryplan,
+					       const std::size_t ctx_id);
 };
 
 } // namespace dmcs
