@@ -1,6 +1,8 @@
  [
     {
       ContextId: 1,
+      HostName: "localhost",
+      Port: 5001,
       LocalSignature: 
       { 
         1: [a, c1], 
@@ -10,6 +12,8 @@
     }, 
     {
       ContextId: 3,
+      HostName: "localhost",
+      Port: 5003,
       InputSignature: 
       { 
         1: [c, c1, c4], 
@@ -19,6 +23,8 @@
     }, 
     {
       ContextId: 4,
+      HostName: "localhost",
+      Port: 5004,
       InputSignature: 
       { 
         4: [dprime, c1, c4], 
