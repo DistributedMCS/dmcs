@@ -77,8 +77,12 @@ typedef boost::shared_ptr<OutputProjectionMap> OutputProjectionMapPtr;
 struct ContextQueryPlan:
   private ostream_printable<ContextQueryPlan>
 {
-  //id of context
+  // id of context
   ContextID ctx;
+
+  // host name and port of the context
+  std::string hostname;
+  int port;
 
   // below: information before grounding and/or optimization
 
@@ -111,11 +115,12 @@ struct ContextQueryPlan:
   OutputProjectionMapPtr outputProjections;
 
   ContextQueryPlan() {}
-  ContextQueryPlan(ContextID ctx, ConstantListPtr constants,
-      ConstantCategoryListPtr constCats, PredicateArityMapPtr preds,
-      FilterListPtr filters, BeliefTablePtr localSignature,
-      BeliefTablePtr groundInputSignature, OutputProjectionMapPtr outputProjections):
-    ctx(ctx), constants(constants),
+  ContextQueryPlan(ContextID ctx, const std::string& hostname, int port,
+		  ConstantListPtr constants,
+		  ConstantCategoryListPtr constCats, PredicateArityMapPtr preds,
+		  FilterListPtr filters, BeliefTablePtr localSignature,
+		  BeliefTablePtr groundInputSignature, OutputProjectionMapPtr outputProjections):
+    ctx(ctx), hostname(hostname), port(port), constants(constants),
     constCats(constCats), preds(preds),
     filters(filters), localSignature(localSignature),
     groundInputSignature(groundInputSignature), outputProjections(outputProjections) { }

@@ -203,30 +203,32 @@ struct QueryPlanGrammar:
 
     contextqueryplan = lit('{') >>
       lit("ContextId") >> ':' >> int_ /*[_a = _1]*/ [StoreAndRememberContextId(state)] >> 
+      ',' >> lit("HostName") >> ':' >> hostname [_b = _1] >>
+      ',' >> lit("Port") >> ':' >> int_ [_c = _1] >>
       -(',' >> lit("Constants") >> ':' >>
         //_b = construct<ConstantListPtr>(new_<ConstantList>(_1)) ?
-        constants [_b = _1]) >>
+        constants [_d = _1]) >>
       -(',' >> lit("ConstantCategories") >> ':' >>
         //_c = construct<CategoryListPtr>(new_<CategoryList>(_1)) ?
-        categories [_c = _1]) >>
+        categories [_e = _1]) >>
       -(',' >> lit("Predicates") >> ':' >>
         //_d = construct<PredicateListPtr>(new_<PredicateList>(_1)) ?
-        predicates [_d = _1]) >>
+        predicates [_f = _1]) >>
       -(',' >> lit("Filters") >> ':' >>
         //_e = construct<FilterListPtr>(new_<FilterList>(_1)) ?
-        filters [_e = _1]) >>
+        filters [_g = _1]) >>
       (-(',' >> lit("LocalSignature") >> ':' >> signature ))
         [ if_( !!_1)
-          [ _f = lazy_get(_1) ]
+          [ _h = lazy_get(_1) ]
         ] >>
       (-(',' >> lit("InputSignature") >> ':' >> signature ))
         [ if_( !!_1)
-          [ _g = lazy_get(_1) ]
+          [ _i = lazy_get(_1) ]
         ] >>
       -(',' >> lit("OutputProjections") >> ':' >>
-        outputprojections [_h = _1]) >> -(lit(',')) >>
+        outputprojections [_j = _1]) >> -(lit(',')) >>
     '}' >> eps [_val = construct<ContextQueryPlan>(
-                        _a, _b, _c, _d, _e, _f, _g, _h)];
+						   _a, _b, _c, _d, _e, _f, _g, _h, _i, _j)];
 
    signature = lit('{')
      >> (id_with_ground_tuple % ',') [RegisterAndInsertIntoBeliefSet(state)] 
@@ -237,6 +239,9 @@ struct QueryPlanGrammar:
 
    ident %= ( +(ascii::alnum) )
           | ( lit('"') >> qi::lexeme[*(ascii::char_ - '"')] >> lit('"') );
+
+   ///TODO: grammar for URL. Now simplified by putting hostname between the quotes
+   hostname %= lit('"') >> qi::lexeme[*(ascii::char_ - '"')] >> lit('"');
 
     /*
        constants %= lit("Constants:") >> '[' >> constant % ',' >> ']';
@@ -286,10 +291,10 @@ struct QueryPlanGrammar:
 
   qi::rule<Iterator, ContextQueryPlan(),
 	   qi::locals<
-       ContextID, ConstantListPtr, ConstantCategoryListPtr,
-       PredicateArityMapPtr, FilterListPtr, BeliefTablePtr,
-       BeliefTablePtr, OutputProjectionMapPtr
-     >, Skipper> contextqueryplan;
+	     ContextID, std::string, int, ConstantListPtr, ConstantCategoryListPtr,
+	     PredicateArityMapPtr, FilterListPtr, BeliefTablePtr,
+	     BeliefTablePtr, OutputProjectionMapPtr
+	     >, Skipper> contextqueryplan;
 
   qi::rule<Iterator, ConstantListPtr(), Skipper> constants;
   //qi::rule<Iterator, Constant(), Skipper> constant;
@@ -313,6 +318,7 @@ struct QueryPlanGrammar:
 
   qi::rule<Iterator, OutputProjectionMapPtr(), Skipper> outputprojections;
 
+  qi::rule<Iterator, std::string(), Skipper> hostname;
   qi::rule<Iterator, std::string(), Skipper> ident;
 };
 
