@@ -168,7 +168,8 @@ public:
   public:
     Init(Levels levels)
     {
-      Logger::Instance().setPrintLevels(levels);
+      //Logger::Instance().setPrintLevels(levels);
+      Logger::Instance().setPrintLevels(1);
     }
   };
 };

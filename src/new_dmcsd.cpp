@@ -94,10 +94,10 @@ Options";
 	  return 1;
 	}
 
-      if (myid == 0 || myport == 0 || system_size == 0 || bs_size == 0 ||
+      if (myport == 0 || system_size == 0 || bs_size == 0 ||
 	  filename_local_kb.empty() || filename_bridge_rules.empty() || filename_query_plan.empty())
 	{
-	  std::cerr << "The following options are mandatory: --context, --port, " << std::endl 
+	  std::cerr << "The following options are mandatory: --port, " << std::endl 
 	            << "                                     --system_size, --belief-state-size," << std::endl
 		    << "                                     --kb, --br, --queryplan." << std::endl;
 	  std::cerr << desc << std::endl;
@@ -118,11 +118,17 @@ Options";
       
       if (neighbors->empty())
 	{
+	  std::cerr << "Leaf context" << std::endl;
 	  NewContextPtr ctx(new NewContext(myid, dlv_inst, local_queryplan.localSignature));
 	  ctx_vec->push_back(ctx);
 	}
       else
 	{
+	  std::cerr << "Intermediate context" << std::endl;
+	  for (NewNeighborVec::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
+	    {
+	      std::cout << **it << std::endl;
+	    }
 	  NewContextPtr ctx(new NewContext(myid, pack_size, dlv_inst, local_queryplan.localSignature, bridge_rules, neighbors));
 	  ctx_vec->push_back(ctx);
 	}

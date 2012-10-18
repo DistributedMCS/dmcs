@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleParser )
   std::cout << "Got neighbors:" << std::endl;
   for (NewNeighborVec::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
     {
-      const NewNeighbor n = **it;
+      const NewNeighbor& n = **it;
       std::cout << n << std::endl;
     }
 }

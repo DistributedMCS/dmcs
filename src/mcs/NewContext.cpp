@@ -78,6 +78,13 @@ NewContext::getRequestOffset()
 
 
 
+NewNeighborVecPtr
+NewContext::getNeighbors()
+{
+  return neighbors;
+}
+
+
 void
 NewContext::startup(NewConcurrentMessageDispatcherPtr md,
 		    RequestDispatcherPtr rd,

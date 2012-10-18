@@ -100,6 +100,7 @@ NewServer::~NewServer()
 void
 NewServer::initialize()
 {
+  DBGLOG(DBG, "NewServer::initialize()");
   std::size_t no_neighbors = 0;
   if (reg->neighbors != NewNeighborVecPtr())
     {
@@ -114,6 +115,7 @@ NewServer::initialize()
 
   if (reg->neighbors != NewNeighborVecPtr())
     {
+      DBGLOG(DBG, "NewServer::initialize(): intermediate context.");
       thread_factory->createNeighborThreads(reg->message_dispatcher,
 					    reg->neighbors);
 

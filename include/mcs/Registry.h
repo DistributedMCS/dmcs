@@ -30,6 +30,8 @@
 #ifndef REGISTRY_H
 #define REGISTRY_H
 
+#include <set>
+
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/NewContext.h"
@@ -50,9 +52,35 @@ struct Registry
       queue_size(qs),
       belief_set_size(bs),
       belief_state_offset(0),
-      contexts(cs),
-      neighbors(NewNeighborVecPtr())
-  { }
+      contexts(cs)
+  {
+    std::cerr << "Init Registry" << std::endl;
+    std::set<NewNeighbor*> tmp_storage;
+    neighbors = boost::shared_ptr<NewNeighborVec>(new NewNeighborVec);
+    bool has_neighbors = false;
+
+    for (NewContextVec::const_iterator it = contexts->begin(); it != contexts->end(); ++it)
+      {
+	NewContextPtr ctx = *it;
+	NewNeighborVecPtr ctx_neighbors = ctx->getNeighbors();
+	if (ctx_neighbors)
+	  {
+	    for (NewNeighborVec::const_iterator jt = ctx_neighbors->begin(); jt != ctx_neighbors->end(); ++jt)
+	      {
+		NewNeighborPtr neighbor = *jt;
+		std::set<NewNeighbor*>::const_iterator kt = tmp_storage.find(neighbor.get());
+		if (kt == tmp_storage.end())
+		  {
+		    tmp_storage.insert(neighbor.get());
+		    neighbors->push_back(neighbor);
+		    has_neighbors = true;
+		  }
+	      }
+	  }
+      }
+
+    if (!has_neighbors)	neighbors.reset();
+  }
 
   Registry(const std::size_t ss,
 	   const std::size_t qs,

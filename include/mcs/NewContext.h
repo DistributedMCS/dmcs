@@ -70,6 +70,9 @@ public:
   std::size_t 
   getRequestOffset();
 
+  NewNeighborVecPtr
+  getNeighbors();
+
 private:
   void
   leaf_process_request(std::size_t parent_qid,
