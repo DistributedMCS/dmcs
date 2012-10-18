@@ -1,1 +1,1 @@
-
+dprime(X,Y) :- d(X,Y).

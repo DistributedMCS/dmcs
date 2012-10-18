@@ -5,20 +5,9 @@
     Port: 5004,
     LocalSignature: 
     { 
-      1: [d, c1, c4], 
-      2: [d, c2, c5], 
-      3: [d, c3, c6], 
-      4: [dprime, c1, c4], 
-      5: [dprime, c2, c5], 
-      6: [dprime, c3, c6], 
-    }, 
-  }, 
-  {
-    ContextId: 5,
-    HostName: "localhost",
-    Port: 5005,
-    InputSignature: 
-    { 
+      1: [p, c1, c4], 
+      2: [p, c2, c5], 
+      3: [p, c3, c6], 
       4: [e, c1, c4], 
       5: [e, c2, c5], 
       6: [e, c3, c6], 

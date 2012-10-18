@@ -1,3 +1,3 @@
-a(c1) :- (3:c(c1,c4)), not (4:dprime(c1,c4)).
-a(c2) :- (3:c(c2,c5)), not (4:dprime(c2,c5)).
-a(c3) :- (3:c(c3,c6)), not (4:dprime(c3,c6)).
+b(c4) :- (1:dom(c1,c4)), not (2:c(c1,c4)).
+b(c5) :- (1:dom(c2,c5)), not (2:c(c2,c5)).
+b(c6) :- (1:dom(c3,c6)), not (2:c(c3,c6)).
