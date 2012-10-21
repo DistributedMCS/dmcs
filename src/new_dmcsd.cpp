@@ -98,7 +98,7 @@ Options";
 	  filename_local_kb.empty() || filename_bridge_rules.empty() || filename_query_plan.empty())
 	{
 	  std::cerr << "The following options are mandatory: --port, " << std::endl 
-	            << "                                     --system_size, --belief-state-size," << std::endl
+	            << "                                     --system-size, --belief-state-size," << std::endl
 		    << "                                     --kb, --br, --queryplan." << std::endl;
 	  std::cerr << desc << std::endl;
 	  return 1;

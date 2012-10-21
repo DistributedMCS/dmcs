@@ -1,0 +1,69 @@
+ [
+  {
+    ContextId: 0,
+    HostName: "localhost",
+    Port: 5000,
+    LocalSignature: 
+    { 
+      1: [a, c1], 
+      2: [a, c2], 
+      3: [a, c3], 
+    }, 
+  },
+  {
+    ContextId: 1,
+    HostName: "localhost",
+    Port: 5001,
+    LocalSignature: 
+    { 
+      1: [b, c4], 
+      2: [b, c5], 
+      3: [b, c6], 
+      4: [dom, c1, c4], 
+      5: [dom, c2, c5], 
+      6: [dom, c3, c6], 
+    }, 
+  },
+  {
+    ContextId: 2,
+    HostName: "localhost",
+    Port: 5002,
+    LocalSignature: 
+    { 
+      1: [c, c1, c4], 
+      2: [c, c2, c5], 
+      3: [c, c3, c6], 
+    }, 
+  }, 
+  {
+    ContextId: 3,
+    HostName: "localhost",
+    Port: 5003,
+    LocalSignature: 
+    { 
+      1: [d, c1, c4], 
+      2: [d, c2, c5], 
+      3: [d, c3, c6], 
+      4: [dprime, c1, c4], 
+      5: [dprime, c2, c5], 
+      6: [dprime, c3, c6], 
+    }, 
+  },
+  {
+    ContextId: 4,
+    HostName: "localhost",
+    Port: 5004,
+    LocalSignature: 
+    { 
+      1: [p, c1, c4], 
+      2: [p, c2, c5], 
+      3: [p, c3, c6], 
+      4: [e, c1, c4], 
+      5: [e, c2, c5], 
+      6: [e, c3, c6], 
+      7: [f, c1, c4], 
+      8: [f, c2, c5], 
+      9: [f, c3, c6], 
+    }, 
+  }, 
+]

@@ -49,6 +49,7 @@ namespace dmcs {
 #define QP                 "queryplan"
 #define TOPOLOGY           "topology"
 #define CONTEXTS           "contexts"
+#define SIGNATURE          "signature"
 #define ATOMS              "atoms"
 #define INTERFACE          "interface"
 #define BRIDGE_RULES       "bridge_rules"

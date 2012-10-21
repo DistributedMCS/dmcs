@@ -8,4 +8,4 @@
 
 ./new_dmcsd --context=4 --port=5004 --system-size=5 --packsize=4 --belief-state-size=10 --kb=../../examples/context4.lp --br=../../examples/context4.br --queryplan=../../examples/context4.qp
 
-./new_dmcsc --port=5000 --root=0 --k1=1 --k2=4
+./new_dmcsc --port=5000 --root=0 --signature=../../examples/client.qp --system-size=5 --belief-state-size=10 --k1=1 --k2=4

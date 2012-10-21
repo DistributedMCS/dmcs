@@ -43,12 +43,16 @@
 
 #include "dmcs/ProgramOptions.h"
 #include "mcs/BackwardMessage.h"
+#include "mcs/BeliefTable.h"
+#include "mcs/ID.h"
 #include "mcs/NewBeliefState.h"
 #include "mcs/ForwardMessage.h"
 #include "mcs/Logger.h"
 #include "mcs/QueryID.h"
 #include "mcs/ReturnedBeliefState.h"
 #include "network/NewClient.h"
+#include "mcs/QueryPlan.h"
+#include "parser/QueryPlanParser.h"
 
 #include <set>
 #include <fstream>
@@ -62,9 +66,50 @@ using namespace dmcs;
 std::set<NewBeliefState> final_result;
 std::size_t no_belief_states = 0;
 std::size_t handled_belief_states = 0;
+std::size_t system_size = 0;
+std::size_t bs_size = 0;
+ContextQueryPlanMapPtr query_plan = ContextQueryPlanMapPtr();
 
 boost::posix_time::ptime start_time;
 boost::mutex print_mutex;
+
+
+void
+print_belief_state(const NewBeliefState& bs)
+{
+  std::size_t count = bs.status_bit.count();
+  if (count == 0)
+    {
+      std::cout << "[ ]";
+    }
+
+  std::cout << "[";
+  std::size_t bit = bs.status_bit.get_first();
+  do
+    {
+      if (!bs.value_bit.test(bit)) std::cout << "-";
+
+      std::size_t ctx_id = bit / (bs_size+1);
+      std::size_t local_pos = bit % (bs_size+1);
+
+      const ContextQueryPlan& cqp = query_plan->find(ctx_id)->second;
+      const BeliefTablePtr& signature = cqp.localSignature;
+
+      if (local_pos > 0) // non-epsilon bit
+	{
+	  ID local_id(ID::MAINKIND_BELIEF, local_pos);
+	  const Belief& b = signature->getByID(local_id);
+
+	  std::cout << ctx_id << ":" << b.text;
+	}
+
+      bit = bs.status_bit.get_next(bit);
+      
+      if (local_pos > 0 && bit) std::cout << ", ";
+    }
+  while (bit);
+}
+
 
 void
 handle_belief_states(ReturnedBeliefStateListPtr result)
@@ -82,12 +127,22 @@ handle_belief_states(ReturnedBeliefStateListPtr result)
 
 	      boost::mutex::scoped_lock lock(print_mutex);
 
-	      std::cout << "Partial Equilibrium #" << no_belief_states << ": ( " << *p.first << ")" << std::endl;
+	      // query_plan is global
+	      if (query_plan != ContextQueryPlanMapPtr())
+		{
+		  std::cout << "Partial Equilibrium #" << no_belief_states << ": ( ";
+		  print_belief_state(*p.first);
+		  std::cout << ")" << std::endl;
+		}
+	      else
+		{
+		  std::cout << "Partial Equilibrium #" << no_belief_states << ": ( " << *p.first << ")" << std::endl;
+		}
 
-	      boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
+	      //boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
 
-	      std::cerr << "[" << diff.total_seconds() << "." << diff.total_milliseconds() << "] "
-			<< "Partial Equilibrium #" << no_belief_states << ": ( " << *p.first << ")" << std::endl;
+	      //std::cerr << "[" << diff.total_seconds() << "." << diff.total_milliseconds() << "] "
+	      //	<< "Partial Equilibrium #" << no_belief_states << ": ( " << *p.first << ")" << std::endl;
 	      
 	    }
 
@@ -148,6 +203,7 @@ main(int argc, char* argv[])
     {
       std::string hostname;
       std::string port;
+      std::string filename_signature = "";
       std::size_t root_ctx;
       // range of requested equilibria. [0,0] for requesting all equilibria
       std::size_t k1;
@@ -162,6 +218,8 @@ main(int argc, char* argv[])
 	(HOSTNAME, boost::program_options::value<std::string>(&hostname)->default_value("localhost"), "set host name")
 	(PORT, boost::program_options::value<std::string>(&port), "set port")
 	(ROOT_CTX, boost::program_options::value<std::size_t>(&root_ctx)->default_value(0), "set root context id to query")
+	(SIGNATURE, boost::program_options::value<std::string>(&filename_signature)->default_value(""), "set signature file name")
+	(BS_SIZE, boost::program_options::value<std::size_t>(&bs_size), "set belief state size")
 	(K1, boost::program_options::value<std::size_t>(&k1)->default_value(1), "set starting range of requested equlibria. k1 <= k2")
 	(K2, boost::program_options::value<std::size_t>(&k2)->default_value(1), "set end range of requested equilibria. [0,0] for requesting all equilibria")
 	;
@@ -207,6 +265,18 @@ main(int argc, char* argv[])
 
       NewClient client(*io_service, it, header, request);
       client.setCallback(&handle_belief_states);
+
+      if (!filename_signature.empty())
+	{
+	  if (bs_size == 0)
+	    {
+	      std::cerr << "When signature file name is available, the following parameters must be set:" << std::endl
+			<< "  --belief-state-size " << std::endl;
+	      std::cerr << desc << std::endl;
+	      return 1;
+	    }
+	  query_plan = QueryPlanParser::parseFile(filename_signature);
+	}
 
       // catch Ctrl-C and interrupts
       sig_t s = signal(SIGINT, handle_signal);

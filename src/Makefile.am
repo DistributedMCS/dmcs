@@ -55,6 +55,7 @@ new_dmcsc_SOURCES = \
 	new_dmcsc.cpp 
 
 new_dmcsc_LDADD = \
+	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/network/libthreads.a \
