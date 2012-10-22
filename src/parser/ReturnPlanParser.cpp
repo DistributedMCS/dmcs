@@ -30,6 +30,7 @@
 #undef BOOST_SPIRIT_DEBUG
 #undef BOOST_SPIRIT_DEBUG_WS
 
+#include "mcs/BeliefStateOffset.h"
 #include "parser/ReturnPlanParser.h"
 
 #include <boost/config/warning_disable.hpp>
@@ -56,14 +57,13 @@ using namespace dmcs;
 
 struct SemState
 {
-  SemState(const ReturnPlanMapPtr& return_plan)
-    : return_plan(return_plan)
+  SemState()
+  //    : return_plan(new ReturnPlanMap)
   { }
 
-  const ReturnPlanMapPtr return_plan;
-  std::size_t     current_parent_id;
-  std::size_t     current_ctx_id;
-  NewBeliefState* current_belief_state;
+  ReturnPlanMapPtr return_plan;
+  std::size_t      current_parent_id;
+  NewBeliefState*  current_belief_state;
 };
 
 
@@ -80,8 +80,61 @@ struct InsertIntoMap
 		  Ctx& ctx,
 		  boost::spirit::qi::unused_type) const
   {
+    s.return_plan->insert(std::make_pair(s.current_parent_id, s.current_belief_state));
   }
 };
+
+
+struct GetParentId
+{
+  SemState& s;
+
+  GetParentId(SemState& s)
+    : s(s)
+  { }
+
+  template<typename SourceAttributes, typename Ctx>
+  void operator()(const SourceAttributes& source,
+		  Ctx& ctx,
+		  boost::spirit::qi::unused_type) const
+  {
+    const unsigned int parent_id = source;
+    s.current_parent_id = parent_id;
+    s.current_belief_state = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+						BeliefStateOffset::instance()->SIZE_BS());
+    s.current_belief_state->setEpsilon(BeliefStateOffset::instance()->getStartingOffsets());
+  }
+};
+
+
+struct ActivateBits
+{
+  SemState& s;
+
+  ActivateBits(SemState& s)
+    : s(s)
+  { }
+
+  template<typename SourceAttributes, typename Ctx>
+  void operator()(const SourceAttributes& source,
+		  Ctx& ctx,
+		  boost::spirit::qi::unused_type) const
+  {
+    const fusion::vector2<unsigned int, std::vector<unsigned int> >& input = source;
+    const unsigned int ctx_id = fusion::at_c<0>(input);
+    const std::vector<unsigned int>& local_ids = fusion::at_c<1>(input);
+
+    for (std::vector<unsigned int>::const_iterator it = local_ids.begin();
+	 it != local_ids.end(); ++it)
+      {
+	s.current_belief_state->set(ctx_id, *it, 
+				    BeliefStateOffset::instance()->getStartingOffsets(),
+				    NewBeliefState::DMCS_TRUE);
+
+      }
+  }  
+};
+
 
 template<typename Iterator>
 struct SkipperGrammar: boost::spirit::qi::grammar<Iterator>
@@ -104,7 +157,8 @@ struct SkipperGrammar: boost::spirit::qi::grammar<Iterator>
 template<typename Iterator, typename Skipper>
 struct ReturnPlanGrammar : qi::grammar<Iterator, Skipper>
 {
-  ReturnPlanGrammar(SemState& state) : ReturnPlanGrammar::base_type(start)
+  //ReturnPlanGrammar(SemState& state) : ReturnPlanGrammar::base_type(start)
+  ReturnPlanGrammar() : ReturnPlanGrammar::base_type(start)
   {
     using qi::lit;
     using qi::eps;
@@ -120,30 +174,36 @@ struct ReturnPlanGrammar : qi::grammar<Iterator, Skipper>
     using phoenix::insert;
     using phoenix::at_c;
 
-    start = ( 
-	     lit('[' >> return_plan % ',' >> -(lit(',')) >> lit(']'))
-            ) [InsertIntoMap(state)];
+    //start = ( lit('[' >> (return_plan [InsertIntoMap(state)]) % ',' >> -(lit(',')) >> lit(']')) );
+    //start = ( lit('[' >> return_plan % ',' >> -(lit(',')) >> lit(']')) );
+    start = ( lit('[' >> -(lit(',')) >> lit(']')) );
     
+#if 0
     return_plan = lit('{') >>
-      lit("ContextId") >> ':' >> int_ >>
+      //lit("ContextId") >> ':' >> uint_ [GetParentId(state)] >>
+      lit("ContextId") >> ':' >> uint_ >>
       lit("ReturnSignature") >> ':' >>
       return_signature >> 
       lit('}');
 
     return_signature =
-      lit('[') >> return_beliefs % ',' >> lit(']');
+      //lit('[') >> (return_beliefs [ActivateBits(state)]) % ',' >> lit(']');
+    lit('[') >> return_beliefs % ',' >> lit(']');
 
     return_beliefs = lit('{') >>
-      lit("ContextId") >> ':' >> int_ >>
+      lit("ContextId") >> ':' >> uint_ >>
       lit("ReturnBeliefs") >> ':' >> 
-      lit('[') >> int_ % ',' >> lit(']') >> 
+      lit('[') >> uint_ % ',' >> lit(']') >> 
       lit('}');
+#endif
   }
 
   qi::rule<Iterator, Skipper> start;
-  qi::rule<Iterator, Skipper> return_plan;
-  qi::rule<Iterator, Skipper> return_signature;
-  qi::rule<Iterator, Skipper> return_beliefs;
+  //qi::rule<Iterator, Skipper> return_plan;
+  //qi::rule<Iterator, Skipper> return_signature;
+  //qi::rule<Iterator, Skipper> return_beliefs;
+
+  //qi::rule<Iterator, fusion::vector2<unsigned int, std::vector<unsigned int> >(), Skipper> return_beliefs;
 };
 
 
@@ -166,6 +226,34 @@ ReturnPlanParser::parseFile(const std::string& infile)
 ReturnPlanMapPtr 
 ReturnPlanParser::parseString(const std::string& instr)
 {
+  std::string::const_iterator begIt = instr.begin();
+  std::string::const_iterator endIt = instr.end();
+
+
+  typedef SkipperGrammar<std::string::const_iterator> Skipper;
+
+  Skipper skipper;
+  //  SemState state;
+
+
+  //ReturnPlanGrammar<std::string::const_iterator, Skipper> grammar(state);
+  ReturnPlanGrammar<std::string::const_iterator, Skipper> grammar;
+
+  /*
+  
+
+  bool r = qi::phrase_parse(begIt, endIt, grammar, skipper);
+
+  if (r && begIt == endIt)
+    {
+      std::cerr << "Return plan parsing succeeded" << std::endl;
+      return state.return_plan;
+    }
+  else
+    {
+      std::cerr << "Return plan parsing failed" << std::endl;
+      throw std::runtime_error("Return plan parsing failed");
+      }*/
 }
 
 } // namespace dmcs
