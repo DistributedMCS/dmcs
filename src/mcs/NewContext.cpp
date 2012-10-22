@@ -175,7 +175,7 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
 					 std::size_t k1,
 					 std::size_t k2)
 {
-  assert (0 < k1 && k1 < k2);
+  assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
 
   while (1)
     {
@@ -199,26 +199,36 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
       int timeout = 0;
       md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);
       
-      std::size_t models_sent = read_and_send(parent_qid, eval, md);
-      std::size_t models_counter = eval->getModelsCounter();
-
-      if (models_sent == 0)
+      if (k1 == 0 && k2 == 0)
 	{
-	  DBGLOG(DBG, "DLVEvaluator::intermediate_process_request(): models_counter = " << models_counter);
-	  DBGLOG(DBG, "DLVEvaluator::intermediate_process_request(): models_sent    = " << models_sent);
-	  assert (models_counter < k1);
-	  k2 -= models_counter;
-	  k1 -= models_counter;
-	}
-      else if (models_sent < k2 - k1 + 1)
-	{
-	  k2 = k2 - models_sent - k1 + 1;
-	  k1 = 1;
+	  std::size_t models_sent = read_and_send(parent_qid, eval, md);
 	}
       else
 	{
-	  assert (models_sent == k2 - k1 + 1);
-	  break;
+	  std::size_t models_sent = read_and_send(parent_qid, eval, md);
+	  std::size_t models_counter = eval->getModelsCounter();
+
+	  if (models_sent == 0)
+	    // there was no model in the range [k1,k2]. models_counter are the number of models before k1.
+	    {
+	      DBGLOG(DBG, "DLVEvaluator::intermediate_process_request(): models_counter = " << models_counter);
+	      DBGLOG(DBG, "DLVEvaluator::intermediate_process_request(): models_sent    = " << models_sent);
+	      assert (models_counter < k1);
+	      k2 -= models_counter;
+	      k1 -= models_counter;
+	    }
+	  else if (models_sent < k2 - k1 + 1)
+	    // the number models returned by the Evaluator is in between k1,k2.
+	    {
+	      k2 = k2 - models_sent - k1 + 1;
+	      k1 = 1;
+	    }
+	  else
+	    // the Evaluator returned exactly models in range [k1,k2]
+	    {
+	      assert (models_sent == k2 - k1 + 1);
+	      break;
+	    }
 	}
     }
 }
