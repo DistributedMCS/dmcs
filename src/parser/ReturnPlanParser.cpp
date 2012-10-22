@@ -41,6 +41,7 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/fusion/adapted/std_pair.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp> 
 
 #include <istream>
@@ -54,6 +55,7 @@ namespace phoenix = boost::phoenix;
 namespace fusion = boost::fusion;
 
 using namespace dmcs;
+
 
 struct SemState
 {
@@ -157,8 +159,7 @@ struct SkipperGrammar: boost::spirit::qi::grammar<Iterator>
 template<typename Iterator, typename Skipper>
 struct ReturnPlanGrammar : qi::grammar<Iterator, Skipper>
 {
-  //ReturnPlanGrammar(SemState& state) : ReturnPlanGrammar::base_type(start)
-  ReturnPlanGrammar() : ReturnPlanGrammar::base_type(start)
+  ReturnPlanGrammar(SemState& state) : ReturnPlanGrammar::base_type(start)
   {
     using qi::lit;
     using qi::eps;
@@ -174,36 +175,30 @@ struct ReturnPlanGrammar : qi::grammar<Iterator, Skipper>
     using phoenix::insert;
     using phoenix::at_c;
 
-    //start = ( lit('[' >> (return_plan [InsertIntoMap(state)]) % ',' >> -(lit(',')) >> lit(']')) );
-    //start = ( lit('[' >> return_plan % ',' >> -(lit(',')) >> lit(']')) );
-    start = ( lit('[' >> -(lit(',')) >> lit(']')) );
-    
-#if 0
+    start = ( 
+	     lit('[') >> (return_plan [InsertIntoMap(state)]) % ',' >> -(lit(',')) >> lit(']')
+	    );
+
     return_plan = lit('{') >>
-      //lit("ContextId") >> ':' >> uint_ [GetParentId(state)] >>
-      lit("ContextId") >> ':' >> uint_ >>
+      lit("ContextId") >> ':' >> uint_ [GetParentId(state)] >>
       lit("ReturnSignature") >> ':' >>
       return_signature >> 
       lit('}');
 
     return_signature =
-      //lit('[') >> (return_beliefs [ActivateBits(state)]) % ',' >> lit(']');
-    lit('[') >> return_beliefs % ',' >> lit(']');
+      lit('[') >> (return_beliefs [ActivateBits(state)]) % ',' >> lit(']');
 
     return_beliefs = lit('{') >>
       lit("ContextId") >> ':' >> uint_ >>
       lit("ReturnBeliefs") >> ':' >> 
       lit('[') >> uint_ % ',' >> lit(']') >> 
       lit('}');
-#endif
   }
 
   qi::rule<Iterator, Skipper> start;
-  //qi::rule<Iterator, Skipper> return_plan;
-  //qi::rule<Iterator, Skipper> return_signature;
-  //qi::rule<Iterator, Skipper> return_beliefs;
-
-  //qi::rule<Iterator, fusion::vector2<unsigned int, std::vector<unsigned int> >(), Skipper> return_beliefs;
+  qi::rule<Iterator, Skipper> return_plan;
+  qi::rule<Iterator, Skipper> return_signature;
+  qi::rule<Iterator, fusion::vector2<unsigned int, std::vector<unsigned int> >(), Skipper> return_beliefs;
 };
 
 
@@ -216,12 +211,43 @@ namespace dmcs {
 ReturnPlanMapPtr 
 ReturnPlanParser::parseStream(std::istream& in)
 {
+  std::ostringstream buf;
+  std::string line;
+
+  while (!in.eof())
+    {
+      std::getline(in, line);
+      buf << line << std::endl;
+      //std::cerr << "Read >>" << line << "<<" << std::endl;
+    }
+
+  if (in.fail()) in.clear();
+
+  std::string input = buf.str();
+  return parseString(input);
 }
+
+
 
 ReturnPlanMapPtr 
 ReturnPlanParser::parseFile(const std::string& infile)
 {
+  std::ifstream ifs;
+
+  ifs.open(infile.c_str());
+  if (!ifs.is_open())
+    {
+      std::ostringstream oss;
+      oss << "File " << infile << " not found!";
+      throw std::runtime_error(oss.str());
+    }
+  else
+    {
+      return parseStream(ifs);
+    }
 }
+
+
 
 ReturnPlanMapPtr 
 ReturnPlanParser::parseString(const std::string& instr)
@@ -233,14 +259,10 @@ ReturnPlanParser::parseString(const std::string& instr)
   typedef SkipperGrammar<std::string::const_iterator> Skipper;
 
   Skipper skipper;
-  //  SemState state;
+  SemState state;
 
 
-  //ReturnPlanGrammar<std::string::const_iterator, Skipper> grammar(state);
-  ReturnPlanGrammar<std::string::const_iterator, Skipper> grammar;
-
-  /*
-  
+  ReturnPlanGrammar<std::string::const_iterator, Skipper> grammar(state);
 
   bool r = qi::phrase_parse(begIt, endIt, grammar, skipper);
 
@@ -253,7 +275,7 @@ ReturnPlanParser::parseString(const std::string& instr)
     {
       std::cerr << "Return plan parsing failed" << std::endl;
       throw std::runtime_error("Return plan parsing failed");
-      }*/
+    }
 }
 
 } // namespace dmcs
