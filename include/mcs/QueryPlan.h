@@ -16,7 +16,7 @@
 namespace dmcs
 {
 
-typedef int ContextID;
+typedef std::size_t ContextID;
 typedef std::list<std::string>
   ConstantList;
 typedef std::map<ContextID, BeliefState>

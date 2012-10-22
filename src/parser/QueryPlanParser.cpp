@@ -49,7 +49,7 @@ struct StoreAndRememberContextId
     boost::spirit::qi::unused_type) const
   {
     // ctx_in_locals is a_
-    int& ctx_in_locals = boost::fusion::at_c<0>(ctx.locals);
+    ContextID& ctx_in_locals = boost::fusion::at_c<0>(ctx.locals);
     const int& parserattr = source;
     s.currentCtx = parserattr;
     ctx_in_locals = parserattr;

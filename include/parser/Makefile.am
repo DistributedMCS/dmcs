@@ -26,6 +26,7 @@ noinst_HEADERS =  \
 		ParserDirector.tcc \
 		ParserState.h \
 		QueryPlanParser.h \
+		ReturnPlanParser.h \
 		SpiritDebugging.h \
 		SpiritFilePositionNode.h 
 

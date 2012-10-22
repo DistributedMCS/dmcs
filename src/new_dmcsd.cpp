@@ -104,6 +104,8 @@ Options";
 	  return 1;
 	}
 
+      BeliefStateOffset* bso_instance = BeliefStateOffset::create(system_size, bs_size);
+
       ContextQueryPlanMapPtr queryplan_map = QueryPlanParser::parseFile(filename_query_plan);
       const ContextQueryPlan& local_queryplan = queryplan_map->find(myid)->second;
       BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(filename_bridge_rules, queryplan_map, myid);;

@@ -33,6 +33,7 @@
 #include <iosfwd>
 #include <limits>
 #include <list>
+#include <map>
 #include <vector>
 
 #include <boost/lexical_cast.hpp>
@@ -144,6 +145,8 @@ typedef boost::shared_ptr<NewBeliefStatePackage> NewBeliefStatePackagePtr;
 typedef std::vector<NewBeliefStateVec::const_iterator> NewBeliefStateIteratorVec;
 typedef boost::shared_ptr<NewBeliefStateIteratorVec> NewBeliefStateIteratorVecPtr;
 
+typedef std::map<std::size_t, NewBeliefState*> ReturnPlanMap;
+typedef boost::shared_ptr<ReturnPlanMap> ReturnPlanMapPtr;
 
 // inline functions ************************************************
 

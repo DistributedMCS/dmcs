@@ -32,4 +32,5 @@ libparser_a_SOURCES = \
 		ClaspResultOnlineParser.cpp \
 		DLVResultGrammar.cpp \
 		DLVResultParser.cpp \
-		QueryPlanParser.cpp
+		QueryPlanParser.cpp \
+		ReturnPlanParser.cpp
