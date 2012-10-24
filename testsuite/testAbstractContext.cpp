@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
 }
 
 
-
+/*
 void
 send_input_belief_state(NewConcurrentMessageDispatcherPtr md, 
 			std::size_t neighbor_offset,
@@ -449,7 +449,7 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
   bs22->set(ctx_id3, id_f.address, bso->getStartingOffsets());
   bs22->set(ctx_id3, id_g.address, bso->getStartingOffsets(), NewBeliefState::DMCS_FALSE);
 
-  std::size_t qid = query_id(ctx_id0, 0);
+  std::size_t qid = query_id(ctx_id0, 1);
   ReturnedBeliefState* rbs21 = new ReturnedBeliefState(bs21, qid);
   ReturnedBeliefState* rbs22 = new ReturnedBeliefState(bs22, qid);
   ReturnedBeliefState* rbs23 = new ReturnedBeliefState(NULL, qid);
@@ -544,10 +544,14 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
   NewContextPtr ctx(new NewContext(ctx_id0, pack_size, dlv_inst, btab0, return_plan0, brtab, neighbors));
 
   NewJoinerDispatcherPtr joiner_dispatcher(new NewJoinerDispatcher);
-  joiner_dispatcher->registerIdOffset(qid, ctx_id0);
+  //joiner_dispatcher->registerIdOffset(qid, ctx_id0);
   
-  NewJoinerDispatcherWrapper joiner_wrapper;
-  boost::thread joiner_dispatcher_thread(joiner_wrapper, joiner_dispatcher, md);
+  // make sure that this dispatcher is registered
+  //boost::posix_time::milliseconds n(1000);
+  //boost::this_thread::sleep(n);
+
+  NewJoinerDispatcherWrapper joiner_dispatcher_wrapper;
+  boost::thread joiner_dispatcher_thread(joiner_dispatcher_wrapper, joiner_dispatcher, md);
 
   NewContextWrapper context_wrapper;
   RequestDispatcherPtr rd(new RequestDispatcher);
@@ -580,10 +584,9 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
 
   std::cerr << "res1 = " << *res1 << std::endl;
   std::cerr << "res2 = " << *res2 << std::endl;
-}
+}*/
 
 
-/*
 BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
 {
   std::size_t NO_BS = 2;
@@ -651,7 +654,6 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
 
   context_thread.join();
 }
-*/
 
 // Local Variables:
 // mode: C++
