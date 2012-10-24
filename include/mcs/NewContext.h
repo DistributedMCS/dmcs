@@ -54,13 +54,15 @@ public:
 	     std::size_t pack_size,
 	     InstantiatorPtr i,
 	     BeliefTablePtr ex_sig,
+	     ReturnPlanMapPtr return_plan,
 	     BridgeRuleTablePtr br,
 	     NewNeighborVecPtr nbs);
 
   // Constructor for leaf contexts
   NewContext(std::size_t cid,
 	     InstantiatorPtr i,
-	     BeliefTablePtr ex_sig);
+	     BeliefTablePtr ex_sig,
+	     ReturnPlanMapPtr return_plan);
 
   void
   startup(NewConcurrentMessageDispatcherPtr md,
@@ -123,6 +125,8 @@ private:
   NewNeighborVecPtr neighbors;
 
   StreamingJoinerPtr joiner;
+
+  ReturnPlanMapPtr return_plan;
 };
 
 typedef boost::shared_ptr<NewContext> NewContextPtr;

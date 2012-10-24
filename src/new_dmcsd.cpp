@@ -48,6 +48,7 @@
 #include "network/NewServer.h"
 #include "parser/BridgeRuleParser.h"
 #include "parser/QueryPlanParser.h"
+#include "parser/ReturnPlanParser.h"
 
 using namespace dmcs;
 
@@ -65,6 +66,7 @@ main(int argc, char* argv[])
       std::string filename_local_kb;
       std::string filename_bridge_rules;
       std::string filename_query_plan;
+      std::string filename_return_plan;
 
       const char* help_description = "\n\
 Usage: dmcsd --context=N --port=PORT --kb=FILE --br=FILE --queryplan=FILE [OPTIONS]\n\n\
@@ -82,6 +84,7 @@ Options";
 	(KB, boost::program_options::value<std::string>(&filename_local_kb), "set Knowledge Base file name")
 	(BR, boost::program_options::value<std::string>(&filename_bridge_rules), "set Bridge Rules file name")
 	(QP, boost::program_options::value<std::string>(&filename_query_plan), "set Query Plan file name")
+	(RP, boost::program_options::value<std::string>(&filename_return_plan), "set Return Plan file name")
 	;
 
       boost::program_options::variables_map vm;
@@ -95,16 +98,19 @@ Options";
 	}
 
       if (myport == 0 || system_size == 0 || bs_size == 0 ||
-	  filename_local_kb.empty() || filename_bridge_rules.empty() || filename_query_plan.empty())
+	  filename_local_kb.empty() || filename_bridge_rules.empty() || 
+	  filename_query_plan.empty() || filename_return_plan.empty())
 	{
 	  std::cerr << "The following options are mandatory: --port, " << std::endl 
 	            << "                                     --system-size, --belief-state-size," << std::endl
-		    << "                                     --kb, --br, --queryplan." << std::endl;
+		    << "                                     --kb, --br, --queryplan, --returnplan." << std::endl;
 	  std::cerr << desc << std::endl;
 	  return 1;
 	}
 
       BeliefStateOffset* bso_instance = BeliefStateOffset::create(system_size, bs_size);
+
+      ReturnPlanMapPtr return_plan = ReturnPlanParser::parseFile(filename_return_plan);
 
       ContextQueryPlanMapPtr queryplan_map = QueryPlanParser::parseFile(filename_query_plan);
       const ContextQueryPlan& local_queryplan = queryplan_map->find(myid)->second;
@@ -121,7 +127,7 @@ Options";
       if (neighbors->empty())
 	{
 	  std::cerr << "Leaf context" << std::endl;
-	  NewContextPtr ctx(new NewContext(myid, dlv_inst, local_queryplan.localSignature));
+	  NewContextPtr ctx(new NewContext(myid, dlv_inst, local_queryplan.localSignature, return_plan));
 	  ctx_vec->push_back(ctx);
 	}
       else
@@ -131,7 +137,9 @@ Options";
 	    {
 	      std::cout << **it << std::endl;
 	    }
-	  NewContextPtr ctx(new NewContext(myid, pack_size, dlv_inst, local_queryplan.localSignature, bridge_rules, neighbors));
+	  NewContextPtr ctx(new NewContext(myid, pack_size, dlv_inst, 
+					   local_queryplan.localSignature, return_plan,
+					   bridge_rules, neighbors));
 	  ctx_vec->push_back(ctx);
 	}
 

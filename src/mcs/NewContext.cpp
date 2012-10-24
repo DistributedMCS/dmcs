@@ -37,13 +37,15 @@ namespace dmcs {
 // for leaf contexts
 NewContext::NewContext(std::size_t cid,
 		       InstantiatorPtr i,
-		       BeliefTablePtr ex_sig)
+		       BeliefTablePtr ex_sig,
+		       ReturnPlanMapPtr return_plan)
   : is_leaf(true),
     ctx_id(cid),
     query_counter(0),
     inst(i),
     bridge_rules(BridgeRuleTablePtr()),
     export_signature(ex_sig),
+    return_plan(return_plan),
     neighbors(NewNeighborVecPtr()),
     joiner(StreamingJoinerPtr())
 { }
@@ -55,6 +57,7 @@ NewContext::NewContext(std::size_t cid,
 		       std::size_t pack_size,
 		       InstantiatorPtr i,
 		       BeliefTablePtr ex_sig,
+		       ReturnPlanMapPtr return_plan,
 		       BridgeRuleTablePtr br,
 		       NewNeighborVecPtr nbs)
   : is_leaf(nbs->size() == 0),
@@ -63,6 +66,7 @@ NewContext::NewContext(std::size_t cid,
     inst(i),
     bridge_rules(br),
     export_signature(ex_sig),
+    return_plan(return_plan),
     neighbors(nbs),
     joiner(new StreamingJoiner(pack_size, nbs))
 { }
@@ -285,6 +289,13 @@ NewContext::send_out_result(std::size_t parent_qid,
       
       // combine
       (*belief_state) = (*belief_state) | (*input_bs); 
+
+      // project
+      std::size_t parent_ctx_id = invoker_from_qid(parent_qid);
+      ReturnPlanMap::const_iterator it = return_plan->find(parent_ctx_id);
+      assert (it != return_plan->end());
+      NewBeliefState* interface = it->second;
+      (*belief_state) = (*belief_state) & (*interface);
     }
 
   ReturnedBeliefState* rbs = new ReturnedBeliefState(belief_state, parent_qid);

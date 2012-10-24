@@ -37,6 +37,7 @@ namespace dmcs {
 #define DEFAULT_PORT       5001
 #define DEFAULT_QUEUE_SIZE 50
 #define DEFAULT_PACK_SIZE  5
+#define INVOKER_ID         1023
 #define QUERY_VARS         "query-variables"
 #define SYSTEM_SIZE        "system-size"
 #define QUEUE_SIZE         "queue-size"
@@ -47,6 +48,7 @@ namespace dmcs {
 #define KB                 "kb"
 #define BR                 "br"
 #define QP                 "queryplan"
+#define RP                 "returnplan"
 #define TOPOLOGY           "topology"
 #define CONTEXTS           "contexts"
 #define SIGNATURE          "signature"

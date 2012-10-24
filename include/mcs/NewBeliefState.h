@@ -85,6 +85,9 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
   inline NewBeliefState&
   operator| (const NewBeliefState& bs2);
 
+  inline NewBeliefState&
+  operator& (const NewBeliefState& bs2);
+
   inline std::size_t
   size() const;
 
@@ -190,6 +193,17 @@ NewBeliefState::operator| (const NewBeliefState& bs2)
 {
   status_bit |= bs2.status_bit;
   value_bit  |= bs2.value_bit;
+
+  return *this;
+}
+
+
+
+inline NewBeliefState&
+NewBeliefState::operator& (const NewBeliefState& bs2)
+{
+  status_bit &= bs2.status_bit;
+  value_bit  &= bs2.value_bit;
 
   return *this;
 }

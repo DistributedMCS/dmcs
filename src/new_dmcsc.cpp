@@ -256,7 +256,7 @@ main(int argc, char* argv[])
 
       // setup client
       std::string header = HEADER_REQ_DMCS;
-      std::size_t invoker = 1023;      
+      std::size_t invoker = INVOKDER_ID;      
       std::size_t query_order = 1;
       std::size_t qid = query_id(invoker, root_ctx, query_order);
       std::size_t end_qid = shutdown_query_id(invoker, root_ctx);
