@@ -58,9 +58,11 @@ using namespace dmcs;
 
 
 void
-init_local_kb(std::size_t ctx_id,
+init_local_kb(std::size_t invoker_id,
+	      std::size_t ctx_id,
 	      std::string& kbspec,
-	      BeliefTablePtr& btab)
+	      BeliefTablePtr& btab,
+	      ReturnPlanMapPtr& return_plan)
 {
   //const char* ex = getenv("EXAMPLESDIR");
   //assert (ex != 0);
@@ -80,7 +82,11 @@ init_local_kb(std::size_t ctx_id,
   Belief belief_i(ctx_id, "i");
   Belief belief_j(ctx_id, "j");
 
+  NewBeliefState* interface = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+						 BeliefStateOffset::instance()->SIZE_BS());
+
   btab->storeAndGetID(belief_epsilon1);
+  interface->setEpsilon(BeliefStateOffset::instance()->getStartingOffsets());
   btab->storeAndGetID(belief_a);
   btab->storeAndGetID(belief_b);
   btab->storeAndGetID(belief_c);
@@ -91,6 +97,13 @@ init_local_kb(std::size_t ctx_id,
   btab->storeAndGetID(belief_h);
   btab->storeAndGetID(belief_i);
   btab->storeAndGetID(belief_j);
+
+  for (std::size_t i = 1; i <= 10; ++i)
+    {
+      interface->set(ctx_id, i, BeliefStateOffset::instance()->getStartingOffsets());
+    }
+
+  return_plan->insert(std::make_pair<std::size_t, NewBeliefState*>(1023, interface));
 }
 
 
@@ -135,7 +148,7 @@ read_eval(NewConcurrentMessageDispatcherPtr md,
 
 }
 
-/*
+
 BOOST_AUTO_TEST_CASE ( testDLVEvaluator )
 {
   std::size_t NO_BS = 2;
@@ -150,8 +163,11 @@ BOOST_AUTO_TEST_CASE ( testDLVEvaluator )
 
   NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
 
+  ReturnPlanMapPtr return_plan(new ReturnPlanMap);
+
   std::size_t ctx_id1 = 1;
-  init_local_kb(ctx_id1, kbspec, btab);
+  std::size_t invoker_id = 1023;
+  init_local_kb(invoker_id, ctx_id1, kbspec, btab, return_plan);
 
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
@@ -215,6 +231,7 @@ BOOST_AUTO_TEST_CASE ( testEngineInstantiatorEvaluatorCreation )
 }
 
 
+
 BOOST_AUTO_TEST_CASE ( testRunningDLV )
 {
   EnginePtr dlv_engine = DLVEngine::create();
@@ -258,9 +275,8 @@ BOOST_AUTO_TEST_CASE ( testRunningDLV )
   ID id_not_files_tweety = btab->storeAndGetID(not_flies_tweety);
   ID id_fit_tweety = btab->storeAndGetID(fit_tweety);
 
-  DLVEvaluatorPtr dlv_eval_casted = boost::static_pointer_cast<DLVEvaluator>(dlv_eval);
-
-  boost::thread evaluation_thread(*dlv_eval_casted, ctx_id, btab, md);
+  EvaluatorWrapper eval_wrapper;
+  boost::thread evaluation_thread(eval_wrapper, dlv_eval, ctx_id, btab, md);
 
   //  boost::posix_time::milliseconds n(1000);
   //boost::this_thread::sleep(n);
@@ -321,7 +337,7 @@ send_input_belief_state(NewConcurrentMessageDispatcherPtr md,
 
   ForwardMessage* notification = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::NEIGHBOR_OUT_MQ, neighbor_offset, timeout);
   
-  std::size_t qid = notification->query_id;
+  std::size_t qid = notification->qid;
 
   std::size_t ctx_id = ctxid_from_qid(qid);
   std::size_t query_order = qorder_from_qid(qid);
@@ -338,6 +354,7 @@ send_input_belief_state(NewConcurrentMessageDispatcherPtr md,
 }
 
 
+
 BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
 {
   std::size_t NO_BS = 4;
@@ -346,6 +363,7 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
 
   std::size_t QUEUE_SIZE = 5;
   std::size_t NO_NEIGHBORS = 2;
+  std::size_t invoker_id = 1023;
   NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
   ConcurrentMessageQueuePtr cmq0(new ConcurrentMessageQueue(QUEUE_SIZE));
   ConcurrentMessageQueuePtr cmq1(new ConcurrentMessageQueue(QUEUE_SIZE));
@@ -362,6 +380,15 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
   Belief a1(ctx_id0, "a1");
   Belief a2(ctx_id0, "a2");
   BeliefTablePtr btab0(new BeliefTable);
+
+  ReturnPlanMapPtr return_plan0(new ReturnPlanMap);
+  NewBeliefState* interface = new NewBeliefState(NO_BS, BS_SIZE);
+  interface->set(0);
+  interface->set(1);
+  interface->set(2);
+  interface->set(3);
+
+  return_plan0->insert(std::make_pair<std::size_t, NewBeliefState*>(invoker_id, interface));
 
   ID id_epsilon0 = btab0->storeAndGetID(epsilon0);
   ID id_a = btab0->storeAndGetID(a);
@@ -514,19 +541,23 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
   std::size_t pack_size = 10;
-  NewContext ctx(ctx_id0, pack_size, dlv_inst, btab0, brtab, neighbors, o2i);
+  NewContextPtr ctx(new NewContext(ctx_id0, pack_size, dlv_inst, btab0, return_plan0, brtab, neighbors));
 
-  NewJoinerDispatcherPtr joiner_dispatcher(new NewJoinerDispatcher(md));
+  NewJoinerDispatcherPtr joiner_dispatcher(new NewJoinerDispatcher);
   joiner_dispatcher->registerIdOffset(qid, ctx_id0);
   
-  boost::thread joiner_dispatcher_thread(*joiner_dispatcher);
-  boost::thread context_thread(ctx, md, joiner_dispatcher);
+  NewJoinerDispatcherWrapper joiner_wrapper;
+  boost::thread joiner_dispatcher_thread(joiner_wrapper, joiner_dispatcher, md);
+
+  NewContextWrapper context_wrapper;
+  RequestDispatcherPtr rd(new RequestDispatcher);
+  boost::thread context_thread(context_wrapper, ctx, md, rd, joiner_dispatcher);
 
   // needs some time for the context thread to start up and register its REQUEST_MQ to md
   boost::posix_time::milliseconds context_starting_up(100);
   boost::this_thread::sleep(context_starting_up);  
 
-  std::size_t parent_qid = query_id(100, 1);
+  std::size_t parent_qid = query_id(invoker_id, 1);
   ForwardMessage* fwd_mess = new ForwardMessage(parent_qid, 1, 5);
   ForwardMessage* end_mess = new ForwardMessage(shutdown_query_id(), 1, 5);
 
@@ -550,9 +581,9 @@ BOOST_AUTO_TEST_CASE ( testRunningIntermediateContext )
   std::cerr << "res1 = " << *res1 << std::endl;
   std::cerr << "res2 = " << *res2 << std::endl;
 }
-*/
 
 
+/*
 BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
 {
   std::size_t NO_BS = 2;
@@ -561,6 +592,7 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
 
   std::string kbspec;
   BeliefTablePtr btab(new BeliefTable);
+  ReturnPlanMapPtr return_plan(new ReturnPlanMap);
 
   std::size_t QUEUE_SIZE = 10;
   std::size_t NO_NEIGHBORS = 0;
@@ -568,7 +600,8 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
   NewConcurrentMessageDispatcherPtr md(new NewConcurrentMessageDispatcher(QUEUE_SIZE, NO_NEIGHBORS));
 
   std::size_t ctx_id1 = 1;
-  init_local_kb(ctx_id1, kbspec, btab);
+  std::size_t invoker_id = 1023;
+  init_local_kb(invoker_id, ctx_id1, kbspec, btab, return_plan);
 
   EnginePtr dlv_engine = DLVEngine::create();
   EngineWPtr dlv_engine_wp(dlv_engine);
@@ -577,11 +610,11 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
 
   std::cerr << "btab = " << *btab << std::endl;
 
-  NewContextPtr ctx(new NewContext(ctx_id1, dlv_inst, btab));
+  NewContextPtr ctx(new NewContext(ctx_id1, dlv_inst, btab, return_plan));
   NewContextWrapper context_wraper;
   //NewJoinerDispatcherPtr joiner_dispatcher = NewJoinerDispatcherPtr();
   
-  RequestDispatcherPtr rd(new RequestDispatcher(md));
+  RequestDispatcherPtr rd(new RequestDispatcher);
 
   boost::thread context_thread(context_wraper, ctx, md, rd);
 
@@ -596,7 +629,7 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
   std::size_t k31 = 1;
   std::size_t k32 = 10;
 
-  std::size_t parent_qid = query_id(0, 1);
+  std::size_t parent_qid = query_id(invoker_id, 1);
   ForwardMessage* request1 = new ForwardMessage(parent_qid, k11, k12);
   ForwardMessage* request2 = new ForwardMessage(parent_qid, k21, k22);
   ForwardMessage* request3 = new ForwardMessage(parent_qid, k31, k32);
@@ -618,7 +651,7 @@ BOOST_AUTO_TEST_CASE ( testRunningLeafContext )
 
   context_thread.join();
 }
-
+*/
 
 // Local Variables:
 // mode: C++
