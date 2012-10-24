@@ -60,7 +60,7 @@ using namespace dmcs;
 struct SemState
 {
   SemState()
-  //    : return_plan(new ReturnPlanMap)
+    : return_plan(new ReturnPlanMap)
   { }
 
   ReturnPlanMapPtr return_plan;
@@ -180,7 +180,7 @@ struct ReturnPlanGrammar : qi::grammar<Iterator, Skipper>
 	    );
 
     return_plan = lit('{') >>
-      lit("ContextId") >> ':' >> uint_ [GetParentId(state)] >>
+      lit("ContextId") >> ':' >> uint_ [GetParentId(state)] >> lit(',') >>
       lit("ReturnSignature") >> ':' >>
       return_signature >> 
       lit('}');
@@ -189,7 +189,7 @@ struct ReturnPlanGrammar : qi::grammar<Iterator, Skipper>
       lit('[') >> (return_beliefs [ActivateBits(state)]) % ',' >> lit(']');
 
     return_beliefs = lit('{') >>
-      lit("ContextId") >> ':' >> uint_ >>
+      lit("ContextId") >> ':' >> uint_ >> lit(',') >>
       lit("ReturnBeliefs") >> ':' >> 
       lit('[') >> uint_ % ',' >> lit(']') >> 
       lit('}');

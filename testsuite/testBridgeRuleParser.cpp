@@ -64,3 +64,7 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleParser )
       std::cout << n << std::endl;
     }
 }
+
+// Local Variables:
+// mode: C++
+// End:

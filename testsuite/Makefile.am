@@ -58,6 +58,7 @@ TESTS = \
 	testAbstractContext \
 	testDLVProcess \
 	testNeighbors \
+	testReturnPlanParser \
 	testSystemWithQueryPlan \
 	testSystem
 
@@ -106,6 +107,7 @@ check_PROGRAMS = \
 	testAbstractContext \
 	testDLVProcess \
 	testNeighbors \
+	testReturnPlanParser \
 	testSystemWithQueryPlan \
 	testSystem
 
@@ -309,5 +311,10 @@ testSystemWithQueryPlan_LDADD = \
 
 testBridgeRuleParser_SOURCES = testBridgeRuleParser.cpp 
 testBridgeRuleParser_LDADD = \
+	$(top_builddir)/src/parser/libparser.a \
+	$(top_builddir)/src/mcs/libmcs.a 
+
+testReturnPlanParser_SOURCES = testReturnPlanParser.cpp 
+testReturnPlanParser_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/mcs/libmcs.a 
