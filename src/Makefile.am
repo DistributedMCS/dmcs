@@ -35,7 +35,7 @@ LIBS = \
 	$(LOG4CXX_LIBS)
 
 # install dmcsd and dmcsc into $prefix/bin
-bin_PROGRAMS = dmcsd dmcsc new_dmcsd new_dmcsc
+bin_PROGRAMS = dmcsd dmcsc new_dmcsd new_dmcsc new_dmcsm
 
 # the new_dmcsd binary
 new_dmcsd_SOURCES = \
@@ -59,6 +59,16 @@ new_dmcsc_LDADD = \
 	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/src/mcs/libmcs.a 
+
+# the dmcsm binary
+new_dmcsm_SOURCES = \
+	new_dmcsm.cpp 
+
+new_dmcsm_LDADD = \
+	$(top_builddir)/src/parser/libparser.a \
+	$(top_builddir)/src/dmcs/liblog.a \
+	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/mcs/libmcs.a 
 
 # the dmcsd binary
