@@ -130,7 +130,7 @@ run_client(std::string server_port, ForwardMessage& want_send)
 
 BOOST_AUTO_TEST_CASE ( testLeafSystem )
 {
-  std::size_t SYSTEM_SIZE = 2;
+  std::size_t SYSTEM_SIZE = 6;
   std::size_t BS_SIZE = 10;
   std::size_t QUEUE_SIZE = 10;
 
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE ( testLeafSystem )
   BeliefTablePtr btab(new BeliefTable);
 
   // setup a leaf context
-  std::size_t invoker0 = 1000;
+  std::size_t invoker0 = 1023;
   std::size_t ctx_id1 = 0;
   init_local_kb(ctx_id1, kbspec, btab);
 
@@ -146,8 +146,12 @@ BOOST_AUTO_TEST_CASE ( testLeafSystem )
   EngineWPtr dlv_engine_wp(dlv_engine);
   InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, kbspec);
 
+  NewBeliefState* interface(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan0(new ReturnPlanMap);
+  return_plan0->insert(std::make_pair<std::size_t, NewBeliefState*>(invoker0, interface));
+
   std::cerr << "Starting context..." << std::endl;
-  NewContextPtr ctx(new NewContext(ctx_id1, dlv_inst, btab));
+  NewContextPtr ctx(new NewContext(ctx_id1, dlv_inst, btab, return_plan0));
   NewContextVecPtr ctxs(new NewContextVec);
   ctxs->push_back(ctx);
   
@@ -244,7 +248,7 @@ init_root_ctx(std::size_t root_id,
 
 BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
 {
-  std::size_t SYSTEM_SIZE = 2;
+  std::size_t SYSTEM_SIZE = 6;
   std::size_t BS_SIZE = 10;
   std::size_t QUEUE_SIZE = 10;
 
@@ -252,6 +256,8 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   std::string kbspec2;
   BeliefTablePtr btab2(new BeliefTable);
 
+  std::size_t invoker = 1023;
+  std::size_t ctx_id1 = 0;
   std::size_t ctx_id2 = 1;
   std::string ctx_hostname2 = "localhost";
   std::string port2 = "5678";
@@ -263,7 +269,11 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   EngineWPtr dlv_engine_wp2(dlv_engine2);
   InstantiatorPtr dlv_inst2 = dlv_engine2->createInstantiator(dlv_engine_wp2, kbspec2);
 
-  NewContextPtr ctx2(new NewContext(ctx_id2, dlv_inst2, btab2));
+  NewBeliefState* interface2(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan2(new ReturnPlanMap);
+  return_plan2->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id1, interface2));
+
+  NewContextPtr ctx2(new NewContext(ctx_id2, dlv_inst2, btab2, return_plan2));
   NewContextVecPtr contexts2(new NewContextVec);
   contexts2->push_back(ctx2);
 
@@ -278,12 +288,15 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   BeliefTablePtr btab1(new BeliefTable);
   BridgeRuleTablePtr br1(new BridgeRuleTable);
 
-  std::size_t invoker = 1000;
-  std::size_t ctx_id1 = 0;
+
   init_root_ctx(ctx_id1, kbspec1, btab1, btab2, br1);
 
   std::size_t ctx_off2 = 0;
   
+  NewBeliefState* interface1(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan1(new ReturnPlanMap);
+  return_plan1->insert(std::make_pair<std::size_t, NewBeliefState*>(invoker, interface1));
+
   NewNeighborPtr n1(new NewNeighbor(ctx_id2, ctx_off2, ctx_hostname2, port2));
   NewNeighborVecPtr neighbors1(new NewNeighborVec);
   neighbors1->push_back(n1);
@@ -293,7 +306,7 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   InstantiatorPtr dlv_inst1 = dlv_engine1->createInstantiator(dlv_engine_wp1, kbspec1);
 
   std::size_t pack_size = 3;
-  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, btab1, br1, neighbors1));
+  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, btab1, return_plan1, br1, neighbors1));
   NewContextVecPtr contexts1(new NewContextVec);
   contexts1->push_back(ctx1);
 
@@ -305,9 +318,8 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   boost::posix_time::milliseconds server_starting_up1(200);
   boost::this_thread::sleep(server_starting_up1);
 
-  std::size_t invoker0 = 1000;
   std::size_t query_order1 = 1;
-  std::size_t qid1 = query_id(invoker0, ctx_id1, query_order1);
+  std::size_t qid1 = query_id(invoker, ctx_id1, query_order1);
 
   std::size_t k1 = 1;
   std::size_t k2 = 5;
@@ -320,13 +332,14 @@ BOOST_AUTO_TEST_CASE ( testIntermediateSystem )
   client_thread.join();
 }
 
-
+#if 0
 BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 {
   std::size_t SYSTEM_SIZE = 6;
   std::size_t BS_SIZE = 10;
   std::size_t QUEUE_SIZE = 10;
 
+  std::size_t invoker = 1023;
   std::size_t ctx_id1 = 1;
   std::size_t ctx_id2 = 2;
   std::size_t ctx_id3 = 3;
@@ -360,7 +373,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   //assert (ex != 0);
   //kbspec5 = ex;
   //kbspec5 += "/context5.lp";
-  std::string kbspec5 = "../../examples/context5.lp";
+  std::string kbspec5 = "../../examples/context4.lp";
 
   Belief belief_epsilon55(ctx_id5, "epsilon");
   Belief belief_pc1c4_55(ctx_id5, "p(c1,c4)");
@@ -389,7 +402,13 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp5(dlv_engine5);
   InstantiatorPtr dlv_inst5 = dlv_engine5->createInstantiator(dlv_engine_wp5, kbspec5);
 
-  NewContextPtr ctx5(new NewContext(ctx_id5, dlv_inst5, btab55));
+  NewBeliefState* interface54(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  NewBeliefState* interface53(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan5(new ReturnPlanMap);
+  return_plan5->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id4, interface54));
+  return_plan5->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id3, interface53));
+
+  NewContextPtr ctx5(new NewContext(ctx_id5, dlv_inst5, btab55, return_plan5));
   NewContextVecPtr contexts5(new NewContextVec);
   contexts5->push_back(ctx5);
 
@@ -404,7 +423,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   BeliefTablePtr btab44(new BeliefTable);
   //kbspec4 = ex;
   //kbspec4 += "/context4.lp";
-  std::string kbspec4 = "../../examples/context4.lp";
+  std::string kbspec4 = "../../examples/context3.lp";
 
   Belief belief_epsilon44(ctx_id4, "epsilon");
   Belief belief_dc1c4_44(ctx_id4, "d(c1,c4)");
@@ -488,7 +507,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp4(dlv_engine4);
   InstantiatorPtr dlv_inst4 = dlv_engine4->createInstantiator(dlv_engine_wp4, kbspec4);
 
-  NewContextPtr ctx4(new NewContext(ctx_id4, pack_size, dlv_inst4, btab44, bridge_rules4, neighbors4));
+  NewBeliefState* interface41(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan4(new ReturnPlanMap);
+  return_plan4->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id1, interface41));
+
+  NewContextPtr ctx4(new NewContext(ctx_id4, pack_size, dlv_inst4, btab44, return_plan4, bridge_rules4, neighbors4));
   NewContextVecPtr contexts4(new NewContextVec);
   contexts4->push_back(ctx4);
 
@@ -499,7 +522,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   BeliefTablePtr btab33(new BeliefTable);
   //kbspec3 = ex;
   //kbspec3 += "/context3.lp";
-  std::string kbspec3 = "../../examples/context3.lp";
+  std::string kbspec3 = "../../examples/context2.lp";
 
   Belief belief_epsilon33(ctx_id3, "epsilon");
   Belief belief_cc1c4_33(ctx_id3, "c(c1,c4)");
@@ -577,7 +600,13 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp3(dlv_engine3);
   InstantiatorPtr dlv_inst3 = dlv_engine3->createInstantiator(dlv_engine_wp3, kbspec3);
 
-  NewContextPtr ctx3(new NewContext(ctx_id3, pack_size, dlv_inst3, btab33, bridge_rules3, neighbors3));
+  NewBeliefState* interface31(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  NewBeliefState* interface32(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan3(new ReturnPlanMap);
+  return_plan3->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id1, interface31));
+  return_plan3->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id2, interface32));
+
+  NewContextPtr ctx3(new NewContext(ctx_id3, pack_size, dlv_inst3, btab33, return_plan3, bridge_rules3, neighbors3));
   NewContextVecPtr contexts3(new NewContextVec);
   contexts3->push_back(ctx3);
 
@@ -588,7 +617,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   BeliefTablePtr btab22(new BeliefTable);
   //kbspec2 = ex;
   //kbspec2 += "/context2.lp";
-  std::string kbspec2 = "../../examples/context2.lp";
+  std::string kbspec2 = "../../examples/context1.lp";
 
   Belief belief_epsilon22(ctx_id2, "epsilon");
   Belief belief_bc4_22(ctx_id2, "b(c4)");
@@ -663,7 +692,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp2(dlv_engine2);
   InstantiatorPtr dlv_inst2 = dlv_engine2->createInstantiator(dlv_engine_wp2, kbspec2);
 
-  NewContextPtr ctx2(new NewContext(ctx_id2, pack_size, dlv_inst2, btab22, bridge_rules2, neighbors2));
+  NewBeliefState* interface20(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan2(new ReturnPlanMap);
+  return_plan2->insert(std::make_pair<std::size_t, NewBeliefState*>(invoker, interface20));
+
+  NewContextPtr ctx2(new NewContext(ctx_id2, pack_size, dlv_inst2, btab22, return_plan2, bridge_rules2, neighbors2));
   NewContextVecPtr contexts2(new NewContextVec);
   contexts2->push_back(ctx2);
 
@@ -674,7 +707,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   BeliefTablePtr btab11(new BeliefTable);
   //kbspec1 = ex;
   //kbspec1 += "/context1.lp";
-  std::string kbspec1 = "../../examples/context1.lp";
+  std::string kbspec1 = "../../examples/context0.lp";
 
   Belief belief_epsilon11(ctx_id1, "epsilon");
   Belief belief_ac1_11(ctx_id1, "a(c1)");
@@ -768,7 +801,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp1(dlv_engine1);
   InstantiatorPtr dlv_inst1 = dlv_engine1->createInstantiator(dlv_engine_wp1, kbspec1);
 
-  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, btab11, bridge_rules1, neighbors1));
+  NewBeliefState* interface10(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan1(new ReturnPlanMap);
+  return_plan1->insert(std::make_pair<std::size_t, NewBeliefState*>(invoker, interface10));
+
+  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, btab11, return_plan1, bridge_rules1, neighbors1));
   NewContextVecPtr contexts1(new NewContextVec);
   contexts1->push_back(ctx1);
 
@@ -778,9 +815,8 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   boost::posix_time::milliseconds servers_starting_up(500);
   boost::this_thread::sleep(servers_starting_up);
 
-  std::size_t invoker0 = 1000;
   std::size_t query_order1 = 1;
-  std::size_t qid1 = query_id(invoker0, ctx_id1, query_order1);
+  std::size_t qid1 = query_id(invoker, ctx_id1, query_order1);
 
   std::size_t k1 = 1;
   std::size_t k2 = 5;
@@ -792,6 +828,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   client_thread.join();
 }
+#endif 
 
 // Local Variables:
 // mode: C++

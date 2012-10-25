@@ -37,17 +37,29 @@ NewBeliefState::NewBeliefState()
 
 
 
-NewBeliefState::NewBeliefState(std::size_t n)
+NewBeliefState::NewBeliefState(std::size_t n, bool setall)
   : status_bit(n), 
     value_bit(n)
-{ }
+{
+  if (setall)
+    {
+      status_bit.set();
+      value_bit.set();
+    }
+}
 
 
 
-NewBeliefState::NewBeliefState(std::size_t no_bs, std::size_t bs_size)
+NewBeliefState::NewBeliefState(std::size_t no_bs, std::size_t bs_size, bool setall)
   : status_bit(no_bs * (bs_size+1)), 
     value_bit(no_bs * (bs_size+1))
-{ }
+{
+  if (setall)
+    {
+      status_bit.set();
+      value_bit.set();
+    }  
+}
 
 
 

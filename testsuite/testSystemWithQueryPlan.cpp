@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   testSystem.cpp
+ * @file   testSystemWQueryPlan.cpp
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
  * @date   Tue Mar  13 9:28:15 2012
  * 
@@ -393,6 +393,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   std::size_t BS_SIZE = 10;
   std::size_t QUEUE_SIZE = 10;
 
+  std::size_t invoker = 1023;
   std::size_t ctx_id1 = 1;
   std::size_t ctx_id2 = 2;
   std::size_t ctx_id3 = 3;
@@ -634,13 +635,19 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   //assert (ex != 0);
   //kbspec5 = ex;
   //kbspec5 += "/context5.lp";
-  std::string kbspec5 = "../../examples/context5.lp";
+  std::string kbspec5 = "../../examples/context4.lp";
 
   EnginePtr dlv_engine5 = DLVEngine::create();
   EngineWPtr dlv_engine_wp5(dlv_engine5);
   InstantiatorPtr dlv_inst5 = dlv_engine5->createInstantiator(dlv_engine_wp5, kbspec5);
 
-  NewContextPtr ctx5(new NewContext(ctx_id5, dlv_inst5, at5ctx5.localSignature));
+  NewBeliefState* interface54(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  NewBeliefState* interface53(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan5(new ReturnPlanMap);
+  return_plan5->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id4, interface54));
+  return_plan5->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id3, interface53));
+
+  NewContextPtr ctx5(new NewContext(ctx_id5, dlv_inst5, at5ctx5.localSignature, return_plan5));
   NewContextVecPtr contexts5(new NewContextVec);
   contexts5->push_back(ctx5);
 
@@ -658,7 +665,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   //kbspec4 = ex;
   //kbspec4 += "/context4.lp";
-  std::string kbspec4 = "../../examples/context4.lp";
+  std::string kbspec4 = "../../examples/context3.lp";
 
   CHECK_BeliefIDs(qp4, qp5, 5, "e(c1,c4)");
   CHECK_BeliefIDs(qp4, qp5, 5, "e(c2,c5)");
@@ -713,7 +720,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp4(dlv_engine4);
   InstantiatorPtr dlv_inst4 = dlv_engine4->createInstantiator(dlv_engine_wp4, kbspec4);
 
-  NewContextPtr ctx4(new NewContext(ctx_id4, pack_size, dlv_inst4, at4ctx4.localSignature, bridge_rules4, neighbors4));
+  NewBeliefState* interface41(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan4(new ReturnPlanMap);
+  return_plan4->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id1, interface41));
+
+  NewContextPtr ctx4(new NewContext(ctx_id4, pack_size, dlv_inst4, at4ctx4.localSignature, return_plan4, bridge_rules4, neighbors4));
   NewContextVecPtr contexts4(new NewContextVec);
   contexts4->push_back(ctx4);
 
@@ -729,7 +740,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   //kbspec3 = ex;
   //kbspec3 += "/context3.lp";
-  std::string kbspec3 = "../../examples/context3.lp";
+  std::string kbspec3 = "../../examples/context2.lp";
 
   #if 0
   // query plan of ctx 3 must be sufficient to parse bridge rules!
@@ -777,7 +788,13 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp3(dlv_engine3);
   InstantiatorPtr dlv_inst3 = dlv_engine3->createInstantiator(dlv_engine_wp3, kbspec3);
 
-  NewContextPtr ctx3(new NewContext(ctx_id3, pack_size, dlv_inst3, at3ctx3.localSignature, bridge_rules3, neighbors3));
+  NewBeliefState* interface31(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  NewBeliefState* interface32(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan3(new ReturnPlanMap);
+  return_plan3->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id1, interface31));
+  return_plan3->insert(std::make_pair<std::size_t, NewBeliefState*>(ctx_id2, interface32));
+
+  NewContextPtr ctx3(new NewContext(ctx_id3, pack_size, dlv_inst3, at3ctx3.localSignature, return_plan3, bridge_rules3, neighbors3));
   NewContextVecPtr contexts3(new NewContextVec);
   contexts3->push_back(ctx3);
 
@@ -792,7 +809,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   //kbspec2 = ex;
   //kbspec2 += "/context2.lp";
-  std::string kbspec2 = "../../examples/context2.lp";
+  std::string kbspec2 = "../../examples/context1.lp";
 
   #if 0
   // query plan of ctx 2 must be sufficient to parse bridge rules!
@@ -846,7 +863,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   EngineWPtr dlv_engine_wp2(dlv_engine2);
   InstantiatorPtr dlv_inst2 = dlv_engine2->createInstantiator(dlv_engine_wp2, kbspec2);
 
-  NewContextPtr ctx2(new NewContext(ctx_id2, pack_size, dlv_inst2, at2ctx2.localSignature, bridge_rules2, neighbors2));
+  NewBeliefState* interface20(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan2(new ReturnPlanMap);
+  return_plan2->insert(std::make_pair<std::size_t, NewBeliefState*>(invoker, interface20));
+
+  NewContextPtr ctx2(new NewContext(ctx_id2, pack_size, dlv_inst2, at2ctx2.localSignature, return_plan2, bridge_rules2, neighbors2));
   NewContextVecPtr contexts2(new NewContextVec);
   contexts2->push_back(ctx2);
 
@@ -862,7 +883,7 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
 
   //kbspec1 = ex;
   //kbspec1 += "/context1.lp";
-  std::string kbspec1 = "../../examples/context1.lp";
+  std::string kbspec1 = "../../examples/context0.lp";
 
   // instead of this complicated lines
   BOOST_CHECK_EQUAL(at1ctx3.groundInputSignature->getIDByString("c(c1,c4)"),
@@ -937,7 +958,11 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   InstantiatorPtr dlv_inst1 = dlv_engine1->createInstantiator(dlv_engine_wp1, kbspec1);
 
   #warning for a clean interface, the context should store qp1 and the index 1 (i.e., that it is the context with index 1 in this plan) Note: we could make an autodetection of the index 1: a query plan only contains a localSignature for the context where it is located
-  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, at1ctx1.localSignature, bridge_rules1, neighbors1));
+  NewBeliefState* interface10(new NewBeliefState(SYSTEM_SIZE, BS_SIZE, true));
+  ReturnPlanMapPtr return_plan1(new ReturnPlanMap);
+  return_plan1->insert(std::make_pair<std::size_t, NewBeliefState*>(invoker, interface10));
+
+  NewContextPtr ctx1(new NewContext(ctx_id1, pack_size, dlv_inst1, at1ctx1.localSignature, return_plan1, bridge_rules1, neighbors1));
   NewContextVecPtr contexts1(new NewContextVec);
   contexts1->push_back(ctx1);
 
@@ -948,9 +973,8 @@ BOOST_AUTO_TEST_CASE ( testDiamondPlusSystem )
   boost::this_thread::sleep(servers_starting_up);
   //  #endif
 
-  std::size_t invoker0 = 1000;
   std::size_t query_order1 = 1;
-  std::size_t qid1 = query_id(invoker0, ctx_id1, query_order1);
+  std::size_t qid1 = query_id(invoker, ctx_id1, query_order1);
 
   std::size_t k1 = 1;
   std::size_t k2 = 5;

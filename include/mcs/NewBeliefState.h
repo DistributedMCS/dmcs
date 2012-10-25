@@ -66,8 +66,8 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
     };
 
   NewBeliefState();
-  NewBeliefState(std::size_t n);
-  NewBeliefState(std::size_t no_bs, std::size_t bs_size);
+  NewBeliefState(std::size_t n, bool setall = false);
+  NewBeliefState(std::size_t no_bs, std::size_t bs_size, bool setall = false);
   NewBeliefState(const NewBeliefState& bs);
 
   NewBeliefState&
