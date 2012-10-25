@@ -43,6 +43,7 @@
 
 #include "dmcs/ProgramOptions.h"
 #include "mcs/Logger.h"
+#include "network/Manager.h"
 
 using namespace dmcs;
 
@@ -51,17 +52,16 @@ main(int argc, char* argv[])
 {
   try
     {
-      std::string hostname;
-      std::string port;
-      std::size_t system_size;
+      std::size_t port = 0;
+      std::size_t system_size = 0;
 
-      const char* help_description = "\nUsage: dmcsm --hostname=HOSTNAME --port=PORT --system-size=N";
+      const char* help_description = "\nUsage: dmcsm --port=PORT --system-size=N";
 
       boost::program_options::options_description desc(help_description);
 
       desc.add_options()
 	(HELP, "produce help and usage message")
-	(PORT, boost::program_options::value<std::string>(&port), "set port")
+	(PORT, boost::program_options::value<std::size_t>(&port), "set port")
 	(SYSTEM_SIZE, boost::program_options::value<std::size_t>(&system_size), "set system size");
 
       boost::program_options::variables_map vm;        
@@ -73,13 +73,22 @@ main(int argc, char* argv[])
 	  std::cerr << desc << std::endl;
 	  exit(1);
         }
-
-      if (hostname.empty() || port.empty() || system_size == 0)
+      
+      if (port == 0 || system_size == 0)
 	{
 	  std::cerr << "The following options are mandatory: --port, --system-size " << std::endl;
 	  std::cerr << desc << std::endl;
 	  return 1;
 	}
+
+      boost::asio::io_service io_service_manager;
+      boost::asio::ip::tcp::endpoint endpoint_manager(boost::asio::ip::tcp::v4(), port);
+
+      Manager manager(io_service_manager, endpoint_manager);
+
+      boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service_manager));
+      io_service_manager.run();
+      t.join();
     }
   catch (std::exception& e)
     {

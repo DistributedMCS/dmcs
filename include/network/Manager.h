@@ -18,48 +18,53 @@
  */
 
 /**
- * @file   Message.h
- * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
- * @date   Fri Dec  23 10:24:54 2011
+ * @file   Manager.h
+ * @author Minh Dao Tran <dao@kr.tuwien.ac.at>
+ * @date   Thu Oct  25 22:28:26 2012
  * 
  * @brief  
  * 
  * 
  */
 
-#ifndef NEW_MESSAGE_H
-#define NEW_MESSAGE_H
+#ifndef __MANAGER_H__
+#define __MANAGER_H__
+
+#include "network/connection.hpp"
 
 namespace dmcs {
 
-#define HEADER_REQ_DMCS "DMCS REQ DMCS"
-#define HEADER_REQ_PRI_DMCS "DMCS REQ PRI_DMCS"
-#define HEADER_REQ_OPT_DMCS "DMCS REQ OPT_DMCS"
-#define HEADER_REQ_STM_DMCS "DMCS REQ STM_DMCS"
-#define HEADER_REQ_DYN_DMCS "DMCS REQ DYN_DMCS"
-#define HEADER_REQ_INSTANTIATE "DMCS REQ INSTANTIATE"
-#define HEADER_ANS "DMCS ANS"
-#define HEADER_EOF "DMCS EOF"
-#define HEADER_NEXT "DMCS NEXT"
-#define HEADER_TERMINATE "DMCS TERMINATE"
-
-#define INIT_PHASE1_COMPLETED "INIT PHASE1 COMPLETED"
-#define INIT_START_PHASE2     "INIT START PHASE2"
-
-struct NewMessage
+class Manager
 {
-  virtual ~NewMessage() 
-  {}
+public:
+  Manager(boost::asio::io_service& i,
+	  const boost::asio::ip::tcp::endpoint& endpoint,
+	  std::size_t system_size);
 
-  // templates cant be virtual
-  template<class Archive>
-  void serialize(Archive & /* ar */, const unsigned int /* version */)
-  {}
+  void
+  handle_accept(const boost::system::error_code& e, 
+		connection_ptr conn);
+
+  void
+  handle_read_header(const boost::system::error_code& e, 
+		     connection_ptr conn,
+		     boost::shared_ptr<std::string> header);
+
+  void
+  trigger_2nd_phase(const boost::system::error_code& e, 
+		    connection_ptr conn);
+
+private:
+  boost::asio::io_service& io_service;
+  boost::asio::ip::tcp::acceptor acceptor;
+  std::vector<connection_ptr> connections_storage;
+  std::size_t system_size;
 };
 
 } // namespace dmcs
 
-#endif // NEW_MESSAGE_H
+#endif // __MANAGER_H__
+
 
 // Local Variables:
 // mode: C++

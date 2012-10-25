@@ -18,6 +18,7 @@ noinst_HEADERS =  \
 		HandlerWrapper.h \
 		JoinThread.h \
 		JoinerDispatcher.h \
+		Manager.h \
 		MessagingGateway.h \
 		NeighborOut.h \
 		NeighborThread.h \
