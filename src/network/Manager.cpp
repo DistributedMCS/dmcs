@@ -119,10 +119,11 @@ Manager::handle_read_header(const boost::system::error_code& e,
 void
 Manager::trigger_2nd_phase()
 {
+  std::string trigger_message = INIT_START_PHASE2;
   for (std::vector<connection_ptr>::const_iterator it = connections_vec.begin(); it != connections_vec.end(); ++it)
     {
       connection_ptr conn = *it;
-      conn->write(INIT_START_PHASE2);
+      conn->write(trigger_message);
     }
 }
 

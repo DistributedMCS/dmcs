@@ -187,7 +187,7 @@ NewServer::wait_trigger(const boost::system::error_code& e,
 {
   if (!e)
     {
-      boost::shared_ptr<std::string> trigger_message;
+      boost::shared_ptr<std::string> trigger_message(new std::string);
       conn->async_read(*trigger_message,
 			boost::bind(&NewServer::handle_read_trigger_message, this,
 				    boost::asio::placeholders::error,
@@ -209,6 +209,7 @@ NewServer::handle_read_trigger_message(const boost::system::error_code& e,
 {
   if (!e)
     {
+      DBGLOG(DBG, "NewServer::handle_read_trigger_message: got " << *trigger_message);
       if (trigger_message->compare(INIT_START_PHASE2) == 0)
 	{
 	  second_initialization_phase();

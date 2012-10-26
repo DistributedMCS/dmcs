@@ -10,6 +10,8 @@
 
 ./new_dmcsc --port=5000 --root=0 --signature=../../examples/client.qp --belief-state-size=10 --k1=1 --k2=4
 
+./new_dmcsm --port=4999 --system-size=5
+
 
 ***********************
 
