@@ -27,6 +27,7 @@
  * 
  */
 
+#include "mcs/Logger.h"
 #include "mcs/NewMessage.h"
 #include "network/Manager.h"
 
@@ -55,7 +56,31 @@ Manager::Manager(boost::asio::io_service& i,
 void
 Manager::handle_accept(const boost::system::error_code& e, 
 		       connection_ptr conn)
-{ }
+{
+  if (!e)
+    {
+      // Start an accept operation for a new connection.
+      connection_ptr new_conn(new connection(acceptor.io_service()));
+      acceptor.async_accept(new_conn->socket(),
+			    boost::bind(&Manager::handle_accept, this,
+					boost::asio::placeholders::error,
+					new_conn)
+			    );
+
+      boost::shared_ptr<std::string> header(new std::string);
+      
+      conn->async_read(*header,
+		       boost::bind(&Manager::handle_read_header, this,
+				   boost::asio::placeholders::error,
+				   conn,
+				   header));
+    }
+  else
+    {
+      DBGLOG(ERROR, "Manager::handle_accept: ERROR:" << e.message());
+      throw std::runtime_error(e.message());
+    } 
+}
 
 
 
@@ -63,13 +88,43 @@ void
 Manager::handle_read_header(const boost::system::error_code& e, 
 			    connection_ptr conn,
 			    boost::shared_ptr<std::string> header)
-{ }
+{
+  boost::mutex::scoped_lock lock(mtx);
+
+  if (!e)
+    {
+      DBGLOG(DBG, "Manager: got header = " << *header);
+      if (header->compare(INIT_PHASE1_COMPLETED) == 0)
+	{
+	  connections_vec.push_back(conn);
+	  if (connections_vec.size() == system_size)
+	    {
+	      trigger_2nd_phase();
+	    }
+	}
+      else
+	{
+	  DBGLOG(ERROR, "Manager::handle_read_header: Unknown notification from dmcsd.");
+	  throw std::runtime_error("Unknown notification from dmcsd.");
+	}
+    }
+  else
+    {
+      DBGLOG(ERROR, "Manager::handle_read_header: ERROR:" << e.message());
+      throw std::runtime_error(e.message());
+    }
+}
 
 
 void
-Manager::trigger_2nd_phase(const boost::system::error_code& e, 
-			   connection_ptr conn)
-{ }
+Manager::trigger_2nd_phase()
+{
+  for (std::vector<connection_ptr>::const_iterator it = connections_vec.begin(); it != connections_vec.end(); ++it)
+    {
+      connection_ptr conn = *it;
+      conn->write(INIT_START_PHASE2);
+    }
+}
 
 
 } // namespace dmcs
