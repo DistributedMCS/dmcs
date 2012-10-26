@@ -59,9 +59,30 @@ public:
 		     connection_ptr conn,
 		     boost::shared_ptr<std::string> header);
 
+  void
+  send_notification_to_manager(const boost::system::error_code& e,
+			       connection_ptr conn,
+			       NewConcurrentMessageDispatcherPtr md,
+			       boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
+
+  void
+  wait_trigger(const boost::system::error_code& e,
+	       connection_ptr conn);
+
+  void
+  handle_read_trigger_message(const boost::system::error_code& e,
+			      boost::shared_ptr<std::string> trigger_message,
+			      connection_ptr conn);
+
+  void
+  connect_to_manager();
+
 private:
   void
-  initialize();
+  first_initialization_phase();
+
+  void
+  second_initialization_phase();
 
 private:
   boost::asio::io_service& io_service;
@@ -73,6 +94,8 @@ private:
   NewThreadFactoryPtr thread_factory;
   std::vector<HandlerWrapper*> handler_vec;
   BoostThreadVec handler_thread_vec;
+
+  boost::shared_ptr<boost::asio::io_service> io_service_to_manager;
 };
 
 typedef boost::shared_ptr<NewServer> NewServerPtr;

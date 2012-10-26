@@ -48,21 +48,24 @@ NewServer::NewServer(boost::asio::io_service& i,
 		     const boost::asio::ip::tcp::endpoint& endpoint,
 		     const RegistryPtr r)
   : io_service(i),
+    io_service_to_manager(new boost::asio::io_service),
     acceptor(io_service, endpoint),
     port(endpoint.port()),
     reg(r),
     thread_factory(new NewThreadFactory)
 {
-  initialize();
+  first_initialization_phase();
   connection_ptr my_connection(new connection(io_service));
 
-  DBGLOG(DBG, "NewServer::ctor: waiting for new connection.");
+  DBGLOG(DBG, "NewServer::ctor: First phase initialization done. Waiting for new connection.");
 
   acceptor.async_accept(my_connection->socket(),
 			boost::bind(&NewServer::handle_accept, this,
 				    boost::asio::placeholders::error,
 				    my_connection)
 			);
+
+  connect_to_manager();
 }
 
 
@@ -98,7 +101,7 @@ NewServer::~NewServer()
 
 
 void
-NewServer::initialize()
+NewServer::first_initialization_phase()
 {
   DBGLOG(DBG, "NewServer::initialize()");
   std::size_t no_neighbors = 0;
@@ -112,7 +115,121 @@ NewServer::initialize()
 
   reg->request_dispatcher = RequestDispatcherPtr(new RequestDispatcher);
   reg->output_dispatcher = NewOutputDispatcherPtr(new NewOutputDispatcher);
+}
 
+
+void
+NewServer::connect_to_manager()
+{
+  DBGLOG(DBG, "NewServer::connect_to_manager");
+
+  boost::asio::ip::tcp::resolver resolver(*io_service_to_manager);
+  boost::asio::ip::tcp::resolver::query query(reg->manager_hostname, reg->manager_port);
+  boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
+  boost::asio::ip::tcp::endpoint endpoint = *res_it;
+  
+  connection_ptr conn(new connection(*io_service_to_manager));
+  
+  conn->socket().async_connect(endpoint,
+			       boost::bind(&NewServer::send_notification_to_manager, this,
+					   boost::asio::placeholders::error,
+					   conn,
+					   reg->message_dispatcher,
+					   ++res_it)
+			       );
+  
+    boost::shared_ptr<boost::thread> mt(new boost::thread(boost::bind(&boost::asio::io_service::run, io_service_to_manager)));
+    io_service_to_manager->run();
+    
+    mt->join(); // waits for termination
+}
+
+
+void
+NewServer::send_notification_to_manager(const boost::system::error_code& e,
+					connection_ptr conn,
+					NewConcurrentMessageDispatcherPtr md,
+					boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
+{
+  if (!e)
+    {
+      std::string notification = INIT_PHASE1_COMPLETED;
+      conn->async_write(notification,
+			boost::bind(&NewServer::wait_trigger, this,
+				    boost::asio::placeholders::error,
+				    conn));
+    }
+  else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator())
+    {
+	// Try the next endpoint.
+	conn->socket().close();
+	
+	boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
+	conn->socket().async_connect(endpoint,
+				     boost::bind(&NewServer::send_notification_to_manager, this,
+						 boost::asio::placeholders::error,
+						 conn,
+						 md,
+						 ++endpoint_iterator)
+				     );
+    }
+  else
+    {
+      DBGLOG(ERROR, "NewServer::send_notification_to_manager: ERROR:" << e.message());
+      throw std::runtime_error(e.message());
+    }
+}
+
+
+void
+NewServer::wait_trigger(const boost::system::error_code& e,
+			connection_ptr conn)
+{
+  if (!e)
+    {
+      boost::shared_ptr<std::string> trigger_message;
+      conn->async_read(*trigger_message,
+			boost::bind(&NewServer::handle_read_trigger_message, this,
+				    boost::asio::placeholders::error,
+				    trigger_message,
+				    conn));      
+    }
+  else
+    {
+      DBGLOG(ERROR, "NewServer::wait_trigger: ERROR:" << e.message());
+      throw std::runtime_error(e.message());
+    }
+}
+
+
+void
+NewServer::handle_read_trigger_message(const boost::system::error_code& e,
+				       boost::shared_ptr<std::string> trigger_message,
+				       connection_ptr conn)
+{
+  if (!e)
+    {
+      if (trigger_message->compare(INIT_START_PHASE2) == 0)
+	{
+	  second_initialization_phase();
+	}
+      else
+	{
+	  DBGLOG(ERROR, "NewServer::handle_read_trigger_message: Unknown message from Manager.");
+	  throw std::runtime_error("Unknown message from Manager");
+	}
+    }
+  else
+    {
+      DBGLOG(ERROR, "NewServer::handle_read_trigger_message: ERROR:" << e.message());
+      throw std::runtime_error(e.message());
+    }
+}
+
+
+void
+NewServer::second_initialization_phase()
+{
   if (reg->neighbors != NewNeighborVecPtr())
     {
       DBGLOG(DBG, "NewServer::initialize(): intermediate context.");

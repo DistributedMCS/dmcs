@@ -84,7 +84,7 @@ main(int argc, char* argv[])
       boost::asio::io_service io_service_manager;
       boost::asio::ip::tcp::endpoint endpoint_manager(boost::asio::ip::tcp::v4(), port);
 
-      Manager manager(io_service_manager, endpoint_manager);
+      Manager manager(io_service_manager, endpoint_manager, system_size);
 
       boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service_manager));
       io_service_manager.run();

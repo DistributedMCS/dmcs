@@ -47,10 +47,14 @@ struct Registry
   Registry(const std::size_t ss,
 	   const std::size_t qs,
 	   const std::size_t bs,
+	   const std::string& manager_hostname,
+	   const std::string& manager_port,
 	   NewContextVecPtr cs)
     : system_size(ss),
       queue_size(qs),
       belief_set_size(bs),
+      manager_hostname(manager_hostname),
+      manager_port(manager_port),
       belief_state_offset(0),
       contexts(cs)
   {
@@ -85,11 +89,15 @@ struct Registry
   Registry(const std::size_t ss,
 	   const std::size_t qs,
 	   const std::size_t bs,
+	   const std::string& manager_hostname,
+	   const std::string& manager_port,
 	   NewContextVecPtr cs,
 	   NewNeighborVecPtr ns)
     : system_size(ss),
       queue_size(qs),
       belief_set_size(bs),
+      manager_hostname(manager_hostname),
+      manager_port(manager_port),
       belief_state_offset(0),
       contexts(cs),
       neighbors(ns)
@@ -107,6 +115,8 @@ struct Registry
   std::size_t system_size;
   std::size_t queue_size;
   std::size_t belief_set_size;
+  std::string manager_hostname;
+  std::string manager_port;
 
   BeliefStateOffset* belief_state_offset;
   NewConcurrentMessageDispatcherPtr message_dispatcher;

@@ -32,6 +32,9 @@
 
 #include "network/connection.hpp"
 
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+
 namespace dmcs {
 
 class Manager
@@ -51,14 +54,14 @@ public:
 		     boost::shared_ptr<std::string> header);
 
   void
-  trigger_2nd_phase(const boost::system::error_code& e, 
-		    connection_ptr conn);
+  trigger_2nd_phase();
 
 private:
   boost::asio::io_service& io_service;
   boost::asio::ip::tcp::acceptor acceptor;
-  std::vector<connection_ptr> connections_storage;
+  std::vector<connection_ptr> connections_vec;
   std::size_t system_size;
+  boost::mutex mtx;
 };
 
 } // namespace dmcs

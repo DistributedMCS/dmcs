@@ -63,6 +63,7 @@ main(int argc, char* argv[])
       std::size_t queue_size = 0;
       std::size_t bs_size = 0; // for testing, the generator should take care of this value
       std::size_t pack_size = 0;
+      std::string manager;
       std::string filename_local_kb;
       std::string filename_bridge_rules;
       std::string filename_query_plan;
@@ -77,6 +78,7 @@ Options";
 	(HELP, "produce help and usage message")
 	(CONTEXT_ID, boost::program_options::value<std::size_t>(&myid), "set context ID")
 	(PORT, boost::program_options::value<int>(&myport), "set port")
+	(MANAGER, boost::program_options::value<std::string>(&manager), "set Manager HOST:PORT")
 	(SYSTEM_SIZE, boost::program_options::value<std::size_t>(&system_size), "set system size")
 	(QUEUE_SIZE, boost::program_options::value<std::size_t>(&queue_size)->default_value(DEFAULT_QUEUE_SIZE), "set concurrent message queue size")
 	(BS_SIZE, boost::program_options::value<std::size_t>(&bs_size), "set belief state size")
@@ -99,9 +101,10 @@ Options";
 
       if (myport == 0 || system_size == 0 || bs_size == 0 ||
 	  filename_local_kb.empty() || filename_bridge_rules.empty() || 
-	  filename_query_plan.empty() || filename_return_plan.empty())
+	  filename_query_plan.empty() || filename_return_plan.empty() ||
+	  manager.empty())
 	{
-	  std::cerr << "The following options are mandatory: --port, " << std::endl 
+	  std::cerr << "The following options are mandatory: --port, --manager " << std::endl 
 	            << "                                     --system-size, --belief-state-size," << std::endl
 		    << "                                     --kb, --br, --queryplan, --returnplan." << std::endl;
 	  std::cerr << desc << std::endl;
@@ -109,6 +112,17 @@ Options";
 	}
 
       BeliefStateOffset* bso_instance = BeliefStateOffset::create(system_size, bs_size);
+
+      // extract manager's hostname and port
+      std::size_t split_colon = manager.find_last_of(":");
+      if (split_colon == std::string::npos)
+	{
+	  std::cerr << "--manager must be of the form HOST:PORT" << std::endl;
+	  std::cerr << desc << std::endl;
+	  return 1;
+	}
+      std::string manager_hostname = manager.substr(0, split_colon);
+      std::string manager_port = manager.substr(split_colon+1);
 
       ReturnPlanMapPtr return_plan = ReturnPlanParser::parseFile(filename_return_plan);
 
@@ -143,7 +157,8 @@ Options";
 	  ctx_vec->push_back(ctx);
 	}
 
-      RegistryPtr reg(new Registry(system_size, queue_size, bs_size, ctx_vec));
+      RegistryPtr reg(new Registry(system_size, queue_size, bs_size, 
+				   manager_hostname, manager_port, ctx_vec));
       
       boost::asio::io_service io_service_server;
       boost::asio::ip::tcp::endpoint endpoint_server(boost::asio::ip::tcp::v4(), myport);
