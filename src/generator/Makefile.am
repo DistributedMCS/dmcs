@@ -27,7 +27,7 @@ LIBS = \
 	$(LOG4CXX_LIBS)
 
 
-noinst_PROGRAMS = dmcsGen dynGen
+noinst_PROGRAMS = dmcsGen dynGen new_dmcsGen 
 
 dmcsGen_SOURCES = \
 		dmcsGen.cpp \
@@ -36,6 +36,17 @@ dmcsGen_SOURCES = \
 		staticGen.cpp
 
 dmcsGen_LDADD = \
+	$(top_builddir)/src/dmcs/liblog.a \
+	$(top_builddir)/src/dmcs/libdmcs.a 
+
+new_dmcsGen_SOURCES = \
+		new_dmcsGen.cpp \
+		LogicVisitor.cpp \
+		ContextGenerator.cpp \
+		new_staticGen.cpp
+
+new_dmcsGen_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a
 

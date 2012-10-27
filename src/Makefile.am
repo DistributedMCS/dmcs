@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = dmcs dyndmcs generator network loopformula parser process solver mcs
+SUBDIRS = mcs dmcs dyndmcs generator network loopformula parser process solver 
 
 # global preprocessor flags
 AM_CPPFLAGS = \
