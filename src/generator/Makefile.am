@@ -40,10 +40,10 @@ dmcsGen_LDADD = \
 	$(top_builddir)/src/dmcs/libdmcs.a 
 
 new_dmcsGen_SOURCES = \
+		new_staticGen.cpp \
 		new_dmcsGen.cpp \
 		LogicVisitor.cpp \
-		ContextGenerator.cpp \
-		new_staticGen.cpp
+		NewContextGenerator.cpp
 
 new_dmcsGen_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \

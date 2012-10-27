@@ -28,6 +28,10 @@
 
 #include "mcs/BeliefTable.h"
 
+#include <sstream>
+
+#include <boost/tokenizer.hpp>
+
 namespace dmcs {
 
 BeliefTable::~BeliefTable()
@@ -46,6 +50,39 @@ std::ostream& BeliefTable::print(std::ostream& o) const
       o << "  " << ID(it->kind, it->address) << ":" << *it << std::endl;
     }
   return o;
+}
+
+
+std::string
+BeliefTable::gen_print() const
+{
+  std::string tmp = "{\n";
+
+  boost::char_separator<char> sep(",()");
+
+  const AddressIndex& aidx = container.get<impl::AddressTag>();
+  for (AddressIndex::const_iterator it = aidx.begin(); it != aidx.end(); ++it)
+    {
+      Belief b = *it;
+      if (b.address != 0)
+	{
+	  std::stringstream out;
+	  out << b.address;
+	  tmp = tmp + "  " + out.str() + ": [";
+
+	  boost::tokenizer<boost::char_separator<char> > tok(b.text, sep);
+	  boost::tokenizer<boost::char_separator<char> >::const_iterator it = tok.begin();
+	  tmp = tmp + *it;
+	  ++it;
+
+	  for (; it != tok.end(); ++it) tmp = tmp + ", " + *it;
+
+	  tmp = tmp + "],\n";
+	}
+    }
+
+  tmp = tmp + "},\n";
+  return tmp;
 }
 
 

@@ -142,6 +142,9 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
   BitMagic value_bit;
 };
 
+// only used for test cases generating purposes
+typedef boost::shared_ptr<NewBeliefState> NewBeliefStatePtr;
+
 typedef std::vector<NewBeliefState*> NewBeliefStateVec;
 typedef boost::shared_ptr<NewBeliefStateVec> NewBeliefStateVecPtr;
 

@@ -105,6 +105,9 @@ public:
 
   virtual std::ostream& print(std::ostream& o) const;
   
+  //TODO: find a nicer way to print the BeliefTable for generator purpose
+  std::string
+  gen_print() const;
 protected:
   IDAddress nextAddress;
 };
@@ -195,6 +198,7 @@ ID BeliefTable::storeWithID(const Belief& b, ID setid) throw()
 
 typedef boost::shared_ptr<BeliefTable> BeliefTablePtr;
 typedef std::vector<BeliefTablePtr> BeliefTableVec;
+typedef boost::shared_ptr<BeliefTableVec> BeliefTableVecPtr;
 
 } // namespace dmcs
 
