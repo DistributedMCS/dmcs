@@ -91,7 +91,7 @@ protected:
   bool
   cover_neighbors(std::size_t id);
 
-  BeliefSet
+  NewBeliefStatePtr
   local_interface(/* std::size_t id1, */ std::size_t id2);
 
   void

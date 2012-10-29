@@ -37,13 +37,13 @@
 #include "generator/DiamondOptTopoGenerator.h"
 #include "generator/DiamondArbitraryTopoGenerator.h"
 #include "generator/DiamondZigZagTopoGenerator.h"
-#include "generator/DiamondZigZagOptTopoGenerator.h"
+//#include "generator/DiamondZigZagOptTopoGenerator.h"
 #include "generator/HouseTopoGenerator.h"
-#include "generator/HouseOptTopoGenerator.h"
+//#include "generator/HouseOptTopoGenerator.h"
 #include "generator/MultipleRingTopoGenerator.h"
-#include "generator/MultipleRingOptTopoGenerator.h"
+//#include "generator/MultipleRingOptTopoGenerator.h"
 #include "generator/RingTopoGenerator.h"
-#include "generator/RingOptTopoGenerator.h"
+//#include "generator/RingOptTopoGenerator.h"
 #include "generator/RingEdgeTopoGenerator.h"
 #include "generator/NewContextGenerator.h"
 #include "generator/QueryPlanWriter.h"
@@ -392,14 +392,14 @@ generate_contexts()
   // interface in the optimal topology.
 
 #ifdef DEBUG
-  DMCS_LOG_TRACE("minV: " << *minV);
+  DMCS_LOG_TRACE("minV: " << *new_minV);
   DMCS_LOG_TRACE("Original local interface:");
 
   for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
     {
       ContextPair cp = it->first;
 
-      DMCS_LOG_TRACE("(" << cp.first << ", " << cp.second << ") --> " << it->second);
+      DMCS_LOG_TRACE("(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
     }
 #endif
 }
@@ -414,7 +414,7 @@ generate_opt_topology()
     {
       ContextPair cp = it->first;
       
-      BeliefStatePtr interface(new BeliefState(*it->second));
+      NewBeliefStatePtr interface(new NewBeliefState(*it->second));
       LocalInterfacePair lp(cp, interface);
       opt_lcim->insert(lp);
     }
@@ -430,6 +430,7 @@ generate_opt_topology()
 	opt_topo_gen = new DiamondOptTopoGenerator(no_contexts, opt_lcim);
 	break;
       }
+#if 0
     case DIAMOND_ZIGZAG_TOPOLOGY:
       {
 	opt_topo_gen = new DiamondZigZagOptTopoGenerator(no_contexts, opt_lcim);
@@ -450,6 +451,7 @@ generate_opt_topology()
 	opt_topo_gen = new MultipleRingOptTopoGenerator(no_contexts, opt_lcim);
 	break;
       }
+#endif
     }
 
   // then adjust to get optimal local interface
@@ -458,16 +460,47 @@ generate_opt_topology()
 #ifdef DEBUG
   DMCS_LOG_DEBUG("Optimal local interface:");
 
-  for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
+  for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
     {
       ContextPair cp = it->first;
 
-      DMCS_LOG_DEBUG("(" << cp.first << ", " << cp.second << ") --> " << it->second);
+      DMCS_LOG_DEBUG("(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
     }
 #endif
 }
 
 
+/*
+void
+write_belief_table_to_file(BeliefTablePtr btab, std::ofstream file, const std::string& )
+{
+}*/
+
+void
+write_opt_plans()
+{
+  // query plans and return plans
+  for (std::size_t i = 0; i < system_size; ++i)
+    {
+      std::stringstream str_i;
+      std::stringstream str_port;
+      str_i << i;
+      str_port << BASE_PORT + i;
+
+      std::string filename_qp = prefix + str_i.str() + ".qp";
+      std::ofstream file_qp;
+      file_qp.open(filename_qp.c_str());
+      file_qp.close();
+
+      std::string filename_rp = prefix + str_i.str() + ".rp";
+      std::ofstream file_rp;
+      file_rp.open(filename_rp.c_str());
+      file_rp.close();      
+    }
+}
+
+
+#if 0
 void
 generate_query_plan(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
 {
@@ -519,7 +552,7 @@ generate_query_plan(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
 			make_edge_writer(query_plan->interface),
 			make_graph_writer(out.str()));
 }
-
+#endif
 
 
 void
@@ -721,7 +754,7 @@ print_opt_command_lines()
   file_command_line_opt.close();
 }
 
-
+#if 0
 const std::string
 getOptimumDLVFilter() 
 {
@@ -901,7 +934,7 @@ print_opt_dlv_command_lines()
 
   file_command_line_dlv_opt.close();
 }
-
+#endif
 
 int 
 main(int argc, char* argv[])
@@ -942,6 +975,17 @@ main(int argc, char* argv[])
   DMCS_LOG_TRACE("generate_contexts");
   generate_contexts();
 
+  if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
+      topology_type != RING_EDGE_TOPOLOGY && topology_type != BINARY_TREE_TOPOLOGY)
+    {
+      generate_opt_topology();
+      write_opt_plans();
+      //generate_query_plan(opt_qp, opt_lcim);
+      //print_query_plan(opt_qp,  prefix + OPT_EXT);
+      //print_opt_command_lines();
+      //print_opt_dlv_command_lines();
+    }
+
   /*
   DMCS_LOG_TRACE("generate_query_plan");
   generate_query_plan(orig_qp, lcim);
@@ -966,15 +1010,7 @@ main(int argc, char* argv[])
     }
 
   // only for some fixed topologies where optimization is possible
-  if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
-      topology_type != RING_EDGE_TOPOLOGY && topology_type != BINARY_TREE_TOPOLOGY)
-    {
-      generate_opt_topology();
-      generate_query_plan(opt_qp, opt_lcim);
-      print_query_plan(opt_qp,  prefix + OPT_EXT);
-      print_opt_command_lines();
-      //print_opt_dlv_command_lines();
-    }
+
   */
 
   return 0;
