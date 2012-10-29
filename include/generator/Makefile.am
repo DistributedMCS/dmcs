@@ -15,6 +15,7 @@ noinst_HEADERS =  \
 		HouseTopoGenerator.h \
 		HouseOptTopoGenerator.h \
 		LogicVisitor.h \
+		NewLogicVisitor.h \
 		MultipleRingTopoGenerator.h \
 		MultipleRingOptTopoGenerator.h \
 		TopologyGenerator.h \

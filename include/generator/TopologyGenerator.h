@@ -63,6 +63,7 @@ public:
   {
     for (std::size_t i = 1; i <= system_size; ++i)
       {
+	//std::cerr << "TopologyGenerator::generate: genNeighborList with i = " << i << std::endl;
 	genNeighborList(i);
       }
   }
@@ -73,7 +74,8 @@ public:
   void
   genNeighbor(std::size_t from, std::size_t to)
   {
-    (*topo)[from-1]->push_back(to);
+    //std::cerr << "TopologyGenerator::genNeighbor: from = " << from << ", to = " << to << std::endl;
+    (*topo)[from-1]->push_back(to-1);
   }
 
 protected:

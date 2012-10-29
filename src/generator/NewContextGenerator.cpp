@@ -31,8 +31,9 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
-#include "generator/LogicVisitor.h"
+#include "generator/NewLogicVisitor.h"
 #include "generator/NewContextGenerator.h"
+#include "mcs/BeliefStateOffset.h"
 
 #include "dmcs/Log.h"
 
@@ -56,30 +57,24 @@ NewContextGenerator::generate()
 {
   std::size_t system_size = context_interfaces->size();
 
-  for (std::size_t i = 1; i <= system_size; ++i)
+  for (std::size_t i = 0; i < system_size; ++i)
     {
       local_kb->clear();
       bridge_rules->clear();
 
-      DMCS_LOG_TRACE("Generate local KB of context i = " << i);
-
       generate_local_kb();
-
-      DMCS_LOG_TRACE("Generate BR of context i = " << i);
       
-      NeighborVecPtr neighbors = (*orig_topo)[i-1];
+      NeighborVecPtr neighbors = (*orig_topo)[i];
       if (neighbors->size() > 0)
 	{
 	  generate_bridge_rule_list(i);
 	}
 
-      DMCS_LOG_TRACE("Generate BR of context i = " << i << ". DONE");
-
-
       write_local_kb(i);
       write_bridge_rules(i);
 
-      // Update min V
+
+
       update_min_V();
 
       // Compute local interface between context i and all of its
@@ -87,19 +82,18 @@ NewContextGenerator::generate()
       // to a BeliefSet. We need this information later for creating
       // the optimal interface wrt. the optimal topology
       
-      const NeighborVecPtr nbors = (*orig_topo)[i-1];
+      const NeighborVecPtr nbors = (*orig_topo)[i];
       for (NeighborVec::const_iterator jt = nbors->begin(); jt != nbors->end(); ++jt)
 	{
 	  // get local interface from context[i] to context[*jt]
-	  BeliefSet lci = local_interface(*jt);
-	  BeliefStatePtr V(new BeliefState(system_size, 0));
-	  (*V)[*jt - 1] = lci;
+	  NewBeliefStatePtr V = local_interface(*jt);
 	  
 	  ContextPair e(i, *jt);
 	  lcim->insert(LocalInterfacePair(e, V));
 	}
     }
 
+#if 0
   // Finally, set interface of the root context to all 1, except for
   // the case of ring.
   if (topology_type != PURE_RING_TOPOLOGY && topology_type != RING_EDGE_TOPOLOGY
@@ -111,6 +105,7 @@ NewContextGenerator::generate()
     }
 
   DMCS_LOG_TRACE("DONE");
+#endif
 }
 
 
@@ -207,7 +202,7 @@ NewContextGenerator::generate_bridge_rule(std::size_t id)
   // loop until enough unique atoms
   std::size_t count = 0;
 
-  NeighborVecPtr nbors = (*orig_topo)[id-1];
+  NeighborVecPtr nbors = (*orig_topo)[id];
 
   do {
     std::size_t nbors_size = nbors->size();
@@ -215,7 +210,7 @@ NewContextGenerator::generate_bridge_rule(std::size_t id)
     std::size_t nbor_pos  = (rand() % nbors_size);
     std::size_t nbor_id   = (*nbors)[nbor_pos];
 
-    Interface nbor_interface = (*context_interfaces)[nbor_id - 1];
+    Interface nbor_interface = (*context_interfaces)[nbor_id];
     
     std::size_t no_interface_atoms = nbor_interface.size();
     std::size_t atom_pos = rand() % no_interface_atoms;
@@ -278,9 +273,9 @@ NewContextGenerator::cover_neighbors(std::size_t id)
   // otw, we have to compare the actual neighbors, not just the number of them
 
   DMCS_LOG_TRACE("neighbor size: " << nbors.size());
-  DMCS_LOG_TRACE("orig nb " << id << "size: " << ( (*orig_topo)[id-1]->size() ) );
+  DMCS_LOG_TRACE("orig nb " << id << ", size: " << ( (*orig_topo)[id-1]->size() ) );
 
-  return (nbors.size() == (*orig_topo)[id-1]->size());
+  return (nbors.size() == (*orig_topo)[id]->size());
 }
 
 
@@ -297,10 +292,10 @@ NewContextGenerator::write_local_kb(std::size_t id)
   file_lp.open(filename_lp.c_str());
  
   std::ostringstream oss;
-  LogicVisitor lv(oss);
+  NewLogicVisitor lv(oss);
   for (Rules::const_iterator it = local_kb->begin(); it != local_kb->end(); ++it)
     {
-      lv.visitRule(*it, id, sigmas);
+      lv.visitRule(*it, id, (*sigma_vec)[id]);
     }
   file_lp << oss.str();
   file_lp.close();
@@ -320,27 +315,32 @@ NewContextGenerator::write_bridge_rules(std::size_t id)
   file_br.open(filename_br.c_str());
  
   std::ostringstream oss;
-  LogicVisitor lv(oss);
+  NewLogicVisitor lv(oss);
+
   for (BridgeRules::const_iterator it = bridge_rules->begin(); it != bridge_rules->end(); ++it)
     {
-      lv.visitBridgeRule(*it, id, sigmas);
+      lv.visitBridgeRule(*it, id, sigma_vec);
     }
+
   file_br << oss.str();
   file_br.close();  
 }
 
 
 
-BeliefSet
+NewBeliefStatePtr
 NewContextGenerator::local_interface(/* std::size_t id1, */ std::size_t id2)
 {
   // with the assumption that bridge_rules now contains bridge rules
-  // of context id1 and id2 is one of its neighbors
+  // of context id1 and id2 is one of its neighbors.
+  // id1 is therefore IMPLICIT in this context.
 
-  BeliefSet lc;
-  setEpsilon(lc);
+  NewBeliefStatePtr lc(new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+					  BeliefStateOffset::instance()->SIZE_BS()));
 
-  const SignaturePtr sig = (*sigmas)[id2-1];
+  lc->setEpsilon(id2, BeliefStateOffset::instance()->getStartingOffsets());
+
+  const BeliefTablePtr sig = (*sigma_vec)[id2];
 
   for (BridgeRules::const_iterator r = bridge_rules->begin(); r != bridge_rules->end(); ++r)
     {
@@ -348,24 +348,12 @@ NewContextGenerator::local_interface(/* std::size_t id1, */ std::size_t id2)
       const NegativeBridgeBody& nb = getNegativeBody(*r);
       
       for (PositiveBridgeBody::const_iterator i = pb.begin(); i != pb.end(); ++i)
-	{
-	  if (i->first == id2)
-	    {
-	      const SignatureByLocal& local = boost::get<Tag::Local>(*sig);
-	      SignatureByLocal::const_iterator loc_it = local.find(i->second);
-	      lc.set(loc_it->localId);
-	    }
-	}
+	if (i->first == id2)
+	  lc->set(i->first, i->second, BeliefStateOffset::instance()->getStartingOffsets());
       
       for (NegativeBridgeBody::const_iterator i = nb.begin(); i != nb.end(); ++i)
-	{
-	  if (i->first == id2)
-	    {
-	      const SignatureByLocal& local = boost::get<Tag::Local>(*sig);
-	      SignatureByLocal::const_iterator loc_it = local.find(i->second);
-	      lc.set(loc_it->localId);
-	    }
-	}
+	if (i->first == id2)
+	  lc->set(i->first, i->second, BeliefStateOffset::instance()->getStartingOffsets());
     }
 
   return lc;
@@ -380,8 +368,6 @@ NewContextGenerator::update_min_V()
   std::size_t atom_id;
 
   // update minV based on the bridge rules just been generated
-  BeliefState& v_state = *minV;
-
   for (BridgeRules::const_iterator it = bridge_rules->begin(); it != bridge_rules->end(); ++it)
     {
       const PositiveBridgeBody& pb = getPositiveBody(*it);
@@ -391,22 +377,14 @@ NewContextGenerator::update_min_V()
 	{
 	  context_id = k->first;
 	  atom_id = k->second;
-	  
-	  BeliefSet& vb = v_state[context_id - 1];
-	  
-	  // in V: turn on the corresponding bit in the corresponding context
-	  vb.set(atom_id);
+	  minV->set(context_id, atom_id, BeliefStateOffset::instance()->getStartingOffsets());
 	}
       
       for (NegativeBridgeBody::const_iterator k = nb.begin(); k != nb.end(); ++k)
 	{
 	  context_id = k->first;
 	  atom_id = k->second;
-	  
-	  BeliefSet& vb = v_state[context_id - 1];
-	  
-	  // in V: turn on the corresponding bit in the corresponding context
-	  vb.set(atom_id);
+	  minV->set(context_id, atom_id, BeliefStateOffset::instance()->getStartingOffsets());
 	}
     }
 }

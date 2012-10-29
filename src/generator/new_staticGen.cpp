@@ -361,18 +361,18 @@ generate_orig_topology()
   orig_topo_gen->generate();
 
 
-#if defined(DEBUG)
+  //#if defined(DEBUG)
   DMCS_LOG_DEBUG("Original topology:");
-  for (std::size_t i = 1; i <= no_contexts; ++ i)
+  for (std::size_t i = 0; i < no_contexts; ++ i)
     {
-      NeighborVecPtr neighbors = (*orig_topo)[i-1];
+      NeighborVecPtr neighbors = (*orig_topo)[i];
 
       std::ostringstream oss;
       std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(oss, " "));
 
       DMCS_LOG_DEBUG(i << " --> " << oss.str());
     }
-#endif
+  //#endif
 }
 
 
@@ -382,7 +382,7 @@ void
 generate_contexts()
 {
   NewContextGenerator cgen(orig_topo, context_interfaces, 
-			   sigmas, minV, lcim, no_atoms, no_bridge_rules, 
+			   sigma_vec, new_minV, lcim, no_atoms, no_bridge_rules, 
 			   topology_type, prefix);
 
   cgen.generate();
@@ -939,12 +939,10 @@ main(int argc, char* argv[])
   DMCS_LOG_TRACE("generate_orig_topology");
   generate_orig_topology();
 
-  /*
-
-
   DMCS_LOG_TRACE("generate_contexts");
   generate_contexts();
 
+  /*
   DMCS_LOG_TRACE("generate_query_plan");
   generate_query_plan(orig_qp, lcim);
 

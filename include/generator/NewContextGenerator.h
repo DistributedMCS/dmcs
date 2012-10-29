@@ -36,9 +36,10 @@
 #include <map>
 
 #include "generator/OptTopologyGenerator.h"
-#include "mcs/BeliefState.h"
+#include "mcs/NewBeliefState.h"
+#include "mcs/BeliefTable.h"
 #include "mcs/Rule.h"
-#include "mcs/Signature.h"
+
 
 namespace dmcs { namespace generator {
 
@@ -51,14 +52,14 @@ class NewContextGenerator
 {
 public:
   NewContextGenerator(NeighborVec2Ptr orig_topo_,
-		      InterfaceVecPtr context_interfaces_, SignatureVecPtr sigmas_,
-		      BeliefStatePtr minV_, LocalInterfaceMapPtr lcim_,
+		      InterfaceVecPtr context_interfaces_, BeliefTableVecPtr sigma_vec,
+		      NewBeliefStatePtr minV_, LocalInterfaceMapPtr lcim_,
 		      std::size_t no_atoms_, 
 		      std::size_t no_bridge_rules_, 
 		      std::size_t topology_type_,
 		      std::string& prefix_)
     : orig_topo(orig_topo_), context_interfaces(context_interfaces_), 
-      sigmas(sigmas_), minV(minV_), lcim(lcim_), no_atoms(no_atoms_), 
+      sigma_vec(sigma_vec), minV(minV_), lcim(lcim_), no_atoms(no_atoms_), 
       no_bridge_rules(no_bridge_rules_), 
       topology_type(topology_type_), prefix(prefix_),
       local_kb(new Rules), bridge_rules(new BridgeRules), 
@@ -99,8 +100,8 @@ protected:
 protected:
   NeighborVec2Ptr orig_topo;
   InterfaceVecPtr context_interfaces;
-  SignatureVecPtr sigmas;
-  BeliefStatePtr minV;
+  BeliefTableVecPtr sigma_vec;
+  NewBeliefStatePtr minV;
   LocalInterfaceMapPtr lcim;
 
   std::size_t no_atoms;
