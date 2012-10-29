@@ -154,7 +154,7 @@ read_input(int argc, char* argv[])
   desc.add_options()
     (HELP, "Help message")
     (CONTEXTS, boost::program_options::value<std::size_t>(&no_contexts)->default_value(4), "Number of contexts")
-    (ATOMS, boost::program_options::value<std::size_t>(&no_atoms)->default_value(5), "Number of local atoms")
+    (ATOMS, boost::program_options::value<std::size_t>(&no_atoms)->default_value(9), "Number of local atoms")
     (INTERFACE, boost::program_options::value<std::size_t>(&no_interface_atoms)->default_value(3), "Number of interface atoms")
     (BRIDGE_RULES, boost::program_options::value<std::size_t>(&no_bridge_rules)->default_value(2), "Number of bridge rules")
     (TOPOLOGY, boost::program_options::value<std::size_t>(&topology_type)->default_value(1), HELP_MESSAGE_TOPO)
@@ -470,103 +470,180 @@ generate_opt_topology()
 }
 
 
-/*
+
 void
-write_belief_table_to_file(BeliefTablePtr btab, std::ofstream file, const std::string& )
+write_belief_table_to_file(BeliefTablePtr btab, std::ofstream& file, 
+			   const std::string& signature_kind,
+			   std::size_t ctx_id)
 {
-}*/
+  std::size_t port = BASE_PORT + ctx_id;
+
+  file << "  {\n";
+  file << "    ContextId: " << ctx_id << ",\n";
+  file << "    HostName: \"localhost\",\n";
+  file << "    Port: " << port << ",\n";
+  file << "    " << signature_kind << ":\n";
+  file << btab->gen_print();
+  file << "  },\n";
+}
+
+
+BeliefTablePtr
+input_signature_from_belief_state(std::size_t ctx_id,
+				  NewBeliefStatePtr bs)
+{
+  BeliefTablePtr insig(new BeliefTable);
+  BeliefTablePtr local_sig = (*sigma_vec)[ctx_id];
+
+  const std::vector<std::size_t>& starting_offset = BeliefStateOffset::instance()->getStartingOffsets();
+  std::size_t check_bit = starting_offset[ctx_id];
+  std::size_t last_bit;
+  if (ctx_id == no_contexts - 1)
+    {
+      last_bit = bs->size();
+    }
+  else
+    {
+      last_bit = starting_offset[ctx_id+1] - 1;
+    }
+
+  do
+    {
+      check_bit = bs->getNext(check_bit);
+      if (check_bit > last_bit || check_bit == 0) 
+	break;
+
+      std::size_t local_id = check_bit - starting_offset[ctx_id];
+      ID id(ctx_id | ID::MAINKIND_BELIEF, local_id);
+      const Belief& b = local_sig->getByID(id);
+      insig->storeWithID(b, id);
+    }
+  while (1);
+
+  return insig;
+}
+
+
+void
+write_return_signature_to_file(std::ofstream& file, 
+			       NewBeliefStatePtr bs,
+			       std::size_t ctx_id)
+{
+  const std::vector<std::size_t>& starting_offset = BeliefStateOffset::instance()->getStartingOffsets();
+  std::size_t count = 0;
+  std::size_t epsilon_id;
+  std::size_t last_bit;
+  std::size_t check_bit;
+  std::size_t local_id;
+
+  file << "  {\n";
+  file << "    ContextId: " << ctx_id << "\n";
+  file << "    ReturnSignature:\n";
+  file << "    [\n";
+  for (std::vector<std::size_t>::const_iterator it = starting_offset.begin(); it != starting_offset.end(); ++it)
+    {
+      epsilon_id = *it;
+      if (bs->test(epsilon_id) == NewBeliefState::DMCS_TRUE)
+	{
+	  file << "      {\n";
+	  file << "        ContextId: " << count << ",\n";
+	  file << "        ReturnBeliefs: [";
+	  if (count == no_contexts - 1)
+	    {
+	      last_bit = bs->size();
+	    }
+	  else
+	    {
+	      last_bit = starting_offset[count+1]-1;
+	    }
+	  
+	  check_bit = bs->getNext(epsilon_id);
+	  if (check_bit != 0 && check_bit <= last_bit)
+	    {
+	      local_id = check_bit - epsilon_id;
+	      file << local_id;
+	      do
+		{
+		  check_bit = bs->getNext(check_bit);
+		  if (check_bit > last_bit || check_bit == 0) 
+		    break;
+		  local_id = check_bit - epsilon_id;
+		  file << ", " << local_id;
+		}
+	      while (1);
+	    }
+
+	  file << "]\n";
+	  file << "      },\n";
+	}
+      count++;
+    }
+  file << "   ]\n";
+  file << "  },\n";
+}
+
 
 void
 write_opt_plans()
 {
-  // query plans and return plans
-  for (std::size_t i = 0; i < system_size; ++i)
+  std::string local_signature = "LocalSignature";
+  std::string input_signature = "InputSignature";
+
+  for (std::size_t i = 0; i < no_contexts; ++i)
     {
       std::stringstream str_i;
-      std::stringstream str_port;
       str_i << i;
-      str_port << BASE_PORT + i;
 
-      std::string filename_qp = prefix + str_i.str() + ".qp";
+      // query plans 
+      std::string filename_qp = prefix + "-" + str_i.str() + ".qp";
       std::ofstream file_qp;
       file_qp.open(filename_qp.c_str());
+      file_qp << "[\n";
+      write_belief_table_to_file((*sigma_vec)[i], file_qp, local_signature, i);
+
+      for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
+	{
+	  ContextPair cp = it->first;
+	  if (cp.first == i)
+	    {
+	      BeliefTablePtr insig = input_signature_from_belief_state(cp.second, it->second);
+	      write_belief_table_to_file(insig, file_qp, input_signature, cp.second);
+	    }
+	}
+
+      file_qp << "]\n";
       file_qp.close();
 
-      std::string filename_rp = prefix + str_i.str() + ".rp";
+
+      // return plans
+      std::string filename_rp = prefix + "-" + str_i.str() + ".rp";
       std::ofstream file_rp;
       file_rp.open(filename_rp.c_str());
+      file_rp << "[\n";
+      if (i == 0)
+	{
+	  const std::vector<std::size_t>& starting_offset = BeliefStateOffset::instance()->getStartingOffsets();
+	  NewBeliefStatePtr bs(new NewBeliefState(no_contexts, no_atoms));
+	  for (std::size_t j = 0; j < starting_offset[1]; ++j)
+	      bs->set(j);
+
+	  write_return_signature_to_file(file_rp, bs, 1023);
+	}
+      else
+	{
+	  for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
+	    {
+	      ContextPair cp = it->first;
+	      if (cp.second == i)
+		{
+		  NewBeliefStatePtr bs = it->second;
+		  write_return_signature_to_file(file_rp, bs, cp.first);
+		}
+	    }
+	}
+      file_rp << "]\n";
       file_rp.close();      
     }
-}
-
-
-#if 0
-void
-generate_query_plan(QueryPlanPtr query_plan, LocalInterfaceMapPtr lcim)
-{
-  DMCS_LOG_TRACE("add_vertex");
-
-  for (std::size_t i = 1; i <= no_contexts; ++i)
-    {
-      boost::add_vertex(query_plan->graph);
-    }
-
-  DMCS_LOG_TRACE("setup properties");
-
-  std::string localhost = "localhost";
-  std::stringstream out;
-  for (std::size_t i = 1; i <= no_contexts; ++i)
-    {
-      out.str("");
-      out << BASE_PORT + i;
-      std::string port = out.str();
-
-      putProp<VertexHostnameProperty, std::string>(i, query_plan->hostname, localhost);
-      putProp<VertexPortProperty, std::string>(i, query_plan->port, port);
-      putProp<VertexSigmaProperty, Signature>(i, query_plan->sigma, *(*sigmas)[i-1]);
-    }
-
-  DMCS_LOG_TRACE("setup properties");
-
-  for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
-    {
-      ContextPair cp = it->first;
-      std::size_t from = cp.first;
-      std::size_t to   = cp.second;
-      BeliefStatePtr interface = it->second;
-
-      //add_edge(from, to, orig_qp);
-      Vertex u = boost::vertex(from-1, query_plan->graph);
-      Vertex v = boost::vertex(to-1, query_plan->graph);
-      
-      boost::add_edge(u, v, query_plan->graph);
-      putProp<EdgeInterfaceProperty, BeliefStatePtr>(query_plan, from, to, query_plan->interface, interface);
-    }
-
-  DMCS_LOG_TRACE("write graphviz");
-
-  out.str("");
-  out << minV;
-  boost::write_graphviz(std::cerr, query_plan->graph, 
-			make_vertex_writer(query_plan->hostname, query_plan->port, query_plan->sigma), 
-			make_edge_writer(query_plan->interface),
-			make_graph_writer(out.str()));
-}
-#endif
-
-
-void
-print_query_plan(QueryPlanPtr query_plan, const std::string& filename)
-{
-  std::ofstream file_topo;
-  file_topo.open(filename.c_str());
-  std::stringstream out;
-  out << minV;
-  boost::write_graphviz(file_topo, query_plan->graph, 
-			make_vertex_writer(query_plan->hostname, query_plan->port, query_plan->sigma), 
-			make_edge_writer(query_plan->interface),
-			make_graph_writer(out.str()));
-  file_topo.close();
 }
 
 
@@ -980,18 +1057,11 @@ main(int argc, char* argv[])
     {
       generate_opt_topology();
       write_opt_plans();
-      //generate_query_plan(opt_qp, opt_lcim);
-      //print_query_plan(opt_qp,  prefix + OPT_EXT);
       //print_opt_command_lines();
       //print_opt_dlv_command_lines();
     }
 
   /*
-  DMCS_LOG_TRACE("generate_query_plan");
-  generate_query_plan(orig_qp, lcim);
-
-  DMCS_LOG_TRACE("print_query_plan");
-  print_query_plan(orig_qp, prefix + TOP_EXT);
 
   DMCS_LOG_TRACE("print_command_lines");
   print_command_lines();

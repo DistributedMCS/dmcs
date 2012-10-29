@@ -56,7 +56,7 @@ std::ostream& BeliefTable::print(std::ostream& o) const
 std::string
 BeliefTable::gen_print() const
 {
-  std::string tmp = "{\n";
+  std::string tmp = "      {\n";
 
   boost::char_separator<char> sep(",()");
 
@@ -68,7 +68,7 @@ BeliefTable::gen_print() const
 	{
 	  std::stringstream out;
 	  out << b.address;
-	  tmp = tmp + "  " + out.str() + ": [";
+	  tmp = tmp + "        " + out.str() + ": [";
 
 	  boost::tokenizer<boost::char_separator<char> > tok(b.text, sep);
 	  boost::tokenizer<boost::char_separator<char> >::const_iterator it = tok.begin();
@@ -81,7 +81,7 @@ BeliefTable::gen_print() const
 	}
     }
 
-  tmp = tmp + "},\n";
+  tmp = tmp + "      },\n";
   return tmp;
 }
 
