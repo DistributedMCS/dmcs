@@ -53,38 +53,40 @@ public:
       {
 	return;
       }
-    BeliefStatePtr bs_2a = getInterface(lcim, firstLoopEnd, 3);
-    BeliefStatePtr bs_2b = getInterface(lcim, earLoopSize+1, 1);
-    BeliefStatePtr bs_2c = getInterface(lcim, system_size, earLoopSize);
+    
+    NewBeliefStatePtr bs_2a = getInterface(lcim, firstLoopEnd-1, 2);
+    NewBeliefStatePtr bs_2b = getInterface(lcim, earLoopSize, 0);
+    NewBeliefStatePtr bs_2c = getInterface(lcim, system_size-1, earLoopSize-1);
 
     if (id == earLoopSize +1)
       {
-	BeliefStatePtr bs_11 = getInterface(lcim, id, id + secondLoopJump);	    
-	update(bs_11, bs_2a);
-	update(bs_11, bs_2b);
-	update(bs_11, bs_2c);
+	NewBeliefStatePtr bs_11 = getInterface(lcim, id-1, id+secondLoopJump-1);
+
+	(*bs_11) = (*bs_11) | (*bs_2a);
+	(*bs_11) = (*bs_11) | (*bs_2b);
+	(*bs_11) = (*bs_11) | (*bs_2c);
       }
     else
       {
-	BeliefStatePtr bs_12 = getInterface(lcim, id, id+1);	    
-	update(bs_12, bs_2a);
-	update(bs_12, bs_2b);
-	update(bs_12, bs_2c);
+	NewBeliefStatePtr bs_12 = getInterface(lcim, id-1, id);
+	(*bs_12) = (*bs_12) | (*bs_2a);
+	(*bs_12) = (*bs_12) | (*bs_2b);
+	(*bs_12) = (*bs_12) | (*bs_2c);
       }
 
     if (id == 2)
       {
-	BeliefStatePtr bs_11 = getInterface(lcim, id, id + earLoopSize);	    
-	update(bs_11, bs_2a);
-	update(bs_11, bs_2b);
-	update(bs_11, bs_2c);
+	NewBeliefStatePtr bs_11 = getInterface(lcim, id-1, id+earLoopSize-1);
+	(*bs_11) = (*bs_11) | (*bs_2a);
+	(*bs_11) = (*bs_11) | (*bs_2b);
+	(*bs_11) = (*bs_11) | (*bs_2c);
       }
 
     if (id == 1)
       {
-	ContextPair p1(firstLoopEnd, 3);
-	ContextPair p2(earLoopSize + 1, 1);
-	ContextPair p3(system_size, earLoopSize);
+	ContextPair p1(firstLoopEnd-1, 2);
+	ContextPair p2(earLoopSize, 0);
+	ContextPair p3(system_size-1, earLoopSize-1);
 
 	lcim->erase(p1);
 	lcim->erase(p2);
