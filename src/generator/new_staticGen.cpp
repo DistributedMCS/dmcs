@@ -136,6 +136,7 @@ std::size_t no_interface_atoms;
 std::size_t no_bridge_rules;
 std::size_t topology_type;
 std::size_t startup_time;
+std::size_t pack_size;
 
 std::string prefix;
 std::string filename;
@@ -147,7 +148,6 @@ std::ofstream file_command_line;
 std::ofstream file_command_line_sh;
 std::ofstream file_command_line_opt;
 std::ofstream file_command_line_opt_sh;
-std::ofstream file_command_line_streaming_sh;
 std::ofstream file_dlv;
 std::ofstream file_command_line_dlv;
 std::ofstream file_command_line_dlv_opt;
@@ -167,6 +167,7 @@ read_input(int argc, char* argv[])
     (TOPOLOGY, boost::program_options::value<std::size_t>(&topology_type)->default_value(1), HELP_MESSAGE_TOPO)
     (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Prefix for all files")
     (STARTUP_TIME, boost::program_options::value<std::size_t>(&startup_time)->default_value(20), "Sleeping time after initializing all dmcsd")
+    (PACK_SIZE, boost::program_options::value<std::size_t>(&pack_size)->default_value(0), "Package size")
     (LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
     ;
 
@@ -339,9 +340,22 @@ init()
 
   setup_topos();
   
-  // initialize minV as we now know the system size  
+  // initialize minV as we now know the system size
   new_minV = NewBeliefStatePtr(new NewBeliefState(no_contexts, no_atoms));
-  new_minV->setEpsilon(bso->getStartingOffsets());
+  const std::vector<std::size_t>& starting_offset = bso->getStartingOffsets();
+  new_minV->setEpsilon(starting_offset);
+
+  std::size_t last_index = no_atoms;
+  if (no_contexts > 1)
+    {
+      last_index = starting_offset[1] - 1;
+    }
+
+  // turn on all bits of the root context
+  for (std::size_t i = 1; i <= last_index; ++i)
+    {
+      new_minV->set(i);
+    }
 
   add_cmdline_options();
 }
@@ -621,7 +635,7 @@ write_return_signature_to_file(std::ofstream& file,
 
 
 void
-write_opt_plans()
+write_plans()
 {
   std::string local_signature = "LocalSignature";
   std::string input_signature = "InputSignature";
@@ -631,7 +645,7 @@ write_opt_plans()
       std::stringstream str_i;
       str_i << i;
 
-      // query plans 
+      // query plans ##########################################################################################
       std::string filename_qp = prefix + "-" + str_i.str() + ".qp";
       std::ofstream file_qp;
       file_qp.open(filename_qp.c_str());
@@ -652,11 +666,11 @@ write_opt_plans()
       file_qp.close();
 
 
-      // return plans
-      std::string filename_rp = prefix + "-" + str_i.str() + ".rp";
-      std::ofstream file_rp;
-      file_rp.open(filename_rp.c_str());
-      file_rp << "[\n";
+      // opt return plans #####################################################################################
+      std::string filename_opt_rp = prefix + "-" + str_i.str() + ".orp";
+      std::ofstream file_opt_rp;
+      file_opt_rp.open(filename_opt_rp.c_str());
+      file_opt_rp << "[\n";
       if (i == 0)
 	{
 	  const std::vector<std::size_t>& starting_offset = BeliefStateOffset::instance()->getStartingOffsets();
@@ -664,7 +678,7 @@ write_opt_plans()
 	  for (std::size_t j = 0; j < starting_offset[1]; ++j)
 	      bs->set(j);
 
-	  write_return_signature_to_file(file_rp, bs, 1023);
+	  write_return_signature_to_file(file_opt_rp, bs, 1023);
 	}
       else
 	{
@@ -674,13 +688,37 @@ write_opt_plans()
 	      if (cp.second == i)
 		{
 		  NewBeliefStatePtr bs = it->second;
-		  write_return_signature_to_file(file_rp, bs, cp.first);
+		  write_return_signature_to_file(file_opt_rp, bs, cp.first);
+		}
+	    }
+	}
+      file_opt_rp << "]\n";
+      file_opt_rp.close();
+
+      // return plans #########################################################################################
+      std::string filename_rp = prefix + "-" + str_i.str() + ".rp";
+      std::ofstream file_rp;
+      file_rp.open(filename_rp.c_str());
+      file_rp << "[\n";
+      if (i == 0)
+	{
+	  write_return_signature_to_file(file_rp, new_minV, 1023);
+	}
+      else
+	{
+	  for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
+	    {
+	      ContextPair cp = it->first;
+	      if (cp.second == i)
+		{
+		  write_return_signature_to_file(file_rp, new_minV, cp.first);
 		}
 	    }
 	}
       file_rp << "]\n";
       file_rp.close();      
-    }
+
+    } // end for i = 0..no_contexts-1
 }
 
 
@@ -748,8 +786,13 @@ void
 print_command_lines_file(bool is_shellscript, 
 			 std::string testpath,
 			 std::string dmcspath,
-			 std::ofstream& file)
+			 std::size_t k1,
+			 std::size_t k2,
+			 std::string filename)
 {
+  std::ofstream file;
+  file.open(filename.c_str());
+
   if (is_shellscript)
     {
       file << "#!/bin/bash" << std::endl
@@ -780,28 +823,66 @@ print_command_lines_file(bool is_shellscript,
        << dmcspath << "/" << DMCSC << " "
        << "--hostname=localhost "
        << "--port=" << BASE_PORT << " "
+       << "--root=0 "
        << "--signature=" << testpath << "/client.qp "
        << "--belief-state-size=" << no_atoms << " "
-       << "--k1=1 --k2=10 "
+       << "--k1=" << k1 << " "
+       << "--k2=" << k2 << " "
        << " > " << prefix << ".log "
        << " 2> " << prefix << "-err.log" << std::endl;
+
+  file.close();
 }
 
 
 void
 print_command_lines()
 {
-  std::string filename_command_line        = prefix + CMD_EXT;
-  std::string filename_command_line_sh     = prefix + SH_CMD_EXT;
+  std::string filename_command_line_all        = prefix + "_command_line_all.txt";
+  std::string filename_command_line_all_sh     = prefix + "_command_line_all.sh";
+  std::string filename_command_line_opt_all    = prefix + "_command_line_opt_all.txt";
+  std::string filename_command_line_opt_all_sh = prefix + "_command_line_opt_all.sh";
 
-  file_command_line.open(filename_command_line.c_str());
-  file_command_line_sh.open(filename_command_line_sh.c_str());
-  
-  print_command_lines_file(false, TESTDIR, DMCSPATH, file_command_line);
-  print_command_lines_file(true, TESTDIR, DMCSPATH, file_command_line_sh);
+  if (pack_size > 0)
+    {
+      std::stringstream out;
+      out << pack_size;
 
-  file_command_line_sh.close();
-  file_command_line.close();
+      std::string filename_command_line_pack        = prefix + "_command_line_" + out.str() + ".txt";
+      std::string filename_command_line_pack_sh     = prefix + "_command_line_" + out.str() + ".sh";
+    }
+
+  print_command_lines_file(false, TESTDIR, DMCSPATH, 0, 0, filename_command_line_all);
+  print_command_lines_file(true, TESTDIR, DMCSPATH, 0, 0, filename_command_line_all_sh);
+
+  if (pack_size > 0)
+    {
+      std::stringstream out;
+      out << pack_size;
+
+      std::string filename_command_line_pack        = prefix + "_command_line_" + out.str() + ".txt";
+      std::string filename_command_line_pack_sh     = prefix + "_command_line_" + out.str() + ".sh";
+      print_command_lines_file(false, TESTDIR, DMCSPATH, 1, pack_size, filename_command_line_pack);
+      print_command_lines_file(true, TESTDIR, DMCSPATH, 1, pack_size, filename_command_line_pack_sh);
+    }
+
+  OptionValueMap::iterator it = cmdline_options.find("returnplan");
+  assert (it != cmdline_options.end());
+  it->second = prefix + ".orp";
+
+  print_command_lines_file(false, TESTDIR, DMCSPATH, 0, 0, filename_command_line_opt_all);
+  print_command_lines_file(true, TESTDIR, DMCSPATH, 0, 0, filename_command_line_opt_all_sh);
+
+  if (pack_size > 0)
+    {
+      std::stringstream out;
+      out << pack_size;
+      std::string filename_command_line_opt_pack    = prefix + "_command_line_opt_" + out.str() + ".txt";
+      std::string filename_command_line_opt_pack_sh = prefix + "_command_line_opt_" + out.str() + ".sh";
+
+      print_command_lines_file(false, TESTDIR, DMCSPATH, 1, pack_size, filename_command_line_opt_pack);
+      print_command_lines_file(true, TESTDIR, DMCSPATH, 1, pack_size, filename_command_line_opt_pack_sh);
+    }
 }
 
 
@@ -1039,7 +1120,7 @@ main(int argc, char* argv[])
       topology_type != RING_EDGE_TOPOLOGY && topology_type != BINARY_TREE_TOPOLOGY)
     {
       generate_opt_topology();
-      write_opt_plans();
+      write_plans();
       //print_opt_command_lines();
       //print_opt_dlv_command_lines();
     }
