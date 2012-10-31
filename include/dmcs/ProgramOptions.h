@@ -72,6 +72,7 @@ namespace dmcs {
 #define MAX_RESOURCES      "reso"
 #define K1                 "k1"
 #define K2                 "k2"
+#define STARTUP_TIME       "startup-time"
 
 } // namespace dmcs
 

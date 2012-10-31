@@ -65,6 +65,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <map>
 #include <sstream>
 #include <vector>
 
@@ -73,7 +74,8 @@ using namespace dmcs::generator;
 
 #define DMCSD "new_dmcsd"
 #define DMCSC "new_dmcsc"
-#define TESTSDIR "."
+#define DMCSM "new_dmcsm"
+#define TESTDIR "."
 #define DMCSPATH "../build-dbg/src"
 #define STR_LOCALHOST "localhost"
 #define LP_EXT  ".lp"
@@ -105,6 +107,8 @@ using namespace dmcs::generator;
    7: House Topology\n\
    8: Multiple Ring Topology"
 
+typedef std::map<std::string, std::string> OptionValueMap;
+OptionValueMap cmdline_options;
 
 BeliefTableVecPtr sigma_vec(new BeliefTableVec);
 BeliefTableVecPtr context_interface_table_vec(new BeliefTableVec);
@@ -131,6 +135,7 @@ std::size_t no_atoms;
 std::size_t no_interface_atoms;
 std::size_t no_bridge_rules;
 std::size_t topology_type;
+std::size_t startup_time;
 
 std::string prefix;
 std::string filename;
@@ -147,6 +152,8 @@ std::ofstream file_dlv;
 std::ofstream file_command_line_dlv;
 std::ofstream file_command_line_dlv_opt;
 
+
+
 int 
 read_input(int argc, char* argv[])
 {
@@ -159,6 +166,7 @@ read_input(int argc, char* argv[])
     (BRIDGE_RULES, boost::program_options::value<std::size_t>(&no_bridge_rules)->default_value(2), "Number of bridge rules")
     (TOPOLOGY, boost::program_options::value<std::size_t>(&topology_type)->default_value(1), HELP_MESSAGE_TOPO)
     (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Prefix for all files")
+    (STARTUP_TIME, boost::program_options::value<std::size_t>(&startup_time)->default_value(20), "Sleeping time after initializing all dmcsd")
     (LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
     ;
 
@@ -292,6 +300,33 @@ setup_topos()
 }
 
 
+void
+add_cmdline_options()
+{
+  std::stringstream out;
+  out << MANAGER_PORT;
+  std::string str_manager = "localhost:" + out.str();
+
+  out.str("");
+  out << no_contexts;
+  std::string str_system_size = out.str();
+
+  out.str("");
+  out << no_atoms;
+  std::string str_bs_size = out.str();
+
+  cmdline_options.insert(std::pair<std::string, std::string>("manager", str_manager));
+  cmdline_options.insert(std::pair<std::string, std::string>("context", ""));
+  cmdline_options.insert(std::pair<std::string, std::string>("port", ""));
+  cmdline_options.insert(std::pair<std::string, std::string>("system-size", str_system_size));
+  cmdline_options.insert(std::pair<std::string, std::string>("belief-state-size", str_bs_size));
+  cmdline_options.insert(std::pair<std::string, std::string>("kb", prefix + ".lp"));
+  cmdline_options.insert(std::pair<std::string, std::string>("br", prefix + ".br"));
+  cmdline_options.insert(std::pair<std::string, std::string>("queryplan", prefix + ".qp"));
+  cmdline_options.insert(std::pair<std::string, std::string>("returnplan", prefix + ".rp"));
+}
+
+
 
 void 
 init()
@@ -307,6 +342,8 @@ init()
   // initialize minV as we now know the system size  
   new_minV = NewBeliefStatePtr(new NewBeliefState(no_contexts, no_atoms));
   new_minV->setEpsilon(bso->getStartingOffsets());
+
+  add_cmdline_options();
 }
 
 
@@ -647,6 +684,109 @@ write_opt_plans()
 }
 
 
+void
+print_dmcsd_line(bool is_shellscript,
+		 std::size_t i,
+		 const std::string& testpath,
+		 const std::string& dmcspath,
+		 std::ofstream& file)
+{
+  std::stringstream out;
+  std::string final_value;
+
+  file << dmcspath << "/" << DMCSD << " ";
+
+  for (OptionValueMap::const_iterator it = cmdline_options.begin(); it != cmdline_options.end(); ++it)
+    {
+      out.str("");
+      const std::string& option = it->first;
+      std::string value = it->second;
+
+      if (value == "")
+	// need some number
+	{
+	  if (option == "context")
+	    {
+	      out << i;
+	      final_value = out.str();
+	    }
+	  else // option == "port"
+	    {
+	      std::size_t port = BASE_PORT + i;
+	      out << port;
+	      final_value = out.str();
+	    }
+	}
+      else
+	{
+	  // need to adapt a file name with the context id
+	  std::size_t dot_pos = value.find(".");
+	  if (dot_pos != std::string::npos)
+	    {
+	      out << i;
+	      value.insert(dot_pos, "-" + out.str());
+	      final_value = testpath + "/" + value;
+	    }
+	  else
+	    {
+	      final_value = value;
+	    }
+	}
+      file << "--" << option << "=" << final_value << " ";
+    } // end for
+  
+  if (is_shellscript)
+    {
+      file << " >/dev/null 2>&1 &";
+    }
+
+  file << std::endl;
+}
+
+
+void
+print_command_lines_file(bool is_shellscript, 
+			 std::string testpath,
+			 std::string dmcspath,
+			 std::ofstream& file)
+{
+  if (is_shellscript)
+    {
+      file << "#!/bin/bash" << std::endl
+	   << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
+	   << "export TESTPATH='" << testpath << "'" << std::endl
+	   << "export DMCSPATH='" << dmcspath << "'" << std::endl
+	   << "killall " << DMCSD << std::endl << std::endl;
+
+      testpath = "$TESTPATH";
+      dmcspath = "$DMCSPATH";
+    }
+
+  file << dmcspath << "/" << DMCSM " " 
+       << "--port=" << MANAGER_PORT << " "
+       << "--system-sze=" << no_contexts << std::endl;
+
+  for (std::size_t i = 0; i < no_contexts; ++i)
+    {
+      print_dmcsd_line(is_shellscript, i, testpath, dmcspath, file);
+    }
+
+  if (is_shellscript)
+    {
+      file << "sleep " << startup_time << std::endl;
+    }
+
+  file << "/usr/bin/time --portability -o " << prefix << "-time.log "
+       << dmcspath << "/" << DMCSC << " "
+       << "--hostname=localhost "
+       << "--port=" << BASE_PORT << " "
+       << "--signature=" << testpath << "/client.qp "
+       << "--belief-state-size=" << no_atoms << " "
+       << "--k1=1 --k2=10 "
+       << " > " << prefix << ".log "
+       << " 2> " << prefix << "-err.log" << std::endl;
+}
+
 
 void
 print_command_lines()
@@ -656,70 +796,9 @@ print_command_lines()
 
   file_command_line.open(filename_command_line.c_str());
   file_command_line_sh.open(filename_command_line_sh.c_str());
-
-  // Initialization for shell scripts
-  file_command_line_sh << "#!/bin/bash" << std::endl
-		       << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
-		       << "export TESTSPATH='" TESTSDIR "'" << std::endl
-		       << "export DMCSPATH='.'" << std::endl;
-
-  // dmcsd commands
-  // ./dmcsd <id> <hostname> <port> <filename_lp> <filename_br> <filename_topo> 
-
-  std::string command_line_sh;
-  std::string command_line;
-
-  for (std::size_t i = 1; i <= no_contexts; ++i)
-    {
-      std::stringstream out;
-      std::stringstream index;
-      std::stringstream port;
-      
-      index << i;
-      port << BASE_PORT + i;
-
-      // ID PortNo@Hostname
-      out << "--" << CONTEXT_ID << "=" << i << " " 
-	  << "--" << PORT << "=" << port.str();
-
-      command_line_sh = "$DMCSPATH/" DMCSD " " + out.str() + 
-	" --" KB "=$TESTSPATH/" + prefix + "-" + index.str() + LP_EXT +
-	" --" BR "=$TESTSPATH/" + prefix + "-" + index.str() + BR_EXT +
-	" --" TOPOLOGY "=$TESTSPATH/" + prefix + TOP_EXT;
-
-      command_line = "./" DMCSD " " + out.str() + 
-	" --" KB "=" TESTSDIR "/" + prefix + "-" + index.str() + LP_EXT +
-	" --" BR "=" TESTSDIR "/" + prefix + "-" + index.str() + BR_EXT +
-	" --" TOPOLOGY "=" TESTSDIR "/" + prefix + TOP_EXT;
-
-      file_command_line_sh << command_line_sh << "> /dev/null 2>&1 &" << std::endl;
-      file_command_line << command_line << std::endl;
-    }
-
-  // client command
-  // time | ./dmcsc localhost 5001
-  std::stringstream port1;
-  std::stringstream system_size;
-  std::stringstream globalV;
-
-  port1 << 5001;
-  system_size << no_contexts;
-  globalV << minV;
-
-  command_line_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcs-time.log $DMCSPATH/"  DMCSC
-    " --" HOSTNAME "=localhost"
-    " --" PORT "=" + port1.str() +
-    " --" SYSTEM_SIZE "=" + system_size.str() + 
-    " --" QUERY_VARS "=\"" + globalV.str() + "\" > "+ prefix +"-dmcs.log 2> " + prefix +"-dmcs-err.log";
   
-  command_line = "time ./" DMCSC 
-    " --" HOSTNAME "=localhost" 
-    " --" PORT "=" + port1.str() +
-    " --" SYSTEM_SIZE "=" + system_size.str() + 
-    " --" QUERY_VARS "=\"" + globalV.str() + "\"";
-
-  file_command_line_sh << command_line_sh << std::endl << "killall " DMCSD << std::endl;
-  file_command_line << command_line << std::endl;
+  print_command_lines_file(false, TESTDIR, DMCSPATH, file_command_line);
+  print_command_lines_file(true, TESTDIR, DMCSPATH, file_command_line_sh);
 
   file_command_line_sh.close();
   file_command_line.close();
@@ -729,107 +808,8 @@ print_command_lines()
 void
 print_opt_command_lines()
 {
-  std::string filename_command_line_opt    = prefix + OPT_CMD_EXT;
-  std::string filename_command_line_opt_sh = prefix + OPT_SH_CMD_EXT;
-  std::string filename_command_line_streaming_sh = prefix + STREAMING_SH_CMD_EXT;
-
-  file_command_line_opt.open(filename_command_line_opt.c_str());
-  file_command_line_opt_sh.open(filename_command_line_opt_sh.c_str());
-  file_command_line_streaming_sh.open(filename_command_line_streaming_sh.c_str());
-
-  // Initialization for shell scripts
-  file_command_line_opt_sh << "#!/bin/bash" << std::endl
-			   << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
-			   << "export TESTSPATH='.'" << std::endl
-			   << "export DMCSPATH=" << DMCSPATH << std::endl;
-
-  file_command_line_streaming_sh << "#!/bin/bash" << std::endl
-				 << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
-				 << "export TESTSPATH='.'" << std::endl
-				 << "export DMCSPATH=" << DMCSPATH << std::endl;
-
-
-  // dmcsd commands
-  // ./dmcsd <id> <hostname> <port> <filename_lp> <filename_br> <filename_topo> 
-
-  std::string command_line_opt_sh;
-  std::string command_line_streaming_sh;
-  std::string command_line_opt;
-
-  file_command_line_opt_sh << "killall dmcsd" << std::endl;
-  file_command_line_streaming_sh << "killall dmcsd" << std::endl;
-
-  for (std::size_t i = 1; i <= no_contexts; ++i)
-    {
-      std::stringstream out;
-      std::stringstream index;
-      std::stringstream port;
-      
-      index << i;
-      port << BASE_PORT + i;
-
-      // ID PortNo@Hostname
-      out << "--" << CONTEXT_ID << "=" << i << " " 
-	  << "--" << PORT << "=" << port.str();
-
-      command_line_opt_sh = "$DMCSPATH/" DMCSD " " + out.str() + 
-	" --" KB "=$TESTSPATH/" + prefix + "-" + index.str() + LP_EXT +
-	" --" BR "=$TESTSPATH/" + prefix + "-" + index.str() + BR_EXT +
-	" --"TOPOLOGY "=$TESTSPATH/" + prefix + OPT_EXT;
-
-      command_line_opt = DMCSPATH "/" DMCSD " " + out.str() + 
-	" --" KB "=" TESTSDIR "/" + prefix + "-" + index.str() + LP_EXT +
-	" --" BR "=" TESTSDIR "/" + prefix + "-" + index.str() + BR_EXT +
-	" --" TOPOLOGY "=" TESTSDIR "/" + prefix + OPT_EXT;
-
-      file_command_line_opt_sh << command_line_opt_sh << " > /dev/null 2>&1 &" << std::endl;
-      file_command_line_streaming_sh << command_line_opt_sh << " --reso=1 > log" << i << ".txt 2>&1 &" << std::endl;
-      file_command_line_opt << command_line_opt << std::endl;
-    }
-
-  // client command
-  // time | ./dmcsc localhost 5001
-  std::stringstream port1;
-  std::stringstream system_size;
-  std::stringstream globalV;
-
-  port1 << 5001;
-  system_size << no_contexts;
-  globalV << minV;
-
-  command_line_opt_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcs-opt-time.log $DMCSPATH/"  DMCSC
-    " --" HOSTNAME "=localhost" 
-    " --" PORT "=" + port1.str() +
-    " --" STREAMING "=0"
-    " --" SYSTEM_SIZE "=" + system_size.str() + " > "+ prefix +"-dmcs-opt.log 2> " + prefix +"-dmcs-opt-err.log";
-
-  /*command_line_streaming_sh = "/usr/bin/time --portability -o "+ prefix +"-dmcs-streaming-time.log $DMCSPATH/"  DMCSC
-    " --" HOSTNAME "=localhost" 
-    " --" PORT "=" + port1.str() +
-    " --" STREAMING "=1"
-    " --" PACK_SIZE "=100"
-    " --" SYSTEM_SIZE "=" + system_size.str() + " > "+ prefix +"-dmcs-streaming.log 2> " + prefix +"-dmcs-streaming-err.log";*/
-
-  command_line_streaming_sh = "time $DMCSPATH/"  DMCSC
-    " --" HOSTNAME "=localhost" 
-    " --" PORT "=" + port1.str() +
-    " --" STREAMING "=1"
-    " --" PACK_SIZE "=100"
-    " --" SYSTEM_SIZE "=" + system_size.str();
-  
-  command_line_opt = "time " DMCSPATH "/" DMCSC 
-    " --" HOSTNAME "=localhost"
-    " --" PORT "=" + port1.str() +
-    " --" SYSTEM_SIZE "=" + system_size.str();
-  
-  file_command_line_opt_sh << "sleep 20\n" << command_line_opt_sh << std::endl << "killall " DMCSD << std::endl;
-  file_command_line_streaming_sh << "sleep 2\n" << command_line_streaming_sh << std::endl << "killall " DMCSD << std::endl;
-  file_command_line_opt << command_line_opt << std::endl;
-
-  file_command_line_opt_sh.close();
-  file_command_line_streaming_sh.close();
-  file_command_line_opt.close();
 }
+
 
 #if 0
 const std::string
@@ -992,8 +972,8 @@ print_dlv_command_lines()
   file_command_line_dlv.open(filename_command_line_dlv.c_str());
 
   std::string generalFilter = getGeneralDLVFilter();
-  file_command_line_dlv << "dlv -silent -filter=" << generalFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq "<< std::endl;
-  file_command_line_dlv << "dlv -silent -filter=" << generalFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq | wc -l"<< std::endl;
+  file_command_line_dlv << "dlv -silent -filter=" << generalFilter <<" "<< TESTDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq "<< std::endl;
+  file_command_line_dlv << "dlv -silent -filter=" << generalFilter <<" "<< TESTDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq | wc -l"<< std::endl;
 
   file_command_line_dlv.close();
 }
@@ -1006,8 +986,8 @@ print_opt_dlv_command_lines()
   file_command_line_dlv_opt.open(filename_command_line_dlv_opt.c_str());
 
   std::string optimumFilter = getOptimumDLVFilter();
-  file_command_line_dlv_opt << "dlv -silent -filter=" << optimumFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq "<< std::endl;
-  file_command_line_dlv_opt << "dlv -silent -filter=" << optimumFilter <<" "<< TESTSDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq | wc -l"<< std::endl;
+  file_command_line_dlv_opt << "dlv -silent -filter=" << optimumFilter <<" "<< TESTDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq "<< std::endl;
+  file_command_line_dlv_opt << "dlv -silent -filter=" << optimumFilter <<" "<< TESTDIR <<"/"<< filename << DLV_EXT<<" | sort | uniq | wc -l"<< std::endl;
 
   file_command_line_dlv_opt.close();
 }
@@ -1052,6 +1032,9 @@ main(int argc, char* argv[])
   DMCS_LOG_TRACE("generate_contexts");
   generate_contexts();
 
+  DMCS_LOG_TRACE("print_command_lines");
+  print_command_lines();
+
   if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
       topology_type != RING_EDGE_TOPOLOGY && topology_type != BINARY_TREE_TOPOLOGY)
     {
@@ -1063,8 +1046,7 @@ main(int argc, char* argv[])
 
   /*
 
-  DMCS_LOG_TRACE("print_command_lines");
-  print_command_lines();
+ 
 
   //DMCS_LOG_TRACE("print_dlv_command_lines");
   //print_dlv_command_lines();

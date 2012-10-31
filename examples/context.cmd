@@ -1,3 +1,5 @@
+./new_dmcsm --port=4999 --system-size=5
+
 ./new_dmcsd --context=0 --port=5000 --system-size=5 --packsize=4 --belief-state-size=10 --kb=../../examples/context0.lp --br=../../examples/context0.br --queryplan=../../examples/context0.qp --returnplan=../../examples/context0.rp --manager=localhost:4999
 
 ./new_dmcsd --context=1 --port=5001 --system-size=5 --packsize=4 --belief-state-size=10 --kb=../../examples/context1.lp --br=../../examples/context1.br --queryplan=../../examples/context1.qp --returnplan=../../examples/context1.rp --manager=localhost:4999
@@ -10,7 +12,7 @@
 
 ./new_dmcsc --port=5000 --root=0 --signature=../../examples/client.qp --belief-state-size=10 --k1=1 --k2=4
 
-./new_dmcsm --port=4999 --system-size=5
+
 
 
 ***********************
