@@ -418,7 +418,7 @@ generate_orig_topology()
   orig_topo_gen->generate();
 
 
-  //#if defined(DEBUG)
+#if defined(DEBUG)
   DMCS_LOG_DEBUG("Original topology:");
   for (std::size_t i = 0; i < no_contexts; ++ i)
     {
@@ -429,7 +429,7 @@ generate_orig_topology()
 
       DMCS_LOG_DEBUG(i << " --> " << oss.str());
     }
-  //#endif
+#endif
 }
 
 
@@ -749,7 +749,8 @@ print_dmcsd_line(bool is_shellscript,
 		 std::size_t i,
 		 const std::string& testpath,
 		 const std::string& path,
-		 std::ofstream& file)
+		 std::ofstream& file,
+		 bool want_log = false)
 {
   std::stringstream out;
   std::string final_value;
@@ -797,7 +798,25 @@ print_dmcsd_line(bool is_shellscript,
   
   if (is_shellscript)
     {
-      file << " >/dev/null 2>&1 &";
+      if (want_log)
+	{
+	  // find test name from option --kb
+	  OptionValueMap::const_iterator it = cmdline_options.find("kb");
+	  assert (it != cmdline_options.end());
+
+	  std::stringstream out;
+	  out << i;
+	  
+	  std::string filename = it->second;
+	  std::size_t dot_pos = filename.find(".");
+	  assert (dot_pos != std::string::npos);
+
+	  std::string logfilename = filename.substr(0, dot_pos) + "-" + out.str() + ".log";
+
+	  file << " >" << logfilename << " 2>&1 &";
+	}
+      else
+	file << " >/dev/null 2>&1 &";
     }
 
   file << std::endl;
@@ -810,7 +829,8 @@ print_command_lines_file(bool is_shellscript,
 			 std::string path,
 			 std::size_t k1,
 			 std::size_t k2,
-			 std::string filename)
+			 std::string filename,
+			 bool want_log = false)
 {
   std::ofstream file;
   file.open(filename.c_str());
@@ -834,7 +854,7 @@ print_command_lines_file(bool is_shellscript,
 
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
-      print_dmcsd_line(is_shellscript, i, testpath, path, file);
+      print_dmcsd_line(is_shellscript, i, testpath, path, file, want_log);
     }
 
   if (is_shellscript)
@@ -861,22 +881,16 @@ print_command_lines_file(bool is_shellscript,
 void
 print_command_lines()
 {
-  std::string filename_command_line_all        = prefix + "_command_line_all.txt";
-  std::string filename_command_line_all_sh     = prefix + "_command_line_all.sh";
-  std::string filename_command_line_opt_all    = prefix + "_command_line_opt_all.txt";
-  std::string filename_command_line_opt_all_sh = prefix + "_command_line_opt_all.sh";
-
-  if (pack_size > 0)
-    {
-      std::stringstream out;
-      out << pack_size;
-
-      std::string filename_command_line_pack        = prefix + "_command_line_" + out.str() + ".txt";
-      std::string filename_command_line_pack_sh     = prefix + "_command_line_" + out.str() + ".sh";
-    }
+  std::string filename_command_line_all            = prefix + "_command_line_all.txt";
+  std::string filename_command_line_all_sh         = prefix + "_command_line_all.sh";
+  std::string filename_command_line_all_log_sh     = prefix + "_command_line_all_log.sh";
+  std::string filename_command_line_opt_all        = prefix + "_command_line_opt_all.txt";
+  std::string filename_command_line_opt_all_sh     = prefix + "_command_line_opt_all.sh";
+  std::string filename_command_line_opt_all_log_sh = prefix + "_command_line_opt_all_log.sh";
 
   print_command_lines_file(false, TESTDIR, dmcspath, 0, 0, filename_command_line_all);
   print_command_lines_file(true, TESTDIR, dmcspath, 0, 0, filename_command_line_all_sh);
+  print_command_lines_file(true, TESTDIR, dmcspath, 0, 0, filename_command_line_all_log_sh, true);
 
   if (pack_size > 0)
     {
@@ -885,8 +899,10 @@ print_command_lines()
 
       std::string filename_command_line_pack        = prefix + "_command_line_" + out.str() + ".txt";
       std::string filename_command_line_pack_sh     = prefix + "_command_line_" + out.str() + ".sh";
+      std::string filename_command_line_pack_log_sh = prefix + "_command_line_log_" + out.str() + ".sh";
       print_command_lines_file(false, TESTDIR, dmcspath, 1, pack_size, filename_command_line_pack);
       print_command_lines_file(true, TESTDIR, dmcspath, 1, pack_size, filename_command_line_pack_sh);
+      print_command_lines_file(true, TESTDIR, dmcspath, 1, pack_size, filename_command_line_pack_log_sh, true);
     }
 
   OptionValueMap::iterator it = cmdline_options.find("returnplan");
@@ -895,16 +911,19 @@ print_command_lines()
 
   print_command_lines_file(false, TESTDIR, dmcspath, 0, 0, filename_command_line_opt_all);
   print_command_lines_file(true, TESTDIR, dmcspath, 0, 0, filename_command_line_opt_all_sh);
+  print_command_lines_file(true, TESTDIR, dmcspath, 0, 0, filename_command_line_opt_all_log_sh, true);
 
   if (pack_size > 0)
     {
       std::stringstream out;
       out << pack_size;
-      std::string filename_command_line_opt_pack    = prefix + "_command_line_opt_" + out.str() + ".txt";
-      std::string filename_command_line_opt_pack_sh = prefix + "_command_line_opt_" + out.str() + ".sh";
+      std::string filename_command_line_opt_pack        = prefix + "_command_line_opt_" + out.str() + ".txt";
+      std::string filename_command_line_opt_pack_sh     = prefix + "_command_line_opt_" + out.str() + ".sh";
+      std::string filename_command_line_opt_pack_log_sh = prefix + "_command_line_opt_log_" + out.str() + ".sh";
 
       print_command_lines_file(false, TESTDIR, dmcspath, 1, pack_size, filename_command_line_opt_pack);
       print_command_lines_file(true, TESTDIR, dmcspath, 1, pack_size, filename_command_line_opt_pack_sh);
+      print_command_lines_file(true, TESTDIR, dmcspath, 1, pack_size, filename_command_line_opt_pack_log_sh, true);
     }
 }
 
