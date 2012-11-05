@@ -130,6 +130,7 @@ OptTopologyGenerator* opt_topo_gen;
 NeighborVec2Ptr orig_topo(new NeighborVec2);
 NeighborVec2Ptr opt_topo(new NeighborVec2);
 
+bool        gen_data;
 std::size_t no_contexts;
 std::size_t no_atoms;
 std::size_t no_interface_atoms;
@@ -160,6 +161,7 @@ read_input(int argc, char* argv[])
   boost::program_options::options_description desc("Allowed options");
   desc.add_options()
     (HELP, "Help message")
+    (GENDATA, boost::program_options::value<bool>(&gen_data)->default_value(false), "Set to generate data. Generate only command lines by default.")
     (CONTEXTS, boost::program_options::value<std::size_t>(&no_contexts)->default_value(4), "Number of contexts")
     (ATOMS, boost::program_options::value<std::size_t>(&no_atoms)->default_value(9), "Number of local atoms")
     (INTERFACE, boost::program_options::value<std::size_t>(&no_interface_atoms)->default_value(3), "Number of interface atoms")
@@ -886,12 +888,6 @@ print_command_lines()
 }
 
 
-void
-print_opt_command_lines()
-{
-}
-
-
 #if 0
 const std::string
 getOptimumDLVFilter() 
@@ -1092,30 +1088,24 @@ main(int argc, char* argv[])
 
   init();
 
-  std::cerr << "Local Signatures:" << std::endl;
-  for (BeliefTableVec::const_iterator it = sigma_vec->begin(); it != sigma_vec->end(); ++it)
+  if (gen_data)
     {
-      BeliefTablePtr btab = *it;
-      std::cerr << btab->gen_print() << std::endl;
+      DMCS_LOG_TRACE("generate_orig_topology");
+      generate_orig_topology();
+
+      DMCS_LOG_TRACE("generate_contexts");
+      generate_contexts();
+ 
+      DMCS_LOG_TRACE("print_command_lines");
+      print_command_lines();
+    }
+  else
+    {
+      DMCS_LOG_TRACE("print_command_lines ONLY");
+      print_command_lines();
     }
 
-  std::cerr << "Input Signatures:" << std::endl;
-  for (BeliefTableVec::const_iterator it = context_interface_table_vec->begin(); 
-       it != context_interface_table_vec->end(); ++it)
-    {
-      BeliefTablePtr btab = *it;
-      std::cerr << btab->gen_print() << std::endl;
-    }
-
-  DMCS_LOG_TRACE("generate_orig_topology");
-  generate_orig_topology();
-
-  DMCS_LOG_TRACE("generate_contexts");
-  generate_contexts();
-
-  DMCS_LOG_TRACE("print_command_lines");
-  print_command_lines();
-
+  /*
   if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
       topology_type != RING_EDGE_TOPOLOGY && topology_type != BINARY_TREE_TOPOLOGY)
     {
@@ -1124,10 +1114,6 @@ main(int argc, char* argv[])
       //print_opt_command_lines();
       //print_opt_dlv_command_lines();
     }
-
-  /*
-
- 
 
   //DMCS_LOG_TRACE("print_dlv_command_lines");
   //print_dlv_command_lines();

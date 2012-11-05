@@ -38,6 +38,7 @@ namespace dmcs {
 #define DEFAULT_QUEUE_SIZE 50
 #define DEFAULT_PACK_SIZE  5
 #define INVOKER_ID         1023
+#define GENDATA            "gen-data"
 #define QUERY_VARS         "query-variables"
 #define SYSTEM_SIZE        "system-size"
 #define QUEUE_SIZE         "queue-size"
