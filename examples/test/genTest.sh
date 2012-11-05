@@ -1,6 +1,24 @@
 #!/bin/bash
 
-DMCSGEN=../../../../build/src/generator/new_dmcsGen
+DMCSGEN=../../../../../build/src/generator/new_dmcsGen
+PRINTLOG=yes
+
+###############################################################################
+
+createSubDir()
+{
+    dirName=$1
+    
+    if [ ! -e $dirName ] || [ ! -d $dirName ] ; then
+	mkdir $dirName
+	if [ x$PRINTLOG = xyes ] ; then
+	    echo Create subdir $dirName
+	fi
+    fi
+
+} # end createSubDir
+
+###############################################################################
 
 createOneTest()
 {
@@ -14,13 +32,11 @@ createOneTest()
     # args[2] = no_atoms
     # args[3] = no_interface
     # args[4] = no_bridgerules
+    # args[5] = instances
     
-    testname=$tname-${args[1]}-${args[2]}-${args[3]}-${args[4]}
+    testname=$tname-${args[1]}-${args[2]}-${args[3]}-${args[4]}-${args[5]}
 
-    if [ ! -e $testname ] || [ ! -d $testname ] ; then
-	echo Create subdir $testname
-	mkdir $testname
-    fi
+    createSubDir $testname
 
     cd $testname
 
@@ -36,6 +52,7 @@ createOneTest()
     cd .. # get out of $testname
 
 } # end createOneTest
+
 
 ###############################################################################
 
@@ -65,29 +82,32 @@ do
     fi
 done
 
+
+createSubDir config
+createSubDir data
+
 python listTests.py
 
-for topofile in `ls *.cfg` ; do
+for topofile in `ls config/*.cfg` ; do
     length=${#topofile}
-    let "length -= 4"
-    toponame=${topofile:0:$length}
+    let "length -= 11"
+    toponame=${topofile:7:$length}
 
     for line in `cat $topofile` ; do
 	list=(`echo $line | tr ',' ' ' `)
 	no_arguments=${#list[@]}
 
-	if [ $no_arguments -ne 5 ] ; then
-	    echo "Bailing out: Number of arguments in config file should be 5!"
+	if [ $no_arguments -ne 6 ] ; then
+	    echo "Bailing out: Number of arguments should be 6!"
 	    exit 1
 	fi
 
-	if [ ! -e $toponame ] || [ ! -d $toponame ] ; then
-	    echo Creating subdir $toponame
-	    mkdir $toponame
-	fi
+	cd data
+	createSubDir $toponame
 
 	cd $toponame
 	createOneTest $gendata $packsize $toponame list[@]
-	cd .. # get out of $toponame
+
+	cd ../.. # get out of data/$toponame
     done
 done
