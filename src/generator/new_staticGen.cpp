@@ -138,6 +138,7 @@ std::size_t no_bridge_rules;
 std::size_t topology_type;
 std::size_t startup_time;
 std::size_t pack_size;
+std::size_t timeout;
 
 std::string prefix;
 std::string filename;
@@ -172,6 +173,7 @@ read_input(int argc, char* argv[])
     (DMCSPATH, boost::program_options::value<std::string>(&dmcspath), "Path to dmcs binaries")
     (STARTUP_TIME, boost::program_options::value<std::size_t>(&startup_time)->default_value(20), "Sleeping time after initializing all dmcsd")
     (PACK_SIZE, boost::program_options::value<std::size_t>(&pack_size)->default_value(0), "Package size")
+    (TIMEOUT, boost::program_options::value<std::size_t>(&timeout)->default_value(600), "Set timeout when running the test")
     (LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
     ;
 
@@ -839,6 +841,7 @@ print_command_lines_file(bool is_shellscript,
     {
       file << "#!/bin/bash" << std::endl
 	   << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
+	   << "export TIMEOUT=" << timeout << std::endl
 	   << "export TESTPATH='" << testpath << "'" << std::endl
 	   << "export DMCSPATH='" << path << "'" << std::endl
 	   << "killall " << DMCSD << std::endl << std::endl
@@ -862,8 +865,14 @@ print_command_lines_file(bool is_shellscript,
       file << "sleep " << startup_time << std::endl;
     }
 
-  file << "/usr/bin/time --portability -o " << prefix << "-time.log "
-       << path << "/" << DMCSC << " "
+  file << "/usr/bin/time --portability -o " << prefix << "-time.log ";
+
+  if (is_shellscript)
+    {
+      file << "/usr/bin/timeout -k 20 $TIMEOUT ";
+    }
+
+  file << path << "/" << DMCSC << " "
        << "--hostname=localhost "
        << "--port=" << BASE_PORT << " "
        << "--root=0 "
