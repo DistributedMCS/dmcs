@@ -58,6 +58,7 @@ namespace dmcs {
 #define BRIDGE_RULES       "bridge_rules"
 #define TEMPLATE           "template"
 #define PREFIX             "prefix"
+#define DMCSPATH           "dmcspath"
 #define LOGGING            "logging"
 #define DAEMONIZE          "daemon"
 #define DYNAMIC            "dynamic"

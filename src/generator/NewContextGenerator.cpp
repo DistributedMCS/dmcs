@@ -273,7 +273,7 @@ NewContextGenerator::cover_neighbors(std::size_t id)
   // otw, we have to compare the actual neighbors, not just the number of them
 
   DMCS_LOG_TRACE("neighbor size: " << nbors.size());
-  DMCS_LOG_TRACE("orig nb " << id << ", size: " << ( (*orig_topo)[id-1]->size() ) );
+  DMCS_LOG_TRACE("orig nb " << id << ", size: " << ( (*orig_topo)[id]->size() ) );
 
   return (nbors.size() == (*orig_topo)[id]->size());
 }

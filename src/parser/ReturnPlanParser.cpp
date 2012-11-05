@@ -186,7 +186,7 @@ struct ReturnPlanGrammar : qi::grammar<Iterator, Skipper>
       lit('}');
 
     return_signature =
-      lit('[') >> (return_beliefs [ActivateBits(state)]) % ',' >> lit(']');
+      lit('[') >> (return_beliefs [ActivateBits(state)]) % ',' >> -(lit(',')) >> lit(']');
 
     return_beliefs = lit('{') >>
       lit("ContextId") >> ':' >> uint_ >> lit(',') >>

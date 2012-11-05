@@ -76,7 +76,7 @@ using namespace dmcs::generator;
 #define DMCSC "new_dmcsc"
 #define DMCSM "new_dmcsm"
 #define TESTDIR "."
-#define DMCSPATH "../build-dbg/src"
+//#define DMCSPATH "../build-dbg/src"
 #define STR_LOCALHOST "localhost"
 #define LP_EXT  ".lp"
 #define BR_EXT  ".br"
@@ -142,6 +142,7 @@ std::size_t pack_size;
 std::string prefix;
 std::string filename;
 std::string logging;
+std::string dmcspath;
 
 std::ofstream file_rules;
 std::ofstream file_topo;
@@ -168,6 +169,7 @@ read_input(int argc, char* argv[])
     (BRIDGE_RULES, boost::program_options::value<std::size_t>(&no_bridge_rules)->default_value(2), "Number of bridge rules")
     (TOPOLOGY, boost::program_options::value<std::size_t>(&topology_type)->default_value(1), HELP_MESSAGE_TOPO)
     (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Prefix for all files")
+    (DMCSPATH, boost::program_options::value<std::string>(&dmcspath), "Path to dmcs binaries")
     (STARTUP_TIME, boost::program_options::value<std::size_t>(&startup_time)->default_value(20), "Sleeping time after initializing all dmcsd")
     (PACK_SIZE, boost::program_options::value<std::size_t>(&pack_size)->default_value(0), "Package size")
     (LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
@@ -177,8 +179,10 @@ read_input(int argc, char* argv[])
   boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
   boost::program_options::notify(vm);
 
-  if (vm.count(HELP) || prefix.compare("") == 0 || no_contexts == 0 || no_atoms == 0 ||
-       no_interface_atoms == 0 || no_bridge_rules == 0)
+  if (vm.count(HELP) || 
+      prefix.compare("") == 0 || dmcspath.compare("") == 0 || 
+      no_contexts == 0 || no_atoms == 0 ||
+      no_interface_atoms == 0 || no_bridge_rules == 0)
     {
       std::cerr << desc;
       return 1;
@@ -483,7 +487,6 @@ generate_opt_topology()
 	opt_topo_gen = new DiamondOptTopoGenerator(no_contexts, opt_lcim);
 	break;
       }
-#if 0
     case DIAMOND_ZIGZAG_TOPOLOGY:
       {
 	opt_topo_gen = new DiamondZigZagOptTopoGenerator(no_contexts, opt_lcim);
@@ -504,7 +507,6 @@ generate_opt_topology()
 	opt_topo_gen = new MultipleRingOptTopoGenerator(no_contexts, opt_lcim);
 	break;
       }
-#endif
     }
 
   // then adjust to get optimal local interface
@@ -590,7 +592,7 @@ write_return_signature_to_file(std::ofstream& file,
   std::size_t local_id;
 
   file << "  {\n";
-  file << "    ContextId: " << ctx_id << "\n";
+  file << "    ContextId: " << ctx_id << ",\n";
   file << "    ReturnSignature:\n";
   file << "    [\n";
   for (std::vector<std::size_t>::const_iterator it = starting_offset.begin(); it != starting_offset.end(); ++it)
@@ -637,10 +639,26 @@ write_return_signature_to_file(std::ofstream& file,
 
 
 void
-write_plans()
+write_plans(bool write_opt_plans)
 {
   std::string local_signature = "LocalSignature";
   std::string input_signature = "InputSignature";
+
+  // client's query plan ######################################################################################
+  std::string filename_client_qp = "client.qp";
+  std::ofstream file_client_qp;
+  file_client_qp.open(filename_client_qp.c_str());
+  file_client_qp << "[\n";
+  
+  for (std::size_t i = 0; i < no_contexts; ++i)
+    {
+      write_belief_table_to_file((*sigma_vec)[i], file_client_qp, local_signature, i);
+    }
+
+  file_client_qp << "]\n";
+  file_client_qp.close();
+
+  // context specific query plans #############################################################################
 
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
@@ -667,36 +685,6 @@ write_plans()
       file_qp << "]\n";
       file_qp.close();
 
-
-      // opt return plans #####################################################################################
-      std::string filename_opt_rp = prefix + "-" + str_i.str() + ".orp";
-      std::ofstream file_opt_rp;
-      file_opt_rp.open(filename_opt_rp.c_str());
-      file_opt_rp << "[\n";
-      if (i == 0)
-	{
-	  const std::vector<std::size_t>& starting_offset = BeliefStateOffset::instance()->getStartingOffsets();
-	  NewBeliefStatePtr bs(new NewBeliefState(no_contexts, no_atoms));
-	  for (std::size_t j = 0; j < starting_offset[1]; ++j)
-	      bs->set(j);
-
-	  write_return_signature_to_file(file_opt_rp, bs, 1023);
-	}
-      else
-	{
-	  for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
-	    {
-	      ContextPair cp = it->first;
-	      if (cp.second == i)
-		{
-		  NewBeliefStatePtr bs = it->second;
-		  write_return_signature_to_file(file_opt_rp, bs, cp.first);
-		}
-	    }
-	}
-      file_opt_rp << "]\n";
-      file_opt_rp.close();
-
       // return plans #########################################################################################
       std::string filename_rp = prefix + "-" + str_i.str() + ".rp";
       std::ofstream file_rp;
@@ -708,7 +696,7 @@ write_plans()
 	}
       else
 	{
-	  for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
+	  for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
 	    {
 	      ContextPair cp = it->first;
 	      if (cp.second == i)
@@ -720,6 +708,38 @@ write_plans()
       file_rp << "]\n";
       file_rp.close();      
 
+      // opt return plans #####################################################################################
+      if (write_opt_plans)
+	{
+	  std::string filename_opt_rp = prefix + "-" + str_i.str() + ".orp";
+	  std::ofstream file_opt_rp;
+	  file_opt_rp.open(filename_opt_rp.c_str());
+	  file_opt_rp << "[\n";
+	  if (i == 0)
+	    {
+	      const std::vector<std::size_t>& starting_offset = BeliefStateOffset::instance()->getStartingOffsets();
+	      NewBeliefStatePtr bs(new NewBeliefState(no_contexts, no_atoms));
+	      for (std::size_t j = 0; j < starting_offset[1]; ++j)
+		bs->set(j);
+	      
+	      write_return_signature_to_file(file_opt_rp, bs, 1023);
+	    }
+	  else
+	    {
+	      for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
+		{
+		  ContextPair cp = it->first;
+		  if (cp.second == i)
+		    {
+		      NewBeliefStatePtr bs = it->second;
+		      write_return_signature_to_file(file_opt_rp, bs, cp.first);
+		    }
+		}
+	    }
+	  file_opt_rp << "]\n";
+	  file_opt_rp.close();
+	}
+
     } // end for i = 0..no_contexts-1
 }
 
@@ -728,13 +748,13 @@ void
 print_dmcsd_line(bool is_shellscript,
 		 std::size_t i,
 		 const std::string& testpath,
-		 const std::string& dmcspath,
+		 const std::string& path,
 		 std::ofstream& file)
 {
   std::stringstream out;
   std::string final_value;
 
-  file << dmcspath << "/" << DMCSD << " ";
+  file << path << "/" << DMCSD << " ";
 
   for (OptionValueMap::const_iterator it = cmdline_options.begin(); it != cmdline_options.end(); ++it)
     {
@@ -787,7 +807,7 @@ print_dmcsd_line(bool is_shellscript,
 void
 print_command_lines_file(bool is_shellscript, 
 			 std::string testpath,
-			 std::string dmcspath,
+			 std::string path,
 			 std::size_t k1,
 			 std::size_t k2,
 			 std::string filename)
@@ -800,20 +820,21 @@ print_command_lines_file(bool is_shellscript,
       file << "#!/bin/bash" << std::endl
 	   << "export TIMEFORMAT=$'\\nreal\\t%3R\\nuser\\t%3U\\nsys\\t%3S'" << std::endl
 	   << "export TESTPATH='" << testpath << "'" << std::endl
-	   << "export DMCSPATH='" << dmcspath << "'" << std::endl
-	   << "killall " << DMCSD << std::endl << std::endl;
+	   << "export DMCSPATH='" << path << "'" << std::endl
+	   << "killall " << DMCSD << std::endl << std::endl
+	   << "killall " << DMCSM << std::endl << std::endl;
 
       testpath = "$TESTPATH";
-      dmcspath = "$DMCSPATH";
+      path = "$DMCSPATH";
     }
 
-  file << dmcspath << "/" << DMCSM " " 
+  file << path << "/" << DMCSM " " 
        << "--port=" << MANAGER_PORT << " "
-       << "--system-sze=" << no_contexts << std::endl;
+       << "--system-size=" << no_contexts << " &" << std::endl;
 
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
-      print_dmcsd_line(is_shellscript, i, testpath, dmcspath, file);
+      print_dmcsd_line(is_shellscript, i, testpath, path, file);
     }
 
   if (is_shellscript)
@@ -822,7 +843,7 @@ print_command_lines_file(bool is_shellscript,
     }
 
   file << "/usr/bin/time --portability -o " << prefix << "-time.log "
-       << dmcspath << "/" << DMCSC << " "
+       << path << "/" << DMCSC << " "
        << "--hostname=localhost "
        << "--port=" << BASE_PORT << " "
        << "--root=0 "
@@ -854,8 +875,8 @@ print_command_lines()
       std::string filename_command_line_pack_sh     = prefix + "_command_line_" + out.str() + ".sh";
     }
 
-  print_command_lines_file(false, TESTDIR, DMCSPATH, 0, 0, filename_command_line_all);
-  print_command_lines_file(true, TESTDIR, DMCSPATH, 0, 0, filename_command_line_all_sh);
+  print_command_lines_file(false, TESTDIR, dmcspath, 0, 0, filename_command_line_all);
+  print_command_lines_file(true, TESTDIR, dmcspath, 0, 0, filename_command_line_all_sh);
 
   if (pack_size > 0)
     {
@@ -864,16 +885,16 @@ print_command_lines()
 
       std::string filename_command_line_pack        = prefix + "_command_line_" + out.str() + ".txt";
       std::string filename_command_line_pack_sh     = prefix + "_command_line_" + out.str() + ".sh";
-      print_command_lines_file(false, TESTDIR, DMCSPATH, 1, pack_size, filename_command_line_pack);
-      print_command_lines_file(true, TESTDIR, DMCSPATH, 1, pack_size, filename_command_line_pack_sh);
+      print_command_lines_file(false, TESTDIR, dmcspath, 1, pack_size, filename_command_line_pack);
+      print_command_lines_file(true, TESTDIR, dmcspath, 1, pack_size, filename_command_line_pack_sh);
     }
 
   OptionValueMap::iterator it = cmdline_options.find("returnplan");
   assert (it != cmdline_options.end());
   it->second = prefix + ".orp";
 
-  print_command_lines_file(false, TESTDIR, DMCSPATH, 0, 0, filename_command_line_opt_all);
-  print_command_lines_file(true, TESTDIR, DMCSPATH, 0, 0, filename_command_line_opt_all_sh);
+  print_command_lines_file(false, TESTDIR, dmcspath, 0, 0, filename_command_line_opt_all);
+  print_command_lines_file(true, TESTDIR, dmcspath, 0, 0, filename_command_line_opt_all_sh);
 
   if (pack_size > 0)
     {
@@ -882,8 +903,8 @@ print_command_lines()
       std::string filename_command_line_opt_pack    = prefix + "_command_line_opt_" + out.str() + ".txt";
       std::string filename_command_line_opt_pack_sh = prefix + "_command_line_opt_" + out.str() + ".sh";
 
-      print_command_lines_file(false, TESTDIR, DMCSPATH, 1, pack_size, filename_command_line_opt_pack);
-      print_command_lines_file(true, TESTDIR, DMCSPATH, 1, pack_size, filename_command_line_opt_pack_sh);
+      print_command_lines_file(false, TESTDIR, dmcspath, 1, pack_size, filename_command_line_opt_pack);
+      print_command_lines_file(true, TESTDIR, dmcspath, 1, pack_size, filename_command_line_opt_pack_sh);
     }
 }
 
@@ -1098,6 +1119,17 @@ main(int argc, char* argv[])
  
       DMCS_LOG_TRACE("print_command_lines");
       print_command_lines();
+
+      if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
+	  topology_type != RING_EDGE_TOPOLOGY && topology_type != BINARY_TREE_TOPOLOGY)
+	{
+	  generate_opt_topology();
+	  write_plans(true);
+	}
+      else
+	{
+	  write_plans(false);
+	}
     }
   else
     {
@@ -1105,16 +1137,8 @@ main(int argc, char* argv[])
       print_command_lines();
     }
 
-  /*
-  if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
-      topology_type != RING_EDGE_TOPOLOGY && topology_type != BINARY_TREE_TOPOLOGY)
-    {
-      generate_opt_topology();
-      write_plans();
-      //print_opt_command_lines();
-      //print_opt_dlv_command_lines();
-    }
 
+  /*
   //DMCS_LOG_TRACE("print_dlv_command_lines");
   //print_dlv_command_lines();
 

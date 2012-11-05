@@ -1,6 +1,7 @@
 #!/bin/bash
 
-DMCSGEN=../../../../../build/src/generator/new_dmcsGen
+DMCSPATH=../../../../../build/src
+DMCSGEN=$DMCSPATH/generator/new_dmcsGen
 PRINTLOG=yes
 
 ###############################################################################
@@ -40,10 +41,10 @@ createOneTest()
 
     cd $testname
 
-    RUNGEN="$DMCSGEN --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname"
+    RUNGEN="$DMCSGEN --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname --dmcspath=$DMCSPATH"
 
     if [ x$gdt = xyes ] ; then
-	RUNGEN="$DMCSGEN --gen-data=true --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname"
+	RUNGEN="$DMCSGEN --gen-data=true --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname --dmcspath=$DMCSPATH"
     fi
 
     echo "Calling $RUNGEN"
