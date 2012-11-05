@@ -4,8 +4,10 @@ DMCSGEN=../../../../build/src/generator/new_dmcsGen
 
 createOneTest()
 {
-    tname=$1
-    args=("${!2}")
+    gdt=$1
+    ps=$2
+    tname=$3
+    args=("${!4}")
 
     # args[0] = topo_id
     # args[1] = system_size
@@ -22,8 +24,12 @@ createOneTest()
 
     cd $testname
 
-    RUNGEN="$DMCSGEN --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --prefix=$tname"
-    pwd
+    RUNGEN="$DMCSGEN --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname"
+
+    if [ x$gdt = xyes ] ; then
+	RUNGEN="$DMCSGEN --gen-data=true --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname"
+    fi
+
     echo "Calling $RUNGEN"
     $RUNGEN
 
@@ -32,6 +38,32 @@ createOneTest()
 } # end createOneTest
 
 ###############################################################################
+
+# extract command line arguments:
+#
+# -d yes/no -p N
+#
+
+gendata=no
+packsize=0
+
+while [ $# -gt 0 ]
+do
+    case "$1" in
+	-h) echo >&2 "Usage: $0 [-d yes/no] [-p N]"
+	    exit 0;;
+	-d) gendata="$2"; shift;;
+	-p) packsize="$2"; shift;;
+	-*) echo >&2 "Usage: $0 [-d yes/no] [-p N]"
+	    exit 1;;
+	*) break;;
+    esac
+    shift
+
+    if [ x$packsize = x ] ; then
+	packsize=0
+    fi
+done
 
 python listTests.py
 
@@ -55,7 +87,7 @@ for topofile in `ls *.cfg` ; do
 	fi
 
 	cd $toponame
-	createOneTest $toponame list[@]
+	createOneTest $gendata $packsize $toponame list[@]
 	cd .. # get out of $toponame
     done
 done
