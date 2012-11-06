@@ -92,7 +92,7 @@ evaluate_bridge_rules(const BridgeRuleTablePtr& brtab,
 	}
     }
 
-  HeadsPlusBeliefState* heads = new HeadsPlusBeliefState(h, k1, k2, input);
+  HeadsPlusBeliefState* heads = new HeadsPlusBeliefState(input, h, k1, k2);
   return heads;
 }
 
