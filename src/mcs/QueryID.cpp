@@ -34,7 +34,6 @@ namespace dmcs {
 QueryID* QueryID::_instance = 0;
 
 
-
 void
 QueryID::setupMask(std::size_t& mask,
 		   std::size_t mask_beg, 
@@ -48,36 +47,38 @@ QueryID::setupMask(std::size_t& mask,
 }
 
 
-
 QueryID::QueryID()
 {
   // for a 64-bit integer:
   //  4 bits for query type
-  // 30 bits for query order
+  // 24 bits for query order
+  //  6 bits for joiner offset 
   // 10 bits for context id
   // 10 bits for neighbor offset
   // 10 bits for neighbor id
   // We don't expect more than 2^10 contexts
 
   std::size_t s = sizeof(std::size_t)*8;
-  std::size_t query_order_length = 30;
+  std::size_t query_order_length = 24;
+  std::size_t joiner_offset_length = 6;
 
   query_order_shift = 4;
-  while ((s - query_order_shift - query_order_length) % 3 != 0) query_order_shift++;
+  while ((s - query_order_shift - query_order_length - joiner_offset_length) % 3 != 0) query_order_shift++;
 
-  std::size_t one_third_left = (s - query_order_shift - query_order_length) / 3;
-
-  local_context_shift = query_order_shift + query_order_length;
+  std::size_t one_third_left = (s - query_order_shift - query_order_length - joiner_offset_length) / 3;
+  
+  joiner_offset_shift = query_order_shift + query_order_length;
+  local_context_shift = joiner_offset_shift + joiner_offset_length;
   neighbor_offset_shift = local_context_shift + one_third_left;
   neighbor_id_shift = neighbor_offset_shift + one_third_left;
 
   setupMask(query_type_mask, 0, query_order_shift);
-  setupMask(query_order_mask, query_order_shift, local_context_shift);
+  setupMask(query_order_mask, query_order_shift, joiner_offset_shift);
+  setupMask(joiner_offset_mask, joiner_offset_shift, local_context_shift);
   setupMask(local_context_mask, local_context_shift, neighbor_offset_shift);
   setupMask(neighbor_offset_mask, neighbor_offset_shift, neighbor_id_shift);
   setupMask(neighbor_id_mask, neighbor_id_shift, s);
 }
-
 
 
 QueryID* 
@@ -91,7 +92,6 @@ QueryID::instance()
 }
 
 
-
 std::size_t
 QueryID::QUERY_ORDER_SHIFT() const
 {
@@ -99,11 +99,17 @@ QueryID::QUERY_ORDER_SHIFT() const
 }
 
 
-
 std::size_t
 QueryID::LOCAL_CONTEXT_SHIFT() const
 {
   return local_context_shift;
+}
+
+
+std::size_t
+QueryID::JOINER_OFFSET_SHIFT() const
+{
+  return joiner_offset_shift;
 }
 
 
@@ -147,11 +153,17 @@ QueryID::LOCAL_CONTEXT_MASK() const
 
 
 std::size_t
+QueryID::JOINER_OFFSET_MASK() const
+{
+  return joiner_offset_mask;
+}
+
+
+std::size_t
 QueryID::NEIGHBOR_OFFSET_MASK() const
 {
   return neighbor_offset_mask;
 }
-
 
 
 std::size_t

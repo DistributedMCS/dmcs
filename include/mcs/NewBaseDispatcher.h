@@ -31,6 +31,7 @@
 #define NEW_BASE_DISPATCHER_H
 
 #include <map>
+#include "mcs/Logger.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 
 namespace dmcs {
@@ -44,6 +45,7 @@ public:
   void
   registerIdOffset(std::size_t id, std::size_t offset)
   {
+    DBGLOG(DBG, "NewBaseDispatcher::registerIdOffset: id = " << id << ", offset = " << offset);
     std::map<std::size_t, std::size_t>::iterator it = id2offset.find(id);
     if (it != id2offset.end())
       {
@@ -59,6 +61,7 @@ public:
   void
   unregisterIdOffset(std::size_t id, std::size_t offset)
   {
+    DBGLOG(DBG, "NewBaseDispatcher::unregisterIdOffset: id = " << id << ", offset = " << offset);
     std::map<std::size_t, std::size_t>::iterator it = id2offset.find(id);
     assert (it != id2offset.end());
     assert (it->second == offset);

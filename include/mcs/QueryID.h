@@ -33,7 +33,7 @@
 #include <iostream>
 #include <iomanip>
 
-#define detailprint(qid) "{ctx=" << ctxid_from_qid(qid) << ", invoker=" << invoker_from_qid(qid) << ", noff=" << neighbor_offset_from_qid(qid) << ", nid=" << neighbor_id_from_qid(qid) << ", qorder=" << qorder_from_qid(qid) << "}"
+#define detailprint(qid) "{ctx=" << ctxid_from_qid(qid) << ", invoker=" << invoker_from_qid(qid) << ", noff=" << neighbor_offset_from_qid(qid) << ", nid=" << neighbor_id_from_qid(qid) << ", joiner_off=" << joiner_offset_from_qid(qid) << ", qorder=" << qorder_from_qid(qid) << "}"
 
 namespace dmcs {
 
@@ -54,6 +54,9 @@ public:
   LOCAL_CONTEXT_SHIFT() const;
 
   std::size_t
+  JOINER_OFFSET_SHIFT() const;
+
+  std::size_t
   NEIGHBOR_OFFSET_SHIFT() const;
 
   std::size_t
@@ -67,6 +70,9 @@ public:
 
   std::size_t
   LOCAL_CONTEXT_MASK() const;
+
+  std::size_t
+  JOINER_OFFSET_MASK() const;
 
   std::size_t
   NEIGHBOR_OFFSET_MASK() const;
@@ -89,12 +95,14 @@ private:
 private:
   std::size_t query_order_shift;
   std::size_t local_context_shift;
+  std::size_t joiner_offset_shift;
   std::size_t neighbor_offset_shift;
   std::size_t neighbor_id_shift;
 
   std::size_t query_type_mask;
   std::size_t query_order_mask;
   std::size_t local_context_mask;
+  std::size_t joiner_offset_mask;
   std::size_t neighbor_offset_mask;
   std::size_t neighbor_id_mask;
 
@@ -136,6 +144,7 @@ query_id(const std::size_t ctx_id,
 inline std::size_t
 query_id(const std::size_t query_type,
 	 const std::size_t ctx_id, 
+	 const std::size_t joiner_offset,
 	 const std::size_t neighbor_id,
 	 const std::size_t neighbor_offset,
 	 const std::size_t query_order)
@@ -143,6 +152,7 @@ query_id(const std::size_t query_type,
   return (query_type
 	  | (query_order << QueryID::instance()->QUERY_ORDER_SHIFT()) 
 	  | (ctx_id << QueryID::instance()->LOCAL_CONTEXT_SHIFT()) 
+	  | (joiner_offset << QueryID::instance()->JOINER_OFFSET_SHIFT())
 	  | (neighbor_offset << QueryID::instance()->NEIGHBOR_OFFSET_SHIFT())
 	  | (neighbor_id << QueryID::instance()->NEIGHBOR_ID_SHIFT()));
 }
@@ -207,6 +217,12 @@ invoker_from_qid(std::size_t qid)
 }
 
 
+inline std::size_t
+joiner_offset_from_qid(std::size_t qid)
+{
+  return ((qid & QueryID::instance()->JOINER_OFFSET_MASK()) >> QueryID::instance()->JOINER_OFFSET_SHIFT());
+}
+
 
 inline std::size_t
 neighbor_offset_from_qid(std::size_t qid)
@@ -229,6 +245,21 @@ receiver_from_qid(std::size_t qid)
 {
   return neighbor_id_from_qid(qid);
 }
+
+
+inline void
+set_joiner_offset(std::size_t& qid, const std::size_t j_offset)
+{
+  qid |= (j_offset << QueryID::instance()->JOINER_OFFSET_SHIFT());
+}
+
+
+inline void
+unset_joiner_offset(std::size_t& qid)
+{
+  qid &= ~(QueryID::instance()->JOINER_OFFSET_MASK());
+}
+
 
 
 inline void

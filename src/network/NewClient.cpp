@@ -214,6 +214,10 @@ NewClient::handle_read_answer(const boost::system::error_code& e,
 	{
 	  std::size_t pack_size = mess->getPackSize();
 	  std::size_t next_k = 0;
+
+	  DBGLOG(DBG, "result_list.size() = " << result_list->size());
+	  DBGLOG(DBG, "pack_size = " << pack_size);
+
 	  if (pack_size > 0)
 	    {
 	      assert (result_list->size() <= pack_size);
@@ -231,6 +235,7 @@ NewClient::handle_read_answer(const boost::system::error_code& e,
 	    }
 	  else
 	    {
+	      DBGLOG(DBG, "NewClient::handle_read_answer(): next_k = " << next_k);
 	      std::size_t k_one = mess->k2 + 1;
 	      std::size_t k_two = mess->k2 + next_k;
 

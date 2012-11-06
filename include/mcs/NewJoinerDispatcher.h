@@ -33,6 +33,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 
+#include "mcs/Logger.h"
 #include "mcs/NewBaseDispatcher.h"
 #include "mcs/JoinIn.h"
 #include "mcs/QueryID.h"
@@ -63,11 +64,13 @@ public:
 	  {
 	    ReturnedBeliefState* rbs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::NEIGHBOR_IN_MQ, neighbor_offset, timeout);
 	    
-	    std::size_t old_qid = rbs->qid;
-	    set_neighbor_offset(rbs->qid, neighbor_offset);
-	    std::size_t offset = get_offset(old_qid);
+	    //	    std::size_t old_qid = rbs->qid;
+	    //set_neighbor_offset(rbs->qid, neighbor_offset);
+	    DBGLOG(DBG, "NewJoinerDispatcher: startup(): qid = " << rbs->qid << detailprint(rbs->qid));
+
+	    std::size_t joiner_offset = joiner_offset_from_qid(rbs->qid);
 	    
-	    md->send(NewConcurrentMessageDispatcher::JOIN_IN_MQ, offset, rbs, timeout);
+	    md->send(NewConcurrentMessageDispatcher::JOIN_IN_MQ, joiner_offset, rbs, timeout);
 	  }
 	boost::this_thread::interruption_point();
       }

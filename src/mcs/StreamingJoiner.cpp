@@ -81,12 +81,14 @@ StreamingJoiner::trigger_join(std::size_t query_id,
     {
       reset();
       ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);
+      DBGLOG(DBG, "Return NULL");
       return end_rbs;
     }
   else if (!joined_results.empty())
     {
       ReturnedBeliefState* rbs = joined_results.front();
       joined_results.pop_front();
+      DBGLOG(DBG, "Return " << *rbs);
       return rbs;
     }
   else
@@ -139,6 +141,12 @@ StreamingJoiner::first_join(std::size_t query_id,
   bool succeeded = do_join(query_id);
   next_neighbor = 0;
   asking_next = false;
+
+  DBGLOG(DBG, "Joined results");
+  for (ReturnedBeliefStateList::const_iterator it = joined_results.begin(); it != joined_results.end(); ++it)
+    {
+      DBGLOG(DBG, **it);
+    }
 
   if (succeeded)
     {
@@ -232,6 +240,7 @@ StreamingJoiner::ask_neighbor_and_receive(std::size_t neighbor_index,
 					  NewConcurrentMessageDispatcherPtr md,
 					  NewJoinerDispatcherPtr jd)
 {
+  DBGLOG(DBG, "StreamingJoiner::ask_neighbor_and_receive: forward_qid = " << forward_qid);
   ask_neighbor(neighbor_index, forward_qid, k1, k2, md, jd);
 
   int timeout = 0;
@@ -257,6 +266,7 @@ StreamingJoiner::ask_neighbor_and_receive(std::size_t neighbor_index,
       else
 	{
 	  // now unregister from JoinerDispatcher
+	  DBGLOG(DBG, "StreamingJoiner::ask_neighbor_and_receive: qid = " << qid << detailprint(qid) << ", joiner_offset = " << joiner_offset);
 	  jd->unregisterIdOffset(qid, joiner_offset);
 	  break;
 	}
@@ -449,14 +459,18 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
       std::size_t noff = neighbor_offset_from_qid(qid);
       std::size_t neighbor_index = (*offset2index)[noff];
 
+      DBGLOG(DBG, "StreamingJoiner::ask_first_packs: got something from noff = " << noff << ", nidex = " << neighbor_index);
+
       if (bs)
 	{
 	  std::size_t stripped_qid = qid;
 
+	  DBGLOG(DBG, "StreamingJoiner::ask_first_packs: bs = " << *bs);
 	  // neighbor id and offset are set by the neighbor and JoinerDispatcher, respectively.
 	  // We have to unset them to compare to the original forward qid
 	  unset_neighbor_id(stripped_qid);
 	  unset_neighbor_offset(stripped_qid);
+	  unset_joiner_offset(stripped_qid);
 	  assert (stripped_qid == forward_qid);
 
 	  NewBeliefStateVecPtr& bsv = input_belief_states[neighbor_index];
@@ -466,7 +480,7 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
       else // NULL rbs <--> end of pack from JOIN_IN 
 	{
 	  // unregister from JoinerDispatcher
-	  unset_neighbor_offset(qid);
+	  //unset_neighbor_offset(qid);
 	  DBGLOG(DBG, "StreamingJoiner::ask_first_packs: unregister qid=" << qid << " " << detailprint(qid) << ", joiner_offset=" << joiner_offset);
 	  jd->unregisterIdOffset(qid, joiner_offset);
 	  if (count_models_read[neighbor_index] == 0)
@@ -495,9 +509,12 @@ StreamingJoiner::ask_neighbor(std::size_t neighbor_index,
 {
   cleanup_input(neighbor_index);
   std::size_t neighbor_id = ((*neighbors)[neighbor_index])->neighbor_id;
+  std::size_t noff = ((*neighbors)[neighbor_index])->neighbor_offset;
 
   DBGLOG(DBG, "StreamingJoiner::ask_neighbor: before setting neigbhor: qid = " << qid << " " << detailprint(qid));
   set_neighbor_id(qid, neighbor_id);
+  set_neighbor_offset(qid, noff);
+  set_joiner_offset(qid, joiner_offset);
 
   DBGLOG(DBG, "StreamingJoiner::ask_neighbor: qid = " << qid << " " << detailprint(qid) << ", joiner_offset = " << joiner_offset);
   DBGLOG(DBG, "StreamingJoiner::ask_neighbor: jd = " << jd.get());
@@ -505,8 +522,6 @@ StreamingJoiner::ask_neighbor(std::size_t neighbor_index,
   jd->registerIdOffset(qid, joiner_offset);
 
   ForwardMessage* request = new ForwardMessage(qid, k1, k2);
-
-  std::size_t noff = ((*neighbors)[neighbor_index])->neighbor_offset;
 
   DBGLOG(DBG, "StreamingJoiner: sending to noff = " << noff << ". With mess = " << *request);
   int timeout = 0;
