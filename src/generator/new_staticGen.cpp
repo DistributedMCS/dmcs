@@ -327,6 +327,7 @@ add_cmdline_options()
   cmdline_options.insert(std::pair<std::string, std::string>("manager", str_manager));
   cmdline_options.insert(std::pair<std::string, std::string>("context", ""));
   cmdline_options.insert(std::pair<std::string, std::string>("port", ""));
+  cmdline_options.insert(std::pair<std::string, std::string>("packsize", ""));
   cmdline_options.insert(std::pair<std::string, std::string>("system-size", str_system_size));
   cmdline_options.insert(std::pair<std::string, std::string>("belief-state-size", str_bs_size));
   cmdline_options.insert(std::pair<std::string, std::string>("kb", prefix + ".lp"));
@@ -749,6 +750,7 @@ write_plans(bool write_opt_plans)
 void
 print_dmcsd_line(bool is_shellscript,
 		 std::size_t i,
+		 std::size_t ps,
 		 const std::string& testpath,
 		 const std::string& path,
 		 std::ofstream& file,
@@ -761,9 +763,10 @@ print_dmcsd_line(bool is_shellscript,
 
   for (OptionValueMap::const_iterator it = cmdline_options.begin(); it != cmdline_options.end(); ++it)
     {
-      out.str("");
       const std::string& option = it->first;
       std::string value = it->second;
+
+      out.str("");
 
       if (value == "")
 	// need some number
@@ -771,6 +774,11 @@ print_dmcsd_line(bool is_shellscript,
 	  if (option == "context")
 	    {
 	      out << i;
+	      final_value = out.str();
+	    }
+	  else if (option == "packsize")
+	    {
+	      out << ps;
 	      final_value = out.str();
 	    }
 	  else // option == "port"
@@ -857,7 +865,7 @@ print_command_lines_file(bool is_shellscript,
 
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
-      print_dmcsd_line(is_shellscript, i, testpath, path, file, want_log);
+      print_dmcsd_line(is_shellscript, i, k2, testpath, path, file, want_log);
     }
 
   if (is_shellscript)

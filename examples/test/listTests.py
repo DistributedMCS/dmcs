@@ -21,7 +21,7 @@ def main(argv):
                       [4]  # ring
                       ]
 
-    no_atoms       = [10 ]
+    no_atoms       = [9 ]
     no_interface   = [ 5 ]
     no_bridgerules = [ 5 ]
     instances      = [ 'a', 'b' ]
