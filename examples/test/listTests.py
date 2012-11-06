@@ -7,16 +7,24 @@ import string
 def main(argv):
     toponames      = ['diamond', 'tree', 'zigzag', 'ring']
     topo_ids       = [ 1, 6, 3, 4 ]
-    system_sizes   = [[4, 40],  # diamond
-                      [4, 100], # tree
-                      [4, 40],  # zigzag
-                      [4, 100]  # ring
+    system_sizes   = [[4],  # diamond
+                      [4], # tree
+                      [4],  # zigzag
+                      [4]  # ring
                      ]
+
+    toponames      = ['diamond']
+    topo_ids       = [ 1, 6, 3, 4 ]
+    system_sizes   = [[4],  # diamond
+                      [4], # tree
+                      [4],  # zigzag
+                      [4]  # ring
+                      ]
 
     no_atoms       = [10 ]
     no_interface   = [ 5 ]
     no_bridgerules = [ 5 ]
-    instances      = [ 'a' ]
+    instances      = [ 'a', 'b' ]
     #instances      = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j' ]
 
     for i in range(0,len(toponames)):

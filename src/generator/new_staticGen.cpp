@@ -890,12 +890,12 @@ print_command_lines_file(bool is_shellscript,
 void
 print_command_lines()
 {
-  std::string filename_command_line_all            = prefix + "_command_line_all.txt";
-  std::string filename_command_line_all_sh         = prefix + "_command_line_all.sh";
-  std::string filename_command_line_all_log_sh     = prefix + "_command_line_all_log.sh";
-  std::string filename_command_line_opt_all        = prefix + "_command_line_opt_all.txt";
-  std::string filename_command_line_opt_all_sh     = prefix + "_command_line_opt_all.sh";
-  std::string filename_command_line_opt_all_log_sh = prefix + "_command_line_opt_all_log.sh";
+  std::string filename_command_line_all            = prefix + "-command-line-all.txt";
+  std::string filename_command_line_all_sh         = prefix + "-command-line-all.sh";
+  std::string filename_command_line_all_log_sh     = prefix + "-command-line-all-log.sh";
+  std::string filename_command_line_opt_all        = prefix + "-command-line-opt-all.txt";
+  std::string filename_command_line_opt_all_sh     = prefix + "-command-line-opt-all.sh";
+  std::string filename_command_line_opt_all_log_sh = prefix + "-command-line-opt-all-log.sh";
 
   print_command_lines_file(false, TESTDIR, dmcspath, 0, 0, filename_command_line_all);
   print_command_lines_file(true, TESTDIR, dmcspath, 0, 0, filename_command_line_all_sh);
@@ -906,9 +906,9 @@ print_command_lines()
       std::stringstream out;
       out << pack_size;
 
-      std::string filename_command_line_pack        = prefix + "_command_line_" + out.str() + ".txt";
-      std::string filename_command_line_pack_sh     = prefix + "_command_line_" + out.str() + ".sh";
-      std::string filename_command_line_pack_log_sh = prefix + "_command_line_log_" + out.str() + ".sh";
+      std::string filename_command_line_pack        = prefix + "-command-line-" + out.str() + ".txt";
+      std::string filename_command_line_pack_sh     = prefix + "-command-line-" + out.str() + ".sh";
+      std::string filename_command_line_pack_log_sh = prefix + "-command-line-" + out.str() + "-log.sh";
       print_command_lines_file(false, TESTDIR, dmcspath, 1, pack_size, filename_command_line_pack);
       print_command_lines_file(true, TESTDIR, dmcspath, 1, pack_size, filename_command_line_pack_sh);
       print_command_lines_file(true, TESTDIR, dmcspath, 1, pack_size, filename_command_line_pack_log_sh, true);
@@ -926,9 +926,9 @@ print_command_lines()
     {
       std::stringstream out;
       out << pack_size;
-      std::string filename_command_line_opt_pack        = prefix + "_command_line_opt_" + out.str() + ".txt";
-      std::string filename_command_line_opt_pack_sh     = prefix + "_command_line_opt_" + out.str() + ".sh";
-      std::string filename_command_line_opt_pack_log_sh = prefix + "_command_line_opt_log_" + out.str() + ".sh";
+      std::string filename_command_line_opt_pack        = prefix + "-command-line-opt-" + out.str() + ".txt";
+      std::string filename_command_line_opt_pack_sh     = prefix + "-command-line-opt-" + out.str() + ".sh";
+      std::string filename_command_line_opt_pack_log_sh = prefix + "-command-line-opt-" + out.str() + "-log.sh";
 
       print_command_lines_file(false, TESTDIR, dmcspath, 1, pack_size, filename_command_line_opt_pack);
       print_command_lines_file(true, TESTDIR, dmcspath, 1, pack_size, filename_command_line_opt_pack_sh);
