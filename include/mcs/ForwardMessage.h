@@ -30,12 +30,16 @@
 #ifndef FORWARD_MESSAGE_H
 #define FORWARD_MESSAGE_H
 
+#include <set>
 #include <boost/shared_ptr.hpp>
+#include <boost/serialization/set.hpp>
 
 #include "mcs/Printhelpers.h"
 #include "mcs/NewMessage.h"
 
 namespace dmcs {
+
+typedef std::set<std::size_t> NewHistory;
 
 struct ForwardMessage : 
     public NewMessage,
@@ -49,6 +53,7 @@ struct ForwardMessage :
   ForwardMessage(const ForwardMessage& fMess);
 
   ForwardMessage(std::size_t qid,
+		 const NewHistory& history,
 		 std::size_t k_one = 0,
 		 std::size_t k_two = 0);
 
@@ -66,6 +71,7 @@ struct ForwardMessage :
     ar & qid;
     ar & k1;
     ar & k2;
+    ar & history;
   }
 
   std::ostream&
@@ -74,6 +80,7 @@ struct ForwardMessage :
   std::size_t qid;
   std::size_t k1;         // The invoker wants models from k1 to k2
   std::size_t k2;
+  NewHistory history;
 };
 
 typedef boost::shared_ptr<ForwardMessage> ForwardMessagePtr;

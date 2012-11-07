@@ -74,6 +74,7 @@ StreamingJoiner::reset()
 
 ReturnedBeliefState*
 StreamingJoiner::trigger_join(std::size_t query_id, 
+			      const NewHistory& history,
 			      NewConcurrentMessageDispatcherPtr md,
 			      NewJoinerDispatcherPtr jd)
 {
@@ -93,7 +94,7 @@ StreamingJoiner::trigger_join(std::size_t query_id,
     }
   else
     {
-      return process(query_id, md, jd);
+      return process(query_id, history, md, jd);
     }
 }
 
@@ -101,16 +102,17 @@ StreamingJoiner::trigger_join(std::size_t query_id,
 
 ReturnedBeliefState*
 StreamingJoiner::process(std::size_t query_id, 
+			 const NewHistory& history,
 			 NewConcurrentMessageDispatcherPtr md,
 			 NewJoinerDispatcherPtr jd)
 {
   if (first_round)
     {
-      return first_join(query_id, md, jd);
+      return first_join(query_id, history, md, jd);
     }
   else if (pack_size > 0)
     {
-      return next_join(query_id, md, jd);
+      return next_join(query_id, history, md, jd);
     }
   else
     {
@@ -124,13 +126,14 @@ StreamingJoiner::process(std::size_t query_id,
 
 ReturnedBeliefState*
 StreamingJoiner::first_join(std::size_t query_id, 
+			    const NewHistory& history,
 			    NewConcurrentMessageDispatcherPtr md,
 			    NewJoinerDispatcherPtr jd)
 {
   // Warming up round, set first_round to FALSE
   first_round = false;
 
-  if (!ask_first_packs(query_id, 0, neighbors->size()-1, md, jd))
+  if (!ask_first_packs(query_id, history, 0, neighbors->size()-1, md, jd))
     {
       // A neighbor is inconsistent. Reset and return NULL 
       reset();
@@ -157,7 +160,7 @@ StreamingJoiner::first_join(std::size_t query_id,
 
   if (pack_size > 0)
     {
-      succeeded = next_join(query_id, md, jd);
+      succeeded = next_join(query_id, history, md, jd);
       if (succeeded)
 	{
 	  ReturnedBeliefState* rbs = joined_results.front();
@@ -174,6 +177,7 @@ StreamingJoiner::first_join(std::size_t query_id,
 
 ReturnedBeliefState*
 StreamingJoiner::next_join(std::size_t query_id, 
+			   const NewHistory& history,
 			   NewConcurrentMessageDispatcherPtr md,
 			   NewJoinerDispatcherPtr jd)
 {
@@ -195,14 +199,14 @@ StreamingJoiner::next_join(std::size_t query_id,
       std::size_t k_two = (pc+1) * pack_size;
       
       // Ask next at neighbor_offset
-      if (ask_neighbor_and_receive(next_neighbor, query_id, k_one, k_two, md, jd))
+      if (ask_neighbor_and_receive(next_neighbor, query_id, history, k_one, k_two, md, jd))
 	{
 	  if (asking_next)
 	    {
 	      assert (next_neighbor > 0);
 	            
 	      // Ask first packs before neighbor_offset
-	      bool ret = ask_first_packs(query_id, 0, next_neighbor - 1, md, jd);
+	      bool ret = ask_first_packs(query_id, history, 0, next_neighbor - 1, md, jd);
 	            
 	      assert (ret == true);
 	            
@@ -235,13 +239,14 @@ StreamingJoiner::next_join(std::size_t query_id,
 bool
 StreamingJoiner::ask_neighbor_and_receive(std::size_t neighbor_index,
 					  std::size_t forward_qid,
+					  const NewHistory& history,
 					  std::size_t k1,
 					  std::size_t k2,		  
 					  NewConcurrentMessageDispatcherPtr md,
 					  NewJoinerDispatcherPtr jd)
 {
   DBGLOG(DBG, "StreamingJoiner::ask_neighbor_and_receive: forward_qid = " << forward_qid);
-  ask_neighbor(neighbor_index, forward_qid, k1, k2, md, jd);
+  ask_neighbor(neighbor_index, forward_qid, history, k1, k2, md, jd);
 
   int timeout = 0;
   std::size_t count_models_read = 0;
@@ -411,6 +416,7 @@ StreamingJoiner::join(std::size_t query_id,
 
 bool
 StreamingJoiner::ask_first_packs(std::size_t forward_qid, 
+				 const NewHistory& history,
 				 std::size_t from_neighbor, 
 				 std::size_t to_neighbor,
 				 NewConcurrentMessageDispatcherPtr md,
@@ -432,7 +438,7 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
 	}
 
       // in this method, we register to joiner_dispatcher
-      ask_neighbor(i, forward_qid, k1, k2, md, jd);
+      ask_neighbor(i, forward_qid, history, k1, k2, md, jd);
     }
 
   // now wait for the models from neighbors (might be returned in a mess)
@@ -502,6 +508,7 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
 void
 StreamingJoiner::ask_neighbor(std::size_t neighbor_index, 
 			      std::size_t qid, 
+			      const NewHistory& history,
 			      std::size_t k1, 
 			      std::size_t k2,
 			      NewConcurrentMessageDispatcherPtr md,
@@ -521,7 +528,7 @@ StreamingJoiner::ask_neighbor(std::size_t neighbor_index,
   DBGLOG(DBG, "StreamingJoiner::ask_first_packs: register qid=" << qid << " " << detailprint(qid) << ", joiner_offset=" << joiner_offset);
   jd->registerIdOffset(qid, joiner_offset);
 
-  ForwardMessage* request = new ForwardMessage(qid, k1, k2);
+  ForwardMessage* request = new ForwardMessage(qid, history, k1, k2);
 
   DBGLOG(DBG, "StreamingJoiner: sending to noff = " << noff << ". With mess = " << *request);
   int timeout = 0;

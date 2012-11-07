@@ -129,7 +129,7 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
 	  DBGLOG(DBG, "DLVEvaluator::reset_process(). id = " << id);
 	  const Belief& belief = btab->getByID(id);
 
-	  if (heads->mode == Heads::NORMAL_SOLVE)
+	  if (heads->getMode() == Heads::NORMAL_SOLVE)
 	    {
 	      DBGLOG(DBG, "DLVEvaluator::reset_process(): Add " << belief.text << " into program stream.");
 	      programStream << belief.text << ".\n";

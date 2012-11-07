@@ -48,7 +48,8 @@ public:
 		  NewNeighborVecPtr n);
 
   ReturnedBeliefState*
-  trigger_join(std::size_t query_id, 
+  trigger_join(std::size_t query_id,
+	       const NewHistory& history,
 	       NewConcurrentMessageDispatcherPtr md,
 	       NewJoinerDispatcherPtr jd);
 
@@ -58,16 +59,19 @@ private:
 
   ReturnedBeliefState*
   process(std::size_t query_id, 
+	  const NewHistory& history,
 	  NewConcurrentMessageDispatcherPtr md,
 	  NewJoinerDispatcherPtr jd);
 
   ReturnedBeliefState*
   first_join(std::size_t query_id, 
+	     const NewHistory& history,
 	     NewConcurrentMessageDispatcherPtr md,
 	     NewJoinerDispatcherPtr jd);
 
   ReturnedBeliefState*
   next_join(std::size_t query_id, 
+	    const NewHistory& history,
 	    NewConcurrentMessageDispatcherPtr md,
 	    NewJoinerDispatcherPtr jd);
 
@@ -87,6 +91,7 @@ private:
 
   bool
   ask_first_packs(std::size_t query_id, 
+		  const NewHistory& history,
 		  std::size_t from_neighbor, 
 		  std::size_t to_neighbor,
 		  NewConcurrentMessageDispatcherPtr md,
@@ -95,6 +100,7 @@ private:
   void
   ask_neighbor(std::size_t neighbor_index, 
 	       std::size_t query_id, 
+	       const NewHistory& history,
 	       std::size_t k1, 
 	       std::size_t k2,
 	       NewConcurrentMessageDispatcherPtr md,
@@ -103,6 +109,7 @@ private:
   bool
   ask_neighbor_and_receive(std::size_t noff,
 			   std::size_t query_id,
+			   const NewHistory& history,
 			   std::size_t k1,
 			   std::size_t k2,
 			   NewConcurrentMessageDispatcherPtr md,

@@ -48,6 +48,11 @@ evaluate_bridge_rules(const BridgeRuleTablePtr& brtab,
 		      std::size_t k2,
 		      const std::vector<std::size_t>& starting_offset);
 
+Heads*
+collect_bridge_heads(const BridgeRuleTablePtr& brtab,
+		     std::size_t k1,
+		     std::size_t k2);
+
 } // namespace dmcs
 
 #endif // BRIDGE_RULE_EVALUATOR_H

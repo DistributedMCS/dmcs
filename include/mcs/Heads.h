@@ -126,6 +126,11 @@ public:
       }
   }
 
+  HeadMode getMode()
+  {
+    return mode;
+  }
+
 protected:
   NewBeliefState* heads;
   std::size_t k1;

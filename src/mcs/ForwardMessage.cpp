@@ -45,15 +45,18 @@ ForwardMessage::ForwardMessage(const ForwardMessage& fMess)
   qid = fMess.qid;
   k1 = fMess.k1;
   k2 = fMess.k2;
+  history = fMess.history;
 }
 
 
 ForwardMessage::ForwardMessage(std::size_t q,
+			       const NewHistory& history,
 			       std::size_t k_one,
 			       std::size_t k_two)
   : qid(q), 
     k1(k_one),
-    k2(k_two)
+    k2(k_two),
+    history(history)
 { }
 
 
@@ -83,7 +86,9 @@ ForwardMessage::setPackRequest(const std::size_t k_one,
 std::ostream&
 ForwardMessage::print(std::ostream& os) const
 {
-  os << "{" << qid << "}" << "[" << k1 << "," << k2 << "]";
+  os << "{" << qid << "}" << "[" << k1 << "," << k2 << "] {";
+  std::copy(history.begin(), history.end(), std::ostream_iterator<std::size_t>(os, " "));
+  os << "}";
   return os;
 }
 

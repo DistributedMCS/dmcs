@@ -96,6 +96,29 @@ evaluate_bridge_rules(const BridgeRuleTablePtr& brtab,
   return heads;
 }
 
+
+Heads*
+collect_bridge_heads(const BridgeRuleTablePtr& brtab,
+		     std::size_t k1,
+		     std::size_t k2)
+{
+  NewBeliefState* h = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+					 BeliefStateOffset::instance()->SIZE_BS());
+  
+  std::pair<BridgeRuleTable::AddressIterator, BridgeRuleTable::AddressIterator> iters = brtab->getAllByAddress();
+
+  for (BridgeRuleTable::AddressIterator it = iters.first; it != iters.second; ++it)
+    {
+      const BridgeRule& r = *it;
+      std::size_t ctx_id = r.head.contextID();
+      IDAddress address = r.head.address;
+      h->set(ctx_id, address, BeliefStateOffset::instance()->getStartingOffsets());
+    }
+  
+  Heads* heads = new Heads(h, k1, k2, Heads::CYCLE_BREAK);
+  return heads;
+}
+
 } // namespace dmcs
 
 // Local Variables:

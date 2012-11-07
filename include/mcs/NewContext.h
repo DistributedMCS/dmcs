@@ -85,19 +85,38 @@ private:
 
   void
   intermediate_process_request(std::size_t parent_qid,
+			       const NewHistory& history,
 			       EvaluatorPtr eval,
 			       NewConcurrentMessageDispatcherPtr md,
 			       NewJoinerDispatcherPtr jd,
 			       std::size_t k1,
 			       std::size_t k2);
 
+  void
+  break_cycle(std::size_t parent_qid,
+	      EvaluatorPtr eval,
+	      NewConcurrentMessageDispatcherPtr md,
+	      NewJoinerDispatcherPtr jd,
+	      std::size_t k1,
+	      std::size_t k2);
+
   std::size_t
   read_and_send(std::size_t parent_qid,
+		bool normal_solve,
 		EvaluatorPtr eval,
 		NewConcurrentMessageDispatcherPtr md);
 
+  bool
+  read_and_send_k1_k2(std::size_t parent_qid,
+		      bool normal_solve,
+		      std::size_t k1,
+		      std::size_t k2,
+		      EvaluatorPtr eval,
+		      NewConcurrentMessageDispatcherPtr md);
+
   void
   send_out_result(std::size_t parent_qid,
+		  bool normal_solve,
 		  Heads* heads,
 		  NewBeliefState* belief_state,
 		  NewConcurrentMessageDispatcherPtr md);

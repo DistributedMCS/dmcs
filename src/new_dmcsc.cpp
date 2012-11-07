@@ -260,8 +260,10 @@ main(int argc, char* argv[])
       std::size_t query_order = 1;
       std::size_t qid = query_id(invoker, root_ctx, query_order);
       std::size_t end_qid = shutdown_query_id(invoker, root_ctx);
-      ForwardMessage request(qid, k1, k2);
-      ForwardMessage end_message(end_qid);
+      NewHistory history;
+      history.insert(INVOKER_ID);
+      ForwardMessage request(qid, history, k1, k2);
+      ForwardMessage end_message(end_qid, history);
 
       NewClient client(*io_service, it, header, request);
       client.setCallback(&handle_belief_states);
