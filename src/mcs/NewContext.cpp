@@ -37,14 +37,14 @@ namespace dmcs {
 // for leaf contexts
 NewContext::NewContext(std::size_t cid,
 		       InstantiatorPtr i,
-		       BeliefTablePtr ex_sig,
+		       BeliefTablePtr lsig,
 		       ReturnPlanMapPtr return_plan)
   : is_leaf(true),
     ctx_id(cid),
     query_counter(0),
     inst(i),
     bridge_rules(BridgeRuleTablePtr()),
-    export_signature(ex_sig),
+    local_signature(lsig),
     return_plan(return_plan),
     neighbors(NewNeighborVecPtr()),
     joiner(StreamingJoinerPtr())
@@ -56,7 +56,7 @@ NewContext::NewContext(std::size_t cid,
 NewContext::NewContext(std::size_t cid,
 		       std::size_t pack_size,
 		       InstantiatorPtr i,
-		       BeliefTablePtr ex_sig,
+		       BeliefTablePtr lsig,
 		       ReturnPlanMapPtr return_plan,
 		       BridgeRuleTablePtr br,
 		       NewNeighborVecPtr nbs)
@@ -65,7 +65,7 @@ NewContext::NewContext(std::size_t cid,
     query_counter(0),
     inst(i),
     bridge_rules(br),
-    export_signature(ex_sig),
+    local_signature(lsig),
     return_plan(return_plan),
     neighbors(nbs),
     joiner(new StreamingJoiner(pack_size, nbs))
@@ -94,7 +94,7 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
 		    RequestDispatcherPtr rd,
 		    NewJoinerDispatcherPtr jd)
 {
-  // Register REQUEST_MQ to md
+  // Register REQUESTMQ to md
   ctx_offset = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::REQUEST_MQ);
   rd->registerIdOffset(ctx_id, ctx_offset);
 
@@ -107,7 +107,7 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
   // Start evaluator thread
   InstantiatorWPtr inst_wptr(inst);
   EvaluatorPtr eval = inst->createEvaluator(inst_wptr);
-  inst->startThread(eval, ctx_id, export_signature, md);
+  inst->startThread(eval, ctx_id, local_signature, md);
 
   int timeout = 0;
   while (1)
@@ -146,11 +146,11 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
 	      history.insert(ctx_id);
 	      intermediate_process_request(parent_qid, history, eval, md, jd, k1, k2);
 	    }
-	  else
+	  //	  else
 	    // cycle detected
-	    {
-	      break_cycle(parent_qid, eval, md, jd, k1, k2);
-	    }
+	  //  {
+	  //    break_cycle(parent_qid, eval, md, jd, k1, k2);
+	  //  }
 	}
 
       // Send the marker for the end of models
@@ -223,6 +223,7 @@ NewContext::intermediate_process_request(std::size_t parent_qid,
 }
 
 
+#if 0
 void
 NewContext::break_cycle(std::size_t parent_qid,
 			EvaluatorPtr eval,
@@ -240,6 +241,7 @@ NewContext::break_cycle(std::size_t parent_qid,
 
   read_and_send_k1_k2(parent_qid, false, k1, k2, eval, md);
 }
+#endif
 
 
 bool
@@ -284,6 +286,7 @@ NewContext::read_and_send_k1_k2(std::size_t parent_qid,
 
   return false;
 }  
+
   
 // Read from EVAL_OUT_MQ[index] until getting (heads, NULL).
 // Return the number of models received.

@@ -82,7 +82,7 @@ DLVInstantiator::createEvaluator(const InstantiatorWPtr& inst)
 void
 DLVInstantiator::startThread(EvaluatorPtr eval,
 			     std::size_t ctx_id,
-			     BeliefTablePtr ex_sig,
+			     BeliefTablePtr lsig,
 			     NewConcurrentMessageDispatcherPtr md)
 {
   //DLVEvaluatorPtr dlv_eval = boost::static_pointer_cast<DLVEvaluator>(eval);
@@ -90,7 +90,7 @@ DLVInstantiator::startThread(EvaluatorPtr eval,
 
   EvaluatorWrapper eval_wrapper;
   boost::thread*& t = getThread(eval);
-  t = new boost::thread(eval_wrapper, eval, ctx_id, ex_sig, md);
+  t = new boost::thread(eval_wrapper, eval, ctx_id, lsig, md);
 }
 
 

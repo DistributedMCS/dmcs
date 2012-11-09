@@ -48,12 +48,12 @@ public:
   // For now, we initialize the context only at the beginning.
   // Later, the idea is to have the query plan included in the request to a context.
   // Upon receiving a request, the context goes to the specified query plan and 
-  // reads off information regarding bridge rules, neighbors, export signature,...
+  // reads off information regarding bridge rules, neighbors, local signature,...
   // This is the dynamic setting for future work.
   NewContext(std::size_t cid,
 	     std::size_t pack_size,
 	     InstantiatorPtr i,
-	     BeliefTablePtr ex_sig,
+	     BeliefTablePtr lsig,
 	     ReturnPlanMapPtr return_plan,
 	     BridgeRuleTablePtr br,
 	     NewNeighborVecPtr nbs);
@@ -61,7 +61,7 @@ public:
   // Constructor for leaf contexts
   NewContext(std::size_t cid,
 	     InstantiatorPtr i,
-	     BeliefTablePtr ex_sig,
+	     BeliefTablePtr lsig,
 	     ReturnPlanMapPtr return_plan);
 
   void
@@ -92,6 +92,7 @@ private:
 			       std::size_t k1,
 			       std::size_t k2);
 
+#if 0
   void
   break_cycle(std::size_t parent_qid,
 	      EvaluatorPtr eval,
@@ -99,6 +100,7 @@ private:
 	      NewJoinerDispatcherPtr jd,
 	      std::size_t k1,
 	      std::size_t k2);
+#endif
 
   std::size_t
   read_and_send(std::size_t parent_qid,
@@ -134,10 +136,12 @@ private:
   // This is done at while reading the query plan.
   BridgeRuleTablePtr bridge_rules;
 
-  // This just contains the beliefs that are exported to the parents.
-  // Other local beliefs should be hidden inside the Evaluator and treated
-  // as text. 
-  BeliefTablePtr export_signature;
+  // For the moment, export_signature cannot stay here, 
+  // since the Evaluator needs the whole local signature to
+  // evaluate the bridge rules. 
+  // Note that the context passes the signature to inst and ints
+  // passes the signature to the evaluation thread.
+  BeliefTablePtr local_signature;
 
   // For now, neighbors' signatures are not needed
   // as we assume that they are provided once by the query plan.
