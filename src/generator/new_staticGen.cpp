@@ -642,6 +642,32 @@ write_return_signature_to_file(std::ofstream& file,
 
 
 void
+write_query_plan(std::size_t ctx_id, const std::string filename, LocalInterfaceMapPtr interface)
+{
+  std::string local_signature = "LocalSignature";
+  std::string input_signature = "InputSignature";
+
+  std::ofstream file_qp;
+  file_qp.open(filename.c_str());
+  file_qp << "[\n";
+  write_belief_table_to_file((*sigma_vec)[ctx_id], file_qp, local_signature, ctx_id);
+  
+  for (LocalInterfaceMap::const_iterator it = interface->begin(); it != interface->end(); ++it)
+    {
+      ContextPair cp = it->first;
+      if (cp.first == ctx_id)
+	{
+	  BeliefTablePtr insig = input_signature_from_belief_state(cp.second, it->second);
+	  write_belief_table_to_file(insig, file_qp, input_signature, cp.second);
+	}
+    }
+  
+  file_qp << "]\n";
+  file_qp.close();  
+}
+
+
+void
 write_plans(bool write_opt_plans)
 {
   std::string local_signature = "LocalSignature";
@@ -662,31 +688,21 @@ write_plans(bool write_opt_plans)
   file_client_qp.close();
 
   // context specific query plans #############################################################################
-
   for (std::size_t i = 0; i < no_contexts; ++i)
     {
       std::stringstream str_i;
       str_i << i;
 
-      // query plans ##########################################################################################
+      // query plans 
       std::string filename_qp = prefix + "-" + str_i.str() + ".qp";
-      std::ofstream file_qp;
-      file_qp.open(filename_qp.c_str());
-      file_qp << "[\n";
-      write_belief_table_to_file((*sigma_vec)[i], file_qp, local_signature, i);
+      write_query_plan(i, filename_qp, lcim);
 
-      for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
+      // opt query plans 
+      if (write_opt_plans)
 	{
-	  ContextPair cp = it->first;
-	  if (cp.first == i)
-	    {
-	      BeliefTablePtr insig = input_signature_from_belief_state(cp.second, it->second);
-	      write_belief_table_to_file(insig, file_qp, input_signature, cp.second);
-	    }
+	  std::string filename_opt_qp = prefix + "-" + str_i.str() + ".oqp";
+	  write_query_plan(i, filename_opt_qp, opt_lcim);
 	}
-
-      file_qp << "]\n";
-      file_qp.close();
 
       // return plans #########################################################################################
       std::string filename_rp = prefix + "-" + str_i.str() + ".rp";
