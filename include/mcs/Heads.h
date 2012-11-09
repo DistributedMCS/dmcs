@@ -37,20 +37,12 @@ namespace dmcs {
 class Heads
 {
 public:
-  enum HeadMode
-    {
-      NORMAL_SOLVE = 0,
-      CYCLE_BREAK
-    };
-
   Heads(NewBeliefState* h,
 	std::size_t k_one,
-	std::size_t k_two,
-	HeadMode mode = NORMAL_SOLVE)
+	std::size_t k_two)
     : heads(h),
       k1(k_one),
-      k2(k_two),
-      mode(mode)
+      k2(k_two)
   { }
 
   NewBeliefState*
@@ -126,16 +118,10 @@ public:
       }
   }
 
-  HeadMode getMode()
-  {
-    return mode;
-  }
-
 protected:
   NewBeliefState* heads;
   std::size_t k1;
   std::size_t k2;
-  HeadMode mode;
 };
 
 
@@ -145,9 +131,8 @@ public:
   HeadsPlusBeliefState(const NewBeliefState* i,
 		       NewBeliefState* h, 
 		       std::size_t k1,
-		       std::size_t k2,
-		       HeadMode m = Heads::NORMAL_SOLVE)
-    : Heads(h, k1, k2, m), input(i)
+		       std::size_t k2)
+    : Heads(h, k1, k2), input(i)
   { }
 
   const NewBeliefState*

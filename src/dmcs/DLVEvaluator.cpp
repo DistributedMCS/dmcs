@@ -129,18 +129,9 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
 	  DBGLOG(DBG, "DLVEvaluator::reset_process(). id = " << id);
 	  const Belief& belief = btab->getByID(id);
 
-	  if (heads->getMode() == Heads::NORMAL_SOLVE)
-	    {
-	      DBGLOG(DBG, "DLVEvaluator::reset_process(): Add " << belief.text << " into program stream.");
-	      programStream << belief.text << ".\n";
-	    }
-	  else 
-	    // heads->mode == Heads::CYCLE_BREAK
-	    // In this case, we require the evaluator to guess on bridge rules' heads
-	    {
-	      DBGLOG(DBG, "DLVEvaluator::reset_process(): Add " << belief.text << " v -" << belief.text << " into program stream.");
-	      programStream << belief.text << " v -" << belief.text << ".\n";
-	    }
+	  DBGLOG(DBG, "DLVEvaluator::reset_process(): Add " << belief.text << " into program stream.");
+	  programStream << belief.text << ".\n";
+
 	  pos = head_input->getNext(pos);
 	}
     }
