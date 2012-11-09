@@ -34,25 +34,6 @@
 
 namespace dmcs {
 
-// for leaf contexts
-NewContext::NewContext(std::size_t cid,
-		       InstantiatorPtr i,
-		       BeliefTablePtr lsig,
-		       ReturnPlanMapPtr return_plan)
-  : is_leaf(true),
-    ctx_id(cid),
-    query_counter(0),
-    inst(i),
-    bridge_rules(BridgeRuleTablePtr()),
-    local_signature(lsig),
-    return_plan(return_plan),
-    neighbors(NewNeighborVecPtr()),
-    joiner(StreamingJoinerPtr())
-{ }
-
-
-
-// for intermediate contexts
 NewContext::NewContext(std::size_t cid,
 		       std::size_t pack_size,
 		       InstantiatorPtr i,
@@ -67,9 +48,13 @@ NewContext::NewContext(std::size_t cid,
     bridge_rules(br),
     local_signature(lsig),
     return_plan(return_plan),
-    neighbors(nbs),
-    joiner(new StreamingJoiner(pack_size, nbs))
-{ }
+    neighbors(nbs)
+{
+  if (nbs->size() == 0)
+    joiner = StreamingJoinerPtr();
+  else
+    joiner = StreamingJoinerPtr(new StreamingJoiner(pack_size, nbs));
+}
 
 
 
@@ -130,6 +115,13 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
       // Bad requests are not allowed
       assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
 
+      // cycle detecting is handled at RequestDispatcher. 
+      // If it is detected, then a thread for cycle breaking will be created to deal with the situation.
+      // We don't have to care about breaking the cycles here.
+
+      process_request(parent_qid, history, eval, md, jd, k1, k2);
+
+#if 0
       if (is_leaf)
 	{
 	  assert ( jd == NewJoinerDispatcherPtr() );
@@ -152,6 +144,7 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
 	  //    break_cycle(parent_qid, eval, md, jd, k1, k2);
 	  //  }
 	}
+#endif
 
       // Send the marker for the end of models
       ReturnedBeliefState* rbs = new ReturnedBeliefState(NULL, parent_qid);
@@ -162,6 +155,88 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
   Heads* end_heads = NULL;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), end_heads, timeout);
   inst->stopThread(eval);
+}
+
+
+void
+NewContext::process_request(std::size_t parent_qid,
+			    const NewHistory& history,
+			    EvaluatorPtr eval,
+			    NewConcurrentMessageDispatcherPtr md,
+			    NewJoinerDispatcherPtr jd,
+			    std::size_t k1,
+			    std::size_t k2)
+{
+  assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
+  NewBeliefState* input;
+
+  while (1)
+    {
+      // prepare the fixed part of the input
+      if (!is_leaf)
+	{
+	  std::size_t this_qid = query_id(ctx_id, ++query_counter);
+	  DBGLOG(DBG, "NewContext[" << ctx_id << "]::process_request: trigger join with query_id = " << this_qid << " " << detailprint(this_qid));
+	  ReturnedBeliefState* rbs = joiner->trigger_join(this_qid, history, md, jd);
+	  if (rbs->belief_state == NULL)
+	    {
+	      break;
+	    }
+	  
+	  input = rbs->belief_state;
+	}
+      else
+	input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+				   BeliefStateOffset::instance()->SIZE_BS());
+
+      // check whether we need to guess for some other part of the input, by:
+      // + looking into the input
+      // + looking into the ReturnPlanMap
+      //
+      // If there is a pair (id, bs) in the ReturnPlanMap such that 
+      // the epsilon bit of this context id is UNDEFINED in input then
+      // all beliefs marked in bs must be guessed.
+      // We put it in another belief state called guessing_input
+
+      NewBeliefState* guessing_input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+							  BeliefStateOffset::instance()->SIZE_BS());
+
+      NewBeliefState* current_guess = new BeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+						      BeliefStateOffset::instance()->SIZE_BS());
+
+      bool has_guessing_input = false;
+
+      for (ReturnPlanMap::const_iterator it = return_plan->begin(); it != return_plan->end(); ++it)
+	{
+	  std::size_t id = it->first;
+	  if (isEpsilon(id, BeliefStateOffset::instance()->getStartingOffsets()))
+	    {
+	      NewBeliefState* interface = it->second;
+	      has_guessing_input = true;
+	      (*guessing_input) = (*guessing_input) | (*interface);
+
+	      current_guess->setEpsilon(id,  BeliefStateOffset::instance()->getStartingOffsets());
+	    }
+	}
+
+      if (!has_guessing_input)
+	{
+	  delete guessing_input;
+	  guessing_input = NULL;
+
+	  delete current_guess;
+	  current_guess = NULL;
+	}
+      
+      if (guessing_input != NULL)
+	{
+	  // make guess
+	}
+      else
+	{
+	  // push input into BREval and get Heads, and evaluate
+	}
+    }
 }
 
 

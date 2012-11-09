@@ -58,12 +58,6 @@ public:
 	     BridgeRuleTablePtr br,
 	     NewNeighborVecPtr nbs);
 
-  // Constructor for leaf contexts
-  NewContext(std::size_t cid,
-	     InstantiatorPtr i,
-	     BeliefTablePtr lsig,
-	     ReturnPlanMapPtr return_plan);
-
   void
   startup(NewConcurrentMessageDispatcherPtr md,
 	  RequestDispatcherPtr rd,
@@ -91,6 +85,15 @@ private:
 			       NewJoinerDispatcherPtr jd,
 			       std::size_t k1,
 			       std::size_t k2);
+
+  void
+  process_request(std::size_t parent_qid,
+		  const NewHistory& history,
+		  EvaluatorPtr eval,
+		  NewConcurrentMessageDispatcherPtr md,
+		  NewJoinerDispatcherPtr jd,
+		  std::size_t k1,
+		  std::size_t k2);
 
 #if 0
   void

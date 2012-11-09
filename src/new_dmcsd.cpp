@@ -137,24 +137,19 @@ Options";
       InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, filename_local_kb);
 
       NewContextVecPtr ctx_vec(new NewContextVec);
-      
-      if (neighbors->empty())
-	{
-	  std::cerr << "Leaf context" << std::endl;
-	  NewContextPtr ctx(new NewContext(myid, dlv_inst, local_queryplan.localSignature, return_plan));
-	  ctx_vec->push_back(ctx);
-	}
-      else
+ 
+      NewContextPtr ctx(new NewContext(myid, pack_size, dlv_inst, 
+				       local_queryplan.localSignature, 
+				       return_plan, bridge_rules, neighbors));
+      ctx_vec->push_back(ctx);
+     
+      if (!neighbors->empty())
 	{
 	  std::cerr << "Intermediate context" << std::endl;
 	  for (NewNeighborVec::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
 	    {
 	      std::cout << **it << std::endl;
 	    }
-	  NewContextPtr ctx(new NewContext(myid, pack_size, dlv_inst, 
-					   local_queryplan.localSignature, return_plan,
-					   bridge_rules, neighbors));
-	  ctx_vec->push_back(ctx);
 	}
 
       RegistryPtr reg(new Registry(system_size, queue_size, bs_size, 
