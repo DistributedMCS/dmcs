@@ -158,6 +158,53 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
 }
 
 
+std::pair<NewBeliefState*, NewBeliefState*>
+check_guessing_input()
+{
+  // check whether we need to guess for some other part of the input, by:
+  // + looking into the input
+  // + looking into the ReturnPlanMap
+  //
+  // If there is a pair (id, bs) in the ReturnPlanMap such that 
+  // the epsilon bit of this context id is UNDEFINED in input then
+  // all beliefs marked in bs must be guessed.
+  // We put it in another belief state called guessing_input
+
+  NewBeliefState* guessing_input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+						      BeliefStateOffset::instance()->SIZE_BS());
+
+  NewBeliefState* current_guess = new BeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+						  BeliefStateOffset::instance()->SIZE_BS());
+
+  bool has_guessing_input = false;
+  
+  for (ReturnPlanMap::const_iterator it = return_plan->begin(); it != return_plan->end(); ++it)
+    {
+      std::size_t id = it->first;
+      if (isEpsilon(id, BeliefStateOffset::instance()->getStartingOffsets()))
+	{
+	  NewBeliefState* interface = it->second;
+	  has_guessing_input = true;
+	  (*guessing_input) = (*guessing_input) | (*interface);
+	  
+	  current_guess->setEpsilon(id,  BeliefStateOffset::instance()->getStartingOffsets());
+	}
+    }
+  
+  if (!has_guessing_input)
+    {
+      delete guessing_input;
+      guessing_input = NULL;
+      
+      delete current_guess;
+      current_guess = NULL;
+    }
+
+  return std::make_pair<NewBeliefState*, NewBeliefState*>(current_guess, guessing_input);
+}
+
+
+
 void
 NewContext::process_request(std::size_t parent_qid,
 			    const NewHistory& history,
@@ -189,54 +236,103 @@ NewContext::process_request(std::size_t parent_qid,
 	input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
 				   BeliefStateOffset::instance()->SIZE_BS());
 
-      // check whether we need to guess for some other part of the input, by:
-      // + looking into the input
-      // + looking into the ReturnPlanMap
-      //
-      // If there is a pair (id, bs) in the ReturnPlanMap such that 
-      // the epsilon bit of this context id is UNDEFINED in input then
-      // all beliefs marked in bs must be guessed.
-      // We put it in another belief state called guessing_input
-
-      NewBeliefState* guessing_input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-							  BeliefStateOffset::instance()->SIZE_BS());
-
-      NewBeliefState* current_guess = new BeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-						      BeliefStateOffset::instance()->SIZE_BS());
-
-      bool has_guessing_input = false;
-
-      for (ReturnPlanMap::const_iterator it = return_plan->begin(); it != return_plan->end(); ++it)
-	{
-	  std::size_t id = it->first;
-	  if (isEpsilon(id, BeliefStateOffset::instance()->getStartingOffsets()))
-	    {
-	      NewBeliefState* interface = it->second;
-	      has_guessing_input = true;
-	      (*guessing_input) = (*guessing_input) | (*interface);
-
-	      current_guess->setEpsilon(id,  BeliefStateOffset::instance()->getStartingOffsets());
-	    }
-	}
-
-      if (!has_guessing_input)
-	{
-	  delete guessing_input;
-	  guessing_input = NULL;
-
-	  delete current_guess;
-	  current_guess = NULL;
-	}
+      std::pair<NewBeliefState*, NewBeliefState*> g = check_guessing_input();
+      NewBeliefState* current_guess  = g->first;
+      NewBeliefState* guessing_input = g->second;
       
       if (guessing_input != NULL)
 	{
 	  // make guess
+	  DBGLOG(DBG, "NewContext::process_request(). Guessing input = " << *guessing_input);
+	  bool computed_k1_k2 = false;
+	  do
+	    {
+	      NewBeliefState* combined_input = 
+		new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+				   BeliefStateOffset::instance()->SIZE_BS());
+	      (*combined_input ) = (*input) | (*current_guess);
+
+	      if (compute(combined_input, k1, k2)) 
+		{
+		  computed_k1_k2 = true;
+		  break;
+		}
+
+	      current_guess = next_guess(current_guess, guessing_input);
+	    }
+	  while (current_guess);
+
+	  if (computed_k1_k2 || is_leaf) 
+	    {
+	      delete guessing_input;
+	      guessing_input = NULL;
+
+	      if (current_guess)
+		{
+		  delete current_guess;
+		  current_guess = NULL;
+		}
+
+	      break;
+	    }
 	}
       else
-	{
-	  // push input into BREval and get Heads, and evaluate
+	{ 
+	  if (compute(input, k1, k2) || is_leaf) break;
 	}
     }
+}
+
+
+
+NewBeliefState*
+NewContext::next_guess(NewBeliefState* current_guess, 
+		       NewBeliefState* guessing_input)
+{
+  std::size_t n = BeliefStateOffset::instance()->NO_BLOCKS();
+  std::size_t s = BeliefStateOffset::instance()->BS_SIZE();
+
+  std::size_t first_bit_set = guessing_input->getFirst();
+  assert (first_bit_set % (s+1) == 0);
+  std::size_t bit = first_bit_set;
+
+  do
+    {
+      bit = guessing_input->getNext(bit);
+      
+      if (bit % (s+1) != 0)
+	{
+	  if (current_guess->test(bit) == NewBeliefState::DMCS_UNDEF)
+	    {
+	      // set this bit to 1
+	      current_guess->set(bit, NewBeliefState::DMCS_TRUE);
+
+	      // set all bits before, except epsilon bits, to 0
+	      std::size_t previous_bit = first_bit_set;
+	      previous_bit = guessing_input->getNext(previous_bit);
+	      while (previous_bit < bit)
+		{
+		  if (previous_bit % (s+1) != 0)
+		    {
+		      current_guess->set(previous_bit, NewBeliefState::DMCS_UNDEF);
+		    }
+		  previous_bit = guessing_input->getNext(previous_bit);
+		}
+
+	      // have a new guess
+	      break;
+	    }
+	}
+    }
+  while (bit);
+
+  if (!bit)
+    {
+      delete current_guess;
+      current_guess = NULL;
+    }
+
+  return current_guess;
 }
 
 

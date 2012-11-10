@@ -95,6 +95,13 @@ private:
 		  std::size_t k1,
 		  std::size_t k2);
 
+  NewBeliefState*
+  next_guess(NewBeliefState* current_guess,
+	     NewBeliefState* guessing_input);
+  
+  std::pair<NewBeliefState*, NewBeliefState*>
+  check_guessing_input();
+
 #if 0
   void
   break_cycle(std::size_t parent_qid,
