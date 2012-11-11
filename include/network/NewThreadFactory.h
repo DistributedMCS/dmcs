@@ -61,7 +61,7 @@ public:
 			NewNeighborVecPtr neighbors);
 
   void
-  createContextThreads(NewContextVecPtr contexts,
+  createContextThreads(NormalContextVecPtr contexts,
 		       NewConcurrentMessageDispatcherPtr md,
 		       RequestDispatcherPtr rd,
 		       NewJoinerDispatcherPtr jd);

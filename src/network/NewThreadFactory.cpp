@@ -136,15 +136,15 @@ NewThreadFactory::createNeighborThreads(NewConcurrentMessageDispatcherPtr md,
 
 
 void
-NewThreadFactory::createContextThreads(NewContextVecPtr contexts,
+NewThreadFactory::createContextThreads(NormalContextVecPtr contexts,
 				       NewConcurrentMessageDispatcherPtr md,
 				       RequestDispatcherPtr rd,
 				       NewJoinerDispatcherPtr jd)
 {
-  for (NewContextVec::const_iterator it = contexts->begin();
+  for (NormalContextVec::const_iterator it = contexts->begin();
        it != contexts->end(); ++it)
     {
-      NewContextWrapper ctx_wrapper;
+      NormalContextWrapper ctx_wrapper;
       boost::thread* ctx_thread = new boost::thread(ctx_wrapper, *it, md, rd, jd);
       context_thread_vec.push_back(ctx_thread);
     }

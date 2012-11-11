@@ -36,32 +36,14 @@
 namespace dmcs {
 
 NewContext::NewContext(std::size_t cid,
-		       std::size_t pack_size,
-		       InstantiatorPtr i,
-		       BeliefTablePtr lsig,
 		       ReturnPlanMapPtr return_plan,
 		       ContextQueryPlanMapPtr queryplan_map,
-		       BridgeRuleTablePtr br,
-		       NewNeighborVecPtr nbs,
-		       NewNeighborVecPtr gnbs)
-  : is_leaf(nbs->size() == 0),
-    ctx_id(cid),
-    query_counter(0),
-    inst(i),
-    bridge_rules(br),
-    local_signature(lsig),
+		       BridgeRuleTablePtr br)
+  : ctx_id(cid),
     return_plan(return_plan),
     queryplan_map(queryplan_map),
-    neighbors(nbs),
-    guessing_neighbors(gnbs)
-{
-  if (nbs->size() == 0)
-    joiner = StreamingJoinerPtr();
-  else
-    joiner = StreamingJoinerPtr(new StreamingJoiner(pack_size, nbs));
-
-  init();
-}
+    bridge_rules(br)
+{ }
 
 
 NewContext::~NewContext()
@@ -81,208 +63,6 @@ NewContext::~NewContext()
 
 
 
-void
-NewContext::init()
-{
-  // compute total_guessing_input once and for all
-  if (guessing_neighbors == NewNeighborVecPtr())
-    {
-      total_guessing_input = NULL;
-      starting_guess = NULL;
-    }
-  else
-    {
-      total_guessing_input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-						BeliefStateOffset::instance()->SIZE_BS());
-
-      starting_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-					  BeliefStateOffset::instance()->SIZE_BS());
-
-      for (NewNeighborVec::const_iterator it = guessing_neighbors->begin(); it != guessing_neighbors->end(); ++it)
-	{
-	  NewNeighborPtr neighbor = *it;
-	  std::size_t nid = neighbor->neighbor_id;
-
-	  total_guessing_input->setEpsilon(nid, BeliefStateOffset::instance()->getStartingOffsets());
-	  starting_guess->setEpsilon(nid, BeliefStateOffset::instance()->getStartingOffsets());
-
-	  ContextQueryPlanMap::const_iterator qit = queryplan_map->find(nid);
-	  assert (qit != queryplan_map->end());
-	  const ContextQueryPlan& cqp = qit->second;
-
-	  if (cqp.groundInputSignature)
-	    {
-	      std::pair<BeliefTable::AddressIterator, BeliefTable::AddressIterator> iters = cqp.groundInputSignature->getAllByAddress();
-	      for (BeliefTable::AddressIterator ait = iters.first; ait != iters.second; ++ait)
-		{
-		  const Belief& b = *ait;
-		  total_guessing_input->set(nid, b.address, BeliefStateOffset::instance()->getStartingOffsets());
-		}
-	    }
-	}
-    }
-}
-
-
-std::size_t
-NewContext::getRequestOffset()
-{
-  return ctx_offset;
-}
-
-
-
-NewNeighborVecPtr
-NewContext::getNeighbors()
-{
-  return neighbors;
-}
-
-
-void
-NewContext::startup(NewConcurrentMessageDispatcherPtr md,
-		    RequestDispatcherPtr rd,
-		    NewJoinerDispatcherPtr jd)
-{
-  // Register REQUESTMQ to md
-  ctx_offset = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::REQUEST_MQ);
-  rd->registerIdOffset(ctx_id, ctx_offset);
-
-  if (!is_leaf)
-    {
-      assert (joiner);
-      joiner->registerJoinIn(ctx_offset, md);
-    }
-
-  // Start evaluator thread
-  InstantiatorWPtr inst_wptr(inst);
-  EvaluatorPtr eval = inst->createEvaluator(inst_wptr);
-  inst->startThread(eval, ctx_id, local_signature, md);
-
-  // spawn a corresponding cycle breaker
-  CycleBreakerPtr cycle_breaker(new CycleBreaker);
-  CycleBreakerWrapper cycle_breaker_wrapper;
-  cycle_breaker_thread = new boost::thread(cycle_breaker_wrapper, cycle_breaker, md, rd, jd);
-
-  int timeout = 0;
-  while (1)
-    {
-      DBGLOG(DBG, "NewContext[" << ctx_id << "]::startup(): Waiting at REQUEST_MQ[" << ctx_offset << "]");
-      // Listen to the REQUEST_MQ
-      ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_MQ, ctx_offset, timeout);
-
-      DBGLOG(DBG, "NewContext[" << ctx_id << "]::startup(): Got message: " << *fwd_mess);
-      
-      std::size_t parent_qid = fwd_mess->qid;
-      if (is_shutdown(parent_qid))
-	{
-	  break;
-	}
-
-      std::size_t k1 = fwd_mess->k1;
-      std::size_t k2 = fwd_mess->k2;
-
-      // Bad requests are not allowed
-      assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
-
-      // cycle detecting is handled at RequestDispatcher. 
-      // If it is detected, then a thread for cycle breaking will be created to deal with the situation.
-      // We don't have to care about breaking the cycles here.
-
-      NewHistory history = fwd_mess->history;
-      assert (history.find(ctx_id) == history.end());
-      history.insert(ctx_id);
-      process_request(parent_qid, history, eval, md, jd, k1, k2);
-
-      // Send the marker for the end of models
-      ReturnedBeliefState* rbs = new ReturnedBeliefState(NULL, parent_qid);
-      md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs, timeout);      
-    } 
-
-  // send NULL to evaluator to tell it to stop
-  Heads* end_heads = NULL;
-  md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), end_heads, timeout);
-  inst->stopThread(eval);
-}
-
-
-void
-NewContext::process_request(std::size_t parent_qid,
-			    const NewHistory& history,
-			    EvaluatorPtr eval,
-			    NewConcurrentMessageDispatcherPtr md,
-			    NewJoinerDispatcherPtr jd,
-			    std::size_t k1,
-			    std::size_t k2)
-{
-  assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
-  NewBeliefState* input;
-
-  while (1)
-    {
-      // prepare the fixed part of the input
-      if (!is_leaf)
-	{
-	  std::size_t this_qid = query_id(ctx_id, ++query_counter);
-	  DBGLOG(DBG, "NewContext[" << ctx_id << "]::process_request: trigger join with query_id = " << this_qid << " " << detailprint(this_qid));
-	  ReturnedBeliefState* rbs = joiner->trigger_join(this_qid, history, md, jd);
-	  if (rbs->belief_state == NULL)
-	    {
-	      break;
-	    }
-	  
-	  input = rbs->belief_state;
-	}
-      else
-	input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-				   BeliefStateOffset::instance()->SIZE_BS());
-      
-      if (total_guessing_input != NULL)
-	{
-	  NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-							     BeliefStateOffset::instance()->SIZE_BS());
-	  
-	  (*current_guess) = (*starting_guess);
-
-	  // make guess
-	  DBGLOG(DBG, "NewContext::process_request(). Guessing input = " << *total_guessing_input);
-	  bool computed_k1_k2 = false;
-	  do
-	    {
-	      NewBeliefState* combined_input = 
-		new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-				   BeliefStateOffset::instance()->SIZE_BS());
-	      (*combined_input ) = (*input) | (*current_guess);
-
-	      if (compute(combined_input, k1, k2, parent_qid, eval, md)) 
-		{
-		  computed_k1_k2 = true;
-		  break;
-		}
-
-	      current_guess = next_guess(current_guess, total_guessing_input);
-	    }
-	  while (current_guess);
-
-	  if (computed_k1_k2 || is_leaf) 
-	    {
-	      if (current_guess)
-		{
-		  delete current_guess;
-		  current_guess = NULL;
-		}
-
-	      break;
-	    }
-	}
-      else
-	{ 
-	  if (compute(input, k1, k2, parent_qid, eval, md) || is_leaf) break;
-	}
-    }
-}
-
-
 bool
 NewContext::compute(NewBeliefState* input,
 		    std::size_t k1,
@@ -292,17 +72,18 @@ NewContext::compute(NewBeliefState* input,
 		    NewConcurrentMessageDispatcherPtr md)
 {
   ///@todo: create heads = (NULL, k1, k2) in case of real leaf node.
-  DBGLOG(DBG, "NewContext[" << ctx_id << "]::compute(): input = " << *input);
+  DBGLOG(DBG, "NormalContext[" << ctx_id << "]::compute(): input = " << *input);
   Heads* heads = evaluate_bridge_rules(bridge_rules, input, k1, k2,
 				BeliefStateOffset::instance()->getStartingOffsets());      
   
-  DBGLOG(DBG, "NewContext[" << ctx_id << "]::compute(): heads = " << *(heads->getHeads()));
+  DBGLOG(DBG, "NormalContext[" << ctx_id << "]::compute(): heads = " << *(heads->getHeads()));
   // send heads to Evaluator
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);
   
   return read_and_send_k1_k2(parent_qid, true, k1, k2, eval, md);
 }
+
 
 
 NewBeliefState*

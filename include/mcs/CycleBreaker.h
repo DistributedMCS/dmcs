@@ -32,13 +32,39 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "dmcs/Evaluator.h"
+#include "mcs/BridgeRuleEvaluator.h"
+#include "mcs/QueryPlan.h"
+#include "mcs/RequestDispatcher.h"
+#include "mcs/StreamingJoiner.h"
+#include "network/NewConcurrentMessageDispatcher.h"
+#include "mcs/NewContext.h"
+
 namespace dmcs {
 
-class CycleBreaker
+class CycleBreaker : public NewContext
 {
 public:
+  CycleBreaker(std::size_t cid,
+	       EvaluatorPtr eval,
+	       ReturnPlanMapPtr return_plan,
+	       ContextQueryPlanMapPtr queryplan_map,
+	       BridgeRuleTablePtr bridge_rules);
+
+  ~CycleBreaker();
+
   void
-  startup();
+  startup(NewConcurrentMessageDispatcherPtr md,
+	  RequestDispatcherPtr rd,
+	  NewJoinerDispatcherPtr jd);
+
+private:
+  void
+  init();
+
+private:
+  std::size_t breaker_offset;
+  EvaluatorPtr eval;
 };
 
 
@@ -52,7 +78,7 @@ struct CycleBreakerWrapper
 	     RequestDispatcherPtr rd,
 	     NewJoinerDispatcherPtr jd)
   {
-    cycle_breaker->startup();
+    cycle_breaker->startup(md, rd, jd);
   }
 };
 

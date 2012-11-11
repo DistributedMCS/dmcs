@@ -22,6 +22,7 @@ noinst_HEADERS =  \
 		NewContext.h \
 		CycleBreaker.h \
 		NewMessage.h \
+		NormalContext.h \
 		NewNeighbor.h \
 		NewJoinerDispatcher.h \
 		NewOutputDispatcher.h \

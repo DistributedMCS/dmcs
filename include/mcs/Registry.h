@@ -34,7 +34,7 @@
 
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "mcs/BeliefStateOffset.h"
-#include "mcs/NewContext.h"
+#include "mcs/NormalContext.h"
 #include "mcs/NewOutputDispatcher.h"
 #include "mcs/NewJoinerDispatcher.h"
 #include "mcs/RequestDispatcher.h"
@@ -49,7 +49,7 @@ struct Registry
 	   const std::size_t bs,
 	   const std::string& manager_hostname,
 	   const std::string& manager_port,
-	   NewContextVecPtr cs)
+	   NormalContextVecPtr cs)
     : system_size(ss),
       queue_size(qs),
       belief_set_size(bs),
@@ -63,9 +63,9 @@ struct Registry
     neighbors = boost::shared_ptr<NewNeighborVec>(new NewNeighborVec);
     bool has_neighbors = false;
 
-    for (NewContextVec::const_iterator it = contexts->begin(); it != contexts->end(); ++it)
+    for (NormalContextVec::const_iterator it = contexts->begin(); it != contexts->end(); ++it)
       {
-	NewContextPtr ctx = *it;
+	NormalContextPtr ctx = *it;
 	NewNeighborVecPtr ctx_neighbors = ctx->getNeighbors();
 	if (ctx_neighbors)
 	  {
@@ -91,7 +91,7 @@ struct Registry
 	   const std::size_t bs,
 	   const std::string& manager_hostname,
 	   const std::string& manager_port,
-	   NewContextVecPtr cs,
+	   NormalContextVecPtr cs,
 	   NewNeighborVecPtr ns)
     : system_size(ss),
       queue_size(qs),
@@ -123,7 +123,7 @@ struct Registry
   RequestDispatcherPtr request_dispatcher;
   NewOutputDispatcherPtr output_dispatcher;
   NewJoinerDispatcherPtr joiner_dispatcher;
-  NewContextVecPtr contexts;
+  NormalContextVecPtr contexts;
   NewNeighborVecPtr neighbors;
 };
 

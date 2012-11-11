@@ -42,6 +42,7 @@ libmcs_a_SOURCES = \
 		NewBeliefState.cpp \
 		NewContext.cpp \
 		CycleBreaker.cpp \
+		NormalContext.cpp \
 		Pool.cpp \
 		QueryID.cpp \
 		QueryPlan.cpp \

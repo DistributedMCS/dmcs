@@ -52,40 +52,20 @@ public:
   // reads off information regarding bridge rules, neighbors, local signature,...
   // This is the dynamic setting for future work.
   NewContext(std::size_t cid,
-	     std::size_t pack_size,
-	     InstantiatorPtr i,
-	     BeliefTablePtr lsig,
 	     ReturnPlanMapPtr return_plan,
 	     ContextQueryPlanMapPtr queryplan_map,
-	     BridgeRuleTablePtr br,
-	     NewNeighborVecPtr nbs,
-	     NewNeighborVecPtr gnbs);
+	     BridgeRuleTablePtr br);
   
   ~NewContext();
 
-  void
+  virtual void
   startup(NewConcurrentMessageDispatcherPtr md,
 	  RequestDispatcherPtr rd,
-	  NewJoinerDispatcherPtr jd = NewJoinerDispatcherPtr());
-  
-  std::size_t 
-  getRequestOffset();
+	  NewJoinerDispatcherPtr jd = NewJoinerDispatcherPtr()) = 0;
 
-  NewNeighborVecPtr
-  getNeighbors();
-
-private:
-  void
-  init();
-
-  void
-  process_request(std::size_t parent_qid,
-		  const NewHistory& history,
-		  EvaluatorPtr eval,
-		  NewConcurrentMessageDispatcherPtr md,
-		  NewJoinerDispatcherPtr jd,
-		  std::size_t k1,
-		  std::size_t k2);
+protected:
+  virtual void
+  init() = 0;
 
   NewBeliefState*
   next_guess(NewBeliefState* current_guess,
@@ -120,61 +100,18 @@ private:
 		  NewBeliefState* belief_state,
 		  NewConcurrentMessageDispatcherPtr md);
 
-private:
-  bool is_leaf;
+protected:
   std::size_t ctx_id;
-  std::size_t ctx_offset;
-  std::size_t query_counter;
-
-  // The instantiator holds the path (string) to the local knowledge base
-  InstantiatorPtr inst;
-
-  // Somehow bridge rules should know the input interface from the neighbors.
-  // This is done at while reading the query plan.
-  BridgeRuleTablePtr bridge_rules;
-
-  // For the moment, export_signature cannot stay here, 
-  // since the Evaluator needs the whole local signature to
-  // evaluate the bridge rules. 
-  // Note that the context passes the signature to inst and ints
-  // passes the signature to the evaluation thread.
-  BeliefTablePtr local_signature;
-
-  // For now, neighbors' signatures are not needed
-  // as we assume that they are provided once by the query plan.
-  NewNeighborVecPtr neighbors;
-
-  // Neighbors that we have to guess on bridge atoms.
-  // For opt topologies where some links are cut to break cycles.
-  NewNeighborVecPtr guessing_neighbors;
-
-  StreamingJoinerPtr joiner;
-
   ReturnPlanMapPtr return_plan;
-
   ContextQueryPlanMapPtr queryplan_map;
+  BridgeRuleTablePtr bridge_rules;
   NewBeliefState* total_guessing_input;
   NewBeliefState* starting_guess;
-
-  // to deal with cycles
-  boost::thread* cycle_breaker_thread;
 };
 
 typedef boost::shared_ptr<NewContext> NewContextPtr;
 typedef std::vector<NewContextPtr> NewContextVec;
 typedef boost::shared_ptr<NewContextVec> NewContextVecPtr;
-
-struct NewContextWrapper
-{
-  void
-  operator()(NewContextPtr context,
-	     NewConcurrentMessageDispatcherPtr md,
-	     RequestDispatcherPtr rd,
-	     NewJoinerDispatcherPtr jd = NewJoinerDispatcherPtr())
-  {
-    context->startup(md, rd, jd);
-  }
-};
 
 } // namespace dmcs
 

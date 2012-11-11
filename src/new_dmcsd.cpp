@@ -42,7 +42,7 @@
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/BeliefTable.h"
 #include "mcs/ID.h"
-#include "mcs/NewContext.h"
+#include "mcs/NormalContext.h"
 #include "mcs/QueryPlan.h"
 #include "mcs/RequestDispatcher.h"
 #include "network/NewClient.h"
@@ -193,13 +193,13 @@ Options";
       EngineWPtr dlv_engine_wp(dlv_engine);
       InstantiatorPtr dlv_inst = dlv_engine->createInstantiator(dlv_engine_wp, filename_local_kb);
 
-      NewContextVecPtr ctx_vec(new NewContextVec);
+      NormalContextVecPtr ctx_vec(new NormalContextVec);
  
-      NewContextPtr ctx(new NewContext(myid, pack_size, dlv_inst, 
-				       local_queryplan.localSignature, 
-				       return_plan, queryplan_map,
-				       bridge_rules, 
-				       physical_neighbors, guessing_neighbors));
+      NormalContextPtr ctx(new NormalContext(myid, pack_size, dlv_inst, 
+					     local_queryplan.localSignature, 
+					     return_plan, queryplan_map,
+					     bridge_rules, 
+					     physical_neighbors, guessing_neighbors));
       ctx_vec->push_back(ctx);
      
       if (!physical_neighbors->empty())

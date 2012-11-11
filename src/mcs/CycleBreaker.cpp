@@ -27,22 +27,76 @@
  * 
  */
 
+#include "mcs/BeliefStateOffset.h"
 #include "mcs/CycleBreaker.h"
 
 namespace dmcs {
+
+CycleBreaker::CycleBreaker(std::size_t ctx_id,			   
+			   EvaluatorPtr eval,
+			   ReturnPlanMapPtr return_plan,
+			   ContextQueryPlanMapPtr queryplan_map,
+			   BridgeRuleTablePtr bridge_rules)
+  : NewContext(ctx_id, return_plan, queryplan_map, bridge_rules),
+    eval(eval)
+{
+  init();
+}
+
+
+CycleBreaker::~CycleBreaker()
+{
+  delete total_guessing_input;
+  total_guessing_input = NULL;
+
+  delete starting_guess;
+  starting_guess = NULL;
+}
+
+
+void
+CycleBreaker::init()
+{
+  total_guessing_input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+					    BeliefStateOffset::instance()->SIZE_BS());
+
+  starting_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+				      BeliefStateOffset::instance()->SIZE_BS());
+
+  for (ContextQueryPlanMap::const_iterator it = queryplan_map->begin(); it != queryplan_map->end(); ++it)
+    {
+      std::size_t cid = it->first;
+      const ContextQueryPlan& cqp = it->second;
+      if (cqp.groundInputSignature)
+	{
+	  total_guessing_input->setEpsilon(cid, BeliefStateOffset::instance()->getStartingOffsets());
+	  starting_guess->setEpsilon(cid, BeliefStateOffset::instance()->getStartingOffsets());
+
+	  std::pair<BeliefTable::AddressIterator, BeliefTable::AddressIterator> iters = cqp.groundInputSignature->getAllByAddress();
+	  for (BeliefTable::AddressIterator ait = iters.first; ait != iters.second; ++ait)
+	    {
+	      const Belief& b = *ait;
+	      total_guessing_input->set(cid, b.address, BeliefStateOffset::instance()->getStartingOffsets());
+	    }
+	}
+    }
+}
+
 
 void
 CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
 		      RequestDispatcherPtr rd,
 		      NewJoinerDispatcherPtr jd)
 {
+#if 0
   int timeout = 0;
   while (1)
     {
-      DBGLOG(DBG, "CycleBreaker[" << ctx_id << "]::startup(): Waiting at CYCLE_BREAKER_MQ[" << ctx_offset << "]");
+      DBGLOG(DBG, "CycleBreaker[" << ctx_id << "]::startup(): Waiting at CYCLE_BREAKER_MQ[" << breaker_offset << "]");
       // Listen to the CYCLE_BREAKER_MQ
       ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::CYCLE_BREAKER_MQ, ctx_offset, timeout);
-      
+     
+
       DBGLOG(DBG, "CycleBreaker[" << ctx_id << "]::startup(): Got message: " << *fwd_mess);
       
       std::size_t parent_qid = fwd_mess->qid;
@@ -57,8 +111,21 @@ CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
       // Bad requests are not allowed
       assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
 
+      // different from non-cycle-breaking task, we will guess for all input here,
+      // including the bridge atoms from neighbors that might not be involved in the current cycle.
+      NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+							 BeliefStateOffset::instance()->SIZE_BS());
+      
+      (*current_guess) = (*starting_guess);      
 
+      do
+	{
+	  if (compute(current_guess, k1, k2, parent_qid, eval, md)) break;
+	  current_guess = next_guess(current_guess, total_guessing_input);
+	}
+      while (current_guess);
     }
+#endif
 }
 
 } // namespace dmcs
