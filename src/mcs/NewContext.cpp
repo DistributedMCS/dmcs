@@ -29,6 +29,7 @@
 
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/NewContext.h"
+#include "mcs/CycleBreaker.h"
 #include "mcs/ForwardMessage.h"
 #include "dmcs/DLVEvaluator.h"
 
@@ -95,6 +96,10 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
   InstantiatorWPtr inst_wptr(inst);
   EvaluatorPtr eval = inst->createEvaluator(inst_wptr);
   inst->startThread(eval, ctx_id, local_signature, md);
+
+  // spawn a corresponding cycle breaker
+  CycleBreakerWrapper cycle_breaker_wrapper;
+  cycle_breaker_thread = new boost::thread(cycle_breaker_wrapper, md, rd, jd);
 
   int timeout = 0;
   while (1)

@@ -147,6 +147,9 @@ private:
   StreamingJoinerPtr joiner;
 
   ReturnPlanMapPtr return_plan;
+
+  // to deal with cycles
+  boost::thread* cycle_breaker_thread;
 };
 
 typedef boost::shared_ptr<NewContext> NewContextPtr;

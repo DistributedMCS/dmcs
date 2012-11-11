@@ -41,6 +41,7 @@ libmcs_a_SOURCES = \
 		Logger.cpp \
 		NewBeliefState.cpp \
 		NewContext.cpp \
+		CycleBreaker.cpp \
 		Pool.cpp \
 		QueryID.cpp \
 		QueryPlan.cpp \

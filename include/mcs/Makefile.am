@@ -20,6 +20,7 @@ noinst_HEADERS =  \
 		NewBaseDispatcher.h \
 		NewBeliefState.h \
 		NewContext.h \
+		CycleBreaker.h \
 		NewMessage.h \
 		NewNeighbor.h \
 		NewJoinerDispatcher.h \
