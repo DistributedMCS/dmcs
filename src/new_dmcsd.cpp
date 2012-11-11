@@ -31,6 +31,8 @@
 #include "config.h"
 #endif
 
+#include <algorithm>
+
 #include <boost/program_options.hpp>
 
 #include "dmcs/ProgramOptions.h"
@@ -67,6 +69,7 @@ main(int argc, char* argv[])
       std::string filename_local_kb;
       std::string filename_bridge_rules;
       std::string filename_query_plan;
+      std::string filename_opt_query_plan = "";
       std::string filename_return_plan;
 
       const char* help_description = "\n\
@@ -86,6 +89,7 @@ Options";
 	(KB, boost::program_options::value<std::string>(&filename_local_kb), "set Knowledge Base file name")
 	(BR, boost::program_options::value<std::string>(&filename_bridge_rules), "set Bridge Rules file name")
 	(QP, boost::program_options::value<std::string>(&filename_query_plan), "set Query Plan file name")
+	(OPTQP, boost::program_options::value<std::string>(&filename_opt_query_plan), "set optimal Query Plan file name")
 	(RP, boost::program_options::value<std::string>(&filename_return_plan), "set Return Plan file name")
 	;
 
@@ -126,11 +130,64 @@ Options";
 
       ReturnPlanMapPtr return_plan = ReturnPlanParser::parseFile(filename_return_plan);
 
+      std::cerr << filename_opt_query_plan << std::endl;
+      ContextQueryPlanMapPtr opt_queryplan_map = ContextQueryPlanMapPtr();
+      if (filename_opt_query_plan != "")
+	{
+	  DBGLOG(DBG, "Parse opt query plan");
+	  opt_queryplan_map = QueryPlanParser::parseFile(filename_opt_query_plan);
+	}
+
       ContextQueryPlanMapPtr queryplan_map = QueryPlanParser::parseFile(filename_query_plan);
       const ContextQueryPlan& local_queryplan = queryplan_map->find(myid)->second;
-      BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(filename_bridge_rules, queryplan_map, myid);;
+      BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(filename_bridge_rules, queryplan_map, myid);
       BridgeRuleTablePtr bridge_rules = ret_val.first;
-      NewNeighborVecPtr neighbors = ret_val.second;
+
+      NewNeighborVecPtr guessing_neighbors = ret_val.second;
+      NewNeighborVecPtr physical_neighbors(new NewNeighborVec);
+
+      DBGLOG(DBG, "new_dmcsd: compute physical and guessing neighbors");
+      if (opt_queryplan_map != ContextQueryPlanMapPtr())
+	{
+	  // divide neighbors into 2 parts:
+	  // + physical neighbors: those that appear in the (optimal) query plan
+	  // + guessing neighbors: those that could be observed from bridge rules (through parsing),
+	  //   but was cut away when constructing the optimal query plan.
+	  
+	  // first all logical neighbors are guessing neighbors.
+	  // then look into the query plan map:
+	  // if a neighbor id appears here, then it is indeed a physical neighbor.
+	  // we move it from "guessing neighbors" to "physical neighbors"
+	  DBGLOG(DBG, "new_dmcsd: check for physical neighbors");
+	  for (ContextQueryPlanMap::const_iterator it = opt_queryplan_map->begin(); it != opt_queryplan_map->end(); ++it)
+	    {
+	      DBGLOG(DBG, "new_dmcsd: checking id = " << it->first);
+	      const ContextQueryPlan& cqp = it->second;
+	      if (cqp.groundInputSignature)
+		{
+		  DBGLOG(DBG, "new_dmcsd: got a physical neighbor = " << it->first);
+		  for (NewNeighborVec::iterator nit = guessing_neighbors->begin(); nit != guessing_neighbors->end(); ++nit)
+		    {
+		      NewNeighborPtr neighbor = *nit;
+		      if (neighbor->neighbor_id == it->first)
+			{
+			  // make the move
+			  physical_neighbors->push_back(neighbor);
+			  guessing_neighbors->erase(nit);
+			  
+			  break;
+			}
+		    }
+		}
+	    }
+	}
+      else
+	{
+	  physical_neighbors = guessing_neighbors;
+	  guessing_neighbors = NewNeighborVecPtr();
+	}
+
+      DBGLOG(DBG, "new_dmcsd: compute physical and guessing neighbors. DONE!");
 
       EnginePtr dlv_engine = DLVEngine::create();
       EngineWPtr dlv_engine_wp(dlv_engine);
@@ -140,13 +197,23 @@ Options";
  
       NewContextPtr ctx(new NewContext(myid, pack_size, dlv_inst, 
 				       local_queryplan.localSignature, 
-				       return_plan, bridge_rules, neighbors));
+				       return_plan, bridge_rules, 
+				       physical_neighbors, guessing_neighbors));
       ctx_vec->push_back(ctx);
      
-      if (!neighbors->empty())
+      if (!physical_neighbors->empty())
 	{
-	  std::cerr << "Intermediate context" << std::endl;
-	  for (NewNeighborVec::const_iterator it = neighbors->begin(); it != neighbors->end(); ++it)
+	  std::cerr << "new_dmcsd: physical neighbors:" << std::endl;
+	  for (NewNeighborVec::const_iterator it = physical_neighbors->begin(); it != physical_neighbors->end(); ++it)
+	    {
+	      std::cout << **it << std::endl;
+	    }
+	}
+
+      if (guessing_neighbors != NewNeighborVecPtr())
+	{
+	  std::cerr << "new_dmcsd: guessing neighbors:" << std::endl;
+	  for (NewNeighborVec::const_iterator it = guessing_neighbors->begin(); it != guessing_neighbors->end(); ++it)
 	    {
 	      std::cout << **it << std::endl;
 	    }

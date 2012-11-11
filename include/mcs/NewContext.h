@@ -56,7 +56,8 @@ public:
 	     BeliefTablePtr lsig,
 	     ReturnPlanMapPtr return_plan,
 	     BridgeRuleTablePtr br,
-	     NewNeighborVecPtr nbs);
+	     NewNeighborVecPtr nbs,
+	     NewNeighborVecPtr gnbs);
 
   void
   startup(NewConcurrentMessageDispatcherPtr md,
@@ -71,22 +72,6 @@ public:
 
 private:
   void
-  leaf_process_request(std::size_t parent_qid,
-		       EvaluatorPtr eval,
-		       NewConcurrentMessageDispatcherPtr md,
-		       std::size_t k1,
-		       std::size_t k2);
-
-  void
-  intermediate_process_request(std::size_t parent_qid,
-			       const NewHistory& history,
-			       EvaluatorPtr eval,
-			       NewConcurrentMessageDispatcherPtr md,
-			       NewJoinerDispatcherPtr jd,
-			       std::size_t k1,
-			       std::size_t k2);
-
-  void
   process_request(std::size_t parent_qid,
 		  const NewHistory& history,
 		  EvaluatorPtr eval,
@@ -100,17 +85,15 @@ private:
 	     NewBeliefState* guessing_input);
   
   std::pair<NewBeliefState*, NewBeliefState*>
-  check_guessing_input();
+  check_guessing_input(NewBeliefState* input);
 
-#if 0
-  void
-  break_cycle(std::size_t parent_qid,
-	      EvaluatorPtr eval,
-	      NewConcurrentMessageDispatcherPtr md,
-	      NewJoinerDispatcherPtr jd,
-	      std::size_t k1,
-	      std::size_t k2);
-#endif
+  bool
+  compute(NewBeliefState* input,
+	  std::size_t k1,
+	  std::size_t k2,
+	  std::size_t parent_qid,
+	  EvaluatorPtr eval,
+	  NewConcurrentMessageDispatcherPtr md);
 
   std::size_t
   read_and_send(std::size_t parent_qid,
@@ -156,6 +139,10 @@ private:
   // For now, neighbors' signatures are not needed
   // as we assume that they are provided once by the query plan.
   NewNeighborVecPtr neighbors;
+
+  // Neighbors that we have to guess on bridge atoms.
+  // For opt topologies where some links are cut to break cycles.
+  NewNeighborVecPtr guessing_neighbors;
 
   StreamingJoinerPtr joiner;
 

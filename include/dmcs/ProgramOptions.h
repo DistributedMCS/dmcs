@@ -49,6 +49,7 @@ namespace dmcs {
 #define KB                 "kb"
 #define BR                 "br"
 #define QP                 "queryplan"
+#define OPTQP              "optqueryplan"
 #define RP                 "returnplan"
 #define TOPOLOGY           "topology"
 #define CONTEXTS           "contexts"

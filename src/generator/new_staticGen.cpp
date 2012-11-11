@@ -942,6 +942,8 @@ print_command_lines()
   assert (it != cmdline_options.end());
   it->second = prefix + ".orp";
 
+  cmdline_options.insert(std::pair<std::string, std::string>("optqueryplan", prefix + ".oqp"));
+
   print_command_lines_file(false, TESTDIR, dmcspath, 0, 0, filename_command_line_opt_all);
   print_command_lines_file(true, TESTDIR, dmcspath, 0, 0, filename_command_line_opt_all_sh);
   print_command_lines_file(true, TESTDIR, dmcspath, 0, 0, filename_command_line_opt_all_log_sh, true);
