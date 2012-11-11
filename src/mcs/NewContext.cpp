@@ -40,6 +40,7 @@ NewContext::NewContext(std::size_t cid,
 		       InstantiatorPtr i,
 		       BeliefTablePtr lsig,
 		       ReturnPlanMapPtr return_plan,
+		       ContextQueryPlanMapPtr queryplan_map,
 		       BridgeRuleTablePtr br,
 		       NewNeighborVecPtr nbs,
 		       NewNeighborVecPtr gnbs)
@@ -50,6 +51,7 @@ NewContext::NewContext(std::size_t cid,
     bridge_rules(br),
     local_signature(lsig),
     return_plan(return_plan),
+    queryplan_map(queryplan_map),
     neighbors(nbs),
     guessing_neighbors(gnbs)
 {
@@ -57,9 +59,69 @@ NewContext::NewContext(std::size_t cid,
     joiner = StreamingJoinerPtr();
   else
     joiner = StreamingJoinerPtr(new StreamingJoiner(pack_size, nbs));
+
+  init();
 }
 
 
+NewContext::~NewContext()
+{
+  if (total_guessing_input)
+    {
+      delete total_guessing_input;
+      total_guessing_input = NULL;
+    }
+
+  if (starting_guess)
+    {
+      delete starting_guess;
+      starting_guess = NULL;
+    }
+}
+
+
+
+void
+NewContext::init()
+{
+  // compute total_guessing_input once and for all
+  if (guessing_neighbors == NewNeighborVecPtr())
+    {
+      total_guessing_input = NULL;
+      starting_guess = NULL;
+    }
+  else
+    {
+      total_guessing_input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+						BeliefStateOffset::instance()->SIZE_BS());
+
+      starting_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+					  BeliefStateOffset::instance()->SIZE_BS());
+
+      for (NewNeighborVec::const_iterator it = guessing_neighbors->begin(); it != guessing_neighbors->end(); ++it)
+	{
+	  NewNeighborPtr neighbor = *it;
+	  std::size_t nid = neighbor->neighbor_id;
+
+	  total_guessing_input->setEpsilon(nid, BeliefStateOffset::instance()->getStartingOffsets());
+	  starting_guess->setEpsilon(nid, BeliefStateOffset::instance()->getStartingOffsets());
+
+	  ContextQueryPlanMap::const_iterator qit = queryplan_map->find(nid);
+	  assert (qit != queryplan_map->end());
+	  const ContextQueryPlan& cqp = qit->second;
+
+	  if (cqp.groundInputSignature)
+	    {
+	      std::pair<BeliefTable::AddressIterator, BeliefTable::AddressIterator> iters = cqp.groundInputSignature->getAllByAddress();
+	      for (BeliefTable::AddressIterator ait = iters.first; ait != iters.second; ++ait)
+		{
+		  const Belief& b = *ait;
+		  total_guessing_input->set(nid, b.address, BeliefStateOffset::instance()->getStartingOffsets());
+		}
+	    }
+	}
+    }
+}
 
 
 std::size_t
@@ -98,8 +160,9 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
   inst->startThread(eval, ctx_id, local_signature, md);
 
   // spawn a corresponding cycle breaker
+  CycleBreakerPtr cycle_breaker(new CycleBreaker);
   CycleBreakerWrapper cycle_breaker_wrapper;
-  cycle_breaker_thread = new boost::thread(cycle_breaker_wrapper, md, rd, jd);
+  cycle_breaker_thread = new boost::thread(cycle_breaker_wrapper, cycle_breaker, md, rd, jd);
 
   int timeout = 0;
   while (1)
@@ -143,48 +206,6 @@ NewContext::startup(NewConcurrentMessageDispatcherPtr md,
 }
 
 
-std::pair<NewBeliefState*, NewBeliefState*>
-NewContext::check_guessing_input(NewBeliefState* input)
-{
-  // check whether we need to guess for some other part of the input, by:
-  // + looking into the input
-  // + looking into the ReturnPlanMap
-  //
-  // If there is a pair (id, bs) in the ReturnPlanMap such that 
-  // the epsilon bit of this context id is UNDEFINED in input then
-  // all beliefs marked in bs must be guessed.
-  // We put it in another belief state called guessing_input
-
-  if (guessing_neighbors == NewNeighborVecPtr())
-    {
-      return std::make_pair<NewBeliefState*, NewBeliefState*>(NULL, NULL);
-    }
-
-  NewBeliefState* guessing_input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-						      BeliefStateOffset::instance()->SIZE_BS());
-
-  NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-						     BeliefStateOffset::instance()->SIZE_BS());
-
-  for (NewNeighborVec::const_iterator it = guessing_neighbors->begin(); it != guessing_neighbors->end(); ++it)
-    {
-      NewNeighborPtr neighbor = *it;
-      std::size_t nid = neighbor->neighbor_id;
-
-      ReturnPlanMap::const_iterator rit = return_plan->find(nid);
-      assert (rit != return_plan->end());
-
-      NewBeliefState* interface = rit->second;
-      (*guessing_input) = (*guessing_input) | (*interface);
-	  
-      current_guess->setEpsilon(nid,  BeliefStateOffset::instance()->getStartingOffsets());
-    }
-
-  return std::make_pair<NewBeliefState*, NewBeliefState*>(current_guess, guessing_input);
-}
-
-
-
 void
 NewContext::process_request(std::size_t parent_qid,
 			    const NewHistory& history,
@@ -215,15 +236,16 @@ NewContext::process_request(std::size_t parent_qid,
       else
 	input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
 				   BeliefStateOffset::instance()->SIZE_BS());
-
-      std::pair<NewBeliefState*, NewBeliefState*> g = check_guessing_input(input);
-      NewBeliefState* current_guess  = g.first;
-      NewBeliefState* guessing_input = g.second;
       
-      if (guessing_input != NULL)
+      if (total_guessing_input != NULL)
 	{
+	  NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+							     BeliefStateOffset::instance()->SIZE_BS());
+	  
+	  (*current_guess) = (*starting_guess);
+
 	  // make guess
-	  DBGLOG(DBG, "NewContext::process_request(). Guessing input = " << *guessing_input);
+	  DBGLOG(DBG, "NewContext::process_request(). Guessing input = " << *total_guessing_input);
 	  bool computed_k1_k2 = false;
 	  do
 	    {
@@ -238,15 +260,12 @@ NewContext::process_request(std::size_t parent_qid,
 		  break;
 		}
 
-	      current_guess = next_guess(current_guess, guessing_input);
+	      current_guess = next_guess(current_guess, total_guessing_input);
 	    }
 	  while (current_guess);
 
 	  if (computed_k1_k2 || is_leaf) 
 	    {
-	      delete guessing_input;
-	      guessing_input = NULL;
-
 	      if (current_guess)
 		{
 		  delete current_guess;

@@ -81,6 +81,7 @@ class BeliefTable :
 public:
   typedef Container::index<impl::AddressTag>::type AddressIndex;
   typedef Container::index<impl::BeliefTag>::type BeliefIndex;
+  typedef AddressIndex::iterator AddressIterator;
 
 // methods
 public:
@@ -105,6 +106,9 @@ public:
 
   virtual std::ostream& print(std::ostream& o) const;
   
+  inline std::pair<AddressIterator, AddressIterator>
+  getAllByAddress() const throw();
+
   //TODO: find a nicer way to print the BeliefTable for generator purpose
   std::string
   gen_print() const;
@@ -194,6 +198,15 @@ ID BeliefTable::storeWithID(const Belief& b, ID setid) throw()
   assert(success);
   
   return setid;
+}
+
+std::pair<BeliefTable::AddressIterator, BeliefTable::AddressIterator>
+BeliefTable::getAllByAddress() const throw()
+{
+  ReadLock lock(mutex);
+  const AddressIndex& idx = container.get<impl::AddressTag>();
+
+  return std::make_pair(idx.begin(), idx.end());
 }
 
 typedef boost::shared_ptr<BeliefTable> BeliefTablePtr;

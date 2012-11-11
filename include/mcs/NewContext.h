@@ -34,6 +34,7 @@
 #include "dmcs/Instantiator.h"
 #include "mcs/BeliefTable.h"
 #include "mcs/BridgeRuleEvaluator.h"
+#include "mcs/QueryPlan.h"
 #include "mcs/RequestDispatcher.h"
 #include "mcs/StreamingJoiner.h"
 #include "network/NewConcurrentMessageDispatcher.h"
@@ -55,9 +56,12 @@ public:
 	     InstantiatorPtr i,
 	     BeliefTablePtr lsig,
 	     ReturnPlanMapPtr return_plan,
+	     ContextQueryPlanMapPtr queryplan_map,
 	     BridgeRuleTablePtr br,
 	     NewNeighborVecPtr nbs,
 	     NewNeighborVecPtr gnbs);
+  
+  ~NewContext();
 
   void
   startup(NewConcurrentMessageDispatcherPtr md,
@@ -72,6 +76,9 @@ public:
 
 private:
   void
+  init();
+
+  void
   process_request(std::size_t parent_qid,
 		  const NewHistory& history,
 		  EvaluatorPtr eval,
@@ -84,9 +91,6 @@ private:
   next_guess(NewBeliefState* current_guess,
 	     NewBeliefState* guessing_input);
   
-  std::pair<NewBeliefState*, NewBeliefState*>
-  check_guessing_input(NewBeliefState* input);
-
   bool
   compute(NewBeliefState* input,
 	  std::size_t k1,
@@ -147,6 +151,10 @@ private:
   StreamingJoinerPtr joiner;
 
   ReturnPlanMapPtr return_plan;
+
+  ContextQueryPlanMapPtr queryplan_map;
+  NewBeliefState* total_guessing_input;
+  NewBeliefState* starting_guess;
 
   // to deal with cycles
   boost::thread* cycle_breaker_thread;

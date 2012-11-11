@@ -197,7 +197,8 @@ Options";
  
       NewContextPtr ctx(new NewContext(myid, pack_size, dlv_inst, 
 				       local_queryplan.localSignature, 
-				       return_plan, bridge_rules, 
+				       return_plan, queryplan_map,
+				       bridge_rules, 
 				       physical_neighbors, guessing_neighbors));
       ctx_vec->push_back(ctx);
      
