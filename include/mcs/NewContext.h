@@ -73,8 +73,8 @@ protected:
   
   bool
   compute(NewBeliefState* input,
-	  std::size_t k1,
-	  std::size_t k2,
+	  std::size_t& k1,
+	  std::size_t& k2,
 	  std::size_t parent_qid,
 	  EvaluatorPtr eval,
 	  NewConcurrentMessageDispatcherPtr md);
@@ -88,8 +88,8 @@ protected:
   bool
   read_and_send_k1_k2(std::size_t parent_qid,
 		      bool normal_solve,
-		      std::size_t k1,
-		      std::size_t k2,
+		      std::size_t& k1,
+		      std::size_t& k2,
 		      EvaluatorPtr eval,
 		      NewConcurrentMessageDispatcherPtr md);
 

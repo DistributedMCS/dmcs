@@ -65,8 +65,8 @@ NewContext::~NewContext()
 
 bool
 NewContext::compute(NewBeliefState* input,
-		    std::size_t k1,
-		    std::size_t k2,
+		    std::size_t& k1,
+		    std::size_t& k2,
 		    std::size_t parent_qid,
 		    EvaluatorPtr eval,
 		    NewConcurrentMessageDispatcherPtr md)
@@ -140,11 +140,12 @@ NewContext::next_guess(NewBeliefState* current_guess,
 bool
 NewContext::read_and_send_k1_k2(std::size_t parent_qid,
 				bool normal_solve,
-				std::size_t k1,
-				std::size_t k2,
+				std::size_t& k1,
+				std::size_t& k2,
 				EvaluatorPtr eval,
 				NewConcurrentMessageDispatcherPtr md)
 {
+  DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): k1 = " << k1 << ", k2 = " << k2);
   if (k1 == 0 && k2 == 0)
     {
       std::size_t models_sent = read_and_send(parent_qid, normal_solve, eval, md);
@@ -153,12 +154,13 @@ NewContext::read_and_send_k1_k2(std::size_t parent_qid,
     {
       std::size_t models_sent = read_and_send(parent_qid, normal_solve, eval, md);
       std::size_t models_counter = eval->getModelsCounter();
+
+      DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): models_counter = " << models_counter);
+      DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): models_sent    = " << models_sent);
       
       if (models_sent == 0)
 	// there was no model in the range [k1,k2]. models_counter are the number of models before k1.
 	{
-	  DBGLOG(DBG, "DLVEvaluator::read_and_send_k1_k2(): models_counter = " << models_counter);
-	  DBGLOG(DBG, "DLVEvaluator::read_and_send_k1_k2(): models_sent    = " << models_sent);
 	  assert (models_counter < k1);
 	  k2 -= models_counter;
 	  k1 -= models_counter;
