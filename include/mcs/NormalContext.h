@@ -90,7 +90,6 @@ private:
 
 private:
   bool is_leaf;
-  std::size_t ctx_offset;
   std::size_t query_counter;
 
   // The instantiator holds the path (string) to the local knowledge base

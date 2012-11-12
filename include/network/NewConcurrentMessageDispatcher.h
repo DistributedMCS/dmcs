@@ -52,7 +52,8 @@ public:
       JOINER_DISPATCHER_MQ,
       SEPARATOR,                 // separating 1-dimensional to 2-dimensional queues
       REQUEST_MQ,                // use: id - SEPARATOR to get the index of the vector
-      NEIGHBOR_OUT_MQ,           //      storing all queues of type id
+      CYCLE_BREAKER_MQ,          //      storing all queues of type id
+      NEIGHBOR_OUT_MQ,           
       NEIGHBOR_IN_MQ,
       JOIN_IN_MQ,
       EVAL_IN_MQ,

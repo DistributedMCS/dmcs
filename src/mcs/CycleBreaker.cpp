@@ -32,7 +32,8 @@
 
 namespace dmcs {
 
-CycleBreaker::CycleBreaker(std::size_t ctx_id,			   
+CycleBreaker::CycleBreaker(std::size_t ctx_id,
+			   std::size_t coff,
 			   EvaluatorPtr eval,
 			   ReturnPlanMapPtr return_plan,
 			   ContextQueryPlanMapPtr queryplan_map,
@@ -40,6 +41,7 @@ CycleBreaker::CycleBreaker(std::size_t ctx_id,
   : NewContext(ctx_id, return_plan, queryplan_map, bridge_rules),
     eval(eval)
 {
+  ctx_offset = coff;
   init();
 }
 
@@ -88,11 +90,10 @@ CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
 		      RequestDispatcherPtr rd,
 		      NewJoinerDispatcherPtr jd)
 {
-#if 0
   int timeout = 0;
   while (1)
     {
-      DBGLOG(DBG, "CycleBreaker[" << ctx_id << "]::startup(): Waiting at CYCLE_BREAKER_MQ[" << breaker_offset << "]");
+      DBGLOG(DBG, "CycleBreaker[" << ctx_id << "]::startup(): Waiting at CYCLE_BREAKER_MQ[" << ctx_offset << "]");
       // Listen to the CYCLE_BREAKER_MQ
       ForwardMessage* fwd_mess = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::CYCLE_BREAKER_MQ, ctx_offset, timeout);
      
@@ -124,8 +125,11 @@ CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
 	  current_guess = next_guess(current_guess, total_guessing_input);
 	}
       while (current_guess);
+
+      // Send the marker for the end of models
+      ReturnedBeliefState* rbs = new ReturnedBeliefState(NULL, parent_qid);
+      md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs, timeout);      
     }
-#endif
 }
 
 } // namespace dmcs

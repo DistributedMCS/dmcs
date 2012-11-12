@@ -45,7 +45,8 @@ namespace dmcs {
 class CycleBreaker : public NewContext
 {
 public:
-  CycleBreaker(std::size_t cid,
+  CycleBreaker(std::size_t ctx_id,
+	       std::size_t ctx_offset,
 	       EvaluatorPtr eval,
 	       ReturnPlanMapPtr return_plan,
 	       ContextQueryPlanMapPtr queryplan_map,
@@ -63,7 +64,6 @@ private:
   init();
 
 private:
-  std::size_t breaker_offset;
   EvaluatorPtr eval;
 };
 

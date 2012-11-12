@@ -171,7 +171,7 @@ read_input(int argc, char* argv[])
     (TOPOLOGY, boost::program_options::value<std::size_t>(&topology_type)->default_value(1), HELP_MESSAGE_TOPO)
     (PREFIX, boost::program_options::value<std::string>(&prefix)->default_value("student"), "Prefix for all files")
     (DMCSPATH, boost::program_options::value<std::string>(&dmcspath), "Path to dmcs binaries")
-    (STARTUP_TIME, boost::program_options::value<std::size_t>(&startup_time)->default_value(20), "Sleeping time after initializing all dmcsd")
+    (STARTUP_TIME, boost::program_options::value<std::size_t>(&startup_time)->default_value(3), "Sleeping time after initializing all dmcsd")
     (PACK_SIZE, boost::program_options::value<std::size_t>(&pack_size)->default_value(0), "Package size")
     (TIMEOUT, boost::program_options::value<std::size_t>(&timeout)->default_value(600), "Set timeout when running the test")
     (LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
@@ -713,15 +713,13 @@ write_plans(bool write_opt_plans)
 	{
 	  write_return_signature_to_file(file_rp, new_minV, 1023);
 	}
-      else
+
+      for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
 	{
-	  for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
+	  ContextPair cp = it->first;
+	  if (cp.second == i)
 	    {
-	      ContextPair cp = it->first;
-	      if (cp.second == i)
-		{
-		  write_return_signature_to_file(file_rp, new_minV, cp.first);
-		}
+	      write_return_signature_to_file(file_rp, new_minV, cp.first);
 	    }
 	}
       file_rp << "]\n";

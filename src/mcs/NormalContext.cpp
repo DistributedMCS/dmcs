@@ -145,6 +145,8 @@ NormalContext::startup(NewConcurrentMessageDispatcherPtr md,
   ctx_offset = md->createAndRegisterMQ(NewConcurrentMessageDispatcher::REQUEST_MQ);
   rd->registerIdOffset(ctx_id, ctx_offset);
 
+  md->createAndRegisterMQ(NewConcurrentMessageDispatcher::CYCLE_BREAKER_MQ, ctx_offset);
+
   if (!is_leaf)
     {
       assert (joiner);
@@ -157,7 +159,8 @@ NormalContext::startup(NewConcurrentMessageDispatcherPtr md,
   inst->startThread(eval, ctx_id, local_signature, md);
 
   // spawn a corresponding cycle breaker
-  CycleBreakerPtr cycle_breaker(new CycleBreaker(ctx_id, eval, return_plan, queryplan_map, bridge_rules));
+  CycleBreakerPtr cycle_breaker(new CycleBreaker(ctx_id, ctx_offset, eval, 
+						 return_plan, queryplan_map, bridge_rules));
   CycleBreakerWrapper cycle_breaker_wrapper;
   cycle_breaker_thread = new boost::thread(cycle_breaker_wrapper, cycle_breaker, md, rd, jd);
 

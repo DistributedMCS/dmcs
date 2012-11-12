@@ -124,9 +124,9 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
 	  IDAddress address = pos - this_starting_offset;
 	  
 	  ID id(kind, address);
-	  DBGLOG(DBG, "DLVEvaluator::reset_process(). pos = " << pos);
-	  DBGLOG(DBG, "DLVEvaluator::reset_process(). address = " << address);
-	  DBGLOG(DBG, "DLVEvaluator::reset_process(). id = " << id);
+	  //DBGLOG(DBG, "DLVEvaluator::reset_process(). pos = " << pos);
+	  //DBGLOG(DBG, "DLVEvaluator::reset_process(). address = " << address);
+	  //DBGLOG(DBG, "DLVEvaluator::reset_process(). id = " << id);
 	  const Belief& belief = btab->getByID(id);
 
 	  DBGLOG(DBG, "DLVEvaluator::reset_process(): Add " << belief.text << " into program stream.");

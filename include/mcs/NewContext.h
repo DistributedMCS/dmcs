@@ -102,6 +102,7 @@ protected:
 
 protected:
   std::size_t ctx_id;
+  std::size_t ctx_offset;
   ReturnPlanMapPtr return_plan;
   ContextQueryPlanMapPtr queryplan_map;
   BridgeRuleTablePtr bridge_rules;

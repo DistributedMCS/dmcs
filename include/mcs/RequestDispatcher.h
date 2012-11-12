@@ -55,8 +55,16 @@ public:
 	std::size_t qid = request->qid;
 	std::size_t receiver = receiver_from_qid(qid);
 	std::size_t offset = get_offset(receiver);
+	const NewHistory& history = request->history;
 
-	md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
+	if (history.find(receiver) == history.end())
+	  {
+	    md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
+	  }
+	else
+	  {
+	    md->send(NewConcurrentMessageDispatcher::CYCLE_BREAKER_MQ, offset, request, timeout);
+	  }
 
 	boost::this_thread::interruption_point();
       }
