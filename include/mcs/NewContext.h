@@ -93,7 +93,7 @@ protected:
 		      EvaluatorPtr eval,
 		      NewConcurrentMessageDispatcherPtr md);
 
-  void
+  bool
   send_out_result(std::size_t parent_qid,
 		  bool normal_solve,
 		  Heads* heads,

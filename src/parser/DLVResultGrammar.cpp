@@ -78,8 +78,7 @@ handle_finished_answerset::operator()(qi::unused_type, qi::unused_type, qi::unus
 
   state.adder(state.current);
   // create empty answer set for subsequent parsing
-  state.current = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-				     BeliefStateOffset::instance()->SIZE_BS());
+  state.reset_current();
 }
 
 } // namespacee dmcs

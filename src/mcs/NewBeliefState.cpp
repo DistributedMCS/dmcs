@@ -86,6 +86,47 @@ NewBeliefState::operator= (const NewBeliefState& bs)
 }
 
 
+// not an associative operator
+bool
+NewBeliefState::consistent_with(const NewBeliefState& bm,
+				std::size_t id,
+				const std::vector<std::size_t>& starting_offsets)
+{
+  assert (status_bit.size() == bm.status_bit.size());
+  assert (value_bit.size() == bm.value_bit.size());
+
+  if (isEpsilon(id, starting_offsets) || bm.isEpsilon(id, starting_offsets))
+    return true;
+
+  std::size_t start_bit = starting_offsets[id];
+  std::size_t end_bit;
+
+  if (id == starting_offsets.size() - 1)
+    {
+      end_bit = status_bit.size();
+    }
+  else
+    {
+      end_bit = starting_offsets[id+1];
+    }
+
+  // check in range [start_bit, end_bit)
+  std::size_t pos = bm.status_bit.get_next(start_bit);
+  
+  do
+    {
+      if (test(pos) != bm.test(pos))
+	{
+	  return false;
+	}
+      pos = bm.status_bit.get_next(pos);
+    }
+  while (pos != 0 && pos < end_bit);
+
+  return true;
+}
+
+
 
 std::ostream&
 NewBeliefState::print(std::ostream& os) const

@@ -135,6 +135,11 @@ struct NewBeliefState : private ostream_printable<NewBeliefState>
   friend inline void
   and_bm(NewBeliefState& bs, const BitMagic& mask);
 
+  bool
+  consistent_with(const NewBeliefState& bm, 
+		  std::size_t id,
+		  const std::vector<std::size_t>& starting_offsets);
+
   std::ostream&
   print(std::ostream& os) const;
 

@@ -73,8 +73,8 @@ NewContext::compute(NewBeliefState* input,
 {
   ///@todo: create heads = (NULL, k1, k2) in case of real leaf node.
   DBGLOG(DBG, "NormalContext[" << ctx_id << "]::compute(): input = " << *input);
-  Heads* heads = evaluate_bridge_rules(ctx_id, bridge_rules, input, k1, k2,
-				BeliefStateOffset::instance()->getStartingOffsets());      
+  Heads* heads = evaluate_bridge_rules(bridge_rules, input, k1, k2,
+				       BeliefStateOffset::instance()->getStartingOffsets());      
   
   if (heads == NULL)
     {
@@ -218,8 +218,15 @@ NewContext::read_and_send(std::size_t parent_qid,
       else
 	{
 	  DBGLOG(DBG, "NewContext[" << ctx_id << "]::read_and_send(). Got res = " << *belief_state);
-	  ++models_counter;
-	  send_out_result(parent_qid, normal_solve, heads, belief_state, md);
+	  if (send_out_result(parent_qid, normal_solve, heads, belief_state, md))
+	    {
+	      ++models_counter;
+	      DBGLOG(DBG, "NewContext[" << ctx_id << "]::read_and_send(). successfully sent.");
+	    }
+	  else
+	    {
+	      DBGLOG(DBG, "NewContext[" << ctx_id << "]::read_and_send().NOT sent due to wrong guess.");
+	    }
 	}
     }
 
@@ -227,7 +234,7 @@ NewContext::read_and_send(std::size_t parent_qid,
 }
 
 
-void
+bool
 NewContext::send_out_result(std::size_t parent_qid,
 			    bool normal_solve,
 			    Heads* heads,
@@ -242,6 +249,21 @@ NewContext::send_out_result(std::size_t parent_qid,
 	  const NewBeliefState* input_bs = heads_plus_bs->getInputBeliefState();
 
 	  // combine
+	  DBGLOG(DBG, "NewContext::send_out_result(): belief_state = " << *belief_state);
+	  DBGLOG(DBG, "NewContext::send_out_result(): input_bs     = " << *input_bs);
+	  if (!belief_state->consistent_with(*input_bs, ctx_id,
+					     BeliefStateOffset::instance()->getStartingOffsets()))
+	    {
+	      DBGLOG(DBG, "NewContext::send_out_result(): conflict detected!");
+	      delete belief_state;
+	      belief_state = NULL;
+
+	      // delete heads_plus_bs?
+	      // where to delete input_bs?
+
+	      return false;
+	    }
+	    
 	  (*belief_state) = (*belief_state) | (*input_bs); 
 	}
       // otherwise, this context broke a cycle and we don't have input_bs
@@ -258,6 +280,7 @@ NewContext::send_out_result(std::size_t parent_qid,
 
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, rbs, timeout);
+  return true;
 }
 
 

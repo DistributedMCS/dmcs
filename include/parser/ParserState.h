@@ -47,11 +47,29 @@ struct ParserState
 	      DLVResultParser::BeliefStateAdder a)
     : ctx_id(cid),
       btab(b),
-      current(new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(), 
-				 BeliefStateOffset::instance()->SIZE_BS())),
       adder(a)
   {
-    current->setEpsilon(ctx_id, BeliefStateOffset::instance()->getStartingOffsets());
+    reset_current();
+  }
+
+  void
+  reset_current()
+  {
+    current = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+				 BeliefStateOffset::instance()->SIZE_BS());
+
+    const std::vector<std::size_t>& starting_offsets = BeliefStateOffset::instance()->getStartingOffsets();
+    current->setEpsilon(ctx_id, starting_offsets);
+
+    std::size_t start_bit = starting_offsets[ctx_id] + 1;
+    std::size_t end_bit;
+    if (ctx_id == starting_offsets.size() - 1)
+      end_bit = current->status_bit.size();
+    else
+      end_bit = starting_offsets[ctx_id+1];
+
+    for (std::size_t i = start_bit; i < end_bit; ++i)
+      current->set(i, NewBeliefState::DMCS_FALSE);
   }
 };
 
