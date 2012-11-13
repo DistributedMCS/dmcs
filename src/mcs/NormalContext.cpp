@@ -81,6 +81,10 @@ NormalContext::~NormalContext()
 void
 NormalContext::init()
 {
+  std::size_t n = BeliefStateOffset::instance()->NO_BLOCKS();
+  std::size_t s = BeliefStateOffset::instance()->SIZE_BS();
+  const std::vector<std::size_t>& starting_offsets =  BeliefStateOffset::instance()->getStartingOffsets();
+
   // compute total_guessing_input once and for all
   if (guessing_neighbors == NewNeighborVecPtr())
     {
@@ -89,19 +93,16 @@ NormalContext::init()
     }
   else
     {
-      total_guessing_input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-						BeliefStateOffset::instance()->SIZE_BS());
-
-      starting_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-					  BeliefStateOffset::instance()->SIZE_BS());
+      total_guessing_input = new NewBeliefState(n, s);
+      starting_guess = new NewBeliefState(n, s);
 
       for (NewNeighborVec::const_iterator it = guessing_neighbors->begin(); it != guessing_neighbors->end(); ++it)
 	{
 	  NewNeighborPtr neighbor = *it;
 	  std::size_t nid = neighbor->neighbor_id;
 
-	  total_guessing_input->setEpsilon(nid, BeliefStateOffset::instance()->getStartingOffsets());
-	  starting_guess->setEpsilon(nid, BeliefStateOffset::instance()->getStartingOffsets());
+	  total_guessing_input->setEpsilon(nid, starting_offsets);
+	  starting_guess->setEpsilon(nid, starting_offsets);
 
 	  ContextQueryPlanMap::const_iterator qit = queryplan_map->find(nid);
 	  assert (qit != queryplan_map->end());
@@ -113,7 +114,8 @@ NormalContext::init()
 	      for (BeliefTable::AddressIterator ait = iters.first; ait != iters.second; ++ait)
 		{
 		  const Belief& b = *ait;
-		  total_guessing_input->set(nid, b.address, BeliefStateOffset::instance()->getStartingOffsets());
+		  total_guessing_input->set(nid, b.address, starting_offsets);
+		  starting_guess->set(nid, b.address, starting_offsets, NewBeliefState::DMCS_FALSE);
 		}
 	    }
 	}

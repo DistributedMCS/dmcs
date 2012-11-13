@@ -59,11 +59,13 @@ CycleBreaker::~CycleBreaker()
 void
 CycleBreaker::init()
 {
-  total_guessing_input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-					    BeliefStateOffset::instance()->SIZE_BS());
+  std::size_t n = BeliefStateOffset::instance()->NO_BLOCKS();
+  std::size_t s = BeliefStateOffset::instance()->SIZE_BS();
+  const std::vector<std::size_t>& starting_offsets = BeliefStateOffset::instance()->getStartingOffsets();
 
-  starting_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-				      BeliefStateOffset::instance()->SIZE_BS());
+  total_guessing_input = new NewBeliefState(n, s);
+
+  starting_guess = new NewBeliefState(n, s);
 
   for (ContextQueryPlanMap::const_iterator it = queryplan_map->begin(); it != queryplan_map->end(); ++it)
     {
@@ -71,14 +73,15 @@ CycleBreaker::init()
       const ContextQueryPlan& cqp = it->second;
       if (cqp.groundInputSignature)
 	{
-	  total_guessing_input->setEpsilon(cid, BeliefStateOffset::instance()->getStartingOffsets());
-	  starting_guess->setEpsilon(cid, BeliefStateOffset::instance()->getStartingOffsets());
+	  total_guessing_input->setEpsilon(cid, starting_offsets);
+	  starting_guess->setEpsilon(cid, starting_offsets);
 
 	  std::pair<BeliefTable::AddressIterator, BeliefTable::AddressIterator> iters = cqp.groundInputSignature->getAllByAddress();
 	  for (BeliefTable::AddressIterator ait = iters.first; ait != iters.second; ++ait)
 	    {
 	      const Belief& b = *ait;
-	      total_guessing_input->set(cid, b.address, BeliefStateOffset::instance()->getStartingOffsets());
+	      total_guessing_input->set(cid, b.address, starting_offsets);
+	      starting_guess->set(cid, b.address, starting_offsets, NewBeliefState::DMCS_FALSE);
 	    }
 	}
     }

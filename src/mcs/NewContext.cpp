@@ -73,8 +73,13 @@ NewContext::compute(NewBeliefState* input,
 {
   ///@todo: create heads = (NULL, k1, k2) in case of real leaf node.
   DBGLOG(DBG, "NormalContext[" << ctx_id << "]::compute(): input = " << *input);
-  Heads* heads = evaluate_bridge_rules(bridge_rules, input, k1, k2,
+  Heads* heads = evaluate_bridge_rules(ctx_id, bridge_rules, input, k1, k2,
 				BeliefStateOffset::instance()->getStartingOffsets());      
+  
+  if (heads == NULL)
+    {
+      return false;
+    }
   
   DBGLOG(DBG, "NormalContext[" << ctx_id << "]::compute(): heads = " << *(heads->getHeads()));
   // send heads to Evaluator
@@ -103,7 +108,7 @@ NewContext::next_guess(NewBeliefState* current_guess,
       
       if (bit % (s+1) != 0)
 	{
-	  if (current_guess->test(bit) == NewBeliefState::DMCS_UNDEF)
+	  if (current_guess->test(bit) == NewBeliefState::DMCS_FALSE)
 	    {
 	      // set this bit to 1
 	      current_guess->set(bit, NewBeliefState::DMCS_TRUE);
@@ -115,7 +120,7 @@ NewContext::next_guess(NewBeliefState* current_guess,
 		{
 		  if (previous_bit % (s+1) != 0)
 		    {
-		      current_guess->set(previous_bit, NewBeliefState::DMCS_UNDEF);
+		      current_guess->set(previous_bit, NewBeliefState::DMCS_FALSE);
 		    }
 		  previous_bit = guessing_input->getNext(previous_bit);
 		}
