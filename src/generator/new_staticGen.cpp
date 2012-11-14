@@ -262,14 +262,12 @@ read_input(int argc, char* argv[])
       }
     } // switch
 
-#if 0
-  DMCS_LOG_INFO("Number of contexts:                            " << no_contexts);
-  DMCS_LOG_INFO("Number of atoms per context:                   " << no_atoms);
-  DMCS_LOG_INFO("Number of maximum interface atoms per context: " << no_interface_atoms);
-  DMCS_LOG_INFO("Number of maximum bridge rules per context:    " << no_bridge_rules);
-  DMCS_LOG_INFO("Topology type:                                 " << topology_type);
-  DMCS_LOG_INFO("Prefix for filename:                           " << prefix);
-#endif 
+  DBGLOG(DBG, "Number of contexts:                            " << no_contexts);
+  DBGLOG(DBG, "Number of atoms per context:                   " << no_atoms);
+  DBGLOG(DBG, "Number of maximum interface atoms per context: " << no_interface_atoms);
+  DBGLOG(DBG, "Number of maximum bridge rules per context:    " << no_bridge_rules);
+  DBGLOG(DBG, "Topology type:                                 " << topology_type);
+  DBGLOG(DBG, "Prefix for filename:                           " << prefix);
 
   return 0;
 }
@@ -405,7 +403,7 @@ generate_orig_topology()
 
 
 #if defined(DEBUG)
-  //  DMCS_LOG_DEBUG("Original topology:");
+  DBGLOG(DBG, "Original topology:");
   for (std::size_t i = 0; i < no_contexts; ++ i)
     {
       NeighborVecPtr neighbors = (*orig_topo)[i];
@@ -413,7 +411,7 @@ generate_orig_topology()
       std::ostringstream oss;
       std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(oss, " "));
 
-      //DMCS_LOG_DEBUG(i << " --> " << oss.str());
+      DBGLOG(DBG, i << " --> " << oss.str());
     }
 #endif
 }
@@ -435,14 +433,13 @@ generate_contexts()
   // interface in the optimal topology.
 
 #ifdef DEBUG
-  //DMCS_LOG_TRACE("minV: " << *new_minV);
-  //DMCS_LOG_TRACE("Original local interface:");
+  DBGLOG(DBG, "minV: " << *new_minV);
+  DBGLOG(DBG, "Original local interface:");
 
   for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
     {
       ContextPair cp = it->first;
-
-      //DMCS_LOG_TRACE("(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
+      DBGLOG(DBG, "(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
     }
 #endif
 }
@@ -499,13 +496,13 @@ generate_opt_topology()
   opt_topo_gen->create_opt_interface();
 
 #ifdef DEBUG
-  //DMCS_LOG_DEBUG("Optimal local interface:");
+  DBGLOG(DBG, "Optimal local interface:");
 
   for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
     {
       ContextPair cp = it->first;
 
-      //DMCS_LOG_DEBUG("(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
+      DBGLOG(DBG, "(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
     }
 #endif
 }
@@ -1146,13 +1143,13 @@ main(int argc, char* argv[])
 
   if (gen_data)
     {
-      //DMCS_LOG_TRACE("generate_orig_topology");
+      DBGLOG(DBG, "generate_orig_topology");
       generate_orig_topology();
 
-      //DMCS_LOG_TRACE("generate_contexts");
+      DBGLOG(DBG, "generate_contexts");
       generate_contexts();
  
-      //DMCS_LOG_TRACE("print_command_lines");
+      DBGLOG(DBG, "print_command_lines");
       print_command_lines();
 
       if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
@@ -1168,28 +1165,9 @@ main(int argc, char* argv[])
     }
   else
     {
-      //DMCS_LOG_TRACE("print_command_lines ONLY");
+      DBGLOG(DBG, "print_command_lines ONLY");
       print_command_lines();
     }
-
-
-  /*
-  //DMCS_LOG_TRACE("print_dlv_command_lines");
-  //print_dlv_command_lines();
-
-  // binary tree topology is a special case, orig_qp can be reused to
-  // print opt_qp. Hence, we just need to print without any further
-  // construction for the opt case.
-  if (topology_type == BINARY_TREE_TOPOLOGY)
-    {
-      print_query_plan(orig_qp, prefix + OPT_EXT);
-      print_opt_command_lines();
-      //print_opt_dlv_command_lines();
-    }
-
-  // only for some fixed topologies where optimization is possible
-
-  */
 
   return 0;
 }
