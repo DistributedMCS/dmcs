@@ -30,7 +30,6 @@
 #ifndef GEN_MULTIPLE_RING_OPT_TOPO_GENERATOR_H
 #define GEN_MULTIPLE_RING_OPT_TOPO_GENERATOR_H
 
-#include "dmcs/BeliefCombination.h"
 #include "generator/OptTopologyGenerator.h"
 
 namespace dmcs { namespace generator {

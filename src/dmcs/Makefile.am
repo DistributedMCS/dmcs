@@ -26,18 +26,10 @@ LIBS = \
 	$(BOOST_GRAPH_LIBS)
 
 
-noinst_LIBRARIES = libdmcs.a libcache.a liblog.a
-
-# the cache library
-libcache_a_SOURCES = Cache.cpp
-
-# the cache library
-liblog_a_SOURCES = Log.cpp
+noinst_LIBRARIES = libdmcs.a
 
 # the DMCS library
 libdmcs_a_SOURCES = \
-		BaseDMCS.cpp \
-		Debug.cpp \
 		Engine.cpp \
 		Instantiator.cpp \
 		Evaluator.cpp \
@@ -45,11 +37,5 @@ libdmcs_a_SOURCES = \
 		DLVEvaluator.cpp \
 		DLVInstantiator.cpp \
 		InputProvider.cpp \
-		OptDMCS.cpp \
-		PrimitiveDMCS.cpp \
-                QueryPlan.cpp \
-                BeliefCombination.cpp \
-		PrimitiveDMCS.cpp \
-		OptDMCS.cpp \
 		URLBuf.cpp
-#		StreamingDMCS.cpp
+

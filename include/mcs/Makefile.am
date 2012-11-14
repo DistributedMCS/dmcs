@@ -5,14 +5,12 @@ noinst_HEADERS =  \
 		BackwardMessage.h \
 		BaseJoiner.h \
 		Belief.h \
-		BeliefState.h \
 		BeliefStateOffset.h \
 		BeliefTable.h \
 		BridgeRule.h \
 		BridgeRuleEvaluator.h \
 		BridgeRuleTable.h \
 		ForwardMessage.h \
-		HashedBiMap.h \
 		Heads.h \
 		ID.h \
 		JoinIn.h \
@@ -34,10 +32,7 @@ noinst_HEADERS =  \
 		Registry.h \
 		RequestDispatcher.h \
 		ReturnedBeliefState.h \
-		ResourceManager.h \
 		Rule.h \
-		Signature.h \
 		StreamingJoiner.h \
-		Table.h \
-		Theory.h
+		Table.h 
 

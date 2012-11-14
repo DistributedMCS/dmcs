@@ -31,7 +31,7 @@
 #ifndef __NEW_DMCS_GEN_H__
 #define __NEW_DMCS_GEN_H__
 
-#include "generator/ContextGenerator.h"
+#include "generator/NewContextGenerator.h"
 #include "mcs/BeliefTable.h"
 
 

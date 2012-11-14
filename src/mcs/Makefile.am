@@ -46,6 +46,5 @@ libmcs_a_SOURCES = \
 		Pool.cpp \
 		QueryID.cpp \
 		QueryPlan.cpp \
-	  	ResourceManager.cpp \
 		ReturnedBeliefState.cpp \
 		StreamingJoiner.cpp 

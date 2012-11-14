@@ -2,7 +2,7 @@
 #define __QUERY_PLAN__INCLUDED__
 
 #include "mcs/ID.h"
-#include "mcs/BeliefState.h"
+#include "mcs/NewBeliefState.h"
 #include "mcs/BeliefTable.h"
 #include "mcs/Printhelpers.h"
 
@@ -19,7 +19,7 @@ namespace dmcs
 typedef std::size_t ContextID;
 typedef std::list<std::string>
   ConstantList;
-typedef std::map<ContextID, BeliefState>
+typedef std::map<ContextID, NewBeliefState>
   OutputProjectionMap;
 typedef std::map<std::string, unsigned>
   PredicateArityMap;

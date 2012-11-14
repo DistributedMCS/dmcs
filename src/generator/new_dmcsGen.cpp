@@ -36,7 +36,7 @@
 #include <sstream>
 
 #include "generator/new_dmcsGen.h"
-#include "dmcs/Log.h"
+//#include "dmcs/Log.h"
 
 namespace dmcs { namespace generator {
 

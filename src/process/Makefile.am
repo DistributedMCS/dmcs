@@ -30,7 +30,5 @@ noinst_LIBRARIES = libprocess.a
 
 # the process library
 libprocess_a_SOURCES = \
-		ClaspProcess.cpp \
 		DLVProcess.cpp \
-		NewProcessBuf.cpp \
-		ProcessBuf.cpp
+		NewProcessBuf.cpp 

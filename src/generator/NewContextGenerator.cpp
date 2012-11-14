@@ -35,7 +35,7 @@
 #include "generator/NewContextGenerator.h"
 #include "mcs/BeliefStateOffset.h"
 
-#include "dmcs/Log.h"
+//#include "dmcs/Log.h"
 
 #include <iostream>
 #include <sstream>
@@ -104,7 +104,7 @@ NewContextGenerator::generate()
       (*minV)[0] = maxBeliefSet(range);
     }
 
-  DMCS_LOG_TRACE("DONE");
+  //DMCS_LOG_TRACE("DONE");
 #endif
 }
 
@@ -159,7 +159,7 @@ addUniqueBridgeAtom(BridgeRulePtr& r, std::size_t neighbor_id, int neighbor_atom
 {
   BridgeAtom bap = std::make_pair(neighbor_id, std::max(neighbor_atom, -neighbor_atom));
 
-  DMCS_LOG_TRACE("Adding atom " << neighbor_atom << " of neighbor " << neighbor_id);
+  //DMCS_LOG_TRACE("Adding atom " << neighbor_atom << " of neighbor " << neighbor_id);
 
   PositiveBridgeBody& pb = getPositiveBody(r);
   NegativeBridgeBody& nb = getNegativeBody(r);
@@ -259,21 +259,21 @@ NewContextGenerator::cover_neighbors(std::size_t id)
       for (PositiveBridgeBody::const_iterator j = pb.begin(); j != pb.end(); ++j)
 	{
 	  nbors.insert(j->first);
-	  DMCS_LOG_TRACE("insert neighbor id" << j->first);
+	  //DMCS_LOG_TRACE("insert neighbor id" << j->first);
 	}
       
       for (NegativeBridgeBody::const_iterator j = nb.begin(); j != nb.end(); ++j)
 	{
 	  nbors.insert(j->first);
-	  DMCS_LOG_TRACE("insert neighbor id" << j->first);
+	  //DMCS_LOG_TRACE("insert neighbor id" << j->first);
 	}
     }
   
   // this only works if we generate bridge rules from neighbors.
   // otw, we have to compare the actual neighbors, not just the number of them
 
-  DMCS_LOG_TRACE("neighbor size: " << nbors.size());
-  DMCS_LOG_TRACE("orig nb " << id << ", size: " << ( (*orig_topo)[id]->size() ) );
+  //DMCS_LOG_TRACE("neighbor size: " << nbors.size());
+  //DMCS_LOG_TRACE("orig nb " << id << ", size: " << ( (*orig_topo)[id]->size() ) );
 
   return (nbors.size() == (*orig_topo)[id]->size());
 }

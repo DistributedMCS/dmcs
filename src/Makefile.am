@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = mcs dmcs dyndmcs generator network loopformula parser process solver 
+SUBDIRS = mcs dmcs generator network parser process 
 
 # global preprocessor flags
 AM_CPPFLAGS = \
@@ -35,7 +35,7 @@ LIBS = \
 	$(LOG4CXX_LIBS)
 
 # install dmcsd and dmcsc into $prefix/bin
-bin_PROGRAMS = dmcsd dmcsc new_dmcsd new_dmcsc new_dmcsm
+bin_PROGRAMS = new_dmcsd new_dmcsc new_dmcsm
 
 # the new_dmcsd binary
 new_dmcsd_SOURCES = \
@@ -56,7 +56,6 @@ new_dmcsc_SOURCES = \
 
 new_dmcsc_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
-	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/mcs/libmcs.a 
@@ -68,32 +67,7 @@ new_dmcsm_SOURCES = \
 new_dmcsm_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/parser/libparser.a \
-	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/mcs/libmcs.a 
 
-# the dmcsd binary
-dmcsd_SOURCES = \
-		dmcsd.cpp
 
-dmcsd_LDADD = \
-	$(top_builddir)/src/dmcs/liblog.a \
-	$(top_builddir)/src/network/libnetwork.a \
-	$(top_builddir)/src/dmcs/libdmcs.a \
-	$(top_builddir)/src/network/libthreads.a \
-	$(top_builddir)/src/process/libprocess.a \
-	$(top_builddir)/src/dmcs/libcache.a \
-	$(top_builddir)/src/loopformula/libtranslation.a \
-	$(top_builddir)/src/dyndmcs/libdyndmcs.a \
-	$(top_builddir)/src/solver/libsolver.a \
-	$(top_builddir)/src/mcs/libmcs.a \
-	$(top_builddir)/relsat-20070104/librelsat.a \
-	@LIBCURL@
-
-# the dmcsc binary
-dmcsc_SOURCES = \
-		dmcsc.cpp 
-
-dmcsc_LDADD = \
-	$(top_builddir)/src/dmcs/liblog.a \
-	$(top_builddir)/src/dmcs/libdmcs.a

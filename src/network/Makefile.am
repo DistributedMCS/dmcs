@@ -29,22 +29,11 @@ noinst_LIBRARIES = libnetwork.a libthreads.a
 
 # the NETWORK library
 libnetwork_a_SOURCES = \
-		Server.cpp \
 		NewServer.cpp \
 		Manager.cpp
 
-
 # the THREADS library
 libthreads_a_SOURCES = \
-		ConcurrentMessageDispatcher.cpp \
-		ConcurrentMessageQueueFactory.cpp \
-		JoinThread.cpp \
-		OutputThread.cpp \
-		StreamingDMCSThread.cpp \
-		ThreadFactory.cpp \
-		RelSatSolverThread.cpp \
-		OutputDispatcher.cpp \
-		JoinerDispatcher.cpp \
 		NewClient.cpp \
 		NewConcurrentMessageDispatcher.cpp \
 		NewOutputThread.cpp \
@@ -52,8 +41,3 @@ libthreads_a_SOURCES = \
 		NewNeighborThread.cpp \
 		NewHandler.cpp \
 		NewThreadFactory.cpp
-
-
-# don't compile boost::message_queue for now
-#		MessageDispatcher.cpp
-#		MessageQueueFactory.cpp

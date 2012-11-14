@@ -46,18 +46,14 @@
 #include "generator/RingOptTopoGenerator.h"
 #include "generator/RingEdgeTopoGenerator.h"
 #include "generator/NewContextGenerator.h"
-#include "generator/QueryPlanWriter.h"
 
 #include "dmcs/ProgramOptions.h"
-#include "dmcs/QueryPlan.h"
-#include "dmcs/Log.h"
+//#include "dmcs/Log.h"
 
-#include "mcs/BeliefTable.h"
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/NewBeliefState.h"
 
 #include "mcs/Rule.h"
-#include "mcs/Signature.h"
 
 #include <boost/program_options.hpp>
 
@@ -115,14 +111,9 @@ BeliefTableVecPtr context_interface_table_vec(new BeliefTableVec);
 
 NewBeliefStatePtr new_minV;
 
-SignatureVecPtr sigmas(new SignatureVec);
 InterfaceVecPtr context_interfaces(new InterfaceVec);
-BeliefStatePtr  minV;
 LocalInterfaceMapPtr lcim(new LocalInterfaceMap);
 LocalInterfaceMapPtr opt_lcim(new LocalInterfaceMap);
-
-QueryPlanPtr orig_qp(new QueryPlan);
-QueryPlanPtr opt_qp(new QueryPlan);
 
 TopologyGenerator* orig_topo_gen;
 OptTopologyGenerator* opt_topo_gen;
@@ -188,16 +179,6 @@ read_input(int argc, char* argv[])
     {
       std::cerr << desc;
       return 1;
-    }
-
-  // setup log4cxx
-  if (logging.empty())
-    {
-      init_loggers("dmcsGen");
-    }
-  else
-    {
-      init_loggers("dmcsGen", logging.c_str());
     }
 
   switch (topology_type)
@@ -281,12 +262,14 @@ read_input(int argc, char* argv[])
       }
     } // switch
 
+#if 0
   DMCS_LOG_INFO("Number of contexts:                            " << no_contexts);
   DMCS_LOG_INFO("Number of atoms per context:                   " << no_atoms);
   DMCS_LOG_INFO("Number of maximum interface atoms per context: " << no_interface_atoms);
   DMCS_LOG_INFO("Number of maximum bridge rules per context:    " << no_bridge_rules);
   DMCS_LOG_INFO("Topology type:                                 " << topology_type);
   DMCS_LOG_INFO("Prefix for filename:                           " << prefix);
+#endif 
 
   return 0;
 }
@@ -422,7 +405,7 @@ generate_orig_topology()
 
 
 #if defined(DEBUG)
-  DMCS_LOG_DEBUG("Original topology:");
+  //  DMCS_LOG_DEBUG("Original topology:");
   for (std::size_t i = 0; i < no_contexts; ++ i)
     {
       NeighborVecPtr neighbors = (*orig_topo)[i];
@@ -430,7 +413,7 @@ generate_orig_topology()
       std::ostringstream oss;
       std::copy(neighbors->begin(), neighbors->end(), std::ostream_iterator<std::size_t>(oss, " "));
 
-      DMCS_LOG_DEBUG(i << " --> " << oss.str());
+      //DMCS_LOG_DEBUG(i << " --> " << oss.str());
     }
 #endif
 }
@@ -452,14 +435,14 @@ generate_contexts()
   // interface in the optimal topology.
 
 #ifdef DEBUG
-  DMCS_LOG_TRACE("minV: " << *new_minV);
-  DMCS_LOG_TRACE("Original local interface:");
+  //DMCS_LOG_TRACE("minV: " << *new_minV);
+  //DMCS_LOG_TRACE("Original local interface:");
 
   for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
     {
       ContextPair cp = it->first;
 
-      DMCS_LOG_TRACE("(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
+      //DMCS_LOG_TRACE("(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
     }
 #endif
 }
@@ -516,13 +499,13 @@ generate_opt_topology()
   opt_topo_gen->create_opt_interface();
 
 #ifdef DEBUG
-  DMCS_LOG_DEBUG("Optimal local interface:");
+  //DMCS_LOG_DEBUG("Optimal local interface:");
 
   for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
     {
       ContextPair cp = it->first;
 
-      DMCS_LOG_DEBUG("(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
+      //DMCS_LOG_DEBUG("(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
     }
 #endif
 }
@@ -1163,13 +1146,13 @@ main(int argc, char* argv[])
 
   if (gen_data)
     {
-      DMCS_LOG_TRACE("generate_orig_topology");
+      //DMCS_LOG_TRACE("generate_orig_topology");
       generate_orig_topology();
 
-      DMCS_LOG_TRACE("generate_contexts");
+      //DMCS_LOG_TRACE("generate_contexts");
       generate_contexts();
  
-      DMCS_LOG_TRACE("print_command_lines");
+      //DMCS_LOG_TRACE("print_command_lines");
       print_command_lines();
 
       if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
@@ -1185,7 +1168,7 @@ main(int argc, char* argv[])
     }
   else
     {
-      DMCS_LOG_TRACE("print_command_lines ONLY");
+      //DMCS_LOG_TRACE("print_command_lines ONLY");
       print_command_lines();
     }
 
