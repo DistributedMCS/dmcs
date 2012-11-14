@@ -35,7 +35,7 @@
 
 #include "network/connection.hpp"
 #include "network/NewConcurrentMessageDispatcher.h"
-#include "mcs/NewOutputDispatcher.h"
+#include "network/NewOutputDispatcher.h"
 
 namespace dmcs {
 

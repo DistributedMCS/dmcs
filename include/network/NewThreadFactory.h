@@ -32,11 +32,11 @@
 
 #include <boost/thread.hpp>
 
-#include "mcs/NewJoinerDispatcher.h"
-#include "mcs/NewOutputDispatcher.h"
+#include "network/NewJoinerDispatcher.h"
+#include "network/NewOutputDispatcher.h"
 #include "mcs/NewNeighbor.h"
 #include "mcs/Registry.h"
-#include "mcs/RequestDispatcher.h"
+#include "network/RequestDispatcher.h"
 #include "network/NewNeighborThread.h"
 
 namespace dmcs {

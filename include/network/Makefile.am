@@ -10,7 +10,10 @@ noinst_HEADERS =  \
 		HandlerWrapper.h \
 		NewNeighborOut.h \
 		NewNeighborThread.h \
+		NewJoinerDispatcher.h \
+		NewOutputDispatcher.h \
 		NewOutputThread.h \
+		RequestDispatcher.h \
 		NewServer.h \
 		NewThreadFactory.h \
 		connection.hpp

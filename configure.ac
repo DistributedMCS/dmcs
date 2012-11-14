@@ -203,9 +203,7 @@ AC_CONFIG_FILES([
            Makefile 
            include/Makefile
            include/dmcs/Makefile
-           include/dyndmcs/Makefile
            include/generator/Makefile
-           include/loopformula/Makefile
            include/mcs/Makefile
            include/network/Makefile
            include/parser/Makefile
@@ -213,9 +211,7 @@ AC_CONFIG_FILES([
            include/solver/Makefile
            src/Makefile
            src/dmcs/Makefile
-           src/dyndmcs/Makefile
            src/generator/Makefile
-           src/loopformula/Makefile
            src/mcs/Makefile
            src/network/Makefile
            src/parser/Makefile

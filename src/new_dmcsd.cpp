@@ -44,7 +44,7 @@
 #include "mcs/ID.h"
 #include "mcs/NormalContext.h"
 #include "mcs/QueryPlan.h"
-#include "mcs/RequestDispatcher.h"
+#include "network/RequestDispatcher.h"
 #include "network/NewClient.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "network/NewServer.h"

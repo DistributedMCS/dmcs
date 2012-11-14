@@ -22,15 +22,12 @@ noinst_HEADERS =  \
 		NewMessage.h \
 		NormalContext.h \
 		NewNeighbor.h \
-		NewJoinerDispatcher.h \
-		NewOutputDispatcher.h \
 		Pool.h \
 		Printhelpers.h \
 		ProxySignatureByLocal.h \
 		QueryID.h \
 		QueryPlan.h \
 		Registry.h \
-		RequestDispatcher.h \
 		ReturnedBeliefState.h \
 		Rule.h \
 		StreamingJoiner.h \

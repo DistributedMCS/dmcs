@@ -35,7 +35,7 @@
 #include "dmcs/Evaluator.h"
 #include "mcs/BridgeRuleEvaluator.h"
 #include "mcs/QueryPlan.h"
-#include "mcs/RequestDispatcher.h"
+#include "network/RequestDispatcher.h"
 #include "mcs/StreamingJoiner.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "mcs/NewContext.h"

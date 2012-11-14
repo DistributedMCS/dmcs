@@ -35,7 +35,7 @@
 #include <boost/thread/thread.hpp>
 
 #include "mcs/ForwardMessage.h"
-#include "mcs/NewOutputDispatcher.h"
+#include "network/NewOutputDispatcher.h"
 #include "network/connection.hpp"
 #include "network/NewOutputThread.h"
 

@@ -33,7 +33,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include "mcs/NewBeliefState.h"
-#include "mcs/NewJoinerDispatcher.h"
+#include "network/NewJoinerDispatcher.h"
 #include "mcs/NewNeighbor.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 

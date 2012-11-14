@@ -35,9 +35,9 @@
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/NormalContext.h"
-#include "mcs/NewOutputDispatcher.h"
-#include "mcs/NewJoinerDispatcher.h"
-#include "mcs/RequestDispatcher.h"
+#include "network/NewOutputDispatcher.h"
+#include "network/NewJoinerDispatcher.h"
+#include "network/RequestDispatcher.h"
 #include "mcs/NewNeighbor.h"
 
 namespace dmcs {
