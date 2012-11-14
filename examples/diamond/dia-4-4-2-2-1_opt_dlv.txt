@@ -1,2 +1,0 @@
-dlv -silent -filter=a1,b1,c1,d1,d2,b3,c3,a4,b4,d4 tests/dia-4-4-2-2-1.dlv | sort | uniq 
-dlv -silent -filter=a1,b1,c1,d1,d2,b3,c3,a4,b4,d4 tests/dia-4-4-2-2-1.dlv | sort | uniq | wc -l

@@ -1,2 +1,0 @@
-dlv -silent -filter=a1,b1,c1,d1,b2,d3,c4,d4 tests/diamond-4-4-2-2-a.dlv | sort | uniq 
-dlv -silent -filter=a1,b1,c1,d1,b2,d3,c4,d4 tests/diamond-4-4-2-2-a.dlv | sort | uniq | wc -l
