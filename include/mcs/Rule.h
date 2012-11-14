@@ -36,7 +36,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
-#include "dyndmcs/Variable.h"
+#include "mcs/Variable.h"
 
 
 

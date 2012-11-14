@@ -34,5 +34,6 @@ noinst_HEADERS =  \
 		ReturnedBeliefState.h \
 		Rule.h \
 		StreamingJoiner.h \
-		Table.h 
+		Table.h \
+		Variable.h
 
