@@ -56,11 +56,13 @@ createOneTest()
 
 
 ###############################################################################
-
+#
 # extract command line arguments:
 #
 # -d yes/no -p N
 #
+# -d: generate data (yes) or just command lines (no)
+# -p: pack size
 
 gendata=no
 packsize=0

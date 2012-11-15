@@ -172,6 +172,11 @@ read_input(int argc, char* argv[])
   boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
   boost::program_options::notify(vm);
 
+  if (startup_time < 2*no_contexts)
+    {
+      startup_time = 2*no_contexts;
+    }
+
   if (vm.count(HELP) || 
       prefix.compare("") == 0 || dmcspath.compare("") == 0 || 
       no_contexts == 0 || no_atoms == 0 ||
@@ -824,6 +829,7 @@ print_dmcsd_line(bool is_shellscript,
     }
 
   file << std::endl;
+  file << "sleep 1" << std::endl;
 }
 
 
@@ -867,7 +873,7 @@ print_command_lines_file(bool is_shellscript,
       file << "sleep " << startup_time << std::endl;
     }
 
-  file << "/usr/bin/time --portability -o " << prefix << "-time.log ";
+  file << "/usr/bin/time --verbose -o " << prefix << "-time.log ";
 
   if (is_shellscript)
     {
