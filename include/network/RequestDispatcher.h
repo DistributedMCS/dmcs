@@ -57,6 +57,15 @@ public:
 	std::size_t offset = get_offset(receiver);
 	const NewHistory& history = request->history;
 
+	if (is_shutdown(request->qid))
+	  {
+	    DBGLOG(DBG, "RequestDispatcher::startup(): got shut_down request. BREAK NOW!");
+	    md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
+	    md->send(NewConcurrentMessageDispatcher::CYCLE_BREAKER_MQ, offset, request, timeout);
+	    break;
+	  }
+
+	// not a shut_down request, let's continue
 	if (history.find(receiver) == history.end())
 	  {
 	    md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);

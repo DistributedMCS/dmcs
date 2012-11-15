@@ -28,13 +28,16 @@
  */
 
 #include "mcs/Logger.h"
+#include "mcs/JoinIn.h"
 #include "network/NewHandler.h"
 
 namespace dmcs {
 
-NewHandler::NewHandler(std::size_t p)
+  NewHandler::NewHandler(std::size_t p,
+			 NewServer* server)
   : first_round(true),
-    port(p)
+    port(p),
+    server(server)
 { }
 
 
@@ -178,8 +181,15 @@ NewHandler::handle_finalize(const boost::system::error_code& e,
   if (!e)
     {
       assert (is_shutdown(mess->qid));
+
+      // propagate the shut_down message to reachable threads.
       int timeout = 0;
-      md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, mess, timeout);
+
+      server->notify_shutdown_handler();
+      if (server->isShutdown())
+	{
+	  server->shutdown();
+	}
 
       DBGLOG(DBG, "NewHandler::handle_finalize: closing connection.");
       conn->socket().close();

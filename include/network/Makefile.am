@@ -13,6 +13,7 @@ noinst_HEADERS =  \
 		NewJoinerDispatcher.h \
 		NewOutputDispatcher.h \
 		NewOutputThread.h \
+		NetworkPointers.h \
 		RequestDispatcher.h \
 		NewServer.h \
 		NewThreadFactory.h \

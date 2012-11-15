@@ -35,19 +35,19 @@
 #include <boost/thread/thread.hpp>
 
 #include "mcs/ForwardMessage.h"
+#include "network/NetworkPointers.h"
 #include "network/NewOutputDispatcher.h"
 #include "network/connection.hpp"
 #include "network/NewOutputThread.h"
+#include "network/NewServer.h";
 
 namespace dmcs {
-
-class NewHandler;
-typedef boost::shared_ptr<NewHandler> NewHandlerPtr;
 
 class NewHandler
 {
 public:
-  NewHandler(std::size_t p);
+  NewHandler(std::size_t p,
+	     NewServer* server);
 
   ~NewHandler();
 
@@ -86,6 +86,7 @@ private:
   std::size_t port;              // just for debugging information
   NewOutputThreadPtr output_sender;
   boost::thread* output_thread;
+  NewServer* server;
 };
   
 } // namespace dmcs

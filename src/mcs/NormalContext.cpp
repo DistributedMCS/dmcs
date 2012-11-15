@@ -178,6 +178,7 @@ NormalContext::startup(NewConcurrentMessageDispatcherPtr md,
       std::size_t parent_qid = fwd_mess->qid;
       if (is_shutdown(parent_qid))
 	{
+	  DBGLOG(DBG, "NormalContext[" << ctx_id << "]::startup(): got shut_down request. BREAK NOW!");
 	  break;
 	}
 

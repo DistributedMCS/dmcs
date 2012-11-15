@@ -54,6 +54,13 @@ public:
       {
 	int timeout = 0;
 	NewJoinIn* notification = md->receive<NewJoinIn>(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, timeout);
+	
+	if (notification == NULL)
+	  {
+	    DBGLOG(DBG, "NewJoinerDispatcher::startup(): got NULL. BREAK NOW!");
+	    break;
+	  }
+
 	std::size_t neighbor_offset = notification->neighbor_offset;
 	std::size_t no_belief_state = notification->no_belief_state;
 	

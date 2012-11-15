@@ -56,6 +56,10 @@ public:
   init_mq(NewConcurrentMessageDispatcherPtr md,
 	  NewOutputDispatcherPtr od);
 
+  std::size_t
+  getOutputOffset();
+
+
 private:
   void
   write_result(connection_ptr c,

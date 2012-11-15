@@ -55,13 +55,13 @@ public:
 	int timeout = 0;
 	ReturnedBeliefState* returned_bs = md->receive<ReturnedBeliefState>(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, timeout);
 	
-	std::size_t qid = returned_bs->qid;
-
-	if (is_shutdown(qid))
+	if (returned_bs == NULL)
 	  {
+	    DBGLOG(DBG, "NewOutputDispatcher::startup(): got NULL. BREAK NOW!");
 	    break;
 	  }
 
+	std::size_t qid = returned_bs->qid;
 	std::size_t ctx_id = ctxid_from_qid(qid);
 	DBGLOG(DBG, "NewOutputDispatcher::startup(): send to ctx_id = " << ctx_id);
 	std::size_t offset = get_offset(ctx_id);

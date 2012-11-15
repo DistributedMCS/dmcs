@@ -333,6 +333,7 @@ main(int argc, char* argv[])
 		// either fixed point reached 
 		// or all equilibria were requested, i.e., [k1,k2] = [0,0]
 		{
+		  DBGLOG(DBG, "new_dmcsc: Going to terminate the client.");
 		  client.terminate(end_message);
 		  last_round = true;
 		}

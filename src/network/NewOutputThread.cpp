@@ -61,6 +61,13 @@ NewOutputThread::init_mq(NewConcurrentMessageDispatcherPtr md,
 }
 
 
+
+std::size_t
+NewOutputThread::getOutputOffset()
+{
+  return offset;
+}
+
 void
 NewOutputThread::clean_up(ReturnedBeliefStateListPtr output_list)
 {
@@ -93,6 +100,7 @@ NewOutputThread::startup(connection_ptr conn,
 
       if (res == NULL) 
 	{
+	  DBGLOG(DBG, "NewOutputThread::startup(): got NULL. BREAK NOW!");
 	  clean_up(output_list);
 	  break;
 	}

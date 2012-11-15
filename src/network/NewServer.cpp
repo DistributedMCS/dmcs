@@ -52,7 +52,8 @@ NewServer::NewServer(boost::asio::io_service& i,
     acceptor(io_service, endpoint),
     port(endpoint.port()),
     reg(r),
-    thread_factory(new NewThreadFactory)
+    thread_factory(new NewThreadFactory),
+    count_shutdown_handlers(0)
 {
   first_initialization_phase();
   connection_ptr my_connection(new connection(io_service));
@@ -142,6 +143,40 @@ NewServer::connect_to_manager()
     io_service_to_manager->run();
     
     mt->join(); // waits for termination
+}
+
+
+void
+NewServer::notify_shutdown_handler() 
+{
+  ///@todo: mutex protection here
+  count_shutdown_handlers++;
+}
+
+
+
+bool
+NewServer::isShutdown()
+{
+  assert (count_shutdown_handlers <= handler_vec.size());
+  return (count_shutdown_handlers == handler_vec.size());
+}
+
+
+
+void
+NewServer::shutdown()
+{
+#if 0
+  md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, mess, timeout);
+  
+  ReturnedBeliefState* end_res = NULL;
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, output_sender->getOutputOffset(), end_res, timeout);
+  md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, end_res, timeout);
+  
+  //NewJoinIn* end_notif = NULL;
+  //md->send(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, end_notif, timeout);
+#endif
 }
 
 
@@ -298,7 +333,9 @@ NewServer::handle_read_header(const boost::system::error_code& e,
 	  boost::asio::ip::tcp::socket& sock = conn->socket();
 	  boost::asio::ip::tcp::endpoint ep  = sock.remote_endpoint(); 
 
-	  NewHandlerPtr handler(new NewHandler(ep.port()));
+	  
+
+	  NewHandlerPtr handler(new NewHandler(ep.port(), this));
 	  HandlerWrapper* handler_wrapper = new HandlerWrapper();
 
 	  boost::this_thread::interruption_point();

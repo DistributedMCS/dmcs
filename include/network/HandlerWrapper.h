@@ -31,6 +31,7 @@
 #define HANDLER_WRAPPER_H
 
 #include "network/connection.hpp"
+#include "network/NetworkPointers.h"
 #include "network/NewHandler.h"
 #include "mcs/Registry.h"
 

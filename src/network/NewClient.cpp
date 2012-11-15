@@ -279,6 +279,7 @@ NewClient::terminate(ForwardMessage& end_mess)
   boost::shared_ptr<std::string> header(new std::string(HEADER_TERMINATE));
   ForwardMessagePtr mess(new ForwardMessage(end_mess));
 
+  DBGLOG(DBG, "NewClient::terminate(): send header = " << *header);
   conn->async_write(*header,
 		    boost::bind(&NewClient::handle_finalize, this,
 				boost::asio::placeholders::error,
@@ -297,6 +298,7 @@ NewClient::handle_finalize(const boost::system::error_code& e,
 {
   if (!e)
     {
+      DBGLOG(DBG, "NewClient::terminate(): send end_mess = " << *mess);
       conn->async_write(*mess,
 			boost::bind(&NewClient::closing, this,
 				    boost::asio::placeholders::error,
@@ -319,6 +321,7 @@ NewClient::closing(const boost::system::error_code& e,
 {
   if (!e)
     {
+      DBGLOG(DBG, "NewClient::closing(): close socket.");
       conn->socket().close();
     }
   else

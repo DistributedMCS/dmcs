@@ -31,6 +31,7 @@
 #define NEW_SERVER_H
 
 #include "mcs/Registry.h"
+#include "network/NetworkPointers.h"
 #include "network/connection.hpp"
 #include "network/NewHandler.h"
 #include "network/HandlerWrapper.h"
@@ -77,6 +78,15 @@ public:
   void
   connect_to_manager();
 
+  void
+  notify_shutdown_handler();
+
+  bool
+  isShutdown();
+
+  void
+  shutdown();
+
 private:
   void
   first_initialization_phase();
@@ -95,10 +105,10 @@ private:
   std::vector<HandlerWrapper*> handler_vec;
   BoostThreadVec handler_thread_vec;
 
+  std::size_t count_shutdown_handlers;
+
   boost::shared_ptr<boost::asio::io_service> io_service_to_manager;
 };
-
-typedef boost::shared_ptr<NewServer> NewServerPtr;
 
 } // namespace dmcs
 
