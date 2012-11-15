@@ -129,21 +129,22 @@ NewServer::connect_to_manager()
   boost::asio::ip::tcp::resolver::iterator res_it = resolver.resolve(query);
   boost::asio::ip::tcp::endpoint endpoint = *res_it;
   
-  connection_ptr conn(new connection(*io_service_to_manager));
+  conn_to_manager = connection_ptr(new connection(*io_service_to_manager));
   
-  conn->socket().async_connect(endpoint,
-			       boost::bind(&NewServer::send_notification_to_manager, this,
-					   boost::asio::placeholders::error,
-					   conn,
-					   reg->message_dispatcher,
-					   ++res_it)
-			       );
+  conn_to_manager->socket().async_connect(endpoint,
+					  boost::bind(&NewServer::send_notification_to_manager, this,
+						      boost::asio::placeholders::error,
+						      conn_to_manager,
+						      reg->message_dispatcher,
+						      ++res_it)
+					  );
   
     boost::shared_ptr<boost::thread> mt(new boost::thread(boost::bind(&boost::asio::io_service::run, io_service_to_manager)));
     io_service_to_manager->run();
     
     mt->join(); // waits for termination
 }
+
 
 
 void
@@ -165,18 +166,27 @@ NewServer::isShutdown()
 
 
 void
-NewServer::shutdown()
+NewServer::shutdown(NewConcurrentMessageDispatcherPtr md)
 {
-#if 0
-  md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, mess, timeout);
+  int timeout = 0;
+  ForwardMessage* end_mess = NULL;
+  md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, end_mess, timeout);
   
   ReturnedBeliefState* end_res = NULL;
-  md->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, output_sender->getOutputOffset(), end_res, timeout);
   md->send(NewConcurrentMessageDispatcher::OUTPUT_DISPATCHER_MQ, end_res, timeout);
   
-  //NewJoinIn* end_notif = NULL;
-  //md->send(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, end_notif, timeout);
-#endif
+  if (reg->joiner_dispatcher != NewJoinerDispatcherPtr())
+    {
+      NewJoinIn* end_notif = NULL;
+      md->send(NewConcurrentMessageDispatcher::JOINER_DISPATCHER_MQ, end_notif, timeout);
+    }
+
+  thread_factory->killThreads();
+
+  // notify Manager
+  std::string str_terminate = HEADER_TERMINATE;
+  conn_to_manager->write(str_terminate);
+  conn_to_manager->socket().close();
 }
 
 

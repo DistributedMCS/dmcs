@@ -47,34 +47,40 @@ public:
 
   void
   startup(NewConcurrentMessageDispatcherPtr md)
-  {
+  {    
     while (1)
       {
 	int timeout = 0;
 	ForwardMessage* request = md->receive<ForwardMessage>(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, timeout);
+
+	if (request == NULL)
+	  {
+	    DBGLOG(DBG, "RequestDispatcher::startup(): got NULL. BREAK NOW!");
+	    break;
+	  }
+
 	std::size_t qid = request->qid;
 	std::size_t receiver = receiver_from_qid(qid);
 	std::size_t offset = get_offset(receiver);
 	const NewHistory& history = request->history;
-
-	if (is_shutdown(request->qid))
+	if (is_shutdown(qid))
 	  {
-	    DBGLOG(DBG, "RequestDispatcher::startup(): got shut_down request. BREAK NOW!");
+	    DBGLOG(DBG, "RequestDispatcher::startup(): got shutdown qid. Forward to context and cycle breaker at offset = " << offset);
 	    md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
-	    md->send(NewConcurrentMessageDispatcher::CYCLE_BREAKER_MQ, offset, request, timeout);
-	    break;
-	  }
-
-	// not a shut_down request, let's continue
-	if (history.find(receiver) == history.end())
-	  {
-	    md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
+	    md->send(NewConcurrentMessageDispatcher::CYCLE_BREAKER_MQ, offset, request, timeout);	    
 	  }
 	else
 	  {
-	    md->send(NewConcurrentMessageDispatcher::CYCLE_BREAKER_MQ, offset, request, timeout);
+	    // not a shut_down request, let's continue
+	    if (history.find(receiver) == history.end())
+	      {
+		md->send(NewConcurrentMessageDispatcher::REQUEST_MQ, offset, request, timeout);
+	      }
+	    else
+	      {
+		md->send(NewConcurrentMessageDispatcher::CYCLE_BREAKER_MQ, offset, request, timeout);
+	      }
 	  }
-
 	boost::this_thread::interruption_point();
       }
   }

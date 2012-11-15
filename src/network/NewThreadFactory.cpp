@@ -40,9 +40,15 @@ NewThreadFactory::NewThreadFactory()
 
 
 NewThreadFactory::~NewThreadFactory()
+{ }
+
+
+void
+NewThreadFactory::killThreads()
 {
   if (request_dispatcher_thread && request_dispatcher_thread->joinable())
     {
+      DBGLOG(DBG, "NewThreadFactory::killThreads(): request_dispatcher_thread");
       request_dispatcher_thread->interrupt();
       request_dispatcher_thread->join();
       delete request_dispatcher_thread;
@@ -59,20 +65,23 @@ NewThreadFactory::~NewThreadFactory()
 
   if (joiner_dispatcher_thread && joiner_dispatcher_thread->joinable())
     {
+      DBGLOG(DBG, "NewThreadFactory::killThreads(): joiner_dispatcher_thread");
       joiner_dispatcher_thread->interrupt();
       joiner_dispatcher_thread->join();
       delete joiner_dispatcher_thread;
       joiner_dispatcher_thread = 0;
     }
 
+  std::size_t i = 0;
   for (BoostThreadVec::iterator it = neighbor_thread_vec.begin();
-       it != neighbor_thread_vec.end(); ++it)
+       it != neighbor_thread_vec.end(); ++it, ++i)
     {
       boost::thread* neighbor_thread = *it;
       assert (neighbor_thread);
 
       if (neighbor_thread->joinable())
 	{
+	  DBGLOG(DBG, "NewThreadFactory::killThreads(): neighbor_thread " << i);
 	  neighbor_thread->interrupt();
 	  neighbor_thread->join();
 	  delete neighbor_thread;
@@ -80,14 +89,16 @@ NewThreadFactory::~NewThreadFactory()
 	}
     }
 
+  i = 0;
   for (BoostThreadVec::iterator it = context_thread_vec.begin();
-       it != context_thread_vec.end(); ++it)
+       it != context_thread_vec.end(); ++it, ++i)
     {
       boost::thread* context_thread = *it;
       assert(context_thread);
 
       if (context_thread->joinable())
 	{
+	  DBGLOG(DBG, "NewThreadFactory::killThreads(): context_thread " << i);
 	  context_thread->interrupt();
 	  context_thread->join();
 	  delete context_thread;
@@ -95,7 +106,6 @@ NewThreadFactory::~NewThreadFactory()
 	}
     }
 }
-
 
 
 void

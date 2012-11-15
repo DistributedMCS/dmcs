@@ -66,6 +66,9 @@ public:
 		       RequestDispatcherPtr rd,
 		       NewJoinerDispatcherPtr jd);
 
+  void
+  killThreads();
+
 private:
   boost::thread* request_dispatcher_thread;
   boost::thread* output_dispatcher_thread;

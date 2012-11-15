@@ -29,6 +29,7 @@
 
 #include "mcs/Logger.h"
 #include "mcs/JoinIn.h"
+#include "mcs/QueryID.h"
 #include "network/NewHandler.h"
 
 namespace dmcs {
@@ -181,14 +182,19 @@ NewHandler::handle_finalize(const boost::system::error_code& e,
   if (!e)
     {
       assert (is_shutdown(mess->qid));
-
-      // propagate the shut_down message to reachable threads.
       int timeout = 0;
+
+      // propagate the shut_down message to the output thread that I created.
+      ReturnedBeliefState* end_res = NULL;
+      md->send(NewConcurrentMessageDispatcher::OUTPUT_MQ, output_sender->getOutputOffset(), end_res, timeout);
+
+      // and to request dispatcher so that it can forward to the corresponding context and cycle breaker
+      md->send(NewConcurrentMessageDispatcher::REQUEST_DISPATCHER_MQ, mess, timeout);
 
       server->notify_shutdown_handler();
       if (server->isShutdown())
 	{
-	  server->shutdown();
+	  server->shutdown(md);
 	}
 
       DBGLOG(DBG, "NewHandler::handle_finalize: closing connection.");

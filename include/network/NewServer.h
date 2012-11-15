@@ -85,7 +85,7 @@ public:
   isShutdown();
 
   void
-  shutdown();
+  shutdown(NewConcurrentMessageDispatcherPtr md);
 
 private:
   void
@@ -107,6 +107,7 @@ private:
 
   std::size_t count_shutdown_handlers;
 
+  connection_ptr conn_to_manager;
   boost::shared_ptr<boost::asio::io_service> io_service_to_manager;
 };
 

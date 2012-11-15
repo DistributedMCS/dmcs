@@ -56,11 +56,24 @@ public:
   void
   trigger_2nd_phase();
 
+  void
+  wait_termination(const boost::system::error_code& e, 
+		   connection_ptr conn);
+
+  void
+  handle_finalize(const boost::system::error_code& e, 
+		  connection_ptr conn,
+		  boost::shared_ptr<std::string> header);
+
+  void
+  close_all_connections();
+
 private:
   boost::asio::io_service& io_service;
   boost::asio::ip::tcp::acceptor acceptor;
   std::vector<connection_ptr> connections_vec;
   std::size_t system_size;
+  std::size_t count_terminations;
   boost::mutex mtx;
 };
 

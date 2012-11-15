@@ -38,7 +38,8 @@ Manager::Manager(boost::asio::io_service& i,
 		 std::size_t system_size)
   : io_service(i),
     acceptor(io_service, endpoint),
-    system_size(system_size)
+    system_size(system_size),
+    count_terminations(0)
 { 
   connection_ptr my_connection(new connection(io_service));
 
@@ -93,7 +94,7 @@ Manager::handle_read_header(const boost::system::error_code& e,
 
   if (!e)
     {
-      DBGLOG(DBG, "Manager: got header = " << *header);
+      DBGLOG(DBG, "Manager::handle_read_header(): got header = " << *header);
       if (header->compare(INIT_PHASE1_COMPLETED) == 0)
 	{
 	  connections_vec.push_back(conn);
@@ -104,13 +105,13 @@ Manager::handle_read_header(const boost::system::error_code& e,
 	}
       else
 	{
-	  DBGLOG(ERROR, "Manager::handle_read_header: Unknown notification from dmcsd.");
+	  DBGLOG(ERROR, "Manager::handle_read_header(): Unknown notification from dmcsd.");
 	  throw std::runtime_error("Unknown notification from dmcsd.");
 	}
     }
   else
     {
-      DBGLOG(ERROR, "Manager::handle_read_header: ERROR:" << e.message());
+      DBGLOG(ERROR, "Manager::handle_read_header(): ERROR:" << e.message());
       throw std::runtime_error(e.message());
     }
 }
@@ -123,7 +124,81 @@ Manager::trigger_2nd_phase()
   for (std::vector<connection_ptr>::const_iterator it = connections_vec.begin(); it != connections_vec.end(); ++it)
     {
       connection_ptr conn = *it;
-      conn->write(trigger_message);
+      conn->async_write(trigger_message,
+			boost::bind(&Manager::wait_termination, this,
+				   boost::asio::placeholders::error,
+				    conn)
+			);
+    }
+}
+
+
+void
+Manager::wait_termination(const boost::system::error_code& e, 
+			  connection_ptr conn)
+{
+  if (!e)
+    {
+      // do nothing here as we are struggling to propagate the end_mess to neighbors,
+      // hence there will not be enough notifications of termination to the Manager.
+
+      /*boost::shared_ptr<std::string> header(new std::string);
+      
+      conn->async_read(*header,
+		       boost::bind(&Manager::handle_finalize, this,
+				   boost::asio::placeholders::error,
+				   conn,
+				   header));*/
+    }
+  else
+    {
+      DBGLOG(ERROR, "Manager::wait_termination: ERROR:" << e.message());
+      throw std::runtime_error(e.message());
+    }
+}
+
+
+
+void
+Manager::handle_finalize(const boost::system::error_code& e, 
+			 connection_ptr conn,
+			 boost::shared_ptr<std::string> header)
+{
+  boost::mutex::scoped_lock lock(mtx);
+
+  if (!e)
+    {
+      DBGLOG(DBG, "Manager::handle_finalize(): got header = " << *header);
+      if (header->compare(HEADER_TERMINATE) == 0)
+	{
+	  count_terminations++;
+	  if (count_terminations == system_size)
+	    {
+	      close_all_connections();
+	    }
+	}
+      else
+	{
+	  DBGLOG(ERROR, "Manager::handle_finalize(): Unknown header from dmcsd.");
+	  throw std::runtime_error("Unknown header from dmcsd.");
+	}
+    }
+  else
+    {
+      DBGLOG(ERROR, "Manager::handle_finalize: ERROR:" << e.message());
+      throw std::runtime_error(e.message());
+    }
+}
+
+
+
+void
+Manager::close_all_connections()
+{
+  for (std::vector<connection_ptr>::const_iterator it = connections_vec.begin(); it != connections_vec.end(); ++it)
+    {
+      connection_ptr conn = *it;
+      conn->socket().close();
     }
 }
 
