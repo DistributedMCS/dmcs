@@ -57,7 +57,7 @@ new_dmcsc_SOURCES = \
 new_dmcsc_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
-	$(top_builddir)/src/network/libthreads.a \
+	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/mcs/libmcs.a 
 
 # the dmcsm binary

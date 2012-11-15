@@ -30,11 +30,11 @@ noinst_LIBRARIES = libnetwork.a libthreads.a
 # the NETWORK library
 libnetwork_a_SOURCES = \
 		NewServer.cpp \
+		NewClient.cpp \
 		Manager.cpp
 
 # the THREADS library
 libthreads_a_SOURCES = \
-		NewClient.cpp \
 		NewConcurrentMessageDispatcher.cpp \
 		NewOutputThread.cpp \
 		NewNeighborOut.cpp \
