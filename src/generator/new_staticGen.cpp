@@ -829,7 +829,7 @@ print_dmcsd_line(bool is_shellscript,
     }
 
   file << std::endl;
-  file << "sleep 1" << std::endl;
+  file << "sleep 2" << std::endl;
 }
 
 

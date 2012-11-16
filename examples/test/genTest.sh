@@ -2,7 +2,8 @@
 
 DMCSPATH=../../../../../build/src
 DMCSGEN=$DMCSPATH/generator/new_dmcsGen
-PRINTLOG=yes
+DOECHO=yes
+TIMEOUT=1000
 
 ###############################################################################
 
@@ -12,7 +13,7 @@ createSubDir()
     
     if [ ! -e $dirName ] || [ ! -d $dirName ] ; then
 	mkdir $dirName
-	if [ x$PRINTLOG = xyes ] ; then
+	if [ x$DOECHO = xyes ] ; then
 	    echo Create subdir $dirName
 	fi
     fi
@@ -41,13 +42,16 @@ createOneTest()
 
     cd $testname
 
-    RUNGEN="$DMCSGEN --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname --dmcspath=$DMCSPATH"
+    RUNGEN="$DMCSGEN --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname --dmcspath=$DMCSPATH --timeout=$TIMEOUT"
 
     if [ x$gdt = xyes ] ; then
-	RUNGEN="$DMCSGEN --gen-data=true --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname --dmcspath=$DMCSPATH"
+	RUNGEN="$DMCSGEN --gen-data=true --topology=${args[0]} --contexts=${args[1]} --atoms=${args[2]} --interface=${args[3]} --bridge_rules=${args[4]} --packsize=$ps --prefix=$tname --dmcspath=$DMCSPATH --timeout=$TIMEOUT"
     fi
 
-    echo "Calling $RUNGEN"
+    if [ x$DOECHO = xyes ] ; then
+	echo "Calling $RUNGEN"
+    fi
+
     $RUNGEN
 
     cd .. # get out of $testname
@@ -109,6 +113,14 @@ for topofile in `ls config/*.cfg` ; do
 	createSubDir $toponame
 
 	cd $toponame
+
+	if [ x$gendata = xyes ] ; then
+	    if [ x$DOECHO = xyes ] ; then
+		echo Sleep 10 secs...
+	    fi
+	    sleep 10
+	fi
+
 	createOneTest $gendata $packsize $toponame list[@]
 
 	cd ../.. # get out of data/$toponame
