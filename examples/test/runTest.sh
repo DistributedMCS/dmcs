@@ -40,7 +40,10 @@ moveLogFiles()
     createSubDir $basedir/output/$toponame/$testname
     createSubDir $basedir/output/$toponame/$testname/$mode
 
-    rm $basedir/output/$toponame/$testname/$mode/*
+    if [ x$WANTLOG = xyes ] ; then
+	rm $basedir/output/$toponame/$testname/$mode/*
+    fi
+
     mv *.log $basedir/output/$toponame/$testname/$mode
 } # end of moveLogFiles
 
@@ -72,11 +75,11 @@ runOneInstance()
 
     if [ $RETVAL = 0 ] ; then
 	echo "PASSED: $teName $tpack $runOpt" > $toName-status.log
-	echo $toName $teName $tpack $runOpt >> $basedir/passedtests.log
+	echo $toName,$teName,$tpack,$runOpt >> $basedir/passedtests.log
 	(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "PASSED: dmcs testcase: $teName $tpack $runOpt" $EMAIL
     else
 	echo "FAILED: $teName $tpack $runOpt" > $toName-status.log
-	echo $toName $teName $tpack $runOpt >> $basedir/$filename
+	echo $toName,$teName,$tpack,$runOpt >> $basedir/$filename
 	(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED: dmcs testcase: $teName $tpack $runOpt" $EMAIL
     fi
 
@@ -113,7 +116,24 @@ runAll()
 #################################################################################
 reRun()
 {
-    echo reRun
+    filename=$1
+    for line in `cat $filename` ; do
+	echo $line
+	list=(`echo $line | tr ',' ' ' `)
+	noArguments=${#list[@]}
+
+	# list[0] = toponame
+	# list[1] = testname
+	# list[2] = testpack
+	# list[3] = (mode)
+	cd data/${list[0]}/${list[1]}
+	if [ $noArguments -eq 4 ] ; then
+	    runOneInstance failedtests.tmp ${list[0]} ${list[1]} ${list[2]} ${list[3]}
+	else
+	    runOneInstance failedtests.tmp ${list[0]} ${list[1]} ${list[2]}
+	fi
+	cd ../../.. # get out of data/$toponame/$testname
+    done
 } # end of reRun()
 
 #################################################################################
@@ -134,7 +154,7 @@ do
 	-h) echo >&2 "Usage: $0 [-f FILE] [-r]"
 	    exit 0;;
 	-f) filename="$2"; shift;;
-	-r) rerun="$2"; shift;;
+	-r) rerun=yes;; 
 	-*) echo >&2  "Usage: $0 [-f FILE] [-r]"
 	    exit 1;;
 	*) break;;
