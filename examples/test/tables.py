@@ -53,6 +53,7 @@ def copy_text(output_file, template_file):
     t.closed
 
 
+
 def element_compare(element1, element2):
     if element1 == element2:
         return 0
@@ -60,6 +61,7 @@ def element_compare(element1, element2):
         return -1
     else:
         return 1
+
 
 
 #  0: if instance1 == instance2
@@ -123,9 +125,10 @@ def complete_test_case(dirname, subdirs):
 
 
 
-def ordered_push(outcomes, outcome):
+def ordered_push(outcomes, outcome, sorted_testcases, testcase):
     if outcomes == []:
         outcomes.append(outcome)
+        sorted_testcases.append(testcase)
     else:
         i = 0
         new_val = float(outcome[0][0])
@@ -135,10 +138,13 @@ def ordered_push(outcomes, outcome):
             if old_val > new_val:
                 break
         outcomes.insert(i-1, outcome)
+        sorted_testcases.insert(i-1, testcase)
+
 
 
 def process_test_cases(toponame, testpacks, current_test_case):
     outcomes = []
+    sorted_testcases = []
 
     test_runs = []
     for p in testpacks:
@@ -152,10 +158,53 @@ def process_test_cases(toponame, testpacks, current_test_case):
             for r in test_runs:
                 outcome.append(get_outcome(toponame, dirname + r))
 
-            ordered_push(outcomes, outcome)
+            ordered_push(outcomes, outcome, sorted_testcases, instance)
 
-    print outcomes
-    print "\n"
+    return outcomes, sorted_testcases
+
+
+
+def final_display(val):
+    if val == '1000124':
+        return '---'
+    elif val == '10001':
+        return 'E'
+    else:
+        return val
+
+
+
+def build_row(tex_output, tex_row_template, 
+              outcomes, sorted_testcases,
+              topo, topo_abbr):
+    copy_text(tex_output, 'templates/tex_separator.tpl')
+    for i in range(len(outcomes)):
+        outcome = outcomes[i]
+        instance = sorted_testcases[i]
+
+        print len(outcome)
+        print instance
+        mem = topo + '-' + instance[1] + '-' + instance[2] + '-' + instance[3] + '-' + instance[4] + '-' + instance[5] 
+        str_i = '{' + str(i+1) + '}'
+
+        tex_output.write(tex_row_template.format(mem,
+                                                 topo_abbr,
+                                                 str_i,
+                                                 instance[1],
+                                                 instance[2],
+                                                 instance[3],
+                                                 instance[4],
+                                                 final_display(outcome[0][0]),
+                                                 final_display(outcome[0][1]),
+                                                 final_display(outcome[1][0]),
+                                                 final_display(outcome[1][1]),
+                                                 final_display(outcome[2][0]),
+                                                 final_display(outcome[3][0]),
+                                                 final_display(outcome[4][0]),
+                                                 final_display(outcome[5][0]),
+                                                 final_display(outcome[6][0]),
+                                                 final_display(outcome[7][0])))
+
 
 def main(argv):
     # copy header
@@ -193,13 +242,26 @@ def main(argv):
                     else:
                         break
 
-                process_test_cases(topo, testpacks, current_test_case)
+                outcomes, sorted_testcases = process_test_cases(topo, testpacks, current_test_case)
+
+                if outcomes != []:
+                    build_row(tex_output, tex_row_template, 
+                              outcomes, sorted_testcases,
+                              topo, topo_abbreviation[topo])
+
+                print outcomes
+                print "\n"
+                print sorted_testcases
+                print "\n"
+
                 if line == "":
                     break
                 
                 current_test_case = [current_instance]
         config_file.closed
-    
+
+        copy_text(tex_output, 'templates/tex_footer.tpl')
+    tex_output.closed
 
 if __name__ == "__main__":
     import sys
