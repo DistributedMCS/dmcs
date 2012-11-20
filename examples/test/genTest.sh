@@ -3,7 +3,7 @@
 DMCSPATH=../../../../../build/src
 DMCSGEN=$DMCSPATH/generator/new_dmcsGen
 DOECHO=yes
-TIMEOUT=1000
+TIMEOUT=600
 
 ###############################################################################
 

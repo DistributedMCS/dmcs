@@ -204,19 +204,19 @@ Options";
      
       if (!physical_neighbors->empty())
 	{
-	  std::cerr << "new_dmcsd: physical neighbors:" << std::endl;
+	  DBGLOG(DBG,  "new_dmcsd: physical neighbors:");
 	  for (NewNeighborVec::const_iterator it = physical_neighbors->begin(); it != physical_neighbors->end(); ++it)
 	    {
-	      std::cout << **it << std::endl;
+	      DBGLOG(DBG, **it);
 	    }
 	}
 
       if (guessing_neighbors != NewNeighborVecPtr())
 	{
-	  std::cerr << "new_dmcsd: guessing neighbors:" << std::endl;
+	  DBGLOG(DBG, "new_dmcsd: guessing neighbors:");
 	  for (NewNeighborVec::const_iterator it = guessing_neighbors->begin(); it != guessing_neighbors->end(); ++it)
 	    {
-	      std::cout << **it << std::endl;
+	      DBGLOG(DBG, **it);
 	    }
 	}
 

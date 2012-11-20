@@ -58,7 +58,6 @@ struct Registry
       belief_state_offset(0),
       contexts(cs)
   {
-    std::cerr << "Init Registry" << std::endl;
     std::set<NewNeighbor*> tmp_storage;
     neighbors = boost::shared_ptr<NewNeighborVec>(new NewNeighborVec);
     bool has_neighbors = false;

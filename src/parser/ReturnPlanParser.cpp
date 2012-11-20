@@ -268,12 +268,12 @@ ReturnPlanParser::parseString(const std::string& instr)
 
   if (r && begIt == endIt)
     {
-      std::cerr << "Return plan parsing succeeded" << std::endl;
+      //std::cerr << "Return plan parsing succeeded" << std::endl;
       return state.return_plan;
     }
   else
     {
-      std::cerr << "Return plan parsing failed" << std::endl;
+      //std::cerr << "Return plan parsing failed" << std::endl;
       throw std::runtime_error("Return plan parsing failed");
     }
 }

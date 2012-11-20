@@ -500,16 +500,28 @@ generate_opt_topology()
   // then adjust to get optimal local interface
   opt_topo_gen->create_opt_interface();
 
-#ifdef DEBUG
+  //#ifdef DEBUG
   DBGLOG(DBG, "Optimal local interface:");
 
   for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
     {
       ContextPair cp = it->first;
+      std::cout << "(" << cp.first << ", " << cp.second << ") --> " << *(it->second) << std::endl;
 
       DBGLOG(DBG, "(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
     }
-#endif
+
+  DBGLOG(DBG, "Original local interface:");
+  for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
+    {
+      ContextPair cp = it->first;
+      std::cout << "(" << cp.first << ", " << cp.second << ") --> " << *(it->second) << std::endl;
+
+      DBGLOG(DBG, "(" << cp.first << ", " << cp.second << ") --> " << *(it->second));
+    }
+
+
+  //#endif
 }
 
 
@@ -723,7 +735,37 @@ write_plans(bool write_opt_plans)
 	      NewBeliefStatePtr bs(new NewBeliefState(no_contexts, no_atoms));
 	      for (std::size_t j = 0; j < starting_offset[1]; ++j)
 		bs->set(j);
-	      
+
+	      for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
+		{
+		  ContextPair cp = it->first;
+		  if (cp.first == 0)
+		    {
+		      NewBeliefStatePtr neighbor_bs = it->second;
+		      std::size_t j = cp.second;
+		      NewBeliefStatePtr mask(new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+								BeliefStateOffset::instance()->SIZE_BS()));
+
+		      std::size_t beg_mask = starting_offset[j];
+		      std::size_t end_mask;
+		      if (j == starting_offset.size()-1)
+			{
+			  end_mask = mask->size();
+			}
+		      else
+			{
+			  end_mask = starting_offset[j+1];
+			}
+		      
+		      for (std::size_t k = beg_mask; k < end_mask; ++k)
+			{
+			  mask->set(k);
+			}
+
+		      (*bs) = (*bs) | ( (*neighbor_bs) & (*mask) );
+		    }
+		}
+
 	      write_return_signature_to_file(file_opt_rp, bs, 1023);
 	    }
 	  else
@@ -738,6 +780,7 @@ write_plans(bool write_opt_plans)
 		    }
 		}
 	    }
+
 	  file_opt_rp << "]\n";
 	  file_opt_rp.close();
 	}
@@ -829,7 +872,11 @@ print_dmcsd_line(bool is_shellscript,
     }
 
   file << std::endl;
-  file << "sleep 2" << std::endl;
+
+  if (is_shellscript)
+    {
+      file << "sleep 2" << std::endl;
+    }
 }
 
 
@@ -852,8 +899,9 @@ print_command_lines_file(bool is_shellscript,
 	   << "export TIMEOUT=" << timeout << std::endl
 	   << "export TESTPATH='" << testpath << "'" << std::endl
 	   << "export DMCSPATH='" << path << "'" << std::endl
-	   << "killall " << DMCSD << std::endl << std::endl
-	   << "killall " << DMCSM << std::endl << std::endl;
+	   << "killall " << DMCSD << std::endl 
+	   << "killall " << DMCSM << std::endl 
+	   << "sleep 5" << std::endl;
 
       testpath = "$TESTPATH";
       path = "$DMCSPATH";
@@ -862,6 +910,11 @@ print_command_lines_file(bool is_shellscript,
   file << path << "/" << DMCSM " " 
        << "--port=" << MANAGER_PORT << " "
        << "--system-size=" << no_contexts << " &" << std::endl;
+
+  if (is_shellscript)
+    {
+      file << "sleep 5" << std::endl;
+    }
 
   for (std::size_t i = 0; i < no_contexts; ++i)
     {

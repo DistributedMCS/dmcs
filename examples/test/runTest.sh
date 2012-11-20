@@ -1,11 +1,13 @@
 #!/bin/bash
 
 DOECHO=yes
-LOGDAEMOND=yes
+WANTLOG=yes
 EMAIL=dao@kr.tuwien.ac.at
 
 testpack[0]="all"
-testpack[1]="10"
+testpack[1]="1"
+testpack[2]="10"
+testpack[3]="100"
 
 #################################################################################
 createSubDir()
@@ -59,7 +61,7 @@ runOneInstance()
     basedir=../../..
 
     wantlog=
-    if [ x$LOGDAEMOND = xyes ] ; then
+    if [ x$WANTLOG = xyes ] ; then
 	wantlog=-log
     fi
 
@@ -76,11 +78,11 @@ runOneInstance()
     if [ $RETVAL = 0 ] ; then
 	echo "PASSED: $teName $tpack $runOpt" > $toName-status.log
 	echo $toName,$teName,$tpack,$runOpt >> $basedir/passedtests.log
-	(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "PASSED: dmcs testcase: $teName $tpack $runOpt" $EMAIL
+	(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "PASSED: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
     else
 	echo "FAILED: $teName $tpack $runOpt" > $toName-status.log
 	echo $toName,$teName,$tpack,$runOpt >> $basedir/$filename
-	(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED: dmcs testcase: $teName $tpack $runOpt" $EMAIL
+	(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
     fi
 
     moveLogFiles $toName $teName $tpack $runOpt

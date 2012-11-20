@@ -124,7 +124,8 @@ NewOutputThread::write_result(connection_ptr conn,
     {
       const std::string header = HEADER_ANS;
       conn->write(header);
-      
+
+      output_list->sort(my_compare);
       remove_duplication(output_list);
       BackwardMessage bmess(output_list);
       

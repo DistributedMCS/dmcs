@@ -140,7 +140,7 @@ struct RegisterAndInsertIntoBeliefSet
         }
         predicate[predicate.size()-1] = ')';
       }
-      std::cerr << "got belief " << address << " with string '" << predicate << "'" << std::endl;
+      //std::cerr << "got belief " << address << " with string '" << predicate << "'" << std::endl;
 
       Belief bel(s.currentCtx, address, predicate);
       qpm->storeWithID(bel, ID(bel.kind, bel.address));
@@ -375,7 +375,7 @@ QueryPlanParser::parseStream(std::istream& in)
     {
       std::getline(in, line);
       buf << line << std::endl;
-      std::cerr << "Read >>" << line << "<<" << std::endl;
+      //std::cerr << "Read >>" << line << "<<" << std::endl;
     }
 
   if (in.fail()) in.clear();
@@ -405,9 +405,9 @@ QueryPlanParser::parseString(const std::string& str)
    
   if(r && begIt == endIt)
   {
-    std::cout << "Parsing succeeded\n";
-    std::cout << "Result is: " << state.qplan << std::endl;
-    std::cout << *state.qplan << std::endl;
+    //std::cout << "Parsing succeeded\n";
+    //std::cout << "Result is: " << state.qplan << std::endl;
+    //std::cout << *state.qplan << std::endl;
     return state.qplan;
   }
   else

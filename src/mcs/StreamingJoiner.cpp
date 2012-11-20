@@ -160,13 +160,7 @@ StreamingJoiner::first_join(std::size_t query_id,
 
   if (pack_size > 0)
     {
-      succeeded = next_join(query_id, history, md, jd);
-      if (succeeded)
-	{
-	  ReturnedBeliefState* rbs = joined_results.front();
-	  joined_results.pop_front();
-	  return rbs;
-	}
+      return next_join(query_id, history, md, jd);
     }
 
   ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);
@@ -315,7 +309,7 @@ StreamingJoiner::join(std::size_t query_id,
   assert ((input_belief_states.size() == beg_it->size()) && (beg_it->size() == end_it->size()));
   bool ret = false;
 
-#if 0
+#if 1
   DBGLOG(DBG, "Join:");
   NewBeliefStateIteratorVec::const_iterator bt = beg_it->begin();
   NewBeliefStateIteratorVec::const_iterator et = end_it->begin();
@@ -325,7 +319,7 @@ StreamingJoiner::join(std::size_t query_id,
 	{
 	  DBGLOG(DBG, **it);
 	}
-      DBGLOG(std::endl);
+      DBGLOG(DBG, std::endl);
     }
 #endif // 0
 
@@ -406,6 +400,8 @@ StreamingJoiner::join(std::size_t query_id,
   // Joining succeeded. Now send this input to SAT solver via joiner_sat_notif
   // be careful that we are blocked here. Use timeout sending instead?
   ReturnedBeliefState* rbs = new ReturnedBeliefState(result, query_id);
+
+  DBGLOG(DBG, "Succeeded: push back " << *result);
   joined_results.push_back(rbs);
 
   return true;

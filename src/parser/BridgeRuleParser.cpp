@@ -105,7 +105,6 @@ struct PassIdentToBelief
     const std::string& ident = source;
     std::string& belief = boost::fusion::at_c<0>(ctx.attributes);
     belief = source;
-    std::cout << "belief = " << belief << std::endl;
   }
 };
 
@@ -345,13 +344,13 @@ BridgeRuleParser::parseString(const std::string& instr,
 
   if (r && begIt == endIt)
     {
-      std::cerr << "Bridge rules parsing succeeded" << std::endl;
+      //std::cerr << "Bridge rules parsing succeeded" << std::endl;
       BridgeRuleParserReturnVal ret_val(state.bridge_rules, state.neighbors);
       return ret_val;
     }
   else
     {
-      std::cerr << "Bridge rules parsing failed" << std::endl;
+      //std::cerr << "Bridge rules parsing failed" << std::endl;
       throw std::runtime_error("Bridge rules parsing failed");
     }
 }
