@@ -81,7 +81,7 @@ NewContext::compute(NewBeliefState* input,
       return false;
     }
   
-  DBGLOG(DBG, "NormalContext[" << ctx_id << "]::compute(): heads = " << *(heads->getHeads()));
+  DBGLOG(DBG, "NewContext[" << ctx_id << "]::compute(): heads = " << *(heads->getHeads()));
   // send heads to Evaluator
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);

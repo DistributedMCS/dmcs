@@ -31,7 +31,10 @@
 #include "mcs/NormalContext.h"
 #include "mcs/CycleBreaker.h"
 #include "mcs/ForwardMessage.h"
+#include "mcs/LeafJoiner.h"
+#include "mcs/StreamingJoiner.h"
 #include "dmcs/DLVEvaluator.h"
+
 
 namespace dmcs {
 
@@ -53,7 +56,7 @@ NormalContext::NormalContext(std::size_t cid,
     guessing_neighbors(gnbs)
 {
   if (nbs->size() == 0)
-    joiner = StreamingJoinerPtr();
+    joiner = LeafJoinerPtr(new LeafJoiner(nbs));
   else
     joiner = StreamingJoinerPtr(new StreamingJoiner(pack_size, nbs));
 
@@ -228,7 +231,7 @@ NormalContext::process_request(std::size_t parent_qid,
 	{
 	  std::size_t this_qid = query_id(ctx_id, ++query_counter);
 	  DBGLOG(DBG, "NormalContext[" << ctx_id << "]::process_request: trigger join with query_id = " << this_qid << " " << detailprint(this_qid));
-	  ReturnedBeliefState* rbs = joiner->trigger_join(this_qid, history, md, jd);
+	  ReturnedBeliefState* rbs = joiner->first_join(this_qid, history, md, jd);
 	  if (rbs->belief_state == NULL)
 	    {
 	      break;

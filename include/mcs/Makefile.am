@@ -19,6 +19,7 @@ noinst_HEADERS =  \
 		NewBeliefState.h \
 		NewContext.h \
 		CycleBreaker.h \
+		LeafJoiner.h \
 		NewMessage.h \
 		NormalContext.h \
 		NewNeighbor.h \

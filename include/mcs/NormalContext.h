@@ -36,7 +36,7 @@
 #include "mcs/BridgeRuleEvaluator.h"
 #include "mcs/QueryPlan.h"
 #include "network/RequestDispatcher.h"
-#include "mcs/StreamingJoiner.h"
+#include "mcs/BaseJoiner.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "mcs/NewContext.h"
 
@@ -110,7 +110,7 @@ private:
   // For opt topologies where some links are cut to break cycles.
   NewNeighborVecPtr guessing_neighbors;
 
-  StreamingJoinerPtr joiner;
+  BaseJoinerPtr joiner;
 
   // to deal with cycles
   boost::thread* cycle_breaker_thread;

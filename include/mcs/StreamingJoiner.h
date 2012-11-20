@@ -53,16 +53,6 @@ public:
 	       NewConcurrentMessageDispatcherPtr md,
 	       NewJoinerDispatcherPtr jd);
 
-private:
-  void
-  reset();
-
-  ReturnedBeliefState*
-  process(std::size_t query_id, 
-	  const NewHistory& history,
-	  NewConcurrentMessageDispatcherPtr md,
-	  NewJoinerDispatcherPtr jd);
-
   ReturnedBeliefState*
   first_join(std::size_t query_id, 
 	     const NewHistory& history,
@@ -75,6 +65,15 @@ private:
 	    NewConcurrentMessageDispatcherPtr md,
 	    NewJoinerDispatcherPtr jd);
 
+private:
+  void
+  reset();
+
+  ReturnedBeliefState*
+  process(std::size_t query_id, 
+	  const NewHistory& history,
+	  NewConcurrentMessageDispatcherPtr md,
+	  NewJoinerDispatcherPtr jd);
 
   bool
   do_join(std::size_t query_id);

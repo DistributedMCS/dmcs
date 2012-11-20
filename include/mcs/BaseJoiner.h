@@ -33,9 +33,11 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include "mcs/NewBeliefState.h"
-#include "network/NewJoinerDispatcher.h"
+#include "mcs/ForwardMessage.h"
 #include "mcs/NewNeighbor.h"
+#include "mcs/ReturnedBeliefState.h"
 #include "network/NewConcurrentMessageDispatcher.h"
+#include "network/NewJoinerDispatcher.h"
 
 namespace dmcs {
 
@@ -47,6 +49,18 @@ public:
   void
   registerJoinIn(std::size_t offset,
 		 NewConcurrentMessageDispatcherPtr md);
+
+  virtual ReturnedBeliefState*
+  first_join(std::size_t query_id,
+	     const NewHistory& history,
+	     NewConcurrentMessageDispatcherPtr md,
+	     NewJoinerDispatcherPtr jd) = 0;
+  
+  virtual ReturnedBeliefState*
+  next_join(std::size_t query_id,
+	    const NewHistory& history,
+	    NewConcurrentMessageDispatcherPtr md,
+	    NewJoinerDispatcherPtr jd) = 0;
 
 protected:
   void
@@ -64,6 +78,8 @@ protected:
   NewBeliefStatePackage input_belief_states;
   ReturnedBeliefStateList joined_results;
 };
+
+typedef boost::shared_ptr<BaseJoiner> BaseJoinerPtr;
 
 } // namespace dmcs
 
