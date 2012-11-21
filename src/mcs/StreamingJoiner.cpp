@@ -135,6 +135,7 @@ StreamingJoiner::first_join(std::size_t query_id,
 
   if (!ask_first_packs(query_id, history, 0, neighbors->size()-1, md, jd))
     {
+      DBGLOG(DBG, "StreamingJoiner::first_join: One neighbor is inconsistent. Bailing out!");
       // A neighbor is inconsistent. Reset and return NULL 
       reset();
       ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);
@@ -160,6 +161,7 @@ StreamingJoiner::first_join(std::size_t query_id,
 
   if (pack_size > 0)
     {
+      DBGLOG(DBG, "StreamingJoiner::first_join: first join failed. Call next join.");
       return next_join(query_id, history, md, jd);
     }
 
@@ -175,6 +177,18 @@ StreamingJoiner::next_join(std::size_t query_id,
 			   NewConcurrentMessageDispatcherPtr md,
 			   NewJoinerDispatcherPtr jd)
 {
+  if (!joined_results.empty())
+    {
+      ReturnedBeliefState* rbs = joined_results.front();
+      joined_results.pop_front();
+      return rbs;
+    }
+  else if (pack_size == 0)
+    {
+      ReturnedBeliefState* end_rbs = new ReturnedBeliefState(NULL, query_id);
+      return end_rbs;
+    }
+
   // now really going to the loop of asking next =============================================
   while (1)
     {
@@ -191,6 +205,8 @@ StreamingJoiner::next_join(std::size_t query_id,
       pc++;
       std::size_t k_one = pc * pack_size + 1;
       std::size_t k_two = (pc+1) * pack_size;
+
+      DBGLOG(DBG, "StreamingJoiner::next_join: k1 = " << k_one << ", k2 = " << k_two);
       
       // Ask next at neighbor_offset
       if (ask_neighbor_and_receive(next_neighbor, query_id, history, k_one, k_two, md, jd))
@@ -200,6 +216,7 @@ StreamingJoiner::next_join(std::size_t query_id,
 	      assert (next_neighbor > 0);
 	            
 	      // Ask first packs before neighbor_offset
+	      DBGLOG(DBG, "StreamingJoiner::next_join: Going to ask_first_pack. next_neighbor = " << next_neighbor);
 	      bool ret = ask_first_packs(query_id, history, 0, next_neighbor - 1, md, jd);
 	            
 	      assert (ret == true);
@@ -223,6 +240,7 @@ StreamingJoiner::next_join(std::size_t query_id,
 	{
 	  next_neighbor++;
 	  asking_next = true;
+	  DBGLOG(DBG, "StreamingJoiner::next_join: move to next neighbor = " << next_neighbor);
 	}	
     }
 }
@@ -256,6 +274,7 @@ StreamingJoiner::ask_neighbor_and_receive(std::size_t neighbor_index,
 
       if (bs)
 	{
+	  DBGLOG(DBG, "StreamingJoiner::ask_neighbor_and_receive: bs = " << *bs);
 	  std::size_t offset = neighbor_offset_from_qid(qid);
 	  std::size_t noff = ((*neighbors)[neighbor_index])->neighbor_offset;
 	  assert (noff == offset);
@@ -401,7 +420,7 @@ StreamingJoiner::join(std::size_t query_id,
   // be careful that we are blocked here. Use timeout sending instead?
   ReturnedBeliefState* rbs = new ReturnedBeliefState(result, query_id);
 
-  DBGLOG(DBG, "Succeeded: push back " << *result);
+  //DBGLOG(DBG, "StreamingJoiner::join: Succeeded: push back " << *result);
   joined_results.push_back(rbs);
 
   return true;
@@ -420,7 +439,7 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
 {
   assert (from_neighbor <= to_neighbor && to_neighbor < neighbors->size());
 
-  DBGLOG(DBG, "StreamingJoiner::ask_first_packs: forward_qid = " << forward_qid);
+  DBGLOG(DBG, "StreamingJoiner::ask_first_packs: forward_qid = " << forward_qid << ", from_neighbor = " << from_neighbor << ", to_neighbor = " << to_neighbor);
 
   for (std::size_t i = from_neighbor; i <= to_neighbor; ++i)
     {
@@ -433,6 +452,7 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
 	  k2 = pack_size;
 	}
 
+      DBGLOG(DBG, "StreamingJoiner::ask_first_packs i = " << i << ", k1 = " << k1 << ", k2 = " << k2);
       // in this method, we register to joiner_dispatcher
       ask_neighbor(i, forward_qid, history, k1, k2, md, jd);
     }
@@ -487,6 +507,7 @@ StreamingJoiner::ask_first_packs(std::size_t forward_qid,
 	  jd->unregisterIdOffset(qid, joiner_offset);
 	  if (count_models_read[neighbor_index] == 0)
 	    {
+	      DBGLOG(DBG, "StreamingJoiner::ask_first_packs: encounter an inconsistent neighbor with noff = " << noff);
 	      // this neighbor is inconsistent
 	      return false;
 	    }

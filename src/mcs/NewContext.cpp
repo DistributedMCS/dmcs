@@ -265,6 +265,7 @@ NewContext::send_out_result(std::size_t parent_qid,
 	    }
 	    
 	  (*belief_state) = (*belief_state) | (*input_bs); 
+	  DBGLOG(DBG, "NewContext::send_out_result(): combined bs = " << *belief_state);
 	}
       // otherwise, this context broke a cycle and we don't have input_bs
 

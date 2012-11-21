@@ -55,7 +55,7 @@ DLVResultParser::parse(std::istream& is,
     {
       std::string input;
       std::getline(is, input);
-      DBGLOG(DBG, "DLVResultParser::parse(): Input to parser = " << input);
+      //DBGLOG(DBG, "DLVResultParser::parse(): Input to parser = " << input);
       if (input.empty() || is.bad())
 	{
 	  /*DBGLOG(DBG, "leaving loop because got input size " << input.size() 

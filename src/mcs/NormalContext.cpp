@@ -212,79 +212,82 @@ NormalContext::startup(NewConcurrentMessageDispatcherPtr md,
 }
 
 
+
+bool
+NormalContext::process_input(NewBeliefState* input,
+			     std::size_t parent_qid,
+			     EvaluatorPtr eval,
+			     NewConcurrentMessageDispatcherPtr md,
+			     std::size_t& k1,
+			     std::size_t& k2)
+{
+  if (total_guessing_input != NULL)
+    {
+      NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+							 BeliefStateOffset::instance()->SIZE_BS());
+      
+      (*current_guess) = (*starting_guess);
+      
+      // iterate over all possible guesses or until k1 --> k2 models were computed
+      DBGLOG(DBG, "NormalContext::process_request(). Guessing input = " << *total_guessing_input);
+      bool computed_k1_k2 = false;
+      do
+	{
+	  NewBeliefState* combined_input = 
+	    new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+			       BeliefStateOffset::instance()->SIZE_BS());
+	  (*combined_input ) = (*input) | (*current_guess);
+	  
+	  if (compute(combined_input, k1, k2, parent_qid, eval, md)) 
+	    {
+	      computed_k1_k2 = true;
+	      break;
+	    }
+	  
+	  current_guess = next_guess(current_guess, total_guessing_input);
+	}
+      while (current_guess);
+
+      // carefully clean up
+      if (current_guess)
+	{
+	  delete current_guess;
+	  current_guess = NULL;
+	}
+
+      return computed_k1_k2;
+    }
+  else
+    {
+      return compute(input, k1, k2, parent_qid, eval, md);
+    }
+}
+
+
+
 void
 NormalContext::process_request(std::size_t parent_qid,
-			    const NewHistory& history,
-			    EvaluatorPtr eval,
-			    NewConcurrentMessageDispatcherPtr md,
-			    NewJoinerDispatcherPtr jd,
-			    std::size_t k1,
-			    std::size_t k2)
+			       const NewHistory& history,
+			       EvaluatorPtr eval,
+			       NewConcurrentMessageDispatcherPtr md,
+			       NewJoinerDispatcherPtr jd,
+			       std::size_t k1,
+			       std::size_t k2)
 {
   assert ((k1 == 0 && k2 == 0) || (0 < k1 && k1 < k2+1));
-  NewBeliefState* input;
 
-  while (1)
+  std::size_t this_qid = query_id(ctx_id, ++query_counter);
+  ReturnedBeliefState* rbs = joiner->first_join(this_qid, history, md, jd);
+  NewBeliefState* input = rbs->belief_state;
+
+  while (input != NULL)
     {
-      // prepare the fixed part of the input
-      if (!is_leaf)
-	{
-	  std::size_t this_qid = query_id(ctx_id, ++query_counter);
-	  DBGLOG(DBG, "NormalContext[" << ctx_id << "]::process_request: trigger join with query_id = " << this_qid << " " << detailprint(this_qid));
-	  ReturnedBeliefState* rbs = joiner->first_join(this_qid, history, md, jd);
-	  if (rbs->belief_state == NULL)
-	    {
-	      break;
-	    }
-	  
-	  input = rbs->belief_state;
-	}
-      else
-	input = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-				   BeliefStateOffset::instance()->SIZE_BS());
-      
-      if (total_guessing_input != NULL)
-	{
-	  NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-							     BeliefStateOffset::instance()->SIZE_BS());
-	  
-	  (*current_guess) = (*starting_guess);
+      DBGLOG(DBG, "NormalContext::process_request: input = " << *input);
+      if (process_input(input, parent_qid, eval, md, k1, k2)) break;
 
-	  // make guess
-	  DBGLOG(DBG, "NormalContext::process_request(). Guessing input = " << *total_guessing_input);
-	  bool computed_k1_k2 = false;
-	  do
-	    {
-	      NewBeliefState* combined_input = 
-		new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-				   BeliefStateOffset::instance()->SIZE_BS());
-	      (*combined_input ) = (*input) | (*current_guess);
-
-	      if (compute(combined_input, k1, k2, parent_qid, eval, md)) 
-		{
-		  computed_k1_k2 = true;
-		  break;
-		}
-
-	      current_guess = next_guess(current_guess, total_guessing_input);
-	    }
-	  while (current_guess);
-
-	  if (computed_k1_k2 || is_leaf) 
-	    {
-	      if (current_guess)
-		{
-		  delete current_guess;
-		  current_guess = NULL;
-		}
-
-	      break;
-	    }
-	}
-      else
-	{ 
-	  if (compute(input, k1, k2, parent_qid, eval, md) || is_leaf) break;
-	}
+      this_qid = query_id(ctx_id, ++query_counter);
+      rbs = joiner->next_join(this_qid, history, md, jd);
+      input = rbs->belief_state;
     }
 }
 

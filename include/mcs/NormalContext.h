@@ -79,6 +79,14 @@ private:
   void
   init();
 
+  bool
+  process_input(NewBeliefState* input,
+		std::size_t parent_qid,
+		EvaluatorPtr eval,
+		NewConcurrentMessageDispatcherPtr md,
+		std::size_t& k1,
+		std::size_t& k2);
+
   void
   process_request(std::size_t parent_qid,
 		  const NewHistory& history,
