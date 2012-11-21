@@ -1,7 +1,8 @@
 #!/bin/bash
 
 DOECHO=yes
-WANTLOG=yes
+WANTLOG=no
+MAXTRY=4
 EMAIL=dao@kr.tuwien.ac.at
 
 testpack[0]="all"
@@ -70,20 +71,37 @@ runOneInstance()
 	wantOpt=-opt
     fi
 
-    echo "Run "$teName $tpack $runOpt
-    bash $toName-command-line$wantOpt-$tpack$wantlog.sh
-    RETVAL=$?
-    echo $RETVAL
+    for (( i = 1; i <= $MAXTRY; ++i)) ; do
+	if [ $i -eq 1 ] ; then
+	    echo "Run "$teName $tpack $runOpt
+	else
+	    echo "Retry($i) "$teName $tpack $runOpt
+	fi
 
-    if [ $RETVAL = 0 ] ; then
-	echo "PASSED: $teName $tpack $runOpt" > $toName-status.log
-	echo $toName,$teName,$tpack,$runOpt >> $basedir/passedtests.log
-	(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "PASSED: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
-    else
-	echo "FAILED: $teName $tpack $runOpt" > $toName-status.log
-	echo $toName,$teName,$tpack,$runOpt >> $basedir/$filename
-	(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
-    fi
+	bash $toName-command-line$wantOpt-$tpack$wantlog.sh
+	RETVAL=$?
+	echo $RETVAL
+	
+	if [ $RETVAL -eq 0 ] ; then
+	    echo "PASSED: $teName $tpack $runOpt" > $toName-status.log
+	    echo $toName,$teName,$tpack,$runOpt >> $basedir/passedtests.log
+	    (cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "PASSED: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
+	    break
+	elif [ $RETVAL -eq 124 ] ; then
+	    echo "TIMEOUT: $teName $tpack $runOpt" > $toName-status.log
+	    echo $toName,$teName,$tpack,$runOpt >> $basedir/timeouttests.log
+	    (cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "TIMEOUT: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
+	    break
+	else
+	    if [ $i -eq $MAXtRY ] ; then
+		echo "FAILED: $teName $tpack $runOpt" > $toName-status.log
+		echo $toName,$teName,$tpack,$runOpt >> $basedir/$filename
+		(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
+	    else
+		(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED($i): dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
+	    fi
+	fi
+    done
 
     moveLogFiles $toName $teName $tpack $runOpt
 } # end of runOneInstance

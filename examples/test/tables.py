@@ -125,6 +125,14 @@ def complete_test_case(dirname, subdirs):
 
 
 
+def peek(outcomes):
+    for oc in outcomes:
+        print oc[0][0]
+
+    print "\n"
+
+
+
 def ordered_push(outcomes, outcome, sorted_testcases, testcase):
     if outcomes == []:
         outcomes.append(outcome)
@@ -132,18 +140,28 @@ def ordered_push(outcomes, outcome, sorted_testcases, testcase):
     else:
         i = 0
         new_val = float(outcome[0][0])
+        found = False
+
         while i < len(outcomes):
             old_val = float(outcomes[i][0][0])
             i = i + 1
+            print "Compare: " + str(old_val) + " and " + str(new_val)
             if old_val > new_val:
+                found = True
                 break
-        outcomes.insert(i-1, outcome)
-        sorted_testcases.insert(i-1, testcase)
 
+        if found == True:
+            outcomes.insert(i-1, outcome)
+            sorted_testcases.insert(i-1, testcase)
+        else:
+            outcomes.insert(i, outcome)
+            sorted_testcases.insert(i, testcase)
+
+        peek(outcomes)
 
 
 def process_test_cases(toponame, testpacks, current_test_case):
-    outcomes = []
+    outcomes = [ ]
     sorted_testcases = []
 
     test_runs = []
@@ -182,8 +200,8 @@ def build_row(tex_output, tex_row_template,
         outcome = outcomes[i]
         instance = sorted_testcases[i]
 
-        print len(outcome)
-        print instance
+        #print len(outcome)
+        #print instance
         mem = topo + '-' + instance[1] + '-' + instance[2] + '-' + instance[3] + '-' + instance[4] + '-' + instance[5] 
         str_i = '{' + str(i+1) + '}'
 
@@ -249,10 +267,10 @@ def main(argv):
                               outcomes, sorted_testcases,
                               topo, topo_abbreviation[topo])
 
-                print outcomes
-                print "\n"
-                print sorted_testcases
-                print "\n"
+                #print outcomes
+                #print "\n"
+                #print sorted_testcases
+                #print "\n"
 
                 if line == "":
                     break
