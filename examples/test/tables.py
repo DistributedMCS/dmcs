@@ -88,7 +88,24 @@ def get_no_answers(filename):
     return no_answers
 
 
+def get_no_intermediate_answers(filename):
+    no_answers = '---'
+    print'"filename = ' + filename
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        if len(lines) > 0:
+            last_line = lines[len(lines)-1]
+            print 'last_line = ' + last_line
+            sign = last_line.find('Received partial equilibria:')
+            if sign != -1:
+                no_answers = last_line[sign + len('Received partial equilibria:') + 1 : len(last_line)-1]
+                print 'no_answers = ' + no_answers
+    f.closed
+    return no_answers
+
+
 def get_outcome(toponame, dirname):
+    err_filename    = dirname + '/' + toponame + '-err.log'
     status_filename = dirname + '/' + toponame + '-status.log'
     time_filename   = dirname + '/' + toponame + '-time.log'
     log_filename    = dirname + '/' + toponame + '.log'
@@ -108,6 +125,7 @@ def get_outcome(toponame, dirname):
         noans = get_no_answers(log_filename)
     else:
         outcome = get_error_code(time_filename)
+        noans = get_no_intermediate_answers(err_filename)
 
     return outcome, noans
 
@@ -125,14 +143,6 @@ def complete_test_case(dirname, subdirs):
 
 
 
-def peek(outcomes):
-    for oc in outcomes:
-        print oc[0][0]
-
-    print "\n"
-
-
-
 def ordered_push(outcomes, outcome, sorted_testcases, testcase):
     if outcomes == []:
         outcomes.append(outcome)
@@ -145,7 +155,6 @@ def ordered_push(outcomes, outcome, sorted_testcases, testcase):
         while i < len(outcomes):
             old_val = float(outcomes[i][0][0])
             i = i + 1
-            print "Compare: " + str(old_val) + " and " + str(new_val)
             if old_val > new_val:
                 found = True
                 break
@@ -157,7 +166,6 @@ def ordered_push(outcomes, outcome, sorted_testcases, testcase):
             outcomes.insert(i, outcome)
             sorted_testcases.insert(i, testcase)
 
-        peek(outcomes)
 
 
 def process_test_cases(toponame, testpacks, current_test_case):
@@ -192,6 +200,15 @@ def final_display(val):
 
 
 
+def nice_display(time, val):
+    if time == '1000124':        
+        return '(' + val + ')'
+    elif time == '10001':
+        return 'E'
+    else:
+        return time
+
+
 def build_row(tex_output, tex_row_template, 
               outcomes, sorted_testcases,
               topo, topo_abbr):
@@ -205,6 +222,8 @@ def build_row(tex_output, tex_row_template,
         mem = topo + '-' + instance[1] + '-' + instance[2] + '-' + instance[3] + '-' + instance[4] + '-' + instance[5] 
         str_i = '{' + str(i+1) + '}'
 
+        print outcome
+
         tex_output.write(tex_row_template.format(mem,
                                                  topo_abbr,
                                                  str_i,
@@ -216,12 +235,12 @@ def build_row(tex_output, tex_row_template,
                                                  final_display(outcome[0][1]),
                                                  final_display(outcome[1][0]),
                                                  final_display(outcome[1][1]),
-                                                 final_display(outcome[2][0]),
-                                                 final_display(outcome[3][0]),
-                                                 final_display(outcome[4][0]),
-                                                 final_display(outcome[5][0]),
-                                                 final_display(outcome[6][0]),
-                                                 final_display(outcome[7][0])))
+                                                 nice_display(outcome[2][0], outcome[2][1]),
+                                                 nice_display(outcome[3][0], outcome[3][1]),
+                                                 nice_display(outcome[4][0], outcome[4][1]),
+                                                 nice_display(outcome[5][0], outcome[5][1]),
+                                                 nice_display(outcome[6][0], outcome[6][1]),
+                                                 nice_display(outcome[7][0], outcome[7][1])))
 
 
 def main(argv):
