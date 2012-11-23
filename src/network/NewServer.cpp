@@ -285,16 +285,20 @@ NewServer::second_initialization_phase()
       reg->joiner_dispatcher = NewJoinerDispatcherPtr(new NewJoinerDispatcher);
     }
   
+  DBGLOG(DBG, "NewServer::initialize(): create main threads.");
   thread_factory->createMainThreads(reg->message_dispatcher,
 				    reg->request_dispatcher,
 				    reg->output_dispatcher,
 				    reg->joiner_dispatcher);
 
+  DBGLOG(DBG, "NewServer::initialize(): create context threads.");
   thread_factory->createContextThreads(reg->contexts,
 				       reg->message_dispatcher,
 				       reg->request_dispatcher,
 				       reg->joiner_dispatcher);
+  DBGLOG(DBG, "NewServer::initialize(): second initialization phase DONE.");
 }
+
 
 
 void

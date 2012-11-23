@@ -136,6 +136,7 @@ NewThreadFactory::createNeighborThreads(NewConcurrentMessageDispatcherPtr md,
   for (NewNeighborVec::const_iterator it = neighbors->begin();
        it != neighbors->end(); ++it)
     {
+      DBGLOG(DBG, "NewThreadFactory::createNeighborThreads: neighbor = " << **it);
       NewNeighborThreadPtr neighbor(new NewNeighborThread(*it));
       NewNeighborThreadWrapper neighbor_wrapper;
       boost::thread* neighbor_thread = new boost::thread(neighbor_wrapper, neighbor, md);

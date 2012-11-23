@@ -498,7 +498,10 @@ generate_opt_topology()
     }
 
   // then adjust to get optimal local interface
-  opt_topo_gen->create_opt_interface();
+  if (topology_type !=  BINARY_TREE_TOPOLOGY)
+    {
+      opt_topo_gen->create_opt_interface();
+    }
 
   //#ifdef DEBUG
   DBGLOG(DBG, "Optimal local interface:");
@@ -685,7 +688,7 @@ write_plans(bool write_opt_plans)
   file_client_qp.close();
 
   // context specific query plans #############################################################################
-  for (std::size_t i = 0; i < no_contexts; ++i)
+  for (int i = no_contexts-1; i >= 0; --i)
     {
       std::stringstream str_i;
       str_i << i;
@@ -736,7 +739,7 @@ write_plans(bool write_opt_plans)
 	      for (std::size_t j = 0; j < starting_offset[1]; ++j)
 		bs->set(j);
 
-	      for (LocalInterfaceMap::const_iterator it = opt_lcim->begin(); it != opt_lcim->end(); ++it)
+	      for (LocalInterfaceMap::const_iterator it = lcim->begin(); it != lcim->end(); ++it)
 		{
 		  ContextPair cp = it->first;
 		  if (cp.first == 0)
@@ -1212,7 +1215,7 @@ main(int argc, char* argv[])
       print_command_lines();
 
       if (topology_type != RANDOM_TOPOLOGY && topology_type != DIAMOND_ARBITRARY_TOPOLOGY &&
-	  topology_type != RING_EDGE_TOPOLOGY && topology_type != BINARY_TREE_TOPOLOGY)
+	  topology_type != RING_EDGE_TOPOLOGY)
 	{
 	  generate_opt_topology();
 	  write_plans(true);

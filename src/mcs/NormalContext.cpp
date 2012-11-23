@@ -212,6 +212,29 @@ NormalContext::startup(NewConcurrentMessageDispatcherPtr md,
 }
 
 
+bool
+NormalContext::must_guess(NewBeliefState* input)
+{
+  if (total_guessing_input == NULL)
+    return false;
+
+  // if for one of the guessing neighbor, the epsilon bit is OFF then we also have to guess
+  //
+  ///@todo: can be made more efficient by determining neighbors that needs guess
+  for (NewNeighborVec::const_iterator it = guessing_neighbors->begin(); it != guessing_neighbors->end(); ++it)
+    {
+      NewNeighborPtr neighbor = *it;
+      std::size_t neighbor_id = neighbor->neighbor_id;
+      
+      if (input->isEpsilon(neighbor_id, BeliefStateOffset::instance()->getStartingOffsets()))
+	{
+	  return true;
+	}
+    }
+
+  return false;
+}
+
 
 bool
 NormalContext::process_input(NewBeliefState* input,
@@ -221,7 +244,7 @@ NormalContext::process_input(NewBeliefState* input,
 			     std::size_t& k1,
 			     std::size_t& k2)
 {
-  if (total_guessing_input != NULL)
+  if (must_guess(input))
     {
       NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
 							 BeliefStateOffset::instance()->SIZE_BS());

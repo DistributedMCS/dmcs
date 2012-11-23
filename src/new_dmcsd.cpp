@@ -130,7 +130,6 @@ Options";
 
       ReturnPlanMapPtr return_plan = ReturnPlanParser::parseFile(filename_return_plan);
 
-      std::cerr << filename_opt_query_plan << std::endl;
       ContextQueryPlanMapPtr opt_queryplan_map = ContextQueryPlanMapPtr();
       if (filename_opt_query_plan != "")
 	{
@@ -179,6 +178,22 @@ Options";
 			}
 		    }
 		}
+	    }
+
+	  // reassign neighbors' offsets
+	  std::size_t new_neighbor_offset = 0;
+	  for (NewNeighborVec::iterator it = physical_neighbors->begin(); it != physical_neighbors->end(); ++it)
+	    {
+	      NewNeighborPtr neighbor = *it;
+	      neighbor->neighbor_offset = new_neighbor_offset;
+	      new_neighbor_offset++;
+	    }
+
+	  for (NewNeighborVec::iterator it = guessing_neighbors->begin(); it != guessing_neighbors->end(); ++it)
+	    {
+	      NewNeighborPtr neighbor = *it;
+	      neighbor->neighbor_offset = new_neighbor_offset;
+	      new_neighbor_offset++;
 	    }
 	}
       else

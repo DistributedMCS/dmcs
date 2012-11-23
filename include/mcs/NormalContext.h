@@ -80,6 +80,9 @@ private:
   init();
 
   bool
+  must_guess(NewBeliefState* input);
+
+  bool
   process_input(NewBeliefState* input,
 		std::size_t parent_qid,
 		EvaluatorPtr eval,
