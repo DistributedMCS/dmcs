@@ -43,9 +43,11 @@ NewClient::setCallback(CallbackFunc f)
 NewClient::NewClient(boost::asio::io_service& io_service,
 		     boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
 		     const std::string& h,
-		     ForwardMessage& fwd_mess)
+		     ForwardMessage& fwd_mess,
+		     bool loop = true)
   : conn(new connection(io_service)),
-    callback(0)
+    callback(0),
+    loop(loop)
 {
   boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
 
@@ -229,7 +231,11 @@ NewClient::handle_read_answer(const boost::system::error_code& e,
 	      callback(result_list);
 	    }
 
-	  if (next_k == 0)
+	  if (!loop)
+	    {
+	      DBGLOG(DBG, "NewClient::handle_read_answer(): Only once round required. Let's get back.");
+	    }
+	  else if (next_k == 0)
 	    {
 	      DBGLOG(DBG, "NewClient::handle_read_answer(): Done. Let's get back.");
 	    }

@@ -205,6 +205,7 @@ main(int argc, char* argv[])
       std::string port;
       std::string filename_signature = "";
       std::size_t root_ctx;
+      bool loop;
       // range of requested equilibria. [0,0] for requesting all equilibria
       std::size_t k1;
       std::size_t k2;
@@ -220,6 +221,7 @@ main(int argc, char* argv[])
 	(ROOT_CTX, boost::program_options::value<std::size_t>(&root_ctx)->default_value(0), "set root context id to query")
 	(SIGNATURE, boost::program_options::value<std::string>(&filename_signature)->default_value(""), "set signature file name")
 	(BS_SIZE, boost::program_options::value<std::size_t>(&bs_size), "set belief state size")
+	(LOOP, boost::program_options::value<bool>(&loop)->default_value(true), "set belief state size")
 	(K1, boost::program_options::value<std::size_t>(&k1)->default_value(1), "set starting range of requested equlibria. k1 <= k2")
 	(K2, boost::program_options::value<std::size_t>(&k2)->default_value(1), "set end range of requested equilibria. [0,0] for requesting all equilibria")
 	;
@@ -265,7 +267,7 @@ main(int argc, char* argv[])
       ForwardMessage request(qid, history, k1, k2);
       ForwardMessage end_message(end_qid, history);
 
-      NewClient client(*io_service, it, header, request);
+      NewClient client(*io_service, it, header, request, loop);
       client.setCallback(&handle_belief_states);
 
       if (!filename_signature.empty())
@@ -313,12 +315,12 @@ main(int argc, char* argv[])
 	  diff_count = final_result.size() - diff_count;
 	  next_count++;
 
-	  /*if (!unique)
+	  if (!loop)
 	    {
-	      DBGLOG(DBG, "new_dmcsc: Do not need unique answers. Going to terminate the client after 1st round.");
+	      DBGLOG(DBG, "new_dmcsc: Do not require looping. Going to terminate the client after 1st round.");
 	      client.terminate(end_message);
 	      break;
-	      }*/
+	    }
 
 	  if (last_round)
 	    {

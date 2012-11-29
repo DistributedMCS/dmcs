@@ -77,6 +77,7 @@ namespace dmcs {
 #define K2                 "k2"
 #define STARTUP_TIME       "startup-time"
 #define TIMEOUT            "timeout"
+#define LOOP               "loop"
 
 } // namespace dmcs
 

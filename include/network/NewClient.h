@@ -42,7 +42,8 @@ public:
   NewClient(boost::asio::io_service& io_service,
 	    boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
 	    const std::string& h,
-	    ForwardMessage& fwd_mess);
+	    ForwardMessage& fwd_mess,
+	    bool loop);
 
   typedef void (*CallbackFunc)(ReturnedBeliefStateListPtr);
 
@@ -102,6 +103,7 @@ private:
 private:
   connection_ptr conn;
   CallbackFunc callback;
+  bool loop;
 };
 
 } // namespace dmcs
