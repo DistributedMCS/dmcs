@@ -59,6 +59,13 @@ public:
 
 private:
   void
+  test_and_send(NewBeliefState* local_model,
+		const NewBeliefState* input_bs,
+		Heads* heads,
+		std::size_t ctx_id,
+		NewConcurrentMessageDispatcherPtr md);
+
+  void
   read_all(std::size_t ctx_id,
 	   Heads* heads,
 	   BeliefTablePtr btab,

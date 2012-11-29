@@ -36,7 +36,7 @@
 #include "dmcs/Instantiator.h"
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/Logger.h"
-#include "parser/DLVResultParser.h"
+#include "parser/NewDLVResultParser.h"
 
 namespace dmcs {
 
@@ -143,38 +143,73 @@ DLVEvaluator::reset_process(std::size_t ctx_id,
 
 
 void
+DLVEvaluator::test_and_send(NewBeliefState* local_model,
+			    const NewBeliefState* input_bs,
+			    Heads* heads,
+			    std::size_t ctx_id,
+			    NewConcurrentMessageDispatcherPtr md)
+{
+  if (!local_model->consistent_with(*input_bs, ctx_id,
+				    BeliefStateOffset::instance()->getStartingOffsets()))
+    {
+      DBGLOG(DBG, "DLVEvaluator::test_and_send: inconsistent with input_bs = " << *input_bs);
+      delete local_model;
+      local_model = NULL;
+    }
+  else
+    {
+      DBGLOG(DBG, "DLVEvaluator::test_and_send: consistent with input_bs = " << *input_bs);
+      models_counter++;
+      (*local_model) = (*local_model) | (*input_bs);
+      HeadsBeliefStatePair* res = new HeadsBeliefStatePair();
+      res->first = heads;
+      res->second = local_model;
+
+      DBGLOG(DBG, "DLVEvaluator::test_and_send: send back = " << *local_model);
+      
+      int timeout = 0;
+      md->send(NewConcurrentMessageDispatcher::EVAL_OUT_MQ, out_queue, res, timeout);
+    }
+
+}
+
+
+void
 DLVEvaluator::read_all(std::size_t ctx_id,
 		       Heads* heads,
 		       BeliefTablePtr btab,
 		       NewConcurrentMessageDispatcherPtr md)
 {
-  BeliefStateResultAdder adder(out_queue, md, heads);
-  DLVResultParser dlv_parser(ctx_id, btab);
+  // dirty hack
+  HeadsPlusBeliefState* heads_plus_bs = static_cast<HeadsPlusBeliefState*>(heads);
+  const NewBeliefState* input_bs = heads_plus_bs->getInputBeliefState();
+
+  NewDLVResultParser dlv_parser(btab, ctx_id);
 
   std::istream& is = proc->getInput();
   do
     {
-      std::string input;
-      std::getline(is, input);
+      std::string str_input;
+      std::getline(is, str_input);
 
-      if ( input.empty() || is.bad() )
+      if ( str_input.empty() || is.bad() )
       {
-	/*DBGLOG(DBG, "DLVEvaluator::read_all: Leaving loop because got input size " << input.size() 
+	/*DBGLOG(DBG, "DLVEvaluator::read_all: Leaving loop because got input size " << str_input.size() 
 		  << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
 		  << ", eof " << is.eof());*/
 	break;
       }
 
       // discard weak answer set cost lines
-      if( 0 == input.compare(0, 22, "Cost ([Weight:Level]):") )
+      if( 0 == str_input.compare(0, 22, "Cost ([Weight:Level]):") )
       {
 	//DBGLOG(DBG, "DLVEvaluator::read_all: Discarding weak answer set cost line");
       }
       else
       {
 	// parse line
-	std::istringstream iss(input);
-	dlv_parser.parse(iss, adder);
+	NewBeliefState* local_model = dlv_parser.parseString(str_input);
+	test_and_send(local_model, input_bs, heads, ctx_id, md);
       }      
     }
   while (1);
@@ -190,33 +225,42 @@ DLVEvaluator::read_until_k2(std::size_t ctx_id,
 {
   assert (0 < k1 && k1 <= k2);
 
-  BeliefStateResultAdder adder(out_queue, md, heads);
-  DLVResultParser dlv_parser(ctx_id, btab);
+  HeadsPlusBeliefState* heads_plus_bs = static_cast<HeadsPlusBeliefState*>(heads);
+  const NewBeliefState* input_bs = heads_plus_bs->getInputBeliefState();
+
+  NewDLVResultParser dlv_parser(btab, ctx_id);
 
   std::istream& is = proc->getInput();
 
   // ignore  the first k1 models
   while (models_counter < k1-1)
     {
-      std::string input;
-      std::getline(is, input);
+      std::string str_input;
+      std::getline(is, str_input);
 
-      if ( input.empty() || is.bad() )
+      if ( str_input.empty() || is.bad() )
       {
-	/*DBGLOG(DBG, "DLVEvaluator::read_until_k2: Leaving loop because got input size " << input.size() 
+	/*DBGLOG(DBG, "DLVEvaluator::read_until_k2: Leaving loop because got input size " << str_input.size() 
 		  << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
 		  << ", eof " << is.eof());*/
 	break;
       }
 
       // discard weak answer set cost lines
-      if ( 0 == input.compare(0, 22, "Cost ([Weight:Level]):") )
+      if ( 0 == str_input.compare(0, 22, "Cost ([Weight:Level]):") )
       {
 	//DBGLOG(DBG, "DLVEvaluator::read_until_k2: Discarding weak answer set cost line");
       }
       else
       {
-	++models_counter;
+	NewBeliefState* local_model = dlv_parser.parseString(str_input);
+	if (local_model->consistent_with(*input_bs, ctx_id,
+					 BeliefStateOffset::instance()->getStartingOffsets()))
+	  {
+	    ++models_counter;
+	  }
+	delete local_model;
+	local_model = NULL;
       }      
     }
 
@@ -225,30 +269,32 @@ DLVEvaluator::read_until_k2(std::size_t ctx_id,
       return;
     }
 
+  DBGLOG(DBG, "DLVEvaluator::read_until_k2: " << k1-1 << "models ignored.");
+
   while (models_counter < k2)
     {
-      std::string input;
-      std::getline(is, input);
+      std::string str_input;
+      std::getline(is, str_input);
 
-      if ( input.empty() || is.bad() )
+      if ( str_input.empty() || is.bad() )
       {
-	/*DBGLOG(DBG, "DLVEvaluator::read_until_k2: Leaving loop because got input size " << input.size() 
+	/*DBGLOG(DBG, "DLVEvaluator::read_until_k2: Leaving loop because got input size " << str_input.size() 
 		  << ", stream bits fail " << is.fail() << ", bad " << is.bad() 
 		  << ", eof " << is.eof() << std::endl;*/
 	break;
       }
 
       // discard weak answer set cost lines
-      if( 0 == input.compare(0, 22, "Cost ([Weight:Level]):") )
+      if( 0 == str_input.compare(0, 22, "Cost ([Weight:Level]):") )
       {
 	//DBGLOG(DBG, "DLVEvaluator::read_until_k2: Discarding weak answer set cost line");
       }
       else
       {
 	// parse line
-	++models_counter;
-	std::istringstream iss(input);
-	dlv_parser.parse(iss, adder);
+	NewBeliefState* local_model = dlv_parser.parseString(str_input);
+	DBGLOG(DBG, "DLVEvaluator::read_until_k2: local_model" << *local_model);
+	test_and_send(local_model, input_bs, heads, ctx_id, md);
       }      
     }
 }
