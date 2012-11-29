@@ -79,7 +79,7 @@ protected:
 	  EvaluatorPtr eval,
 	  NewConcurrentMessageDispatcherPtr md);
 
-  std::size_t
+  std::pair<std::size_t, std::size_t>
   read_and_send(std::size_t parent_qid,
 		bool normal_solve,
 		EvaluatorPtr eval,

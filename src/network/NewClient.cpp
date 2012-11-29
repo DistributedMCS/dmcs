@@ -215,8 +215,8 @@ NewClient::handle_read_answer(const boost::system::error_code& e,
 	  std::size_t pack_size = mess->getPackSize();
 	  std::size_t next_k = 0;
 
-	  DBGLOG(DBG, "result_list.size() = " << result_list->size());
-	  DBGLOG(DBG, "pack_size = " << pack_size);
+	  DBGLOG(DBG, "NewClient::handle_read_answer: result_list.size() = " << result_list->size());
+	  DBGLOG(DBG, "NewClient::handle_read_answer: pack_size = " << pack_size);
 
 	  if (pack_size > 0)
 	    {

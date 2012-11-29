@@ -153,15 +153,25 @@ NewContext::read_and_send_k1_k2(std::size_t parent_qid,
   DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): k1 = " << k1 << ", k2 = " << k2);
   if (k1 == 0 && k2 == 0)
     {
-      std::size_t models_sent = read_and_send(parent_qid, normal_solve, eval, md);
+      std::pair<std::size_t, std::size_t> p = read_and_send(parent_qid, normal_solve, eval, md);
+      std::size_t models_sent = p.first;
+      std::size_t conflict_models = p.second;
     }
   else
     {
-      std::size_t models_sent = read_and_send(parent_qid, normal_solve, eval, md);
+      std::pair<std::size_t, std::size_t> p = read_and_send(parent_qid, normal_solve, eval, md);
+      std::size_t models_sent = p.first;
+      std::size_t conflict_models = p.second;
       std::size_t models_counter = eval->getModelsCounter();
 
-      DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): models_counter = " << models_counter);
-      DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): models_sent    = " << models_sent);
+      DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): models_counter  = " << models_counter);
+      DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): conflict_models = " << conflict_models);
+      DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): models_sent     = " << models_sent);
+
+      assert (conflict_models <= models_counter);
+      models_counter -= conflict_models;
+
+      DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): non-conflict models_counter  = " << models_counter);
       
       if (models_sent == 0)
 	// there was no model in the range [k1,k2]. models_counter are the number of models before k1.
@@ -191,13 +201,15 @@ NewContext::read_and_send_k1_k2(std::size_t parent_qid,
 // Read from EVAL_OUT_MQ[index] until getting (heads, NULL).
 // Return the number of models received.
 // Note that this function doesn't care about (k1, k2). The Evaluator and the outter loop take care of this issue.
-std::size_t
+std::pair<std::size_t, std::size_t>
 NewContext::read_and_send(std::size_t parent_qid,
 			  bool normal_solve,
 			  EvaluatorPtr eval,
 			  NewConcurrentMessageDispatcherPtr md)
 {
-  std::size_t models_counter = 0;
+  std::size_t models_sent = 0;
+  std::size_t conflict_models = 0;
+
   int timeout = 0;
   while (1)
     {
@@ -220,17 +232,18 @@ NewContext::read_and_send(std::size_t parent_qid,
 	  DBGLOG(DBG, "NewContext[" << ctx_id << "]::read_and_send(). Got res = " << *belief_state);
 	  if (send_out_result(parent_qid, normal_solve, heads, belief_state, md))
 	    {
-	      ++models_counter;
+	      ++models_sent;
 	      DBGLOG(DBG, "NewContext[" << ctx_id << "]::read_and_send(). successfully sent.");
 	    }
 	  else
 	    {
+	      ++conflict_models;
 	      DBGLOG(DBG, "NewContext[" << ctx_id << "]::read_and_send().NOT sent due to wrong guess.");
 	    }
 	}
     }
 
-  return models_counter;
+  return std::make_pair<std::size_t, std::size_t>(models_sent, conflict_models);
 }
 
 

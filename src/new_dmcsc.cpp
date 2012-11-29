@@ -304,7 +304,7 @@ main(int argc, char* argv[])
 
       while (keep_running)
 	{
-	  DBGLOG(DBG, "Entering round " << next_count);
+	  DBGLOG(DBG, "new_dmcsc: Entering round " << next_count);
 	  io_service->run();
 
 	  last_model_count = model_count;
@@ -312,6 +312,13 @@ main(int argc, char* argv[])
 
 	  diff_count = final_result.size() - diff_count;
 	  next_count++;
+
+	  /*if (!unique)
+	    {
+	      DBGLOG(DBG, "new_dmcsc: Do not need unique answers. Going to terminate the client after 1st round.");
+	      client.terminate(end_message);
+	      break;
+	      }*/
 
 	  if (last_round)
 	    {
@@ -326,6 +333,7 @@ main(int argc, char* argv[])
 		  std::size_t left_to_request = pack_size - final_result.size();
 		  k1 = k2 + 1;
 		  k2 = k1 + left_to_request;
+		  DBGLOG(DBG, "new_dmcsc: Going to ask for next. k1 = " << k1 << ", k2 = " << k2);
 		  request.setPackRequest(k1, k2);
 		  client.next(request);
 		}
