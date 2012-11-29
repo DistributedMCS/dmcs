@@ -5,6 +5,7 @@ noinst_HEADERS =  \
 		BridgeRuleParser.h \
 		DLVResultGrammar.h \
 		DLVResultParser.h \
+		NewDLVResultParser.h \
 		ParserState.h \
 		QueryPlanParser.h \
 		ReturnPlanParser.h 

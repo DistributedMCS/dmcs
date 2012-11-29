@@ -31,5 +31,6 @@ libparser_a_SOURCES = \
 		BridgeRuleParser.cpp \
 		DLVResultGrammar.cpp \
 		DLVResultParser.cpp \
+		NewDLVResultParser.cpp \
 		QueryPlanParser.cpp \
 		ReturnPlanParser.cpp

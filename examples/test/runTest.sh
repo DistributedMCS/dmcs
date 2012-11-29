@@ -27,15 +27,20 @@ createSubDir()
 #################################################################################
 moveLogFiles()
 {
-    no_args=$#
+    noargs=$#
     optimized=opt_
-    if [ $no_args -eq 3 ] ; then
+    loopMode=noloop_
+    mode=
+    if [ $noargs -eq 3 ] ; then
 	optimized=
+	loopMode=
+    elif [ $noargs -eq 4 ] ; then
+	loopMode=	
     fi
     
     toponame=$1
     testname=$2
-    mode=$optimized$3
+    mode=$optimized$loopMode$3
     basedir=../../..
 
     createSubDir $basedir/output
@@ -58,6 +63,7 @@ runOneInstance()
     teName=$3
     tpack=$4
     runOpt=$5
+    noLoop=$6
 
     basedir=../../..
 
@@ -71,39 +77,45 @@ runOneInstance()
 	wantOpt=-opt
     fi
 
-    for (( i = 1; i <= $MAXTRY; ++i)) ; do
-	if [ $i -eq 1 ] ; then
-	    echo "Run "$teName $tpack $runOpt
+    wantNoLoop=
+    if [ x$noLoop = xnoloop ] ; then
+	wantNoLoop=-noloop
+    fi
+
+    declare -i j
+    for (( j=1; j <= $MAXTRY; ++j)) ; do
+	if [ $j -eq 1 ] ; then
+	    echo "Run "$teName $tpack $runOpt $noLoop
 	else
-	    echo "Retry($i) "$teName $tpack $runOpt
+	    echo "Retry($j) "$teName $tpack $runOpt $noLoop
 	fi
 
-	bash $toName-command-line$wantOpt-$tpack$wantlog.sh
+	bash $toName-command-line$wantOpt-$tpack$wantlog$wantNoLoop.sh
 	RETVAL=$?
 	echo $RETVAL
 	
 	if [ $RETVAL -eq 0 ] ; then
-	    echo "PASSED: $teName $tpack $runOpt" > $toName-status.log
-	    echo $toName,$teName,$tpack,$runOpt >> $basedir/passedtests.log
-	    (cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "PASSED: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
+	    echo "PASSED: $teName $tpack $runOpt $noLoop" > $toName-status.log
+	    echo $toName,$teName,$tpack,$runOpt,$noLoop >> $basedir/passedtests.log
+	    (cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "PASSED: dmcs testcase on GLUCK: $teName $tpack $runOpt $noLoop" $EMAIL
 	    break
 	elif [ $RETVAL -eq 124 ] ; then
-	    echo "TIMEOUT: $teName $tpack $runOpt" > $toName-status.log
-	    echo $toName,$teName,$tpack,$runOpt >> $basedir/timeouttests.log
-	    (cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "TIMEOUT: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
+	    echo "TIMEOUT: $teName $tpack $runOpt $noLoop" > $toName-status.log
+	    echo $toName,$teName,$tpack,$runOpt,$noLoop >> $basedir/timeouttests.log
+	    (cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "TIMEOUT: dmcs testcase on GLUCK: $teName $tpack $runOpt $noLoop" $EMAIL
 	    break
 	else
-	    if [ $i -eq $MAXtRY ] ; then
-		echo "FAILED: $teName $tpack $runOpt" > $toName-status.log
-		echo $toName,$teName,$tpack,$runOpt >> $basedir/$filename
-		(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED: dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
+	    if [ $j -eq $MAXTRY ] ; then
+		echo "FAILED: $teName $tpack $runOpt $noLoop" > $toName-status.log
+		echo $toName,$teName,$tpack,$runOpt,$noLoop >> $basedir/$filename
+		(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED: dmcs testcase on GLUCK: $teName $tpack $runOpt $noLoop" $EMAIL
 	    else
-		(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED($i): dmcs testcase on GLUCK: $teName $tpack $runOpt" $EMAIL
+		(cat $toName-time.log ; echo ; cat $toName.log ; echo ; cat $toName-err.log) | mail -s "FAILED($j): dmcs testcase on GLUCK: $teName $tpack $runOpt $noLoop" $EMAIL
 	    fi
 	fi
     done
 
-    moveLogFiles $toName $teName $tpack $runOpt
+    moveLogFiles $toName $teName $tpack $runOpt $noLoop
 } # end of runOneInstance
 
 #################################################################################
@@ -126,6 +138,9 @@ runAll()
 	    for ((i = 0; i < $no_test_packs; ++i)) ; do
 		runOneInstance $filename $toponame $testname ${testpack[$i]}
 		runOneInstance $filename $toponame $testname ${testpack[$i]} opt
+		if [ $i -gt 0 ] ; then
+		    runOneInstance $filename $toponame $testname ${testpack[$i]} opt noloop
+		fi
 	    done
 	    
 	    cd ../../.. # get out of data/$toponame/$testname
@@ -145,9 +160,12 @@ reRun()
 	# list[0] = toponame
 	# list[1] = testname
 	# list[2] = testpack
-	# list[3] = (mode)
+	# list[3] = (opt-mode)
+	# list[4] = (loop-mode)
 	cd data/${list[0]}/${list[1]}
-	if [ $noArguments -eq 4 ] ; then
+	if [ $noArguments -eq 5 ] ; then
+	    runOneInstance failedtests.tmp ${list[0]} ${list[1]} ${list[2]} ${list[3]} ${list[4]}
+	elif [ $noArguments -eq 4 ] ; then
 	    runOneInstance failedtests.tmp ${list[0]} ${list[1]} ${list[2]} ${list[3]}
 	else
 	    runOneInstance failedtests.tmp ${list[0]} ${list[1]} ${list[2]}
