@@ -252,15 +252,21 @@ NormalContext::process_input(NewBeliefState* input,
       (*current_guess) = (*starting_guess);
       
       // iterate over all possible guesses or until k1 --> k2 models were computed
-      DBGLOG(DBG, "NormalContext::process_request(). Guessing input = " << *total_guessing_input);
+      DBGLOG(DBG, "NormalContext::process_input(). Total guessing input = " << *total_guessing_input);
+      DBGLOG(DBG, "NormalContext::process_input(). input = " << *input);
+      DBGLOG(DBG, "NormalContext::process_input(). starting guess = " << *current_guess);
       bool computed_k1_k2 = false;
       do
 	{
 	  NewBeliefState* combined_input = 
 	    new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
 			       BeliefStateOffset::instance()->SIZE_BS());
-	  (*combined_input ) = (*input) | (*current_guess);
+	  (*combined_input) = (*input);
+	  (*combined_input) = (*combined_input) | (*current_guess);
 	  
+	  DBGLOG(DBG, "NormalContext::process_input(). input = " << *input);
+	  DBGLOG(DBG, "NormalContext::process_input(). combined input = " << *combined_input);
+
 	  if (compute(combined_input, k1, k2, parent_qid, eval, md)) 
 	    {
 	      computed_k1_k2 = true;
@@ -268,6 +274,14 @@ NormalContext::process_input(NewBeliefState* input,
 	    }
 	  
 	  current_guess = next_guess(current_guess, total_guessing_input);
+	  if (current_guess)
+	    {
+	      DBGLOG(DBG, "NormalContext::process_input(). current guess = " << *current_guess);
+	    }
+	  else
+	    {
+	      DBGLOG(DBG, "NormalContext::process_input(). current guess = NULL. break!");
+	    }
 	}
       while (current_guess);
 

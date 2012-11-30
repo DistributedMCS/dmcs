@@ -72,7 +72,7 @@ NewContext::compute(NewBeliefState* input,
 		    NewConcurrentMessageDispatcherPtr md)
 {
   ///@todo: create heads = (NULL, k1, k2) in case of real leaf node.
-  DBGLOG(DBG, "NormalContext[" << ctx_id << "]::compute(): input = " << *input);
+  DBGLOG(DBG, "NewContext[" << ctx_id << "]::compute(): input = " << *input);
   Heads* heads = evaluate_bridge_rules(bridge_rules, input, k1, k2,
 				       BeliefStateOffset::instance()->getStartingOffsets());      
   

@@ -39,7 +39,7 @@ bool
 NewConcurrentMessageDispatcher::send(MQIDs id, MessageType* mess, int msecs)
 {
   assert (id < SEPARATOR);
-  DBGLOG(DBG, "NewConcurrentMessageDispatcher::send(" << id << ")");
+  //DBGLOG(DBG, "NewConcurrentMessageDispatcher::send(" << id << ")");
   ConcurrentMessageQueuePtr cmq = getMQ(id);
   return send(cmq.get(), mess, msecs);
 }
@@ -52,7 +52,7 @@ NewConcurrentMessageDispatcher::send(MQIDs type, std::size_t id,
 				     MessageType* mess, int msecs)
 {
   assert (SEPARATOR < type && type < END_OF_MQ);
-  DBGLOG(DBG, "NewConcurrentMessageDispatcher::send(" << type << ", " << id << ")");
+  //DBGLOG(DBG, "NewConcurrentMessageDispatcher::send(" << type << ", " << id << ")");
   ConcurrentMessageQueuePtr cmq = getMQ(type, id);
   return send(cmq.get(), mess, msecs);
 }
@@ -91,7 +91,7 @@ MessageType*
 NewConcurrentMessageDispatcher::receive(MQIDs id, int msecs)
 {
   assert (id < SEPARATOR);
-  DBGLOG(DBG, "NewConcurrentMessageDispatcher::receive(" << id << ")");
+  //DBGLOG(DBG, "NewConcurrentMessageDispatcher::receive(" << id << ")");
   ConcurrentMessageQueuePtr cmq = getMQ(id);
   return receive<MessageType>(cmq.get(), msecs);
 }
@@ -103,7 +103,7 @@ MessageType*
 NewConcurrentMessageDispatcher::receive(MQIDs type, std::size_t id, int msecs)
 {
   assert (SEPARATOR < type && type < END_OF_MQ);
-  DBGLOG(DBG, "NewConcurrentMessageDispatcher::receive(" << type << ", " << id << ")");
+  //DBGLOG(DBG, "NewConcurrentMessageDispatcher::receive(" << type << ", " << id << ")");
   ConcurrentMessageQueuePtr cmq = getMQ(type, id);
   return receive<MessageType>(cmq.get(), msecs);
 }

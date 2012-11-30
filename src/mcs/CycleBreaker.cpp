@@ -121,12 +121,21 @@ CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
       NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
 							 BeliefStateOffset::instance()->SIZE_BS());
       
-      (*current_guess) = (*starting_guess);      
+      (*current_guess) = (*starting_guess);
+      DBGLOG(DBG, "CycleBreaker::startup: starting guess = " << *current_guess);
 
       do
 	{
 	  if (compute(current_guess, k1, k2, parent_qid, eval, md)) break;
 	  current_guess = next_guess(current_guess, total_guessing_input);
+	  if (current_guess)
+	    {
+	      DBGLOG(DBG, "CycleBreaker::startup: current guess = " << *current_guess);
+	    }
+	  else
+	    {
+	      DBGLOG(DBG, "CycleBreaker::startup: current guess = NULL, break!");
+	    }
 	}
       while (current_guess);
 
