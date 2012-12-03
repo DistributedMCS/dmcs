@@ -40,7 +40,7 @@ StreamingJoiner::StreamingJoiner(std::size_t ps,
     pack_size(ps),
     offset2index(new NeighborOffset2Index),
     next_neighbor(0),
-    first_round(true),
+    //    first_round(true),
     asking_next(false),
     pack_count(n->size(), 0)
 {
@@ -62,7 +62,7 @@ StreamingJoiner::reset()
 {
   BaseJoiner::reset();
 
-  first_round = true;
+  //  first_round = true;
   asking_next = false;
   next_neighbor = 0;
   
@@ -71,7 +71,7 @@ StreamingJoiner::reset()
 }
 
 
-
+#if 0
 ReturnedBeliefState*
 StreamingJoiner::trigger_join(std::size_t query_id, 
 			      const NewHistory& history,
@@ -121,6 +121,7 @@ StreamingJoiner::process(std::size_t query_id,
       return end_rbs;
     }
 }
+#endif
 
 
 
@@ -130,8 +131,8 @@ StreamingJoiner::first_join(std::size_t query_id,
 			    NewConcurrentMessageDispatcherPtr md,
 			    NewJoinerDispatcherPtr jd)
 {
-  // Warming up round, set first_round to FALSE
-  first_round = false;
+  reset();
+  //  first_round = false;
 
   if (!ask_first_packs(query_id, history, 0, neighbors->size()-1, md, jd))
     {

@@ -47,11 +47,13 @@ public:
   StreamingJoiner(std::size_t ps,
 		  NewNeighborVecPtr n);
 
+#if 0
   ReturnedBeliefState*
   trigger_join(std::size_t query_id,
 	       const NewHistory& history,
 	       NewConcurrentMessageDispatcherPtr md,
 	       NewJoinerDispatcherPtr jd);
+#endif 
 
   ReturnedBeliefState*
   first_join(std::size_t query_id, 
@@ -69,11 +71,13 @@ private:
   void
   reset();
 
+#if 0
   ReturnedBeliefState*
   process(std::size_t query_id, 
 	  const NewHistory& history,
 	  NewConcurrentMessageDispatcherPtr md,
 	  NewJoinerDispatcherPtr jd);
+#endif
 
   bool
   do_join(std::size_t query_id);
@@ -119,7 +123,7 @@ private:
   // if pack_size == 0, we ask for all models
   std::size_t pack_size;            
   std::size_t next_neighbor;
-  bool first_round;
+  //  bool first_round;
   bool asking_next;
   std::vector<std::size_t> pack_count;
   NeighborOffset2IndexPtr offset2index;

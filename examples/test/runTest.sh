@@ -27,32 +27,37 @@ createSubDir()
 #################################################################################
 moveLogFiles()
 {
-    noargs=$#
-    optimized=opt_
-    loopMode=noloop_
+    mvTopoName=$1
+    mvTestName=$2
+    mvTestPack=$3
+    mvRunOpt=$4
+    mvNoLoop=$5
+
+    optimized=
+    loopMode=
     mode=
-    if [ $noargs -eq 3 ] ; then
-	optimized=
-	loopMode=
-    elif [ $noargs -eq 4 ] ; then
-	loopMode=	
+
+    if [ x$mvRunOpt = xopt ] ; then
+	optimized=opt_
     fi
-    
-    toponame=$1
-    testname=$2
+
+    if [ x$mvNoLoop = xnoloop ] ; then
+	loopMode=noloop_
+    fi
+
     mode=$optimized$loopMode$3
     basedir=../../..
 
     createSubDir $basedir/output
-    createSubDir $basedir/output/$toponame
-    createSubDir $basedir/output/$toponame/$testname
-    createSubDir $basedir/output/$toponame/$testname/$mode
+    createSubDir $basedir/output/$mvTopoName
+    createSubDir $basedir/output/$mvTopoName/$mvTestName
+    createSubDir $basedir/output/$mvTopoName/$mvTestName/$mode
 
     if [ x$WANTLOG = xyes ] ; then
-	rm $basedir/output/$toponame/$testname/$mode/*
+	rm $basedir/output/$mvTopoName/$mvTestName/$mode/*
     fi
 
-    mv *.log $basedir/output/$toponame/$testname/$mode
+    mv *.log $basedir/output/$mvTopoName/$mvTestName/$mode
 } # end of moveLogFiles
 
 #################################################################################
@@ -136,9 +141,10 @@ runAll()
 	    
 	    no_test_packs=${#testpack[@]}
 	    for ((i = 0; i < $no_test_packs; ++i)) ; do
-		runOneInstance $filename $toponame $testname ${testpack[$i]}
-		runOneInstance $filename $toponame $testname ${testpack[$i]} opt
-		if [ $i -gt 0 ] ; then
+		runOneInstance $filename $toponame $testname ${testpack[$i]} noopt loop
+		runOneInstance $filename $toponame $testname ${testpack[$i]} opt loop
+		if [ $i -gt 1 ] ; then
+		    runOneInstance $filename $toponame $testname ${testpack[$i]} noopt noloop
 		    runOneInstance $filename $toponame $testname ${testpack[$i]} opt noloop
 		fi
 	    done
