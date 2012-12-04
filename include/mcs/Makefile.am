@@ -10,6 +10,7 @@ noinst_HEADERS =  \
 		BridgeRule.h \
 		BridgeRuleEvaluator.h \
 		BridgeRuleTable.h \
+		CachePosition.h \
 		ForwardMessage.h \
 		Heads.h \
 		ID.h \

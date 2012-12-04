@@ -26,7 +26,7 @@ LIBS = \
 	$(BOOST_GRAPH_LIBS)
 
 
-noinst_LIBRARIES = libmcs.a
+noinst_LIBRARIES = libmcs.a libcache.a
 
 # the mcs library
 libmcs_a_SOURCES = \
@@ -49,3 +49,7 @@ libmcs_a_SOURCES = \
 		QueryPlan.cpp \
 		ReturnedBeliefState.cpp \
 		StreamingJoiner.cpp 
+
+# the cache lirary
+libcache_a_SOURCES = \
+		CachePosition.cpp

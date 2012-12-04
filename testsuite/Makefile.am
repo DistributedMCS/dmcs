@@ -25,6 +25,7 @@ LIBS = \
 
 
 TESTS = \
+	testCache \
 	testClasp \
 	testBeliefComparison \
 	testBridgeRuleParswer \
@@ -68,6 +69,7 @@ TESTS_ENVIRONMENT = \
 	BOOST_TEST_LOG_LEVEL=all
 
 check_PROGRAMS = \
+	testCache \
 	testClasp \
 	testBeliefComparison \
 	testBridgeRuleParser \
@@ -110,6 +112,10 @@ check_PROGRAMS = \
 	testReturnPlanParser \
 	testSystemWithQueryPlan \
 	testSystem
+
+testCache_SOURCES = testCache.cpp
+testCache_LDADD = \
+	$(top_builddir)/src/mcs/libcache.a 
 
 testClasp_SOURCES = testClasp.cpp 
 testClasp_LDADD = \

@@ -39,7 +39,7 @@ bin_PROGRAMS = new_dmcsd new_dmcsc new_dmcsm
 
 # the new_dmcsd binary
 new_dmcsd_SOURCES = \
-		new_dmcsd.cpp
+	new_dmcsd.cpp
 
 new_dmcsd_LDADD = \
 	$(top_builddir)/src/dmcs/libdmcs.a \
@@ -48,6 +48,7 @@ new_dmcsd_LDADD = \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/mcs/libmcs.a \
+	$(top_builddir)/src/mcs/libcache.a \
 	@LIBCURL@
 
 # the dmcsc binary
