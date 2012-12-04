@@ -256,6 +256,7 @@ NewContext::send_out_result(std::size_t parent_qid,
 {
   if (heads->getHeads() != NULL)
     {
+#if 0
       if (normal_solve)
 	{
 	  HeadsPlusBeliefState* heads_plus_bs = static_cast<HeadsPlusBeliefState*>(heads);
@@ -281,6 +282,7 @@ NewContext::send_out_result(std::size_t parent_qid,
 	  DBGLOG(DBG, "NewContext::send_out_result(): combined bs = " << *belief_state);
 	}
       // otherwise, this context broke a cycle and we don't have input_bs
+#endif
 
       // project
       std::size_t parent_ctx_id = invoker_from_qid(parent_qid);
