@@ -132,14 +132,10 @@ def get_outcome(toponame, dirname):
 
 
 def complete_test_case(dirname, subdirs):
-    print "Check dir = " + dirname
-    print "subdirs = " 
-    print subdirs
     if os.path.exists(dirname) == False:
         return False
 
     for subdir in subdirs:
-        print "Check subdir = " + subdir
         if os.path.exists(dirname + subdir) == False:
             return False
 
@@ -186,8 +182,6 @@ def process_test_cases(toponame, testpacks, current_test_case):
             test_runs.append('/opt_noloop_' + p)
         test_runs.append('/opt_' + p)
 
-    print test_runs
-
     for instance in current_test_case:
         dirname = 'output/' + toponame + '/' + toponame + '-' + instance[1] + '-' + instance[2] + '-' + instance[3] + '-' + instance[4] + '-' + instance[5]
         if complete_test_case(dirname, test_runs):
@@ -196,8 +190,6 @@ def process_test_cases(toponame, testpacks, current_test_case):
                 outcome.append(get_outcome(toponame, dirname + r))
 
             ordered_push(outcomes, outcome, sorted_testcases, instance)
-        else:
-            print "directory not complete for toponame = " + toponame
 
     return outcomes, sorted_testcases
 
