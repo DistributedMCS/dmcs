@@ -246,10 +246,21 @@ NormalContext::process_input(NewBeliefState* input,
 {
   if (must_guess(input))
     {
-      NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-							 BeliefStateOffset::instance()->SIZE_BS());
-      
-      (*current_guess) = (*starting_guess);
+      NewBeliefState* current_guess;
+
+      std::size_t current_step = cache.find_position(k1);
+
+      if (current_step == 0)
+	{
+	  current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+					     BeliefStateOffset::instance()->SIZE_BS());
+	  
+	  (*current_guess) = (*starting_guess);
+	}
+      else
+	{
+	  current_guess = jump_guess(total_guessing_input, current_step);
+	}
       
       // iterate over all possible guesses or until k1 --> k2 models were computed
       DBGLOG(DBG, "NormalContext::process_input(). Total guessing input = " << *total_guessing_input);
@@ -267,12 +278,13 @@ NormalContext::process_input(NewBeliefState* input,
 	  DBGLOG(DBG, "NormalContext::process_input(). input = " << *input);
 	  DBGLOG(DBG, "NormalContext::process_input(). combined input = " << *combined_input);
 
-	  if (compute(combined_input, k1, k2, parent_qid, eval, md)) 
+	  if (compute(combined_input, k1, k2, parent_qid, current_step, eval, md)) 
 	    {
 	      computed_k1_k2 = true;
 	      break;
 	    }
 	  
+	  current_step++;
 	  current_guess = next_guess(current_guess, total_guessing_input);
 	  if (current_guess)
 	    {
@@ -296,7 +308,9 @@ NormalContext::process_input(NewBeliefState* input,
     }
   else
     {
-      return compute(input, k1, k2, parent_qid, eval, md);
+      // disable caching
+      std::size_t current_step_zero = 0;
+      return compute(input, k1, k2, parent_qid, current_step_zero, eval, md);
     }
 }
 

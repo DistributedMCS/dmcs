@@ -34,6 +34,7 @@
 #include "dmcs/Instantiator.h"
 #include "mcs/BeliefTable.h"
 #include "mcs/BridgeRuleEvaluator.h"
+#include "mcs/CachePosition.h"
 #include "mcs/QueryPlan.h"
 #include "network/RequestDispatcher.h"
 #include "mcs/StreamingJoiner.h"
@@ -70,12 +71,17 @@ protected:
   NewBeliefState*
   next_guess(NewBeliefState* current_guess,
 	     NewBeliefState* guessing_input);
+
+  NewBeliefState*
+  jump_guess(NewBeliefState* guessing_input,
+	     std::size_t step);
   
   bool
   compute(NewBeliefState* input,
 	  std::size_t& k1,
 	  std::size_t& k2,
 	  std::size_t parent_qid,
+	  std::size_t current_step,
 	  EvaluatorPtr eval,
 	  NewConcurrentMessageDispatcherPtr md);
 
@@ -87,6 +93,7 @@ protected:
 
   bool
   read_and_send_k1_k2(std::size_t parent_qid,
+		      std::size_t current_step,
 		      bool normal_solve,
 		      std::size_t& k1,
 		      std::size_t& k2,
@@ -103,6 +110,7 @@ protected:
 protected:
   std::size_t ctx_id;
   std::size_t ctx_offset;
+  CachePosition cache;
   ReturnPlanMapPtr return_plan;
   ContextQueryPlanMapPtr queryplan_map;
   BridgeRuleTablePtr bridge_rules;

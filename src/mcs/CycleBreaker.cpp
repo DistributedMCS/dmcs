@@ -118,19 +118,35 @@ CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
 
       // different from non-cycle-breaking task, we will guess for all input here,
       // including the bridge atoms from neighbors that might not be involved in the current cycle.
-      NewBeliefState* current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
-							 BeliefStateOffset::instance()->SIZE_BS());
+      NewBeliefState* current_guess;
+
+      std::size_t current_step = cache.find_position(k1);
+      DBGLOG(DBG, "CycleBreaker::startup: current_step = " << current_step);
+      if (current_step == 0)
+	{
+	  current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+					     BeliefStateOffset::instance()->SIZE_BS());
       
-      (*current_guess) = (*starting_guess);
+	  (*current_guess) = (*starting_guess);
+	   DBGLOG(DBG, "CycleBreaker::startup: starting_guess = " << *current_guess);
+	}
+      else
+	{
+	   current_guess = jump_guess(total_guessing_input, current_step);
+	   DBGLOG(DBG, "CycleBreaker::startup: jump_guess = " << *current_guess);
+	}
+
       DBGLOG(DBG, "CycleBreaker::startup: starting guess = " << *current_guess);
 
       do
 	{
-	  if (compute(current_guess, k1, k2, parent_qid, eval, md)) break;
+	  if (compute(current_guess, k1, k2, parent_qid, current_step, eval, md)) break;
+
+	  current_step++;
 	  current_guess = next_guess(current_guess, total_guessing_input);
 	  if (current_guess)
 	    {
-	      DBGLOG(DBG, "CycleBreaker::startup: current guess = " << *current_guess);
+	      DBGLOG(DBG, "CycleBreaker::startup: next guess = " << *current_guess);
 	    }
 	  else
 	    {

@@ -68,6 +68,7 @@ NewContext::compute(NewBeliefState* input,
 		    std::size_t& k1,
 		    std::size_t& k2,
 		    std::size_t parent_qid,
+		    std::size_t current_step,
 		    EvaluatorPtr eval,
 		    NewConcurrentMessageDispatcherPtr md)
 {
@@ -86,10 +87,85 @@ NewContext::compute(NewBeliefState* input,
   int timeout = 0;
   md->send(NewConcurrentMessageDispatcher::EVAL_IN_MQ, eval->getInQueue(), heads, timeout);
   
-  return read_and_send_k1_k2(parent_qid, true, k1, k2, eval, md);
+  return read_and_send_k1_k2(parent_qid, current_step, true, k1, k2, eval, md);
 }
 
 
+
+NewBeliefState*
+NewContext::jump_guess(NewBeliefState* guessing_input,
+		       std::size_t step)
+{
+  NewBeliefState* guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+					     BeliefStateOffset::instance()->SIZE_BS());
+  (*guess) = (*starting_guess);
+
+  if (step == 0)
+    {
+      return guess;
+    }
+
+  std::size_t n = BeliefStateOffset::instance()->NO_BLOCKS();
+  std::size_t s = BeliefStateOffset::instance()->SIZE_BS();
+
+  // convert step to binary, store in a vector
+  std::vector<bool> bin_step;
+
+  while (step > 0)
+    {
+      bool rem = ((step%2) == 1);
+      bin_step.push_back(rem);
+      step /= 2;
+    }
+
+  std::vector<bool>::const_iterator it = bin_step.begin();
+  std::size_t first_bit_set = guessing_input->getFirst();
+  assert (first_bit_set % (s+1) == 0);
+  std::size_t bit = first_bit_set;
+
+  // now turn on/off corresponding bits based on the stored binary representation of step
+  do
+    {
+      bit = guessing_input->getNext(bit);
+      
+      if (bit % (s+1) != 0)
+	{
+	  if (*it)
+	    {
+	      guess->set(bit, NewBeliefState::DMCS_TRUE);
+	    }
+	  else
+	    {
+	      guess->set(bit, NewBeliefState::DMCS_FALSE);
+	    }
+
+	  it++;
+	  if (it == bin_step.end())
+	    {
+	      break;
+	    }
+	}
+    }
+  while (bit);
+
+
+  while (bit)
+    {
+      bit = guessing_input->getNext(bit);
+      if (bit % (s+1) != 0)
+	{
+	  guess->set(bit, NewBeliefState::DMCS_FALSE);
+	}
+    }
+
+  if (it != bin_step.end())
+    {
+      delete guess;
+      guess = NULL;
+    }
+
+  return guess;
+}
 
 NewBeliefState*
 NewContext::next_guess(NewBeliefState* current_guess, 
@@ -142,8 +218,10 @@ NewContext::next_guess(NewBeliefState* current_guess,
 }
 
 
+
 bool
 NewContext::read_and_send_k1_k2(std::size_t parent_qid,
+				std::size_t current_step,
 				bool normal_solve,
 				std::size_t& k1,
 				std::size_t& k2,
@@ -179,6 +257,12 @@ NewContext::read_and_send_k1_k2(std::size_t parent_qid,
 	  assert (models_counter < k1);
 	  k2 -= models_counter;
 	  k1 -= models_counter;
+
+	  if (current_step > 0)
+	    {
+	      DBGLOG(DBG, "NewContext::read_and_send_k1_k2(): update cache with (" <<  current_step << "," << models_counter << ")");
+	      cache.update_cache(current_step, models_counter);
+	    }
 	}
       else if (models_sent < k2 - k1 + 1)
 	// the number models returned by the Evaluator is in between k1,k2.
