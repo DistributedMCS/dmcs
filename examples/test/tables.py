@@ -132,10 +132,14 @@ def get_outcome(toponame, dirname):
 
 
 def complete_test_case(dirname, subdirs):
+    print "Check dir = " + dirname
+    print "subdirs = " 
+    print subdirs
     if os.path.exists(dirname) == False:
         return False
 
     for subdir in subdirs:
+        print "Check subdir = " + subdir
         if os.path.exists(dirname + subdir) == False:
             return False
 
@@ -169,13 +173,20 @@ def ordered_push(outcomes, outcome, sorted_testcases, testcase):
 
 
 def process_test_cases(toponame, testpacks, current_test_case):
-    outcomes = [ ]
+    outcomes = []
     sorted_testcases = []
 
     test_runs = []
     for p in testpacks:
+        if (p != 'all') and (p != '1'):
+            test_runs.append('/noloop_' + p)
         test_runs.append('/' + p)
+
+        if (p != 'all') and (p != '1'):
+            test_runs.append('/opt_noloop_' + p)
         test_runs.append('/opt_' + p)
+
+    print test_runs
 
     for instance in current_test_case:
         dirname = 'output/' + toponame + '/' + toponame + '-' + instance[1] + '-' + instance[2] + '-' + instance[3] + '-' + instance[4] + '-' + instance[5]
@@ -185,6 +196,8 @@ def process_test_cases(toponame, testpacks, current_test_case):
                 outcome.append(get_outcome(toponame, dirname + r))
 
             ordered_push(outcomes, outcome, sorted_testcases, instance)
+        else:
+            print "directory not complete for toponame = " + toponame
 
     return outcomes, sorted_testcases
 
@@ -207,6 +220,18 @@ def nice_display(time, val):
         return 'E'
     else:
         return time
+
+def combined_display(time, val):
+    if time == '1000124':        
+        return '(' + val + ')'
+    elif time == '10001':
+        return 'E'
+    else:
+        blank_count = 4 - len(val)
+        blanks = ''
+        for i in range(blank_count):
+            blanks = blanks + '\ '
+        return time + blanks + '(' + val + ')'
 
 
 def build_row(tex_output, tex_row_template, 
@@ -237,10 +262,18 @@ def build_row(tex_output, tex_row_template,
                                                  final_display(outcome[1][1]),
                                                  nice_display(outcome[2][0], outcome[2][1]),
                                                  nice_display(outcome[3][0], outcome[3][1]),
-                                                 nice_display(outcome[4][0], outcome[4][1]),
+                                                 final_display(outcome[4][0]), 
+                                                 outcome[4][1],
                                                  nice_display(outcome[5][0], outcome[5][1]),
-                                                 nice_display(outcome[6][0], outcome[6][1]),
-                                                 nice_display(outcome[7][0], outcome[7][1])))
+                                                 final_display(outcome[6][0]), 
+                                                 outcome[6][1],
+                                                 nice_display(outcome[7][0], outcome[7][1]),
+                                                 final_display(outcome[8][0]), 
+                                                 outcome[8][1],
+                                                 nice_display(outcome[9][0], outcome[9][1]),
+                                                 final_display(outcome[10][0]), 
+                                                 outcome[10][1],
+                                                 nice_display(outcome[11][0], outcome[11][1])))
 
 
 def main(argv):
@@ -255,12 +288,12 @@ def main(argv):
 
     topo_abbreviation = {'diamond' : 'D', 'ring' : 'R', 'tree' : 'T', 'zigzag' : 'Z'}
     #topologies = ['diamond', 'ring', 'tree', 'zigzag']
-    topologies = ['diamond']
+    topologies = ['ring']
     testpacks  = ['all', '1', '10', '100' ]
-    subdirs = ['', '/all', '/opt_all', '/1', '/opt_1', '/10', '/opt_10', '/100', '/opt_100']
+    subdirs = ['', '/all', '/opt_all', '/1', '/opt_1', '/10', '/noloop_10', '/opt_10', '/opt_noloop_10', '/100', '/noloop_100', '/opt_100', '/opt_noloop_100']
 
     for topo in topologies:
-        filename = 'config/' + topo + '.cfg'
+        filename = 'config/' + topo + '.out'
         with open(filename, 'r') as config_file:
             line = config_file.readline()
             line = line[:len(line)-1]
