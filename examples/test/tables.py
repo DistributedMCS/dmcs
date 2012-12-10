@@ -255,7 +255,7 @@ def build_row(tex_output, tex_row_template,
         mem = topo + '-' + instance[1] + '-' + instance[2] + '-' + instance[3] + '-' + instance[4] + '-' + instance[5] 
         str_i = '{' + str(i+1) + '}'
 
-        print outcome
+        #print outcome
 
         tex_output.write(tex_row_template.format(mem,
                                                  topo_abbr,
@@ -293,6 +293,50 @@ def build_footer(tex_output, topo, inputext):
 
 
 
+def build_raw_data(outcomes, sorted_testcases,
+                   topo, current_test_case,
+                   raw_row_template):
+
+    # which parameter setting we are on now?
+    instance = current_test_case[0]
+    test_name = topo + '-' + instance[1] + '-' + instance[2] + '-' + instance[3] + '-' + instance[4]
+    path = 'output/' + topo + '/' + test_name
+
+    print path
+    if not os.path.exists(path):
+        print "Make dir " + path
+        os.makedirs(path)
+    
+    with open(path + '/' + test_name + '.dat', 'w') as f:
+        for i in range(len(outcomes)):
+            outcome = outcomes[i]
+            f.write(raw_row_template.format(final_display(outcome[0][0]),
+                                            final_display(outcome[0][1]),
+                                            final_display(outcome[1][0]),
+                                            final_display(outcome[1][1]),
+                                            final_display(outcome[2][0]),
+                                            final_display(outcome[2][1]),
+                                            final_display(outcome[3][0]),
+                                            final_display(outcome[3][1]),
+                                            final_display(outcome[4][0]),
+                                            final_display(outcome[4][1]),
+                                            final_display(outcome[5][0]),
+                                            final_display(outcome[5][1]),
+                                            final_display(outcome[6][0]),
+                                            final_display(outcome[6][1]),
+                                            final_display(outcome[7][0]),
+                                            final_display(outcome[7][1]),
+                                            final_display(outcome[8][0]),
+                                            final_display(outcome[8][1]),
+                                            final_display(outcome[9][0]),
+                                            final_display(outcome[9][1]),
+                                            final_display(outcome[10][0]),
+                                            final_display(outcome[10][1]),
+                                            final_display(outcome[11][0]),
+                                            final_display(outcome[11][1])
+                                            ))
+    f.closed
+
 
 def main(argv):
     parser = OptionParser()
@@ -312,6 +356,12 @@ def main(argv):
     with open('templates/tex_row.tpl', 'r') as t:
         tex_row_template = t.read()
     t.closed
+
+    # read raw data row template
+    with open('templates/raw_row.tpl', 'r') as raw_row:
+        raw_row_template = raw_row.read()
+    raw_row.closed
+
 
     topo_abbreviation = {'diamond' : 'D', 'ring' : 'R', 'tree' : 'T', 'zigzag' : 'Z'}
     testpacks  = ['all', '1', '10', '100' ]
@@ -343,6 +393,10 @@ def main(argv):
                 build_row(tex_output, tex_row_template, 
                           outcomes, sorted_testcases,
                           topo, topo_abbreviation[topo])
+
+                build_raw_data(outcomes, sorted_testcases, 
+                               topo, current_test_case,
+                               raw_row_template)
 
             #print outcomes
             #print "\n"
