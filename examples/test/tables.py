@@ -300,7 +300,7 @@ def build_raw_data(outcomes, sorted_testcases,
     # which parameter setting we are on now?
     instance = current_test_case[0]
     test_name = topo + '-' + instance[1] + '-' + instance[2] + '-' + instance[3] + '-' + instance[4]
-    path = 'output/' + topo + '/' + test_name
+    path = 'output/' + topo
 
     print path
     if not os.path.exists(path):
