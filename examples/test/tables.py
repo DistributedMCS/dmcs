@@ -5,7 +5,7 @@ import optparse
 import string
 import re
 import os
-
+from optparse import OptionParser
 
 def get_running_time(log_time):
     # Watchout: we only expect time of the form MM:SS.SS
@@ -142,6 +142,23 @@ def complete_test_case(dirname, subdirs):
     return True
 
 
+def compare(outcome1, outcome2):
+    val1 = float(outcome1[0][0])
+    val2 = float(outcome2[0][0])
+    if (val1 > val2):
+        return 1
+    elif (val1 < val2):
+        return -1
+    else: # val1 == val2
+        val1 = float(outcome1[1][0])
+        val2 = float(outcome2[1][0])
+        if (val1 > val2):
+            return 1
+        elif (val1 < val2):
+            return -1
+    
+    return 0
+
 
 def ordered_push(outcomes, outcome, sorted_testcases, testcase):
     if outcomes == []:
@@ -149,15 +166,14 @@ def ordered_push(outcomes, outcome, sorted_testcases, testcase):
         sorted_testcases.append(testcase)
     else:
         i = 0
-        new_val = float(outcome[0][0])
         found = False
 
         while i < len(outcomes):
-            old_val = float(outcomes[i][0][0])
-            i = i + 1
-            if old_val > new_val:
+            if compare(outcomes[i], outcome) == 1:
+                i = i + 1
                 found = True
                 break
+            i = i + 1
 
         if found == True:
             outcomes.insert(i-1, outcome)
@@ -252,8 +268,8 @@ def build_row(tex_output, tex_row_template,
                                                  final_display(outcome[0][1]),
                                                  final_display(outcome[1][0]),
                                                  final_display(outcome[1][1]),
-                                                 nice_display(outcome[2][0], outcome[2][1]),
-                                                 nice_display(outcome[3][0], outcome[3][1]),
+                                                 final_display(outcome[2][0]),
+                                                 final_display(outcome[3][0]),
                                                  final_display(outcome[4][0]), 
                                                  outcome[4][1],
                                                  nice_display(outcome[5][0], outcome[5][1]),
@@ -268,9 +284,28 @@ def build_row(tex_output, tex_row_template,
                                                  nice_display(outcome[11][0], outcome[11][1])))
 
 
+
+
+def build_footer(tex_output, topo, inputext):
+    with open('templates/tex_footer.tpl') as f:
+        for line in f.readlines():
+            tex_output.write(line.format(topo + '-' + inputext))
+
+
+
+
 def main(argv):
+    parser = OptionParser()
+    parser.add_option("-i", "--inp", dest="inputext", help="extension of output instances", metavar="INP")
+    parser.add_option("-t", "--topo", dest="topology", help="topology to create table", metavar="TOPO")
+
+    (options, args) = parser.parse_args()
+    
+    topo = options.topology
+    inputext = options.inputext
+
     # copy header
-    tex_output = open('./table.tex', 'w')
+    tex_output = open('./table-' + topo + '-' + inputext + '.tex', 'w')
     copy_text(tex_output, 'templates/tex_header.tpl')
 
     # read row template
@@ -279,50 +314,48 @@ def main(argv):
     t.closed
 
     topo_abbreviation = {'diamond' : 'D', 'ring' : 'R', 'tree' : 'T', 'zigzag' : 'Z'}
-    #topologies = ['diamond', 'ring', 'tree', 'zigzag']
-    topologies = ['ring']
     testpacks  = ['all', '1', '10', '100' ]
     subdirs = ['', '/all', '/opt_all', '/1', '/opt_1', '/10', '/noloop_10', '/opt_10', '/opt_noloop_10', '/100', '/noloop_100', '/opt_100', '/opt_noloop_100']
 
-    for topo in topologies:
-        filename = 'config/' + topo + '.out'
-        with open(filename, 'r') as config_file:
-            line = config_file.readline()
-            line = line[:len(line)-1]
-            current_instance = re.split(',', line)
-            current_test_case = [current_instance]
+
+    filename = 'config/' + topo + '.' + inputext
+    with open(filename, 'r') as config_file:
+        line = config_file.readline()
+        line = line[:len(line)-1]
+        current_instance = re.split(',', line)
+        current_test_case = [current_instance]
+        while True:
+
             while True:
-
-                while True:
-                    line = config_file.readline()
-                    if line == "":
-                        break
-                    line = line[:len(line)-1]
-                    current_instance = re.split(',', line)
-                    if instance_compare(current_instance, current_test_case[0]) == 0:
-                        current_test_case.append(current_instance)
-                    else:
-                        break
-
-                outcomes, sorted_testcases = process_test_cases(topo, testpacks, current_test_case)
-
-                if outcomes != []:
-                    build_row(tex_output, tex_row_template, 
-                              outcomes, sorted_testcases,
-                              topo, topo_abbreviation[topo])
-
-                #print outcomes
-                #print "\n"
-                #print sorted_testcases
-                #print "\n"
-
+                line = config_file.readline()
                 if line == "":
                     break
-                
-                current_test_case = [current_instance]
-        config_file.closed
+                line = line[:len(line)-1]
+                current_instance = re.split(',', line)
+                if instance_compare(current_instance, current_test_case[0]) == 0:
+                    current_test_case.append(current_instance)
+                else:
+                    break
 
-        copy_text(tex_output, 'templates/tex_footer.tpl')
+            outcomes, sorted_testcases = process_test_cases(topo, testpacks, current_test_case)
+            
+            if outcomes != []:
+                build_row(tex_output, tex_row_template, 
+                          outcomes, sorted_testcases,
+                          topo, topo_abbreviation[topo])
+
+            #print outcomes
+            #print "\n"
+            #print sorted_testcases
+            #print "\n"
+
+            if line == "":
+                break
+                
+            current_test_case = [current_instance]
+    config_file.closed
+
+    build_footer(tex_output, topo, inputext)
     tex_output.closed
 
 if __name__ == "__main__":

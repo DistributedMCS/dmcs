@@ -93,7 +93,7 @@ done
 createSubDir config
 createSubDir data
 
-python listTests.py
+python listTests.py --ext=cfg
 
 for topofile in `ls config/*.cfg` ; do
     length=${#topofile}
