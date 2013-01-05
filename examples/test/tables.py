@@ -210,10 +210,20 @@ def process_test_cases(toponame, testpacks, current_test_case):
     return outcomes, sorted_testcases
 
 
+def final_data_display(val):
+    if val == '1000124':
+        return '600'
+    elif val == '10001':
+        return 'E'
+    else:
+        return val
 
-def final_display(val):
+
+def final_table_display(val):
     if val == '1000124':
         return '---'
+    elif val == '1000134':
+        return 'M'
     elif val == '10001':
         return 'E'
     else:
@@ -264,22 +274,22 @@ def build_row(tex_output, tex_row_template,
                                                  instance[2],
                                                  instance[3],
                                                  instance[4],
-                                                 final_display(outcome[0][0]),
-                                                 final_display(outcome[0][1]),
-                                                 final_display(outcome[1][0]),
-                                                 final_display(outcome[1][1]),
-                                                 final_display(outcome[2][0]),
-                                                 final_display(outcome[3][0]),
-                                                 final_display(outcome[4][0]), 
+                                                 final_table_display(outcome[0][0]),
+                                                 final_table_display(outcome[0][1]),
+                                                 final_table_display(outcome[1][0]),
+                                                 final_table_display(outcome[1][1]),
+                                                 final_table_display(outcome[2][0]),
+                                                 final_table_display(outcome[3][0]),
+                                                 final_table_display(outcome[4][0]), 
                                                  outcome[4][1],
                                                  nice_display(outcome[5][0], outcome[5][1]),
-                                                 final_display(outcome[6][0]), 
+                                                 final_table_display(outcome[6][0]), 
                                                  outcome[6][1],
                                                  nice_display(outcome[7][0], outcome[7][1]),
-                                                 final_display(outcome[8][0]), 
+                                                 final_table_display(outcome[8][0]), 
                                                  outcome[8][1],
                                                  nice_display(outcome[9][0], outcome[9][1]),
-                                                 final_display(outcome[10][0]), 
+                                                 final_table_display(outcome[10][0]), 
                                                  outcome[10][1],
                                                  nice_display(outcome[11][0], outcome[11][1])))
 
@@ -306,36 +316,69 @@ def build_raw_data(outcomes, sorted_testcases,
     if not os.path.exists(path):
         print "Make dir " + path
         os.makedirs(path)
-    
-    with open(path + '/' + test_name + '.dat', 'w') as f:
-        for i in range(len(outcomes)):
-            outcome = outcomes[i]
-            f.write(raw_row_template.format(final_display(outcome[0][0]),
-                                            final_display(outcome[0][1]),
-                                            final_display(outcome[1][0]),
-                                            final_display(outcome[1][1]),
-                                            final_display(outcome[2][0]),
-                                            final_display(outcome[2][1]),
-                                            final_display(outcome[3][0]),
-                                            final_display(outcome[3][1]),
-                                            final_display(outcome[4][0]),
-                                            final_display(outcome[4][1]),
-                                            final_display(outcome[5][0]),
-                                            final_display(outcome[5][1]),
-                                            final_display(outcome[6][0]),
-                                            final_display(outcome[6][1]),
-                                            final_display(outcome[7][0]),
-                                            final_display(outcome[7][1]),
-                                            final_display(outcome[8][0]),
-                                            final_display(outcome[8][1]),
-                                            final_display(outcome[9][0]),
-                                            final_display(outcome[9][1]),
-                                            final_display(outcome[10][0]),
-                                            final_display(outcome[10][1]),
-                                            final_display(outcome[11][0]),
-                                            final_display(outcome[11][1])
-                                            ))
-    f.closed
+
+    cdoutput = 'condenseoutput';
+    if not os.path.exists(cdoutput):
+        print "Make dir " + cdoutput
+        os.makedirs(cdoutput)
+
+    with open(cdoutput + '/' + test_name + '.dat', 'w') as f1:
+        with open(path + '/' + test_name + '.dat', 'w') as f:
+            for i in range(len(outcomes)):
+                outcome = outcomes[i]
+                f.write(raw_row_template.format(final_data_display(outcome[0][0]),
+                                                final_data_display(outcome[0][1]),
+                                                final_data_display(outcome[1][0]),
+                                                final_data_display(outcome[1][1]),
+                                                final_data_display(outcome[2][0]),
+                                                final_data_display(outcome[2][1]),
+                                                final_data_display(outcome[3][0]),
+                                                final_data_display(outcome[3][1]),
+                                                final_data_display(outcome[4][0]),
+                                                final_data_display(outcome[4][1]),
+                                                final_data_display(outcome[5][0]),
+                                                final_data_display(outcome[5][1]),
+                                                final_data_display(outcome[6][0]),
+                                                final_data_display(outcome[6][1]),
+                                                final_data_display(outcome[7][0]),
+                                                final_data_display(outcome[7][1]),
+                                                final_data_display(outcome[8][0]),
+                                                final_data_display(outcome[8][1]),
+                                                final_data_display(outcome[9][0]),
+                                                final_data_display(outcome[9][1]),
+                                                final_data_display(outcome[10][0]),
+                                                final_data_display(outcome[10][1]),
+                                                final_data_display(outcome[11][0]),
+                                                final_data_display(outcome[11][1])
+                                                ))
+
+                f1.write(raw_row_template.format(final_data_display(outcome[0][0]),
+                                                final_data_display(outcome[0][1]),
+                                                final_data_display(outcome[1][0]),
+                                                final_data_display(outcome[1][1]),
+                                                final_data_display(outcome[2][0]),
+                                                final_data_display(outcome[2][1]),
+                                                final_data_display(outcome[3][0]),
+                                                final_data_display(outcome[3][1]),
+                                                final_data_display(outcome[4][0]),
+                                                final_data_display(outcome[4][1]),
+                                                final_data_display(outcome[5][0]),
+                                                final_data_display(outcome[5][1]),
+                                                final_data_display(outcome[6][0]),
+                                                final_data_display(outcome[6][1]),
+                                                final_data_display(outcome[7][0]),
+                                                final_data_display(outcome[7][1]),
+                                                final_data_display(outcome[8][0]),
+                                                final_data_display(outcome[8][1]),
+                                                final_data_display(outcome[9][0]),
+                                                final_data_display(outcome[9][1]),
+                                                final_data_display(outcome[10][0]),
+                                                final_data_display(outcome[10][1]),
+                                                final_data_display(outcome[11][0]),
+                                                final_data_display(outcome[11][1])
+                                                ))
+        f.closed
+    f1.closed
 
 
 def main(argv):
