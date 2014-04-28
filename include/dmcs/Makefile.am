@@ -2,14 +2,12 @@ AUTOMAKE_OPTIONS = gnu
 
 # including headers for make dist
 noinst_HEADERS =  \
-		BaseDMCS.h \
-		Cache.h \
-		OptCommandType.h \
-		OptDMCS.h \
-		OptMessage.h \
-		PrimitiveCommandType.h \
-		PrimitiveDMCS.h \
-		PrimitiveMessage.h 
-
-
-
+		BeliefStateResultAdder.h \
+		DLVEngine.h \
+		DLVEvaluator.h \
+		DLVInstantiator.h \
+		Engine.h \
+		Instantiator.h \
+	  	ProgramOptions.h \
+		StatsInfo.h \
+		URLBuf.h

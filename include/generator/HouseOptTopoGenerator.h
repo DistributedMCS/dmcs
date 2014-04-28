@@ -30,7 +30,6 @@
 #ifndef GEN_HOUSE_OPT_TOPO_GENERATOR_H
 #define GEN_HOUSE_OPT_TOPO_GENERATOR_H
 
-#include "BeliefCombination.h"
 #include "generator/OptTopologyGenerator.h"
 
 namespace dmcs { namespace generator {
@@ -47,9 +46,9 @@ public:
   {
     if (id == 1)
       {
-	BeliefStatePtr bs_12 = getInterface(lcim, id, id+1);
-	BeliefStatePtr bs_23 = getInterface(lcim, id+1, id+2);
-	update(bs_12, bs_23);
+	NewBeliefStatePtr bs_12 = getInterface(lcim, id-1, id);
+	NewBeliefStatePtr bs_23 = getInterface(lcim, id, id+1);
+	(*bs_12) = (*bs_12) | (*bs_23);
 	return;
       }
     
@@ -73,44 +72,43 @@ public:
 		}
 	    }
 
-	  BeliefStatePtr bs_23 = getInterface(lcim, id, id+1);
-	  BeliefStatePtr bs_p3 = getInterface(lcim, parent_id, id+1);
-	  BeliefStatePtr bs_30 = getInterface(lcim, id+1, id+2);
+	  NewBeliefStatePtr bs_23 = getInterface(lcim, id-1, id);
+	  NewBeliefStatePtr bs_p3 = getInterface(lcim, parent_id-1, id);
+	  NewBeliefStatePtr bs_30 = getInterface(lcim, id, id+1);
 
-	  update(bs_23, bs_p3);
-	  update(bs_23, bs_30);
+	  (*bs_23) = (*bs_23) | (*bs_p3);
+	  (*bs_23) = (*bs_23) | (*bs_30);
 
-	  ContextPair p(parent_id, id+1);
+	  ContextPair p(parent_id-1, id);
 	  lcim->erase(p);
 
 	  break;
 	}
       case 3:
 	{
-	  BeliefStatePtr bs_30 = getInterface(lcim, id, id+1);
-	  BeliefStatePtr bs_01 = getInterface(lcim, id+1, id+2);
+	  NewBeliefStatePtr bs_30 = getInterface(lcim, id-1, id);
+	  NewBeliefStatePtr bs_01 = getInterface(lcim, id, id+1);
 
-	  update(bs_30, bs_01);
-
+	  (*bs_30) = (*bs_30) | (*bs_01);
 	  break;
 	}
       case 0:
 	{
-	  BeliefStatePtr bs_01 = getInterface(lcim, id, id+1);
-	  BeliefStatePtr bs_12 = getInterface(lcim, id+1, id-2);
+	  NewBeliefStatePtr bs_01 = getInterface(lcim, id-1, id);
+	  NewBeliefStatePtr bs_12 = getInterface(lcim, id, id-3);
 
-	  update(bs_01, bs_12);
+	  (*bs_01) = (*bs_01) | (*bs_12);
 
-	  ContextPair p(id+1, id-2);
+	  ContextPair p(id, id-3);
 	  lcim->erase(p);
 
 	  std::size_t child_id = id + ((id/4) - 1)*4 + 2;
 	  if (child_id < system_size)
 	    {
-	      BeliefStatePtr bs_p2 = getInterface(lcim, id, child_id);
-	      BeliefStatePtr bs_23 = getInterface(lcim, child_id, child_id+1);
+	      NewBeliefStatePtr bs_p2 = getInterface(lcim, id-1, child_id-1);
+	      NewBeliefStatePtr bs_23 = getInterface(lcim, child_id-1, child_id);
 
-	      update(bs_p2, bs_23);
+	      (*bs_p2) = (*bs_p2) | (*bs_23);
 	    }
 
 	  break;
@@ -120,10 +118,10 @@ public:
 	  std::size_t child_id = id + ((id/4) - 1)*4 + 5;
 	  if (child_id < system_size)
 	    {
-	      BeliefStatePtr bs_p2 = getInterface(lcim, id, child_id);
-	      BeliefStatePtr bs_23 = getInterface(lcim, child_id, child_id+1);
+	      NewBeliefStatePtr bs_p2 = getInterface(lcim, id-1, child_id-1);
+	      NewBeliefStatePtr bs_23 = getInterface(lcim, child_id-1, child_id);
 	      
-	      update(bs_p2, bs_23);
+	      (*bs_p2) = (*bs_p2) | (*bs_23);
 	    }
 	  break;
 	}

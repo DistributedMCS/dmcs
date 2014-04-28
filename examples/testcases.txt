@@ -1,0 +1,8 @@
+tree-10-10-5-5-a
+tree-10-10-5-5-b
+tree-10-10-5-5-c
+end
+diamond-10-10-5-5-a
+diamond-10-10-5-5-b
+diamond-10-10-5-5-c
+end

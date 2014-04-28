@@ -30,7 +30,6 @@
 #ifndef GEN_RING_OPT_TOPO_GENERATOR_H
 #define GEN_RING_OPT_TOPO_GENERATOR_H
 
-#include "BeliefCombination.h"
 #include "generator/OptTopologyGenerator.h"
 
 namespace dmcs { namespace generator {
@@ -53,16 +52,16 @@ public:
 
     if (system_size > 1)
       {
-	BeliefStatePtr bs_this_next = getInterface(lcim, id, id+1);
-	BeliefStatePtr bs_n_1       = getInterface(lcim, system_size, 1);
+	NewBeliefStatePtr bs_this_next = getInterface(lcim, id-1, id);
+	NewBeliefStatePtr bs_n_1       = getInterface(lcim, system_size-1, 0);
 
-	update(bs_this_next, bs_n_1);
+	(*bs_this_next) = (*bs_this_next) | (*bs_n_1);
       }
 
     // remove connection n --> 1
     if (id == 1)
       {
-	ContextPair cp(system_size, 1);
+	ContextPair cp(system_size-1, 0);
 	lcim->erase(cp);
       }
   }

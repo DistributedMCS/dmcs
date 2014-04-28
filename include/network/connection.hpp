@@ -77,6 +77,39 @@ public:
     boost::asio::async_write(socket_, buffers, handler);
   }
 
+
+  /// Synchronously write a data structure to the socket.
+  /// @return number of bytes written
+  template <typename T>
+  std::size_t write(const T& t) throw (boost::system::error_code)
+  {
+    // Serialize the data first so we know how large it is.
+    std::ostringstream archive_stream;
+    boost::archive::text_oarchive archive(archive_stream);
+    archive << t;
+    outbound_data_ = archive_stream.str();
+
+    // Format the header.
+    std::ostringstream header_stream;
+    header_stream << std::setw(header_length)
+      << std::hex << outbound_data_.size();
+    if (!header_stream || header_stream.str().size() != header_length)
+    {
+      // Something went wrong, inform the caller.
+      boost::system::error_code error(boost::asio::error::invalid_argument);
+      throw error;
+    }
+    outbound_header_ = header_stream.str();
+
+    // Write the serialized data to the socket. We use "gather-write" to send
+    // both the header and the data in a single write operation.
+    std::vector<boost::asio::const_buffer> buffers;
+    buffers.push_back(boost::asio::buffer(outbound_header_));
+    buffers.push_back(boost::asio::buffer(outbound_data_));
+    return boost::asio::write(socket_, buffers);
+  }
+
+
   /// Asynchronously read a data structure from the socket.
   template <typename T, typename Handler>
   void async_read(T& t, Handler handler)

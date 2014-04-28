@@ -1,15 +1,15 @@
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <boost/tokenizer.hpp>
-
-#include "ClaspProcess.h"
-#include "DimacsVisitor.h"
-#include "Theory.h"
+#include "mcs/Theory.h"
+#include "process/ClaspProcess.h"
+#include "loopformula/DimacsVisitor.h"
 
 #include "parser/CnfBuilder.h"
 #include "parser/CnfGrammar.h"
 #include "parser/ParserDirector.h"
+
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <boost/tokenizer.hpp>
 
 using namespace dmcs;
 using namespace dmcs::generator;

@@ -1,5 +1,5 @@
+#include "dmcs/QueryPlan.h"
 #include <iostream>
-#include "QueryPlan.h"
 
 using namespace dmcs;
 

@@ -1,9 +1,3709 @@
+2012-03-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/mcs/QueryID.cpp: Add some comments.
+
+	* include/dmcs/ProgramOptions.h: Add options for k1, k2.
+
+	* src/new_dmcsc.cpp: New file.
+
+2012-03-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testSystem.cpp: Adapt testcase for leaf context.
+
+	* include/network/NewOutputThread.h: Fix synchronization problem.
+	* src/network/NewOutputThread.cpp: Likewise.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* include/mcs/NewOutputDispatcher.h: Add logging information.
+
+2012-03-20  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testSystem.cpp: Adapt testcase using NewClient.
+
+	* src/mcs/NewContext.cpp: Fix bug of recalculating k1, k2.
+
+	* src/dmcs/DLVEvaluator.cpp: Correctly feed heads into program stream.
+
+	* include/parser/ParserState.h: Set epsilon bit.
+
+	* include/dmcs/Evaluator.h: Use EvaluatorWrapper.
+	* src/dmcs/Evaluator.cpp: Likewise.
+	* src/dmcs/DLVInstantiator.cpp: Likewise.
+
+	* include/network/Makefile.am: Add NewClient.h.
+	* src/network/Makefile.am: Add NewClient.cpp.
+
+	* src/network/NewHandler.cpp: Also accept HEADER_NEXT.
+
+	* include/network/NewClient.h: New file.
+	* src/network/NewClient.cpp: Likewise.
+
+	* include/mcs/ForwardMessage.h: Add Ptr type.
+	Add default value for k1, k2.
+
+2012-03-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/NewBaseDispatcher.h: Move message_dispatcher out ouf dispatcher.
+	Now use it at the call of startup().
+	* src/network/NewThreadFactory.cpp: Likewise.
+	* src/network/NewServer.cpp: Likewise.
+	* include/mcs/RequestDispatcher.h: Likewise.
+	* include/mcs/NewOutputDispatcher.h: Likewise.
+	* include/mcs/NewJoinerDispatcher.h: Likewise.
+
+	* src/network/NewNeighborThread.cpp: Clean up.
+
+	* src/dmcs/DLVEvaluator.cpp: Nice log messages.
+	* src/mcs/NewContext.cpp: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+	* src/network/NewNeighborOut.cpp: Likewise.
+	* src/network/NewOutputThread.cpp: Likewise.
+	* src/network/NewServer.cpp: Likewise.
+	* src/parser/DLVResultParser.cpp: Likewise.
+
+	* include/network/NewHandler.h: Simplify handle_finalize.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* testsuite/testSystem.cpp: Add testcase for intermediate contexts.
+
+	* testsuite/DmcsClientTest.cpp: Fix input to shutdown query.
+
+	* src/mcs/BeliefStateOffset.cpp: Disable assertion.
+
+	* src/mcs/BackwardMessage.cpp: Fix print().
+
+	* include/network/NewServer.h: Initialize threads at construction time.
+	* src/network/NewServer.cpp: Likewise.
+
+	* include/network/NewConcurrentMessageDispatcher.h: New method for create and register an mq.
+	* src/network/NewConcurrentMessageDispatcher.cpp: Likewise.
+
+	* include/network/NewThreadFactory.h: New file.
+	* src/network/NewThreadFactory.cpp: Likewise.
+
+	* include/network/Makefile.am: Add NewThreadFactory.h
+	* src/network/Makefile.am: Add NewThreadFactory.cpp.
+
+	* include/network/HandlerWrapper.h: Minimize parameters passed.
+
+	* include/mcs/Registry.h: Add lots of information into the Regitry.
+
+	* include/mcs/QueryID.h: Add unset_neighbor_id().
+
+	* include/mcs/NewJoinerDispatcher.h: Create wrapper.
+	* include/network/NewNeighborThread.h: Likewise.
+	* src/network/NewNeighborThread.cpp: Likewise.
+
+	* include/mcs/NewContext.h: Let joiner initialize the offset-index mapping
+	from neighbors' mq to its internal neighbors' index.
+	* src/mcs/NewContext.cpp: Likewise.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
+	* include/mcs/BaseJoiner.h: Fix joiner_offset.
+	* src/mcs/BaseJoiner.cpp: Likewise.
+
+2012-03-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testSystem.cpp: Fix query creation.
+
+	* testsuite/Makefile.am: Don't check testSystem automatically since I don't know
+	how to interrupt the Server now.
+
+	* testsuite/DmcsClientTest.h: Process closing.
+	* testsuite/DmcsClientTest.: Likewise.
+
+	* src/mcs/StreamingJoiner.cpp: Attach neighbor_id to query_id before sending out.
+
+	* src/mcs/NewContext.cpp: Enable an assertion.
+
+	* include/network/NewHandler.h: Add handle_finalize.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* include/mcs/QueryID.h: More query creations.
+
+	* include/mcs/NewOutputDispatcher.h: Add interruption point.
+	* include/mcs/RequestDispatcher.h: Likewise.
+
+2012-03-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testSystem.cpp: Fix initialization.
+
+	* testsuite/DmcsClientTest.cpp: Handle finalizing.
+	* testsuite/DmcsClientTest.h: Likewise.
+
+	* src/network/NewOutputThread.cpp: ctx_id ~~> invoker_id.
+
+	* src/mcs/ID.cpp: Add value for belief mainkind.
+
+	* testsuite/testAbstractContext.cpp: Typo.
+
+	* src/parser/DLVResultGrammar.cpp: Fix parsing bug.
+
+	* include/network/NewServer.h: Make use of HandlerWraper.
+	* src/network/NewServer.cpp: Likewise.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* include/network/NewHandler.h: Pass NewHandlerPtr around to keep the object alive.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* include/network/HandlerWrapper.h: New file.
+
+	* include/network/Makefile.am: Add HandlerWrapper.h.
+
+	* include/mcs/NewContext.h: Use a wrapper to create bug-free thread.
+	(Since boost::thread creates some temporary objects and makes copies of
+	the object with operator()(), this might mess up the value inside the object).
+	* include/mcs/RequestDispatcher.h: Likewise.
+	* include/mcs/NewOutputDispatcher.h: Likewise.
+	* include/network/NewOutputThread.h: Likewise.
+
+2012-03-13  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Add testSystem.
+
+	* testsuite/testSystem.cpp: New file.
+	* testsuite/DmcsClientTest.h: Likewise.
+	* testsuite/DmcsClientTest.cpp: Likewise.
+
+	* include/mcs/NewContext.h: Give leaf context null joiner dispatcher.
+	* src/mcs/NewContext.cpp: Likewise.
+	* testsuite/testAbstractContext.cpp: Adapt testcase.
+
+2012-03-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/NewNeighborOut.cpp: Now also sends headers.
+
+	* include/network/NewHandler.h: Now also receives headers.
+	* src/network/NewHandler.cpp: Likewise.
+
+	* include/network/Makefile.am: Add NewServer.h.
+	* src/network/Makefile.am: Add NewServer.cpp.
+
+	* include/network/NewServer.h: New file.
+	* src/network/NewServer.cpp: Likewise.
+
+	* include/mcs/Makefile.am: Add Registry.h.
+	* include/mcs/Registry.h: New file.
+
+	* include/mcs/NewMessage.h: New header.
+
+2012-03-11  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Makefile.am: Add NewHandler.h.
+	* src/network/Makefile.am: Add NewHandler.cpp.
+
+	* include/network/NewHandler.h: New file.
+	* src/network/NewHandler.cpp: Likewise.
+
+2012-03-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testNeighbors.cpp: Add testcase for NewNeighborOut.
+	* testsuite/NeighborOutServer.h: New file.
+	* testsuite/NeighborOutServer.cpp: Likewise.
+
+	* testsuite/Makefile.am (testDLVProcess_LDADD): Add NeighborOutServer.
+
+	* src/network/NewNeighborThread.cpp: Enable NewNeighborOut.
+
+	* include/mcs/NewOutputDispatcher.h: shutdown() --> is_shutdown()
+	* include/mcs/QueryID.h: Likewise.
+	* src/mcs/NewContext.cpp: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+	* src/network/NewNeighborOut.cpp: Likewise.
+
+	* testsuite/Makefile.am: Add testNeighbors.
+	* testsuite/NeighborInServer.h: New file.
+	* testsuite/testNeighbors.h: Likewise.
+
+	* testsuite/BeliefStateServer.cpp: Typo.
+
+	* src/network/NewNeighborThread.cpp: Allow to terminate.
+
+	* include/mcs/NewBaseDispatcher.h: Fix bugs that are not detected in -O3 compiling mode.
+	* include/mcs/NewBeliefState.h: Likewise.
+
+
+	* src/dmcs/InputProvider.cpp: Likewise.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+	* src/mcs/NewBeliefState.cpp: Likewise.
+
+	* include/mcs/ForwardMessage.h: query_id --> qid.
+	* src/mcs/ForwardMessage.cpp: Likewise.
+	* include/mcs/QueryID.h: Likewise.
+	* src/mcs/NewContext.cpp: Likewise.
+	* src/network/NewNeighborOut.cpp: Likewise.
+	* include/mcs/NewJoinerDispatcher.h: Likewise.
+	* include/mcs/NewOutputDispatcher.h: Likewise.
+	* include/mcs/ReturnedBeliefState.h: Likewise.
+	* src/mcs/ReturnedBeliefState.cpp: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+	* src/network/NewOutputThread.cpp: Likewise.
+
+	* include/mcs/BackwardMessage.h: Move the implementation of serialze() to header file.
+	* src/mcs/BackwardMessage.cpp: Likewise.
+	* include/mcs/ForwardMessage.h: Likewise.
+	* src/mcs/ForwardMessage.cpp: Likewise.
+
+2012-03-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/NewNeighborOut.h: New file.
+	* src/network/NewNeighborOut.cpp: Likewise.
+
+	* include/network/Makefile.am: Add NewNeighborOut.h.
+	* src/network/Makefile.am: Add NewNeighborOut.cpp.
+
+	* include/mcs/QueryID.h: Encode more information in QueryID.
+	* src/mcs/QueryID.cpp: Likewise.
+	* testsuite/testID.cpp: Adapt testcase.
+
+2012-03-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/NewNeighbor.h: Include some basic stuff.
+
+	* include/network/Makefile.am: Add NewOutputThread.h, NewNeighborThread.h.
+	* src/network/Makefile.am: Add NewOutputThread.cpp, NewNeighborThread.cpp.
+
+	* include/network/NewOutputThread.h: New file.
+	* src/network/NewOutputThread.cpp: Likewise.
+	* include/network/NewNeighborThread.h: Likewise.
+	* src/network/NewNeighborThread.cpp: Likewise.
+
+	* include/mcs/NewOutputDispatcher.h: Add Ptr type.
+	* include/mcs/BackwardMessage.h: Likewise.
+
+2012-02-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testAbstractContext.cpp: Fix testcases.
+
+	* src/dmcs/DLVInstantiator.cpp: Init evaluator's mqs from here.
+	* src/dmcs/Evaluator.cpp: Let Instantiator initialize mqs.
+
+	* include/mcs/BridgeRuleEvaluator.h: Update heads with k1, k2.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+	* include/mcs/Heads.h: Likewise.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: Remove temporary method.
+	* include/dmcs/Evaluator.h: Likewise.
+
+	* include/mcs/NewContext.h: Set fixed pack_size for asking neighbors.
+	Will be initiated from command line arguments.
+	* src/mcs/NewContext.cpp: Likewise.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+	* testsuite/testJoiner.cpp: Likewise.
+
+	* testsuite/testDLVProcess.cpp: Add some remarks.
+	* testsuite/testAbstractContext.cpp: Likewise.
+
+	* testsuite/Makefile.am: Add testDLVProcess.
+
+	* src/dmcs/DLVEvaluator.cpp: Clean up.
+	* include/mcs/NewContext.h: Likewise.
+	* src/mcs/NewContext.cpp: Likewise.
+
+2012-02-24  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testDLVProcess.cpp: New file.
+
+2012-02-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/DLVEvaluator.cpp: A dirty hack: sleep 1 microsec to deal with
+	race conditions when deleting dlvprocess.
+
+	* src/dmcs/Evaluator.cpp: Separate init_mqs().
+
+	* include/mcs/Heads.h: Add comparison operators for heads.
+
+	* include/dmcs/DLVEvaluator.h: Move k1, k2 to the level of Evaluator.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+	* include/dmcs/Evaluator.h: Likewise.
+
+	* testsuite/testAbstractContext.cpp: Add testcase for leaf contexts.
+	Add testcase for DLVEvaluator.
+
+	* include/mcs/NewContext.h: Deal with leaf contexts.
+	* src/mcs/NewContext.cpp: Likewise.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
+2012-02-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testAbstractContext.cpp: Fix testcase.
+
+	* src/mcs/NewContext.cpp: Fix return NULL heads.
+
+	* src/dmcs/Evaluator.cpp: Fix case distinction.
+
+	* src/dmcs/DLVInstantiator.cpp: Pass reference of the thread around.
+	* src/dmcs/Instantiator.cpp: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: Create 1 process for each call.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+
+	* src/mcs/StreamingJoiner.cpp: Fix return NULL.
+
+2012-02-20  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/mcs/NewContext.cpp: Register REQUEST_MQ to md.
+
+	* testsuite/testAbstractContext.cpp: Add testRunningContext.
+
+	* include/network/NewConcurrentMessageDispatcher.h: Return queue size.
+	* src/network/NewConcurrentMessageDispatcher.cpp: Likewise.
+
+	* include/dmcs/DLVInstantiator.h: Start and stop threads by instantiators.
+	* src/dmcs/DLVInstantiator.cpp: Likewise.
+	* include/dmcs/Instantiator.h: Likewise.
+	* src/dmcs/Instantiator.cpp: Likewise.
+	* src/mcs/NewContext.cpp: Likewise.
+
+	* include/dmcs/AbstractContext.h: Add some list types.
+
+	* testsuite/testAbstractContext.cpp: Fix test case.
+
+	* src/dmcs/Evaluator.cpp: Fix checking last NULL answer.
+
+	* src/dmcs/DLVEvaluator.cpp: Fix return last NULL answer.
+
+2012-02-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/mcs/NewContext.cpp: A walk-around for the problem of creating thread.
+
+	* src/dmcs/DLVInstantiator.cpp: ConcurrentMessageDispatcher used as parameters
+	instead of data member of Evaluator.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
+	* include/mcs/NewOutputDispatcher.h: Use timeout.
+
+	* include/mcs/NewContext.h: Implement StreamingDMCS algorithm.
+	* src/mcs/NewContext.cpp: Likewise.
+
+	* include/mcs/Makefile.am: Add NewContext.h.
+	* src/mcs/Makefile.am: Add NewContext.cpp.
+
+	* include/mcs/BridgeRuleEvaluator.h: Change method's name.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+
+	* include/dmcs/Instantiator.h: Remove some comment.
+
+	* include/mcs/Heads.h: Introduce pair of Heads* and NewBeliefState*.
+
+	* include/dmcs/BeliefStateResultAdder.h: Heads instead of belief states.
+	* include/dmcs/DLVEvaluator.h: Likewise.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+	* include/dmcs/Evaluator.h: Likewise.
+	* include/mcs/BridgeRuleEvaluator.h: Likewise.
+
+2012-02-17  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/BaseJoiner.h: Remove md, jd from objects and use as parameters.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/mcs/BaseJoiner.cpp: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
+	* testsuite/testJoiner.cpp: Adapt testcase.
+
+	* include/mcs/StreamingJoiner.h: Store a map from neighbor offset to index.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
+	* include/mcs/NewNeighbor.h: Store neighbor_offset.
+
+	* include/mcs/BaseJoiner.h: Give neighbors to Joiner.
+	* src/mcs/BaseJoiner.cpp: Likewise.
+
+2012-02-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/NewContext.h: Starting implementing context.
+	Add comments for future work.
+
+	* src/mcs/NewContext.cpp: New file.
+
+	* src/mcs/BridgeRuleEvaluator.cpp: Return Heads(PlusBeliefState).
+	* include/mcs/BridgeRuleEvaluator.h: Likewise.
+
+	* include/mcs/Makefile.am: Add Heads.h.
+	* include/mcs/Heads.h: New file.
+
+	* testsuite/testBridgeRuleEvaluation.cpp: Adapt testcase.
+
+	* include/mcs/BridgeRuleTable.h (getAllByAddress): New member function.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+
+	* include/mcs/BridgeRuleEvaluator.h: Evaluate the whole table.
+
+2012-02-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/BeliefTable.h: New typedef.
+
+	* include/mcs/NewContext.h: New file.
+
+	* src/dmcs/DLVInstantiator.cpp: Fix input reading bug.
+
+	* examples/testAbstractContext.inp: Add a blank line.
+
+	* testsuite/testBridgeRuleEvaluation.cpp: Fix testcase.
+
+	* include/mcs/BridgeRuleEvaluator.h: Pass input and heads as pointers.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+
+	* include/dmcs/BeliefStateResultAdder.h: Add heads.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+
+2012-01-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testResultParser.cpp: Remove include boost::thread.
+
+	* testsuite/testAbstractContext.cpp: Add testRunningDLV.
+
+	* testsuite/Makefile.am (testAbstractContext_LDADD): Add more libs.
+
+	* src/dmcs/DLVEvaluator.cpp: Finish with solve().
+
+	* include/network/NewConcurrentMessageDispatcher.h: Store queue_size.
+	* src/network/NewConcurrentMessageDispatcher.cpp: Likewise.
+
+	* include/mcs/NewBeliefState.h: Add method for finding TRUE bits.
+
+	* include/dmcs/Makefile.am: Add BeliefStateResultAdder.h.
+
+	* include/dmcs/Instantiator.h: Remove InputProvider.
+	* src/dmcs/Instantiator.cpp: Likewise.
+
+	* include/dmcs/DLVInstantiator.h: Store local_kb as a string.
+	* src/dmcs/DLVInstantiator.cpp: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: More parameters to solve().
+	* include/dmcs/Evaluator.h: Likewise.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
+	* configure.ac: Show DLVPATH.
+
+	* examples/testAbstractContext.inp: Update eample.
+
+2012-01-26  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Add testAbstractContext.
+
+	* src/dmcs/Makefile.am: Add Evaluator.cpp and DLVEvaluator.cpp.
+
+	* src/dmcs/Engine.cpp: Add destructor and method for debugging.
+	* src/dmcs/Instantiator.cpp: Likewise.
+
+	* src/dmcs/DLVEvaluator.cpp: Fix some bugs.
+
+	* src/Makefile.am: Add libcurl.
+
+	* include/dmcs/Engine.h: Add method for debugging.
+	* include/dmcs/Instantiator.h: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: Add options.
+
+	* examples/testAbstractContext.inp: New file.
+	* testsuite/testAbstractContext.cpp: Likewise.
+
+	* include/dmcs/DLVEngine.h: Add destructor.
+	* src/dmcs/DLVEngine.cpp: Likewise.
+	* include/dmcs/Evaluator.h: Likewise.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
+2012-01-25  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/DLVEngine.h: New file.
+	* src/dmcs/Engine.cpp: Likewise.
+	* src/dmcs/DLVEngine.cpp: Likewise.
+
+	* include/dmcs/Makefile.am: Add DLVEngine.h and Engine.h.
+
+	* src/dmcs/Makefile.am: Add DLVEngine.cpp and Engine.cpp.
+
+	* include/dmcs/Engine.h: Add self weak pointer to createInstantiator.
+
+	* include/dmcs/DLVInstantiator.h: Change arguments order.
+	* src/dmcs/DLVInstantiator.cpp: Likewise.
+	* include/dmcs/Instantiator.h: Likewise.
+	* src/dmcs/Instantiator.cpp: Likewise.
+
+	* include/dmcs/AbstractContext.h: Add forward declaration of DLVEngine.
+
+2012-01-24  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/DLVInstantiator.cpp: New file.
+	* src/dmcs/Instantiator.cpp: Likewise.
+	* include/dmcs/DLVInstantiator.h: Likewise.
+	* testsuite/testResultPraser.cpp: Likewise.
+	* src/mcs/testMessageDispatcher.cpp: Likewise.
+
+	* src/dmcs/Makefile.am: Add DLVInstantiator.cpp, InputProvider.cpp,
+	Instantiator.cpp, URLBuf.cpp
+
+	* src/dmcs/InputProvider.cpp: Use assert instead of throw GeneralError.
+
+	* src/dmcs/DLVEvaluator.cpp: Get stream of KB from Instantiator.
+
+	* include/dmcs/Makefile.am: Add DLVInstantiator.h, DLVEvaluator.h,
+	InputProvider.h, URLBuf.h
+
+	* include/dmcs/Instantiator.h: Introduce InputProvider inside
+	as we want to reuse the stream.
+
+	* include/dmcs/Evaluator.h: Fix some typos.
+
+	* include/dmcs/Engine.h: Beautification.
+	* include/dmcs/InputProvider.h: Likewise.
+
+	* include/dmcs/AbstractContext.h: Forward declaration of DLVInstantiator
+	and DLVEvaluator.
+
+2012-01-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/process/Makefile.am: Add NewProcess stuff.
+
+	* include/process/Makefile.am: Add header files to interface with dlv.
+	Use NewProcess for now to avoid fixing Clasp related stuff. Will later
+	unify to Process/ProcessBuf.
+
+	* include/dmcs/Evaluator.h: Add GenericOptions.
+	* src/dmcs/Evaluator.cpp: Likewise.
+
+	* include/dmcs/DLVEvaluator.h: New file.
+	* include/dmcs/InputProvider.h: Likewise.
+	* include/dmcs/URLBuf.h: Likewise.
+	* include/process/DLVProcess.h: Likewise.
+	* include/process/NewProcess.h: Likewise.
+	* include/process/NewProcessBuf.h: Likewise.
+	* src/dmcs/DLVEvaluator.cpp: Likewise.
+	* src/dmcs/InputProvider.cpp: Likewise.
+	* src/dmcs/URLBuf.cpp: Likewise.
+	* src/process/DLVProcess.cpp: Likewise.
+	* src/process/NewProcessBuf.cpp: Likewise.
+
+	* configure.ac: Check for dlv, libcurl.
+
+2012-01-18  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/NewConcurrentMessageDispatcher.cpp: Support creating and registering a new cmq.
+	* include/network/NewConcurrentMessageDispatcher.h: Likewise.
+
+	* testsuite/testMessageDispatcher.cpp: Clarify params.
+
+	* src/dmcs/Evaluator.cpp: New file.
+
+	* include/dmcs/Evaluator.h: No direct ConcurrentMessageQueue,
+	invoke MessageDispatcher instead and get back some id.
+
+2012-01-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testResultParser.cpp: Update testcase.
+
+	* testsuite/SimpleBeliefStateAdder.h: New file, for testing DLVResultParser.
+
+	* include/parser/DLVResultGrammar.h: Fix grammar.
+
+	* src/parser/DLVResultGrammar.cpp: Fix setting truth value of beliefs.
+
+2012-01-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/BeliefTable.h: Add BeliefTablePtr.
+
+	* include/mcs/BeliefStateOffset.h: Add NO_BLOCKS() and SIZE_BS().
+	* src/mcs/BeliefStateOffset.cpp: Likewise.
+
+	* include/mcs/BeliefStateAdder.h: New file.
+	* include/parser/DLVResultGrammar.h: Likewise.
+	* include/parser/DLVResultParser.h: Likewise.
+	* include/parser/ParserState.h: Likewise.
+	* src/parser/DLVResultGrammar.cpp: Likewise.
+	* src/parser/DLVResultParser.cpp: Likewise.
+
+2012-01-04  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Replace testJoinThread by testJoiner.
+
+	* src/mcs/StreamingJoiner.cpp: Fix bug: initialization and receive NULL.
+
+	* include/mcs/NewBeliefState.h: Fix bug: epsilon bits for belief sets.
+	* src/mcs/NewBeliefState.cpp: Likewise.
+	* src/mcs/BeliefStateOffset.cpp: Likewise.
+
+	* testsuite/testJoiner.cpp: New file.
+
+2012-01-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/StreamingJoiner.h: Finish Joiner.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
+	* include/mcs/NewBaseDispatcher.h: include.
+
+	* include/mcs/NewBeliefState.h: New typedef(s) for Joiner.
+
+	* include/mcs/NewJoinerDispatcher.h: Dispatcher by query_id.
+
+	* include/mcs/QueryID.h: Add unset_neighbor_offset().
+
+	* include/mcs/ReturnedBeliefState.h: ReturnedBeliefStateList now contains pointers.
+	* src/mcs/ReturnedBeliefState.cpp: Likewise.
+	* testsuite/testBeliefState.cpp: Adapt testcase.
+
+	* include/mcs/Makefile.am: Add BaseJoiner.h and StreamingJoiner.h.
+	* src/mcs/Makefile.am: Add BaseJoiner.cpp and StreamingJoiner.cpp.
+
+	* include/mcs/BaseJoiner.h: New file.
+	* src/mcs/BaseJoiner.cpp: Likewise.
+	* include/mcs/StreamingJoiner.h: Likewise.
+	* src/mcs/StreamingJoiner.cpp: Likewise.
+
+2012-01-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/Makefile.am: Add NewJoinerDispatcher.h.
+	* include/mcs/NewJoinerDispatcher.h: Newfile.
+
+	* include/mcs/JoinIn.h: Small bug.
+
+	* testsuite/testMessageDispatcher.cpp: Update testcase.
+
+	* include/mcs/NewOutputDispatcher.h: Add infinite loop.
+	* include/mcs/RequestDispatcher.h: Add infinite loop.
+
+	* include/mcs/NewBaseDispatcher.h: Fix some small bugs.
+
+	* src/mcs/QueryID.cpp: Encode SHUTDOWN flag into query_id.
+	* include/mcs/QueryID.h: Likewise.
+	* testsuite/testID: Update testcase.
+
+2012-01-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testMessageDispatcher.cpp: On making testcase for the dispatchers.
+
+	* include/network/NewConcurrentMessageDispatcher.h: Add OUTPUT_MQ type.
+
+	* include/mcs/QueryID.h: Encode neighbor_offset into query_id.
+
+	* src/mcs/QueryID.cpp: Likewise.
+
+	* testsuite/testID.cpp: Update testcase.
+
+	* include/mcs/ForwardMessage.h: Add a comment.
+
+	* testsuite/testBeliefState.cpp: Add testcase for removing duplication.
+
+	* include/mcs/ReturnedBeliefState.h: New file.
+	* src/mcs/ReturnedBeliefState.cpp: Likewise.
+	* include/mcs/BackwardMessage.h: Likwise.
+	* src/mcs/BackwardMessage.cpp: Likwise.
+	* include/mcs/JoinIn.h: Likewise.
+	* include/mcs/NewBaseDispatcher: Likewie.
+	* include/mcs/NewOutputDispatcher: Likewise.
+	* include/mcs/RequestDispatcher: Likewise.
+
+	* include/mcs/Printhelpers.h: Add printlist.
+
+	* include/mcs/Makefile.am: Add ReturnedBeliefState.h, BackwardMessage.h.
+	* src/mcs/Makefile.am: Add ReturnedBeliefState.cpp, BackwardMessage.cpp.
+
+2011-12-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/Belief.h: Add ctx_id().
+
+	* src/network/NewConcurrentMessageDispatcher.cpp: Move creation of mqs to ctor.
+
+	* testsuite/testMessageDispatcher.cpp: New file.
+
+	* testsuite/Makefile.am: add testMessageDispatcher.
+
+	* src/mcs/Makefile.am: Add ForwardMessage.cpp.
+	* incle/mcs/Makefile.am: Add NewMessage.h and ForwardMessage.h.
+
+	* include/network/NewConcurrentMessageDispatcher.tcc: Return value.
+
+	* include/network/ConcurrentMessageQueue.h: New typedef for 2-dimensional
+	vector of ConcurrentMessageQueue.
+
+	* include/mcs/ForwardMessage.h: New file.
+	* src/mcs/ForwardMessage.cpp: Likewise.
+	* include/mcs/NewMessage.h: Likewise.
+
+	* include/network/NewConcurrentMessageDispatcher.h: ctor with k and np_neighbors.
+
+2011-12-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Makefile.am: Add NewConcurrentMessageDispatcher.h.
+	* src/network/Makefile.am: Add NewConcurrentMessageDispatcher.cpp.
+
+	* include/network/NewConcurrentMessageDispatcher.h: New file.
+	* include/network/NewConcurrentMessageDispatcher.tcc: Likewise.
+	* src/network/NewConcurrentMessageDispatcher.cpp: Likewise.
+
+2011-12-27  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBeliefState.cpp: Adapt testcase using BeliefStateOffset.
+
+	* src/mcs/BeliefStateOffset.cpp: Fixed some small bugs.
+
+	* include/mcs/Makefile.am: Add BeliefStateOffset.h.
+	* src/mcs/Makefile.am: Add BeliefStateOffset.cpp to libmcs.
+
+2011-12-25  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/BeliefStateOffset.h: New file.
+	* src/mcs/BeliefStateOffset.cpp: Likewise.
+
+	* testsuite/testBeliefState.cpp: Add testcase for belief combination.
+
+	* src/mcs/NewBeliefState.cpp: Add combination of 2 NewBeliefStates.
+	* include/mcs/NewBeliefState.h: Likewise.
+
+2011-12-23  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Add testBridgeRuleEvaluation.cpp.
+	* src/mcs/Makefile.am: Add BridgeRuleEvaluator.cpp.
+	* include/mcs/Makefile.am: Add BridgeRuleEvaluator.h.
+
+	* include/mcs/BridgeRuleEvaluator.h: New file.
+	* src/mcs/BridgeRuleEvaluator.cpp: Likewise.
+	* testsuite/testBridgeRuleEvaluation.cpp: Likewise.
+
+	* testsuite/testTables.cpp: Check for table size.
+
+	* testsuite/testID.cpp: Add copyright info.
+
+	* include/mcs/Table.h: Fix including Logger.h.
+
+	* include/mcs/ID.h (posLiteralFromBelief): Force NAF bit to 0.
+
+	* include/mcs/BridgeRuleTable.h: Clean up.
+
+2011-12-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/QueryID.h: New file.
+	* src/mcs/QueryID.cpp: Likewise.
+
+2011-12-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBeliefState.cpp: Update testSendingBeliefState.
+	* testsuite/BeliefStateServer.h: Likewise
+	* testsuite/BeliefStateServer.cpp: Likewise.
+	* testsuite/BeliefStateClient.h: Likewise.
+	* testsuite/BeliefStateClient.cpp: Likewise.
+	* testsuite/Makefile.am: Likewise.
+
+	* src/mcs/NewBeliefState.cpp: New file.
+
+	* src/mcs/Makefile.am (libmcs_a_SOURCES): Add NewBeliefState.cpp
+
+	* inclde/mcs/NewBeliefState: Fix load & save methods.
+
+2011-12-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/NewBeliefState.h: New file.
+
+	* include/mcs/Makefile.am: Add BridgeRule.h and BridgeRuleTable.h
+
+	* testsuite/testTables.cpp: Add testBridgeRuleTable.
+
+	* include/mcs/ID.h: Add methods to create belief literals from
+	ID of beliefs.
+
+	* include/mcs/BridgeRule.h: Add struct BridgeRule.
+
+2011-12-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testTables.cpp: Finalize testBeliefTable.
+
+	* testsuite/Makefile.am: Add testTables.
+
+	* src/mcs/Makefile.am: Add new cpp files.
+
+	* src/mcs/ID.cpp: Update print() for belief.
+
+	* include/mcs/Makefile.am: Add new header files.
+
+	* include/mcs/ID.h: Add Belief related stuff.
+
+	* include/mcs/Belief.h:	Change to store kind and text.
+	* include/mcs/BeliefTable.h: Likewise.
+
+	* include/mcs/Belief.h: New file.
+
+	* include/mcs/BeliefTable.h: Likewise.
+	* include/mcs/Table.h: Likewise.
+	* include/mcs/Logger.h: Likewise.
+	* testsuite/testTables.cpp: Likewise.
+	* src/mcs/ID.cpp: Likewise.
+	* src/mcs/Logger.cpp: Likewise.
+	* src/mcs/Belief.cpp: Likewise.
+	* include/mcs/BridgeRule.h: Likewise.
+
+2011-12-07  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/solver/Makefile.am: Remove comments that cause
+	compiler errors.
+
+	* include/mcs/Atoms.h: New file.
+	* include/mcs/ID.h: Likewise.
+	* include/mcs/Printhelpers.h: Likewise.
+
+2011-12-06  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/solver/BaseSolverState.h: New file.
+	* include/solver/InputMessage.h: Likewise.
+	* include/solver/OutputMessage.h: Likewise.
+	* include/solver/Makefile.am: Add new header files.
+
+2011-11-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testWeakPointer.cpp: New file.
+	* testsuite/Family.h: Likewise.
+	* testsuite/Parent.h: Likewise.
+	* testsuite/Parent.cpp: Likewise.
+	* testsuite/Child.h: Likewise.
+	* testsuite/Child.cpp: Likewise.
+	* testsuite/Makefile.am: Add testWeakPointer.
+
+2011-11-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/Engine.h: New file.
+	* include/dmcs/Instantiator.h: Likewise.
+	* include/dmcs/Evaluator.h: Likewise.
+
+2011-09-27  Peter Schueller  <ps@kr.tuwien.ac.at>
+
+	* src/process/ProcessBuf.cpp: Added safe_close() and safe_open()
+	to wrap close() and open() and manage syscall interruptions.
+	(This shall fix problems with too fast clasp exiting.)
+
+2011-09-23  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+	* testsuite/Makefile.am: Add testPool.
+	* testsuite/testPool.cpp: New file.
+
+	* include/mcs/Pool.h: New file.
+	(Pool): use pointer arithmetic.
+	(dmcs): use void*.
+
+	* src/mcs/Pool.cpp: Likewise.
+
+2011-09-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Makefile.am (SUBDIRS): Remove duplicate mcs.
+
+2011-09-08  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Put path in debugging information.
+	* src/network/OutputDispatcher.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/HandlerThread.h: Turn off some debugging information.
+	* include/network/NeighborThread.h: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+	* include/network/AsynClient.tcc: Get out when receive no answer.
+
+	* include/dmcs/ModelSessionId.h: Fix comparison.
+
+	* testsuite/testDispatcher.cpp: Fix make check.
+	* testsuite/testJoinLeak.cpp: Likewise.
+
+	* testsuite/Makefile.am: Add testSATModelOrder.
+
+	* testsuite/testSATModelOrder.cpp: New file.
+	* examples/input.txt: Likewise.
+	* examples/fixed_output.txt: Likewise.
+
+2011-09-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Unregister in case of inconsistent join.
+
+	* include/network/BaseDispatcher.h: Add some debugging info.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* src/mcs/ResourceManager.cpp: Likewise.
+
+	* include/dmcs/CommandTypeFactory.h: Parameterize max resource.
+	* include/dmcs/ProgramOptions.h: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+
+2011-08-31  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Send updated path to NeighborOut.
+
+	* src/mcs/ResourceManager.cpp: Add debugging information.
+
+	* include/network/Server.h: Use mutex lock to protect 1st round initialization.
+	* src/network/Server.cpp: Likewise.
+
+2011-08-30  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/MessagingGateway.h: Add ModelSessionOffset.
+
+	* include/network/JoinThread.h: Split asking neighbors into 2 types: with
+	and without receiving models afterwards.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/network/NeighborOut.h: Don't update path here.
+
+	* src/network/RelSatSolverThread.cpp: Remove deleting request_mq due to
+	segfault.
+
+	* include/network/Worker.h: Take care of deleting request_mq.
+
+	* include/network/RelSatSolverThread.h: Missing forward declaration of
+	ResourceManager.
+
+	* include/network/JoinThread.h: Couple JoinThread and RelSatSolver by 2
+	ConcurrentMessageQueues.
+	* src/network/JoinThread.cpp: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Add receive_notification(),
+	receive_model_offset().
+
+	* include/network/BaseDispatcher.h: Add unRegisterThread(path).
+
+	* include/network/AsynClient.tcc: Adapt to having NULL at the end.
+
+	* include/dmcs/ModelSessionId.h: Allow NULL models.
+	* include/network/NeighborThread.h: Likewise.
+
+2011-08-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Server.h: Remove join_thread and sat_thread
+	* src/network/Server.cpp: Likewise.
+
+	* include/network/ThreadFactory.h: Pass resource_manager and worker_index
+	to create worker threads.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/RelSatSolverThread.h: Use resource_manager and worker_index
+	to update status of solver once it finishes computing.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+	* include/network/Worker.h: Newfile.
+	* include/network/Makefile.am: Add Worker.h.
+
+	* include/network/Handler.tcc: Pass k1, k2 to requestWorker.
+
+	* include/mcs/ResourceManager.h: Use mutex lock and condition variable
+	to manage requesting and updating status of resources.
+	* src/mcs/ResourceManager.cpp: Likewise.
+
+2011-08-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: joiner_sat_notif is deleted by ThreadFactory.
+
+	* include/solver/RelSatSolver.h: Remove SatStatus as Worker already takes
+	care of this.
+
+	* include/network/ThreadFactory.h: Create sat and join threads as pairs.
+	Return Worker as status infor.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/Server.h: Remove lots of threads, now ThreadFactory owns them.
+	* src/network/Server.cpp: Likewise.
+
+	* include/network/RelSatSolverThread.h: Receive request through request_mq
+	rather than mg.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+	* include/network/Handler.h: Make use of ResourceManager.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/HandlerThread.h: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Add helper function
+	for RelSatSolverThread to receive incoming message.
+
+	* include/mcs/ResourceManager.h: Create workers by thread_factory. Set mutex lock.
+	* src/mcs/ResourceManager.cpp: Likewise.
+
+2011-08-18  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Server.h: Add joiner_dispatcher to Server.
+	* src/network/Server.cpp: Likewise.
+
+	* include/solver/RelSatSolver.h: Add SatStatus.
+
+	* include/mcs/ResourceManager.h: New file.
+	* src/mcs/ResourceManager.cpp: Likewise.
+
+	* include/mcs/Makefile.am: Add ResourceManager.h.
+
+	* configure.ac: Add new subdir src/mcs.
+	* src/Makefile.am: Likewise.
+	* include/Makefile.am: Likewise.
+
+2011-08-17  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/Makefile.am: Add JoinerDispatcher.cpp.
+
+	* testsuite/testJoinLeak.cpp: Adapt to JoinerDispatcher.
+
+	* testsuite/testDispatcher.cpp: Remove testJoinerDispatcher because it's included
+	in testJoinLeak.
+
+	* src/network/JoinThread.cpp: Return input_queue to register to JoinerDispatcher.
+	* include/network/JoinThread.h: Likewise.
+
+	* include/network/Handler.h: Register OutputThread to OutputDispatcher.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/OutputThread.h: Don't care about k1, k2.
+	Just read from my cmq untill reaching MAX_READ or a NULL model,
+	then send the result back.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/BaseDispatcher.h: Typo.
+
+2011-08-16  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: Has its own input_queue and read from that.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/solver/RelSatSolver.h: Responsible for ignoring up to k1 models,
+	only returns models from k1 to k2.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/BaseDispatcher.h: New file.
+	* include/network/Makefile.am: Add BaseDispatcher.h
+	* include/network/OutputDispatcher.h: Inherit from BaseDispatcher.
+
+	* testsuite/testOutputDispatcher.cpp: Remove.
+	* testsuite/testDispatcher.cpp: Add.
+	* testsuite/Makefile.am: Likewise.
+
+	* include/network/OutputThread.h: Remove fixed path from OutputThread.
+	Register to OutputDispatcher after getting notification from Handler.
+	* src/network/OutputThread.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
+2011-08-12  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testBlockingAsio.cpp: Add new test case.
+	* testsuite/SimpleClient.h: Likewise.
+	* testsuite/SimpleClient.cpp: Likewise.
+	* testsuite/SimpleServer.h: Likewise.
+	* testsuite/SimpleServer.cpp: Likewise.
+
+2011-08-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueueHelper.h: Add a helper method for
+	receiving models.
+
+	* include/network/Handler.tcc: Clean up.
+	* testsuite/testOutputDispatcher.cpp: Likewise.
+
+	* src/network/OutputDispatcher.cpp: Fix debugging information.
+
+	* src/network/OutputThread.cpp: Receive models from output_dispatcher.
+
+	* src/network/Server.cpp: Fix bug: multiple output_dispatcher.
+
+	* src/solver/RelSatSolver.cpp: Send path even with null models.
+
+2011-08-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/OutputDispatcher.h: Add OutputDispatcherPtr.
+
+	* include/network/Handler.h: Make use of OutputDispatcher.
+	Got around a stupid bug from boost bind. It's strange that
+	adding one more parameter to handle_read_header makes compilation fail.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/HandlerThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/Server.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+
+	* testsuite/Makefile.am: Add new testcase for OutputDispatcher.
+
+	* include/network/Makefile.am: Add OutputDispatcher.h.
+	* src/network/Makefile.am: Add OutputDispatcher.cpp.
+
+	* include/network/OutputDispatcher.h: New file.
+	* src/network/OutputDispatcher.cpp: Likewise.
+	* testsuite/testOutputDispatcher.cpp: Likewise.
+
+2011-07-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/parser/ClaspResultOnlineParser.h: Allow parsing models returned
+	in more than 1 line.
+	* include/parser/ClaspResultOnlineParser.tcc: Likewise.
+
+2011-04-21  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* examples/tables.py: Update script to extract memory usage.
+
+2011-04-19  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Fix looping to get k unique models.
+
+	* include/dmcs/ModelSessionId.h: Fix a corner case that causes memory leak.
+
+	* src/network/JoinThread.cpp: Add some debugging infor.
+	* include/network/NeighborThread.h: Likewise.
+
+	* testsuite/Makefile.am: Add testJoinLeak.
+	* testsuite/testJoinLeak.cpp: Likewise.
+
+2011-04-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/ModelSessionId.h: Remove duplication and delete
+	unused pointers.
+	* include/network/NeighborThread.h: Likewise.
+
+	* testsuite/Makefile.am: Add new test case.
+	* testsuite/testRemoveDuplication.cpp: Likewise.
+
+2011-04-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/ModelSessionId.h: Split serialization to load and save.
+
+	* src/network/JoinThread.cpp: Fix memory leaks.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+2011-04-13  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Clean up.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* include/network/Server.h: Likewise.
+
+	* include/dmcs/ProgramOptions.h: Change some commandline options.
+
+2011-04-04  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* examples/runTest.sh: ulimit to the rescure.
+
+	* examples/genTest.sh: New setting.
+
+	* src/dmcsc.cpp: Fix semantics of --k=0.
+	Print total number of equilibria.
+
+	* src/generator/staticGen.cpp: Fix DMCSPATH.
+
+	* include/generator/DiamondOptTopoGenerator.h: Clean up.
+
+2011-04-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/generator/staticGen.cpp: Add streaming script.
+
+2011-04-01  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingForwardMessage.h: Fix semantics of k=0.
+	* src/network/JoinThread.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+
+2011-04-01  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: On fixing semantics of k=0.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+2011-03-31  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: Clean up and fix memory leaks.
+	Fix another corner case with inconsistency.
+	* src/network/JoinThread.cpp: Likewise.
+
+2011-03-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: Fix corner case: all joins are
+	inconsistent wrt one pack.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/network/OutputThread.h: Fix path.
+	* src/network/Output.cpp: Likewise.
+
+	* src/network/ConcurrentMessageDispatcher.cpp: Remove debugging
+	information that potentially causes segfault!
+
+	* include/network/JoinThread.h: Fix reset.
+	* src/network/JoinThread.cpp: Liekwise.
+
+	* src/dmcsc.cpp: Fix setting next packs.
+
+	* src/network/OutputThread.cpp: Send duplicated models back.
+	* include/network/NeighborThread.h: Remove duplication here.
+
+2011-03-29  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Fix resetting Joiner.
+
+	* include/network/JoinThread.h: Move partial_eqs out of process.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* src/network/JoinThread.cpp: Fix asking next strategy.
+
+	* src/solver/RelSatSolver.cpp: Send NULL pointer at the right place.
+
+	* src/network/OutputThread.cpp: Read up to k2+1 from OUT_MQ and
+	expect NULL at the end.
+
+	* include/network/ThreadFactory.h: Quick and dirty hack: pass
+	query_plan to RelSatSolver so that it can get localV easily as
+	invoker is already passed there via StreamingForwardMessage.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* src/solver/RelSatSolver.cpp: Pass models_sofar as reference to
+	SATSolver to get its value directly.
+
+	* src/network/JoinThread.cpp: Collect joined result into a list
+	and return from there (except for the first time).
+
+	* include/dmcs/BaseNotification.h: Adapt to the SHUPUP type of
+	messages.
+
+2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: SAT has control over Joiner.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/ConcurrentMessageDispatcher.h: Change to
+	send/receive AskNextNotification between SAT and Joiner.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+
+2011-03-28  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Wait for message from SAT and will compute just 1 join at a time.
+
+	* include/solver/RelSatSolver.h: Solve based on parameters from RelSatSolverThread.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/RelSatSolverThread.h: Take care of the message from Handler.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/Handler.tcc: Notify SAT instead of Joiner about the up coming message.
+
+	* include/network/ConcurrentMessageQueueFactory.h: Add MQ for SAT to notify Joiner.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageDispatcher.h: Add methods for
+	sending/receiving BaseNotification.
+	* src/network/ConcurrentMessageDispaicher.cpp: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+
+	* include/dmcs/BaseNotification.h: Add SHUTUP type.
+
+2011-03-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/AskNextNotification.h: Only use integers for path now.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+	* include/dmcs/OutputNotification.h: Likewise.
+	* include/dmcs/ModelSessionId.h: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/dmcs/BaseTypes.h: Likewise.
+	* include/dmcs/BaseNotification.h: Likewise.
+
+	* src/solver/RelSatSolver.cpp: Solve with limit of solutions.
+
+	* src/network/OutputThread.cpp: Break once get a NULL pointer.
+
+2011-03-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Fix offset passing.
+
+	* include/network/HandlerThread.h: Add debugging information for
+	HandlerThread's destructor.
+
+	* include/dmcs/AskNextNotification.h: Simplify path to
+	std::size_t.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+	* include/dmcs/OutputNotification.h: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/dmcs/BaseTypes.h: Likewise.
+	* include/dmcs/BaseNotification.h: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+2011-03-26  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Initialize pack_size.
+
+	* include/network/Handler.h: Handler notifies SAT to start in case
+	of leaf nodes.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/HandlerThread.h: Likewise.
+
+	* include/network/Server.h: Fix a segfault.
+	* src/network/Server.cpp: Likewise.
+
+2011-03-25  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Makefile.am: Add HandlerThread.h
+	* include/network/HandlerThread.h: New file. (Interesting
+	technique: forward declaration of templates)
+
+	* include/network/Handler.h: Let the thread starts at
+	HandlerThread.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Server.h: Likewise.
+	* src/network/Server.cpp: Likewise.
+
+	* src/network/OutputThread.cpp: Read and ignore the first k1
+	models, and then read and store the next until k2.
+
+	* include/dmcs/OutputNotification.h: Replace pack_size by k1, k2.
+	* include/network/Handler.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/ModelSessionId.h: Add path.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/BaseTypes.h: Use PathList to simplify definition of path.
+
+2011-03-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: Set up connection from JoinThread
+	to RelSatSolver.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/Server.h: Likewise.
+
+	* src/network/StreamingDMCSThread.cpp: Remove port.
+
+	* include/network/JoinThread.h: Implement single-path join.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/network/Handler.tcc: Forward message to JoinThread.
+
+	* include/network/Makefile.am: Add AsknextNotification.h
+	* include/network/AskNextNotification.h: New file.
+
+	* include/dmcs/StreamingForwardMessage.h: Specify range of models
+	requested.
+	* src/dmcsc.cpp: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+
+	* src/network/Server.cpp: Create HandlerThread upon Streaming
+	requests.
+
+	* include/network/Handler.h: Make Handler<StreamingCommandType>
+	independent from BaseHandler.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/BaseHandler.h: Likewise.
+
+2011-03-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Server.h: Create threads at start up time.
+	* src/network/Server.cpp: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/ThreadFactory.h: Likewise.
+
+	* include/network/Handler.h: Be less powerful, give power of
+	controlling to Server.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/BaseHandler.h: Adapt to this.
+
+	* include/dmcs/StreamingDMCS.h: Comment out content for testing.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Remove dmcs.
+	* include/dmcs/CommandTypeFactory.h: Likewise.
+
+	* include/network/StreamingDMCSThread.h: Remove port and change
+	interface of operator()().
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+
+	* include/network/JoinThread.h: Remove notification from dmcs.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* src/dmcsd.cpp: Add another command line option for size
+	of MessageQueue.
+	* include/dmcs/ProgramOptions.h: Likewise.
+	* include/dmcs/CommandTypeFactory.h: Likewise.
+
+
+	* include/dmcs/CommandTypeFactory.h: Add methods to return some of
+	the data members.
+
+	* include/network/NeighborOut.h: Remove port.
+	* include/network/NeighborThread.h: Likewise.
+
+	* include/solver/RelSatSolver.h: Remove some data members.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Add copy constructor.
+
+	* include/network/ConcurrentMessageDispatcher.h: Add send/recv
+	methods for incoming messages from Handler to Joiner.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+
+2011-03-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Clean up.
+
+	* include/network/NeighborOut.h: Update path.
+
+	* include/dmcs/StreamingDMCS.h: Use references
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+2011-03-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/QueryPlan.cpp: include config.h when HAVE_CONFIG_H is defined.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/parser/ClaspResultOnlineParser.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/generator/staticGen.cpp: Likewise.
+	* src/generator/dynGen.cpp: Likewise.
+	* src/generator/dmcsGen.cpp: Likewise.
+	* src/generator/ContextGenerator.cpp: Likewise.
+	* src/dyndmcs/Instantiator.cpp: Likewise.
+	* src/dyndmcs/DynamicConfiguration.cpp: Likewise.
+
+	* include/dmcs/BaseNotification.h: 2 possibilities for path
+	with/without DEBUG.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/OutputNotification.h: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+
+	* include/network/JoinThread.h: Clean up.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/dmcs/BaseTypes.h: include iterator.
+
+	* include/dmcs/BaseNotification.h: Add assertion.
+
+	* include/dmcs/StreamingDMCS.h: Adapt to having path instead of invoker.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Remove return const.
+
+	* include/dmcs/Message.h: Move History to BaseTypes.
+
+	* include/dmcs/OutputNotification.h: Inherit from BaseNotification and
+	adapt to having path.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+
+	* include/dmcs/BaseNotification.h: New file.
+	* include/dmcs/BaseTypes.h: Likewise.
+
+	* include/dmcs/Makefile.am: Add BaseNotification.h and BaseTypes.h
+
+2011-03-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Server.h: Check for multiple connections between
+	2 contexts.
+	* src/network/Server.cpp: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Replace invoker by path.
+	* src/dmcsc.cpp: Likewise.
+
+2011-03-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/OutputThread.h: Move output_buffer to OutputThread.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/mcs/BeliefState.h: Only delete the pointers when told to
+	do so. There is a bug in the ConcurrentMessageQueue that prevent
+	me from deleting the pointers in OutputThread::collecting_output().
+
+	* include/dmcs/ModelSessionId.h: Add some assertions.
+
+2011-03-15  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* examples/run-streaming.sh: Update to have log files for different PACK parameters.
+
+	* testsuite/testBeliefStateCaching.cpp: Test stability of cache.
+
+	* src/solver/RelSatSolver.cpp: Clean buffer in destructor.
+
+	* src/network/OutputThread.cpp: Not allowed to delete output anymore.
+
+	* src/dmcs/BeliefCombination.cpp: Fix bug when compiling with DEBUG flag on.
+
+	* include/mcs/BeliefState.h: Add some assertions.
+
+	* include/network/NeighborOut.h: Fix memory leaks.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+2011-03-14  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Add testcase for PartialBeliefState caching.
+	* testsuite/testBeliefStateCaching.cpp: New testcase.
+
+	* src/solver/RelSatSolver.cpp: Cache input and output.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/mcs/BeliefState.h: Add helper functions for PartialBeliefState caching.
+
+	* src/dmcs/OptDMCS.cpp: Before combining, just project the local
+	theory away (keep guessing parts from the neighbors).
+
+	* include/dmcs/BeliefCombination.h: Add project to just a position.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+
+2011-03-13  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Clean up.
+
+	* include/network/OutputThread.h: If EOF then always return EOF
+	wrt NEXT request.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/JoinThread.h: Implementing stateful Joiner.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+
+2011-03-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: On implementing stateful Joiner.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Notify Joiner.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/dmcs/ConflictNotification.h: Inlucde pack_size in the
+	notification.
+
+2011-03-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/OutputThread.h: Stateless OutputThread.
+	* src/network/OutputThread.cpp: Likewise.
+
+2011-03-11  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingBackwardMessage.h: Combine partial belief states and session id into ModelSessionId.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+
+	* include/network/JoinThread.h: Pass pack_size to JoinThread.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/dmcs/StreamingBackwardMessage.h: Combine belief_states and session_id into ModelSessionId.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+
+	* include/dmcs/ModelSessionId.h: New file.
+	* include/dmcs/Makefile.am: Add ModelSessionId.h.
+
+	* include/network/Makefile.am: Remove RouterThread.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/dmcs/CommandTypeFactory.h: Continue cleaning conflicts
+	related stuff.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+2011-03-10  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/ConflictNotification.h: On cleaning conflicts
+	related stuff.
+	* include/dmcs/OutputNotification.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* src/network/ConcurrentMessageDispatcher.cpp: More debugging information.
+
+	* src/dmcs/StreamingDMCS.cpp: Send different messages to different neighbors.
+
+	* include/network/NeighborOut.h: Comment out some delete for debugging.
+	* include/network/RouterThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+2011-03-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Initialize input for the sake of safety.
+
+	* src/dmcs/StreamingDMCS.cpp: Don't mix ConflictNotification sent
+	to different NeighborOut.
+
+	* include/dmcs/StreamingForwardMessage.h: Decision can be NULL.
+
+2011-02-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Write result even in non-debug mode.
+
+	* src/dyndmcs/DynamicConfiguration.cpp: Run in non-inequality
+	atoms mode.
+
+	* include/generator/DynRakeTopoGenerator.h: Make it more sparse.
+
+	* include/generator/DynGridTopoGenerator.h: Generate diagonal
+	edges.
+
+	* include/network/NeighborThread.h: Remove nip_thread.
+
+	* include/network/NeighborOut.h: Fix memory leaks.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+2011-02-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/generator/DynGridTopoGenerator.h: Add more edges to
+	guarantee results.
+
+	* include/generator/DynRakeTopoGenerator.h: Update Rake topo with
+	more back edges. Change some randomize parameters.
+
+2011-02-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: No instantiation for now.
+
+	* src/generator/dynGen.cpp: Fix some paths.
+
+	* include/dyndmcs/DynamicConfiguration.h: Check for duplication,
+	to enforce inequalities.
+	* src/dyndmcs/DynamicConfiguration.cpp: Likewise.
+
+	* include/dyndmcs/ContextSubstitution.h: Add order by ctx_term.
+	* include/dyndmcs/Match.h: Likewise.
+
+	* include/dyndmcs/BaseSortingStrategy.h: Fix heuristics order.
+
+2011-02-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/AsynClient.tcc: Allow for changing k between sessions.
+	* include/network/AsynClient.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+2011-02-10  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* examples/run-dyn.sh: Add dynamic dmcs runner.
+
+2011-02-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/OutputThread.h: Quickly sort & unique result
+	before return.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/solver/ChoicePoint.h: Fix mismatch type between SAT and Router.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* src/network/OutputThread.cpp: Fix sending back in case of EOF.
+
+	* src/dmcs/StreamingDMCS.cpp: Swap order of interrupt and send
+	message to SAT.
+
+	* src/dmcs/QueryPlan.cpp: Move setupMetaNeighbors() to dmcsd, fix
+	non-deterministic segfault.
+	* src/dmcsd.cpp: Likewise.
+
+	* include/solver/ChoicePoint.h: Fix get next flip.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/mcs/BeliefState.h: Add some assertion.
+
+2011-02-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/StreamingDMCS.cpp: Support port in debug output.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/QueryPlan.h: Add mutex lock for creating NeighborList.
+	* src/dmcs/QueryPlan.cpp (getNeighbors): Likewise.
+
+	* src/dmcs/StreamingDMCS.cpp: Trigger neighbors only at the first
+	round.
+
+	* include/network/RouterThread.h: Pass on SAT's reset messages to
+	neighbors.
+
+	* include/dmcs/ConflictNotification.h: Allow sending NULL
+	conflicts.
+	* include/network/NeighborOut.h: Likewise.
+	* include/dmcs/UnsatNotification.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* src/network/OutputThread.cpp: Add some more debug info.
+
+	* include/solver/RelSatSolver.h: Add update_local_input().
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+2011-02-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am (testMessagingGateway_LDADD): Add liblog.a
+
+	* src/network/ConcurrentMessageDispatcher.cpp: Enable logging.
+
+	* include/network/NeighborThread.h: Fix queue parameters.
+
+	* src/dmcsc.cpp: Add total model sampling.
+	(handle_belief_state): Fix locking.
+
+	* examples/run-streaming.sh: Add timelimit support, make run and
+	timelimit optional.
+	Time all daemons and client with time --verbose.
+	Kill daemons before grep run logs.
+	* examples/run-opt.sh: Likewise.
+	* examples/ring-3-10-5-5-a/run-streaming.sh: Likewise.
+	* examples/ring-3-10-5-5-a/run-opt.sh: Likewise.
+
+2011-02-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: Add SIGINT signal handler and sampling of models.
+
+	* examples/ring-3-10-5-5-a: New example.
+
+	* include/dmcs/StreamingForwardMessage.h: Fix streaming
+	asynchronous client.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/network/AsynClient.h: Likewise.
+	* include/network/BaseClient.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* src/dmcsc.cpp: Run io_service in its own thread in streaming mode.
+
+	* testsuite/Makefile.am (testQueryPlan_LDADD): Add liblog.a.
+
+2011-02-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Send NULL at leaf, when EOF.
+
+	* src/dmcs/BeliefCombination.cpp: Add &.
+
+	* include/solver/RelSatSolver.h: Add reset_slaves().
+
+	* include/network/RouterThread.h: Fix memory leaks.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/NeighborOut.h: Add some comment.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/network/Handler.tcc: Remove case --k=0.
+	* include/network/OutputThread.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/dmcs/OutputNotification.h: Add type GET_NEXT.
+
+	* include/network/RouterThread.h: Fix warning.
+
+	* include/dmcs/OutputNotification.h: Add parent_session_id.
+
+	* src/network/JoinThread.cpp: Filter with parent_session_id.
+
+	* src/solver/RelSatSolver.cpp: Send NULL pointer with
+	parent_session_id.
+
+	* include/network/OutputThread.h: Filter output models with parent_session_id.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/Handler.h: Keep parent_session_id around.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/SessionNotification.h: Add operator<<
+
+2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp: Get new session id from SAT.
+
+	* include/dmcs/SessionNotification.h: Add type.
+
+2011-02-05  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/testCombination.cpp: Fix or disable testcases.
+	* testsuite/testInterfaceRelSat.cpp: Likewise.
+	* testsuite/testJoinThread.cpp: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+
+	* include/network/MessagingGateway.h: Add session id.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+
+	* examples/run-opt.sh: Add run support.
+	* examples/run-streaming.sh: Likewise.
+
+	* testsuite/testTranslation.cpp: Fix testcase.
+
+	* include/loopformula/CNFLocalLoopFormulaBuilder.h: Merged Luca's loopformula fix.
+	* include/loopformula/IMPLocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/LocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/LoopFormulaDirector.h: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/loopformula/CNFLocalLoopFormulaBuilder.cpp: Likewise.
+	* src/loopformula/LocalLoopFormulaBuilder.cpp: Likewise.
+
+2011-02-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Inform JoinThread of the new session.
+
+	* src/network/JoinThread.cpp: Catch when interrupted.
+
+	* include/network/JoinThread.h: add process().
+
+	* include/dmcs/SessionNotification.h: Add SessionNotification.h
+	* include/dmcs/Makefile.am: Likewise.
+
+	* src/network/JoinThread.cpp: Filter out old models.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/ConcurrentMessageDispatcher.h: Back to just sending
+	ctx_id and peq_cnt.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+
+	* include/dmcs/StreamingBackwardMessage.h: Attach with each belief
+	state a session_id.
+	* include/network/NeighborThread.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* include/network/OutputThread.h: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Add communication channel between
+	SAT solver and Joiner.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Distinguish my_session_id and
+	parent_session_id.
+	* include/network/Handler.tcc: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/ConflictNotification.h: Add session_id here and
+	there.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/UnsatNotification.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/solver/ChoicePoint.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* src/solver/RelSatSolver.cpp: Fix flipping.
+
+	* include/solver/RelSatSolver.h: Directly pass learned_clauses to RelSatSolver.
+
+	* include/solver/ChoicePoint.h: local_id --> orig_id
+
+	* include/mcs/BeliefState.h: Improve output info.
+
+2011-02-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Send new learned conflicts to Router.
+
+	* include/solver/Conflict.h: operator<< for ConflictVec2p.
+
+	* include/network/RouterThread.h: Pass on conflicts to NeighborOut.
+
+	* include/dmcs/UnsatNotification.h: Add UnsatNotification.
+	* include/dmcs/Makefile.am: Likewise.
+
+	* include/generator/LogicVisitor.h: Print out the rules with atom
+	names from signature.
+	* src/generator/staticGen.cpp: Likewise.
+	* src/generator/dmcsGen.cpp: Likewise.
+	* src/generator/LogicVisitor.cpp: Likewise.
+	* src/generator/ContextGenerator.cpp: Likewise.
+	* include/mcs/Signature.h: Likewise.
+	* include/generator/dmcsGen.h: Likewise.
+
+	* src/generator/staticGen.cpp: Comment out generate dlv command
+	lines for now.
+
+	* src/dmcs/OptDMCS.cpp: Comment out all_masked for now.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+
+	* src/dmcs/BeliefCombination.cpp: Move assertion to if condition.
+
+	* include/mcs/BeliefState.h: Generate maxBeliefSet wrt some
+	range. Convert BeliefState output format to be compatible with
+	operator>>.
+	* src/generator/ContextGenerator.cpp: Likewise.
+
+	* include/generator/OptTopologyGenerator.h: Add putInterface.
+
+	* include/generator/DiamondOptTopoGenerator.h: Fix opt-diamond generator.
+
+2011-02-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* examples/run-streaming.sh: Add runner scripts.
+	* examples/run-opt.sh: Likewise.
+
+2011-02-03  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Fix output projection.
+
+	* include/solver/RelSatSolver.h: Add refresh.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/QueryPlan.h: Setup meta_neighbors.
+	* src/dmcs/QueryPlan.cpp: Likewise.
+
+	* include/dmcs/Neighbor.h: Add vector of NeighborList.
+
+	* src/dmcs/StreamingDMCS.cpp: Get neighbors from query_plan.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+
+	* src/solver/RelSatSolver.cpp: Do nothing when trail is empty. The
+	outer loop takes care of sending NULL to OUT_MQ.
+
+	* src/dmcs/StreamingDMCS.cpp: Check for NULL pointer.
+
+	* include/dmcs/CommandTypeFactory.h: Add conflicts_driven related stuff.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+
+	* include/dmcs/ProgramOptions.h: Add CONFLICTS_DRIVEN option.
+
+2011-02-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Working on backtracking.
+
+	* include/solver/ChoicePoint.h: Find first undecided atom.
+
+2011-02-02  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/solver/ChoicePoint.h: Include numeric.
+
+	* include/dmcs/ConflictNotification.h: Return ostream in
+	operator<<.
+
+2011-02-02  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/solver/ChoicePoint.h: Get global id of an atom.
+
+	* include/dmcs/ConflictNotification.h: opeator<<
+
+	* include/network/ThreadFactory.h: Pass orig_sigs_size to
+	RelSatSolver.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* src/solver/RelSatSolver.cpp: Try next flipping possibility when
+	receiving EOF.
+
+	* src/network/RelSatSolverThread.cpp: Catch restart request.
+
+	* include/solver/ChoicePoint.h: Add ChoicePoint.h
+	* include/solver/Makefile.am: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Use
+	ConcurrentMessageQueue*
+	* include/network/Handler.tcc: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/mcs/BeliefState.h: Add helper methods for Decisionlevel.
+
+	* include/dmcs/StreamingDMCSNotification.h: Add restart related stuff.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/dmcs/ConflictNotification.h: Add decision level.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/dmcs/CommandTypeFactory.h: Add orig_sigs_size.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/dmcsd.cpp: Likewise.
+
+2011-02-01  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp (collect_learned_clauses): Fix
+	warning and code simplification.
+
+2011-01-31  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/BeliefState.h: Set up Decisionlevel as a struct of 2 VecSizeT*.
+
+	* testsuite/testInterfaceRelSat.cpp: Update test case.
+
+	* src/solver/RelSatSolver.cpp: Selectively collect conflicts from relsat.
+
+	* src/dmcsc.cpp: Clean up.
+
+	* include/solver/Conflict.h: Add ConflictBuf.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* src/solver/RelSatSolver.cpp: Add debug info.
+
+	* include/network/Handler.tcc: Support returning all models when
+	getting k=0.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/OutputThread.h: Likewise.
+
+	* include/network/ConcurrentMessageQueueFactory.h: Add DEFAULT_PACK_SIZE.
+
+2011-01-30  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Propagate TERMINATE messages.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueueFactory.h: Support for max queue size.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* testsuite/testJoinThread.cpp: Likewise.
+	* testsuite/testInterfaceRelSat.cpp: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+
+	* testsuite/testJoinThread.cpp: Interrupt thread.
+
+	* testsuite/testInterfaceRelSat.cpp: Fix FTBFS.
+
+	* testsuite/testJoinThread.cpp: Likewise.
+
+	* src/network/OutputThread.cpp: Fix warning.
+
+	* include/network/AsynClient.h (handle_read_header): Clean-up.
+	* include/network/BaseClient.h: Likewise.
+	* include/network/Client.h: Likewise.
+	* include/network/Client.tcc: Likewise.
+
+2011-01-30  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/OutputThread.cpp: Return EOF to user immediately
+	after having all results.
+
+	* include/network/NeighborThread.h: Inform JoinIn before sending
+	models, in order not to be blocked by the size of MQs.
+
+	* include/network/Handler.tcc: Pass invoker to OutputThread.
+	* include/network/OutputThread.h: Likewise.
+
+	* src/solver/RelSatSolver.cpp: Add debug info.
+
+	* include/network/OutputThread.h: Add a flag to store leftover
+	EOF.
+	* src/network/OutputThread.cpp: Likewise.
+
+2011-01-29  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/OutputThread.cpp: Send if there is something in res.
+
+	* src/network/JoinThread.cpp: False assertion.
+
+	* include/network/AsynClient.tcc: Add debug info.
+
+	* src/network/JoinThread.cpp: Inform UNSAT from neighbor.
+
+	* include/network/NeighborOut.h: Add port and use sync write.
+
+	* include/network/Handler.h: Add port.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/ConcurrentMessageQueueFactory.h: Remove IN and
+	CONFLICT message queue.
+	Map UIDs to vector of message queues.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+
+	* src/dmcsc.cpp: Comment out "printing result."
+
+	* include/network/AsynClient.tcc (handle_read_answer): Fix no_answers.
+
+2011-01-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/mcs/BeliefState.h: Add decision-level support.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+
+2011-01-28  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: More debug info.
+
+	* include/network/Handler.tcc: Pass invoker to OutputThread, for
+	output_all (later).
+	* include/network/OutputThread.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/AsynClient.tcc: When gets up to k models, send terminate.
+
+	* include/network/AsynClient.h: Dirty trick for handle_read_header
+	with header as a parameter.
+
+	* src/network/JoinThread.cpp: Reset state of JoinThread.
+
+	* src/solver/RelSatSolver.cpp: Refresh after each solve.
+
+	* src/network/JoinThread.cpp: Loop forever.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+	* src/dmcs/StreamingDMCS.cpp: Start_up any time called.
+
+	* include/network/NeighborOut.h: Use string header.
+
+	* include/network/NeighborThread.h: Incoming thread: keep reading
+	after receiving EOF
+
+	* src/solver/RelSatSolver.cpp: Add debug info.
+
+	* src/network/JoinThread.cpp: Case distinction: when ask for NEXT,
+	when ask for a restart.
+
+	* include/network/JoinThread.h (ask_for_next): Add NotificationType.
+
+2011-01-28  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/connection.hpp (connection::write): Add synchronous write().
+
+	* include/network/OutputThread.h: Fix OutputThread loop.
+	* src/network/OutputThread.cpp: Likewise.
+
+2011-01-27  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Add sanity checks.
+
+	* include/dmcs/ConflictNotification.h: Add NEXT notification type.
+	* include/network/NeighborOut.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* src/dmcs/StreamingDMCS.cpp (StreamingDMCS::work): Not
+	implemented yet.
+
+	* include/network/NeighborOut.h: Merge NeighborIn into
+	NeighborThread and threadify NeighborOut.
+	* include/network/NeighborThread.h: Likewise.
+
+	* include/network/BaseStreamer.h: Remove.
+	* include/network/Makefile.am: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+
+	* include/mcs/BeliefState.h: Add operator=.
+
+	* include/dmcs/StreamingBackwardMessage.h: Typo.
+	* include/network/JoinThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* examples/diamond.opt: Fix epsilon bit in V.
+
+	* testsuite/Makefile.am (testInterfaceRelSat_LDADD): Add libdmcs.a
+
+	* include/network/JoinThread.h: Use PODs as thread parameters and implement shutdown.
+	* include/network/Handler.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* testsuite/testInterfaceRelSat.cpp: Likewise.
+	* testsuite/testJoinThread.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueue.h: Add copy ctor.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+
+	* include/dmcs/StreamingDMCSNotification.h: Add SHUTDOWN
+	notification and consistently use PODs as message payload.
+	* include/dmcs/OutputNotification.h: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+
+2011-01-27  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/JoinThread.cpp (ask_for_next): Only send NULL
+	pointers.
+
+	* include/network/NeighborOut.h: When receive NULL pointers, send
+	out HEADER_NEXt only.
+
+	* include/network/Handler.tcc: When receive HEADER_NEXT, inform
+	OutputThread only.
+
+	* include/network/Handler.h: Pass pack_size.
+
+2011-01-26  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Project models from local solver to
+	output interface.
+	* include/dmcs/BeliefCombination.h: Likewise.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+
+2011-01-25  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/testInterfaceRelSat.cpp: Add test case for importing
+	stuff to relsat.
+	* testsuite/Makefile.am: Likewise.
+
+	* src/solver/RelSatSolver.cpp: Fix bugs in importing stuff.
+
+	* include/solver/RelSatSolver.h: Make some methods public.
+
+	* include/mcs/BeliefState.h: Add a remark.
+
+2011-01-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Collect learned conflicts from
+	relsat. Import conficts/partial ass/input from system.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/solver/Conflict.h: Add 2-dimension vector of Conflict*.
+
+	* include/mcs/BeliefState.h (testBeliefSet): Add const for parameter.
+
+2011-01-24  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/BaseHandler.h: Let Handler clean-up properly.
+	* src/network/Server.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+
+	* src/dmcsc.cpp: Fix FTBFS.
+
+	* include/dyndmcs/DynamicConfiguration.h: Fix DMCS_STATS_INFO
+	compilation.
+
+	* include/parser/BaseBuilder.h: Fix warnings.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/parser/ClaspResultOnlineParser.cpp: Likewise.
+	* testsuite/testJoinThread.cpp: Likewise.
+	* testsuite/testParsers.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueue.h: Fix sanity checks.
+
+	* include/network/BaseHandler.h: Moved typedefs to BaseHandler.
+	* src/network/Server.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+
+2011-01-24  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/RouterThread.h: Move map ctxid <--> offset from
+	Router to SAT wrapper.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/solver/RelSatSolver.h: Add new method for
+	collecting learned clauses from relsat.
+
+	* include/dmcs/ConflictNotification.h: Have multiple conflicts in
+	one Conflict notification.
+
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/Conflict.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+
+2011-01-23  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/mcs/BeliefState.h: Fix output debug.
+
+	* testsuite/testJoinThread.cpp: Add test case for JoinThread.
+	* testsuite/Makefile.am: Likewise.
+
+	* src/network/JoinThread.cpp: Fix join.
+
+	* include/network/JoinThread.h: Remove map ctxid--offset.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Add assert.
+
+2011-01-23  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueue.h: Add sanity checks.
+
+	* include/network/Handler.tcc: Handle client terminate.
+	* include/network/AsynClient.h: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+
+	* configure.ac: Compile with NDEBUG and -O3 by default.
+
+	* src/dmcsd.cpp: Show compile-time options.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/network/AsynClient.h: Add callback.
+	* include/network/AsynClient.tcc: Likewise.
+
+2011-01-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: In leaf case, send NULL model after
+	receiving UNSAT.
+
+	* src/network/OutputThread.cpp: Fix bug: always HEADER_ANS.
+
+	* src/network/JoinThread.cpp: End of join is a NULL model.
+
+	* src/dmcsc.cpp: Get the number of answers.
+
+	* include/network/AsynClient.tcc: Send a message after request
+	next model. We can later change this to just sending HEADER_NEXT.
+
+	* include/network/AsynClient.h: Announce number of answers.
+
+	* include/dmcs/StreamingBackwardMessage.h: More meaningful debug infor.
+
+	* log4cxx.cfg: Enable TRACE.
+
+	* include/network/Makefile.am: Now use AsynClient.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/network/BaseClient.h: Better safe than sorry.
+
+	* include/network/AsynClient.h: Turn into end-user's client.
+	* include/network/AsynClient.tcc: Likewise.
+
+	* include/network/RelSatSolverThread.h: Fix potential underscore
+	bug.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Comment out some
+	debugging information.
+	* include/network/NeighborThread.h: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+
+	* include/network/AsynClient.h: Use MessagingGatewayBCPtr.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/network/NeighborInputThread.h: Likewise.
+	* src/network/NeighborInputThread.cpp: Likewise.
+
+	* include/mcs/BeliefState.h: Use pointer instead of Ptr.
+
+	* include/dmcs/OutputNotification.h: Clean up.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+
+	* include/dmcs/ConflictNotification.h: Use PartialBeliefState
+	instead of BeliefState.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingBackwardMessage.h: Likewise.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/JoinThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/solver/Conflict.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/dmcs/BeliefCombination.h: Add combine method for
+	PartialBeliefState(s).
+
+2011-01-22  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* log4cxx.cfg: Fix duplicates.
+
+	* src/dmcs/Log.cpp: Set TRACE loglevel if defined(DEBUG).
+
+	* include/network/ConcurrentMessageQueueHelper.h: Use DMCS_LOG_TRACE.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Fix memory leak.
+	* include/network/AsynClient.tcc: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* testsuite/testMessagingGateway.cpp: Use MessagingGatewayBCPtr.
+
+2011-01-21  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/network/ConcurrentMessageDispatcher.cpp: Fix regression.
+
+	* examples/diamond.sh: Add shell script.
+
+	* include/network/Session.h: Add docstring.
+
+	* include/network/Handler.h: Fix non-threadsafe parts.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Server.h: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/dmcs/StreamingCommandType.h: Fix warning.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/mcs/BeliefState.h: Likewise.
+
+	* testsuite/testConnection.cpp: Add connection test.
+	* testsuite/Makefile.am: Likewise.
+
+	* testsuite/testBlockingClasp.cpp: Use BOOST_TEST_MESSAGE.
+
+2011-01-21  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/BeliefCombination.cpp (dmcs): Add combine() method for
+	2 ParitialBeliefState(s).
+
+	* include/mcs/BeliefState.h: Add copy constructor, operator!=,
+	size() and resize().
+
+	* testsuite/testBeliefState.cpp: Add testBeliefState.
+	* testsuite/Makefile.am: Likewise.
+
+	* include/mcs/BeliefState.h: Add PartialBeliefState.
+
+2011-01-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcsd.cpp: Add --daemon option.
+	* include/dmcs/ProgramOptions.h: Likewise.
+
+	* examples/pingpong.sh: Add shell script.
+
+	* src/dmcs/BeliefCombination.cpp: Cleanup.
+
+	* include/parser/BridgeRulesBuilder.tcc: Fix regression.
+
+	* include/solver/SatSolver.tcc: Add support for DMCS_LOG_*.
+	* include/parser/ParserDirector.tcc: Likewise.
+	* include/parser/BridgeRulesBuilder.tcc: Likewise.
+	* include/dyndmcs/Instantiator.tcc: Likewise.
+	* testsuite/Makefile.am: Likewise.
+	* testsuite/testBlockingClasp.cpp: Likewise.
+	* testsuite/testTranslation.cpp: Likewise.
+	* testsuite/testClaspResultOnlineParser.cpp: Likewise.
+	* src/dmcs/BaseDMCS.cpp: Likewise.
+	* src/dmcs/Cache.cpp: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+	* src/dyndmcs/DynamicConfiguration.cpp: Likewise.
+	* src/dyndmcs/Instantiator.cpp: Likewise.
+	* src/parser/ClaspResultOnlineParser.cpp: Likewise.
+
+	* include/network/BaseClient.h: Fix warning.
+
+	* include/mcs/Rule.h: Fix argument-dependent name lookup.
+
+	* include/dmcs/Log.h (DMCS_LOG_TRACE): Beautification.
+
+2011-01-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/network/OutputThread.cpp: Add some more debugging
+	information
+
+	* src/network/JoinThread.cpp: Fix join.
+
+	* include/solver/RelSatSolver.h: More informative getting input
+	from JOIN_OUT_MQ.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/Handler.tcc: Spread request for next models to
+	my slaves (dmcs and output threads).
+
+	* include/dmcs/StreamingBackwardMessage.h: Do not output NULL
+	pointers at the end.
+
+	* src/network/OutputThread.cpp: Typo.
+
+	* include/network/NeighborIn.h: Send (offset, 0) to JOIN_IN_MQ
+	when receiving HEADER_EOF.
+
+	* include/network/MessagingGateway.h: ctx_id --> ctx_offset.
+	* src/network/ConcurrentMessageDispactcher.cpp: Likewise.
+
+	* src/network/JoinThread.cpp: Realize EOF/UNSAT via JoinIn.
+
+	* include/network/JoinThread.h: Add 3 states for import.
+
+	* include/network/ThreadFactory.h: Joiner also needs to know the
+	MQs to inform the neighbors.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/network/JoinThread.h: Implement a DFS strategy to ask
+	for next models.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/ConcurrentMessageQueueHelper.h: Include Log.h.
+
+	* include/dmcs/CommandTypeFactory.h: Remove some MQs.
+
+2011-01-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* log4cxx.cfg: Remove date output.
+
+	* src/solver/RelSatSolver.cpp: Add some debugging information.
+
+	* src/network/OutputThread.cpp: Send a NULL pointer after each
+	full package.
+
+	* src/network/JoinThread.cpp: Use int counters.
+
+	* src/network/ConcurrentMessageDispatcher.cpp: Relax the
+	assertion.
+
+	* src/dmcs/StreamingDMCS.cpp: Sending start_up assignment in all
+	cases (leaf and non-leaf).
+
+	* include/network/NeighborThread.h: Allow NeighborIn and
+	NeighborOut to run together.
+
+	* include/network/NeighborIn.h: Add some debug information.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Remove some Ptr.
+
+	* log4cxx.cfg: New file.
+
+	* src/dmcsd.cpp: Add logging commandline argument.
+
+	* include/dmcs/Log.h: Add __PRETTY_FUNCTION__ to DMCS_LOG_TRACE.
+
+	* include/network/Handler.tcc: overwrite_send and receive pure
+	pointers.
+	* include/network/Handler.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+
+	* include/dmcs/OutputNotification.h: Comment out Ptr typedef.
+	* include/dmcs/ConflictNotification.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+
+	* src/network/OutputThread.cpp: Setup header after receive k models.
+
+	* src/dmcs/StreamingDMCS.cpp: Notify SAT via overwrite_send.
+
+	* include/dmcs/StreamingDMCS.h: Store message to SAT.
+
+	* include/solver/RelSatSolver.h: Pass (is_leaf) to RelSatSolver.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/RouterThread.h: Fix call to receive.
+
+	* include/network/NeighborIn.h: Add more debug information.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/Handler.h: Store my notifications so that my
+	slaves can read them.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Store ConflictNotification so that
+	NeighborOut can read it.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/dmcs/ConflictNotification.h: Likewise.
+
+2011-01-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueueHelper.h: Overwritten
+	message leaks.
+
+	* include/network/Makefile.am: Don't include
+	boost::message_queue-related stuff for now.
+	* src/network/Makefile.am: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+
+	* src/network/ThreadFactory.cpp: Fix regression.
+
+	* include/network/AsynClient.tcc: Use int timeout.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+
+	* include/dmcs/ConflictNotification.h: Include boost/thread.hpp.
+	* include/dmcs/OutputNotification.h: Likewise.
+
+	* include/network/ConcurrentMessageQueue.h: Add try_send and
+	try_receive.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+
+	* src/network/MessageDispatcher.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* include/network/MessageDispatcher.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+
+2011-01-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueueHelper.h: New file.
+
+	* include/dmcs/StreamingCommandType.h: Use ConcurrentMessageQueue
+	for one-shot notification rather than boost::future.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.k
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/Makefile.am: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/network/ConcurrentMessageQueue.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+
+2011-01-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/NeighborThread.h: Move send header to
+	NeighborOut.
+
+	* include/network/Handler.h: Ask Server to remove myself when
+	receiving HEADER_TERMINATE.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/BaseHandler.h: Allow list of handlers.
+	* include/network/Server.h: Likewise.
+	* src/network/Server.cpp: Likewise.
+
+	* include/dmcs/Message.h: Add HEADER_TERMINATE.
+
+2011-01-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/NeighborOut.h: Send header and then message.
+
+	* include/network/Handler.tcc: Make use of DMCS_LOG.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/network/BaseStreamer.h: Fix stupid bug.
+
+2011-01-15  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/Makefile.am: Remove StreamingCommandType.cpp
+
+	* include/network/ThreadFactory.h: Add promise and future.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* include/network/NeighborThread.h: Start the connection.
+
+	* include/network/BaseStreamer.h: Get conn instead of io_service.
+
+	* include/dmcs/StreamingCommandType.h: Make use of DMCS_LOG
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/dmcsc.cpp: Likwise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+	* include/network/ThreadFactory.h: create Router.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/NeighborOut.h: Add cnf so that NeighborOut gets
+	promise from Router.
+
+	* include/network/MessagingGateway.h: Use old JoinIn for now, as
+	it doesn't change the Joiner dramatically.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* include/network/NeighborIn.h: Likewise.
+
+	* include/network/ConcurrentMessageQueueFactory.h: Typo.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/BaseStreamer.h: Remove noff.
+
+	* include/dmcs/StreamingDMCS.h: Small change in name.
+
+	* include/dmcs/Makefile.am: Move include of NeighboIn.h and
+	NeighborOut.h to corrent dir.
+	* include/network/Makefile.am: Likewise.
+
+	* include/dmcs/ConflictNotification.h: More typedef.
+
+2011-01-14  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Communicate with SAT thread
+	via a promise.
+	* include/network/Handler.h: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Push cnf to relsat.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+
+	* include/dmcs/ConflictNotification.h: New file.
+	* include/network/NeighborThread.h: Likewise.
+	* include/network/RouterThread.h: Likewise.
+
+	* include/dmcs/Makefile.am: Add new header files.
+	* include/network/Makefile.am: Likewise.
+
+	* include/network/ThreadFactory.h: Create thread for router.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/network/NeighborOut.h: Add cnf and partial_ass.
+
+	* include/network/JoinThread.h: Add mg.
+
+	* include/network/BaseStreamer.h: Remove mg, noff.
+	* include/network/NeighborIn.h: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Add partial_ass.
+
+	* include/dmcs/StreamingDMCS.h: Add thread for router.
+
+	* include/network/BaseStreamer.h: New file.
+	* include/network/NeighborIn.h: Likewise.
+	* include/network/NeighborOut.h: Likewise.
+
+	* include/network/Handler.tcc: Change to the simplified algorithm.
+	* include/network/Handler.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Use Ptr here and there.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingDMCSNotification.h: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/network/JoinThread.h: Likewise.
+
+	* include/dmcs/OutputNotification.h: New file.
+	* include/dmcs/Makefile.am: Add OutputNotification.h
+
+	* src/network/ConcurrentMessageQueueFactory.cpp: Change the
+	MessageQueue system to the simplified algorithm.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+
+	* include/network/MessagingGateway.h: Unify message from neighbor
+	to joiner into 1 queue.
+
+2011-01-13  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/ParentsNotification.h: Removed.
+	* include/dmcs/StreamingDMCSNotification.h: Added.
+
+	* include/dmcs/Makefile.am: ParentsNotification -->
+	StreamingDMCSNotification
+	* include/dmcs/StreamingCommandType.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/Handler.h: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/StreamingDMCSThread.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+
+	* include/network/Handler.h: Notifiy StreamingDMCS using
+	boost::future.
+	* include/network/Handler.tcc: Likewise.
+
+	* src/network/StreamingDMCSThread.cpp: Pass the notification from
+	parents along.
+	* include/network/StreamingDMCSThread.h: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Now listen to Handler for
+	notification from parents.
+	* src/dmcs/StreamingCommandType.cpp: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+
+	* include/dmcs/ParentsNotification.h: New file.
+	* include/dmcs/Makefile.am: Add ParentsNotification.h.
+
+2011-01-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.h: Use dmcs thread.
+	* include/network/Handler.tcc: Likewise.
+
+	* src/dmcs/StreamingDMCS.cpp: Reshape the workflow.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+
+	* include/network/StreamingDMCSThread.h: New file.
+	* src/network/StreamingDMCSThread.cpp: Likewise.
+
+	* include/network/Makefile.am: Add StreamingDMCSThread.h
+	* src/network/Makefile.am: Add StreamingDMCSThread.cpp
+
+	* include/network/OutputThread.h: Wait for a signal from Handler
+	to start.
+	* src/network/OutputThread.cpp: Likewise.
+
+	* include/network/JoinThread.h: Add some references here and there.
+	* src/network/JoinThread.cpp: Likewise.
+
+2011-01-12  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/testMessagingGateway.cpp: Add a future value for
+	thread joining.
+
+	* include/network/ConcurrentMessageQueue.h: Add support for timed
+	message queues.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/network/MessagingGateway.h: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewie.
+	* include/network/MessageDispatcher.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+
+2011-01-12  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: Add streaming join.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/mcs/BeliefState.h: Move some typedef here.
+
+	* include/dmcs/BeliefCombination.h: Combination done with
+	BeliefState& and doesn't need V.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+
+2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/AsynClient.tcc: Send answers to neighbor's queue
+	for the joiner.
+
+	* src/network/NeighborInputThread.cpp: Clean up.
+
+	* src/network/ConcurrentMessageQueueFactory.cpp: Add a comment to
+	mark the offset.
+
+	* include/network/JoinThread.h: On implemeting the join.
+	* src/network/JoinThread.cpp: Likewise.
+
+2011-01-11  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/generator/ContextGenerator.cpp: Add support for DMCS_LOG_*.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+
+	* include/mcs/BeliefState.h: Fix argument-dependent name lookup.
+
+	* include/network/MessagingGateway.h: Allow to send/receive pairs
+	of BeliefState/Conflict.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* include/network/MessageDispatcher.h: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+
+2011-01-11  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/JoinThread.h: Need c2o (bimap between
+	context id and the "offset" in neighbors' message queue).
+	* include/network/NeighborInputThread.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/NeighborInputThread.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/mcs/Makefile.am: Add HashedBiMap.h.
+
+	* include/mcs/HashedBiMap.h: New file.
+
+	* include/network/Handler.tcc: Adapt to new threads.
+	* include/network/Handler.h: Likewsie.
+
+	* include/network/ThreadFactory.h: Remove thread starters.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* src/network/Makefile.am: Update libthreads with new cpp files.
+
+	* include/network/Makefile.am (noinst_HEADERS): Add new header files.
+
+	* include/network/JoinThread.h: New file.
+	* include/network/NeighborInputThread.h: Likewise.
+	* include/network/OutputThread.h: Likewise.
+	* include/network/RelSatSolverThread.h: Likewise.
+	* src/network/JoinThread.cpp: Likewise.
+	* src/network/NeighborInputThread.cpp: Likewise.
+	* src/network/OutputThread.cpp: Likewise.
+	* src/network/RelSatSolverThread.cpp: Likewise.
+
+2011-01-10  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/generator/dynGen.cpp: Setup srand() with gettimeofday().
+
+	* src/dmcs/OptDMCS.cpp: Remove X-Mas leftover casserole.
+
+	* include/network/Client.tcc: Add support for DMCS_LOG_*.
+	* include/network/Handler.tcc: Likewise.
+	* src/network/Server.cpp: Likewise.
+	* include/network/AsynClient.tcc: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/generator/staticGen.cpp: Likewise.
+	* include/dmcs/ProgramOptions.h: Likewise.
+	* src/generator/Makefile.am: Likewise.
+
+	* include/dmcs/Log.h: Add support for configuring the logger from
+	a config file.
+	* src/dmcs/Log.cpp: Likewise.
+
+	* configure.ac: Add --enable-stats for defining DMCS_STATS_INFO.
+
+2011-01-10  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Send 0 instead of *bs = 0.
+
+	* src/network/ThreadFactory.cpp: Check the outcome of result from
+	MQ.
+
+	* include/network/ThreadFactory.h: Let client be a member, again,
+	for keeping information.
+
+	* include/network/Server.h: Remove &. Fix losing information.
+
+	* include/network/Handler.h: Let OutputThread be a member, for
+	the sake of keeping value of other passed around information.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/network/AsynClient.h: Add handle_answer.
+	* include/network/AsynClient.tcc: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Construct without
+	conflict and set conflict later.
+
+	* include/dmcs/StreamingBackwardMessage.h: Remove const result so
+	that the serialization works.
+
+	* include/dmcs/CommandTypeFactory.h: Reference for the
+	constructor.
+
+	* src/network/ThreadFactory.cpp: Use AsynClient for neighbors' thread.
+
+	* include/network/Client.h: Inherit from BaseClient.
+	* include/network/Client.tcc: Likewise.
+
+	* include/network/Makefile.am: Add new header files.
+
+	* include/network/AsynClient.h: New file.
+	* include/network/AsynClient.tcc: Likewise.
+	* include/network/BaseClient.h: Likewise.
+
+	* include/network/Server.h: Add handler data member to Server.
+	* src/network/Server.cpp: Likewise.
+
+	* include/network/Handler.h: Inherit from BaseHandler.
+
+	* include/network/Makefile.am: Add BaseHandler.h.
+
+	* include/network/BaseHandler.h: New file.
+
+	* src/dmcs/StreamingDMCS.cpp: Point to the right message queue.
+
+	* include/network/ThreadFactory.h: Give each neighbor thread an
+	index to find the right message queue.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Use Conflict instead of
+	BeliefState for conflict.
+	* src/dmcsc.cpp: Likewise.
+
+2011-01-10  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc (do_local_job): Create ConcurrentMessageQueueFactory reference.
+
+2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/solver/RelSatSolver.cpp: Fix Segfault.
+
+	* include/network/Handler.h: Bring first_call flag along.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Use ConcurrentMessageQueue thingy.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+
+
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+
+	* include/solver/SatSolverFactory.h: Use local_sig instead of mixed_sig.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/solver/RelSatSolver.h: Push input into relsat.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/Handler.h: Initialize threads and message
+	gateways once.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/mcs/BeliefState.h: Add vector of pointers of BeliefState.
+
+	* include/dmcs/StreamingDMCS.h: Make use of pack_size.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/dmcs/ProgramOptions.h: Add PACK_SIZE option.
+
+
+2011-01-09  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/ConcurrentMessageQueue.h: Add inter-thread
+	message queue based on boost::condition, avoids persistent
+	boost::message_queue.
+	* include/network/ConcurrentMessageQueueFactory.h: Likewise.
+	* include/network/ConcurrentMessageDispatcher.h: Likewise.
+	* src/network/Makefile.am: Likewise.
+	* src/network/ConcurrentMessageQueueFactory.cpp: Likewise.
+	* src/network/ConcurrentMessageDispatcher.cpp: Likewise.
+	* include/network/Makefile.am: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+
+2011-01-09  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingBackwardDMCS.h: New file.
+	* include/dmcs/Makefile.am: Add StreamingBackwardDMCS.h
+
+	* include/network/ThreadFactory.h: Add MessageGateway everywhere.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+
+	* include/network/MessageQueueFactory.h: Add starting point for
+	neighbors' message queues.
+
+	* include/dmcs/StreamingDMCS.h: Remove X-Mas leftover casserole.
+	* include/solver/RelSatSolver.h: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+2011-01-08  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/MessageQueueFactory.h: Fix MQIDs.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+
+	* include/network/MessageDispatcher.h: Add sendJoinIn and
+	recvJoinIn.
+	* include/network/MessagingGateway.h: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+
+	* src/network/Server.cpp: Remove X-Mas leftover casserole.
+	* include/network/Server.h: Likewise.
+
+	* include/network/MessagingGateway.h: Add documentation.
+
+	* include/network/MessageQueueFactory.h: New factory method just
+	for incoming and outgoing queue.
+	Create conflict input for neighbors.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+
+	* src/dmcs/Log.cpp: Initialize logger.
+
+	* src/network/Makefile.am [linux]: Create libthreads.a to fix
+	FTBFS.
+	* testsuite/Makefile.am: Likewise.
+
+	* src/dyndmcs/DynamicConfiguration.cpp: Fix undefined dfs_level.
+
+	* include/dmcs/Log.h: Add global logging facility.
+	* include/dmcs/Makefile.am: Likewise.
+	* src/dmcs/Log.cpp: Likewise.
+	* src/Makefile.am: Likewise.
+	* src/dmcs/Makefile.am: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+2011-01-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/MessageQueueFactory.h: Move the constants to
+	header file.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+
+	* include/network/Handler.h: Let the Handler take care of creating
+	output_thread.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/StreamingCommandType.h: Support executing with a
+	unique id for creating message queues.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+2011-01-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am (TESTS_ENVIRONMENT): Make detailed Boost.Test reports.
+
+	* src/dmcsc.cpp: Initial support for log4cxx.
+	* src/dmcsd.cpp: Likewise.
+
+	* configure.ac: Check for log4cxx and Boost.Asio.
+	* src/Makefile.am: Likewise.
+
+2011-01-07  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/dmcs/StreamingDMCS.h: Give StreamingDMCS the master power.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/network/Handler.tcc: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+
+	* include/mcs/ProxySignatureByLocal.h: Let the references refer to
+	stable sigs.
+
+	* include/dmcs/BaseDMCS.h: Move createGuessingSignature to the
+	base class.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* src/dmcs/BaseDMCS.cpp: Likewise.
+	* include/dmcs/PrimitiveDMCS.h: Likewise.
+	* include/dmcs/OptDMCS.h: Likewise.
+
+2011-01-07  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/parser/ClaspResultBuilder.tcc: Fix BeliefSet instantiation.
+	* testsuite/testBeliefComparison.cpp: Likewise.
+
+	* include/network/Handler.tcc: Check for errors in the ASIO
+	call-back methods.
+	* src/network/Server.cpp: Likwise.
+
+	* include/dmcs/CommandTypeFactory.h: Fix some compiler warnings.
+	* src/dyndmcs/DynamicConfiguration.cpp: Likewise.
+	* include/dyndmcs/Instantiator.h: Likewise.
+	* include/dyndmcs/InstantiateBackwardMessage.h: Likewise.
+	* include/dyndmcs/ChosenCtxSortingStrategy.h: Likewise.
+	* include/dyndmcs/BaseSortingStrategy.h: Likewise.
+
+2011-01-06  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/solver/RelSatSolver.h: Responsible to convert relsat's
+	model into BeliefState format.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* src/dmcs/OptDMCS.cpp: Add a remark.
+
+	* include/solver/SatSolverFactory.h: Add query_plan.
+
+	* include/solver/RelSatSolver.h: create guessing signature
+	here. Need to rethink where to put this.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/network/ThreadFactory.h: Add system_size.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+
+	* include/mcs/ProxySignatureByLocal.h: Add ProxySignatureByLocalPtr.
+
+	* include/loopformula/LoopFormula.h: sort the Head for set_difference.
+
+	* include/dmcs/StreamingDMCS.h: Return query_plan.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Adapt initialization of
+	BeliefState in message.
+
+2011-01-06  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Use libprocess.a and libsolver.a instead
+	of libsatsolver.a
+
+	* testsuite/testGraphProp.cpp: Disable for now.
+
+	* testsuite/testClasp.cpp: Fix signature creation for
+	testClaspResultSmall testcase.
+
+	* testsuite/testBlockingClasp.cpp: Only parse 3 models.
+
+	* testsuite/testCombination.cpp: Fix BeliefSet instantiation.
+	* include/parser/ClaspResultOnlineParser.h: Likewise.
+
+	* src/dmcs/BeliefCombination.cpp: Add more sanity checks.
+
+	* include/generator/QueryPlanWriter.h: Include QueryPlan.h.
+
+	* include/dmcs/Debug.h (printBeliefStateNicely): Move to Debug.
+	* include/dmcs/Makefile.am: Likewise.
+	* include/dmcs/BeliefCombination.h: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* src/dmcs/Makefile.am: Likewise.
+	* src/dmcs/Debug.cpp: Likewise.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+
+2011-01-05  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* testsuite/testTranslation.cpp: Fix signature.
+
+	* include/parser/BridgeRulesBuilder.tcc: Add more meaningful
+	assertions.
+
+	* include/network/Client.tcc: Fix ctor initialisation list.
+
+	* include/mcs/BeliefState.h: Some beautifications.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+
+	* examples/dia-4-4-2-2-1.opt: Fix representation of the interfaces.
+
+	* examples/clasp-result-big.txt: Add terminal 0 to the models.
+
+	* configure.ac: Bump version and fix email address.
+
+2011-01-05  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/BaseDMCS.cpp: Clean up.
+
+	* include/solver/SatSolverFactory.h: Add more support for SAT solving.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+
+	* include/solver/RelSatSolver.h: Add SAT related members
+	and more support for the SAT solving.
+
+	* include/network/Handler.h: Remove SAT related members.
+	* include/network/Handler.tcc: Likewise.
+
+
+
+	* examples/pingpong.cmd: New file.
+	* examples/pingpong.opt: Likewise.
+	* examples/pingpong1.lp: Likewise.
+	* examples/pingpong2.lp: Likewise.
+	* examples/pingpong1.br: Likewise.
+	* examples/pingpong1.br: Likewise.
+
+2011-01-04  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/dmcs/StreamingDMCS.cpp: Remove message queue handling.
+
+	* include/solver/Conflict.h: Add simple conflict representation.
+	* include/solver/Makefile.am: Likewise.
+
+	* include/network/MessagingGateway.h: Initial message queue infrastructure.
+	* include/network/MessageQueueFactory.h: Likewise.
+	* include/network/MessageQueue.h: Likewise.
+	* include/network/MessageDispatcher.h: Likewise.
+	* include/network/Makefile.am: Likewise.
+	* src/network/Makefile.am: Likewise.
+	* testsuite/testMessagingGateway.cpp: Likewise.
+	* testsuite/Makefile.am: Likewise.
+	* src/network/MessageQueueFactory.cpp: Likewise.
+	* src/network/MessageDispatcher.cpp: Likewise.
+
+2011-01-04  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Adapt to SatSolver creation from
+	factory.
+	* include/network/ThreadFactory.h: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+
+	* include/solver/Makefile.am: Add new header files.
+
+	* src/Makefile.am: Add new libs for satsolver and process.
+	* include/Makefile.am: Likewise.
+
+	* src/process: New subdir.
+	* src/solver: Likewise.
+
+	* configure.ac: Add paths to new subdirs.
+
+	* src/process/ClaspProcess.cpp: New file.
+	* src/process/ProcessBuf.cpp: Likewise.
+	* src/process/Makefile.am: Likewise.
+	* src/solver/RelSatSolver.cpp: Likewise.
+	* src/solver/Makefile.am: Likewise.
+	* include/solver/SatSolverFactory.h: Likewise.
+	* include/solver/RelSatSolver.h: Likewise.
+
+	* src/dmcs/Makefile.am: Remove libsatsolver.
+
+	* src/dmcs/ClaspProcess.cpp: Remove.
+	* src/dmcs/ProcessBuf.cpp: Likewise.
+
+	* include/network/Handler.h: Move SATSolver to Handler.
+	* include/network/Handler.tcc: Likewise.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* include/network/ThreadFactory.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/CommandTypeFactory.h: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: include MessageQueue.h
+
+	* include/network/ThreadFactory.h: Segfault fixed.
+	* src/network/ThreadFactory.cpp: Likewise.
+	* include/network/Handler.tcc: Likewise.
+
+	* src/network/Makefile.am: Add relative path to allow compiling
+	from build directory.
+	* src/dmcs/Makefile.am: Likewise.
+	* src/Makefile.am: Likewise.
+
+	* src/dmcsc.cpp: Allow streaming mode (by default).
+	* include/dmcs/ProgramOptions.h: Likewise.
+
+	* include/dmcs/StreamingForwardMessage.h: Add conflict to
+	streaming message, remove restart flag.
+	* src/network/ThreadFactory.cpp: Likewise.
+
 2011-01-03  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
+	* testsuite/testVariable.cpp: Refactoring.
+	* testsuite/testTranslation.cpp: Likewise.
+	* testsuite/testSignature.cpp: Likewise.
+	* testsuite/testResult.cpp: Likewise.
+	* testsuite/testQueryPlan.cpp: Likewise.
+	* testsuite/testParsers.cpp: Likewise.
+	* testsuite/testGraphProp.cpp: Likewise.
+	* testsuite/testCombination.cpp: Likewise.
+	* testsuite/testClaspResultOnlineParser.cpp: Likewise.
+	* testsuite/testClasp.cpp: Likewise.
+	* testsuite/testBlockingClasp.cpp: Likewise.
+	* testsuite/testBeliefComparison.cpp: Likewise.
+	* src/loopformula/DimacsVisitor.cpp: Likewise.
+	* src/generator/staticGen.cpp: Likewise.
+	* src/generator/LogicVisitor.cpp: Likewise.
+	* src/generator/ContextGenerator.cpp: Likewise.
+	* src/dmcsd.cpp: Likewise.
+	* src/dmcsc.cpp: Likewise.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+	* src/dmcs/QueryPlan.cpp: Likewise.
+	* src/dmcs/ProcessBuf.cpp: Likewise.
+	* src/dmcs/PrimitiveDMCS.cpp: Likewise.
+	* src/dmcs/OptDMCS.cpp: Likewise.
+	* src/dmcs/ClaspProcess.cpp: Likewise.
+	* src/dmcs/Cache.cpp: Likewise.
+	* src/dmcs/BeliefCombination.cpp: Likewise.
+	* src/dmcs/BaseDMCS.cpp: Likewise.
+	* include/solver/BaseSolver.h: Likewise.
+	* include/process/ClaspProcess.h: Likewise.
+	* include/parser/LocalKBBuilder.tcc: Likewise.
+	* include/parser/LocalKBBuilder.h: Likewise.
+	* include/parser/CnfBuilder.h: Likewise.
+	* include/parser/ClaspResultOnlineParser.h: Likewise.
+	* include/parser/ClaspResultBuilder.tcc: Likewise.
+	* include/parser/ClaspResultBuilder.h: Likewise.
+	* include/parser/BridgeRulesBuilder.tcc: Likewise.
+	* include/parser/BridgeRulesBuilder.h: Likewise.
+	* include/network/Session.h: Likewise.
+	* include/network/Server.h: Likewise.
+	* include/network/Handler.h: Likewise.
+	* include/network/Client.tcc: Likewise.
+	* include/network/Client.h: Likewise.
+	* include/mcs/Rule.h: Likewise.
+	* include/loopformula/LoopFormulaBuilder.h: Likewise.
+	* include/loopformula/LoopFormula.h: Likewise.
+	* include/loopformula/LocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/IMPLocalLoopFormulaBuilder.h: Likewise.
+	* include/loopformula/DimacsVisitor.h: Likewise.
+	* include/generator/dmcsGen.h: Likewise.
+	* include/generator/RingOptTopoGenerator.h: Likewise.
+	* include/generator/QueryPlanWriter.h: Likewise.
+	* include/generator/OptTopologyGenerator.h: Likewise.
+	* include/generator/MultipleRingOptTopoGenerator.h: Likewise.
+	* include/generator/LogicVisitor.h: Likewise.
+	* include/generator/HouseOptTopoGenerator.h: Likewise.
+	* include/generator/DiamondZigZagOptTopoGenerator.h: Likewise.
+	* include/generator/DiamondOptTopoGenerator.h: Likewise.
+	* include/generator/ContextGenerator.h: Likewise.
+	* include/dyndmcs/InstantiatorCommandType.h: Likewise.
+	* include/dyndmcs/Instantiator.h: Likewise.
+	* include/dyndmcs/InstantiateMessage.h: Likewise.
+	* include/dyndmcs/InstantiateBackwardMessage.h: Likewise.
+	* include/dyndmcs/DynamicConfiguration.h: Likewise.
+	* include/dyndmcs/DynamicCommandType.h: Likewise.
+	* include/dyndmcs/ConfigMessage.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/QueryPlan.h: Likewise.
+	* include/dmcs/PrimitiveDMCS.h: Likewise.
+	* include/dmcs/OptDMCS.h: Likewise.
+	* include/dmcs/Message.h: Likewise.
+	* include/dmcs/Context.h: Likewise.
+	* include/dmcs/CommandType.h: Likewise.
+	* include/dmcs/Cache.h: Likewise.
+	* include/dmcs/BeliefCombination.h: Likewise.
+	* include/dmcs/BaseDMCS.h: Likewise.
+
+	* configure.ac: Move header files to the appropriate directory.
+	* include/Makefile.am: Likewise.
+	* include/dmcs/Makefile.am: Likewise.
+	* include/dyndmcs/Makefile.am: Likewise.
+	* include/generator/Makefile.am: Likewise.
+	* include/loopformula/Makefile.am: Likewise.
+	* include/mcs/Makefile.am: Likewise.
+	* include/process/Makefile.am: Likewise.
+	* include/solver/Makefile.am: Likewise.
+
+	* src/ClaspResultOnlineParser.cpp: Remove X-Mas leftover casserole.
+	* src/ContextGenerator.cpp: Likewise.
+	* src/QueryPlan.cpp: Likewise.
+	* src/QueryPlanGenerator.cpp: Likewise.
+	* src/dmcsGen.cpp: Likewise.
+	* src/dynGen.cpp: Likewise.
+	* src/staticGen.cpp: Likewise.
+	* include/LPGrammar.h: Likewise.
+	* include/QueryPlanGenerator.h: Likewise.
+
 	* configure.ac: Move src/tests to testsuite.
+
 	* Makefile.am: Likewise.
 	* src/Makefile.am: Likewise.
 
+2011-01-03  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.tcc: Let Handler<StreamingCommandType>
+	take care of incoming messages only.
+	* include/network/Handler.h: Likewise.
+
+	* src/network/Makefile.am: Add ThreadFactory.cpp
+	* include/network/Makefile.am: Add ThreadFactory.h
+
+	* src/network/ThreadFactory.cpp: New file.
+	* include/network/ThreadFactory.h: Likewise.
+
+	* include/network/Handler.h: Add specialized Handler for streaming dmcs.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/CommandType.h: Remove thread creation methods.
+	* include/dyndmcs/InstantiatorCommandType.h: Likewise.
+	* include/dyndmcs/DynamicCommandType.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+	* include/dmcs/PrimitiveCommandType.h: Likewise.
+	* include/dmcs/OptCommandType.h: Likewise.
+	* src/dmcs/StreamingCommandType.cpp: Likewise.
+
+2010-12-30  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/parser/Makefile.am (AM_CPPFLAGS): Add BM_CPPFLAGS.
+
+>>>>>>> remotes/svn/dmcs1.5
 2010-12-29  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* src/parser/Makefile.am: Compile libparser.a.
@@ -35,11 +3735,117 @@
 
 	* src/Makefile.am (dmcsd_LDADD): Reorder to fix FTBFS on linux.
 
+2010-12-22  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/network/Handler.h: Setup MQs, threads.
+	* include/network/Handler.tcc: Likewise.
+
+	* include/dmcs/StreamingDMCS.h: Start to integrate relsat.
+	* src/dmcs/StreamingDMCS.cpp: Likewise.
+
+	* include/Theory.h: Add some comments.
+
+	* include/CommandTypeFactory.h: Add some dummy MQs to simulate
+	later MQGateWay.
+
+	* src/dmcs/Makefile.am (libdmcs_a_SOURCES): Add StreamCommandType.cpp.
+
+	* src/dmcs/StreamingCommandType.cpp: New file.
+
+	* include/CommandType.h: Add methods for creating threads.
+	* include/dyndmcs/InstantiatorCommandType.h: Likewise.
+	* include/dyndmcs/DynamicCommandType.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+	* include/dmcs/PrimitiveCommandType.h: Likewise.
+	* include/dmcs/OptCommandType.h: Likewise.
+
+2010-12-20  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcs/StreamingDMCS.cpp: New file.
+	* include/dmcs/StreamingForwardMessage.h: Likewise.
+	* include/dmcs/StreamingDMCS.h: Likewise.
+	* include/dmcs/StreamingCommandType.h: Likewise.
+
+	* include/Makefile.am (noinst_HEADERS): Remove ContextGenerator.h
+
+	* include/dmcs/Makefile.am: Add new headers.
+
+	* include/Message.h: Add header for streaming models.
+
+	* include/CommandTypeFactory.h: Create StreamingCommandType.
+
+	* src/network/Server.cpp: Handle request for streaming models.
+
+	* src/dmcsc.cpp: Include dmcs/StreamingCommandType.h
+
+	* src/dmcs/Makefile.am (libsatsolver_a_SOURCES): Add StreamingDMCS.cpp
+
+2010-12-19  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* Makefile.am: Build with relsat-20070104.
+	* configure.ac: Likewise.
+
+2010-12-19  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* src/dmcsc.cpp: directly read V.
+
+	* include/BeliefState.h: operator>> for BeliefSet and BeliefState.
+
+2010-12-18  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* include/network/Makefile.am: Add MessageQueue.h.
+	* include/network/MessageQueue.h: Likewise.
+
+2010-12-17  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/BeliefState.h: Use bitmagic for BeliefSet. Add
+	serialization methods for BeliefSet.
+	* src/tests/testCombination.cpp: Likewise.
+	* src/tests/testBeliefComparison.cpp: Likewise.
+	* src/staticGen.cpp: Likewise.
+	* src/generator/staticGen.cpp: Likewise.
+	* src/generator/ContextGenerator.cpp: Likewise.
+	* src/QueryPlanGenerator.cpp: Likewise.
+	* src/ContextGenerator.cpp: Likewise.
+	* include/parser/ClaspResultOnlineParser.tcc: Likewise.
+	* include/parser/ClaspResultBuilder.tcc: Likewise.
+	* include/dyndmcs/InstantiateMessage.h: Likewise.
+	* include/ClaspResultOnlineParser.tcc: Likewise.
+	* include/ClaspResultBuilder.tcc: Adapt to new type of BeliefSet.
+
+2010-12-17  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* src/Makefile.am (AM_CPPFLAGS): Use BM_CPPFLAGS.
+	* src/tests/Makefile.am: Likewise.
+	* src/network/Makefile.am: Likewise.
+	* src/loopformula/Makefile.am: Likewise.
+	* src/generator/Makefile.am: Likewise.
+	* src/dyndmcs/Makefile.am: Likewise.
+	* src/dmcs/Makefile.am: Likewise.
+
+	* configure.ac: Checks for bitmagic library.
+
+2010-12-16  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+
+	* include/Makefile.am: Remove header files in subdirs.
+
+2010-12-16  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
+
+	* bm3.7.0: Add bm3.7.0 from http://bmagic.sourceforge.net/.
+
+	* relsat-20070104: Add current relsat trunk from
+	http://relsat.googlecode.com/svn/trunk/.
+
 2010-12-15  Thomas Krennwallner  <tkren@kr.tuwien.ac.at>
 
 	* configure.ac: Require Boost >= 1.42.
 
-2010-12-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
+	* minisat-20100906: Add current minisat master branch from
+	  git://github.com/niklasso/minisat.git.
+
+	* picosat-936: Add picosat-936 from http://fmv.jku.at/picosat/.
+
+22010-12-08  Minh Dao Tran  <dao@kr.tuwien.ac.at>
 
 	* src/Makefile.am: Add missing noinst_LIBRARIES = libcache.a
 

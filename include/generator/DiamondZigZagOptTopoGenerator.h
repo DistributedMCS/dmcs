@@ -30,7 +30,6 @@
 #ifndef GEN_DIAMOND_ZIGZAG_OPT_TOPO_GENERATOR_H
 #define GEN_DIAMOND_ZIGZAG_OPT_TOPO_GENERATOR_H
 
-#include "BeliefCombination.h"
 #include "generator/OptTopologyGenerator.h"
 
 namespace dmcs { namespace generator {
@@ -56,34 +55,36 @@ public:
       {
       case 1:
 	{
-	  BeliefStatePtr bs_12 = getInterface(lcim, id, id+1);
-	  BeliefStatePtr bs_23 = getInterface(lcim, id+1, id+2);
+	  NewBeliefStatePtr bs_12 = getInterface(lcim, id-1, id);
+	  NewBeliefStatePtr bs_23 = getInterface(lcim, id, id+1);
 	  
-	  update(bs_12, bs_23);
+	  (*bs_12) = (*bs_12) | *(bs_23);
 	  break;
 	}
       case 2:
 	{
-	  BeliefStatePtr bs_23 = getInterface(lcim, id, id+1);
-	  BeliefStatePtr bs_13 = getInterface(lcim, id-1, id+1);
-	  BeliefStatePtr bs_34 = getInterface(lcim, id+1, id+2);
+	  NewBeliefStatePtr bs_23 = getInterface(lcim, id-1, id);
+	  NewBeliefStatePtr bs_13 = getInterface(lcim, id-2, id);
+	  NewBeliefStatePtr bs_34 = getInterface(lcim, id, id+1);
 
-	  update(bs_23, bs_13);
-	  update(bs_23, bs_34);
+	  (*bs_23) = (*bs_23) | (*bs_13);
+	  (*bs_23) = (*bs_23) | (*bs_34);
 	  
-	  ContextPair p(id-1, id+1);
+	  ContextPair p(id-2, id);
+
 	  lcim->erase(p);
 
 	  break;
 	}
       case 0:
 	{
-	  BeliefStatePtr bs_34 = getInterface(lcim, id, id+1);
-	  BeliefStatePtr bs_24 = getInterface(lcim, id-1, id+1);
+	  NewBeliefStatePtr bs_34 = getInterface(lcim, id-1, id);
+	  NewBeliefStatePtr bs_24 = getInterface(lcim, id-2, id);
 
-	  update(bs_34, bs_24);
+	  (*bs_34) = (*bs_34) | (*bs_24);
 
-	  ContextPair p(id-1, id+1);
+	  ContextPair p(id-2, id);
+
 	  lcim->erase(p);
 	  
 	  break;

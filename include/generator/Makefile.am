@@ -2,7 +2,8 @@ AUTOMAKE_OPTIONS = gnu
 
 # including headers for make dist
 noinst_HEADERS =  \
-		ContextGenerator.h \
+		BaseVisitor.h \
+		NewContextGenerator.h \
 		BinaryTreeTopoGenerator.h \
 		DiamondTopoGenerator.h \
 		DiamondOptTopoGenerator.h \
@@ -11,17 +12,14 @@ noinst_HEADERS =  \
 		DiamondZigZagOptTopoGenerator.h \
 		HouseTopoGenerator.h \
 		HouseOptTopoGenerator.h \
+		NewLogicVisitor.h \
 		MultipleRingTopoGenerator.h \
 		MultipleRingOptTopoGenerator.h \
 		TopologyGenerator.h \
 		OptTopologyGenerator.h \
+		RandomQPGenerator.h \
 		RingTopoGenerator.h \
 		RingOptTopoGenerator.h \
 		RingEdgeTopoGenerator.h \
-		dmcsGen.h \
-		DynTopologyGenerator.h \
-		DynGridTopoGenerator.h \
-		DynRakeTopoGenerator.h \
-		DynRandomTopoGenerator.h
-
+		new_dmcsGen.h 
 

@@ -1,0 +1,15 @@
+PoolSize = 3
+
+[ContextsInfo]
+C1 = 1, localhost, 5001
+C2 = 2, localhost, 5002
+C3 = 3, localhost, 5003
+
+
+[Signature]
+C1 = (s 1 1 1), (h 1 2 2), (e 1 3 3), (ps 1 4 4), (ph 1 5 5), (pe 1 6 6), (inc 1 7 7), (dec 1 8 8), (interesting 1 9 9), (hard_prof 1 10 10), (pos 1 11 11), (neg 1 12 12)
+C2 = (s 2 1 1), (h 2 2 2), (e 2 3 3), (ps 2 4 4), (ph 2 5 5), (pe 2 6 6), (inc 2 7 7), (dec 2 8 8), (interesting 2 9 9), (hard_prof 2 10 10), (pos 2 11 11), (neg 2 12 12)
+C3 = (s 3 1 1), (h 3 2 2), (e 3 3 3), (ps 3 4 4), (ph 3 5 5), (pe 3 6 6), (inc 3 7 7), (dec 3 8 8), (interesting 3 9 9), (hard_prof 3 10 10), (pos 3 11 11), (neg 3 12 12)
+
+[MM]
+matches = (1 pos 2 s 1), (1 pos 2 h 0.7), (1 neg 2 e 0.9), (1 pos 3 s 0.9), (1 neg 3 e 0.7), (2 pos 3 s 0.8), (2 neg 3 e 0.6), (2 pos 1 s 0.7), (2 neg 1 h 0.5), (2 neg 1 e 0.7), (3 pos 1 s 0.6), (3 neg 1 h 0.6), (3 neg 1 e 0.7)

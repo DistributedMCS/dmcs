@@ -3,6 +3,8 @@ AUTOMAKE_OPTIONS = gnu
 # global preprocessor flags
 AM_CPPFLAGS = \
     -I$(top_srcdir)/include \
+    -I$(top_srcdir) \
+    $(BM_CPPFLAGS) \
     $(BOOST_CPPFLAGS)
 
 # global linker flags
@@ -23,24 +25,16 @@ LIBS = \
 	$(BOOST_SERIALIZATION_LIBS) 
 	$(BOOST_GRAPH_LIBS)
 
-
-noinst_LIBRARIES = libdmcs.a libsatsolver.a libcache.a
-
-# the cache library
-libcache_a_SOURCES = Cache.cpp
+noinst_LIBRARIES = libdmcs.a
 
 # the DMCS library
 libdmcs_a_SOURCES = \
-		BaseDMCS.cpp \
-		OptDMCS.cpp \
-		PrimitiveDMCS.cpp \
-                QueryPlan.cpp \
-                BeliefCombination.cpp \
-		PrimitiveDMCS.cpp \
-		OptDMCS.cpp
-
-# the SATSOLVER library
-libsatsolver_a_SOURCES = \
-		ClaspProcess.cpp \
-		ProcessBuf.cpp
+		Engine.cpp \
+		Instantiator.cpp \
+		Evaluator.cpp \
+		DLVEngine.cpp \
+		DLVEvaluator.cpp \
+		DLVInstantiator.cpp \
+		InputProvider.cpp \
+		URLBuf.cpp
 

@@ -33,19 +33,18 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
-#include "BeliefState.h"
 #include "generator/TopologyGenerator.h"
+#include "mcs/NewBeliefState.h"
 
 namespace dmcs { namespace generator {
 
 typedef std::pair<std::size_t, std::size_t> ContextPair;
-typedef std::pair<ContextPair, BeliefStatePtr> LocalInterfacePair;
-typedef std::map<ContextPair, BeliefStatePtr> LocalInterfaceMap;
+typedef std::pair<ContextPair, NewBeliefStatePtr> LocalInterfacePair;
+typedef std::map<ContextPair, NewBeliefStatePtr> LocalInterfaceMap;
 typedef boost::shared_ptr<LocalInterfaceMap> LocalInterfaceMapPtr;
 
 
-inline
-BeliefStatePtr
+inline NewBeliefStatePtr
 getInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to)
 {
   ContextPair cp(from, to);
@@ -54,6 +53,17 @@ getInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to)
   assert (lcim_it != lcim->end());
 
   return lcim_it->second;
+}
+
+
+inline void
+putInterface(LocalInterfaceMapPtr lcim, std::size_t from, std::size_t to, const NewBeliefStatePtr& bs)
+{
+  ContextPair cp(from, to);
+  LocalInterfaceMap::iterator lcim_it = lcim->find(cp);
+  assert (lcim_it != lcim->end());
+
+  lcim_it->second = bs;
 }
 
 

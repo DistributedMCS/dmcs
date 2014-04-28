@@ -1,0 +1,27 @@
+[
+  {
+    ContextId: 2,
+    HostName: "localhost",
+    Port: 5002,
+    LocalSignature: 
+    { 
+      1: [c, c1, c4], 
+      2: [c, c2, c5], 
+      3: [c, c3, c6], 
+    }, 
+  }, 
+  {
+    ContextId: 4,
+    HostName: "localhost",
+    Port: 5004,
+    InputSignature: 
+    { 
+      4: [e, c1, c4], 
+      5: [e, c2, c5], 
+      6: [e, c3, c6], 
+      7: [f, c1, c4], 
+      8: [f, c2, c5], 
+      9: [f, c3, c6], 
+    }, 
+  }, 
+]

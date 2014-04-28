@@ -1,9 +1,13 @@
-#include "ClaspProcess.h"
+#include "process/ClaspProcess.h"
 #include "parser/ClaspResultOnlineParser.h"
+#include "dmcs/Log.h"
+
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "testBlockingClasp"
 #include <boost/test/unit_test.hpp>
+
+#include <boost/thread.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -12,6 +16,8 @@ using namespace dmcs;
 
 BOOST_AUTO_TEST_CASE ( testBlockingClasp )
 {
+  init_loggers("testBlockingClasp");
+
   // Prepare some signatures
   const SignaturePtr sig(new Signature);
   const SignaturePtr gsig(new Signature);
@@ -48,7 +54,7 @@ BOOST_AUTO_TEST_CASE ( testBlockingClasp )
   clasp.spawn();
 
   std::ostream& os = clasp.getOutput();
-  os << "p cnf 10000 0" << std::endl;
+  os << "p cnf 20 0" << std::endl;
  
   clasp.endoffile();
 
@@ -58,21 +64,27 @@ BOOST_AUTO_TEST_CASE ( testBlockingClasp )
   
   std::size_t count = 0;
   BeliefStatePtr belief_state;
-  std::size_t n;
+
   do
     {
       belief_state = crop.getNextAnswer();
+
       if (belief_state != boost::shared_ptr<BeliefState>())
 	{
-#ifdef DEBUG
-	  std::cerr << belief_state << std::endl;
-#endif
 	  count++;
 
-	  //	  std::cerr << "Input number: ";
-	  sleep(2);
-	  // std::cin >> n;
+	  BOOST_TEST_MESSAGE("read " << belief_state);
+	  BOOST_TEST_MESSAGE("count: " << count);
+
+	  boost::posix_time::milliseconds n(500);
+	  boost::this_thread::sleep(n);
+
+	  BOOST_TEST_MESSAGE("slept 500 msecs");
 	}
     }
-  while (belief_state != boost::shared_ptr<BeliefState>());
+  while (belief_state != boost::shared_ptr<BeliefState>() &&
+	 count < 3);
+
+  BOOST_CHECK_EQUAL(count, 3);
+  BOOST_CHECK_NE(belief_state, boost::shared_ptr<BeliefState>());
 }

@@ -1,0 +1,99 @@
+#
+# C1:
+# a(X) :- (3:c(X,Y)), not (4:dprime(X)).
+#
+# C2:
+# b(Y) :- (2:dom(X,Y)), not (3:c(X,Y)).
+#
+# dom(c1,c4).
+# dom(c2,c5).
+#
+# C3:
+# c(X,Y) :- (5:e(X,Y)).
+#
+# C4:
+# dprime(X) :- d(X,Y).
+# d(X,Y) :- (5:f(X,Y)).
+#
+# C5:
+#
+# e(X,Y) v f(X,Y) :- p(X,Y).
+# p(c1,c4).
+# p(c2,c5).
+# p(c3,c6).
+#
+
+[
+{
+  ContextId: 1,
+
+  Constants: [c1,c2,c3,c4,c5,c6],
+
+  ConstantCategories:
+  [
+    {Category: cat1, Constants: [c1,c2,c3]},
+    {Category: cat2, Constants: [c4,c5,c6]}
+  ],
+
+  Predicates:
+  [
+    {Pred: a, Arity: 1}
+  ],
+
+  Filters:
+  [
+    { Name: filter_a, Pred: a, Arguments: [ {Position:1, Using:[cat1]} ] }
+  ],
+
+  LocalSignature:
+  {
+    1: [a,c1],
+    2: [a,c2],
+    3: [a,c3]
+  }
+},
+
+{
+  ContextId: 3,
+  InputSignature:
+  {
+    1: [c,c1,c4],
+    2: [c,c2,c5],
+    3: [c,c3,c6]
+  }
+},
+
+{
+  ContextId: 4,
+  InputSignature:
+  {
+    4: [dprime,c1,c4],
+    5: [dprime,c2,c5],
+    6: [dprime,c3,c6]
+  }
+},
+
+{
+  ContextId: 5,
+  InputSignature:
+  {
+    4: [e,c1,c4],
+    5: [e,c2,c5],
+    6: [e,c3,c6],
+    7: [f,c1,c4],
+    8: [f,c2,c5],
+    9: [f,c3,c6]
+  }
+},
+
+{
+  ContextId: user,
+  OutputProjection:
+  {
+    1: [1,2,3],
+    3: [1,2,3],
+    4: [4,5,6],
+    5: [4,5,6,7,8,9]
+  } 
+}
+]

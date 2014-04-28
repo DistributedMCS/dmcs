@@ -1,4 +1,4 @@
-c clasp version 1.3.4
+c clasp version 2.0.2
 c Reading from ../../examples/dimacs.txt
 c Solving...
 c Answer: 1
@@ -13,5 +13,6 @@ c Answer: 5
 v 1 2 -3 0
 s SATISFIABLE
 
-c Models    : 5     
-c Time      : 0.000s (Solving: 0.000s)
+c Models        : 5     
+c Time          : 0.000s (Solving: 0.00s 1st Model: 0.00s Unsat: 0.00s)
+c CPU Time      : 0.000s

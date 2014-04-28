@@ -58,6 +58,9 @@ BOOST_AUTO_TEST_CASE ( testMatch )
   BOOST_CHECK_EQUAL(last->tarCtx,  5);
   BOOST_CHECK_EQUAL(last->img,     6);
   BOOST_CHECK_EQUAL(last->quality, 1);
-
-  
 }
+
+// Local Variables:
+// mode: C++
+// End:
+

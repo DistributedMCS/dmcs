@@ -32,23 +32,24 @@
 #include "config.h"
 #endif
 
+#include "dmcs/Log.h"
 #include "dmcs/OptCommandType.h"
 #include "dmcs/PrimitiveCommandType.h"
+#include "dmcs/StreamingCommandType.h"
 
 #include "dyndmcs/DynamicCommandType.h"
 #include "dyndmcs/DynamicConfiguration.h"
 #include "dyndmcs/InstantiatorCommandType.h"
 
+#include "network/AsynClient.h"
 #include "network/Client.h"
-#include "Theory.h"
-#include "BeliefState.h"
-#include "Message.h"
-#include "QueryPlan.h"
-#include "ProgramOptions.h"
 
-#include <fstream>
-#include <iostream>
-#include <string> 
+#include "dmcs/Message.h"
+#include "dmcs/QueryPlan.h"
+#include "dmcs/ProgramOptions.h"
+
+#include "mcs/Theory.h"
+#include "mcs/BeliefState.h"
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -58,6 +59,11 @@
 #include <boost/functional/hash.hpp>
 #include <boost/program_options.hpp>
 
+#include <fstream>
+#include <iostream>
+#include <set>
+#include <string> 
+#include <csignal>
 
 using namespace dmcs;
 
@@ -84,27 +90,151 @@ instantiate(ContextSubstitutionPtr ctx_sub, const std::string& hostName, const s
 
   if (answer->getStatus() == true)
     {
-      std::cerr << "Instantiation finished successfully!" << std::endl;
+      DMCS_LOG_DEBUG("Instantiation finished successfully!");
 
       // Now call the evaluation
     }
 }
+
+std::size_t no_beliefstates = 0;
+bool complete = false;
+
+std::set<PartialBeliefState> final_result;
+std::size_t handled_belief_states = 0;
+
+boost::posix_time::ptime start_time;
+
+boost::mutex print_mutex;
+
+
+void
+handle_belief_state(StreamingBackwardMessage& m)
+{
+#ifdef DEBUG
+  std::cerr << "recvd: " << m << std::endl;
+#endif
+
+  const ModelSessionIdListPtr& result = m.getResult();
+
+  for (ModelSessionIdList::iterator it = result->begin(); it != result->end(); ++it)
+    {
+      PartialBeliefState* pbs = it->partial_belief_state;
+      if (pbs != 0)
+	{
+	  std::pair<std::set<PartialBeliefState>::iterator,bool> p = final_result.insert(*pbs);
+
+	  if (p.second)
+	    {
+	      no_beliefstates++;
+
+	      boost::mutex::scoped_lock lock(print_mutex);
+
+	      std::cout << "Partial Equilibrium #" << no_beliefstates << ": ( " << *p.first << ")" << std::endl;
+
+	      boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
+
+	      std::cerr << "[" << diff.total_seconds() << "." << diff.total_milliseconds() << "] "
+			<< "Partial Equilibrium #" << no_beliefstates << ": ( " << *p.first << ")" << std::endl;
+	    }
+
+	  delete pbs;
+	  pbs = 0;
+	}
+    }
+
+  handled_belief_states += result->size();
+}
+
+
+
+void
+handle_signal(int signum)
+{
+  if (signum == SIGINT) // interrupted, print current stats
+    {
+      boost::mutex::scoped_lock lock(print_mutex);
+
+      std::cerr << "Total Number of Received Equilibria: " << handled_belief_states << std::endl;
+
+      std::cout << "Total Number of Equilibria: " << no_beliefstates << "+" << std::endl;
+
+      exit(0);
+    }
+#if 0
+  else if (signum == SIGALRM)
+    {
+      std::cerr << "Timeout: " << timeout << std::endl;
+    }
+#endif
+}
+
+
+struct SamplingThread
+{
+  void
+  operator() (int msecs)
+  {
+    while (1)
+      {
+	boost::this_thread::sleep(boost::posix_time::milliseconds(msecs));
+
+	{
+	  boost::mutex::scoped_lock lock(print_mutex);
+
+
+	  boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
+
+	  std::cerr << "[" << diff.total_seconds() << "." << diff.total_milliseconds() << "] "
+		    << "Received partial equilibria: " << handled_belief_states << std::endl;
+	}
+      }
+  }
+
+};
+
 
 int
 main(int argc, char* argv[])
 {
   try 
     {
-      std::string hostName = "";
-      std::string port = "";
-      std::string manager = "";
-      std::string qvs = "";
+      std::string hostName;
+      std::string port;
+      std::string manager;
+      std::string qvs;
       std::size_t system_size = 0;
-      std::size_t root_ctx;
-      bool dynamic;
+      std::size_t root_ctx = 0;
+      std::size_t pack_size = 0;
+      bool dynamic = false;
+      bool primitiveDMCS = false;
+      bool streaming = false;
       BeliefStatePtr V(new BeliefState);
 
-      boost::program_options::options_description desc("Allowed options");
+      bool all_answers = false;
+      
+      const char* help_description = "\
+dmcsc " PACKAGE_VERSION " ---"
+#ifdef DEBUG
+	" DEBUG"
+#else
+#ifdef NDEBUG
+	" RELEASE"
+#else
+	" "
+#endif // NDEBUG
+#endif // DEBUG
+#ifdef DMCS_STATS_INFO
+	"STATS"
+#else
+	""
+#endif // DMCS_STATS_INFO
+"\n\n\
+Usage: dmcsc --hostname=NAME --port=PORT --system-size=N [OPTIONS]\n\
+\n\
+Options";
+
+
+      boost::program_options::options_description desc(help_description);
 
       desc.add_options()
 	(HELP, "produce help and usage message")
@@ -115,6 +245,8 @@ main(int argc, char* argv[])
 	(MANAGER, boost::program_options::value<std::string>(&manager), "set Manager HOST:PORT")
 	(DYNAMIC, boost::program_options::value<bool>(&dynamic)->default_value(false), "set to dynamic mode")
 	(ROOT_CTX, boost::program_options::value<std::size_t>(&root_ctx)->default_value(1), "set root context id")
+	(STREAMING, boost::program_options::value<bool>(&streaming)->default_value(true), "set streaming mode")
+	(PACK_SIZE, boost::program_options::value<std::size_t>(&pack_size)->default_value(1), "set number of belief states returned in one pack")
 	;
 	
       boost::program_options::variables_map vm;        
@@ -124,74 +256,68 @@ main(int argc, char* argv[])
       if (vm.count(HELP))
 	{
 	  std::cerr << desc << std::endl;
-	  return 1;
+	  exit(1);
         }
+
+      // setup log4cxx
+      init_loggers("dmcsc");
       
-      bool primitiveDMCS = false;
-      if (qvs.compare("") != 0) // reading V for basic DMCS
+      if (!qvs.empty()) // reading V for basic DMCS
 	{
 	  primitiveDMCS = true;
-	  
-	  boost::tokenizer<> tok(qvs);
-
-	  for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
-	    {
-	      std::istringstream iss(it->c_str());
-	      BeliefSet bs;
-	      iss >> bs;
-	      V->push_back(bs);
-	    }
+	  std::istringstream iss(qvs);
+	  iss >> V;
 	}
 
-      if (port.compare("") == 0)
+      if (port.empty() || hostName.empty())
 	{
-	  std::cerr << desc << "\n";
-	  return 1;
+	  std::cerr << "Need hostname and port." << std::endl;
+	  std::cerr << desc << std::endl;
+	  exit(1);
 	}
 
-      boost::asio::io_service io_service;
-      boost::asio::ip::tcp::resolver resolver(io_service);
+      // setup connection
+      boost::shared_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
+      boost::asio::ip::tcp::resolver resolver(*io_service);
       boost::asio::ip::tcp::resolver::query query(hostName, port);
       boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
       boost::asio::ip::tcp::endpoint endpoint = *it;
 
-      if (dynamic)
-	{ // dynamic mode
-
-	  std::cerr << "In dynamic mode"<< std::endl;
+      if (dynamic) // dynamic mode
+	{
+	  DMCS_LOG_DEBUG("In dynamic mode.");
 
 	  ContextSubstitutionPtr ctx_sub(new ContextSubstitution);
 	  ConfigMessage mess(root_ctx, ctx_sub, false);
 	  
-#ifdef DEBUG
-	  std::cerr << "Message = " << mess << std::endl;
-#endif
+	  DMCS_LOG_DEBUG("Message = " << mess);
 	  
 	  std::string header = HEADER_REQ_DYN_DMCS;
-	  Client<DynamicCommandType> c(io_service, it, header, mess);
-	  io_service.run();
+	  Client<DynamicCommandType> c(*io_service, it, header, mess);
+	  io_service->run();
 
 	  DynamicConfiguration::dynmcs_return_type result = c.getResult();
 
-	  std::cerr << "FINAL RESULT: " << std::endl
-		    << *result << std::endl;
+	  DMCS_LOG_DEBUG("FINAL RESULT: ");
+	  DMCS_LOG_DEBUG(*result);
 
+	  std::cerr << "FINAL RESULT:\n" << *result << std::endl;
 
-	  // instantiate the system, then write .br and .sh files
-	  /*for (ContextSubstitutionList::const_iterator it = result->begin(); it != result->end(); ++it)
-	    {
-	      instantiate(*it);
-	      }*/
-	  ContextSubstitutionList::const_iterator it = result->begin();
-	  instantiate(*it, hostName, port);
+	  //if (result->size() > 0)
+	  //  {
+	      // instantiate the system, then write .br and .sh files
+	  //    ContextSubstitutionList::const_iterator it = result->begin();
+	  //    instantiate(*it, hostName, port);
+	  //  }
 	}
-      else
-	{ // ground mode
+      else // ground mode
+	{
 	  if(system_size == 0 ||
 	     (primitiveDMCS && V->size() == 0) ||
 	     (primitiveDMCS && V->size() != system_size))
 	    {
-	      std::cerr << desc << "\n";
+	      std::cerr << "empty system size" << std::endl;
+	      std::cerr << desc << std::endl;
 	      return 1;
 	    }
 
@@ -202,47 +328,194 @@ main(int argc, char* argv[])
 	  BeliefStateListPtr result(new BeliefStateList);
 #endif // DMCS_STATS_INFO
 	  
-#ifdef DEBUG
-	  std::cerr << "Starting DMCS with " << system_size << std::endl;
-#endif
+	  DMCS_LOG_DEBUG("Starting DMCS with " << system_size << " contexts.");
 	  
 	  if (primitiveDMCS) // primitive DMCS
 	    {
-#ifdef DEBUG
-	      std::cerr << "Primitive" << std::endl;
-	      std::cerr << "Going to send: ";
-	      std::cerr << V << std::endl;
-#endif 
+	      DMCS_LOG_DEBUG("Primitive mode.");
+	      DMCS_LOG_DEBUG("Sending: " << V);
+
 	      std::string header = HEADER_REQ_PRI_DMCS;
 	      PrimitiveMessage mess(V);
-	      Client<PrimitiveCommandType> c(io_service, it, header, mess);
+	      Client<PrimitiveCommandType> c(*io_service, it, header, mess);
 	      
-#ifdef DEBUG
-	      std::cerr << "Running ioservice" <<std::endl;
-#endif
+	      DMCS_LOG_DEBUG("Running ioservice.");
 	  
-	      io_service.run();
+	      io_service->run();
 
-#ifdef DEBUG	  
-	      std::cerr << "Getting results" <<std::endl;
-#endif
+	      DMCS_LOG_DEBUG("Getting results.");
 	  
 	      result = c.getResult();
+
+	      all_answers = true;
+
+#ifdef DMCS_STATS_INFO
+	      no_beliefstates = result->getBeliefStates()->size();
+#else
+	      no_beliefstates = result->size();
+#endif
 	    }
-	  else // Opt DMCS
+	  else // opt or streaming DMCS
 	    {
-	      std::string header = HEADER_REQ_OPT_DMCS;
-	      OptCommandType::input_type mess(0); // invoker ID ?
-	      Client<OptCommandType> c(io_service, it, header, mess);
-	      io_service.run();
+	      // for now, we work on streaming DMCS for the opt topology. 
+	      if (streaming)
+		{
+		  DMCS_LOG_DEBUG("Streaming mode.");
+
+		  if (pack_size == 0)
+		    {
+		      StreamingCommandType::input_type mess(0, 0, 0, 0, 0);
+		      
+		      std::string header = HEADER_REQ_STM_DMCS;
+		      
+		      AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
+		      
+		      c.setCallback(&handle_belief_state);
+		      
+		      io_service->run(); // wait for one round
+		      c.terminate();
+		      
+		      no_beliefstates = final_result.size();
+		    }
+		  else
+		    {
+		      StreamingCommandType::input_type mess(0, 0, 0, 1, pack_size);
+
+		      std::string header = HEADER_REQ_STM_DMCS;
+		      
+		      AsynClient<StreamingForwardMessage, StreamingBackwardMessage> c(*io_service, it, header, mess);
+		      
+		      c.setCallback(&handle_belief_state);
+		      
+		      // catch Ctrl-C and interrupts
+		      sig_t s = signal(SIGINT, handle_signal);
+		      if (s == SIG_ERR)
+			{
+			  perror("signal");
+			  exit(1);
+			}
+		      
+		      
+		      bool keep_running = true;
+		      bool last_round = false;
+		      std::size_t next_count = 0;
+		      std::size_t model_count = 0;
+		      std::size_t last_model_count = 0;
+		      std::size_t diff_count = 0;
+		      
+		      SamplingThread sampler;
+		      
+		      // start iterating
+		      start_time = boost::posix_time::microsec_clock::local_time();
+		      
+		      boost::thread sampler_thread(sampler, 1000);
+		      
+		      while (keep_running)
+			{
+			  DMCS_LOG_DEBUG("Entering round " << next_count);
+			  
+			  io_service->run(); // wait for one round
+			  
+			  // model number accounting
+			  last_model_count = model_count;
+			  model_count = handled_belief_states;
+
+			  DMCS_LOG_TRACE("last_model_count = " << last_model_count << ", model_count = " << model_count << ", diff_count = " << diff_count << ", final_result.size() = " << final_result.size());
+
+			  diff_count = final_result.size() - diff_count;
+			  next_count++;
+
+			  DMCS_LOG_TRACE("new diff_count = " << diff_count);
+			  
+			  
+			  // decide what to do next
+			  
+			  if (last_round)
+			    {
+			      keep_running = false;
+			    }
+			  else
+			    {
+			      io_service->reset(); // ready for the next round
+
+			      std::size_t left_to_request = 0;
+			      if (pack_size > final_result.size())
+				{
+				  left_to_request = pack_size - final_result.size();
+				}
+			      
+			      DMCS_LOG_TRACE("diff_count = " << diff_count << ", left to request = " << left_to_request << ", next_count = " << next_count);
+			      
+			      if (diff_count > 0 && pack_size > final_result.size()) // setup next k here
+				{
+				  DMCS_LOG_TRACE("Got " << diff_count << " partial belief states, getting next batch of size " << pack_size);
+
+				  std::size_t next_k1 = next_count * pack_size + 1;
+				  std::size_t next_k2 = next_k1 + pack_size - 1;
+
+				  DMCS_LOG_TRACE("next_k1 = " << next_k1 << ", next_k2 = " << next_k2);
+				  
+				  mess.setPackRequest(next_k1, next_k2);
+				  c.next(mess);
+				}
+			      else // fixpoint reached, last round
+				{
+				  DMCS_LOG_TRACE("fixpoint reached: model_count = " << model_count << ", final_result: " << final_result.size());
+				  
+				  c.terminate();
+				  last_round = true;
+				}
+			    }
+			}
+		      
+		      no_beliefstates = final_result.size();
+		      std::cout << "Total Number of Equilibria: " << no_beliefstates;
+		      
+		      //std::cerr << "FINAL RESULT: " << final_result.size() << " belief states." << std::endl;
+		      //std::copy(final_result.begin(), final_result.end(), std::ostream_iterator<PartialBeliefState>(std::cerr, "\n"));
+		      
+		      //delete conflicts;
+		      //delete partial_ass;
+		      //delete decision;
+		      
+		      sampler_thread.interrupt();
+		      if (sampler_thread.joinable())
+			{
+			  sampler_thread.join();
+			}
+		    } // pack_sizee > 0
+		}
+	      else // opt mode
+		{
+		  DMCS_LOG_DEBUG("Opt mode.");
+
+		  std::string header = HEADER_REQ_OPT_DMCS;
+		  OptCommandType::input_type mess(0); // invoker ID ?
+		  Client<OptCommandType> c(*io_service, it, header, mess);
+
+		  DMCS_LOG_DEBUG("Running ioservice.");
+
+		  io_service->run();
 	      
-	      result = c.getResult();
+		  DMCS_LOG_DEBUG("Getting results.");
+
+		  result = c.getResult();
+
+		  all_answers = true;
+
+#ifdef DMCS_STATS_INFO
+		  no_beliefstates = result->getBeliefStates()->size();
+#else
+		  no_beliefstates = result->size();
+#endif
+		}
 	    }
 
       // Print results
       // but first read the topology file (quick hack) to get the signatures
       QueryPlanPtr query_plan(new QueryPlan);
 
+#if 0
       query_plan->read_graph(manager);
       BeliefStateListPtr belief_state_list;
 #ifdef DMCS_STATS_INFO
@@ -291,11 +564,8 @@ main(int argc, char* argv[])
 	    }
 
 	  std::cout << ")" << std::endl;
-	}
-
-      /*
-      std::cerr << "Signatures: " << std::endl << sigs << std::endl;*/
-
+	  }
+#endif//0
 
 #ifdef DEBUG
 
@@ -307,23 +577,31 @@ main(int argc, char* argv[])
       
 #endif // DEBUG
       
-
+      
 #ifdef DMCS_STATS_INFO
-      std::cout << "# " << result->getBeliefStates()->size() << std::endl;
+      std::cout << "# " << no_beliefstates << std::endl;
       std::cout << *result->getStatsInfo() << std::endl;
 #else
-      std::cout << "Total Number of Equilibria: " << result->size() << std::endl;
-#endif
+      std::cout << "Total Number of Equilibria: " << no_beliefstates;
+
+      if (!complete)
+	{
+	  std::cout << "+";
+	}
+
+      std::cout << std::endl;
+#endif // DMCS_STATS_INFO
 	}
     }
   catch (std::exception& e)
     {
-      std::cerr << "Error: " << e.what() << std::endl;
+      DMCS_LOG_FATAL("Bailing out: " << e.what());
       return 1;
     }
   catch (...)
     {
-      std::cerr << "Exception of unknown type!" << std::endl;
+      DMCS_LOG_FATAL("Exception of unknown type.");
+      return 1;
     }
   
   return 0;

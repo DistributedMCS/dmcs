@@ -1,4 +1,0 @@
--a v b.
--d v c.
--b v a.
--c v d.

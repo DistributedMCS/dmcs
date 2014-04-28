@@ -1,11 +1,12 @@
-#include "BeliefState.h"
-#include "Rule.h"
-#include "Signature.h"
-#include "QueryPlan.h"
+#include "dmcs/QueryPlan.h"
 
 #include "parser/LocalKBBuilder.h"
 #include "parser/ParserDirector.h"
 #include "parser/PropositionalASPGrammar.h"
+
+#include "mcs/BeliefState.h"
+#include "mcs/Rule.h"
+#include "mcs/Signature.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -35,10 +36,10 @@ BOOST_AUTO_TEST_CASE( testParsersKB )
 
   // some theory file
   std::string filename_local_kb(ex);
-  filename_local_kb += "/dia-4-4-2-2-1-1.lp";
+  filename_local_kb += "/diamond-test-1.lp";
 
   std::string filename_topo(ex);
-  filename_topo += "/dia-4-4-2-2-1.opt";
+  filename_topo += "/diamond-test.opt";
 
   QueryPlanPtr query_plan(new QueryPlan);
 
@@ -46,7 +47,8 @@ BOOST_AUTO_TEST_CASE( testParsersKB )
 
   SignaturePtr sig(new Signature);
   *sig = query_plan->getSignature(myid);
-  std::size_t system_size = query_plan->getSystemSize();
+
+  BOOST_CHECK_EQUAL(sig->size(), 8);
 
   RulesPtr local_kb(new Rules);
 
@@ -54,6 +56,8 @@ BOOST_AUTO_TEST_CASE( testParsersKB )
   ParserDirector<PropositionalASPGrammar> parser_director;
   parser_director.setBuilder(&builder);
   parser_director.parse(filename_local_kb);
+
+  BOOST_CHECK_EQUAL(local_kb->size(), 7);
 }
 
 
