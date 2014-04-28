@@ -30,7 +30,6 @@
 #ifndef GEN_DIAMOND_OPT_TOPO_GENERATOR_H
 #define GEN_DIAMOND_OPT_TOPO_GENERATOR_H
 
-#include "BeliefCombination.h"
 #include "generator/OptTopologyGenerator.h"
 
 namespace dmcs { namespace generator {
@@ -45,7 +44,6 @@ public:
   void
   create_opt_interface(std::size_t id)
   {
-    std::cerr << "system_size = " << system_size << std::endl;
     if (id == system_size)
       {
 	return;
@@ -57,23 +55,22 @@ public:
       {
       case 1:
 	{
-	  BeliefStatePtr bs_12 = getInterface(lcim, id, id+1);
-	  BeliefStatePtr bs_13 = getInterface(lcim, id, id+2);
-	  BeliefStatePtr bs_24 = getInterface(lcim, id+1, id+3);
-	  BeliefStatePtr bs_34 = getInterface(lcim, id+2, id+3);
+	  NewBeliefStatePtr bs_12 = getInterface(lcim, id-1, id);
+	  NewBeliefStatePtr bs_13 = getInterface(lcim, id-1, id+1);
+	  NewBeliefStatePtr bs_24 = getInterface(lcim, id,   id+2);
+	  NewBeliefStatePtr bs_34 = getInterface(lcim, id+1, id+2);
 
-	  update(bs_12, bs_24);
-	  update(bs_13, bs_34);
-	  
+	  (*bs_12) = (*bs_12) | (*bs_24);
+	  (*bs_13) = (*bs_13) | (*bs_34);
 	  break;
 	}
       case 2:
 	{
-	  BeliefStatePtr bs_24 = getInterface(lcim, id, id+2);
-	  BeliefStatePtr bs_34 = getInterface(lcim, id+1, id+2);
-
-	  update(bs_24, bs_34);
-
+	  NewBeliefStatePtr bs_24 = getInterface(lcim, id-1, id+1);
+	  NewBeliefStatePtr bs_34 = getInterface(lcim, id,   id+1);
+	  
+	  (*bs_24) = (*bs_24) | (*bs_34);
+	  putInterface(lcim, id, id+1, bs_24);
 	  break;
 	}
       }
