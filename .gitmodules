@@ -1,0 +1,3 @@
+[submodule "dmcs-common"]
+	path = dmcs-common
+	url = https://github.com/DistributedMCS/dmcs-build.git
