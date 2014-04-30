@@ -78,6 +78,7 @@ namespace dmcs {
 #define STARTUP_TIME       "startup-time"
 #define TIMEOUT            "timeout"
 #define LOOP               "loop"
+#define LOCAL_KB_TYPE      "local-kb-type"
 
 } // namespace dmcs
 

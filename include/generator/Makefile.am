@@ -5,6 +5,9 @@ noinst_HEADERS =  \
 		BaseVisitor.h \
 		NewContextGenerator.h \
 		BinaryTreeTopoGenerator.h \
+		ContextGeneratorBase.h \
+		ContextGeneratorDeterministic.h \
+		ContextGeneratorNonDeterministic.h \
 		DiamondTopoGenerator.h \
 		DiamondOptTopoGenerator.h \
 		DiamondArbitraryTopoGenerator.h \

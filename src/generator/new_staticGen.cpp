@@ -18,7 +18,7 @@
  */
 
 /**
- * @file   staticGen.cpp
+ * @file   new_staticGen.cpp
  * @author Minh Dao-Tran <dao@kr.tuwien.ac.at>
  * @date   Fri Oct  26 22:00:00 2012
  * 
@@ -33,6 +33,8 @@
 
 #include "generator/new_dmcsGen.h"
 #include "generator/BinaryTreeTopoGenerator.h"
+#include "generator/ContextGeneratorDeterministic.h"
+#include "generator/ContextGeneratorNonDeterministic.h"
 #include "generator/DiamondTopoGenerator.h"
 #include "generator/DiamondOptTopoGenerator.h"
 #include "generator/DiamondArbitraryTopoGenerator.h"
@@ -45,7 +47,6 @@
 #include "generator/RingTopoGenerator.h"
 #include "generator/RingOptTopoGenerator.h"
 #include "generator/RingEdgeTopoGenerator.h"
-#include "generator/NewContextGenerator.h"
 
 #include "dmcs/ProgramOptions.h"
 //#include "dmcs/Log.h"
@@ -128,6 +129,7 @@ std::size_t no_interface_atoms;
 std::size_t no_bridge_rules;
 std::size_t topology_type;
 std::size_t startup_time;
+std::size_t local_kb_type;
 std::size_t pack_size;
 std::size_t timeout;
 
@@ -164,6 +166,7 @@ read_input(int argc, char* argv[])
     (DMCSPATH, boost::program_options::value<std::string>(&dmcspath), "Path to dmcs binaries")
     (STARTUP_TIME, boost::program_options::value<std::size_t>(&startup_time)->default_value(3), "Sleeping time after initializing all dmcsd")
     (PACK_SIZE, boost::program_options::value<std::size_t>(&pack_size)->default_value(0), "Package size")
+    (LOCAL_KB_TYPE, boost::program_options::value<std::size_t>(&local_kb_type)->default_value(0), "Local knowledge bases type: [default:0]: non-deterministic, 1: deterministic")
     (TIMEOUT, boost::program_options::value<std::size_t>(&timeout)->default_value(600), "Set timeout when running the test")
     (LOGGING, boost::program_options::value<std::string>(&logging)->default_value(""), "log4cxx config file")
     ;
@@ -180,7 +183,8 @@ read_input(int argc, char* argv[])
   if (vm.count(HELP) || 
       prefix.compare("") == 0 || dmcspath.compare("") == 0 || 
       no_contexts == 0 || no_atoms == 0 ||
-      no_interface_atoms == 0 || no_bridge_rules == 0)
+      no_interface_atoms == 0 || no_bridge_rules == 0 ||
+      (local_kb_type != 0 && local_kb_type != 1))
     {
       std::cerr << desc;
       return 1;
@@ -271,6 +275,12 @@ read_input(int argc, char* argv[])
   DBGLOG(DBG, "Number of atoms per context:                   " << no_atoms);
   DBGLOG(DBG, "Number of maximum interface atoms per context: " << no_interface_atoms);
   DBGLOG(DBG, "Number of maximum bridge rules per context:    " << no_bridge_rules);
+
+  if (local_kb_type == 0)
+    DBGLOG(DBG, "Local knowledge base type:                     non-deterministic");
+  else
+    DBGLOG(DBG, "Local knowledge base type:                     deterministic");
+
   DBGLOG(DBG, "Topology type:                                 " << topology_type);
   DBGLOG(DBG, "Prefix for filename:                           " << prefix);
 
@@ -427,15 +437,25 @@ generate_orig_topology()
 void
 generate_contexts()
 {
-  NewContextGenerator cgen(orig_topo, context_interfaces, 
-			   sigma_vec, new_minV, lcim, no_atoms, no_bridge_rules, 
-			   topology_type, prefix);
+  ContextGeneratorBase *cgen;
 
-  cgen.generate();
+  if (local_kb_type == 0)
+    cgen = new ContextGeneratorNonDeterministic(orig_topo, context_interfaces, 
+						   sigma_vec, new_minV, lcim, no_atoms, no_bridge_rules, 
+						   topology_type, prefix);
+  else
+    cgen = new ContextGeneratorDeterministic(orig_topo, context_interfaces, 
+						sigma_vec, new_minV, lcim, no_atoms, no_bridge_rules, 
+						topology_type, prefix);
+
+  cgen->generate();
   // After this, we have local_kb, bridge rules of all contexts and
   // minV of the system set up. Furthermore, we have the map from
   // edsges to local interfaces, which will be used to compute the
   // interface in the optimal topology.
+
+  delete cgen;
+  cgen = 0;
 
 #ifdef DEBUG
   DBGLOG(DBG, "minV: " << *new_minV);

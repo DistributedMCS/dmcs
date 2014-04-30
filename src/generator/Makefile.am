@@ -33,7 +33,9 @@ new_dmcsGen_SOURCES = \
 		new_staticGen.cpp \
 		new_dmcsGen.cpp \
 		NewLogicVisitor.cpp \
-		NewContextGenerator.cpp
+		ContextGeneratorBase.cpp \
+		ContextGeneratorDeterministic.cpp \
+		ContextGeneratorNonDeterministic.cpp 
 
 new_dmcsGen_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
