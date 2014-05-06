@@ -277,9 +277,13 @@ read_input(int argc, char* argv[])
   DBGLOG(DBG, "Number of maximum bridge rules per context:    " << no_bridge_rules);
 
   if (local_kb_type == 0)
-    DBGLOG(DBG, "Local knowledge base type:                     non-deterministic");
+    {
+      DBGLOG(DBG, "Local knowledge base type:                     non-deterministic");
+    }
   else
-    DBGLOG(DBG, "Local knowledge base type:                     deterministic");
+    {
+      DBGLOG(DBG, "Local knowledge base type:                     deterministic");
+    }
 
   DBGLOG(DBG, "Topology type:                                 " << topology_type);
   DBGLOG(DBG, "Prefix for filename:                           " << prefix);
