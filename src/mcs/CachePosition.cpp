@@ -33,8 +33,10 @@ namespace dmcs {
 
 void
 CachePosition::update_cache(std::size_t index,
-		    std::size_t k)
+			    std::size_t k)
 {
+  if (index <= mark.size()) return;
+
   assert (index == mark.size()+1);
 
   if (index == 1)

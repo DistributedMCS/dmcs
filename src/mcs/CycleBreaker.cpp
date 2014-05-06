@@ -132,15 +132,16 @@ CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
 	}
       else
 	{
-	   current_guess = jump_guess(total_guessing_input, current_step);
-	   if (current_guess)
-	     {
-	       DBGLOG(DBG, "CycleBreaker::startup: jump_guess = " << *current_guess);
-	     }
-	   else
-	     {
-	       DBGLOG(DBG, "CycleBreaker::startup: jump_guess = NULL");
-	     }
+	  DBGLOG(DBG, "CycleBreaker::startup: jump guess with current step = " << current_step);
+	  current_guess = jump_guess(total_guessing_input, current_step);
+	  if (current_guess)
+	    {
+	      DBGLOG(DBG, "CycleBreaker::startup: jump_guess = " << *current_guess);
+	    }
+	  else
+	    {
+	      DBGLOG(DBG, "CycleBreaker::startup: jump_guess = NULL");
+	    }
 	}
 
       while (current_guess)
