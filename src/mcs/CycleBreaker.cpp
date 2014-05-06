@@ -121,7 +121,7 @@ CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
       NewBeliefState* current_guess;
 
       std::size_t current_step = cache.find_position(k1);
-      DBGLOG(DBG, "CycleBreaker::startup: current_step = " << current_step);
+      DBGLOG(DBG, "CycleBreaker::startup: k1 = " << k1 << ", current_step = " << current_step);
       if (current_step == 0)
 	{
 	  current_guess = new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
@@ -133,12 +133,17 @@ CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
       else
 	{
 	   current_guess = jump_guess(total_guessing_input, current_step);
-	   DBGLOG(DBG, "CycleBreaker::startup: jump_guess = " << *current_guess);
+	   if (current_guess)
+	     {
+	       DBGLOG(DBG, "CycleBreaker::startup: jump_guess = " << *current_guess);
+	     }
+	   else
+	     {
+	       DBGLOG(DBG, "CycleBreaker::startup: jump_guess = NULL");
+	     }
 	}
 
-      DBGLOG(DBG, "CycleBreaker::startup: starting guess = " << *current_guess);
-
-      do
+      while (current_guess)
 	{
 	  if (compute(current_guess, k1, k2, parent_qid, current_step, eval, md)) break;
 
@@ -153,7 +158,6 @@ CycleBreaker::startup(NewConcurrentMessageDispatcherPtr md,
 	      DBGLOG(DBG, "CycleBreaker::startup: current guess = NULL, break!");
 	    }
 	}
-      while (current_guess);
 
       // Send the marker for the end of models
       ReturnedBeliefState* rbs = new ReturnedBeliefState(NULL, parent_qid);
