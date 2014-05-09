@@ -26,34 +26,12 @@ LIBS = \
 
 TESTS = \
 	testCache \
-	testClasp \
-	testBeliefComparison \
 	testBridgeRuleParswer \
-	testQueryPlanParser \
-	testParsers \
-	testTranslation \
-	testSignature \
-	testCombination \
-	testClaspResultOnlineParser \
-	testBlockingClasp \
-	testGraphProp \
-	testConnection \
-	testMessagingGateway \
 	testBeliefState \
-	testJoiner \
-	testJoinLeak \
-	testInterfaceRelSat \
-	testBeliefStateCaching \
-	testRemoveDuplication \
-	testDispatcher \
 	testBlockingAsio \
-	testSATModelOrder \
-	testPool \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
 	testTables \
-	testID \
-	testBridgeRuleEvaluation \
 	testMessageDispatcher \
 	testResultParser \
 	testAbstractContext \
@@ -63,6 +41,30 @@ TESTS = \
 	testSystemWithQueryPlan \
 	testSystem
 
+#	testClasp \
+	testDispatcher \
+	testBeliefComparison \
+	testQueryPlanParser \
+	testParsers \
+	testTranslation \
+	testSignature \
+	testQueryPlan \
+	testGraphProp \
+	testVariable \
+	testCombination \
+	testConnection \
+	testMessagingGateway \
+	testJoiner * \
+	testJoinLeak \
+	testInterfaceRelSat \
+	testBeliefStateCaching \
+	testSATModelOrder \
+	testPool * \
+	testID * \
+	testBridgeRuleEvaluation * \
+	testMessageDispatcher \
+	testRemoveDuplication 
+
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
 	BOOST_TEST_REPORT_LEVEL=detailed \
@@ -70,41 +72,13 @@ TESTS_ENVIRONMENT = \
 
 check_PROGRAMS = \
 	testCache \
-	testClasp \
-	testBeliefComparison \
 	testBridgeRuleParser \
-	testQueryPlanParser \
-	testParsers \
-	testTranslation \
-	testSignature \
-	testQueryPlan \
-	testClaspResultOnlineParser \
-	testBlockingClasp \
-	testGraphProp \
-	testVariable \
 	testMatch \
-	testCombination \
-	testClaspResultOnlineParser \
-	testBlockingClasp \
-	testGraphProp \
-	testConnection \
-	testMessagingGateway \
 	testBeliefState \
-	testJoiner \
-	testJoinLeak \
-	testInterfaceRelSat \
-	testBeliefStateCaching \
-	testRemoveDuplication \
-	testDispatcher \
 	testBlockingAsio \
-	testSATModelOrder \
-	testPool \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
 	testTables \
-	testID \
-	testBridgeRuleEvaluation \
-	testMessageDispatcher \
 	testResultParser \
 	testAbstractContext \
 	testDLVProcess \
@@ -117,51 +91,51 @@ testCache_SOURCES = testCache.cpp
 testCache_LDADD = \
 	$(top_builddir)/src/mcs/libcache.a 
 
-testClasp_SOURCES = testClasp.cpp 
-testClasp_LDADD = \
+#testClasp_SOURCES = testClasp.cpp 
+#testClasp_LDADD = \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/solver/libsolver.a \
 	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/loopformula/libtranslation.a
 
-testBeliefComparison_SOURCES = testBeliefComparison.cpp
-testBeliefComparison_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+#testBeliefComparison_SOURCES = testBeliefComparison.cpp
+#testBeliefComparison_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-testQueryPlanParser_SOURCES = testQueryPlanParser.cpp QueryPlanParser.cpp QueryPlan.cpp
-testQueryPlanParser_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+#testQueryPlanParser_SOURCES = testQueryPlanParser.cpp QueryPlanParser.cpp QueryPlan.cpp
+#testQueryPlanParser_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-testParsers_SOURCES = testParsers.cpp
-testParsers_LDADD = \
+#testParsers_SOURCES = testParsers.cpp
+#testParsers_LDADD = \
 	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a
 
-testCombination_SOURCES = testCombination.cpp
-testCombination_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+#testCombination_SOURCES = testCombination.cpp
+#testCombination_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-testTranslation_SOURCES = testTranslation.cpp
-testTranslation_LDADD = \
+#testTranslation_SOURCES = testTranslation.cpp
+#testTranslation_LDADD = \
 	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/loopformula/libtranslation.a
 
-testSignature_SOURCES = testSignature.cpp
+#testSignature_SOURCES = testSignature.cpp
 
-testQueryPlan_SOURCES = testQueryPlan.cpp
-testQueryPlan_LDADD = \
+#testQueryPlan_SOURCES = testQueryPlan.cpp
+#testQueryPlan_LDADD = \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a
 
-testClaspResultOnlineParser_SOURCES = testClaspResultOnlineParser.cpp
-testClaspResultOnlineParser_LDADD = \
+#testClaspResultOnlineParser_SOURCES = testClaspResultOnlineParser.cpp
+#testClaspResultOnlineParser_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/dmcs/liblog.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/solver/libsolver.a \
 	$(top_builddir)/src/loopformula/libtranslation.a
 
-testBlockingClasp_SOURCES = testBlockingClasp.cpp
-testBlockingClasp_LDADD = \
+#testBlockingClasp_SOURCES = testBlockingClasp.cpp
+#testBlockingClasp_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/solver/libsolver.a \
@@ -171,19 +145,19 @@ testBlockingClasp_LDADD = \
 testMatch_SOURCES = testMatch.cpp
 testMatch_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-testVariable_SOURCES = testVariable.cpp
-testVariable_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+#testVariable_SOURCES = testVariable.cpp
+#testVariable_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-testGraphProp_SOURCES = testGraphProp.cpp
-testGraphProp_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+#testGraphProp_SOURCES = testGraphProp.cpp
+#testGraphProp_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-testMessagingGateway_SOURCES = testMessagingGateway.cpp
-testMessagingGateway_LDADD = \
+#testMessagingGateway_SOURCES = testMessagingGateway.cpp
+#testMessagingGateway_LDADD = \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/dmcs/liblog.a
 
-testConnection_SOURCES = testConnection.cpp
-testConnection_LDADD = \
+#testConnection_SOURCES = testConnection.cpp
+#testConnection_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/dmcs/liblog.a
 
@@ -193,23 +167,23 @@ testBeliefState_SOURCES = BeliefStateServer.cpp \
 testBeliefState_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a
 
-testBeliefStateCaching_SOURCES = testBeliefStateCaching.cpp
+#testBeliefStateCaching_SOURCES = testBeliefStateCaching.cpp
 
-testJoiner_SOURCES = testJoiner.cpp
-testJoiner_LDADD = \
+#testJoiner_SOURCES = testJoiner.cpp
+#testJoiner_LDADD = \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a
 
-testJoinLeak_SOURCES = testJoinLeak.cpp
-testJoinLeak_LDADD = \
+#testJoinLeak_SOURCES = testJoinLeak.cpp
+#testJoinLeak_LDADD = \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a
 
-testInterfaceRelSat_SOURCES = testInterfaceRelSat.cpp
-testInterfaceRelSat_LDADD = \
+#testInterfaceRelSat_SOURCES = testInterfaceRelSat.cpp
+#testInterfaceRelSat_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/solver/libsolver.a \
@@ -220,8 +194,8 @@ testInterfaceRelSat_LDADD = \
 testRemoveDuplication_SOURCES = testRemoveDuplication.cpp
 testRemoveDuplication_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-testDispatcher_SOURCES = testDispatcher.cpp
-testDispatcher_LDADD = $(top_builddir)/src/network/libthreads.a \
+#testDispatcher_SOURCES = testDispatcher.cpp
+#testDispatcher_LDADD = $(top_builddir)/src/network/libthreads.a \
 			     $(top_builddir)/src/dmcs/liblog.a
 
 testBlockingAsio_SOURCES = SimpleClient.cpp \
@@ -238,8 +212,8 @@ testSATModelOrder_LDADD = \
 	$(top_builddir)/src/dmcs/liblog.a
 
 
-testPool_SOURCES = testPool.cpp
-testPool_LDADD = \
+#testPool_SOURCES = testPool.cpp
+#testPool_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/network/libnetwork.a
 
@@ -253,12 +227,12 @@ testTables_SOURCES = testTables.cpp
 testTables_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a
 
-testID_SOURCES = testID.cpp
-testID_LDADD = \
+#testID_SOURCES = testID.cpp
+#testID_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a
 
-testBridgeRuleEvaluation_SOURCES = testBridgeRuleEvaluation.cpp
-testBridgeRuleEvaluation_LDADD = \
+#testBridgeRuleEvaluation_SOURCES = testBridgeRuleEvaluation.cpp
+#testBridgeRuleEvaluation_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a
 
 testMessageDispatcher_SOURCES = testMessageDispatcher.cpp 
