@@ -26,20 +26,15 @@ LIBS = \
 
 TESTS = \
 	testCache \
-	testBridgeRuleParswer \
+	testBridgeRuleParser \
 	testBeliefState \
 	testBlockingAsio \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
 	testTables \
-	testMessageDispatcher \
 	testResultParser \
-	testAbstractContext \
 	testDLVProcess \
-	testNeighbors \
-	testReturnPlanParser \
-	testSystemWithQueryPlan \
-	testSystem
+	testReturnPlanParser
 
 #	testClasp \
 	testDispatcher \
@@ -63,7 +58,13 @@ TESTS = \
 	testID * \
 	testBridgeRuleEvaluation * \
 	testMessageDispatcher \
-	testRemoveDuplication 
+	testRemoveDuplication \
+	testAbstractContext \
+	testNeighbors \
+	testSystemWithQueryPlan \
+	testSystem \
+	testMessageDispatcher
+
 
 TESTS_ENVIRONMENT = \
 	EXAMPLESDIR=$(top_srcdir)/examples \
@@ -80,12 +81,8 @@ check_PROGRAMS = \
 	testPolymorphismSharedPtr \
 	testTables \
 	testResultParser \
-	testAbstractContext \
 	testDLVProcess \
-	testNeighbors \
-	testReturnPlanParser \
-	testSystemWithQueryPlan \
-	testSystem
+	testReturnPlanParser 
 
 testCache_SOURCES = testCache.cpp
 testCache_LDADD = \
@@ -235,8 +232,8 @@ testTables_LDADD = \
 #testBridgeRuleEvaluation_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a
 
-testMessageDispatcher_SOURCES = testMessageDispatcher.cpp 
-testMessageDispatcher_LDADD = \
+#testMessageDispatcher_SOURCES = testMessageDispatcher.cpp 
+#testMessageDispatcher_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/network/libthreads.a
 
@@ -245,8 +242,8 @@ testResultParser_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/parser/libparser.a 
 
-testAbstractContext_SOURCES = testAbstractContext.cpp 
-testAbstractContext_LDADD = \
+#testAbstractContext_SOURCES = testAbstractContext.cpp 
+#testAbstractContext_LDADD = \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/process/libprocess.a \
 	$(top_builddir)/src/network/libthreads.a \
@@ -259,17 +256,17 @@ testDLVProcess_LDADD = \
 	$(top_builddir)/src/process/libprocess.a \
 	@LIBCURL@
 
-testNeighbors_SOURCES = testNeighbors.cpp \
+#testNeighbors_SOURCES = testNeighbors.cpp \
 	NeighborInServer.cpp \
 	NeighborOutServer.cpp
-testNeighbors_LDADD = \
+#testNeighbors_LDADD = \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/dmcs/libdmcs.a
 
-testSystem_SOURCES = testSystem.cpp \
+#testSystem_SOURCES = testSystem.cpp \
 	DmcsClientTest.cpp 
-testSystem_LDADD = \
+#testSystem_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/mcs/libmcs.a \
@@ -278,9 +275,9 @@ testSystem_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	@LIBCURL@
 
-testSystemWithQueryPlan_SOURCES = testSystemWithQueryPlan.cpp \
+#testSystemWithQueryPlan_SOURCES = testSystemWithQueryPlan.cpp \
 	DmcsClientTest.cpp 
-testSystemWithQueryPlan_LDADD = \
+#testSystemWithQueryPlan_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \

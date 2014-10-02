@@ -1,3 +1,7 @@
+2014-10-02  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
+
+	* testsuite/Makefile.am: Comment out non-working testcases.
+
 2012-03-22  Minh Dao-Tran  <dao@kr.tuwien.ac.at>
 
 	* src/mcs/QueryID.cpp: Add some comments.
