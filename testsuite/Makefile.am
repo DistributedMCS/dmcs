@@ -26,15 +26,10 @@ LIBS = \
 
 TESTS = \
 	testCache \
-	testBridgeRuleParser \
-	testBeliefState \
 	testBlockingAsio \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
-	testTables \
-	testResultParser \
-	testDLVProcess \
-	testReturnPlanParser
+	testTables 
 
 #	testClasp \
 	testDispatcher \
@@ -63,7 +58,13 @@ TESTS = \
 	testNeighbors \
 	testSystemWithQueryPlan \
 	testSystem \
-	testMessageDispatcher
+	testMessageDispatcher \
+	testReturnPlanParser \
+	testResultParser \
+	testDLVProcess \
+	testBeliefState \
+	testBridgeRuleParser 
+
 
 
 TESTS_ENVIRONMENT = \
@@ -73,16 +74,12 @@ TESTS_ENVIRONMENT = \
 
 check_PROGRAMS = \
 	testCache \
-	testBridgeRuleParser \
 	testMatch \
-	testBeliefState \
 	testBlockingAsio \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
-	testTables \
-	testResultParser \
-	testDLVProcess \
-	testReturnPlanParser 
+	testTables 
+
 
 testCache_SOURCES = testCache.cpp
 testCache_LDADD = \
@@ -158,10 +155,10 @@ testMatch_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/dmcs/liblog.a
 
-testBeliefState_SOURCES = BeliefStateServer.cpp \
+#testBeliefState_SOURCES = BeliefStateServer.cpp \
 	BeliefStateClient.cpp \
 	testBeliefState.cpp
-testBeliefState_LDADD = \
+#testBeliefState_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a
 
 #testBeliefStateCaching_SOURCES = testBeliefStateCaching.cpp
@@ -188,8 +185,8 @@ testBeliefState_LDADD = \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/dmcs/liblog.a
 
-testRemoveDuplication_SOURCES = testRemoveDuplication.cpp
-testRemoveDuplication_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+#testRemoveDuplication_SOURCES = testRemoveDuplication.cpp
+#testRemoveDuplication_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
 #testDispatcher_SOURCES = testDispatcher.cpp
 #testDispatcher_LDADD = $(top_builddir)/src/network/libthreads.a \
@@ -199,8 +196,8 @@ testBlockingAsio_SOURCES = SimpleClient.cpp \
 			   SimpleServer.cpp \
 			   testBlockingAsio.cpp
 
-testSATModelOrder_SOURCES = testSATModelOrder.cpp
-testSATModelOrder_LDADD = \
+#testSATModelOrder_SOURCES = testSATModelOrder.cpp
+#testSATModelOrder_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/relsat-20070104/librelsat.a \
@@ -237,8 +234,8 @@ testTables_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/network/libthreads.a
 
-testResultParser_SOURCES = testResultParser.cpp 
-testResultParser_LDADD = \
+#testResultParser_SOURCES = testResultParser.cpp 
+#testResultParser_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	$(top_builddir)/src/parser/libparser.a 
 
@@ -251,8 +248,8 @@ testResultParser_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	@LIBCURL@
 
-testDLVProcess_SOURCES = testDLVProcess.cpp
-testDLVProcess_LDADD = \
+#testDLVProcess_SOURCES = testDLVProcess.cpp
+#testDLVProcess_LDADD = \
 	$(top_builddir)/src/process/libprocess.a \
 	@LIBCURL@
 
@@ -286,13 +283,13 @@ testDLVProcess_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	@LIBCURL@
 
-testBridgeRuleParser_SOURCES = testBridgeRuleParser.cpp 
-testBridgeRuleParser_LDADD = \
+#testBridgeRuleParser_SOURCES = testBridgeRuleParser.cpp 
+#testBridgeRuleParser_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/mcs/libmcs.a 
 
-testReturnPlanParser_SOURCES = testReturnPlanParser.cpp 
-testReturnPlanParser_LDADD = \
+#testReturnPlanParser_SOURCES = testReturnPlanParser.cpp 
+#testReturnPlanParser_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/mcs/libmcs.a 
 
