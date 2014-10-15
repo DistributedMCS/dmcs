@@ -8,6 +8,8 @@ noinst_HEADERS =  \
 		NewDLVResultParser.h \
 		ParserState.h \
 		QueryPlanParser.h \
+		QueryPlanGrammar.hpp \
+		QueryPlanGrammar.tcc \
 		ReturnPlanParser.h 
 
 
