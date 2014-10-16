@@ -29,12 +29,12 @@ TESTS = \
 	testBlockingAsio \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
+	testNewQueryPlanParser \
 	testTables 
 
 #	testClasp \
 	testDispatcher \
 	testBeliefComparison \
-	testQueryPlanParser \
 	testParsers \
 	testTranslation \
 	testSignature \
@@ -78,6 +78,7 @@ check_PROGRAMS = \
 	testBlockingAsio \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
+	testNewQueryPlanParser \
 	testTables 
 
 
@@ -96,8 +97,16 @@ testCache_LDADD = \
 #testBeliefComparison_SOURCES = testBeliefComparison.cpp
 #testBeliefComparison_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
 
-#testQueryPlanParser_SOURCES = testQueryPlanParser.cpp QueryPlanParser.cpp QueryPlan.cpp
-#testQueryPlanParser_LDADD = $(top_builddir)/src/dmcs/libdmcs.a
+#testQueryPlanParser_SOURCES = testQueryPlanParser.cpp
+#testQueryPlanParser_LDADD = $(top_builddir)/src/parser/libparser.a \
+			$(top_builddir)/src/dmcs/libdmcs.a \
+			$(top_builddir)/src/mcs/libmcs.a 
+
+testNewQueryPlanParser_SOURCES = testNewQueryPlanParser.cpp
+testNewQueryPlanParser_LDADD =  $(top_builddir)/src/parser/libparser.a \
+				$(top_builddir)/src/dmcs/libdmcs.a \
+				$(top_builddir)/src/mcs/libmcs.a 
+
 
 #testParsers_SOURCES = testParsers.cpp
 #testParsers_LDADD = \

@@ -62,23 +62,23 @@ NewQueryPlanParser::parseString(const std::string& str)
   typedef NewSkipperGrammar<std::string::const_iterator> NewSkipper;
 
   NewSkipper skipper;
-  //  SemState state;
-  //NewQueryPlanGrammar<std::string::const_iterator, Skipper> grammar(state);
+  QueryPlanGrammarSemantics semanticsMgr;
+  NewQueryPlanGrammar<std::string::const_iterator, NewSkipper> grammar(semanticsMgr);
 
-  //bool r = phrase_parse(begIt, endIt, grammar, skipper);
+  bool r = phrase_parse(begIt, endIt, grammar, skipper);
    
-  /*if(r && begIt == endIt)
+  if(r && begIt == endIt)
   {
-    //std::cout << "Parsing succeeded\n";
-    //std::cout << "Result is: " << state.qplan << std::endl;
-    //std::cout << *state.qplan << std::endl;
-    return state.qplan;
+    std::cout << "Parsing succeeded\n";
+    //std::cout << "Result is: " << std::endl;
+    //std::cout << *semanticsMgr.m_QueryPlanMap << std::endl;
+    return semanticsMgr.m_QueryPlanMap;
   }
   else
   {
-    std::cout << "Parsing Failed\n";
-    throw std::runtime_error("query plan parsing failed");
-    }*/
+    std::cout << "Parsing Failed" << std::endl;
+    throw std::runtime_error("Query plan parsing failed");
+    }
 }
 
 
