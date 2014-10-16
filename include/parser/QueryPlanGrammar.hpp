@@ -1,7 +1,10 @@
 #ifndef __QUERY_PLAN_GRAMMAR_HPP__
 #define __QUERY_PLAN_GRAMMAR_HPP__
 
+#include <list>
 #include <boost/spirit/include/qi.hpp>
+
+#include "mcs/QueryPlan.h"
 
 template<typename Iterator>
 struct SkipperGrammar : boost::spirit::qi::grammar<Iterator>
@@ -39,6 +42,70 @@ struct SemanticActionBase
     TargetAttribute& target = boost::fusion::at_c<0>(ctx.attributes);
     sem<Tag>()(mgr, source, target);
   }
+};
+
+
+class QueryPlanGrammarSemantics
+{
+public:
+  ContextQueryPlanMapPtr m_QueryPlan;
+  ContextID              m_CurrentCtx;
+
+public:
+  QueryPlanGrammarSemantics();
+
+  #define DMCS_DEFINE_SEMANTIC_ACTION(name, targettype) \
+    struct name: \
+      SemanticActionBase<QueryPlanGrammarSemantics, targettype, name> \
+    { \
+      name(QueryPlanGrammarSemantics& mgr): name ::base_type(mgr) {} \
+    };
+
+  #undef DMCS_DEFINE_SEMANTIC_ACTION
+};
+
+
+//! basic QueryPlanGrammar
+template<typename Iterator, typename Skipper>
+struct QueryPlanGrammarBase
+{
+  QueryPlanGrammarSemantics &sem;
+  QueryPlanGrammarBase(QueryPlanGrammarSemantics&);
+
+  // Helper struct for creating rule types
+  template<typename Attrib=void, typename Dummy=void>
+  struct Rule
+  {
+    typedef boost::spirit::qi::rule<Iterator, Attrib(), Skipper> type;
+  };
+
+  template<typename Dummy>
+  struct Rule<void, Dummy>
+  {
+    typedef boost::spirit::qi::rule<Iterator, Skipper> type;
+    // BEWARE: this is _not_ the same (!) as
+    // typedef boost::spirit::qi::rule<Iterator, boost::spirit::unused_type, Skipper> type;
+  };
+
+  // Core grammar rules
+  typename Rule<>::type start;
+  typename Rule<std::string> ident;
+  typename Rule<ConstantList> constants;
+};
+
+
+template<typename Iterator, typename Skipper>
+struct QueryPlanGrammar : 
+  QueryPlanGrammarBase<Iterator, Skipper>,
+  boost::spirit::qi::grammar<Iterator, Skipper>
+{
+  typedef QueryPlanGrammarBase<Iterator, Skipper> GrammarBase;
+  typedef boost::spirit::qi::grammar<Iterator, Skipper> QiBase;
+
+  QueryPlanGrammar(QueryPlanGrammarSemantics& sem)
+    : GrammarBase(sem),
+      QiBase(GrammarBase::start)
+  { }      
 };
 
 #endif // __QUERY_PLAN_GRAMMAR_HPP__
