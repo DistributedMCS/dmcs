@@ -135,6 +135,7 @@ typedef boost::shared_ptr<const ContextQueryPlanMap>
   ContextQueryPlanMapConstPtr;
 
 std::ostream& operator<< (std::ostream& os, const ConstantList &l);
+std::ostream& operator<< (std::ostream& os, const ConstantCategoryList &l);
 std::ostream& operator<< (std::ostream& os, const ContextQueryPlanMap &m);
 
 } //namespace dmcs

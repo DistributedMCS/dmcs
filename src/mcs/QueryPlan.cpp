@@ -15,7 +15,20 @@ operator<<(std::ostream &os, const ConstantList &l)
 
 std::ostream& ConstantCategory::print(std::ostream& os) const
 {
+  os << "      {Category: " << name << ", Constants: [";
+  std::copy(constants.begin(), constants.end(), std::ostream_iterator<std::string>(os, ", "));
+  os << "]}";
+
+  return os;
 }
+
+std::ostream&
+operator<<(std::ostream &os, const ConstantCategoryList &l)
+{
+  std::copy(l.begin(), l.end(), std::ostream_iterator<ConstantCategory>(os, "\n"));
+  return os;
+}
+
 
 std::ostream& FilterArgumentSpec::print(std::ostream& os) const
 {
@@ -28,11 +41,14 @@ std::ostream& Filter::print(std::ostream& os) const
 std::ostream& ContextQueryPlan::print(std::ostream& os) const
 {
   os << "  {\n";
-  os << "    ContextID: " << ctx << ",\n";
+  os << "    ContextID: " << ctx << "," << std::endl;
   if( !!constants && !constants->empty() )
-    os << "    [" << *constants << "]," << std::endl;
+    os << "    Constants: [" << *constants << "]," << std::endl;
   if( !!constCats && !constCats->empty() )
-      os << "    TODO constCats,\n";
+    os << "    ConstantCategories:" << std::endl
+       << "    [" << std::endl
+       << *constCats
+       << "    ]" << std::endl;
   if( !!preds && !preds->empty() )
       os << "    TODO preds,\n";
   if( !!filters && !filters->empty() )
