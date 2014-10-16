@@ -38,27 +38,6 @@ NewSkipperGrammar<Iterator>::NewSkipperGrammar() : NewSkipperGrammar::base_type(
 };
 
 
-struct lazy_get_impl
-{
-  template<typename X>
-  struct result;
-
-  template<typename T>
-  struct result<boost::optional<T> >
-  {
-    typedef T type;
-  };
-
-  template<typename T>
-  T operator()(const boost::optional<T>& optarg) const
-  {
-    return optarg.get();
-  }
-};
-
-phoenix::function<lazy_get_impl> lazy_get;
-
-
 /////////////////////////////////////////////////////////////////
 // QueryPlanGrammarBase semantic processors /////////////////////
 /////////////////////////////////////////////////////////////////
@@ -69,6 +48,9 @@ struct sem<QueryPlanGrammarSemantics::setContextID>
 		  const int &source, 
 		  const boost::spirit::unused_type target)
   {
+    ContextQueryPlanPtr& currentQP = mgr.m_CurrentQueryPlan;
+    currentQP = ContextQueryPlanPtr(new ContextQueryPlan);
+    currentQP->ctx = source;  
   }
 };
 
@@ -80,6 +62,8 @@ struct sem<QueryPlanGrammarSemantics::setHostName>
 		  const std::string &source, 
 		  const boost::spirit::unused_type target)
   {
+    ContextQueryPlanPtr& currentQP = mgr.m_CurrentQueryPlan;
+    currentQP->hostname = source;
   }
 };
 
@@ -92,6 +76,8 @@ struct sem<QueryPlanGrammarSemantics::setPort>
 		  const int &source, 
 		  const boost::spirit::unused_type target)
   {
+    ContextQueryPlanPtr& currentQP = mgr.m_CurrentQueryPlan;
+    currentQP->port = source;
   }
 };
 
@@ -104,6 +90,8 @@ struct sem<QueryPlanGrammarSemantics::setConstantList>
 		  const ConstantList &source, 
 		  const boost::spirit::unused_type target)
   {
+    ContextQueryPlanPtr& currentQP = mgr.m_CurrentQueryPlan;
+    currentQP->constants = ConstantListPtr(new ConstantList(source));
   }
 };
 
@@ -145,6 +133,24 @@ struct sem<QueryPlanGrammarSemantics::setInputSignature>
 };
 
 
+
+template<>
+struct sem<QueryPlanGrammarSemantics::insertIntoMap>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const boost::spirit::qi::unused_type &source,
+		  boost::spirit::qi::unused_type target)
+  {
+    ContextQueryPlanMapPtr &qpm = mgr.m_QueryPlanMap;
+    ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
+
+    if (!qpm) qpm.reset(new ContextQueryPlanMap);
+    qpm->insert(std::make_pair(currentQP->ctx, *currentQP));
+  }
+};
+
+
+
 /////////////////////////////////////////////////////////////////
 // QueryPlanGrammarBase /////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
@@ -168,19 +174,17 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
   using phoenix::at_c;
 
   start 
-    = (
-       lit('[') >> contextQueryPlan % ',' >> -(lit(',')) >> lit(']')
-      );
+    = ( lit('[') >> contextQueryPlan % ',' >> -(lit(',')) >> lit(']') );
 
   contextQueryPlan
-    =  lit('{') >>
+    = (lit('{') >>
        lit("ContextId")      >> lit(':') >> int_      [Sem::setContextID(sem)]      >> lit(',') >>
        lit("HostName")       >> lit(':') >> hostName  [Sem::setHostName(sem)]       >> lit(',') >>
        lit("Port")           >> lit(':') >> int_      [Sem::setPort(sem)]           >> lit(',') >>
     (-(lit("Constants")      >> lit(':') >> constants [Sem::setConstantList(sem)]   >> lit(',') )) >>
     (-(lit("LocalSignature") >> lit(':') >> signature [Sem::setLocalSignature(sem)] >> lit(',') )) >>
     (-(lit("InputSignature") >> lit(':') >> signature [Sem::setInputSignature(sem)] >> lit(',') )) >>
-       lit('}');
+       lit('}')) [Sem::insertIntoMap(sem)];
 
   ident 
     = qi::lexeme[ ascii::lower >> *(ascii::alnum | qi::char_('_')) ];
@@ -199,9 +203,10 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
     (id_with_ground_tuple % ',') [Sem::registerAndInsertIntoBeliefSet(sem)] >> 
     -(lit(',')) >> lit('}');
   
-
+  #ifdef BOOST_SPIRIT_DEBUG
   BOOST_SPIRIT_DEBUG_NODE(start);
   BOOST_SPIRIT_DEBUG_NODE(constants);
+  #endif
 }
 
 } // namespace dmcs

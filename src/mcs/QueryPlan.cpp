@@ -1,7 +1,17 @@
+#include <algorithm>
+#include <iostream>
+
 #include "mcs/QueryPlan.h"
 
 namespace dmcs
 {
+
+std::ostream&
+operator<<(std::ostream &os, const ConstantList &l)
+{
+  std::copy(l.begin(), l.end(), std::ostream_iterator<std::string>(os, ", "));
+  return os;
+}
 
 std::ostream& ConstantCategory::print(std::ostream& os) const
 {
@@ -20,7 +30,7 @@ std::ostream& ContextQueryPlan::print(std::ostream& os) const
   os << "  {\n";
   os << "    ContextID: " << ctx << ",\n";
   if( !!constants && !constants->empty() )
-      os << "    TODO constants,\n";
+    os << "    [" << *constants << "]," << std::endl;
   if( !!constCats && !constCats->empty() )
       os << "    TODO constCats,\n";
   if( !!preds && !preds->empty() )
@@ -47,8 +57,6 @@ std::ostream& ContextQueryPlan::print(std::ostream& os) const
   return os;
 }
 
-} // namespace dmcs
-
 std::ostream& operator<<(std::ostream& os, const dmcs::ContextQueryPlanMap& m)
 {
   using namespace dmcs;
@@ -62,3 +70,7 @@ std::ostream& operator<<(std::ostream& os, const dmcs::ContextQueryPlanMap& m)
   os << "]\n";
   return os;
 }
+
+
+} // namespace dmcs
+

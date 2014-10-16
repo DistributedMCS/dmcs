@@ -51,8 +51,7 @@ class QueryPlanGrammarSemantics
 {
 public:
   ContextQueryPlanMapPtr m_QueryPlanMap;
-  ContextQueryPlan       m_CurrentQueryPlan;
-  ContextID              m_CurrentCtx;
+  ContextQueryPlanPtr    m_CurrentQueryPlan;
 
 public:
   QueryPlanGrammarSemantics()
@@ -71,6 +70,7 @@ public:
   DMCS_DEFINE_SEMANTIC_ACTION(setConstantList, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setLocalSignature, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setInputSignature, const boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(insertIntoMap, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(registerAndInsertIntoBeliefSet, BeliefTablePtr);
   #undef DMCS_DEFINE_SEMANTIC_ACTION
 };

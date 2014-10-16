@@ -17,55 +17,48 @@ namespace dmcs
 {
 
 typedef std::size_t ContextID;
-typedef std::list<std::string>
-  ConstantList;
-typedef std::map<ContextID, NewBeliefState>
-  OutputProjectionMap;
-typedef std::map<std::string, unsigned>
-  PredicateArityMap;
+typedef std::list<std::string> ConstantList;
+typedef std::map<ContextID, NewBeliefState> OutputProjectionMap;
+typedef std::map<std::string, unsigned> PredicateArityMap;
 
-struct ConstantCategory:
-  private ostream_printable<ConstantCategory>
+struct ConstantCategory : private ostream_printable<ConstantCategory>
 {
   // name of the category
   std::string name;
+
   // constants in the category
   ConstantList constants;
 
-  ConstantCategory(
-      const std::string& name):
-    name(name) {}
+  ConstantCategory(const std::string& name)
+    : name(name) 
+  { }
 
   std::ostream& print(std::ostream& os) const;
 };
-typedef std::list<ConstantCategory>
-  ConstantCategoryList;
+typedef std::list<ConstantCategory> ConstantCategoryList;
 
-struct FilterArgumentSpec:
-  private ostream_printable<FilterArgumentSpec>
+struct FilterArgumentSpec : private ostream_printable<FilterArgumentSpec>
 {
   std::list<std::string> usingCategories;
 
   std::ostream& print(std::ostream& os) const;
 };
 
-typedef std::map<unsigned, FilterArgumentSpec>
-  FilterArgumentSpecMap;
+typedef std::map<unsigned, FilterArgumentSpec> FilterArgumentSpecMap;
 
-struct Filter:
-  private ostream_printable<Filter>
+struct Filter : private ostream_printable<Filter>
 {
   std::string name;
   std::string predicate;
   FilterArgumentSpecMap arguments;
 
-  Filter(const std::string& name, const std::string& predicate):
-    name(name), predicate(predicate) {}
+  Filter(const std::string& name, const std::string& predicate)
+    : name(name), predicate(predicate) 
+ { }
 
   std::ostream& print(std::ostream& os) const;
 };
-typedef std::list<Filter>
-  FilterList;
+typedef std::list<Filter> FilterList;
 
 typedef boost::shared_ptr<ConstantList> ConstantListPtr;
 typedef boost::shared_ptr<ConstantCategoryList> ConstantCategoryListPtr;
@@ -74,8 +67,7 @@ typedef boost::shared_ptr<FilterList> FilterListPtr;
 typedef boost::shared_ptr<BeliefTable> BeliefTablePtr;
 typedef boost::shared_ptr<OutputProjectionMap> OutputProjectionMapPtr;
 
-struct ContextQueryPlan:
-  private ostream_printable<ContextQueryPlan>
+struct ContextQueryPlan : private ostream_printable<ContextQueryPlan>
 {
   // id of context
   ContextID ctx;
@@ -114,22 +106,27 @@ struct ContextQueryPlan:
   // (only known for own context)
   OutputProjectionMapPtr outputProjections;
 
-  ContextQueryPlan() {}
+  ContextQueryPlan() 
+  { }
+
+
   ContextQueryPlan(ContextID ctx, const std::string& hostname, int port,
 		  ConstantListPtr constants,
 		  ConstantCategoryListPtr constCats, PredicateArityMapPtr preds,
 		  FilterListPtr filters, BeliefTablePtr localSignature,
-		  BeliefTablePtr groundInputSignature, OutputProjectionMapPtr outputProjections):
-    ctx(ctx), hostname(hostname), port(port), constants(constants),
-    constCats(constCats), preds(preds),
-    filters(filters), localSignature(localSignature),
-    groundInputSignature(groundInputSignature), outputProjections(outputProjections) { }
+		  BeliefTablePtr groundInputSignature, OutputProjectionMapPtr outputProjections)
+    : ctx(ctx), hostname(hostname), port(port), constants(constants),
+      constCats(constCats), preds(preds),
+      filters(filters), localSignature(localSignature),
+      groundInputSignature(groundInputSignature), 
+      outputProjections(outputProjections) 
+  { }
 
   std::ostream& print(std::ostream& os) const;
 };
 
-typedef std::map<ContextID, ContextQueryPlan>
-  ContextQueryPlanMap;
+typedef boost::shared_ptr<ContextQueryPlan> ContextQueryPlanPtr;
+typedef std::map<ContextID, ContextQueryPlan> ContextQueryPlanMap;
 
 typedef boost::shared_ptr<ContextQueryPlanMap>
   ContextQueryPlanMapPtr;
@@ -137,9 +134,11 @@ typedef boost::shared_ptr<ContextQueryPlanMap>
 typedef boost::shared_ptr<const ContextQueryPlanMap>
   ContextQueryPlanMapConstPtr;
 
+std::ostream& operator<< (std::ostream& os, const ConstantList &l);
+std::ostream& operator<< (std::ostream& os, const ContextQueryPlanMap &m);
+
 } //namespace dmcs
 
-std::ostream& operator<< (std::ostream& os, const dmcs::ContextQueryPlanMap& m);
 
 #if 0
 inline std::ostream&
@@ -235,3 +234,7 @@ operator<< (std::ostream& os, const FilterListPtr& p)
 #endif
 
 #endif // __QUERY_PLAN__INCLUDED__
+
+// Local Variables:
+// mode: C++
+// End:
