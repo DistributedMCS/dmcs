@@ -65,6 +65,9 @@ public:
       name(QueryPlanGrammarSemantics& mgr): name ::base_type(mgr) {} \
     };
 
+  DMCS_DEFINE_SEMANTIC_ACTION(setContextID, const boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(setConstantList, const boost::spirit::unused_type);
+
   #undef DMCS_DEFINE_SEMANTIC_ACTION
 };
 
@@ -92,9 +95,12 @@ struct QueryPlanGrammarBase
   };
 
   // Core grammar rules
-  typename Rule<>::type start;
-  typename Rule<std::string>::type ident;
+  typename Rule<>::type start, contextQueryPlan;
+  typename Rule<std::string>::type ident, hostName;
   typename Rule<ConstantList>::type constants;
+  typename Rule<BeliefTablePtr>::type signature;
+  typename Rule<boost::fusion::vector2<IDAddress, std::vector<std::string> > >::type id_with_ground_tuple;
+
 };
 
 

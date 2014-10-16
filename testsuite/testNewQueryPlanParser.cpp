@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE ( testNewQueryPlanParser )
   const char* ex = getenv("EXAMPLESDIR");
   assert (ex != 0);
 
-  std::string fileNames [] = {"queryPlanParserTest1.txt"};
+  std::string fileNames [] = {"queryPlanParserTest0.txt"};
   int index = 1;
   for(int i = 0; i < index; i++)
   {
