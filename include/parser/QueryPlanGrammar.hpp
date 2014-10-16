@@ -8,6 +8,8 @@
 
 namespace dmcs {
 
+namespace fusion = boost::fusion;
+
 template<typename Iterator>
 struct NewSkipperGrammar : boost::spirit::qi::grammar<Iterator>
 {
@@ -41,7 +43,7 @@ struct SemanticActionBase
   template<typename SourceAttributes, typename Ctx>
   void operator()(const SourceAttributes& source, Ctx& ctx, boost::spirit::qi::unused_type) const
   {
-    TargetAttribute& target = boost::fusion::at_c<0>(ctx.attributes);
+    TargetAttribute& target = fusion::at_c<0>(ctx.attributes);
     sem<Tag>()(mgr, source, target);
   }
 };
@@ -68,10 +70,12 @@ public:
   DMCS_DEFINE_SEMANTIC_ACTION(setHostName, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setPort, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setConstantList, const boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(setConstantCategories, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setLocalSignature, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setInputSignature, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(insertIntoMap, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(registerAndInsertIntoBeliefSet, BeliefTablePtr);
+
   #undef DMCS_DEFINE_SEMANTIC_ACTION
 };
 
@@ -100,10 +104,12 @@ struct QueryPlanGrammarBase
 
   // Core grammar rules
   typename Rule<>::type start, contextQueryPlan;
-  typename Rule<std::string>::type ident, hostName;
+  typename Rule<std::string>::type ident, hostName, catSymbol;
   typename Rule<ConstantList>::type constants;
+  typename Rule<std::vector<fusion::vector2<std::string, ConstantList > > >::type constantCategories;
+  typename Rule<fusion::vector2<std::string, ConstantList > >::type category;
   typename Rule<BeliefTablePtr>::type signature;
-  typename Rule<boost::fusion::vector2<IDAddress, std::vector<std::string> > >::type id_with_ground_tuple;
+  typename Rule<fusion::vector2<IDAddress, std::vector<std::string> > >::type id_with_ground_tuple;
 
 };
 

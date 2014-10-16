@@ -99,12 +99,68 @@ struct sem<QueryPlanGrammarSemantics::setConstantList>
 
 
 template<>
+struct sem<QueryPlanGrammarSemantics::setConstantCategories>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const std::vector<fusion::vector2<std::string, ConstantList > > &source, 
+		  const boost::spirit::unused_type target)
+  {
+    ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
+    ConstantCategoryListPtr &constCats = currentQP->constCats;
+    
+    if (!constCats) constCats.reset(new ConstantCategoryList);
+    std::vector<fusion::vector2<std::string, ConstantList > >::const_iterator it = source.begin();
+    
+    for (; it != source.end(); ++it)
+      {
+	const std::string &name = fusion::at_c<0>(*it);
+
+	ConstantCategory cc(name);
+	cc.constants = fusion::at_c<1>(*it);
+
+	constCats->push_back(cc);
+      }
+  }
+};
+
+
+
+
+template<>
 struct sem<QueryPlanGrammarSemantics::registerAndInsertIntoBeliefSet>
 {
   void operator()(QueryPlanGrammarSemantics &mgr, 
 		  const std::vector<boost::fusion::vector2<IDAddress, std::vector<std::string> > > &source, 
 		  BeliefTablePtr &target)
   {
+    if (!target) target = BeliefTablePtr(new BeliefTable);
+
+    std::vector<fusion::vector2<IDAddress, std::vector<std::string> > >::const_iterator itv;
+    for(itv = source.begin(); itv != source.end(); ++itv)
+    {
+      const fusion::vector2<IDAddress, std::vector<std::string> >& input = *itv;
+      const IDAddress address = fusion::at_c<0>(input);
+      const std::vector<std::string>& tuples = fusion::at_c<1>(input);
+
+      std::vector<std::string>::const_iterator it = tuples.begin();
+      assert(it != tuples.end() && "atom must have at least one constant in tuple");
+      std::string predicate;
+      predicate += *it;
+      it++;
+      if( it != tuples.end() )
+      {
+        predicate += "(";
+        for(;it != tuples.end(); ++it)
+        {
+          predicate += *it + ",";
+        }
+        predicate[predicate.size()-1] = ')';
+      }
+
+      ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
+      Belief bel(currentQP->ctx, address, predicate);
+      target->storeWithID(bel, ID(bel.kind, bel.address));
+    }
   }
 };
 
@@ -117,6 +173,8 @@ struct sem<QueryPlanGrammarSemantics::setLocalSignature>
 		  const BeliefTablePtr &source, 
 		  boost::spirit::qi::unused_type target)
   {
+    ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
+    currentQP->localSignature = source;
   }
 };
 
@@ -129,6 +187,8 @@ struct sem<QueryPlanGrammarSemantics::setInputSignature>
 		  const BeliefTablePtr &source, 
 		  boost::spirit::qi::unused_type target)
   {
+    ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
+    currentQP->groundInputSignature = source;
   }
 };
 
@@ -178,30 +238,44 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
 
   contextQueryPlan
     = (lit('{') >>
-       lit("ContextId")      >> lit(':') >> int_      [Sem::setContextID(sem)]      >> lit(',') >>
-       lit("HostName")       >> lit(':') >> hostName  [Sem::setHostName(sem)]       >> lit(',') >>
-       lit("Port")           >> lit(':') >> int_      [Sem::setPort(sem)]           >> lit(',') >>
-    (-(lit("Constants")      >> lit(':') >> constants [Sem::setConstantList(sem)]   >> lit(',') )) >>
-    (-(lit("LocalSignature") >> lit(':') >> signature [Sem::setLocalSignature(sem)] >> lit(',') )) >>
-    (-(lit("InputSignature") >> lit(':') >> signature [Sem::setInputSignature(sem)] >> lit(',') )) >>
+       lit("ContextId")          >> lit(':') >> int_      [Sem::setContextID(sem)]      >> lit(',') >>
+       lit("HostName")           >> lit(':') >> hostName  [Sem::setHostName(sem)]       >> lit(',') >>
+       lit("Port")               >> lit(':') >> int_      [Sem::setPort(sem)]           >> lit(',') >>
+       lit("Constants")          >> lit(':') >> constants [Sem::setConstantList(sem)]   >> lit(',') >>
+       //    (-(lit("ConstantCategories") >> lit(':') >> constantCategories [Sem::setConstantCategories(sem)] >> lit(',') ))>>
+       (-(lit("ConstantCategories") >> lit(':') >> constantCategories >> lit(',') )) >>
+    (-(lit("LocalSignature")     >> lit(':') >> signature [Sem::setLocalSignature(sem)] >> lit(',') )) >>
+    (-(lit("InputSignature")     >> lit(':') >> signature [Sem::setInputSignature(sem)] >> lit(',') )) >>
        lit('}')) [Sem::insertIntoMap(sem)];
+
+  ///TODO: grammar for URL. Now simplified by putting hostname between the quotes
+  hostName 
+    = lit('"') >> qi::lexeme[*(ascii::char_ - '"')] >> lit('"');
+
+  constants 
+    = lit('[') >> ident % lit(',') >> lit(']');
 
   ident 
     = qi::lexeme[ ascii::lower >> *(ascii::alnum | qi::char_('_')) ];
 
-  constants 
-    = lit('[') >> ident % lit(',') >> lit(']') ;// [Sem::constantList(sem)];
+  constantCategories
+    = lit('[') >> (category % lit(',')) >> lit(']');
 
-  ///TODO: grammar for URL. Now simplified by putting hostname between the quotes
-  hostName = lit('"') >> qi::lexeme[*(ascii::char_ - '"')] >> lit('"');
+  category
+    = lit('{') >> lit("Category") >> lit(':') >>
+      catSymbol >> lit(',') >> 
+      lit("Constants") >> lit(':') >> constants >>
+      lit('}');
 
-  id_with_ground_tuple 
-    = uint_ >> lit(':') >> lit('[') >> ident % ',' >> lit(']');
+  catSymbol = +(qi::alnum);
 
   signature 
     = lit('{') >> 
-    (id_with_ground_tuple % ',') [Sem::registerAndInsertIntoBeliefSet(sem)] >> 
-    -(lit(',')) >> lit('}');
+      (id_with_ground_tuple % ',') [Sem::registerAndInsertIntoBeliefSet(sem)] >> 
+      -(lit(',')) >> lit('}');
+
+  id_with_ground_tuple 
+    = uint_ >> lit(':') >> lit('[') >> ident % ',' >> lit(']');
   
   #ifdef BOOST_SPIRIT_DEBUG
   BOOST_SPIRIT_DEBUG_NODE(start);
