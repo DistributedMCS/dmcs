@@ -32,6 +32,7 @@ libparser_a_SOURCES = \
 		DLVResultGrammar.cpp \
 		DLVResultParser.cpp \
 		NewDLVResultParser.cpp \
+		NewQueryPlanParser.cpp \
 		QueryPlanParser.cpp \
 		ReturnPlanParser.cpp
 

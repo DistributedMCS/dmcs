@@ -6,10 +6,12 @@
 
 #include "mcs/QueryPlan.h"
 
+namespace dmcs {
+
 template<typename Iterator>
-struct SkipperGrammar : boost::spirit::qi::grammar<Iterator>
+struct NewSkipperGrammar : boost::spirit::qi::grammar<Iterator>
 {
-  SkipperGrammar();
+  NewSkipperGrammar();
 
   boost::spirit::qi::rule<Iterator> ws;
 };
@@ -48,11 +50,13 @@ struct SemanticActionBase
 class QueryPlanGrammarSemantics
 {
 public:
-  ContextQueryPlanMapPtr m_QueryPlan;
+  ContextQueryPlanMapPtr m_QueryPlanMap;
+  ContextQueryPlan       m_CurrentQueryPlan;
   ContextID              m_CurrentCtx;
 
 public:
-  QueryPlanGrammarSemantics();
+  QueryPlanGrammarSemantics()
+  { }
 
   #define DMCS_DEFINE_SEMANTIC_ACTION(name, targettype) \
     struct name: \
@@ -66,7 +70,7 @@ public:
 
 
 //! basic QueryPlanGrammar
-template<typename Iterator, typename Skipper>
+template<typename Iterator, typename NewSkipper>
 struct QueryPlanGrammarBase
 {
   QueryPlanGrammarSemantics &sem;
@@ -76,36 +80,38 @@ struct QueryPlanGrammarBase
   template<typename Attrib=void, typename Dummy=void>
   struct Rule
   {
-    typedef boost::spirit::qi::rule<Iterator, Attrib(), Skipper> type;
+    typedef boost::spirit::qi::rule<Iterator, Attrib(), NewSkipper> type;
   };
 
   template<typename Dummy>
   struct Rule<void, Dummy>
   {
-    typedef boost::spirit::qi::rule<Iterator, Skipper> type;
+    typedef boost::spirit::qi::rule<Iterator, NewSkipper> type;
     // BEWARE: this is _not_ the same (!) as
-    // typedef boost::spirit::qi::rule<Iterator, boost::spirit::unused_type, Skipper> type;
+    // typedef boost::spirit::qi::rule<Iterator, boost::spirit::unused_type, NewSkipper> type;
   };
 
   // Core grammar rules
   typename Rule<>::type start;
-  typename Rule<std::string> ident;
-  typename Rule<ConstantList> constants;
+  typename Rule<std::string>::type ident;
+  typename Rule<ConstantList>::type constants;
 };
 
 
-template<typename Iterator, typename Skipper>
-struct QueryPlanGrammar : 
-  QueryPlanGrammarBase<Iterator, Skipper>,
-  boost::spirit::qi::grammar<Iterator, Skipper>
+template<typename Iterator, typename NewSkipper>
+struct NewQueryPlanGrammar : 
+  QueryPlanGrammarBase<Iterator, NewSkipper>,
+  boost::spirit::qi::grammar<Iterator, NewSkipper>
 {
-  typedef QueryPlanGrammarBase<Iterator, Skipper> GrammarBase;
-  typedef boost::spirit::qi::grammar<Iterator, Skipper> QiBase;
+  typedef QueryPlanGrammarBase<Iterator, NewSkipper> GrammarBase;
+  typedef boost::spirit::qi::grammar<Iterator, NewSkipper> QiBase;
 
-  QueryPlanGrammar(QueryPlanGrammarSemantics& sem)
+  NewQueryPlanGrammar(QueryPlanGrammarSemantics& sem)
     : GrammarBase(sem),
       QiBase(GrammarBase::start)
   { }      
 };
+
+} // namespace dmcs
 
 #endif // __QUERY_PLAN_GRAMMAR_HPP__

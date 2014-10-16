@@ -5,11 +5,13 @@
 
 #include "mcs/QueryPlan.h"
 
+namespace dmcs {
+
 /////////////////////////////////////////////////////////////////
 // Skipper //////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 template<typename Iterator>
-SkipperGrammar<Iterator>::SkipperGrammar() : SkipperGrammar::base_type(ws)
+NewSkipperGrammar<Iterator>::NewSkipperGrammar() : NewSkipperGrammar::base_type(ws)
 {
   using namespace boost::spirit;
   ws = ascii::space
@@ -24,8 +26,8 @@ SkipperGrammar<Iterator>::SkipperGrammar() : SkipperGrammar::base_type(ws)
 /////////////////////////////////////////////////////////////////
 // QueryPlanGrammarBase /////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
-template<typename Iterator, typename Skipper>
-QueryPlanGrammarBase<Iterator, Skipper>::QueryPlanGrammarBase(QueryPlanGrammarSemantics &sem)
+template<typename Iterator, typename NewSkipper>
+QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGrammarSemantics &sem)
   : sem(sem)
 {
   namespace qi = boost::spirit::qi;
@@ -43,6 +45,8 @@ QueryPlanGrammarBase<Iterator, Skipper>::QueryPlanGrammarBase(QueryPlanGrammarSe
   start 
     = constants;
 }
+
+} // namespace dmcs
 
 #endif // __QUERY_PLAN_GRAMMAR_TCC__
 
