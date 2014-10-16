@@ -65,27 +65,84 @@ phoenix::function<lazy_get_impl> lazy_get;
 template<>
 struct sem<QueryPlanGrammarSemantics::setContextID>
 {
-  void operator()(QueryPlanGrammarSemantics &mgr, int source, const boost::spirit::unused_type target)
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const int &source, 
+		  const boost::spirit::unused_type target)
   {
-    std::cout << "sem<QueryPlanGrammarSemantics::setContextID>: s = " << source << std::endl;
   }
 };
 
 
 template<>
-struct sem<QueryPlanGrammarSemantics::setConstantList>
+struct sem<QueryPlanGrammarSemantics::setHostName>
 {
-  void operator()(QueryPlanGrammarSemantics &mgr, ConstantList source, const boost::spirit::unused_type target)
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const std::string &source, 
+		  const boost::spirit::unused_type target)
   {
-    std::cout << "sem<QueryPlanGrammarSemantics::setConstantList>: s = " << std::endl;
-    for (ConstantList::const_iterator it = source.begin(); it != source.end(); ++it)
-      {
-	std::cout << *it << " ";
-      }
-    std::cout << std::endl;
   }
 };
 
+
+
+template<>
+struct sem<QueryPlanGrammarSemantics::setPort>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const int &source, 
+		  const boost::spirit::unused_type target)
+  {
+  }
+};
+
+
+
+template<>
+struct sem<QueryPlanGrammarSemantics::setConstantList>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const ConstantList &source, 
+		  const boost::spirit::unused_type target)
+  {
+  }
+};
+
+
+
+
+template<>
+struct sem<QueryPlanGrammarSemantics::registerAndInsertIntoBeliefSet>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const std::vector<boost::fusion::vector2<IDAddress, std::vector<std::string> > > &source, 
+		  BeliefTablePtr &target)
+  {
+  }
+};
+
+
+
+template<>
+struct sem<QueryPlanGrammarSemantics::setLocalSignature>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const BeliefTablePtr &source, 
+		  boost::spirit::qi::unused_type target)
+  {
+  }
+};
+
+
+
+template<>
+struct sem<QueryPlanGrammarSemantics::setInputSignature>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const BeliefTablePtr &source, 
+		  boost::spirit::qi::unused_type target)
+  {
+  }
+};
 
 
 /////////////////////////////////////////////////////////////////
@@ -95,8 +152,6 @@ template<typename Iterator, typename NewSkipper>
 QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGrammarSemantics &sem)
   : sem(sem)
 {
-
-
   typedef QueryPlanGrammarSemantics Sem;
 
   using qi::lit;
@@ -118,12 +173,14 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
       );
 
   contextQueryPlan
-    = lit('{') >>
-    //    lit("ContextId") >> lit(':') >> int_ [Sem::setContextID(sem)] >> lit(',') >>
-    //    lit("HostName")  >> lit(':') >> hostName >> lit(',') >>
-    //    lit("Port")      >> lit(':') >> int_ >> lit(',') >>
-    //    (-lit("Constants") >> lit(':') >> constants [Sem::setConstantList(sem)] >> lit(',')) >>
-    lit('}');
+    =  lit('{') >>
+       lit("ContextId")      >> lit(':') >> int_      [Sem::setContextID(sem)]      >> lit(',') >>
+       lit("HostName")       >> lit(':') >> hostName  [Sem::setHostName(sem)]       >> lit(',') >>
+       lit("Port")           >> lit(':') >> int_      [Sem::setPort(sem)]           >> lit(',') >>
+    (-(lit("Constants")      >> lit(':') >> constants [Sem::setConstantList(sem)]   >> lit(',') )) >>
+    (-(lit("LocalSignature") >> lit(':') >> signature [Sem::setLocalSignature(sem)] >> lit(',') )) >>
+    (-(lit("InputSignature") >> lit(':') >> signature [Sem::setInputSignature(sem)] >> lit(',') )) >>
+       lit('}');
 
   ident 
     = qi::lexeme[ ascii::lower >> *(ascii::alnum | qi::char_('_')) ];
@@ -137,11 +194,10 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
   id_with_ground_tuple 
     = uint_ >> lit(':') >> lit('[') >> ident % ',' >> lit(']');
 
-
-  /*signature 
+  signature 
     = lit('{') >> 
     (id_with_ground_tuple % ',') [Sem::registerAndInsertIntoBeliefSet(sem)] >> 
-    -(lit(',')) >> lit('}');*/
+    -(lit(',')) >> lit('}');
   
 
   BOOST_SPIRIT_DEBUG_NODE(start);

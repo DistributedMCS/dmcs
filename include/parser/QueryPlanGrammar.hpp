@@ -66,8 +66,12 @@ public:
     };
 
   DMCS_DEFINE_SEMANTIC_ACTION(setContextID, const boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(setHostName, const boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(setPort, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setConstantList, const boost::spirit::unused_type);
-
+  DMCS_DEFINE_SEMANTIC_ACTION(setLocalSignature, const boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(setInputSignature, const boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(registerAndInsertIntoBeliefSet, BeliefTablePtr);
   #undef DMCS_DEFINE_SEMANTIC_ACTION
 };
 
