@@ -19,7 +19,7 @@ namespace dmcs
 typedef std::size_t ContextID;
 typedef std::list<std::string> ConstantList;
 typedef std::map<ContextID, NewBeliefState> OutputProjectionMap;
-typedef std::map<std::string, unsigned> PredicateArityMap;
+typedef std::map<std::string, std::size_t> PredicateArityMap;
 
 struct ConstantCategory : private ostream_printable<ConstantCategory>
 {
@@ -137,6 +137,7 @@ typedef boost::shared_ptr<const ContextQueryPlanMap>
 std::ostream& operator<< (std::ostream& os, const ConstantList &l);
 std::ostream& operator<< (std::ostream& os, const ConstantCategoryList &l);
 std::ostream& operator<< (std::ostream& os, const ContextQueryPlanMap &m);
+std::ostream& operator<< (std::ostream& os, const PredicateArityMap &m);
 
 } //namespace dmcs
 

@@ -125,6 +125,31 @@ struct sem<QueryPlanGrammarSemantics::setConstantCategories>
 
 
 
+template<>
+struct sem<QueryPlanGrammarSemantics::setPredicates>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const std::vector<fusion::vector2<std::string, std::size_t > > &source, 
+		  const boost::spirit::unused_type target)
+  {
+    ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
+    PredicateArityMapPtr &preds = currentQP->preds;
+    
+    if (!preds) preds.reset(new PredicateArityMap);
+    std::vector<fusion::vector2<std::string, std::size_t > >::const_iterator it = source.begin();
+    
+    for (; it != source.end(); ++it)
+      {
+	const std::string &name = fusion::at_c<0>(*it);
+	const std::size_t &arity = fusion::at_c<1>(*it);
+
+	preds->insert(std::make_pair<std::string, std::size_t>(name, arity));
+      }
+  }
+};
+
+
+
 
 template<>
 struct sem<QueryPlanGrammarSemantics::registerAndInsertIntoBeliefSet>
@@ -242,8 +267,8 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
        lit("HostName")           >> lit(':') >> hostName  [Sem::setHostName(sem)]       >> lit(',') >>
        lit("Port")               >> lit(':') >> int_      [Sem::setPort(sem)]           >> lit(',') >>
        lit("Constants")          >> lit(':') >> constants [Sem::setConstantList(sem)]   >> lit(',') >>
-       //    (-(lit("ConstantCategories") >> lit(':') >> constantCategories [Sem::setConstantCategories(sem)] >> lit(',') ))>>
-       (-(lit("ConstantCategories") >> lit(':') >> constantCategories >> lit(',') )) >>
+    (-(lit("ConstantCategories") >> lit(':') >> constantCategories [Sem::setConstantCategories(sem)] >> lit(',') )) >>
+    (-(lit("Predicates")         >> lit(':') >> predicates         [Sem::setPredicates(sem)]         >> lit(',') )) >>
     (-(lit("LocalSignature")     >> lit(':') >> signature [Sem::setLocalSignature(sem)] >> lit(',') )) >>
     (-(lit("InputSignature")     >> lit(':') >> signature [Sem::setInputSignature(sem)] >> lit(',') )) >>
        lit('}')) [Sem::insertIntoMap(sem)];
@@ -259,7 +284,7 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
     = qi::lexeme[ ascii::lower >> *(ascii::alnum | qi::char_('_')) ];
 
   constantCategories
-    = lit('[') >> (category % lit(',')) >> lit(']');
+    = lit('[') >> (category % lit(',')) >> -lit(',') >> lit(']');
 
   category
     = lit('{') >> lit("Category") >> lit(':') >>
@@ -267,7 +292,20 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
       lit("Constants") >> lit(':') >> constants >>
       lit('}');
 
-  catSymbol = +(qi::alnum);
+  catSymbol 
+    = +(qi::alnum);
+
+  predicates 
+    = lit('[') >> predicate % ',' >> -lit(',') >> lit(']');
+
+  predicate
+    = lit('{') >> 
+      lit("Pred")  >> lit(':') >> predSymbol >> lit(',') >> 
+      lit("Arity") >> lit(':') >> uint_ >>
+      lit('}');
+
+  predSymbol 
+    = +(qi::alnum);
 
   signature 
     = lit('{') >> 

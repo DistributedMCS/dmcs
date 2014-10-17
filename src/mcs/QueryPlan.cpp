@@ -30,6 +30,21 @@ operator<<(std::ostream &os, const ConstantCategoryList &l)
 }
 
 
+std::ostream& operator<<(std::ostream& os, const PredicateArityMap& m)
+{
+  PredicateArityMap::const_iterator it = m.begin();
+  os << "      " << it->first << "/" << it->second;
+  ++it;
+
+  for (; it != m.end(); ++it)
+    {
+      os << std::endl << "      " << it->first << "/" << it->second;
+    }
+
+  return os;
+}
+
+
 std::ostream& FilterArgumentSpec::print(std::ostream& os) const
 {
 }
@@ -50,7 +65,10 @@ std::ostream& ContextQueryPlan::print(std::ostream& os) const
        << *constCats
        << "    ]" << std::endl;
   if( !!preds && !preds->empty() )
-      os << "    TODO preds,\n";
+    os << "    Predicates:" << std::endl
+       << "    [" << std::endl
+       << *preds  << std::endl
+       << "    ]" << std::endl;
   if( !!filters && !filters->empty() )
       os << "    TODO filters,\n";
   if( !!localSignature && !localSignature->empty() )

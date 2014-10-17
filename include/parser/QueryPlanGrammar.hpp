@@ -71,6 +71,7 @@ public:
   DMCS_DEFINE_SEMANTIC_ACTION(setPort, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setConstantList, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setConstantCategories, const boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(setPredicates, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setLocalSignature, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setInputSignature, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(insertIntoMap, const boost::spirit::unused_type);
@@ -104,13 +105,14 @@ struct QueryPlanGrammarBase
 
   // Core grammar rules
   typename Rule<>::type start, contextQueryPlan;
-  typename Rule<std::string>::type ident, hostName, catSymbol;
+  typename Rule<std::string>::type ident, hostName, catSymbol, predSymbol;
   typename Rule<ConstantList>::type constants;
   typename Rule<std::vector<fusion::vector2<std::string, ConstantList > > >::type constantCategories;
   typename Rule<fusion::vector2<std::string, ConstantList > >::type category;
+  typename Rule<std::vector<fusion::vector2<std::string, std::size_t > > >::type predicates;
+  typename Rule<fusion::vector2<std::string, std::size_t > >::type predicate;
   typename Rule<BeliefTablePtr>::type signature;
   typename Rule<fusion::vector2<IDAddress, std::vector<std::string> > >::type id_with_ground_tuple;
-
 };
 
 
