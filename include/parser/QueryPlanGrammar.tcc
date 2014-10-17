@@ -402,7 +402,10 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
   argument
     = lit('{') >>
       lit("Position") >> lit(':') >> uint_ >> lit(',') >>
-      lit("Using")    >> lit(':') >> (constants | useCategory) >>
+      ( (lit("UsingCon") >> lit(':') >> constants) 
+        |
+        (lit("UsingCat")   >> lit(':') >> useCategory)
+      )  >>
       lit('}');
 
   useCategory 
