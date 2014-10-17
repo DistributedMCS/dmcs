@@ -75,6 +75,7 @@ public:
   DMCS_DEFINE_SEMANTIC_ACTION(setConstantCategories, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setPredicates, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(seekConstantCategory, ConstantListPtr);
+  DMCS_DEFINE_SEMANTIC_ACTION(checkConstantCategory, ConstantListPtr);
   DMCS_DEFINE_SEMANTIC_ACTION(setFilters, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setLocalSignature, const boost::spirit::unused_type);
   DMCS_DEFINE_SEMANTIC_ACTION(setInputSignature, const boost::spirit::unused_type);
@@ -119,6 +120,7 @@ struct QueryPlanGrammarBase
   typename Rule<fusion::vector3<std::string, std::string, std::vector<fusion::vector2<std::size_t, ConstantListPtr> > > >::type filter;
   typename Rule<std::vector<fusion::vector2<std::size_t, ConstantListPtr> > >::type arguments;
   typename Rule<fusion::vector2<std::size_t, ConstantListPtr> >::type argument;
+  typename Rule<ConstantListPtr>::type constantsForArguments;
   typename Rule<ConstantListPtr>::type useCategory;
   typename Rule<BeliefTablePtr>::type signature;
   typename Rule<fusion::vector2<IDAddress, std::vector<std::string> > >::type id_with_ground_tuple;

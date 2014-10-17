@@ -187,6 +187,43 @@ struct sem<QueryPlanGrammarSemantics::seekConstantCategory>
 
 
 
+template<>
+struct sem<QueryPlanGrammarSemantics::checkConstantCategory>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const ConstantListPtr &source,
+		  ConstantListPtr &target)
+  {
+    ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
+
+    if (source->size() > 1) 
+      target = source;
+    else
+      {
+	ConstantCategoryListPtr &constCats = currentQP->constCats;
+	assert(constCats);
+	    
+	ConstantList::const_iterator it = source->begin();
+	std::string name = *it;
+
+	bool catFound = false;
+
+	for (ConstantCategoryList::const_iterator jt = constCats->begin(); jt != constCats->end(); ++jt)
+	  {
+	    if (jt->name.compare(name) == 0)
+	      {
+		target = jt->constants;
+		catFound = true;
+		break;
+	      }
+	  }
+
+	if (!catFound) target = source;
+      }
+  }
+};
+
+
 
 template<>
 struct sem<QueryPlanGrammarSemantics::setFilters>
@@ -402,11 +439,11 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
   argument
     = lit('{') >>
       lit("Position") >> lit(':') >> uint_ >> lit(',') >>
-      ( (lit("UsingCon") >> lit(':') >> constants) 
-        |
-        (lit("UsingCat")   >> lit(':') >> useCategory)
-      )  >>
+      lit("Using") >> lit(':') >> constantsForArguments >>
       lit('}');
+
+  constantsForArguments
+    = constants [Sem::checkConstantCategory(sem)];
 
   useCategory 
     = lit('[') >> catSymbol [Sem::seekConstantCategory(sem)] >> lit(']') ;
