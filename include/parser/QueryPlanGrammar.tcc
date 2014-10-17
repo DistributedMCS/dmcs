@@ -87,11 +87,24 @@ template<>
 struct sem<QueryPlanGrammarSemantics::setConstantList>
 {
   void operator()(QueryPlanGrammarSemantics &mgr, 
-		  const ConstantList &source, 
+		  const ConstantListPtr &source, 
 		  const boost::spirit::unused_type target)
   {
     ContextQueryPlanPtr& currentQP = mgr.m_CurrentQueryPlan;
-    currentQP->constants = ConstantListPtr(new ConstantList(source));
+    currentQP->constants = source;
+  }
+};
+
+
+
+template<>
+struct sem<QueryPlanGrammarSemantics::getCurrentConstantList>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const std::vector<std::string> &source, 
+		  ConstantListPtr &target)
+  {
+    target = ConstantListPtr(new ConstantList(source.begin(), source.end()));
   }
 };
 
@@ -102,14 +115,14 @@ template<>
 struct sem<QueryPlanGrammarSemantics::setConstantCategories>
 {
   void operator()(QueryPlanGrammarSemantics &mgr, 
-		  const std::vector<fusion::vector2<std::string, ConstantList > > &source, 
+		  const std::vector<fusion::vector2<std::string, ConstantListPtr > > &source, 
 		  const boost::spirit::unused_type target)
   {
     ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
     ConstantCategoryListPtr &constCats = currentQP->constCats;
     
     if (!constCats) constCats.reset(new ConstantCategoryList);
-    std::vector<fusion::vector2<std::string, ConstantList > >::const_iterator it = source.begin();
+    std::vector<fusion::vector2<std::string, ConstantListPtr > >::const_iterator it = source.begin();
     
     for (; it != source.end(); ++it)
       {
@@ -144,6 +157,30 @@ struct sem<QueryPlanGrammarSemantics::setPredicates>
 	const std::size_t &arity = fusion::at_c<1>(*it);
 
 	preds->insert(std::make_pair<std::string, std::size_t>(name, arity));
+      }
+  }
+};
+
+
+
+template<>
+struct sem<QueryPlanGrammarSemantics::seekConstantCategory>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const std::string &source,
+		  ConstantListPtr &target)
+  {
+    ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
+    ConstantCategoryListPtr &constCats = currentQP->constCats;
+
+    assert(constCats);
+    for (ConstantCategoryList::const_iterator it = constCats->begin(); it != constCats->end(); ++it)
+      {
+	if (it->name.compare(source) == 0)
+	  {
+	    target = it->constants;
+	    break;
+	  }
       }
   }
 };
@@ -263,14 +300,15 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
 
   contextQueryPlan
     = (lit('{') >>
-       lit("ContextId")          >> lit(':') >> int_      [Sem::setContextID(sem)]      >> lit(',') >>
-       lit("HostName")           >> lit(':') >> hostName  [Sem::setHostName(sem)]       >> lit(',') >>
-       lit("Port")               >> lit(':') >> int_      [Sem::setPort(sem)]           >> lit(',') >>
-       lit("Constants")          >> lit(':') >> constants [Sem::setConstantList(sem)]   >> lit(',') >>
+       lit("ContextId")          >> lit(':') >> int_               [Sem::setContextID(sem)]          >> lit(',') >>
+       lit("HostName")           >> lit(':') >> hostName           [Sem::setHostName(sem)]           >> lit(',') >>
+       lit("Port")               >> lit(':') >> int_               [Sem::setPort(sem)]               >> lit(',') >>
+       lit("Constants")          >> lit(':') >> constants          [Sem::setConstantList(sem)]       >> lit(',') >>
     (-(lit("ConstantCategories") >> lit(':') >> constantCategories [Sem::setConstantCategories(sem)] >> lit(',') )) >>
     (-(lit("Predicates")         >> lit(':') >> predicates         [Sem::setPredicates(sem)]         >> lit(',') )) >>
-    (-(lit("LocalSignature")     >> lit(':') >> signature [Sem::setLocalSignature(sem)] >> lit(',') )) >>
-    (-(lit("InputSignature")     >> lit(':') >> signature [Sem::setInputSignature(sem)] >> lit(',') )) >>
+       //(-(lit("Filters")            >> lit(':') >> filters            [Sem::setFilters(sem)]            >> lit(',') )) >>
+    (-(lit("LocalSignature")     >> lit(':') >> signature          [Sem::setLocalSignature(sem)]     >> lit(',') )) >>
+    (-(lit("InputSignature")     >> lit(':') >> signature          [Sem::setInputSignature(sem)]     >> lit(',') )) >>
        lit('}')) [Sem::insertIntoMap(sem)];
 
   ///TODO: grammar for URL. Now simplified by putting hostname between the quotes
@@ -278,7 +316,7 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
     = lit('"') >> qi::lexeme[*(ascii::char_ - '"')] >> lit('"');
 
   constants 
-    = lit('[') >> ident % lit(',') >> lit(']');
+    = lit('[') >> ( ident % lit(',') ) [Sem::getCurrentConstantList(sem) ] >> lit(']');
 
   ident 
     = qi::lexeme[ ascii::lower >> *(ascii::alnum | qi::char_('_')) ];
@@ -306,6 +344,31 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
 
   predSymbol 
     = +(qi::alnum);
+
+  /*
+  filters 
+    = lit('[') >> filter % lit(',') >> lit(']');
+
+  filter
+    = lit('{') >>
+      lit("Name") >> lit(':') >> filterName >> lit(',') >>
+      lit("Pred") >> lit(':') >> predSymbol >> lit(',') >>
+      lit("Arguments") >> lit(':') >> arguments >>
+      lit('}');
+
+  filterName = +(qi::alnum);
+
+  arguments
+    = lit('[') >> argument % lit(',') >> lit(']');
+
+  argument
+    = lit('{') >>
+      lit("Position") >> lit(':') >> uint_ >> lit(',') >>
+      lit("Using")    >> lit(':') >> (constants | useCategory) >>
+      lit('}');*/
+
+  useCategory 
+    = lit('[') >> catSymbol [Sem::seekConstantCategory(sem)] >> lit(']') ;
 
   signature 
     = lit('{') >> 

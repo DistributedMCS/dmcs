@@ -16,7 +16,7 @@ operator<<(std::ostream &os, const ConstantList &l)
 std::ostream& ConstantCategory::print(std::ostream& os) const
 {
   os << "      {Category: " << name << ", Constants: [";
-  std::copy(constants.begin(), constants.end(), std::ostream_iterator<std::string>(os, ", "));
+  std::copy(constants->begin(), constants->end(), std::ostream_iterator<std::string>(os, ", "));
   os << "]}";
 
   return os;
