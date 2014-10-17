@@ -45,13 +45,28 @@ std::ostream& operator<<(std::ostream& os, const PredicateArityMap& m)
 }
 
 
-std::ostream& FilterArgumentSpec::print(std::ostream& os) const
-{
-}
-
 std::ostream& Filter::print(std::ostream& os) const
 {
+  os << "    Name: " << name << ", Pred: " << predicate << ", Arguments:" << std::endl
+     << "    [" << std::endl;
+
+  for (FilterArgumentSpecMap::const_iterator it = arguments.begin(); it != arguments.end(); ++it)
+    {
+      os << "      {Position:" << it->first << ", Using: [" << *(it->second) << "]}" << std::endl;
+    }
+
+  os << "    ]";
 }
+
+
+
+std::ostream& operator<< (std::ostream& os, const FilterList &l)
+{
+  std::copy(l.begin(), l.end(), std::ostream_iterator<Filter>(os, "\n"));
+  return os;
+}
+
+
 
 std::ostream& ContextQueryPlan::print(std::ostream& os) const
 {
@@ -70,7 +85,10 @@ std::ostream& ContextQueryPlan::print(std::ostream& os) const
        << *preds  << std::endl
        << "    ]" << std::endl;
   if( !!filters && !filters->empty() )
-      os << "    TODO filters,\n";
+    os << "    Filters:" << std::endl
+       << "    [" << std::endl
+       << *filters 
+       << "    ]," << std::endl;
   if( !!localSignature && !localSignature->empty() )
   {
       os << "    LocalSignature:\n";

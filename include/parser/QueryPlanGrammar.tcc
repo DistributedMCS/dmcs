@@ -189,6 +189,45 @@ struct sem<QueryPlanGrammarSemantics::seekConstantCategory>
 
 
 template<>
+struct sem<QueryPlanGrammarSemantics::setFilters>
+{
+  void operator()(QueryPlanGrammarSemantics &mgr, 
+		  const std::vector<fusion::vector3<std::string, std::string, std::vector<fusion::vector2<std::size_t, ConstantListPtr> > > > &source,
+		  const boost::spirit::unused_type target)
+  {
+    ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
+    FilterListPtr &filters = currentQP->filters;
+
+    if (!filters) filters.reset(new FilterList);
+    
+    std::vector<fusion::vector3<std::string, std::string, std::vector<fusion::vector2<std::size_t, ConstantListPtr> > > >::const_iterator it = source.begin();
+    for (; it != source.end(); ++it)
+      {
+	const std::string &name = fusion::at_c<0>(*it);
+	const std::string &predicate = fusion::at_c<1>(*it);
+
+	Filter f(name, predicate);
+
+	const std::vector<fusion::vector2<std::size_t, ConstantListPtr> > &args = fusion::at_c<2>(*it);
+	std::vector<fusion::vector2<std::size_t, ConstantListPtr> >::const_iterator jt = args.begin();
+
+	for (; jt != args.end(); ++jt)
+	  {
+	    const std::size_t &pos = fusion::at_c<0>(*jt);
+	    const ConstantListPtr &arg = fusion::at_c<1>(*jt);
+
+	    f.arguments.insert(std::make_pair<std::size_t, ConstantListPtr>(pos, arg));
+	  }
+
+	filters->push_back(f);
+      }
+  }
+};
+
+
+
+
+template<>
 struct sem<QueryPlanGrammarSemantics::registerAndInsertIntoBeliefSet>
 {
   void operator()(QueryPlanGrammarSemantics &mgr, 
@@ -306,7 +345,7 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
        lit("Constants")          >> lit(':') >> constants          [Sem::setConstantList(sem)]       >> lit(',') >>
     (-(lit("ConstantCategories") >> lit(':') >> constantCategories [Sem::setConstantCategories(sem)] >> lit(',') )) >>
     (-(lit("Predicates")         >> lit(':') >> predicates         [Sem::setPredicates(sem)]         >> lit(',') )) >>
-       //(-(lit("Filters")            >> lit(':') >> filters            [Sem::setFilters(sem)]            >> lit(',') )) >>
+    (-(lit("Filters")            >> lit(':') >> filters            [Sem::setFilters(sem)]            >> lit(',') )) >>
     (-(lit("LocalSignature")     >> lit(':') >> signature          [Sem::setLocalSignature(sem)]     >> lit(',') )) >>
     (-(lit("InputSignature")     >> lit(':') >> signature          [Sem::setInputSignature(sem)]     >> lit(',') )) >>
        lit('}')) [Sem::insertIntoMap(sem)];
@@ -345,9 +384,8 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
   predSymbol 
     = +(qi::alnum);
 
-  /*
   filters 
-    = lit('[') >> filter % lit(',') >> lit(']');
+    = lit('[') >> filter % lit(',') >> -lit(',') >> lit(']');
 
   filter
     = lit('{') >>
@@ -359,13 +397,13 @@ QueryPlanGrammarBase<Iterator, NewSkipper>::QueryPlanGrammarBase(QueryPlanGramma
   filterName = +(qi::alnum);
 
   arguments
-    = lit('[') >> argument % lit(',') >> lit(']');
+    = lit('[') >> argument % lit(',') >> -lit(',') >> lit(']');
 
   argument
     = lit('{') >>
       lit("Position") >> lit(':') >> uint_ >> lit(',') >>
       lit("Using")    >> lit(':') >> (constants | useCategory) >>
-      lit('}');*/
+      lit('}');
 
   useCategory 
     = lit('[') >> catSymbol [Sem::seekConstantCategory(sem)] >> lit(']') ;

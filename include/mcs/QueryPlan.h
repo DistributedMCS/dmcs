@@ -38,14 +38,7 @@ struct ConstantCategory : private ostream_printable<ConstantCategory>
 };
 typedef std::list<ConstantCategory> ConstantCategoryList;
 
-struct FilterArgumentSpec : private ostream_printable<FilterArgumentSpec>
-{
-  std::list<std::string> usingCategories;
-
-  std::ostream& print(std::ostream& os) const;
-};
-
-typedef std::map<unsigned, FilterArgumentSpec> FilterArgumentSpecMap;
+typedef std::map<std::size_t, ConstantListPtr> FilterArgumentSpecMap;
 
 struct Filter : private ostream_printable<Filter>
 {
@@ -139,102 +132,10 @@ std::ostream& operator<< (std::ostream& os, const ConstantList &l);
 std::ostream& operator<< (std::ostream& os, const ConstantCategoryList &l);
 std::ostream& operator<< (std::ostream& os, const ContextQueryPlanMap &m);
 std::ostream& operator<< (std::ostream& os, const PredicateArityMap &m);
+std::ostream& operator<< (std::ostream& os, const FilterList &l);
 
 } //namespace dmcs
 
-
-#if 0
-inline std::ostream&
-operator<< (std::ostream& os, const Category& c)
-{
-  return  os << "[ Category: " << c.catSymbol << ", Constants: [" << c.constantListPtr << "] ] ";
-}	
-
-std::ostream&
-operator<< (std::ostream& os, const CategoryPtr& p)
-{
-  return os << *p;
-}	
-
-
-std::ostream&
-operator<< (std::ostream& os, const CategoryList& c)
-{
-  for(CategoryList::const_iterator it = c.begin(); it != c.end(); it++)
-  {
-    os << *it << " ";
-  }
-  
-  return os;
-}
-
-std::ostream&
-operator<< (std::ostream& os, const CategoryListPtr& p)
-{
-  return os << *p;
-}	
-
-
-std::ostream&
-operator<< (std::ostream& os, const FilterArgument& f)
-{
-  return os << "[ Position: " << f.first << ", " << "Using: [" << f.second << "] ]";
-}
-		
-std::ostream&
-operator<< (std::ostream& os, const FilterArgumentPtr& p)
-{
-  return os << *p;
-}
-
-std::ostream&
-operator<< (std::ostream& os, const FilterArgumentList& f)
-{
-  for(FilterArgumentList::const_iterator it = f.begin(); it != f.end(); it++)
-  {
-    os << *it << " ";
-  }
-
-  return os;
-}
-
-std::ostream&
-operator<< (std::ostream& os, const FilterArgumentListPtr& p)
-{
-  return os << *p;
-}
-
-
-inline std::ostream&
-operator<< (std::ostream& os, const Filter& f)
-{
-  return os << "[ Name: " << f.filterName << ", Pred: " << f.predSymbol << ", Arguments: [ " << f.filterArgumentListPtr << " ]";
-}
-
-std::ostream&
-operator<< (std::ostream& os, const FilterPtr& p)
-{
-  return os << *p;
-}
-
-std::ostream&
-operator<< (std::ostream& os, const FilterList& f)
-{
-  for(FilterList::const_iterator it = f.begin(); it != f.end(); it++)
-  {
-    os << *it << " ";
-  }
-
-  return os;
-}
-
-std::ostream&
-operator<< (std::ostream& os, const FilterListPtr& p)
-{
-  return os << *p;
-}
-
-#endif
 
 #endif // __QUERY_PLAN__INCLUDED__
 
