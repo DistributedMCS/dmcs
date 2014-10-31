@@ -30,6 +30,7 @@ TESTS = \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
 	testNewQueryPlanParser \
+	testReturnPlanParser \
 	testTables 
 
 #	testClasp \
@@ -59,7 +60,6 @@ TESTS = \
 	testSystemWithQueryPlan \
 	testSystem \
 	testMessageDispatcher \
-	testReturnPlanParser \
 	testResultParser \
 	testDLVProcess \
 	testBeliefState \
@@ -79,6 +79,7 @@ check_PROGRAMS = \
 	testWeakPointer \
 	testPolymorphismSharedPtr \
 	testNewQueryPlanParser \
+	testReturnPlanParser \
 	testTables 
 
 
@@ -297,8 +298,9 @@ testTables_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/mcs/libmcs.a 
 
-#testReturnPlanParser_SOURCES = testReturnPlanParser.cpp 
-#testReturnPlanParser_LDADD = \
+testReturnPlanParser_SOURCES = testReturnPlanParser.cpp 
+testReturnPlanParser_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
+	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/mcs/libmcs.a 
 

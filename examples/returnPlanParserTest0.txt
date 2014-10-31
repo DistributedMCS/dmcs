@@ -1,0 +1,48 @@
+[
+  {
+    ContextId: 1023,
+    ReturnSignature:
+    [
+      {
+        ContextId: 0,
+        ReturnBeliefs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      },
+      {
+        ContextId: 1,
+        ReturnBeliefs: [9]
+      },
+      {
+        ContextId: 2,
+        ReturnBeliefs: [4, 6, 7, 8]
+      },
+      {
+        ContextId: 3,
+        ReturnBeliefs: [4, 6, 7, 10]
+      },
+      {
+        ContextId: 4,
+        ReturnBeliefs: [1, 7]
+      },
+      {
+        ContextId: 5,
+        ReturnBeliefs: [6, 10]
+      },
+      {
+        ContextId: 6,
+        ReturnBeliefs: [7, 8, 9]
+      },
+      {
+        ContextId: 7,
+        ReturnBeliefs: [3, 7]
+      },
+      {
+        ContextId: 8,
+        ReturnBeliefs: [1, 4, 8]
+      },
+      {
+        ContextId: 9,
+        ReturnBeliefs: [2, 5, 6]
+      },
+   ]
+  },
+]

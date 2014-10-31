@@ -48,13 +48,13 @@ BOOST_AUTO_TEST_CASE ( testReturnPlanParser )
   
   BeliefStateOffset* bso_instance = BeliefStateOffset::create(system_size, bs_size);
 
-  for (std::size_t i = 0; i <= 4; ++i)
+  for (std::size_t i = 0; i <= 0; ++i)
     {
       std::stringstream out;
       out << i;
 
       std::string returnplan_file(ex);
-      returnplan_file += "/context" + out.str() + ".rp";
+      returnplan_file += "/returnPlanParserTest" + out.str() + ".txt";
       ReturnPlanMapPtr rpm = ReturnPlanParser::parseFile(returnplan_file);
       
       std::cout << "Parsing return plans for context " << i << ". Got return interfaces:" << std::endl;
