@@ -86,9 +86,16 @@ DX_INIT_DOXYGEN([dmcs], [doxygen.cfg], [doc])
 AM_INIT_AUTOMAKE
 
 # Check for C/C++ compiler
-AC_PROG_CC
-AC_PROG_CXX
-AC_PROG_CXXCPP
+save_CFLAGS="$CFLAGS"
+save_CXXFLAGS="$CXXFLAGS"
+${CFLAGS=""}
+${CXXFLAGS=""}
+AC_PROG_CC([clang gcc cc])
+AC_PROG_CXX([clang++ g++ c++])
+AC_PROG_CXXCPP([clang gcc cc])
+
+CFLAGS="$CFLAGS $save_CFLAGS"
+CXXFLAGS="$CXXFLAGS $save_CFLAGS"
 
 # set default warning parameters for g++ compatible compilers
 if test "$GXX" = "yes"; then
