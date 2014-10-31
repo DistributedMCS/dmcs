@@ -10,7 +10,16 @@ namespace fusion = boost::fusion;
 template<typename Iterator>
 struct NewSkipperGrammar : boost::spirit::qi::grammar<Iterator>
 {
-  NewSkipperGrammar();
+  NewSkipperGrammar() : NewSkipperGrammar::base_type(ws)
+  {
+    using namespace boost::spirit;
+    ws = ascii::space
+      | qi::lexeme[ qi::char_('#') > *(qi::char_ - qi::eol) ];
+    
+    #ifdef BOOST_SPIRIT_DEBUG_WS
+      BOOST_SPIRIT_DEBUG_NODE(ws);
+    #endif
+  }
 
   boost::spirit::qi::rule<Iterator> ws;
 };
