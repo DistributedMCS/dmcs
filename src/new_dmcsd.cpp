@@ -49,7 +49,7 @@
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "network/NewServer.h"
 #include "parser/BridgeRuleParser.h"
-#include "parser/QueryPlanParser.h"
+#include "parser/NewQueryPlanParser.hpp"
 #include "parser/ReturnPlanParser.h"
 
 using namespace dmcs;
@@ -134,10 +134,10 @@ Options";
       if (filename_opt_query_plan != "")
 	{
 	  DBGLOG(DBG, "Parse opt query plan");
-	  opt_queryplan_map = QueryPlanParser::parseFile(filename_opt_query_plan);
+	  opt_queryplan_map = NewQueryPlanParser::parseFile(filename_opt_query_plan);
 	}
 
-      ContextQueryPlanMapPtr queryplan_map = QueryPlanParser::parseFile(filename_query_plan);
+      ContextQueryPlanMapPtr queryplan_map = NewQueryPlanParser::parseFile(filename_query_plan);
       const ContextQueryPlan& local_queryplan = queryplan_map->find(myid)->second;
       BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(filename_bridge_rules, queryplan_map, myid);
       BridgeRuleTablePtr bridge_rules = ret_val.first;
