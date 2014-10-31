@@ -52,7 +52,7 @@
 #include "mcs/ReturnedBeliefState.h"
 #include "network/NewClient.h"
 #include "mcs/QueryPlan.h"
-#include "parser/QueryPlanParser.h"
+#include "parser/NewQueryPlanParser.hpp"
 
 #include <set>
 #include <fstream>
@@ -279,7 +279,7 @@ main(int argc, char* argv[])
 	      std::cerr << desc << std::endl;
 	      return 1;
 	    }
-	  query_plan = QueryPlanParser::parseFile(filename_signature);
+	  query_plan = NewQueryPlanParser::parseFile(filename_signature);
 	}
 
       // catch Ctrl-C and interrupts
