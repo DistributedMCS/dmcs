@@ -39,7 +39,7 @@
 #include "network/NewOutputDispatcher.h"
 #include "network/connection.hpp"
 #include "network/NewOutputThread.h"
-#include "network/NewServer.h";
+#include "network/NewServer.h"
 
 namespace dmcs {
 
