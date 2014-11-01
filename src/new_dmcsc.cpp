@@ -54,6 +54,11 @@
 #include "mcs/QueryPlan.h"
 #include "parser/NewQueryPlanParser.hpp"
 
+#include "parser/Parser.hpp"
+#include "parser/Parser.tcc"
+#include "parser/QueryPlanGrammar.hpp"
+#include "parser/QueryPlanGrammar.tcc"
+
 #include <set>
 #include <fstream>
 #include <iostream>
@@ -279,7 +284,7 @@ main(int argc, char* argv[])
 	      std::cerr << desc << std::endl;
 	      return 1;
 	    }
-	  query_plan = NewQueryPlanParser::parseFile(filename_signature);
+	  query_plan = QueryPlanParser_t::parseFile(filename_signature);
 	}
 
       // catch Ctrl-C and interrupts

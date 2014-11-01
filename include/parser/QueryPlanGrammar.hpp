@@ -14,7 +14,7 @@ namespace fusion = boost::fusion;
 class QueryPlanGrammarSemantics
 {
 public:
-  ContextQueryPlanMapPtr m_QueryPlanMap;
+  ContextQueryPlanMapPtr m_ParsedResult;
   ContextQueryPlanPtr    m_CurrentQueryPlan;
   ConstantListPtr        m_CurrentConstantList;
 

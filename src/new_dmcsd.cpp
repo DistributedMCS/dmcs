@@ -52,6 +52,12 @@
 #include "parser/NewQueryPlanParser.hpp"
 #include "parser/ReturnPlanParser.h"
 
+#include "parser/BaseParser.hpp"
+#include "parser/Parser.hpp"
+#include "parser/Parser.tcc"
+#include "parser/QueryPlanGrammar.hpp"
+#include "parser/QueryPlanGrammar.tcc"
+
 using namespace dmcs;
 
 int
@@ -134,10 +140,10 @@ Options";
       if (filename_opt_query_plan != "")
 	{
 	  DBGLOG(DBG, "Parse opt query plan");
-	  opt_queryplan_map = NewQueryPlanParser::parseFile(filename_opt_query_plan);
+	  opt_queryplan_map = QueryPlanParser_t::parseFile(filename_opt_query_plan);
 	}
 
-      ContextQueryPlanMapPtr queryplan_map = NewQueryPlanParser::parseFile(filename_query_plan);
+      ContextQueryPlanMapPtr queryplan_map = QueryPlanParser_t::parseFile(filename_query_plan);
       const ContextQueryPlan& local_queryplan = queryplan_map->find(myid)->second;
       BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(filename_bridge_rules, queryplan_map, myid);
       BridgeRuleTablePtr bridge_rules = ret_val.first;

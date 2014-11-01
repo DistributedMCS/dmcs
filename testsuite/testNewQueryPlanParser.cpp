@@ -13,7 +13,9 @@
 #include <assert.h>
 
 #include "mcs/QueryPlan.h"
-#include "parser/NewQueryPlanParser.hpp"
+
+#include "parser/Parser.hpp"
+#include "parser/Parser.tcc"
 
 using namespace dmcs;
 
@@ -41,8 +43,8 @@ testParser(const std::string& fileName)
 
   std::cerr << "Following query plan will be parsed:\n";
   std::cerr << buffer << "\n";
-  
-  ContextQueryPlanMapPtr plan = NewQueryPlanParser::parseString(buffer);
+
+  ContextQueryPlanMapPtr plan = QueryPlanParser_t::parseString(buffer);
 
   std::cerr << "Got result:\n";
   //std::cerr << *plan << "\n";

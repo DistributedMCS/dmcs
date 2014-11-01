@@ -323,7 +323,7 @@ struct sem<QueryPlanGrammarSemantics::insertIntoMap>
 		  const boost::spirit::qi::unused_type &source,
 		  boost::spirit::qi::unused_type target)
   {
-    ContextQueryPlanMapPtr &qpm = mgr.m_QueryPlanMap;
+    ContextQueryPlanMapPtr &qpm = mgr.m_ParsedResult;
     ContextQueryPlanPtr &currentQP = mgr.m_CurrentQueryPlan;
 
     if (!qpm) qpm.reset(new ContextQueryPlanMap);

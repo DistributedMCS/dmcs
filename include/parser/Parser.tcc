@@ -1,17 +1,22 @@
+#ifndef __PARSER_TCC__
+#define __PARSER_TCC__
+
 #include <istream>
 #include <fstream>
+#include <string>
+#include <boost/shared_ptr.hpp>
+#include <boost/spirit/include/qi.hpp>
 
-#include "parser/QueryPlanGrammar.hpp"
-#include "parser/QueryPlanGrammar.tcc"
-#include "parser/NewQueryPlanParser.hpp"
+#include "parser/BaseParser.hpp"
 
 namespace dmcs {
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 
-ContextQueryPlanMapPtr
-NewQueryPlanParser::parseFile(const std::string& infile)
+template<typename GrammarType, typename SemanticsType, typename ReturnType>
+boost::shared_ptr<ReturnType>
+Parser<GrammarType, SemanticsType, ReturnType>::parseFile(const std::string& infile)
 {
   std::ifstream ifs;
 
@@ -29,8 +34,10 @@ NewQueryPlanParser::parseFile(const std::string& infile)
 }
 
 
-ContextQueryPlanMapPtr
-NewQueryPlanParser::parseStream(std::istream& in)
+
+template<typename GrammarType, typename SemanticsType, typename ReturnType>
+boost::shared_ptr<ReturnType>
+Parser<GrammarType, SemanticsType, ReturnType>::parseStream(std::istream& in)
 {
   std::ostringstream buf;
   std::string line;
@@ -49,8 +56,9 @@ NewQueryPlanParser::parseStream(std::istream& in)
 }
 
 
-ContextQueryPlanMapPtr
-NewQueryPlanParser::parseString(const std::string& str)
+template<typename GrammarType, typename SemanticsType, typename ReturnType>
+boost::shared_ptr<ReturnType>
+Parser<GrammarType, SemanticsType, ReturnType>::parseString(const std::string& str)
 {
   std::string::const_iterator begIt = str.begin();
   std::string::const_iterator endIt = str.end();
@@ -62,8 +70,9 @@ NewQueryPlanParser::parseString(const std::string& str)
   typedef NewSkipperGrammar<std::string::const_iterator> NewSkipper;
 
   NewSkipper skipper;
-  QueryPlanGrammarSemantics semanticsMgr;
-  NewQueryPlanGrammar<std::string::const_iterator, NewSkipper> grammar(semanticsMgr);
+  SemanticsType semanticsMgr;
+  //GrammarType<std::string::const_iterator, NewSkipper> grammar(semanticsMgr);
+  GrammarType grammar(semanticsMgr);
 
   bool r = phrase_parse(begIt, endIt, grammar, skipper);
    
@@ -78,8 +87,9 @@ NewQueryPlanParser::parseString(const std::string& str)
   {
     std::cout << "Parsing Failed" << std::endl;
     throw std::runtime_error("Query plan parsing failed");
-    }
+  }
 }
 
-
 } // namespace dmcs
+
+#endif // __PARSER_TCC__
