@@ -32,7 +32,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "mcs/BeliefStateOffset.h"
-#include "parser/ReturnPlanParser.h"
+#include "parser/ReturnPlanGrammar.hpp"
+#include "parser/ReturnPlanGrammar.tcc"
+#include "parser/Parser.hpp"
+#include "parser/Parser.tcc"
 
 #include <sstream>
 
@@ -55,9 +58,10 @@ BOOST_AUTO_TEST_CASE ( testReturnPlanParser )
 
       std::string returnplan_file(ex);
       returnplan_file += "/returnPlanParserTest" + out.str() + ".txt";
-      ReturnPlanMapPtr rpm = ReturnPlanParser::parseFile(returnplan_file);
+      ReturnPlanMapPtr rpm = ReturnPlanParser_t::parseFile(returnplan_file);
       
       std::cout << "Parsing return plans for context " << i << ". Got return interfaces:" << std::endl;
+#if 0
       for (ReturnPlanMap::const_iterator it = rpm->begin(); it != rpm->end(); ++it)
 	{
 	  std::size_t parent_id = it->first;
@@ -66,6 +70,7 @@ BOOST_AUTO_TEST_CASE ( testReturnPlanParser )
 	  std::cout << parent_id << " " << *interface << std::endl;
 	}
       std::cout << std::endl;
+#endif
     }
 }
 

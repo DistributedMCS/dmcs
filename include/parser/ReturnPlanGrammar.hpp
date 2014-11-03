@@ -13,7 +13,7 @@ namespace fusion = boost::fusion;
 class ReturnPlanGrammarSemantics
 {
 public:
-  ReturnPlanMapPtr m_ReturnPlanMap;
+  ReturnPlanMapPtr m_ParsedResult;
 
 public:
   ReturnPlanGrammarSemantics()
@@ -66,7 +66,7 @@ struct NewReturnPlanGrammar :
   typedef ReturnPlanGrammarBase<Iterator, NewSkipper> GrammarBase;
   typedef boost::spirit::qi::grammar<Iterator, NewSkipper> QiBase;
 
-  NewQueryPlanGrammar(ReturnPlanGrammarSemantics& sem)
+  NewReturnPlanGrammar(ReturnPlanGrammarSemantics& sem)
     : GrammarBase(sem),
       QiBase(GrammarBase::start)
   { }      

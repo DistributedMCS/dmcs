@@ -7,6 +7,7 @@
 
 #include "parser/BaseParser.hpp"
 #include "parser/QueryPlanGrammar.hpp"
+#include "parser/ReturnPlanGrammar.hpp"
 
 namespace dmcs {
 
@@ -21,6 +22,7 @@ public:
 
 typedef NewSkipperGrammar<std::string::const_iterator> NewSkipper;
 typedef Parser<NewQueryPlanGrammar<std::string::const_iterator, NewSkipper>, QueryPlanGrammarSemantics, ContextQueryPlanMap> QueryPlanParser_t;
+typedef Parser<NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, ReturnPlanMap> ReturnPlanParser_t;
 
 } // namespace dmcs
 

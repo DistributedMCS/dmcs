@@ -13,7 +13,7 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp> 
 
-#include "mcs/NewBeliefStateOffset.h"
+#include "mcs/BeliefStateOffset.h"
 
 namespace dmcs {
 
@@ -31,7 +31,7 @@ namespace fusion = boost::fusion;
 // ReturnPlanGrammarBase ////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 template<typename Iterator, typename NewSkipper>
-ReturnPlanGrammarBase<Iterator, NewSkipper>::ReturnPlanGrammarBase(ReturnlanGrammarSemantics &sem)
+ReturnPlanGrammarBase<Iterator, NewSkipper>::ReturnPlanGrammarBase(ReturnPlanGrammarSemantics &sem)
   : sem(sem)
 {
   typedef ReturnPlanGrammarSemantics Sem;
