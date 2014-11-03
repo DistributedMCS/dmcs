@@ -13,7 +13,8 @@
 #include <assert.h>
 
 #include "mcs/QueryPlan.h"
-
+#include "parser/QueryPlanGrammar.hpp"
+#include "parser/QueryPlanGrammar.tcc"
 #include "parser/Parser.hpp"
 #include "parser/Parser.tcc"
 
