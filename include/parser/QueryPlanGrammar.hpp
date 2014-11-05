@@ -106,3 +106,5 @@ struct NewQueryPlanGrammar :
 } // namespace dmcs
 
 #endif // __QUERY_PLAN_GRAMMAR_HPP__
+
+#include "parser/QueryPlanGrammar.tcc"

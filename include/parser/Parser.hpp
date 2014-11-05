@@ -27,3 +27,5 @@ typedef Parser<NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, Re
 } // namespace dmcs
 
 #endif // __PARSER_HPP__
+
+#include "parser/Parser.tcc"

@@ -54,9 +54,6 @@
 
 #include "parser/BaseParser.hpp"
 #include "parser/Parser.hpp"
-#include "parser/Parser.tcc"
-#include "parser/QueryPlanGrammar.hpp"
-#include "parser/QueryPlanGrammar.tcc"
 
 using namespace dmcs;
 
@@ -134,8 +131,7 @@ Options";
       std::string manager_hostname = manager.substr(0, split_colon);
       std::string manager_port = manager.substr(split_colon+1);
 
-      ReturnPlanMapPtr return_plan = ReturnPlanParser::parseFile(filename_return_plan);
-
+      ReturnPlanMapPtr return_plan = ReturnPlanParser_t::parseFile(filename_return_plan);
       ContextQueryPlanMapPtr opt_queryplan_map = ContextQueryPlanMapPtr();
       if (filename_opt_query_plan != "")
 	{

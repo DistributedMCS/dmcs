@@ -93,3 +93,7 @@ Parser<GrammarType, SemanticsType, ReturnType>::parseString(const std::string& s
 } // namespace dmcs
 
 #endif // __PARSER_TCC__
+
+// Local Variables:
+// mode: C++
+// End:
