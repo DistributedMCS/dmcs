@@ -43,7 +43,7 @@ using namespace dmcs;
 
 BOOST_AUTO_TEST_CASE ( testReturnPlanParser )
 {
-  std::size_t system_size = 5;
+  std::size_t system_size = 10;
   std::size_t bs_size = 10;
 
   const char *ex = getenv("EXAMPLESDIR");
@@ -59,18 +59,18 @@ BOOST_AUTO_TEST_CASE ( testReturnPlanParser )
       std::string returnplan_file(ex);
       returnplan_file += "/returnPlanParserTest" + out.str() + ".txt";
       ReturnPlanMapPtr rpm = ReturnPlanParser_t::parseFile(returnplan_file);
-      
+
       std::cout << "Parsing return plans for context " << i << ". Got return interfaces:" << std::endl;
-#if 0
+
       for (ReturnPlanMap::const_iterator it = rpm->begin(); it != rpm->end(); ++it)
 	{
 	  std::size_t parent_id = it->first;
 	  NewBeliefState* interface = it->second;
-	  
+
+	  assert (interface != 0);
 	  std::cout << parent_id << " " << *interface << std::endl;
 	}
       std::cout << std::endl;
-#endif
     }
 }
 
