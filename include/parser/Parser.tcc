@@ -16,7 +16,7 @@ namespace ascii = boost::spirit::ascii;
 
 template<typename GrammarType, typename SemanticsType, typename ReturnType>
 boost::shared_ptr<ReturnType>
-Parser<GrammarType, SemanticsType, ReturnType>::parseFile(const std::string& infile)
+Parser<void, GrammarType, SemanticsType, ReturnType>::parseFile(const std::string& infile)
 {
   std::ifstream ifs;
 
@@ -37,7 +37,7 @@ Parser<GrammarType, SemanticsType, ReturnType>::parseFile(const std::string& inf
 
 template<typename GrammarType, typename SemanticsType, typename ReturnType>
 boost::shared_ptr<ReturnType>
-Parser<GrammarType, SemanticsType, ReturnType>::parseStream(std::istream& in)
+Parser<void, GrammarType, SemanticsType, ReturnType>::parseStream(std::istream& in)
 {
   std::ostringstream buf;
   std::string line;
@@ -58,7 +58,7 @@ Parser<GrammarType, SemanticsType, ReturnType>::parseStream(std::istream& in)
 
 template<typename GrammarType, typename SemanticsType, typename ReturnType>
 boost::shared_ptr<ReturnType>
-Parser<GrammarType, SemanticsType, ReturnType>::parseString(const std::string& str)
+Parser<void, GrammarType, SemanticsType, ReturnType>::parseString(const std::string& str)
 {
   std::string::const_iterator begIt = str.begin();
   std::string::const_iterator endIt = str.end();
@@ -75,7 +75,7 @@ Parser<GrammarType, SemanticsType, ReturnType>::parseString(const std::string& s
   GrammarType grammar(semanticsMgr);
 
   bool r = phrase_parse(begIt, endIt, grammar, skipper);
-   
+  
   if(r && begIt == endIt)
   {
     std::cout << "Parsing succeeded\n";

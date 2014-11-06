@@ -11,8 +11,18 @@
 
 namespace dmcs {
 
-template<typename GrammarType, typename SemanticsType, typename ReturnType>
+template<typename InputType=void, typename GrammarType=void, typename SemanticsType=void, typename ReturnType=void>
 class Parser
+{
+public:
+  static ReturnType* parseStream(InputType &inp, std::istream& in);
+  static ReturnType* parseFile(InputType &inp, const std::string& infile);
+  static ReturnType* parseString(InputType &inp, const std::string& instr);
+};
+
+
+template<typename GrammarType, typename SemanticsType, typename ReturnType>
+class Parser<void, GrammarType, SemanticsType, ReturnType>
 {
 public:
   static boost::shared_ptr<ReturnType> parseStream(std::istream& in);
@@ -20,9 +30,10 @@ public:
   static boost::shared_ptr<ReturnType> parseString(const std::string& instr);
 };
 
+
 typedef NewSkipperGrammar<std::string::const_iterator> NewSkipper;
-typedef Parser<NewQueryPlanGrammar<std::string::const_iterator, NewSkipper>, QueryPlanGrammarSemantics, ContextQueryPlanMap> QueryPlanParser_t;
-typedef Parser<NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, ReturnPlanMap> ReturnPlanParser_t;
+  typedef Parser<void, NewQueryPlanGrammar<std::string::const_iterator, NewSkipper>, QueryPlanGrammarSemantics, ContextQueryPlanMap> QueryPlanParser_t;
+  typedef Parser<void, NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, ReturnPlanMap> ReturnPlanParser_t;
 
 } // namespace dmcs
 
