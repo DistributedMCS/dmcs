@@ -14,6 +14,8 @@ class ReturnPlanGrammarSemantics
 {
 public:
   ReturnPlanMapPtr m_ParsedResult;
+  std::size_t      m_CurrentParentID;
+  NewBeliefState  *m_CurrentBeliefState;
 
 public:
   ReturnPlanGrammarSemantics()
@@ -25,6 +27,10 @@ public:
     { \
       name(ReturnPlanGrammarSemantics& mgr): name ::base_type(mgr) {} \
     };
+
+  DMCS_DEFINE_SEMANTIC_ACTION(getCurrentParentID, boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(activateBits, boost::spirit::unused_type);
+  DMCS_DEFINE_SEMANTIC_ACTION(insertIntoMap, boost::spirit::unused_type);
 
   #undef DMCS_DEFINE_SEMANTIC_ACTION
 };
@@ -76,3 +82,5 @@ struct NewReturnPlanGrammar :
 } // namespace dmcs
 
 #endif // __RETURN_PLAN_GRAMMAR_HPP__
+
+#include "parser/ReturnPlanGrammar.tcc"
