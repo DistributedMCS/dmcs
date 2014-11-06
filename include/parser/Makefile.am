@@ -11,7 +11,6 @@ noinst_HEADERS =  \
 		QueryPlanGrammar.hpp \
 		QueryPlanGrammar.tcc \
 		Parser.hpp \
-		Parser.tcc \
-		ReturnPlanParser.h 
+		Parser.tcc 
 
 
