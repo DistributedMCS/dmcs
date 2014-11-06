@@ -1,3 +1,5 @@
+#include "Parser.hpp"
+
 #include "QueryPlan.h"
 #include "QueryPlanParser.h"
 
