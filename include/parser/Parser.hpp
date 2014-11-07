@@ -5,6 +5,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
+#include "mcs/BeliefTable.h"
 #include "parser/BaseParser.hpp"
 #include "parser/QueryPlanGrammar.hpp"
 #include "parser/ReturnPlanGrammar.hpp"
@@ -15,9 +16,9 @@ template<typename InputType=void, typename GrammarType=void, typename SemanticsT
 class Parser
 {
 public:
-  static ReturnType* parseStream(InputType &inp, std::istream& in);
-  static ReturnType* parseFile(InputType &inp, const std::string& infile);
-  static ReturnType* parseString(InputType &inp, const std::string& instr);
+  static ReturnType parseStream(InputType &inp, std::istream& in);
+  static ReturnType parseFile(InputType &inp, const std::string& infile);
+  static ReturnType parseString(InputType &inp, const std::string& instr);
 };
 
 
@@ -25,16 +26,16 @@ template<typename GrammarType, typename SemanticsType, typename ReturnType>
 class Parser<void, GrammarType, SemanticsType, ReturnType>
 {
 public:
-  static boost::shared_ptr<ReturnType> parseStream(std::istream& in);
-  static boost::shared_ptr<ReturnType> parseFile(const std::string& infile);
-  static boost::shared_ptr<ReturnType> parseString(const std::string& instr);
+  static ReturnType parseStream(std::istream& in);
+  static ReturnType parseFile(const std::string& infile);
+  static ReturnType parseString(const std::string& instr);
 };
 
 
 typedef NewSkipperGrammar<std::string::const_iterator> NewSkipper;
-  typedef Parser<void, NewQueryPlanGrammar<std::string::const_iterator, NewSkipper>, QueryPlanGrammarSemantics, ContextQueryPlanMap> QueryPlanParser_t;
-  typedef Parser<void, NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, ReturnPlanMap> ReturnPlanParser_t;
-
+typedef Parser<void, NewQueryPlanGrammar<std::string::const_iterator, NewSkipper>, QueryPlanGrammarSemantics, ContextQueryPlanMapPtr> QueryPlanParser_t;
+typedef Parser<void, NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, ReturnPlanMapPtr> ReturnPlanParser_t;
+typedef Parser<BeliefTablePtr, NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, NewBeliefState*> DLVResultParser_t;
 } // namespace dmcs
 
 #endif // __PARSER_HPP__
