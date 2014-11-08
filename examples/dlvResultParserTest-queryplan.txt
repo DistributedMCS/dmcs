@@ -1,0 +1,15 @@
+[
+{
+  ContextId: 1,
+  HostName: "localhost",
+  Port: 5001,
+  Constants: [c1,c2,c3,c4], 
+  LocalSignature:
+  {
+    1: [c1],
+    2: [c2],
+    3: [c3],
+    4: [c4],
+  },
+},
+]

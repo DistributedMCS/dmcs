@@ -31,6 +31,7 @@ TESTS = \
 	testPolymorphismSharedPtr \
 	testNewQueryPlanParser \
 	testReturnPlanParser \
+	testDLVResultParser \
 	testTables 
 
 #	testClasp \
@@ -80,6 +81,7 @@ check_PROGRAMS = \
 	testPolymorphismSharedPtr \
 	testNewQueryPlanParser \
 	testReturnPlanParser \
+	testDLVResultParser \
 	testTables 
 
 
@@ -304,3 +306,6 @@ testReturnPlanParser_LDADD = \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/mcs/libmcs.a 
 
+testDLVResultParser_SOURCES = testDLVResultParser.cpp
+testDLVResultParser_LDADD = \
+	$(top_builddir)/src/mcs/libmcs.a 
