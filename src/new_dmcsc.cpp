@@ -284,7 +284,8 @@ main(int argc, char* argv[])
 	      std::cerr << desc << std::endl;
 	      return 1;
 	    }
-	  query_plan = QueryPlanParser_t::parseFile(filename_signature);
+	  QueryPlanParser_t queryplan_parser;
+	  query_plan = queryplan_parser.parseFile(filename_signature);
 	}
 
       // catch Ctrl-C and interrupts

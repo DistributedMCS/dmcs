@@ -45,7 +45,8 @@ testParser(const std::string& fileName)
   std::cerr << "Following query plan will be parsed:\n";
   std::cerr << buffer << "\n";
 
-  ContextQueryPlanMapPtr plan = QueryPlanParser_t::parseString(buffer);
+  QueryPlanParser_t queryplan_parser;
+  ContextQueryPlanMapPtr plan = queryplan_parser.parseString(buffer);
 
   std::cerr << "Got result:\n";
   //std::cerr << *plan << "\n";

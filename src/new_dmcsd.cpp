@@ -131,15 +131,18 @@ Options";
       std::string manager_hostname = manager.substr(0, split_colon);
       std::string manager_port = manager.substr(split_colon+1);
 
-      ReturnPlanMapPtr return_plan = ReturnPlanParser_t::parseFile(filename_return_plan);
+      ReturnPlanParser_t returnplan_parser;
+      ReturnPlanMapPtr return_plan = returnplan_parser.parseFile(filename_return_plan);
       ContextQueryPlanMapPtr opt_queryplan_map = ContextQueryPlanMapPtr();
+
+      QueryPlanParser_t queryplan_parser;
       if (filename_opt_query_plan != "")
 	{
 	  DBGLOG(DBG, "Parse opt query plan");
-	  opt_queryplan_map = QueryPlanParser_t::parseFile(filename_opt_query_plan);
+	  opt_queryplan_map = queryplan_parser.parseFile(filename_opt_query_plan);
 	}
 
-      ContextQueryPlanMapPtr queryplan_map = QueryPlanParser_t::parseFile(filename_query_plan);
+      ContextQueryPlanMapPtr queryplan_map = queryplan_parser.parseFile(filename_query_plan);
       const ContextQueryPlan& local_queryplan = queryplan_map->find(myid)->second;
       BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(filename_bridge_rules, queryplan_map, myid);
       BridgeRuleTablePtr bridge_rules = ret_val.first;

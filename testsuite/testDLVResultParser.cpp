@@ -57,7 +57,8 @@ BOOST_AUTO_TEST_CASE ( testDLVResultParser )
   filename_QueryPlan += "/dlvResultParserTest-queryplan.txt";
   filename_DLVResult += "/dlvResultParserTest-output.txt";
 
-  ContextQueryPlanMapPtr plan = QueryPlanParser_t::parseFile(filename_QueryPlan);
+  QueryPlanParser_t queryplan_parser;
+  ContextQueryPlanMapPtr plan = queryplan_parser.parseFile(filename_QueryPlan);
 
   std::size_t ctxID = 1;
   ContextQueryPlanMap::const_iterator it = plan->find(ctxID);
@@ -70,7 +71,8 @@ BOOST_AUTO_TEST_CASE ( testDLVResultParser )
 
   std::cout << *localSignature << std::endl << std::endl;
 
-  NewBeliefState *bs = DLVResultParser_t::parseFile(valuesHolder, filename_DLVResult);
+  DLVResultParser_t dlvResult_parser(valuesHolder);
+  NewBeliefState *bs = dlvResult_parser.parseFile(filename_DLVResult);
   std::cout << *bs << std::endl;
 }
 

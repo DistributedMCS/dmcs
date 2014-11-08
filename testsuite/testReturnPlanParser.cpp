@@ -58,7 +58,8 @@ BOOST_AUTO_TEST_CASE ( testReturnPlanParser )
 
       std::string returnplan_file(ex);
       returnplan_file += "/returnPlanParserTest" + out.str() + ".txt";
-      ReturnPlanMapPtr rpm = ReturnPlanParser_t::parseFile(returnplan_file);
+      ReturnPlanParser_t returnplan_parser;
+      ReturnPlanMapPtr rpm = returnplan_parser.parseFile(returnplan_file);
 
       std::cout << "Parsing return plans for context " << i << ". Got return interfaces:" << std::endl;
 

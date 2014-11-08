@@ -13,30 +13,42 @@
 
 namespace dmcs {
 
-template<typename InputType=void, typename GrammarType=void, typename SemanticsType=void, typename ReturnType=void>
+template<typename GrammarType, typename SemanticsType, typename ReturnType>
 class Parser
 {
 public:
-  static ReturnType parseStream(const InputType &inp, std::istream& in);
-  static ReturnType parseFile(const InputType &inp, const std::string& infile);
-  static ReturnType parseString(const InputType &inp, const std::string& instr);
+  Parser()
+  { }
+
+  Parser(const SemanticsType &semanticsMgr)
+    : m_SemanticsMgr(semanticsMgr)
+  { }
+
+  ReturnType parseStream(std::istream& in);
+  ReturnType parseFile(const std::string& infile);
+  ReturnType parseString(const std::string& instr);
+
+protected:
+  SemanticsType m_SemanticsMgr;
 };
 
 
-template<typename GrammarType, typename SemanticsType, typename ReturnType>
-class Parser<void, GrammarType, SemanticsType, ReturnType>
+template<typename InputType, typename GrammarType, typename SemanticsType, typename ReturnType>
+class ParserWithInput : public Parser<GrammarType, SemanticsType, ReturnType>
 {
 public:
-  static ReturnType parseStream(std::istream& in);
-  static ReturnType parseFile(const std::string& infile);
-  static ReturnType parseString(const std::string& instr);
+  ParserWithInput(const InputType &inp)
+    : Parser<GrammarType,SemanticsType,ReturnType>(SemanticsType(inp))
+  { }
 };
+
+
 
 
 typedef NewSkipperGrammar<std::string::const_iterator> NewSkipper;
-typedef Parser<void, NewQueryPlanGrammar<std::string::const_iterator, NewSkipper>, QueryPlanGrammarSemantics, ContextQueryPlanMapPtr> QueryPlanParser_t;
-typedef Parser<void, NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, ReturnPlanMapPtr> ReturnPlanParser_t;
-typedef Parser<BeliefTablePtr_CtxID, NewDLVResultGrammar<std::string::const_iterator, NewSkipper>, DLVResultGrammarSemantics, NewBeliefState*> DLVResultParser_t;
+typedef Parser<NewQueryPlanGrammar<std::string::const_iterator, NewSkipper>, QueryPlanGrammarSemantics, ContextQueryPlanMapPtr> QueryPlanParser_t;
+typedef Parser<NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, ReturnPlanMapPtr> ReturnPlanParser_t;
+typedef ParserWithInput<BeliefTablePtr_CtxID, NewDLVResultGrammar<std::string::const_iterator, NewSkipper>, DLVResultGrammarSemantics, NewBeliefState*> DLVResultParser_t;
 } // namespace dmcs
 
 #endif // __PARSER_HPP__
