@@ -27,7 +27,7 @@ namespace fusion = boost::fusion;
 /////////////////////////////////////////////////////////////////
 
 template<>
-struct<semDLVResultGrammarSemantics::handleLiteral>
+struct sem<DLVResultGrammarSemantics::handleLiteral>
 {
   void operator()(DLVResultGrammarSemantics &mgr,
 		  const boost::fusion::vector2<boost::optional<char>, std::string> &source,
@@ -36,19 +36,19 @@ struct<semDLVResultGrammarSemantics::handleLiteral>
     bool strong_neg = boost::fusion::at_c<0>(source);
     const std::string& belief_text = boost::fusion::at_c<1>(source);
 
-    ID belief_id = state.m_BTab->getIDByString(belief_text);
+    ID belief_id = mgr.m_BTab->getIDByString(belief_text);
     assert (belief_id != ID_FAIL);
     
     if (strong_neg)
       {
-	sem.m_ParsedResult->set(sem.ctx_id, 
+	mgr.m_ParsedResult->set(mgr.m_CtxID, 
 				belief_id.address,
 				BeliefStateOffset::instance()->getStartingOffsets(),
 				NewBeliefState::DMCS_FALSE);
       }
     else
       {
-	sem.m_ParsedResult->set(sem.ctx_id, 
+	mgr.m_ParsedResult->set(mgr.m_CtxID, 
 				belief_id.address,
 				BeliefStateOffset::instance()->getStartingOffsets());
       }    
@@ -71,6 +71,9 @@ DLVResultGrammarBase<Iterator, NewSkipper>::DLVResultGrammarBase(DLVResultGramma
   using qi::int_;
   using qi::uint_;
   using qi::_val;
+  using qi::char_;
+  using qi::raw;
+  using qi::lexeme;
   using namespace qi::labels;
   using phoenix::construct;
   using phoenix::new_;

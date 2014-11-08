@@ -3,8 +3,21 @@
 
 #include "mcs/NewBeliefState.h"
 #include "mcs/BeliefTable.h"
+#include "mcs/BeliefStateOffset.h"
 
 namespace dmcs {
+
+struct BeliefTablePtr_CtxID
+{
+  const BeliefTablePtr m_BTab;
+  const std::size_t    m_CtxID;
+
+  BeliefTablePtr_CtxID(const BeliefTablePtr &btab,
+		       const std::size_t ctx_id)
+    : m_BTab(btab),
+      m_CtxID(ctx_id)
+  { }
+};
 
 class DLVResultGrammarSemantics
 {
@@ -14,8 +27,10 @@ public:
   NewBeliefState    *m_ParsedResult;
 
 public:
-  DLVResultGrammarSemantics(const BeliefTablePtr &btab)
-    : m_BTab(btab)
+  DLVResultGrammarSemantics(const BeliefTablePtr_CtxID &inp)
+    : m_BTab(inp.m_BTab),
+      m_CtxID(inp.m_CtxID),
+      m_ParsedResult(new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS()))
   { }
 
   #define DMCS_DEFINE_SEMANTIC_ACTION(name, targettype) \
@@ -27,7 +42,7 @@ public:
 
   DMCS_DEFINE_SEMANTIC_ACTION(handleLiteral, boost::spirit::unused_type);
 
-  #undefine DMCS_DEFINE_SEMANTIC_ACTION
+  #undef DMCS_DEFINE_SEMANTIC_ACTION
 };
 
 
@@ -70,7 +85,7 @@ struct NewDLVResultGrammar :
 
   NewDLVResultGrammar(DLVResultGrammarSemantics& sem)
     : GrammarBase(sem),
-      QiBase(GrammarBase::start)
+      QiBase(GrammarBase::dlvline)
   { }      
 };
 

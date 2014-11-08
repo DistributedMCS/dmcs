@@ -7,6 +7,7 @@
 
 #include "mcs/BeliefTable.h"
 #include "parser/BaseParser.hpp"
+#include "parser/DLVResultGrammar.hpp"
 #include "parser/QueryPlanGrammar.hpp"
 #include "parser/ReturnPlanGrammar.hpp"
 
@@ -16,9 +17,9 @@ template<typename InputType=void, typename GrammarType=void, typename SemanticsT
 class Parser
 {
 public:
-  static ReturnType parseStream(InputType &inp, std::istream& in);
-  static ReturnType parseFile(InputType &inp, const std::string& infile);
-  static ReturnType parseString(InputType &inp, const std::string& instr);
+  static ReturnType parseStream(const InputType &inp, std::istream& in);
+  static ReturnType parseFile(const InputType &inp, const std::string& infile);
+  static ReturnType parseString(const InputType &inp, const std::string& instr);
 };
 
 
@@ -35,7 +36,7 @@ public:
 typedef NewSkipperGrammar<std::string::const_iterator> NewSkipper;
 typedef Parser<void, NewQueryPlanGrammar<std::string::const_iterator, NewSkipper>, QueryPlanGrammarSemantics, ContextQueryPlanMapPtr> QueryPlanParser_t;
 typedef Parser<void, NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, ReturnPlanMapPtr> ReturnPlanParser_t;
-typedef Parser<BeliefTablePtr, NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, NewBeliefState*> DLVResultParser_t;
+typedef Parser<BeliefTablePtr_CtxID, NewDLVResultGrammar<std::string::const_iterator, NewSkipper>, DLVResultGrammarSemantics, NewBeliefState*> DLVResultParser_t;
 } // namespace dmcs
 
 #endif // __PARSER_HPP__
