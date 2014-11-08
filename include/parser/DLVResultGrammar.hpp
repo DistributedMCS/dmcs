@@ -30,7 +30,8 @@ public:
   DLVResultGrammarSemantics(const BeliefTablePtr_CtxID &inp)
     : m_BTab(inp.m_BTab),
       m_CtxID(inp.m_CtxID),
-      m_ParsedResult(new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS()))
+      m_ParsedResult(new NewBeliefState(BeliefStateOffset::instance()->NO_BLOCKS(),
+					BeliefStateOffset::instance()->SIZE_BS()))
   { }
 
   #define DMCS_DEFINE_SEMANTIC_ACTION(name, targettype) \

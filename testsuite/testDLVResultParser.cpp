@@ -48,6 +48,8 @@ using namespace dmcs;
 
 BOOST_AUTO_TEST_CASE ( testDLVResultParser )
 {
+  BeliefStateOffset *bso_instance = BeliefStateOffset::create(10, 5);
+
   const char* ex = getenv("EXAMPLESDIR");
   assert (ex != 0);
 
@@ -73,6 +75,7 @@ BOOST_AUTO_TEST_CASE ( testDLVResultParser )
 
   DLVResultParser_t dlvResult_parser(valuesHolder);
   NewBeliefState *bs = dlvResult_parser.parseFile(filename_DLVResult);
+  
   std::cout << *bs << std::endl;
 }
 
