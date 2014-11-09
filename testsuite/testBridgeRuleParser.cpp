@@ -31,21 +31,30 @@
 #define BOOST_TEST_MODULE "testBridgeRuleParser"
 #include <boost/test/unit_test.hpp>
 
-#include "parser/BridgeRuleParser.h"
 #include "mcs/QueryPlan.h"
 #include "mcs/NewNeighbor.h"
-#include "parser/QueryPlanParser.h"
+#include "parser/Parser.hpp"
 
 using namespace dmcs;
 
 BOOST_AUTO_TEST_CASE ( testBridgeRuleParser )
 {
-  std::string queryplan_file = "../../examples/context1.qp";
-  ContextQueryPlanMapPtr qp1 = QueryPlanParser::parseFile(queryplan_file);
+  const char* ex = getenv("EXAMPLESDIR");
+  assert (ex != 0);
 
-  std::string bridge_rules_file = "../../examples/bridge_rules.inp";
-  const unsigned int ctx_id = 1;
-  BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(bridge_rules_file, qp1, ctx_id);
+  std::string queryplan_file(ex);
+  queryplan_file += "context1.qp";
+  QueryPlanParser_t queryplan_parser;
+  ContextQueryPlanMapPtr qp1 = queryplan_parser.parseFile(queryplan_file);
+
+  std::string bridge_rules_file(ex);
+  bridge_rules_file += "bridge_rules.inp";
+
+  const std::size_t ctx_id = 1;
+  ContextQueryPlanMapPtr_CtxID valuesHolder(qp1, ctx_id);
+  BridgeRuleParser_t bridgerule_parser(valuesHolder);
+  BridgeRuleParserReturnVal ret_val = bridgerule_parser.parseFile(bridge_rules_file);
+
   BridgeRuleTablePtr brtab = ret_val.first;
   NewNeighborVecPtr neighbors = ret_val.second;
 

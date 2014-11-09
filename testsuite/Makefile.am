@@ -32,6 +32,7 @@ TESTS = \
 	testNewQueryPlanParser \
 	testReturnPlanParser \
 	testDLVResultParser \
+	testBridgeRuleParser \
 	testTables 
 
 #	testClasp \
@@ -63,8 +64,7 @@ TESTS = \
 	testMessageDispatcher \
 	testResultParser \
 	testDLVProcess \
-	testBeliefState \
-	testBridgeRuleParser 
+	testBeliefState 
 
 
 
@@ -82,6 +82,7 @@ check_PROGRAMS = \
 	testNewQueryPlanParser \
 	testReturnPlanParser \
 	testDLVResultParser \
+	testBridgeRuleParser \
 	testTables 
 
 
@@ -295,8 +296,8 @@ testTables_LDADD = \
 	$(top_builddir)/src/mcs/libmcs.a \
 	@LIBCURL@
 
-#testBridgeRuleParser_SOURCES = testBridgeRuleParser.cpp 
-#testBridgeRuleParser_LDADD = \
+testBridgeRuleParser_SOURCES = testBridgeRuleParser.cpp 
+testBridgeRuleParser_LDADD = \
 	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/mcs/libmcs.a 
 
