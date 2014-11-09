@@ -4,6 +4,8 @@ AUTOMAKE_OPTIONS = gnu
 noinst_HEADERS =  \
 		BaseParser.hpp \
 		BridgeRuleParser.h \
+		BridgeRuleGrammar.hpp \
+		BridgeRuleGrammar.tcc \
 		DLVResultGrammar.h \
 		DLVResultParser.h \
 		NewDLVResultParser.h \
