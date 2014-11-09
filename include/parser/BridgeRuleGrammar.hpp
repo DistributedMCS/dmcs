@@ -9,13 +9,13 @@ namespace dmcs {
 
 typedef std::pair<BridgeRuleTablePtr, NewNeighborVecPtr> BridgeRuleParserReturnVal;
 
-struct ContextQueryPlanPtr_CtxID
+struct ContextQueryPlanMapPtr_CtxID
 {
-  ContextQueryPlanPtr m_QueryPlan;
-  const std::size_t   m_CtxID;
+  ContextQueryPlanMapPtr m_QueryPlan;
+  const std::size_t      m_CtxID;
 
-  ContextQueryPlanPtr_CtxID(const ContextQueryPlanPtr &qp,
-			    const std::size_t ctx_id)
+  ContextQueryPlanMapPtr_CtxID(const ContextQueryPlanMapPtr &qp,
+			       const std::size_t ctx_id)
     : m_QueryPlan(qp),
       m_CtxID(ctx_id)
   { }
@@ -24,20 +24,22 @@ struct ContextQueryPlanPtr_CtxID
 class BridgeRuleGrammarSemantics
 {
 public:
-  ContextQueryPlanPtr   m_QueryPlan;
-  const std::size_t     m_CtxID;
+  ContextQueryPlanMapPtr    m_QueryPlan;
+  const std::size_t         m_CtxID;
 
-  BridgeRuleTablePtr    m_BridgeRules;
-  NewNeighborVecPtr     m_Neighbors;
-  std::size_t           m_NeighborOffset;
-  std::set<std::size_t> m_NeighborIDs;
+  BridgeRuleTablePtr        m_BridgeRules;
+  NewNeighborVecPtr         m_Neighbors;
+  BridgeRuleParserReturnVal m_ParsedResult;
+  std::size_t               m_NeighborOffset;
+  std::set<std::size_t>     m_NeighborIDs;
 
 public:
-  BridgeRuleGrammarSemantics(const ContextQueryPlanPtr_CtxID &inp)
+  BridgeRuleGrammarSemantics(const ContextQueryPlanMapPtr_CtxID &inp)
     : m_QueryPlan(inp.m_QueryPlan),
       m_CtxID(inp.m_CtxID),
       m_BridgeRules(new BridgeRuleTable),
       m_Neighbors(new NewNeighborVec),
+      m_ParsedResult(BridgeRuleParserReturnVal(m_BridgeRules, m_Neighbors)),
       m_NeighborOffset(0)
   { }
 
@@ -80,10 +82,10 @@ struct BridgeRuleGrammarBase
   };
 
   // Core grammar rules
-  typename Rule<>::type start;
+  typename Rule<>::type start, bridgeRule;
   typename Rule<std::string>::type ident, belief;
-  typename Rule<ID>::type bridgeAtom, bridgeLiteral, bridgeRule;
-  typename Rule<std::vector<string> >::type terms;
+  typename Rule<ID>::type bridgeAtom, bridgeLiteral;
+  typename Rule<std::vector<std::string> >::type terms;
   typename Rule<fusion::vector2<std::string, std::vector<std::string> > >::type predicate;
 };
 

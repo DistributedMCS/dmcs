@@ -50,7 +50,7 @@ typedef NewSkipperGrammar<std::string::const_iterator> NewSkipper;
 typedef Parser<NewQueryPlanGrammar<std::string::const_iterator, NewSkipper>, QueryPlanGrammarSemantics, ContextQueryPlanMapPtr> QueryPlanParser_t;
 typedef Parser<NewReturnPlanGrammar<std::string::const_iterator, NewSkipper>, ReturnPlanGrammarSemantics, ReturnPlanMapPtr> ReturnPlanParser_t;
 typedef ParserWithInput<BeliefTablePtr_CtxID, NewDLVResultGrammar<std::string::const_iterator, NewSkipper>, DLVResultGrammarSemantics, NewBeliefState*> DLVResultParser_t;
-typedef ParserWithInput<ContextQueryPlanPtr_CtxID, NewBridgeRuleGrammar<std::string::const_iterator, NewSkipper>, BridgeRuleGrammarSemantics, BridgeRuleParserReturnVal> BridgeRuleParser_t;
+typedef ParserWithInput<ContextQueryPlanMapPtr_CtxID, NewBridgeRuleGrammar<std::string::const_iterator, NewSkipper>, BridgeRuleGrammarSemantics, BridgeRuleParserReturnVal> BridgeRuleParser_t;
 } // namespace dmcs
 
 #endif // __PARSER_HPP__

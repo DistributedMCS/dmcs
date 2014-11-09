@@ -112,7 +112,7 @@ template<>
 struct sem<BridgeRuleGrammarSemantics::getBridgeRule>
 {
   void operator()(BridgeRuleGrammarSemantics &mgr,
-		  const fusion::vector2<const std::string&, std::vector<ID> > &source;
+		  const fusion::vector2<const std::string&, std::vector<ID> > &source,
 		  boost::spirit::unused_type target)
   {
     const std::string& head = fusion::at_c<0>(source);
@@ -162,24 +162,26 @@ BridgeRuleGrammarBase<Iterator, NewSkipper>::BridgeRuleGrammarBase(BridgeRuleGra
     = ident >> lit('(') >> terms >> lit(')');
 
   belief 
-    = predicate [ Sem::passPredToBelief() ]
-    | ident [ Sem::passIdentToBelief() ];
+    = predicate [ Sem::passPredToBelief(sem) ]
+    | ident [ Sem::passIdentToBelief(sem) ];
 
   bridgeAtom
     = ( lit('(') >> uint_ >> lit(':') >> belief >> lit(')') ) [ Sem::getBridgeAtom(sem) ];
 
   bridgeLiteral 
-    = ( -qi::string("not") >> bridgeAtom ) [ Sem::getBridgeLiteral() ];
+    = ( -qi::string("not") >> bridgeAtom ) [ Sem::getBridgeLiteral(sem) ];
 
   bridgeRule
     = ( belief 
 	>> qi::lit(":-")
 	>> ( bridgeLiteral % qi::char_(',') )
 	>> qi::lit('.')
-	) [ Sem::etBridgeRule(sem) ];
+	) [ Sem::getBridgeRule(sem) ];
 
   start = *bridgeRule;
 }
+
+} // namespace dmcs
 
 #endif // __BRIDGE_RULE_GRAMMAR_TCC__
 
