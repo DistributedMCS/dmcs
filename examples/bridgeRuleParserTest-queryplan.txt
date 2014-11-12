@@ -1,0 +1,41 @@
+[
+  {
+    ContextId: 1,
+    HostName: "localhost",
+    Port: 5001,
+    Constants: [c1,c2,c3,c4,c5,c6],
+    LocalSignature: 
+    { 
+      1: [a, c4], 
+      2: [a, c5], 
+      3: [a, c6], 
+      4: [dom, c1, c4], 
+      5: [dom, c2, c5], 
+      6: [dom, c3, c6], 
+    }, 
+  }, 
+  {
+    ContextId: 2,
+    HostName: "localhost",
+    Port: 5002,
+    Constants: [c1,c2,c3,c4,c5,c6],
+    InputSignature: 
+    { 
+      1: [b, c1], 
+      2: [b, c2], 
+      3: [b, c3], 
+    }, 
+  }, 
+  {
+    ContextId: 4,
+    HostName: "localhost",
+    Port: 5004,
+    Constants: [c1,c2,c3,c4,c5,c6],
+    InputSignature: 
+    { 
+      1: [d, c1, c4], 
+      2: [d, c2, c5], 
+      3: [d, c3, c6], 
+    }, 
+  }, 
+]

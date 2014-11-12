@@ -43,12 +43,12 @@ BOOST_AUTO_TEST_CASE ( testBridgeRuleParser )
   assert (ex != 0);
 
   std::string queryplan_file(ex);
-  queryplan_file += "context1.qp";
+  queryplan_file += "/bridgeRuleParserTest-queryplan.txt";
   QueryPlanParser_t queryplan_parser;
   ContextQueryPlanMapPtr qp1 = queryplan_parser.parseFile(queryplan_file);
 
   std::string bridge_rules_file(ex);
-  bridge_rules_file += "bridge_rules.inp";
+  bridge_rules_file += "/bridgeRuleParserTest-rules.txt";
 
   const std::size_t ctx_id = 1;
   ContextQueryPlanMapPtr_CtxID valuesHolder(qp1, ctx_id);
