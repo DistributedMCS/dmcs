@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = mcs dmcs generator network parser process 
+SUBDIRS = mcs dmcs generator network process 
 
 # global preprocessor flags
 AM_CPPFLAGS = \
@@ -43,7 +43,6 @@ new_dmcsd_SOURCES = \
 
 new_dmcsd_LDADD = \
 	$(top_builddir)/src/dmcs/libdmcs.a \
-	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/network/libthreads.a \
 	$(top_builddir)/src/process/libprocess.a \
@@ -56,7 +55,6 @@ new_dmcsc_SOURCES = \
 	new_dmcsc.cpp 
 
 new_dmcsc_LDADD = \
-	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/network/libnetwork.a \
 	$(top_builddir)/src/mcs/libmcs.a 
@@ -67,6 +65,5 @@ new_dmcsm_SOURCES = \
 
 new_dmcsm_LDADD = \
 	$(top_builddir)/src/network/libnetwork.a \
-	$(top_builddir)/src/parser/libparser.a \
 	$(top_builddir)/src/dmcs/libdmcs.a \
 	$(top_builddir)/src/mcs/libmcs.a 
