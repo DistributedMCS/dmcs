@@ -36,7 +36,7 @@
 #include "dmcs/Instantiator.h"
 #include "mcs/BeliefStateOffset.h"
 #include "mcs/Logger.h"
-#include "parser/NewDLVResultParser.h"
+#include "parser/Parser.hpp"
 
 namespace dmcs {
 
@@ -184,7 +184,8 @@ DLVEvaluator::read_all(std::size_t ctx_id,
   HeadsPlusBeliefState* heads_plus_bs = static_cast<HeadsPlusBeliefState*>(heads);
   const NewBeliefState* input_bs = heads_plus_bs->getInputBeliefState();
 
-  NewDLVResultParser dlv_parser(btab, ctx_id);
+  BeliefTablePtr_CtxID dlv_parser_input(btab, ctx_id);
+  DLVResultParser_t dlv_parser(dlv_parser_input);
 
   std::istream& is = proc->getInput();
   do
@@ -228,7 +229,8 @@ DLVEvaluator::read_until_k2(std::size_t ctx_id,
   HeadsPlusBeliefState* heads_plus_bs = static_cast<HeadsPlusBeliefState*>(heads);
   const NewBeliefState* input_bs = heads_plus_bs->getInputBeliefState();
 
-  NewDLVResultParser dlv_parser(btab, ctx_id);
+  BeliefTablePtr_CtxID dlv_parser_input(btab, ctx_id);
+  DLVResultParser_t dlv_parser(dlv_parser_input);
 
   std::istream& is = proc->getInput();
 

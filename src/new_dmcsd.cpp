@@ -48,11 +48,7 @@
 #include "network/NewClient.h"
 #include "network/NewConcurrentMessageDispatcher.h"
 #include "network/NewServer.h"
-#include "parser/BridgeRuleParser.h"
-#include "parser/NewQueryPlanParser.hpp"
-#include "parser/ReturnPlanParser.h"
 
-#include "parser/BaseParser.hpp"
 #include "parser/Parser.hpp"
 
 using namespace dmcs;
@@ -144,7 +140,10 @@ Options";
 
       ContextQueryPlanMapPtr queryplan_map = queryplan_parser.parseFile(filename_query_plan);
       const ContextQueryPlan& local_queryplan = queryplan_map->find(myid)->second;
-      BridgeRuleParserReturnVal ret_val = BridgeRuleParser::parseFile(filename_bridge_rules, queryplan_map, myid);
+
+      ContextQueryPlanMapPtr_CtxID bridgeRules_parser_input(queryplan_map, myid);
+      BridgeRuleParser_t bridgeRules_parser(bridgeRules_parser_input);
+      BridgeRuleParserReturnVal ret_val = bridgeRules_parser.parseFile(filename_bridge_rules);
       BridgeRuleTablePtr bridge_rules = ret_val.first;
 
       NewNeighborVecPtr guessing_neighbors = ret_val.second;

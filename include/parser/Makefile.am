@@ -3,13 +3,10 @@ AUTOMAKE_OPTIONS = gnu
 # including headers for make dist
 noinst_HEADERS =  \
 		BaseParser.hpp \
-		BridgeRuleParser.h \
 		BridgeRuleGrammar.hpp \
 		BridgeRuleGrammar.tcc \
-		DLVResultGrammar.h \
-		DLVResultParser.h \
-		NewDLVResultParser.h \
-		ParserState.h \
+		DLVResultGrammar.hpp \
+		DLVResultGrammar.tcc \
 		QueryPlanGrammar.hpp \
 		QueryPlanGrammar.tcc \
 		Parser.hpp \
