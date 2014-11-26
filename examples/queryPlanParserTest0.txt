@@ -1,0 +1,43 @@
+[
+{
+  ContextId: 1,
+  HostName: "localhost",
+  Port: 5001,
+  Constants: [c1,c2,c3,c4], 
+  ConstantCategories:
+  [
+    {Category: cat1, Constants: [c1,c2]},
+    {Category: cat2, Constants: [c3,c4]}
+  ],
+  Predicates: 
+  [
+    {Pred: a1, Arity: 1}, 
+    {Pred: a2, Arity: 2}
+  ], 
+  Filters: 
+  [
+    {Name:a, Pred:a1, Arguments:
+      [
+        {Position:1, Using:[c1,c3]}
+      ]
+    },
+    {Name:b, Pred:a2, Arguments:
+      [
+        {Position:1, Using:[c1,c2]},
+        {Position:2, Using:[cat2]},
+      ]
+    }
+  ],
+  LocalSignature:
+  {
+    1: [a1,c1],
+    2: [c3],
+  },
+  InputSignature:
+  {
+    1: [c1],
+    2: [c3],
+  },
+},
+]
+

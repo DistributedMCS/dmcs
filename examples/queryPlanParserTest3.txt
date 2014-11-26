@@ -1,0 +1,39 @@
+[
+  {
+    ContextId: 0,
+    HostName: "localhost",
+    Port: 5000,
+    LocalSignature:
+      {
+        1: [c0a1],
+        2: [c0a2],
+        3: [c0a3],
+        4: [c0a4],
+        5: [c0a5],
+        6: [c0a6],
+        7: [c0a7],
+        8: [c0a8],
+        9: [c0a9],
+        10: [c0a10],
+      },
+  },
+  {
+    ContextId: 1,
+    HostName: "localhost",
+    Port: 5001,
+    InputSignature:
+      {
+        4: [c1a4],
+        10: [c1a10],
+      },
+  },
+  {
+    ContextId: 2,
+    HostName: "localhost",
+    Port: 5002,
+    InputSignature:
+      {
+        10: [c2a10],
+      },
+  },
+]

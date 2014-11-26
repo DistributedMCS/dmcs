@@ -1,0 +1,30 @@
+# comment
+[
+{
+  ContextId: 1,
+  HostName: "localhost",
+  Port: 5001,
+  Constants: [c1,c2,c3,c4], 
+  LocalSignature:
+  {
+    1: [a1,c1],
+    2: [c3],
+  },
+  InputSignature:
+  {
+    1: [c1],
+    2: [c3],
+  },
+},
+{
+  ContextId: 2,
+  HostName: "localhost",
+  Port: 5002,
+},
+{
+  ContextId: 3,
+  HostName: "localhost",
+  Port: 5003,
+},
+]
+
