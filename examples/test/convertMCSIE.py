@@ -23,7 +23,7 @@ def convert(currentDir, topo, line):
     fileMasterHex = testcaseDir + '/master.hex'
     with open(fileMasterHex, 'w') as master:
         for i in range(systemSize):
-            s = '#context(' + str(i+1) + ', "dlv_asp_context_acc", "' + topo + '-' + str(i) + '.lp").\n'
+            s = '#context(' + str(i) + ', "dlv_asp_context_acc", "' + topo + '-' + str(i) + '.lp").\n'
             master.write(s)
 
         master.write('\n')
@@ -47,8 +47,8 @@ def convert(currentDir, topo, line):
 
 def main(argv):
     currentDir = os.getcwd()
-    #topologies = ['diamond', 'tree', 'zigzag', 'ring']
-    topologies = ['diamond']
+    topologies = ['diamond', 'tree', 'zigzag', 'ring']
+    #topologies = ['diamond']
 
     for topo in topologies:
         configFile = currentDir + '/config/' + topo + '.cfg'
