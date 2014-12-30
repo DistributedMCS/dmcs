@@ -14,26 +14,30 @@ def main(argv):
 
     extension = options.extension
 
+    # FULL SET UP
     #toponames      = ['diamond', 'tree', 'zigzag', 'ring']
     #topo_ids       = [ 1, 6, 3, 4 ]
-    #system_sizes   = [[4],  # diamond
-    #                  [4], # tree
-    #                  [4],  # zigzag
-    #                  [4]  # ring
+    #system_sizes   = [[4, 7, 10, 13, 25, 31],  # diamond
+    #                  [7, 10, 25, 31, 70, 100], # tree
+    #                  [4, 7, 10, 13, 25, 31, 70],  # zigzag
+    #                  [4, 7, 10, 13, 70]  # ring
     #                 ]
 
-    toponames      = ['ring']
-    topo_ids       = [ 4 ]
-    system_sizes   = [[4, 7, 10, 13, 70]]
+    #toponames      = ['ring']
+    #topo_ids       = [ 4 ]
+    #system_sizes   = [[4, 7, 10, 13, 70]]
 
-    #toponames      = ['diamond']
-    #topo_ids       = [ 1 ]
-    #system_sizes   = [[4, 7, 10, 13, 25, 31]]
+    toponames      = ['diamond']
+    topo_ids       = [ 1 ]
+    system_sizes   = [[4, 7, 10, 13, 25, 31]]
 
+    no_atoms       = [ 10 ]
+    no_interface   = [ 5  ]
+    no_bridgerules = [ 5  ]
     
-    no_atoms       = [ 10, 20 ]
-    no_interface   = [ 5,  10 ]
-    no_bridgerules = [ 5,  10 ]
+    #no_atoms       = [ 10, 20 ]
+    #no_interface   = [ 5,  10 ]
+    #no_bridgerules = [ 5,  10 ]
     #instances      = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j' ]
     instances      = [ 'a', 'b', 'c', 'd', 'e' ]
     
