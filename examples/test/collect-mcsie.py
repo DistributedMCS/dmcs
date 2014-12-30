@@ -113,7 +113,7 @@ def process_test_cases(toponame, current_test_cases):
     output_filename = 'output-mcsie/' + toponame + '/mcsie-' + toponame + '-' + current_test_cases[0][1] + '-' + current_test_cases[0][2] + '-' + current_test_cases[0][3] + '-' + current_test_cases[0][4] + '.dat'
     with open(output_filename, 'w') as ofile:
         for i in range(0,len(output)):
-            ofile.write(output[i][1] + '\n')
+            ofile.write(output[i][2] + '\n')
     ofile.closed
 
 
