@@ -202,9 +202,11 @@ def process_test_cases(toponame, testpacks, current_test_case):
         dirname = 'output/' + toponame + '/' + toponame + '-' + instance[1] + '-' + instance[2] + '-' + instance[3] + '-' + instance[4] + '-' + instance[5]
         if complete_test_case(dirname, test_runs):
             outcome = []
+            print test_runs
             for r in test_runs:
                 outcome.append(get_outcome(toponame, dirname + r))
 
+            # ordered push by dmcs time and dmcsopt time
             ordered_push(outcomes, outcome, sorted_testcases, instance)
 
     return outcomes, sorted_testcases
@@ -418,7 +420,6 @@ def main(argv):
         current_instance = re.split(',', line)
         current_test_case = [current_instance]
         while True:
-
             while True:
                 line = config_file.readline()
                 if line == "":
