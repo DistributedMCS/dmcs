@@ -17,6 +17,8 @@ checkTopo()
     done
 }
 
+rm $LOGFILENAME
+
 cd output
 
 for toponame in `ls -d */` ; do

@@ -23,11 +23,11 @@ def main(argv):
     atom = options.atom
 
     foundAtom = False
-    s = context + ':' + atom
+    s = context + ':' + atom + ','
     neg = '-' + s
     with open(filename, 'r') as f:
         for line in f:
-            if line.find(s) != -1 and line.find(neg) == -1:
+            if ((line.find(s) != -1) and (line.find(neg) == -1)):
                 foundAtom = True
                 break;
     f.closed
