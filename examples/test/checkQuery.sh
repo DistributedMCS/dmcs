@@ -2,7 +2,6 @@
 
 LOGFILENAME=checkQuery.log
 CONTEXT=0
-ATOM=c0a1
 
 #################################################################################
 checkTopo()
@@ -13,7 +12,7 @@ checkTopo()
 
     for instance in `ls -d */` ; do
 	instance=${instance:0:${#instance}-1}
-	python ../../checkQuery.py --instance=$instance --file=$instance/opt_10/$topo.log --logfile=../../$LOGFILENAME --context=$CONTEXT --atom=$ATOM
+	python ../../checkQuery.py --instance=$instance --file=$instance/opt_10/$topo.log --logfile=../../$LOGFILENAME --context=$CONTEXT
     done
 }
 

@@ -24,9 +24,9 @@ moveLogFiles()
     mvTopoName=$1
     mvInstanceName=$2
 
-    createSubSir $basedir/output-p2p-dr
-    createSubSir $basedir/output-p2p-dr/$mvTopoName
-    createSubSir $basedir/output-p2p-dr/$mvTopoName/$mvInstanceName
+    createSubDir $basedir/output-p2p-dr
+    createSubDir $basedir/output-p2p-dr/$mvTopoName
+    createSubDir $basedir/output-p2p-dr/$mvTopoName/$mvInstanceName
 
     rm $basedir/output-p2p-dr/$mvTopoName/$mvInstanceName/*
 
@@ -54,9 +54,11 @@ runOneInstance()
 
     topo=$1
     instance=$2
+    atom=$3
+    echo "Now testing " $instance " with query " $atom
 
     # copy all rules and trust files to the peer directory
-    # ToDo: move p2p_dr to test and use relative path
+    # ToDo: move p2p-dr to test and use relative path
     cp /Users/minhdt/Documents/softwares/dmcs/examples/test/data-p2p-dr/$topo/$instance/*.* .
 
     list=(`echo $instance | tr '-' ' '`)
@@ -70,13 +72,15 @@ runOneInstance()
 	port=$((5000+i))
 	
 	java Node peer$i $port localhost 1 &
+
+	sleep 1
     done
 
     # query at client
     # ToDo: test on gluck the time command
-    #/usr/bin/time --verbose -o $topo-time.log /usr/bin/timeout -k 20 $TIMEOUT java Client peer0 localhost c0a1
+    #/usr/bin/time --verbose -o $topo-time.log /usr/bin/timeout -k 20 $TIMEOUT java Client peer0 localhost $atom
 
-    time java Client peer0 localhost c0a1
+    time java Client peer0 localhost $atom
 
     moveLogFiles $topo $instance
 
@@ -87,15 +91,11 @@ runOneInstance()
 
 #################################################################################
 
-for topofile in `ls config/*.cfg` ; do
-    length=${#topofile}
-    let "length -=11"
-    toponame=${topofile:7:$length}
-    
-    for line in `cat $topofile` ; do
-	list=(`echo $line | tr ',' ' ' `)
-	instance=$toponame-${list[1]}-${list[2]}-${list[3]}-${list[4]}-${list[5]}
-	
-	runOneInstance $toponame $instance
-    done
+for line in `cat checkQuery.log` ; do
+    list=(`echo $line | tr ',' ' '`)
+    toponame=${list[0]}
+    instance=${list[1]}
+    atom=${list[2]}
+
+    runOneInstance $toponame $instance $atom
 done
