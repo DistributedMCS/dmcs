@@ -33,7 +33,7 @@ SimpleServer::handle_accept(const boost::system::error_code& e, connection_ptr c
   if (!e)
     {
       std::cerr << "SERVER: Create new connection..." << std::endl;
-      connection_ptr new_conn(new connection(acceptor.io_service()));
+      connection_ptr new_conn(new connection(acceptor.get_io_service()));
       conn_man.insert(new_conn);
 
       acceptor.async_accept(new_conn->socket(),
