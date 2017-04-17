@@ -309,7 +309,7 @@ NewServer::handle_accept(const boost::system::error_code& e,
     {
       // boost::this_thread::interruption_point();
       // Start an accept operation for a new connection.
-      connection_ptr new_conn(new connection(acceptor.io_service()));
+      connection_ptr new_conn(new connection(acceptor.get_io_service()));
       acceptor.async_accept(new_conn->socket(),
 			    boost::bind(&NewServer::handle_accept, this,
 					boost::asio::placeholders::error,
