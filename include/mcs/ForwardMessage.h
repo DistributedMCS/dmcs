@@ -32,6 +32,7 @@
 
 #include <set>
 #include <boost/shared_ptr.hpp>
+#include <boost/serialization/serialization.hpp>
 #include <boost/serialization/set.hpp>
 
 #include "mcs/Printhelpers.h"
