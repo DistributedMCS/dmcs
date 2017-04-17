@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = mcs dmcs generator network process 
+SUBDIRS = mcs dmcs generator network process parser
 
 # global preprocessor flags
 AM_CPPFLAGS = \
