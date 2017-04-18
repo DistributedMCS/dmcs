@@ -227,8 +227,8 @@ main(int argc, char* argv[])
 	(SIGNATURE, boost::program_options::value<std::string>(&filename_signature)->default_value(""), "set signature file name")
 	(BS_SIZE, boost::program_options::value<std::size_t>(&bs_size), "set belief state size")
 	(LOOP, boost::program_options::value<bool>(&loop)->default_value(true), "set belief state size")
-	(K1, boost::program_options::value<std::size_t>(&k1)->default_value(1), "set starting range of requested equlibria. k1 <= k2")
-	(K2, boost::program_options::value<std::size_t>(&k2)->default_value(1), "set end range of requested equilibria. [0,0] for requesting all equilibria")
+	(KK1, boost::program_options::value<std::size_t>(&k1)->default_value(1), "set starting range of requested equlibria. k1 <= k2")
+	(KK2, boost::program_options::value<std::size_t>(&k2)->default_value(1), "set end range of requested equilibria. [0,0] for requesting all equilibria")
 	;
 
       boost::program_options::variables_map vm;        
